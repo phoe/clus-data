@@ -1,0 +1,69 @@
+====== Macro DOTIMES ======
+
+====Syntax====
+
+\DefmacWithValuesNewline dotimes {\paren{var count-form [result-form]} \starparam{declaration} \star{{tag | statement}}} {\starparam{result}}
+
+====Arguments and Values====
+
+//var// - a //[[CL:Glossary:symbol]]//.
+
+//count-form// - a //[[CL:Glossary:form]]//.
+
+//result-form// - a //[[CL:Glossary:form]]//.
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//tag// - a //[[CL:Glossary:go tag]]//; \noeval.
+
+//statement// - a //[[CL:Glossary:compound form]]//; \evalspecial.
+
+//results// - if a **[[CL:Macros:return]]** or **[[CL:Macros:return-from]]** form is executed, the //[[CL:Glossary:values]]// passed from that //[[CL:Glossary:form]]//; otherwise, the //[[CL:Glossary:values]]// returned by the //result-form// or **[[CL:Constant Variables:nil]]** if there is no //result-form//.
+
+====Description====
+
+**[[CL:Macros:dotimes]]** iterates over a series of //[[CL:Glossary:integers]]//.
+
+**[[CL:Macros:dotimes]]** evaluates //count-form//, which should produce an //[[CL:Glossary:integer]]//. If //count-form// is zero or negative, the body is not executed. **[[CL:Macros:dotimes]]** then executes the body once for each //[[CL:Glossary:integer]]// from 0 up to but not including the value of //count-form//, in the order in which the //tags// and //statements// occur, with //var// bound to each //[[CL:Glossary:integer]]//. Then //result-form// is evaluated. At the time //result-form// is processed, //var// is bound to the number of times the body was executed. //Tags// label //statements//.
+
+An //[[CL:Glossary:implicit block]]//
+
+named **[[CL:Constant Variables:nil]]** surrounds **[[CL:Macros:dotimes]]**.
+
+**[[CL:Macros:return]]** may be used to terminate the loop immediately without performing any further iterations, returning zero or more //[[CL:Glossary:values]]//.
+
+The body of the loop is an //[[CL:Glossary:implicit tagbody]]//; it may contain tags to serve as the targets of \specref{go} statements. Declarations may appear before the body of the loop.
+
+The //[[CL:Glossary:scope]]// of the binding of //var// does not include the //count-form//, but the //result-form// is included.
+
+It is //[[CL:Glossary:implementation-dependent]]// whether **[[CL:Macros:dotimes]]** //[[CL:Glossary:establishes]]// a new //[[CL:Glossary:binding]]// of //var// on each iteration or whether it //[[CL:Glossary:establishes]]// a binding for //var// once at the beginning and then //assigns// it on any subsequent iterations.
+
+====Examples====
+
+<blockquote> (dotimes (temp-one 10 temp-one)) → 10 ([[CL:Macros:defparameter]] temp-two 0) → 0 (dotimes (temp-one 10 t) (incf temp-two)) → T temp-two → 10 </blockquote>
+
+Here is an example of the use of ''dotimes'' in processing strings:
+
+<blockquote> ;;; True if the specified subsequence of the string is a ;;; palindrome (reads the same forwards and backwards). (defun palindromep (string \optional (start 0) (end (length string))) (dotimes (k (floor (- end start) 2) t) (unless (char-equal (char string (+ start k)) (char string (- end k 1))) (return nil)))) (palindromep "Able was I ere I saw Elba") → T (palindromep "A man, a plan, a canal--Panama!") → NIL (remove-if-not #'alpha-char-p ;Remove punctuation. "A man, a plan, a canal--Panama!") → "AmanaplanacanalPanama" (palindromep (remove-if-not #'alpha-char-p "A man, a plan, a canal--Panama!")) → T (palindromep (remove-if-not #'alpha-char-p "Unremarkable was I ere I saw Elba Kramer, nu?")) → T (palindromep (remove-if-not #'alpha-char-p "A man, a plan, a cat, a ham, a yak, a yam, a hat, a canal--Panama!")) → T </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Macros:do]]**, **[[CL:Macros:dolist]]**, \specref{tagbody}
+
+====Notes====
+
+\specref{go} may be used within the body of **[[CL:Macros:dotimes]]** to transfer control to a statement labeled by a //tag//.
+
+\issue{DECLS-AND-DOC}

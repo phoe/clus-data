@@ -1,0 +1,70 @@
+====== Special Operator SYMBOL-MACROLET ======
+
+
+
+====Syntax====
+
+\DefspecWithValuesNewline symbol-macrolet {\paren{\starparen{symbol expansion}} \starparam{declaration} \starparam{form}} {\starparam{result}}
+
+====Arguments and Values====
+
+//symbol// - a //[[CL:Glossary:symbol]]//.
+
+//expansion// - a //[[CL:Glossary:form]]//.
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+
+//forms// - an //[[CL:Glossary:implicit progn]]//.
+
+//results// - the //[[CL:Glossary:values]]// returned by the //forms//.
+
+====Description====
+
+
+\specref{symbol-macrolet} provides a mechanism for affecting the //[[CL:Glossary:macro expansion]]// environment for //[[CL:Glossary:symbols]]//.
+
+\specref{symbol-macrolet} lexically establishes expansion functions for each of the //[[CL:Glossary:symbol macros]]// named by //symbols//.
+
+The only guaranteed property of an expansion //[[CL:Glossary:function]]// for a //[[CL:Glossary:symbol macro]]// is that when it is applied to the //[[CL:Glossary:form]]// and the //[[CL:Glossary:environment]]// it returns the correct expansion. (In particular, it is //[[CL:Glossary:implementation-dependent]]// whether the expansion is conceptually stored in the expansion function, the //[[CL:Glossary:environment]]//, or both.)
+
+Each reference to //symbol// as a variable within the lexical //[[CL:Glossary:scope]]// of \specref{symbol-macrolet} is expanded by the normal macro expansion process; see section {\secref\SymbolsAsForms}. The expansion of a symbol macro is subject to further macro expansion in the same lexical environment as the symbol macro invocation, exactly analogous to normal //[[CL:Glossary:macros]]//.
+
+Exactly the same //declarations// are allowed as for \specref{let} with one exception: \specref{symbol-macrolet} signals an error if a \declref{special} declaration names one of the //[[CL:Glossary:symbols]]// being defined by \specref{symbol-macrolet}.
+
+
+When the //forms// of the \specref{symbol-macrolet} form are expanded, any use of \specref{setq} to set the value of one of the specified variables is treated as if it were a **[[CL:Macros:setf]]**. **[[CL:Macros:psetq]]** of a //[[CL:Glossary:symbol]]// defined as a symbol macro is treated as if it were a **[[CL:Macros:psetf]]**, and **[[CL:Macros:multiple-value-setq]]** is treated as if it were a \specref{setf} of **[[CL:Functions:values]]**.
+
+The use of \specref{symbol-macrolet} can be shadowed by \specref{let}. In other words, \specref{symbol-macrolet} only substitutes for occurrences of //symbol// that would be in the //[[CL:Glossary:scope]]// of a lexical binding of //symbol// surrounding the //forms//.
+
+====Examples====
+
+<blockquote> ;;; The following is equivalent to ;;; (list 'foo (let ((x 'bar)) x)), ;;; not ;;; (list 'foo (let (('foo 'bar)) 'foo)) (symbol-macrolet ((x 'foo)) (list x (let ((x 'bar)) x))) → (foo bar) \NV (foo foo)
+
+(symbol-macrolet ((x '(foo x))) (list x)) → ((FOO X)) </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+If an attempt is made to bind a //[[CL:Glossary:symbol]]// that is defined as a //[[CL:Glossary:global variable]]//, an error of type **[[CL:Types:program-error]]** is signaled.
+
+
+
+If //declaration// contains a \declref{special} declaration that names one of the //[[CL:Glossary:symbols]]// being bound by \specref{symbol-macrolet}, an error of type **[[CL:Types:program-error]]** is signaled.
+
+====See Also====
+
+**[[CL:Macros:with-slots]]**, **[[CL:Functions:macroexpand]]**
+
+====Notes====
+
+The special form \specref{symbol-macrolet} is the basic mechanism that is used to implement **[[CL:Macros:with-slots]]**.
+
+If a \specref{symbol-macrolet} //[[CL:Glossary:form]]// is a //[[CL:Glossary:top level form]]//, the //forms// are also processed as //[[CL:Glossary:top level forms]]//. see section {\secref\FileCompilation}.
+
+
+
+\issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM} \issue{SYMBOL-MACROLET-DECLARE:ALLOW} \issue{SYMBOL-MACROS-AND-PROCLAIMED-SPECIALS:SIGNALS-AN-ERROR} \issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13} \issue{DECLS-AND-DOC} \issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM} \issue{SYMBOL-MACROLET-DECLARE:ALLOW}

@@ -1,0 +1,51 @@
+====== Function WRITE-STRING, WRITE-LINE ======
+
+====Syntax====
+
+**{write-string} {string ''&optional'' output-stream** //\key} start end// → //string// **{write-line} {string ''&optional'' output-stream** //\key} start end// → //string//
+
+====Arguments and Values====
+
+//string// - a //[[CL:Glossary:string]]//.
+
+//output-stream// -- an //[[CL:Glossary:output]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard output]]//.
+
+//start//, //end// - //[[CL:Glossary:bounding index designators]]// of //string//. \Defaults{//start// and //end//}{''0'' and **[[CL:Constant Variables:nil]]**}
+
+====Description====
+
+**[[CL:Functions:write-string]]** writes the //[[CL:Glossary:characters]]// of the subsequence of //string// //[[CL:Glossary:bounded]]// by //start// and //end// to //output-stream//. **[[CL:Functions:write-line]]** does the same thing, but then outputs a newline afterwards.
+
+====Examples====
+
+<blockquote> (prog1 (write-string "books" nil :end 4) (write-string "worms"))
+▷ bookworms → "books" (progn (write-char #\\*) (write-line "test12" *standard-output* :end 5) (write-line "*test2") (write-char #\\*) nil)
+▷ *test1
+▷ *test2
+▷ * → NIL </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+**[[CL:Variables:*standard-output*]]**, **[[CL:Variables:*terminal-io*]]**.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:read-line]]**, **[[CL:Functions:write-char]]**
+
+====Notes====
+
+**[[CL:Functions:write-line]]** and **[[CL:Functions:write-string]]** return //string//, not the substring //[[CL:Glossary:bounded]]// by //start// and //end//.
+
+<blockquote> (write-string string) ≡ (dotimes (i (length string) (write-char (char string i)))
+
+(write-line string) ≡ (prog1 (write-string string) (terpri)) </blockquote>
+
+\issue{SUBSEQ-OUT-OF-BOUNDS} \issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL} \issue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}

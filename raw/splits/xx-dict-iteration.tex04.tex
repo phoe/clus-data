@@ -1,0 +1,79 @@
+====== Macro LOOP ======
+
+====Syntax====
+
+The "simple" **[[CL:Macros:loop]]** //[[CL:Glossary:form]]//:
+
+\DefmacWithValues loop {\starparam{compound-form}} {\starparam{result}}
+
+The "extended" **[[CL:Macros:loop]]** //[[CL:Glossary:form]]//:
+
+\DefmacWithValues loop {\brac{\down{name-clause}} \stardown{variable-clause} \stardown{main-clause}} {\starparam{result}}
+
+\auxbnf{name-clause}{\loopref{named} //name//} \auxbnf{variable-clause}{\down{with-clause} | \down{initial-final} | \down{for-as-clause}} \auxbnf{with-clause} {\loopref{with} //var1// [//type-spec//] [''='' //form1//] \star{\curly{\loopref{and} //var2// [//type-spec//] [''='' //form2//]}}} \auxbnf{main-clause} {\down{unconditional} | \down{accumulation} | \down{conditional} | \down{termination-test} | \down{initial-final}} \auxbnf{initial-final} {\loopref{initially} \plusparam{compound-form} | \loopref{finally} \plusparam{compound-form}} \auxbnf{unconditional} {\curly{\loopref{do} | \loopref{doing}} \plusparam{compound-form} | \loopref{return} \curly{//form// | \loopref{it}}} \auxbnf{accumulation}{\down{list-accumulation} | \down{numeric-accumulation}} \auxbnf{list-accumulation} {\curly{\loopref{collect} | \loopref{collecting} | \loopref{append} | \loopref{appending} | \loopref{nconc} | \loopref{nconcing}} \curly{//form// | \loopref{it}} \CR \brac{\loopref{into} //simple-var//}} \auxbnf{numeric-accumulation} {\curly{\loopref{count} | \loopref{counting} | \loopref{sum} | \loopref{summing} | \CR \xcurly\loopref{maximize} | \loopref{maximizing} | \loopref{minimize} | \loopref{minimizing}} \curly{//form// | \loopref{it}} \CR \brac{\loopref{into} //simple-var//} [//type-spec//]} \auxbnf{conditional} {\curly{\loopref{if} | \loopref{when} | \loopref{unless}} //form// \down{selectable-clause} \star{\curly{\loopref{and} \down{selectable-clause}}} \CR \brac{\loopref{else} \down{selectable-clause} \star{\curly{\loopref{and} \down{selectable-clause}}}} \CR \brac{\loopref{end}}}
+
+\auxbnf{selectable-clause}{\down{unconditional} | \down{accumulation} | \down{conditional}} \auxbnf{termination-test} {\loopref{while} //form// | \loopref{until} //form// | \loopref{repeat} //form// | \loopref{always} //form// | \loopref{never} //form// | \loopref{thereis} //form//} \auxbnf{for-as-clause} {\curly{\loopref{for} | \loopref{as}} \down{for-as-subclause} \star{\curly{\loopref{and} \down{for-as-subclause}}}} \auxbnf{for-as-subclause} {\down{for-as-arithmetic} | \down{for-as-in-list} | \down{for-as-on-list} | \down{for-as-equals-then} |\CR \down{for-as-across} | \down{for-as-hash} | \down{for-as-package}} \auxbnf{for-as-arithmetic}{//var// [//type-spec//] \down{for-as-arithmetic-subclause}} \auxbnf{for-as-arithmetic-subclause} {\down{arithmetic-up} | \down{arithmetic-downto} | \down{arithmetic-downfrom}} \auxbnf{arithmetic-up} {\begininterleave\curly{\loopref{from} | \loopref{upfrom}} //form1// | \extrainterleave\curly{\loopref{to} | \loopref{upto} | \loopref{below}} //form2// | \extrainterleave\loopref{by} //form3//\endinterleave\prevplus} \auxbnf{arithmetic-downto} {\begininterleave\one{\curly{\loopref{from} //form1//}} | \extrainterleave\one{\curly{\curly{\loopref{downto} | \loopref{above}} //form2//}} | \extrainterleave\loopref{by} //form3//\endinterleave} \auxbnf{arithmetic-downfrom} {\begininterleave\one{\curly{\loopref{downfrom} //form1//}} | \extrainterleave\curly{\loopref{to} | \loopref{downto} | \loopref{above}} //form2// | \extrainterleave\loopref{by} //form3//\endinterleave} \auxbnf{for-as-in-list} {//var// [//type-spec//] \loopref{in} //form1// \brac{\loopref{by} //step-fun//}} \auxbnf{for-as-on-list} {//var// [//type-spec//] \loopref{on} //form1// \brac{\loopref{by} //step-fun//}} \auxbnf{for-as-equals-then} {//var// [//type-spec//] ''='' //form1// \brac{\loopref{then} //form2//}} \auxbnf{for-as-across} {//var// [//type-spec//] \loopref{across} //vector//} \auxbnf{for-as-hash} {//var// [//type-spec//] \loopref{being} \curly{\loopref{each} | \loopref{the}} \CR \lcurly\curly{\loopref{hash-key} | \loopref{hash-keys}} \curly{\loopref{in} | \loopref{of}} //hash-table// \CR \xcurly\brac{\loopref{using} \paren{\loopref{hash-value} //other-var//}} | \CR \xcurly\curly{\loopref{hash-value} | \loopref{hash-values}} \curly{\loopref{in} | \loopref{of}} //hash-table// \CR \xcurly\brac{\loopref{using} \paren{\loopref{hash-key} //other-var//}}\rcurly} \auxbnf{for-as-package} {//var// [//type-spec//] \loopref{being} \curly{\loopref{each} | \loopref{the}} \CR \lcurly\loopref{symbol} | \loopref{symbols} |\CR \xcurly\loopref{present-symbol} | \loopref{present-symbols} |\CR \xcurly\loopref{external-symbol} | \loopref{external-symbols}\rcurly \CR \brac{\curly{\loopref{in} | \loopref{of}} //package//}} \auxbnf{type-spec}{\down{simple-type-spec} | \down{destructured-type-spec}} \auxbnf{simple-type-spec} {\declref{fixnum} | \declref{float} | \declref{t} | \declref{nil}} \auxbnf{destructured-type-spec}{\loopref{of-type} //d-type-spec//} \auxbnf{d-type-spec} {//type-specifier// | ''(//d-type-spec// . //d-type-spec//)''} \auxbnf{var}{\down{d-var-spec}} \auxbnf{var1}{\down{d-var-spec}} \auxbnf{var2}{\down{d-var-spec}} \auxbnf{other-var}{\down{d-var-spec}} \auxbnf{d-var-spec}{//simple-var// | **[[CL:Constant Variables:nil]]** | \paren{\down{d-var-spec} ''.'' \down{d-var-spec}}}
+
+====Arguments and Values====
+
+//compound-form// - a //[[CL:Glossary:compound form]]//.
+
+//name// - a //[[CL:Glossary:symbol]]//.
+
+//simple-var// - a //[[CL:Glossary:symbol]]// (a //[[CL:Glossary:variable]]// name).
+
+//form//, //form1//, //form2//, //form3// - a //[[CL:Glossary:form]]//.
+
+//step-fun// - a //[[CL:Glossary:form]]// that evaluates to a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]//.
+
+//vector// - a //[[CL:Glossary:form]]// that evaluates to a //[[CL:Glossary:vector]]//.
+
+//hash-table// - a //[[CL:Glossary:form]]// that evaluates to a //[[CL:Glossary:hash table]]//.
+
+//package// - a //[[CL:Glossary:form]]// that evaluates to a //[[CL:Glossary:package designator]]//.
+
+//type-specifier// - a //[[CL:Glossary:type specifier]]//. This might be either an //[[CL:Glossary:atomic type specifier]]// or a //[[CL:Glossary:compound type specifier]]//, which introduces some additional complications to proper parsing in the face of destructuring; for further information, see section {\secref\DestructuringLOOPVars}.
+
+//result// - an //[[CL:Glossary:object]]//.
+
+====Description====
+
+For details, see section {\secref\LoopFacility}.
+
+====Examples====
+
+<blockquote> ;; An example of the simple form of LOOP. (defun sqrt-advisor () (loop (format t "~&Number: ") (let ((n (parse-integer (read-line) :junk-allowed t))) (when (not n) (return)) (format t "~&The square root of ~D is ~D.~ → SQRT-ADVISOR (sqrt-advisor)
+▷ Number: \IN{5\CRLF}
+▷ The square root of 5 is 2.236068.
+▷ Number: \IN{4\CRLF}
+▷ The square root of 4 is 2.
+▷ Number: \IN{done\CRLF} → NIL
+
+;; An example of the extended form of LOOP. (defun square-advisor () (loop as n = (progn (format t "~&Number: ") (parse-integer (read-line) :junk-allowed t)) while n do (format t "~&The square of ~D is ~D.~ → SQUARE-ADVISOR (square-advisor)
+▷ Number: \IN{4\CRLF}
+▷ The square of 4 is 16.
+▷ Number: \IN{23\CRLF}
+▷ The square of 23 is 529.
+▷ Number: \IN{done\CRLF} → NIL
+
+;; Another example of the extended form of LOOP. (loop for n from 1 to 10 when (oddp n) collect n) → (1 3 5 7 9) </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Macros:do]]**, **[[CL:Macros:dolist]]**, **[[CL:Macros:dotimes]]**, **[[CL:Macros:return]]**, \specref{go}, \specref{throw}, {\secref\DestructuringLOOPVars}
+
+====Notes====
+
+Except that **[[CL:Macros:loop-finish]]** cannot be used within a simple **[[CL:Functions:loop]]** //[[CL:Glossary:form]]//, a simple **[[CL:Macros:loop]]** //[[CL:Glossary:form]]// is related to an extended **[[CL:Macros:loop]]** //[[CL:Glossary:form]]// in the following way:
+
+<blockquote> (loop \starparam{compound-form}) ≡ (loop do \starparam{compound-form}) </blockquote>
+
+\issue{LOOP-SYNTAX-OVERHAUL:REPAIR} \issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}

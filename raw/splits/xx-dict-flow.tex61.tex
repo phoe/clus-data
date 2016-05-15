@@ -1,0 +1,117 @@
+====== Macro DEFSETF ======
+
+====Syntax====
+
+The "short form":
+
+\DefmacWithValuesNewline defsetf {access-fn update-fn [documentation]} {access-fn}
+
+The "long form":
+
+\DefmacWithValuesNewline defsetf {access-fn lambda-list \paren{\starparam{store-variable}} {\DeclsAndDoc} \starparam{form}} {access-fn}
+
+====Arguments and Values====
+
+//access-fn// - a //[[CL:Glossary:symbol]]// which names a //[[CL:Glossary:function]]// or a //[[CL:Glossary:macro]]//.
+
+//update-fn// - a //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]//.
+
+//lambda-list// - a //[[CL:Glossary:defsetf lambda list]]//.
+
+//store-variable// - a //[[CL:Glossary:symbol]]// (a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//).
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//documentation// - a //[[CL:Glossary:string]]//; \noeval.
+
+//form// - a //[[CL:Glossary:form]]//.
+
+====Description====
+
+**[[CL:Macros:defsetf]]** defines how to **[[CL:Macros:setf]]** a //[[CL:Glossary:place]]// of the form ''(''access-fn'' ...)'' for relatively simple cases. (See **[[CL:Macros:define-setf-expander]]** for more general access to this facility.)
+
+It must be the case that the //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]// named by //access-fn// evaluates all of its arguments.
+
+**[[CL:Macros:defsetf]]** may take one of two forms, called the "short form" and the "long form," which are distinguished by the //[[CL:Glossary:type]]// of the second //[[CL:Glossary:argument]]//.
+
+When the short form is used,
+
+//update-fn// must name a //[[CL:Glossary:function]]// (or //[[CL:Glossary:macro]]//) that takes one more argument than //access-fn// takes. When **[[CL:Macros:setf]]** is given a //[[CL:Glossary:place]]// that is a call on //access-fn//, it expands into a call on //update-fn// that is given all the arguments to //access-fn// and also, as its last argument, the new value (which must be returned by //update-fn// as its value).
+
+The long form **[[CL:Macros:defsetf]]**
+
+resembles **[[CL:Macros:defmacro]]**.
+
+The //lambda-list// describes the arguments of //access-fn//. The //store-variables// describe the value
+
+or values
+
+to be stored into the //[[CL:Glossary:place]]//. The //body// must compute the expansion of a **[[CL:Macros:setf]]** of a call on //access-fn//.
+
+The expansion function is defined in the same //[[CL:Glossary:lexical environment]]// in which the **[[CL:Macros:defsetf]]** //[[CL:Glossary:form]]// appears.
+
+During the evaluation of the //forms//, the variables in the //lambda-list// and the
+
+//store-variables// are bound to names of temporary variables, generated as if by **[[CL:Functions:gensym]]**
+
+or **[[CL:Functions:gentemp]]**, that will be bound by the expansion of **[[CL:Macros:setf]]** to the values of those //[[CL:Glossary:subforms]]//. This binding permits the //forms// to be written without regard for order-of-evaluation issues. **[[CL:Macros:defsetf]]** arranges for the temporary variables to be optimized out of the final result in cases where that is possible.
+
+The body code in **[[CL:Macros:defsetf]]** is implicitly enclosed in a //[[CL:Glossary:block]]// whose name is
+
+//access-fn//
+
+**[[CL:Macros:defsetf]]** ensures that //[[CL:Glossary:subforms]]// of the //[[CL:Glossary:place]]// are evaluated exactly once.
+
+//Documentation// is attached to //access-fn// as a //[[CL:Glossary:documentation string]]// of kind \misc{setf}.
+
+If a **[[CL:Macros:defsetf]]** //[[CL:Glossary:form]]// appears as a //[[CL:Glossary:top level form]]//, the //[[CL:Glossary:compiler]]// must make the //[[CL:Glossary:setf expander]]// available so that it may be used to expand calls to **[[CL:Macros:setf]]** later on in the //[[CL:Glossary:file]]//. Users must ensure that the //forms//, if any, can be evaluated at compile time if the //access-fn// is used in a //[[CL:Glossary:place]]// later in the same //[[CL:Glossary:file]]//. The //[[CL:Glossary:compiler]]// must make these //[[CL:Glossary:setf expanders]]// available to compile-time calls to **[[CL:Functions:get-setf-expansion]]** when its //environment// argument is a value received as the //[[CL:Glossary:environment parameter]]// of a //[[CL:Glossary:macro]]//.
+
+====Examples==== The effect of
+
+<blockquote> (defsetf symbol-value set) </blockquote> is built into the \clisp\ system. This causes the form ''([[CL:Macros:setf]] (symbol-value foo) fu)'' to expand into ''(set foo fu)''.
+
+Note that
+
+<blockquote> (defsetf car rplaca) </blockquote> would be incorrect because **[[CL:Functions:rplaca]]** does not return its last argument.
+
+<blockquote> (defun middleguy (x) (nth (truncate (1- (list-length x)) 2) x)) → MIDDLEGUY (defun set-middleguy (x v) (unless (null x) (rplaca (nthcdr (truncate (1- (list-length x)) 2) x) v)) v) → SET-MIDDLEGUY (defsetf middleguy set-middleguy) → MIDDLEGUY ([[CL:Macros:defparameter]] a (list 'a 'b 'c 'd) b (list 'x) c (list 1 2 3 (list 4 5 6) 7 8 9)) → (1 2 3 (4 5 6) 7 8 9) ([[CL:Macros:setf]] (middleguy a) 3) → 3 ([[CL:Macros:setf]] (middleguy b) 7) → 7 ([[CL:Macros:setf]] (middleguy (middleguy c)) 'middleguy-symbol) → MIDDLEGUY-SYMBOL a → (A 3 C D) b → (7) c → (1 2 3 (4 MIDDLEGUY-SYMBOL 6) 7 8 9) </blockquote>
+
+An example of the use of the long form of **[[CL:Macros:defsetf]]**:
+
+<blockquote> (defsetf subseq (sequence start &optional end) (new-sequence) `(progn (replace ,sequence ,new-sequence :start1 ,start :end1 ,end) ,new-sequence)) → SUBSEQ </blockquote>
+
+<blockquote> (defvar *xy* (make-array '(10 10))) (defun xy (&key ((x x) 0) ((y y) 0)) (aref *xy* x y)) → XY (defun set-xy (new-value &key ((x x) 0) ((y y) 0)) ([[CL:Macros:setf]] (aref *xy* x y) new-value)) → SET-XY (defsetf xy (&key ((x x) 0) ((y y) 0)) (store) `(set-xy ,store 'x ,x 'y ,y)) → XY (get-setf-expansion '(xy a b)) → (#:t0 #:t1), (a b), (#:store), ((lambda (&key ((x #:x)) ((y #:y))) (set-xy #:store 'x #:x 'y #:y)) #:t0 #:t1), (xy #:t0 #:t1) (xy 'x 1) → NIL ([[CL:Macros:setf]] (xy 'x 1) 1) → 1 (xy 'x 1) → 1 (let ((a 'x) (b 'y)) ([[CL:Macros:setf]] (xy a 1 b 2) 3) ([[CL:Macros:setf]] (xy b 5 a 9) 14)) → 14 (xy 'y 0 'x 1) → 1 (xy 'x 1 'y 2) → 3 </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:documentation]]**, **[[CL:Macros:setf]]**,
+
+**[[CL:Macros:define-setf-expander]]**, **[[CL:Functions:get-setf-expansion]]**,
+
+{\secref\GeneralizedReference}, {\secref\DocVsDecls}
+
+====Notes====
+
+//forms// must include provision for returning the correct value (the value
+
+or values
+
+of //store-variable//). This is handled by //forms// rather than by **[[CL:Macros:defsetf]]** because in many cases this value can be returned at no extra cost, by calling a function that simultaneously stores into the //[[CL:Glossary:place]]// and returns the correct value.
+
+A **[[CL:Macros:setf]]** of a call on //access-fn// also evaluates all of //access-fn//'s arguments; it cannot treat any of them specially.
+
+This means that **[[CL:Macros:defsetf]]** cannot be used to describe how to store into a //[[CL:Glossary:generalized reference]]// to a byte, such as ''(ldb field reference)''.
+
+**[[CL:Macros:define-setf-expander]]**
+
+is used to handle situations that do not fit the restrictions imposed by **[[CL:Macros:defsetf]]** and gives the user additional control.
+
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{DECLS-AND-DOC} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92} \issue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW} \issue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW} \issue{FLET-IMPLICIT-BLOCK:YES} \issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}

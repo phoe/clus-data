@@ -1,0 +1,42 @@
+====== Function COPY-ALIST ======
+
+====Syntax====
+
+**copy-alist** //alist// → //new-alist//
+
+====Arguments and Values====
+
+//alist// - an //[[CL:Glossary:association list]]//.
+
+//new-alist// - an //[[CL:Glossary:association list]]//.
+
+====Description====
+
+**[[CL:Functions:copy-alist]]** returns a //[[CL:Glossary:copy]]// of //alist//.
+
+The //[[CL:Glossary:list structure]]// of //alist// is copied, and the //[[CL:Glossary:element|elements]]// of //alist// which are //[[CL:Glossary:conses]]// are also copied (as //[[CL:Glossary:conses]]// only). Any other //[[CL:Glossary:object|objects]]// which are referred to, whether directly or indirectly, by the //alist// continue to be shared.
+
+====Examples====
+
+<blockquote> (defparameter *alist* (acons 1 "one" (acons 2 "two" '()))) *alist* → ((1 . "one") (2 . "two")) (defparameter *list-copy* (copy-list *alist*)) *list-copy* → ((1 . "one") (2 . "two")) (defparameter *alist-copy* (copy-alist *alist*)) *alist-copy* → ((1 . "one") (2 . "two")) ([[CL:Macros:setf]] (cdr (assoc 2 *alist-copy*)) "deux") → "deux" *alist-copy* → ((1 . "one") (2 . "deux")) *alist* → ((1 . "one") (2 . "two")) ([[CL:Macros:setf]] (cdr (assoc 1 *list-copy*)) "uno") → "uno" *list-copy* → ((1 . "uno") (2 . "two")) *alist* → ((1 . "uno") (2 . "two")) </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:copy-list]]**
+
+====Notes====
+
+None.
+

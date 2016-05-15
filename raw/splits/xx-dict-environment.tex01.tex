@@ -1,0 +1,49 @@
+====== Function DECODE-UNIVERSAL-TIME ======
+
+====Syntax====
+
+\DefunWithValuesNewline decode-universal-time {universal-time ''&optional'' time-zone} {second, minute, hour, date, month, year, day, daylight-p, zone}
+
+====Arguments and Values====
+
+//universal-time// - a //[[CL:Glossary:universal time]]//.
+
+//time-zone// - a //[[CL:Glossary:time zone]]//.
+
+//second//, //minute//, //hour//, //date//, //month//, //year//, //day//, //daylight-p//, //zone// - a //[[CL:Glossary:decoded time]]//.
+
+====Description====
+
+Returns the //[[CL:Glossary:decoded time]]// represented by the given //[[CL:Glossary:universal time]]//.
+
+If //time-zone// is not supplied, it defaults to the current time zone adjusted for daylight saving time.
+
+If //time-zone// is supplied, daylight saving time information is ignored. The daylight saving time flag is **[[CL:Constant Variables:nil]]** if //time-zone// is supplied.
+
+====Examples====
+
+<blockquote> (decode-universal-time 0 0) → 0, 0, 0, 1, 1, 1900, 0, //[[CL:Glossary:false]]//, 0
+
+;; The next two examples assume Eastern Daylight Time. (decode-universal-time 2414296800 5) → 0, 0, 1, 4, 7, 1976, 6, //[[CL:Glossary:false]]//, 5 (decode-universal-time 2414293200) → 0, 0, 1, 4, 7, 1976, 6, //[[CL:Glossary:true]]//, 5
+
+;; This example assumes that the time zone is Eastern Daylight Time ;; (and that the time zone is constant throughout the example). (let* ((here (nth 8 (multiple-value-list (get-decoded-time)))) ;Time zone (recently (get-universal-time)) (a (nthcdr 7 (multiple-value-list (decode-universal-time recently)))) (b (nthcdr 7 (multiple-value-list (decode-universal-time recently here))))) (list a b (equal a b))) → ((T 5) (NIL 5) NIL) </blockquote>
+
+====Affected By====
+
+//[[CL:Glossary:Implementation-dependent]]// mechanisms for calculating when or if daylight savings time is in effect for any given session.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:encode-universal-time]]**, **[[CL:Functions:get-universal-time]]**,
+
+{\secref\Time}
+
+====Notes====
+
+None.
+
+\issue{TIME-ZONE-NON-INTEGER:ALLOW} \issue{DECODE-UNIVERSAL-TIME-DAYLIGHT:LIKE-ENCODE} \issue{DECODE-UNIVERSAL-TIME-DAYLIGHT:LIKE-ENCODE}

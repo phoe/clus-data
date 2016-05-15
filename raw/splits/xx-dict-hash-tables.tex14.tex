@@ -1,0 +1,59 @@
+====== Function SXHASH ======
+
+====Syntax====
+
+**sxhash** //object// → //hash-code//
+
+====Arguments and Values====
+
+//object// - an //[[CL:Glossary:object]]//.
+
+//hash-code// - a non-negative //[[CL:Glossary:fixnum]]//.
+
+====Description====
+
+**[[CL:Functions:sxhash]]** returns a hash code for //object//.
+
+The manner in which the hash code is computed is //[[CL:Glossary:implementation-dependent]]//, but subject to certain constraints:
+
+\beginlist \itemitem{1.} ''(equal //x// //y//)'' implies ''(= (sxhash //x//) (sxhash //y//))''.
+
+\itemitem{2.} For any two //[[CL:Glossary:object|objects]]//, //x// and //y//, both of which are //[[CL:Glossary:bit vectors]]//, //[[CL:Glossary:characters]]//, //[[CL:Glossary:conses]]//, //[[CL:Glossary:numbers]]//, //[[CL:Glossary:pathnames]]//, //[[CL:Glossary:strings]]//, or //[[CL:Glossary:symbols]]//, and which are //[[CL:Glossary:similar]]//, ''(sxhash //x//)'' and ''(sxhash //y//)'' //[[CL:Glossary:yield]]// the same mathematical value even if //x// and //y// exist in different //[[CL:Glossary:Lisp images]]// of the same //[[CL:Glossary:implementation]]//. see section {\secref\LiteralsInCompiledFiles}.
+
+\itemitem{3.} The //hash-code// for an //[[CL:Glossary:object]]// is always the //[[CL:Glossary:same]]// within a single //[[CL:Glossary:session]]// provided that the //[[CL:Glossary:object]]// is not visibly modified with regard to the equivalence test **[[CL:Functions:equal]]**. see section {\secref\ModifyingHashKeys}.
+
+\itemitem{4.} The //hash-code// is intended for hashing. This places no verifiable constraint on a //[[CL:Glossary:conforming implementation]]//, but the intent is that an //[[CL:Glossary:implementation]]// should make a good-faith effort to produce //hash-codes// that are well distributed within the range of non-negative //[[CL:Glossary:fixnum|fixnums]]//.
+
+\itemitem{5.} Computation of the //hash-code// must terminate, even if the //object// contains circularities. \endlist
+
+====Examples====
+
+<blockquote> (= (sxhash (list 'list "ab")) (sxhash (list 'list "ab"))) → //[[CL:Glossary:true]]// (= (sxhash "a") (sxhash (make-string 1 :initial-element #\\a))) → //[[CL:Glossary:true]]// (let ((r (make-random-state))) (= (sxhash r) (sxhash (make-random-state r)))) → //[[CL:Glossary:implementation-dependent]]// </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+The //[[CL:Glossary:implementation]]//.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+None.
+
+====Notes====
+
+Many common hashing needs are satisfied by **[[CL:Functions:make-hash-table]]** and the related functions on //[[CL:Glossary:hash tables]]//. **[[CL:Functions:sxhash]]** is intended for use where the pre-defined abstractions are insufficient. Its main intent is to allow the user a convenient means of implementing more complicated hashing paradigms than are provided through //[[CL:Glossary:hash tables]]//.
+
+The hash codes returned by **[[CL:Functions:sxhash]]** are not necessarily related to any hashing strategy used by any other //[[CL:Glossary:function]]// in \clisp.
+
+For //[[CL:Glossary:object|objects]]// of //[[CL:Glossary:types]]// that **[[CL:Functions:equal]]** compares with **[[CL:Functions:eq]]**, item 3 requires that the //hash-code// be based on some immutable quality of the identity of the object. Another legitimate implementation technique would be to have **[[CL:Functions:sxhash]]** assign (and cache) a random hash code for these //[[CL:Glossary:object|objects]]//, since there is no requirement that //[[CL:Glossary:similar]]// but non-**[[CL:Functions:eq]]** objects have the same hash code.
+
+Although //[[CL:Glossary:similarity]]// is defined for //[[CL:Glossary:symbols]]// in terms of both the //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:name]]// and the //[[CL:Glossary:packages]]// in which the //[[CL:Glossary:symbol]]// is //[[CL:Glossary:accessible]]//, item 3 disallows using //[[CL:Glossary:package]]// information to compute the hash code, since changes to the package status of a symbol are not visible to //equal//.
+
+\issue{SXHASH-DEFINITION:SIMILAR-FOR-SXHASH}

@@ -1,0 +1,39 @@
+====== Function UNUSE-PACKAGE ======
+
+====Syntax====
+
+**unuse-package {packages-to-unuse** //\opt} package// → //\t//
+
+====Arguments and Values====
+
+//packages-to-unuse// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:list]]// of //[[CL:Glossary:package designators]]//.
+
+//package// - a //[[CL:Glossary:package designator]]//. The default is the //[[CL:Glossary:current package]]//.
+
+====Description====
+
+**[[CL:Functions:unuse-package]]** causes //package// to cease inheriting all the //[[CL:Glossary:external symbols]]// of //packages-to-unuse//; **[[CL:Functions:unuse-package]]** undoes the effects of **[[CL:Functions:use-package]]**. The //packages-to-unuse// are removed from the //[[CL:Glossary:use list]]// of //package//.
+
+Any //[[CL:Glossary:symbols]]// that have been //[[CL:Glossary:imported]]// into //package// continue to be //[[CL:Glossary:present]]// in //package//.
+
+====Examples====
+
+<blockquote> (in-package "COMMON-LISP-USER") → #<PACKAGE "COMMON-LISP-USER"> (export (intern "SHOES" (make-package 'temp)) 'temp) → T (find-symbol "SHOES") → NIL, NIL (use-package 'temp) → T (find-symbol "SHOES") → SHOES, :INHERITED (find (find-package 'temp) (package-use-list 'common-lisp-user)) → #<PACKAGE "TEMP"> (unuse-package 'temp) → T (find-symbol "SHOES") → NIL, NIL </blockquote>
+
+====Side Effects====
+
+The //[[CL:Glossary:use list]]// of //package// is modified.
+
+====Affected By==== Current state of the package system. ====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:use-package]]**, **[[CL:Functions:package-use-list]]**
+
+====Notes====
+
+None.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}

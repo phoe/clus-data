@@ -1,0 +1,46 @@
+====== Function FBOUNDP ======
+
+====Syntax====
+
+**fboundp** //name// → //generalized-boolean//
+
+
+====Arguments and Values====
+
+//name// - a //[[CL:Glossary:function name]]//.
+
+//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+\Predicate{name}{//[[CL:Glossary:fbound]]//}
+
+====Examples====
+
+<blockquote> (fboundp 'car) → //[[CL:Glossary:true]]// (fboundp 'nth-value) → //[[CL:Glossary:false]]// (fboundp 'with-open-file) → //[[CL:Glossary:true]]// (fboundp 'unwind-protect) → //[[CL:Glossary:true]]// (defun my-function (x) x) → MY-FUNCTION (fboundp 'my-function) → //[[CL:Glossary:true]]// (let ((saved-definition (symbol-function 'my-function))) (unwind-protect (progn (fmakunbound 'my-function) (fboundp 'my-function)) ([[CL:Macros:setf]] (symbol-function 'my-function) saved-definition))) → //[[CL:Glossary:false]]// (fboundp 'my-function) → //[[CL:Glossary:true]]// (defmacro my-macro (x) `',x) → MY-MACRO (fboundp 'my-macro) → //[[CL:Glossary:true]]// (fmakunbound 'my-function) → MY-FUNCTION (fboundp 'my-function) → //[[CL:Glossary:false]]// (flet ((my-function (x) x)) (fboundp 'my-function)) → //[[CL:Glossary:false]]// </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //name// is not a //[[CL:Glossary:function name]]//.
+
+====See Also====
+
+**[[CL:Functions:symbol-function]]**, **[[CL:Functions:fmakunbound]]**, **[[CL:Functions:fdefinition]]**
+
+====Notes====
+
+It is permissible to call **[[CL:Functions:symbol-function]]** on any //[[CL:Glossary:symbol]]// that is //[[CL:Glossary:fbound]]//.
+
+**[[CL:Functions:fboundp]]** is sometimes used to "guard" an access to the //[[CL:Glossary:function cell]]//, as in: <blockquote> (if (fboundp x) (symbol-function x)) </blockquote>
+
+Defining a //[[CL:Glossary:setf expander]]// //F// does not cause the //[[CL:Glossary:setf function]]// ''(setf //F//)'' to become defined.
+
+\issue{FUNCTION-NAME:LARGE} \issue{SETF-FUNCTIONS-AGAIN:MINIMAL-CHANGES}

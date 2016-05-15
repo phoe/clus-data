@@ -1,0 +1,49 @@
+====== Macro MULTIPLE-VALUE-BIND ======
+
+====Syntax====
+
+\DefmacWithValuesNewline multiple-value-bind {\paren{\starparam{var}} //values-form// \starparam{declaration} \starparam{form}} {\starparam{result}}
+
+====Arguments and Values====
+
+//var// - a //[[CL:Glossary:symbol]]// naming a variable; \noeval.
+
+//values-form// - a //[[CL:Glossary:form]]//; \eval.
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//forms// - an //[[CL:Glossary:implicit progn]]//.
+
+//results// - the //[[CL:Glossary:values]]// returned by the //forms//.
+
+====Description====
+
+Creates new variable //[[CL:Glossary:bindings]]// for the //vars// and executes a series of //forms// that use these //[[CL:Glossary:bindings]]//.
+
+The variable //[[CL:Glossary:bindings]]// created are lexical unless \declref{special} declarations are specified.
+
+//Values-form// is evaluated, and each of the //vars// is bound to the respective value returned by that //[[CL:Glossary:form]]//. If there are more //vars// than values returned, extra values of **[[CL:Constant Variables:nil]]** are given to the remaining //vars//. If there are more values than //vars//, the excess values are discarded. The //vars// are bound to the values over the execution of the //forms//, which make up an implicit \specref{progn}. The consequences are unspecified if a type //declaration// is specified for a //var//, but the value to which that //var// is bound is not consistent with the type //declaration//.
+
+The //[[CL:Glossary:scopes]]// of the name binding and //declarations// do not include the //values-form//.
+
+====Examples====
+
+<blockquote> (multiple-value-bind (f r) (floor 130 11) (list f r)) → (11 9) </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+\specref{let}, \specref{multiple-value-call}
+
+====Notes====
+
+<blockquote> (multiple-value-bind (\starparam{var}) //values-form// \starparam{form}) ≡ (multiple-value-call #'(lambda (&optional \starparam{var} &rest #1=#:ignore) (declare (ignore #1#)) \starparam{form}) //values-form//) </blockquote>
+
+\issue{DECLS-AND-DOC}

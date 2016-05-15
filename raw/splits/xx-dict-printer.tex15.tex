@@ -1,0 +1,67 @@
+====== Function WRITE-TO-STRING, PRIN1-TO-STRING, PRINC-TO-STRING ======
+
+====Syntax====
+
+\DefunWithValuesNewline write-to-string {object ''&key'' \writekeys{}} {string}
+
+**prin1-to-string** //object// → //string//
+
+**princ-to-string** //object// → //string//
+
+====Arguments and Values====
+
+//object// - an //[[CL:Glossary:object]]//.
+
+\writekeydescriptions{}
+
+//string// - a //[[CL:Glossary:string]]//.
+
+====Description====
+
+**[[CL:Functions:write-to-string]]**, **[[CL:Functions:prin1-to-string]]**, and **[[CL:Functions:princ-to-string]]** are used to create a //[[CL:Glossary:string]]// consisting of the printed representation of //object//.
+
+//Object// is effectively printed as if by **[[CL:Functions:write]]**, **[[CL:Functions:prin1]]**, or **[[CL:Functions:princ]]**, respectively, and the //[[CL:Glossary:characters]]// that would be output are made into a //[[CL:Glossary:string]]//.
+
+**[[CL:Functions:write-to-string]]** is the general output function. It has the ability to specify all the parameters applicable to the printing of //object//.
+
+**[[CL:Functions:prin1-to-string]]** acts like **[[CL:Functions:write-to-string]]** with '':escape t'', that is, escape characters are written where appropriate.
+
+**[[CL:Functions:princ-to-string]]** acts like **[[CL:Functions:write-to-string]]** with
+
+'':escape nil :readably nil''.
+
+Thus no //[[CL:Glossary:escape]]// //[[CL:Glossary:characters]]// are written.
+
+All other keywords that would be specified to **[[CL:Functions:write-to-string]]** are default values when **[[CL:Functions:prin1-to-string]]** or **[[CL:Functions:princ-to-string]]** is invoked.
+
+The meanings and defaults for the keyword arguments to **[[CL:Functions:write-to-string]]** are the same as those for **[[CL:Functions:write]]**.
+
+====Examples====
+
+<blockquote> (prin1-to-string "abc") → "\\"abc\\"" (princ-to-string "abc") → "abc" </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+**[[CL:Variables:*print-escape*]]**, **[[CL:Variables:*print-radix*]]**, **[[CL:Variables:*print-base*]]**, **[[CL:Variables:*print-circle*]]**, **[[CL:Variables:*print-pretty*]]**, **[[CL:Variables:*print-level*]]**, **[[CL:Variables:*print-length*]]**, **[[CL:Variables:*print-case*]]**, **[[CL:Variables:*print-gensym*]]**, **[[CL:Variables:*print-array*]]**, **[[CL:Variables:*read-default-float-format*]]**.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:write]]**
+
+====Notes====
+
+<blockquote> (write-to-string //object// \star{{//key// //argument//}}) ≡ (with-output-to-string (#1=#:string-stream) (write object :stream #1# \star{{//key// //argument//}}))
+
+(princ-to-string //object//) ≡ (with-output-to-string (string-stream) (princ //object// string-stream))
+
+(prin1-to-string //object//) ≡ (with-output-to-string (string-stream) (prin1 //object// string-stream)) </blockquote>
+
+\issue{PRINC-READABLY:X3J13-DEC-91}

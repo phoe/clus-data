@@ -1,0 +1,2537 @@
+% -*- Mode: TeX -*-
+
+% Sequences
+%  Sequence Mapping
+%  Sequence Counting
+%  Sequence Ordering
+%  Sequence Search
+%  Sequence Comparison
+%  Sequence Substitution
+%  Sequence Joining
+%  Sequence Deletion
+
+%-------------------- Sequence Type --------------------
+
+%%% ========== SEQUENCE
+\begincom{sequence}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+\term{Sequences} are ordered collections of \term{objects},
+called the \term{elements} of the \term{sequence}.
+
+%% 2.15.0 26                                                 
+\Thetypes{vector} and \thetype{list} are \term{disjoint} \subtypesof{sequence},
+%The following is added to make an implicit vagueness explicit. -kmp 29-Mar-91
+but are not necessarily an \term{exhaustive partition} of \term{sequence}.
+
+When viewing a \term{vector} as a \term{sequence}, 
+only the \term{active} \term{elements} of that \term{vector} 
+are considered \term{elements} of the \term{sequence};
+that is,
+\term{sequence} operations respect the \term{fill pointer}
+when given \term{sequences} represented as \term{vectors}.
+
+%% 2.4.0 2
+%% 2.4.0 7
+
+\endcom%{sequence}\ftype{System Class}
+
+%-------------------- Sequences --------------------
+
+%%% ========== COPY-SEQ
+\begincom{copy-seq}\ftype{Function}
+
+%KMP: It's too bad this function is not called copy-sequence.
+
+\label Syntax::
+
+\DefunWithValues copy-seq {sequence} {copied-sequence}
+
+\label Arguments and Values::
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{copied-sequence}---a \term{proper sequence}.
+
+\label Description::
+
+%% 14.1.0 8
+Creates a copy of \param{sequence}.  The \term{elements} of the new
+\term{sequence} are the \term{same} as the corresponding \term{elements} of
+the given \param{sequence}.
+
+%% Moon's suggested interpretation follows:
+
+If \param{sequence} is a \term{vector}, 
+the result is a \term{fresh} \term{simple array}
+of \term{rank} one 
+that has the same \term{actual array element type} as \param{sequence}.
+If \param{sequence} is a \term{list}, 
+the result is a \term{fresh} \term{list}. 
+
+%% End Moon's suggested interpretation.
+
+\label Examples::
+\code
+ (setq str "a string") \EV "a string"
+ (equalp str (copy-seq str)) \EV \term{true}
+ (eql str (copy-seq str)) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+%% Sandra thinks this is excessive.
+%Creates a new \term{sequence}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+
+\label See Also::
+
+\funref{copy-list}
+
+\label Notes::
+
+From a functional standpoint,
+\code
+ (copy-seq x) \EQ (subseq x 0)
+\endcode
+However, the programmer intent is typically very different in these two cases.
+
+\endcom
+
+%%% ========== ELT
+\begincom{elt}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues elt {sequence index} {object}
+\Defsetf         elt {sequence index} {new-object}
+
+\label Arguments and Values::
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{index}---a \term{valid sequence index} for \param{sequence}.
+
+\param{object}---an \term{object}.
+
+\param{new-object}---an \term{object}.
+
+\label Description::
+
+%% 14.1.0 3
+\term{Accesses} the \term{element} of \param{sequence} specified by \param{index}.
+
+% No longer needed -- implied by "Access". -kmp 13-Jan-92
+% %% 14.1.0 5
+% \macref{setf} may be used with \funref{elt} to destructively replace
+% a \term{sequence} element with a new value.
+
+%Barmar thinks (and I agree) that this is redundant with the specification
+%of the argument type above.
+%
+% %% 14.1.0 4
+% \funref{elt} observes the \term{fill pointer} in those \term{vectors} 
+% that have \term{fill pointers}.  
+
+\label Examples::
+
+\code
+ (setq str (copy-seq "0123456789")) \EV "0123456789"
+ (elt str 6) \EV #\\6
+ (setf (elt str 0) #\\#) \EV #\\#
+ str \EV "#123456789"
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+%% e.g., consider:
+%  (LET ((X (NCONC (MAKE-LIST 1000 :INITIAL-ELEMENT 'A) '(B . C))))
+%    (ELT X 1000))
+%  => A
+\Lazychecktype{sequence}{a \term{proper sequence}}
+\Shouldchecktype{index}{a \term{valid sequence index} for \param{sequence}}
+
+\label See Also::                               
+
+\funref{aref},
+\funref{nth},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification}
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+
+\label Notes::
+
+\funref{aref} may be used to \term{access} \term{vector} 
+elements that are beyond the \term{vector}'s \term{fill pointer}.
+
+\endcom
+
+%%% ========== FILL
+\begincom{fill}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues fill {sequence item {\key} start end} {sequence}
+
+\label Arguments and Values::
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{item}---a \term{sequence}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{sequence}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+                        
+\label Description::
+
+%% 14.3.0 3
+Replaces the \term{elements} of \param{sequence} 
+\term{bounded} by \param{start} and \param{end}
+with \param{item}.
+
+\label Examples::
+
+\code
+ (fill (list 0 1 2 3 4 5) '(444)) \EV ((444) (444) (444) (444) (444) (444))
+ (fill (copy-seq "01234") #\\e :start 3) \EV "012ee"
+ (setq x (vector 'a 'b 'c 'd 'e)) \EV #(A B C D E)
+ (fill x 'z :start 1 :end 3) \EV #(A Z Z D E)
+ x \EV #(A Z Z D E)
+ (fill x 'p) \EV #(P P P P P)
+ x \EV #(P P P P P)
+\endcode
+
+\label Side Effects::
+
+\param{Sequence} is destructively modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}} 
+\Shouldchecktype{start}{a non-negative \term{integer}}
+\Shouldchecktype{end}{a non-negative \term{integer} or \nil}
+
+\label See Also::
+
+\funref{replace}, \funref{nsubstitute}
+
+\label Notes::
+
+{\tt  (fill \param{sequence} \param{item}) \EQ 
+   (nsubstitute-if \param{item} (constantly t) \param{sequence})}
+
+\endcom
+
+%%% ========== MAKE-SEQUENCE
+\begincom{make-sequence}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-sequence 
+		 {result-type size {\key} initial-element}
+		 {sequence}
+
+\label Arguments and Values::
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{result-type}---a \typeref{sequence} \term{type specifier}.
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{size}---a non-negative \term{integer}.
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\param{initial-element}---an \term{object}.
+ \Default{\term{implementation-dependent}}
+
+\param{sequence}---a \term{proper sequence}.
+
+\label Description::
+
+%% 14.1.0 12
+Returns a \term{sequence} of the type \param{result-type} and of length \param{size},
+each of the \term{elements} of which has been initialized to \param{initial-element}.
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+If the \param{result-type} is a \term{subtype} of \typeref{list},
+the result will be a \term{list}.
+
+If the \param{result-type} is a \term{subtype} of \typeref{vector},
+then if the implementation can determine the element type specified
+for the \param{result-type}, the element type of the resulting array 
+is the result of \term{upgrading} that element type; or, if the
+implementation can determine that the element type is unspecified (or \f{*}),
+the element type of the resulting array is \typeref{t};
+otherwise, an error is signaled.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\label Examples::
+
+\code
+ (make-sequence 'list 0) \EV ()
+ (make-sequence 'string 26 :initial-element #\\.) 
+\EV ".........................."
+ (make-sequence '(vector double-float) 2
+                :initial-element 1d0)
+\EV #(1.0d0 1.0d0)
+\endcode
+
+\issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+\code
+ (make-sequence '(vector * 2) 3) should signal an error
+ (make-sequence '(vector * 4) 3) should signal an error
+\endcode
+\endissue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+
+
+\label Affected By::
+
+The \term{implementation}.
+
+\label Exceptional Situations::
+
+The consequences are unspecified if \param{initial-element} 
+is not an \term{object} which can be stored in the resulting \term{sequence}.
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+An error \oftype{type-error} must be signaled if the \param{result-type} is neither
+     a \term{recognizable subtype} of \typeref{list},
+ nor a \term{recognizable subtype} of \typeref{vector}.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+An error \oftype{type-error} should be signaled if \param{result-type} specifies 
+the number of elements and \param{size} is different from that number.
+\endissue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+
+\label See Also::
+
+\funref{make-array}, \funref{make-list}
+
+\label Notes::
+\issue{CHARACTER-PROPOSAL:2-6-5}
+\code
+ (make-sequence 'string 5) \EQ (make-string 5)               
+\endcode
+\endissue{CHARACTER-PROPOSAL:2-6-5}
+\endcom
+
+%%% ========== SUBSEQ
+\begincom{subseq}\ftype{Accessor}
+
+%KMP: It's too bad this function is not called subsequence.
+
+\label Syntax::
+
+\DefunWithValues subseq {sequence start {\opt} end} {subsequence}
+\Defsetf         subseq {sequence start {\opt} end} {new-subsequence}
+
+\label Arguments and Values::
+
+\param{sequence}---a \term{proper sequence}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{sequence}.
+ \DefaultFor{\param{end}}{\nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{subsequence}---a \term{proper sequence}.
+
+\param{new-subsequence}---a \term{proper sequence}.
+
+\label Description::
+
+%% 14.1.0 6
+\funref{subseq} creates a \term{sequence} 
+that is a copy of the subsequence of \param{sequence}
+\param{bounded} by \param{start} and \param{end}.
+
+\param{Start} specifies an offset into the original \param{sequence} and
+marks the beginning position of the subsequence.
+\param{end} marks the position following the last element of the subsequence.
+                                                
+\funref{subseq} always allocates a new \term{sequence} for a result;
+it never shares storage with an old \term{sequence}. 
+The result subsequence is always of the same \term{type} as \param{sequence}.
+
+%% Moon's suggested interpretation follows:
+
+If \param{sequence} is a \term{vector},
+the result is a \term{fresh} \term{simple array}
+of \term{rank} one
+that has the same \term{actual array element type} as \param{sequence}.
+If \param{sequence} is a \term{list}, 
+the result is a \term{fresh} \term{list}. 
+
+%% End Moon's suggested interpretation.
+
+%% 14.1.0 7
+\macref{setf} may be used with \funref{subseq} to destructively replace
+\term{elements} of a subsequence with \term{elements} 
+taken from a \term{sequence} of new values.
+If the subsequence and the new sequence are not of equal length,
+the shorter length determines the number of elements that are
+replaced.  The remaining \term{elements} at the end of the longer sequence 
+are not modified in the operation.
+
+\label Examples::
+
+\code
+ (setq str "012345") \EV "012345"
+ (subseq str 2) \EV "2345"
+ (subseq str 3 5) \EV "34"
+ (setf (subseq str 4) "abc") \EV "abc"
+ str \EV "0123ab"
+ (setf (subseq str 0 2) "A") \EV "A"
+ str \EV "A123ab"
+\endcode
+
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+\Lazychecktype{new-subsequence}{a \term{proper sequence}}
+
+\label See Also::
+
+\funref{replace}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Sequence Mapping --------------------
+
+%%% ========== MAP
+\begincom{map}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues map {result-type function {\rest} \plus{sequences}} {result}
+
+\label Arguments and Values:: 
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+\param{result-type} -- a \typeref{sequence} \term{type specifier}, or \nil.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\issue{FUNCTION-TYPE:X3J13-MARCH-88}
+\param{function}---a \term{function designator}.
+  \param{function} must take as many arguments as 
+  there are \param{sequences}.
+\endissue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{result}---if \param{result-type} is a \term{type specifier} other than \nil, 
+		 then a \term{sequence} of the \term{type} it denotes;
+		 otherwise (if the \param{result-type} is \nil), \nil.
+
+\label Description::
+
+%% 7.8.4 3
+Applies \param{function} to successive sets of arguments in which
+one argument is obtained from each \term{sequence}.
+%% 14.2.0 6
+The \param{function} is called first on all the elements with index \f{0},
+then on all those with index \f{1}, and so on.
+The \param{result-type} specifies the \term{type} of the resulting \term{sequence}.
+
+\funref{map} returns \nil\ if \param{result-type} is \nil.      
+%% 14.2.0 5
+Otherwise, \funref{map} returns
+a \term{sequence} such that element \f{j} is the result
+of applying \param{function} to element \f{j} of each of the 
+\param{sequences}.  The result \term{sequence} 
+is as long as the shortest of the
+\param{sequences}.
+The consequences are undefined if the result of applying \param{function} 
+to the successive elements of the \param{sequences} cannot
+be contained in a \term{sequence} of the \term{type} given by \param{result-type}.
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+If the \param{result-type} is a \term{subtype} of \typeref{list},
+the result will be a \term{list}.
+
+If the \param{result-type} is a \term{subtype} of \typeref{vector},
+then if the implementation can determine the element type specified
+for the \param{result-type}, the element type of the resulting array 
+is the result of \term{upgrading} that element type; or, if the
+implementation can determine that the element type is unspecified (or \f{*}),
+the element type of the resulting array is \typeref{t};
+otherwise, an error is signaled.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\label Examples::
+
+\code
+ (map 'string #'(lambda (x y)
+                  (char "01234567890ABCDEF" (mod (+ x y) 16)))
+       '(1 2 3 4)
+       '(10 9 8 7)) \EV "AAAA"
+ (setq seq '("lower" "UPPER" "" "123")) \EV ("lower" "UPPER" "" "123")
+ (map nil #'nstring-upcase seq) \EV NIL
+ seq \EV ("LOWER" "UPPER" "" "123")
+ (map 'list #'- '(1 2 3 4)) \EV (-1 -2 -3 -4)
+ (map 'string
+      #'(lambda (x) (if (oddp x) #\\1 #\\0))
+      '(1 2 3 4)) \EV "1010"
+\endcode
+
+\issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+\code
+ (map '(vector * 4) #'cons "abc" "de") should signal an error
+\endcode
+\endissue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+An error \oftype{type-error} must be signaled if the \param{result-type} is 
+     not a \term{recognizable subtype} of \typeref{list},
+     not a \term{recognizable subtype} of \typeref{vector},
+ and not \nil.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\Lazycheckanytype{sequence}{a \term{proper sequence}}
+
+\issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+An error \oftype{type-error} should be signaled
+if \param{result-type} specifies the
+number of elements and the minimum length of the \param{sequences} 
+is different from that number.
+\endissue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+
+\label See Also::
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes:\None.
+
+\endcom
+
+
+%%% ========== MAP-INTO
+\begincom{map-into}\ftype{Function}
+
+\issue{MAP-INTO:ADD-FUNCTION}
+
+\label Syntax::
+
+\DefunWithValues map-into {result-sequence function {\rest} sequences} {result-sequence}
+
+\label Arguments and Values::
+
+\param{result-sequence}---a \term{proper sequence}.
+
+\param{function}---a \term{designator} for a \term{function}
+		   of as many \term{arguments} as there are \param{sequences}.
+
+\param{sequence}---a \term{proper sequence}.
+
+\label Description::
+
+Destructively modifies \param{result-sequence} to contain the results of
+applying \param{function} to each element in the argument \param{sequences} 
+in turn.
+ 
+\param{result-sequence} and each element of \param{sequences} can each be
+either a \term{list} or a \term{vector}. 
+%Note that NIL is considered to be a sequence, of length zero.  
+If \param{result-sequence} and each element of \param{sequences} are not all
+the same length, the iteration terminates when the shortest \term{sequence}
+(of any of the \param{sequences} or the \param{result-sequence})
+is exhausted.
+If \param{result-sequence} is a \term{vector} with a 
+\term{fill pointer}, the \term{fill pointer} is ignored when deciding how
+many iterations to perform, and afterwards the \term{fill pointer} is set to
+the number of times \param{function} was applied.
+If \param{result-sequence} is longer than the shortest element of \param{sequences},
+extra elements at the end of \param{result-sequence} are left unchanged.
+If \param{result-sequence} is \nil, \funref{map-into} immediately returns
+\nil, since \nil\ is a \term{sequence} of length zero.
+ 
+If \param{function} has side effects, it can count on being called
+first on all of the elements with index 0, then on all of those 
+numbered 1, and so on.
+ 
+\label Examples::
+
+\code
+ (setq a (list 1 2 3 4) b (list 10 10 10 10)) \EV (10 10 10 10)
+ (map-into a #'+ a b) \EV (11 12 13 14)
+ a \EV (11 12 13 14)
+ b \EV (10 10 10 10)
+ (setq k '(one two three)) \EV (ONE TWO THREE)
+ (map-into a #'cons k a) \EV ((ONE . 11) (TWO . 12) (THREE . 13) 14)
+ (map-into a #'gensym) \EV (#:G9090 #:G9091 #:G9092 #:G9093)
+ a \EV (#:G9090 #:G9091 #:G9092 #:G9093)
+\endcode
+
+
+\label Affected By:\None.                                                 
+
+\label Exceptional Situations::
+
+\Lazychecktype{result-sequence}{a \term{proper sequence}}
+\Lazychecktype{sequence}{a \term{proper sequence}}
+
+\label See Also:\None.
+
+\label Notes::
+
+\funref{map-into} differs from \funref{map} in that it modifies an
+existing \term{sequence} rather than creating a new one.
+In addition, \funref{map-into} can be called with only two 
+arguments, while \funref{map} requires at least three arguments.
+
+%% Barmar supplied this.
+\funref{map-into} could be defined by:
+
+\code
+ (defun map-into (result-sequence function &rest sequences)
+   (loop for index below (apply #'min 
+                                (length result-sequence)
+                                (mapcar #'length sequences))
+         do (setf (elt result-sequence index)
+                  (apply function
+                         (mapcar #'(lambda (seq) (elt seq index))
+                                 sequences))))
+   result-sequence)
+\endcode
+
+\endissue{MAP-INTO:ADD-FUNCTION}
+\endcom              
+
+%%% ========== REDUCE
+\begincom{reduce}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues reduce {function sequence {\key} key from-end start end initial-value}
+		 	{result}
+
+\label Arguments and Values::
+
+\param{function}---a \term{designator} for a \term{function}
+   that might be called with either zero or two \term{arguments}.
+
+\param{sequence}---a \term{proper sequence}.
+
+\issue{REDUCE-ARGUMENT-EXTRACTION}
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+\endissue{REDUCE-ARGUMENT-EXTRACTION}
+
+\param{from-end}---a \term{generalized boolean}.
+  \Default{\term{false}}
+ 
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{sequence}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{initial-value}---an \term{object}. 
+
+\param{result}---an \term{object}.
+
+\label Description::
+
+%% 14.2.0 17
+%% 14.2.0 18
+\funref{reduce} uses a binary operation, \param{function},
+to combine the \term{elements} of \param{sequence} 
+\term{bounded} by \param{start} and \param{end}.
+
+The \param{function} must accept as \term{arguments} two \term{elements}
+of \param{sequence} or the results from combining those \term{elements}.
+The \param{function} must also be able to accept no arguments.
+
+\issue{REDUCE-ARGUMENT-EXTRACTION}
+If \param{key} is supplied, it is used is used to extract the values to reduce.
+The \param{key} function is applied exactly once to each element of \param{sequence}
+in the order implied by the reduction order but not to the value of
+\param{initial-value}, if supplied.
+\endissue{REDUCE-ARGUMENT-EXTRACTION}
+The \param{key} function typically returns part of the \term{element} of \param{sequence}.
+If \param{key} is not supplied or is \nil, the \param{sequence} \term{element} itself is used.
+
+The reduction is left-associative,
+unless \param{from-end} is \term{true} in which case it is right-associative.  
+
+If \param{initial-value} is supplied, 
+it is logically placed before the subsequence
+(or after it if \param{from-end} is \term{true})
+and included in the reduction operation.
+
+In the normal case, the result of \funref{reduce} is the combined 
+result of \param{function}'s being applied to successive pairs of \term{elements} 
+of \param{sequence}.
+%% 14.2.0 19
+If the subsequence contains exactly one \term{element} 
+and no \param{initial-value} is given,
+then that \term{element} is returned and \param{function} is not called.
+If the subsequence is empty and an \param{initial-value} is given,
+then the \param{initial-value} is returned and \param{function} is not called.
+%% 14.2.0 20
+If the subsequence is empty and no \param{initial-value} is given,
+then the \param{function} is called with zero arguments,
+and \funref{reduce} returns whatever \param{function} does.
+This is the only case where the
+\param{function} is called with other than two arguments.
+
+\label Examples::
+%% 14.2.0 21
+\code
+ (reduce #'* '(1 2 3 4 5)) \EV 120
+ (reduce #'append '((1) (2)) :initial-value '(i n i t)) \EV (I N I T 1 2)
+ (reduce #'append '((1) (2)) :from-end t                  
+                             :initial-value '(i n i t)) \EV (1 2 I N I T) 
+ (reduce #'- '(1 2 3 4)) \EQ (- (- (- 1 2) 3) 4) \EV -8
+ (reduce #'- '(1 2 3 4) :from-end t)    ;Alternating sum.
+\EQ (- 1 (- 2 (- 3 4))) \EV -2
+ (reduce #'+ '()) \EV 0
+ (reduce #'+ '(3)) \EV 3
+ (reduce #'+ '(foo)) \EV FOO
+ (reduce #'list '(1 2 3 4)) \EV (((1 2) 3) 4)
+ (reduce #'list '(1 2 3 4) :from-end t) \EV (1 (2 (3 4)))
+ (reduce #'list '(1 2 3 4) :initial-value 'foo) \EV ((((foo 1) 2) 3) 4)
+ (reduce #'list '(1 2 3 4)
+        :from-end t :initial-value 'foo) \EV (1 (2 (3 (4 foo))))
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+
+\label See Also::
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes:\None.
+                           
+\endcom
+
+%-------------------- Sequence Counting --------------------
+
+%%% ========== COUNT
+%%% ========== COUNT-IF
+%%% ========== COUNT-IF-NOT
+\begincom{count, count-if, count-if-not}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues count        {item sequence {\key} from-end start end key test test-not} {n}
+\DefunWithValues count-if     {predicate sequence {\key} from-end start end key}  {n}
+\DefunWithValues count-if-not {predicate sequence {\key} from-end start end key}  {n}
+
+\label Arguments and Values:: 
+
+\param{item}---an \term{object}.
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{predicate}---a \term{designator} for a \term{function} of one \term{argument}
+  that returns a \term{generalized boolean}.
+
+\param{from-end}---a \term{generalized boolean}.
+  \Default{\term{false}}
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{sequence}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{n}---a non-negative \term{integer} 
+	    less than or equal to the \term{length} of \param{sequence}.
+
+\label Description::
+
+%% 14.3.0 32
+\funref{count}, \funref{count-if}, and \funref{count-if-not} 
+count and return the number of \term{elements} in 
+the \param{sequence} \term{bounded} by \param{start} and \param{end}
+that \term{satisfy the test}.
+
+The \param{from-end} has no direct effect on the result.
+However, if \param{from-end} is \term{true},
+the \term{elements} of \param{sequence} will be supplied as \term{arguments} to
+      the \param{test},
+      \param{test-not},
+  and \param{key} in reverse order,
+which may change the side-effects, if any, of those functions.
+
+\label Examples::
+
+\code
+ (count #\\a "how many A's are there in here?") \EV 2
+ (count-if-not #'oddp '((1) (2) (3) (4)) :key #'car) \EV 2
+ (count-if #'upper-case-p "The Crying of Lot 49" :start 4) \EV 2 
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+
+\label See Also::
+
+{\secref\TestFunctionRules},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} \term{argument} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+\Thefunction{count-if-not} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\endcom
+
+%%% ========== LENGTH
+\begincom{length}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues length {sequence} {n}
+
+\label Arguments and Values::
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{n}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 14.1.0 9
+Returns the number of \term{elements} in \param{sequence}.
+
+If \param{sequence} is a \term{vector} with a \term{fill pointer},
+the active length as specified by the \term{fill pointer} is returned.
+
+\label Examples::
+
+\code
+ (length "abc") \EV 3
+ (setq str (make-array '(3) :element-type 'character 
+                            :initial-contents "abc"
+                            :fill-pointer t)) \EV "abc"
+ (length str) \EV 3
+ (setf (fill-pointer str) 2) \EV 2
+ (length str) \EV 2
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+%%It's implied by lazychecktype.
+%The results are undefined if \param{sequence} is a \term{circular list}.
+
+\label See Also::
+
+\funref{list-length},
+\typeref{sequence}
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.                
+
+\endcom
+
+%-------------------- Sequence Ordering --------------------
+
+%%% ========== REVERSE
+%%% ========== NREVERSE
+\begincom{reverse, nreverse}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues reverse {sequence} {reversed-sequence}
+
+\DefunWithValues nreverse {sequence} {reversed-sequence}
+
+\label Arguments and Values::
+
+\param{sequence}---a \term{proper sequence}.
+
+%% 14.1.0 10
+\param{reversed-sequence}---a \term{sequence}.
+
+\label Description::
+
+\funref{reverse} and \funref{nreverse} return a new \term{sequence} 
+of the same kind as \param{sequence}, containing the same \term{elements},
+but in reverse order.
+
+\funref{reverse} and \funref{nreverse} differ in that \funref{reverse} 
+always creates and returns a new \term{sequence}, whereas \funref{nreverse}
+might modify and return the given \param{sequence}.  \funref{reverse} never
+modifies the given \param{sequence}.
+
+%% Moon's suggested interpretation follows:
+
+For \funref{reverse}, if \param{sequence} is a \term{vector}, 
+the result is a \term{fresh} \term{simple array} of \term{rank} one
+that has the same \term{actual array element type} as \param{sequence}.
+If \param{sequence} is a \term{list}, the result is a \term{fresh} \term{list}. 
+
+For \funref{nreverse}, if \param{sequence} is a \term{vector},
+the result is a \term{vector}
+that has the same \term{actual array element type} as \param{sequence}.
+If \param{sequence} is a \term{list}, the result is a \term{list}.
+
+%% End Moon's suggested interpretation.
+
+%% 14.1.0 11
+For \funref{nreverse},
+\param{sequence} might be destroyed and re-used to produce the result.
+The result might or might not be \term{identical} to \param{sequence}.
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+Specifically, when \param{sequence} is a \term{list}, 
+\funref{nreverse} is permitted to \macref{setf} any part, \funref{car} or \funref{cdr},
+of any \term{cons} that is part of the \term{list structure} of \param{sequence}.
+When \param{sequence} is a \term{vector},
+\funref{nreverse} is permitted to re-order the elements of \param{sequence}
+in order to produce the resulting \term{vector}.
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\label Examples::
+\code
+ (setq str "abc") \EV "abc"
+ (reverse str) \EV "cba"
+ str \EV "abc"
+ (setq str (copy-seq str)) \EV "abc"
+ (nreverse str) \EV "cba"
+ str \EV \term{implementation-dependent}
+ (setq l (list 1 2 3)) \EV (1 2 3)
+ (nreverse l) \EV (3 2 1)
+ l \EV \term{implementation-dependent}
+\endcode
+
+\label Side Effects::
+
+\funref{nreverse} might either create a new \term{sequence},
+modify the argument \param{sequence}, or both.
+%\funref{reverse} returns a \term{potential copy} of \param{sequence}.
+(\funref{reverse} does not modify \param{sequence}.)
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+                
+\endcom
+
+%%% ========== SORT
+%%% ========== STABLE-SORT
+\begincom{sort, stable-sort}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues sort        {sequence predicate {\key} key} {sorted-sequence}
+\DefunWithValues stable-sort {sequence predicate {\key} key} {sorted-sequence}
+
+\label Arguments and Values::
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{predicate}---a \term{designator} for
+  a \term{function} of two arguments that returns a \term{generalized boolean}.
+
+%% 14.4.0 4
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{sorted-sequence}---a \term{sequence}.
+
+\label Description::
+
+%% 14.4.0 2
+\funref{sort} and \funref{stable-sort} destructively sort \param{sequences}  
+according to the order determined by the \param{predicate} function.
+
+%% Moon's suggested interpretation follows:
+
+If \param{sequence} is a \term{vector},
+the result is a \term{vector} 
+that has the same \term{actual array element type} as \param{sequence}.
+%% Moved to notes per Schulenburg #1 (by X3J13 vote at May 4-5, 1994 meeting).
+%% -kmp 9-May-94
+% The result might or might not be simple, 
+% and might or might not be \term{identical} to \param{sequence}.
+%% Another possible interpretation:
+%% The result might or might not be \term{identical} to \param{sequence}.
+%% If the result is  a \term{vector} that is not \term{identical}
+%% to \param{sequence}, the result is a \term{fresh} \term{simple array}
+%% of \term{rank} one.
+If \param{sequence} is a \term{list},
+the result is a \term{list}. 
+%% End Moon's suggested interpretation.
+
+%% 14.4.0 3
+\funref{sort} determines the relationship between two elements
+by giving keys extracted from the elements to the \param{predicate}.
+The first argument to the \param{predicate} function is the part of one element
+of \param{sequence} extracted by the \param{key} function
+(if supplied); the second
+argument is the part of another element
+of \param{sequence} extracted by the \param{key} function
+(if supplied).
+\param{Predicate} should return \term{true} if and only if the first argument is
+strictly less than the second (in some appropriate sense). 
+If the first argument is greater than or equal to the second
+(in the appropriate sense), then the \param{predicate} should return \term{false}.
+           
+The argument to the \param{key} function is the \param{sequence} element.
+The return value of the \param{key} function 
+becomes an argument to \param{predicate}.
+If \param{key} is not supplied or \nil, the \param{sequence} element itself is used.
+There is no guarantee on the number of times the \param{key} will be called.
+
+%% 14.4.0 5
+If the \param{key} and \param{predicate} always return,
+then the sorting operation will always terminate,
+producing a \term{sequence} containing the same \term{elements} as \param{sequence} 
+(that is, the result is a permutation of \param{sequence}).
+This is guaranteed even if the \param{predicate}
+does not really consistently represent a total order
+(in which case the \term{elements} will be scrambled in some unpredictable way,
+but no \term{element} will be lost).  
+If the \param{key} consistently returns meaningful keys,
+and the \param{predicate} does reflect some total ordering criterion on those keys,
+then the \term{elements} of the \param{sorted-sequence}
+will be properly sorted according to that ordering.
+
+%% 14.4.0 6
+The sorting operation performed by \funref{sort} is not guaranteed stable.
+Elements considered equal by the \param{predicate} might or might not
+stay in their original order.  The \param{predicate} is assumed to
+consider two elements \f{x} and \f{y} to be equal if
+\f{(funcall \i{predicate} \i{x} \i{y})} and
+\f{(funcall \i{predicate} \i{y} \i{x})} are both \term{false}.
+\funref{stable-sort} guarantees stability.
+
+%% 14.5.0 7
+The sorting operation can be destructive in all cases.  In the case of a
+\term{vector} 
+argument, this is accomplished by permuting the elements in place.
+In the case of a \term{list}, the \term{list} is
+destructively reordered in the same manner as for
+\funref{nreverse}.  
+
+%% 14.4.0 9
+%% this paragraph left out
+
+\label Examples::
+
+\code
+ (setq tester (copy-seq "lkjashd")) \EV "lkjashd"
+ (sort tester #'char-lessp) \EV "adhjkls"
+ (setq tester (list '(1 2 3) '(4 5 6) '(7 8 9))) \EV ((1 2 3) (4 5 6) (7 8 9))
+ (sort tester #'> :key #'car)  \EV ((7 8 9) (4 5 6) (1 2 3)) 
+ (setq tester (list 1 2 3 4 5 6 7 8 9 0)) \EV (1 2 3 4 5 6 7 8 9 0)
+ (stable-sort tester #'(lambda (x y) (and (oddp x) (evenp y))))
+\EV (1 3 5 7 9 2 4 6 8 0)
+ (sort (setq committee-data
+             (vector (list (list "JonL" "White") "Iteration")
+                     (list (list "Dick" "Waters") "Iteration")
+                     (list (list "Dick" "Gabriel") "Objects")
+                     (list (list "Kent" "Pitman") "Conditions")
+                     (list (list "Gregor" "Kiczales") "Objects")
+                     (list (list "David" "Moon") "Objects")
+                     (list (list "Kathy" "Chapman") "Editorial")
+                     (list (list "Larry" "Masinter") "Cleanup")
+                     (list (list "Sandra" "Loosemore") "Compiler")))
+       #'string-lessp :key #'cadar)
+\EV #((("Kathy" "Chapman") "Editorial")
+     (("Dick" "Gabriel") "Objects")
+     (("Gregor" "Kiczales") "Objects")
+     (("Sandra" "Loosemore") "Compiler")
+     (("Larry" "Masinter") "Cleanup")
+     (("David" "Moon") "Objects")
+     (("Kent" "Pitman") "Conditions")
+     (("Dick" "Waters") "Iteration")
+     (("JonL" "White") "Iteration"))
+ ;; Note that individual alphabetical order within `committees'
+ ;; is preserved.
+ (setq committee-data 
+       (stable-sort committee-data #'string-lessp :key #'cadr))
+\EV #((("Larry" "Masinter") "Cleanup")
+     (("Sandra" "Loosemore") "Compiler")
+     (("Kent" "Pitman") "Conditions")
+     (("Kathy" "Chapman") "Editorial")
+     (("Dick" "Waters") "Iteration")
+     (("JonL" "White") "Iteration")
+     (("Dick" "Gabriel") "Objects")
+     (("Gregor" "Kiczales") "Objects")
+     (("David" "Moon") "Objects"))
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+
+\label See Also::
+
+\funref{merge},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification},
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules},
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\DestructiveOperations}
+
+\label Notes::
+
+%% Moved from Description per Schulenburg #1 (by X3J13 vote at May 4-5, 1994 meeting).
+%% -kmp 9-May-94
+If \param{sequence} is a \term{vector},
+the result might or might not be simple, 
+and might or might not be \term{identical} to \param{sequence}.
+
+\endcom
+
+%-------------------- Sequence Search --------------------
+
+%%% ========== FIND
+%%% ========== FIND-IF
+%%% ========== FIND-IF-NOT
+\begincom{find, find-if, find-if-not}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues find {item sequence {\key} from-end test test-not start end key} {element}
+\DefunWithValues find-if     {predicate sequence {\key} from-end start end key} {element}
+\DefunWithValues find-if-not {predicate sequence {\key} from-end start end key} {element}
+
+\label Arguments and Values:: 
+
+\param{item}---an \term{object}.
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{predicate}---a \term{designator} for a \term{function} of one \term{argument}
+  that returns a \term{generalized boolean}.
+
+\param{from-end}---a \term{generalized boolean}.
+  \Default{\term{false}}
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{sequence}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{element}---an \term{element} of the \param{sequence}, or \nil.
+
+\label Description::
+
+\funref{find}, \funref{find-if}, and \funref{find-if-not} 
+each search for an \term{element} of the \param{sequence}
+\term{bounded} by \param{start} and \term{end}
+   that \term{satisfies the predicate} \param{predicate} 
+or that \term{satisfies the test} \param{test} or \param{test-not},
+as appropriate.
+                  
+%% 14.3.0 28
+If \param{from-end} is \term{true},
+then the result is the rightmost \term{element} that \term{satisfies the test}. 
+
+%% 14.3.0 26
+If the \param{sequence} contains an \term{element} that \term{satisfies the test},
+then the leftmost or rightmost \param{sequence} element, 
+depending on \param{from-end},
+is returned;
+otherwise \nil\ is returned.
+
+\label Examples::
+
+\code
+ (find #\\d "here are some letters that can be looked at" :test #'char>)
+\EV #\\Space 
+ (find-if #'oddp '(1 2 3 4 5) :end 3 :from-end t) \EV 3
+ (find-if-not #'complexp                                    
+             '#(3.5 2 #C(1.0 0.0) #C(0.0 1.0))
+             :start 2) \EV NIL 
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+
+\label See Also::
+
+\funref{position},
+{\secref\TestFunctionRules},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} \term{argument} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+\Thefunction{find-if-not} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+%% This equivalence isn't true when the element isn't found. -kmp 14-Jan-91
+%
+% \code
+% (find item sequence ...)
+%  \EQ (elt sequence (position item sequence ...))
+% \endcode
+
+\endcom
+
+%%% ========== POSITION
+%%% ========== POSITION-IF
+%%% ========== POSITION-IF-NOT
+\begincom{position, position-if, position-if-not}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues position 
+		 {item sequence {\key} from-end test test-not start end key}
+		 {position}
+
+\DefunWithValues position-if     {predicate sequence {\key} from-end start end key} {position}
+\DefunWithValues position-if-not {predicate sequence {\key} from-end start end key} {position}
+
+\label Arguments and Values::
+
+\param{item}---an \term{object}.
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{predicate}---a \term{designator} for a \term{function} of one argument 
+  that returns a \term{generalized boolean}.
+
+\param{from-end}---a \term{generalized boolean}.
+  \Default{\term{false}}
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{sequence}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{position}---a \term{bounding index} of \param{sequence}, or \nil.
+
+\label Description::
+
+\funref{position}, \funref{position-if}, and \funref{position-if-not} 
+each search \param{sequence} for an \term{element} that \term{satisfies the test}.
+
+%% 14.3.0 29
+%% 14.3.0 31
+The \param{position} returned is the index within \param{sequence}
+    of the leftmost  (if \param{from-end} is \term{true})
+ or of the rightmost (if \param{from-end} is \term{false})
+\term{element} that \term{satisfies the test};
+otherwise \nil\ is returned.
+%% 14.3.0 30
+The index returned is relative to the left-hand end of the entire \param{sequence},
+regardless of the value of \term{start}, \term{end}, or \term{from-end}.
+
+\label Examples::
+
+\code
+ (position #\\a "baobab" :from-end t) \EV 4
+ (position-if #'oddp '((1) (2) (3) (4)) :start 1 :key #'car) \EV 2
+ (position 595 '()) \EV NIL
+ (position-if-not #'integerp '(1 2 3 4 5.0)) \EV 4 
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+
+\label See Also::
+
+\funref{find},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} \term{argument} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+\Thefunction{position-if-not} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\endcom                                        
+
+%%% ========== SEARCH
+\begincom{search}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValuesNewline search
+                        {sequence-1 sequence-2 
+                         {\key} \vtop{\hbox{from-end test test-not}
+                                      \hbox{key start1 start2}
+                                      \hbox{end1 end2}}}
+                        {position}
+
+\label Arguments and Values::
+ 
+\param{Sequence-1}---a \term{sequence}.
+
+\param{Sequence-2}---a \term{sequence}.
+
+\param{from-end}---a \term{generalized boolean}.
+  \Default{\term{false}}
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start1}, \param{end1}---\term{bounding index designators} of \param{sequence-1}.
+ \Defaults{\param{start1} and \param{end1}}{\f{0} and \nil}
+
+\param{start2}, \param{end2}---\term{bounding index designators} of \param{sequence-2}.
+ \Defaults{\param{start2} and \param{end2}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{position}---a \term{bounding index} of \param{sequence-2},
+		   or \nil.
+
+\label Description::
+
+%% 14.3.0 36
+Searches \param{sequence-2} for a subsequence that matches \param{sequence-1}.  
+
+%% 14.3.0 38
+The implementation may choose to search \param{sequence-2} in any order;
+there is no guarantee on the number of times the test is made.
+For example,
+when \param{start-end} is \term{true},
+the \param{sequence} might actually be searched from left to right
+instead of from right to left (but in either case would return
+the rightmost matching subsequence). 
+If the search succeeds,
+\funref{search} returns the offset into \param{sequence-2} 
+of the first element of the leftmost or rightmost matching subsequence, 
+depending on \param{from-end};
+otherwise \funref{search} returns \nil.
+
+%% 14.3.0 37
+If \param{from-end} is \term{true}, the index of the leftmost
+element of the rightmost matching subsequence is returned.
+
+\label Examples::
+\code
+ (search "dog" "it's a dog's life") \EV 7
+ (search '(0 1) '(2 4 6 1 3 5) :key #'oddp) \EV 2
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} \term{argument} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\endcom                                    
+
+%-------------------- Sequence Comparison --------------------
+
+%%% ========== MISMATCH
+\begincom{mismatch}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValuesNewline mismatch
+			{sequence-1 sequence-2 
+			 {\key} from-end test test-not key start1 start2 end1 end2}
+			{position}
+
+\label Arguments and Values::
+ 
+\param{Sequence-1}---a \term{sequence}.
+
+\param{Sequence-2}---a \term{sequence}.
+
+\param{from-end}---a \term{generalized boolean}.
+  \Default{\term{false}}
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start1}, \param{end1}---\term{bounding index designators} of \param{sequence-1}.
+ \Defaults{\param{start1} and \param{end1}}{\f{0} and \nil}
+
+\param{start2}, \param{end2}---\term{bounding index designators} of \param{sequence-2}.
+ \Defaults{\param{start2} and \param{end2}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{position}---a \term{bounding index} of \param{sequence-1},
+		   or \nil.
+
+\label Description::
+
+%% 14.3.0 34
+The specified subsequences of         
+\param{sequence-1} and \param{sequence-2} are compared element-wise.
+
+The \param{key} argument is used for both the \param{sequence-1} and the \param{sequence-2}.
+
+If \param{sequence-1} and \param{sequence-2} 
+are of equal length and match in every element, the result is
+\term{false}.  Otherwise, the result is a non-negative \term{integer},
+the index within
+\param{sequence-1} of the leftmost or rightmost position, depending
+on \param{from-end}, at which the two
+subsequences fail to match.
+If one subsequence 
+is shorter than and a matching prefix of the other,
+the result is the index
+relative to \param{sequence-1} beyond the last position tested.
+
+%% 14.3.0 35
+If \param{from-end} is \term{true}, then one plus the index of the rightmost
+position in which the \param{sequences}
+differ is returned.  In effect, the subsequences
+are aligned at their right-hand ends; then, the last elements are compared,
+the penultimate elements, and so on.  The index returned is 
+an index relative to \param{sequence-1}.                  
+
+\label Examples::                                 
+\code
+ (mismatch "abcd" "ABCDE" :test #'char-equal) \EV 4
+ (mismatch '(3 2 1 1 2 3) '(1 2 3) :from-end t) \EV 3
+ (mismatch '(1 2 3) '(2 3 4) :test-not #'eq :key #'oddp) \EV NIL
+ (mismatch '(1 2 3 4 5 6) '(3 4 5 6 7) :start1 2 :end2 4) \EV NIL 
+\endcode
+                                               
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+                                                            
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} \term{argument} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\endcom
+
+%-------------------- Sequence Substitution --------------------
+
+%%% ========== REPLACE
+\begincom{replace}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues replace 
+		 {sequence-1 sequence-2 {\key} start1 end1 start2 end2}
+		 {sequence-1}
+
+\label Arguments and Values:: 
+
+\param{sequence-1}---a \term{sequence}.
+
+\param{sequence-2}---a \term{sequence}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start1}, \param{end1}---\term{bounding index designators} of \param{sequence-1}.
+ \Defaults{\param{start1} and \param{end1}}{\f{0} and \nil}
+
+\param{start2}, \param{end2}---\term{bounding index designators} of \param{sequence-2}.
+ \Defaults{\param{start2} and \param{end2}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\label Description::
+
+Destructively modifies \param{sequence-1} 
+by replacing the \term{elements} of \param{subsequence-1}
+ 	      \term{bounded} by \param{start1} and \param{end1}
+with the \term{elements} of \param{subsequence-2} 
+      \term{bounded} by \param{start2} and \param{end2}. 
+
+%% 14.3.0 4
+\param{Sequence-1} is destructively modified by copying successive
+\term{elements} into it from \param{sequence-2}.
+\term{Elements} of the subsequence of \param{sequence-2} 
+\term{bounded} by \param{start2} and \param{end2}
+are copied into the subsequence of \param{sequence-1} 
+\term{bounded} by \param{start1} and \param{end1}.
+If these subsequences are not of the same length,
+then the shorter length determines how many \term{elements} are copied;
+the extra \term{elements} near the end of the longer subsequence 
+are not involved in the operation.
+The number of elements copied can be expressed as:
+
+\code
+ (min (- \i{end1} \i{start1}) (- \i{end2} \i{start2}))
+\endcode
+
+%% 14.3.0 5
+If \param{sequence-1} and \param{sequence-2} are the \term{same} \term{object}
+and the region being modified overlaps the region being copied
+from, then it is as if the entire source region were copied to another
+place and only then copied back into the target region.
+However, if \param{sequence-1} and \param{sequence-2} are not the same,
+but the region being modified overlaps the region being copied from
+(perhaps because of shared list structure or displaced \term{arrays}),
+then after the \funref{replace} operation
+the subsequence of \param{sequence-1} being modified will have
+unpredictable contents.
+It is an error if the elements of \param{sequence-2} are not of a 
+\term{type} that can be stored into \param{sequence-1}.
+     
+\label Examples::
+\code
+ (replace "abcdefghij" "0123456789" :start1 4 :end1 7 :start2 4) 
+\EV "abcd456hij"
+ (setq lst "012345678") \EV "012345678"
+ (replace lst lst :start1 2 :start2 0) \EV "010123456"
+ lst \EV "010123456"
+\endcode
+
+\label Side Effects::
+
+The \param{sequence-1} is modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{fill}
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.
+    
+\endcom
+
+%%% ========== SUBSTITUTE
+%%% ========== SUBSTITUTE-IF
+%%% ========== SUBSTITUTE-IF-NOT
+%%% ========== NSUBSTITUTE
+%%% ========== NSUBSTITUTE-IF
+%%% ========== NSUBSTITUTE-IF-NOT
+\begincom{substitute, substitute-if, substitute-if-not,
+	  nsubstitute, nsubstitute-if, nsubstitute-if-not}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValuesNewline substitute
+		 	{newitem  olditem  sequence 
+		   	  {\key} \vtop{\hbox{from-end test}
+				       \hbox{test-not start}
+                                       \hbox{end count key}}}
+			{result-sequence}
+
+\DefunWithValuesNewline substitute-if
+			{newitem predicate sequence {\key} from-end start end count key}
+			{result-sequence}
+
+\DefunWithValuesNewline substitute-if-not
+			{newitem predicate sequence {\key} from-end start end count key}
+			{result-sequence}
+
+\DefunWithValuesNewline nsubstitute
+			{newitem  olditem  sequence
+                          {\key} from-end test test-not start end count key}
+			{sequence}
+
+\DefunWithValuesNewline nsubstitute-if
+			{newitem predicate sequence {\key} from-end start end count key}
+			{sequence}
+
+\DefunWithValuesNewline nsubstitute-if-not
+			{newitem predicate sequence {\key} from-end start end count key}
+			{sequence}
+
+\label Arguments and Values::
+
+\param{newitem}---an \term{object}.
+
+\param{olditem}---an \term{object}.
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{predicate}---a \term{designator} for a \term{function} of one \term{argument}
+  that returns a \term{generalized boolean}.
+
+\param{from-end}---a \term{generalized boolean}.
+  \Default{\term{false}}
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{sequence}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\issue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER}
+\param{count}---an \term{integer} or \nil.
+\endissue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER}
+ \Default{\nil}
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{result-sequence}---a \term{sequence}.
+
+\label Description::
+
+\funref{substitute}, \funref{substitute-if}, and \funref{substitute-if-not}
+return a 
+%% Sandra is queasy about this.
+% modified
+copy of \param{sequence} in which each \term{element}
+that \term{satisfies the test} has been replaced with \param{newitem}.
+
+\funref{nsubstitute}, \funref{nsubstitute-if}, and \funref{nsubstitute-if-not}
+are like \funref{substitute}, \funref{substitute-if}, and
+\funref{substitute-if-not} respectively, but they may modify 
+\param{sequence}.
+
+%% Moon's suggested interpretation follows:
+
+If 
+\param{sequence} is a \term{vector}, the result is a
+\term{vector} that has the same
+\term{actual array element type} as \param{sequence}.
+%% Moved to notes per Schulenburg #1 (by X3J13 vote at May 4-5, 1994 meeting).
+%% -kmp 9-May-94
+% The result might or might not be simple, 
+% and might or might not be \term{identical} to \param{sequence}.
+%% Another possible interpretation:
+%% The result might or might not be \term{identical} to \param{sequence}.
+%% If the result is  a \term{vector} that is not \term{identical}
+%% to \param{sequence}, the result is a \term{fresh} \term{simple array}
+%% of \term{rank} one.
+If \param{sequence} is a \term{list}, the result is a 
+\term{list}. 
+%% End Moon's suggested interpretation.
+
+%% 14.3.0 20
+\param{Count}, if supplied, limits the number of elements
+altered; if more than \param{count} \term{elements} \term{satisfy the test},
+then of these \term{elements} only the leftmost or rightmost, depending
+on \param{from-end}, are replaced,
+as many as specified by \param{count}.
+\issue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER}
+If \param{count} is supplied and negative, 
+the behavior is as if zero had been supplied instead.
+\endissue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER}
+If \param{count} is \nil, all matching items are affected.
+
+%% 14.3.0 21
+Supplying a \param{from-end} of \term{true} matters only when the
+\param{count} is provided (and \term{non-nil});
+in that case,
+only the rightmost \param{count} \term{elements} \term{satisfying the test} are removed
+(instead of the leftmost).
+
+\param{predicate}, \param{test}, and \param{test-not} 
+might be called more than once for each \term{sequence} \term{element},
+and their side effects can happen in any order.         
+
+%% 14.3.0 18
+%% 14.3.0 23
+The result of all these functions is a \term{sequence}
+of the same \term{type} as \param{sequence}
+that has the same elements except that those in the subsequence
+\term{bounded} by \param{start} and \param{end} and \term{satisfying the test} 
+have been replaced by \param{newitem}.  
+
+\funref{substitute}, \funref{substitute-if}, and \funref{substitute-if-not}
+return a \param{sequence} which can share with \param{sequence} 
+or may be \term{identical} to the input \param{sequence}
+if no elements need to be changed.
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\funref{nsubstitute} and  \funref{nsubstitute-if} are required to 
+\macref{setf} any \funref{car} (if \param{sequence} is a \term{list}) 
+or \funref{aref} (if \param{sequence} is a \term{vector})
+of \param{sequence} that is required to be replaced with \param{newitem}.
+If \param{sequence} is a \term{list},
+none of the \term{cdrs} of the top-level \term{list} can be modified.  
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\label Examples::                                                            
+
+\code
+ (substitute #\\. #\\SPACE "0 2 4 6") \EV "0.2.4.6"
+ (substitute 9 4 '(1 2 4 1 3 4 5)) \EV (1 2 9 1 3 9 5)
+ (substitute 9 4 '(1 2 4 1 3 4 5) :count 1) \EV (1 2 9 1 3 4 5)
+ (substitute 9 4 '(1 2 4 1 3 4 5) :count 1 :from-end t)
+\EV (1 2 4 1 3 9 5)
+ (substitute 9 3 '(1 2 4 1 3 4 5) :test #'>) \EV (9 9 4 9 3 4 5)
+
+ (substitute-if 0 #'evenp '((1) (2) (3) (4)) :start 2 :key #'car)
+\EV ((1) (2) (3) 0)
+ (substitute-if 9 #'oddp '(1 2 4 1 3 4 5)) \EV (9 2 4 9 9 4 9)
+ (substitute-if 9 #'evenp '(1 2 4 1 3 4 5) :count 1 :from-end t)
+\EV (1 2 4 1 3 9 5)
+
+ (setq some-things (list 'a 'car 'b 'cdr 'c)) \EV (A CAR B CDR C)
+ (nsubstitute-if "function was here" #'fboundp some-things
+                 :count 1 :from-end t) \EV (A CAR B "function was here" C)
+ some-things \EV (A CAR B "function was here" C)
+ (setq alpha-tester (copy-seq "ab ")) \EV "ab "
+ (nsubstitute-if-not #\\z #'alpha-char-p alpha-tester) \EV "abz"
+ alpha-tester \EV "abz"
+\endcode
+
+\label Side Effects::
+
+\funref{nsubstitute}, \funref{nsubstitute-if}, and \funref{nsubstitute-if-not}
+modify \param{sequence}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+                        
+\label See Also::
+
+\funref{subst},
+\funref{nsubst},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification},
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+%% Moved from Description per Schulenburg #1 (by X3J13 vote at May 4-5, 1994 meeting).
+%% -kmp 9-May-94
+If \param{sequence} is a \term{vector},
+the result might or might not be simple, 
+and might or might not be \term{identical} to \param{sequence}.
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} \term{argument} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The functions \funref{substitute-if-not} and \funref{nsubstitute-if-not} are deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\funref{nsubstitute} and \funref{nsubstitute-if} can be used 
+in for-effect-only positions in code.
+
+Because the side-effecting variants (\eg \funref{nsubstitute})
+potentially change the path that is being traversed, their effects in
+the presence of shared or circular structure may vary in surprising ways when
+compared to their non-side-effecting alternatives.  To see this,
+consider the following side-effect behavior, which might be exhibited by
+some implementations:
+
+\code
+ (defun test-it (fn)
+   (let ((x (cons 'b nil)))
+     (rplacd x x)
+     (funcall fn 'a 'b x :count 1)))
+ (test-it #'substitute) \EV (A . #1=(B . #1#))
+ (test-it #'nsubstitute) \EV (A . #1#)
+\endcode
+
+\endcom
+
+%-------------------- Sequence Joining --------------------
+
+%%% ========== CONCATENATE
+\begincom{concatenate}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues concatenate {result-type {\rest} sequences} {result-sequence}
+
+\label Arguments and Values::
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+\param{result-type}---a \typeref{sequence} \term{type specifier}.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\param{sequences}---a \term{sequence}.
+
+\param{result-sequence}---a \term{proper sequence} of \term{type} \param{result-type}.
+
+\label Description::
+
+%% 14.2.0 3
+\funref{concatenate} returns a \term{sequence} that contains 
+all the individual elements of all the \param{sequences} in the order 
+that they are supplied.
+The \term{sequence} is of type \param{result-type}, 
+which must be a \subtypeof{sequence}.
+
+All of the \param{sequences} are copied from; the result
+does not share any structure with any of the \param{sequences}.
+%% 14.2.0 4
+Therefore, if only one \param{sequence} is provided
+and it is of type \param{result-type},
+\funref{concatenate} is required to copy \param{sequence} rather than simply
+returning it.  
+
+It is an error if any element of the \param{sequences} cannot be an
+element of the \term{sequence} result.
+\reviewer{Barmar: Should signal?}%!!!
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+If the \param{result-type} is a \term{subtype} of \typeref{list},
+the result will be a \term{list}.
+
+If the \param{result-type} is a \term{subtype} of \typeref{vector},
+then if the implementation can determine the element type specified
+for the \param{result-type}, the element type of the resulting array 
+is the result of \term{upgrading} that element type; or, if the
+implementation can determine that the element type is unspecified (or \f{*}),
+the element type of the resulting array is \typeref{t};
+otherwise, an error is signaled.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\label Examples::
+
+\code
+(concatenate 'string "all" " " "together" " " "now") \EV "all together now"
+(concatenate 'list "ABC" '(d e f) #(1 2 3) #*1011)
+\EV (#\\A #\\B #\\C D E F 1 2 3 1 0 1 1)
+(concatenate 'list) \EV NIL
+\endcode
+
+\issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+\code
+  (concatenate '(vector * 2) "a" "bc") should signal an error
+\endcode
+\endissue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+
+\label Affected By:\None.                                                 
+
+\label Exceptional Situations::
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+An error is signaled if the \param{result-type} is neither
+     a \term{recognizable subtype} of \typeref{list},
+ nor a \term{recognizable subtype} of \typeref{vector}.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+An error \oftype{type-error} should be signaled if \param{result-type} 
+specifies the number of elements and the sum of \param{sequences}
+is different from that number.
+\endissue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+
+\label See Also::
+
+\funref{append}
+
+\label Notes:\None.
+
+\endcom              
+
+%%% ========== MERGE
+\begincom{merge}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues merge 
+		 {result-type sequence-1 sequence-2 predicate {\key} key}
+		 {result-sequence}
+
+\label Arguments and Values::
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+\param{result-type}---a \typeref{sequence} \term{type specifier}.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\param{sequence-1}---a \term{sequence}.
+
+\param{sequence-2}---a \term{sequence}.
+
+\param{predicate}---a \term{designator} for
+  a \term{function} of two arguments that returns a \term{generalized boolean}.
+
+%% 14.4.0 12
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{result-sequence}---a \term{proper sequence} of \term{type} \param{result-type}.
+     
+\label Description::
+
+%% 14.4.0 10
+Destructively merges \param{sequence-1} with \param{sequence-2} according
+to an order determined by the \param{predicate}.  \funref{merge} determines
+the relationship between two elements by giving keys extracted from the
+sequence elements to the \param{predicate}.
+
+The first argument to the \param{predicate} function is an element of
+\param{sequence-1} as returned by the \param{key} (if supplied); 
+the second argument is an element of \param{sequence-2} as returned by 
+the \param{key} (if supplied). 
+\param{Predicate} should return \term{true} if and only if its first 
+argument is strictly less than the second (in some appropriate sense). 
+If the first argument is greater than or equal to the second
+(in the appropriate sense), then \param{predicate} should return \term{false}.
+\funref{merge}
+considers two elements \f{x} and \f{y} to be equal if
+\f{(funcall predicate x y)} and
+\f{(funcall predicate y x)} both \term{yield} \term{false}.
+
+%% 14.4.0 11
+%% 14.4.0 12
+The argument to the \param{key} is the \param{sequence} element.
+Typically, the return value of the \param{key} 
+becomes the argument to \param{predicate}.
+If \param{key} is not supplied or \nil, the sequence element itself is used.
+The \param{key} may be executed more than once for each \term{sequence} \term{element},
+and its side effects may occur in any order.
+
+%% 14.4.0 13
+If \param{key} and \param{predicate} return, then the merging operation 
+will terminate.  The result of merging two \term{sequences} \f{x} and \f{y}
+is a new \term{sequence} of type \param{result-type} \f{z}, 
+such that the length of \f{z} is the sum of the lengths of \f{x}
+and \f{y}, and \f{z} contains all the elements of \f{x} and \f{y}.
+If \f{x1} and \f{x2} are two elements of \f{x}, and \f{x1} precedes
+\f{x2} in \f{x}, then \f{x1} precedes \f{x2} in \f{z}, and similarly for
+elements of \f{y}.  In short, \f{z} is an interleaving of \f{x} and \f{y}.
+
+%% 14.4.0 14
+If \f{x} and \f{y} were correctly sorted according to the
+\param{predicate}, then \f{z} will also be correctly sorted.
+If \f{x} or \f{y} is not so sorted, then \f{z} will not be sorted,
+but will nevertheless be an interleaving of \f{x} and \f{y}.
+
+%% 14.4.0 14
+The merging operation is guaranteed stable;
+if two or more elements are considered equal by the \param{predicate}, 
+then the elements from \param{sequence-1} will
+precede those from \param{sequence-2} in the result.
+
+\param{sequence-1} and/or \param{sequence-2} may be destroyed.
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+If the \param{result-type} is a \term{subtype} of \typeref{list},
+the result will be a \term{list}.
+
+If the \param{result-type} is a \term{subtype} of \typeref{vector},
+then if the implementation can determine the element type specified
+for the \param{result-type}, the element type of the resulting array 
+is the result of \term{upgrading} that element type; or, if the
+implementation can determine that the element type is unspecified (or \f{*}),
+the element type of the resulting array is \typeref{t};
+otherwise, an error is signaled.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\label Examples::                               
+\code
+ (setq test1 (list 1 3 4 6 7))
+ (setq test2 (list 2 5 8))
+ (merge 'list test1 test2 #'<) \EV (1 2 3 4 5 6 7 8)
+ (setq test1 (copy-seq "BOY"))
+ (setq test2 (copy-seq :nosy"))
+ (merge 'string test1 test2 #'char-lessp) \EV "BnOosYy"
+ (setq test1 (vector ((red . 1) (blue . 4))))
+ (setq test2 (vector ((yellow . 2) (green . 7))))
+ (merge 'vector test1 test2 #'< :key #'cdr) 
+\EV #((RED . 1) (YELLOW . 2) (BLUE . 4) (GREEN . 7)) 
+\endcode
+\issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+\code
+ (merge '(vector * 4) '(1 5) '(2 4 6) #'<) should signal an error
+\endcode
+\endissue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+An error must be signaled if the \param{result-type} is neither
+     a \term{recognizable subtype} of \typeref{list},
+ nor a \term{recognizable subtype} of \typeref{vector}.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+An error \oftype{type-error} should be signaled
+if \param{result-type} specifies the number of elements 
+and the sum of the lengths of \param{sequence-1} and \param{sequence-2} 
+is different from that number.
+\endissue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+
+\label See Also::
+
+\funref{sort},
+\funref{stable-sort},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification},
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Sequence Deletion --------------------
+
+%%% ========== REMOVE
+%%% ========== REMOVE-IF
+%%% ========== REMOVE-IF-NOT
+%%% ========== DELETE
+%%% ========== DELETE-IF
+%%% ========== DELETE-IF-NOT
+\begincom{remove, remove-if, remove-if-not, 
+          delete, delete-if, delete-if-not}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues remove
+		 {item sequence {\key} from-end test test-not start end count key}
+		 {result-sequence}
+
+\DefunWithValues remove-if 
+		 {test sequence {\key} from-end start end count key}
+		 {result-sequence}
+
+\DefunWithValues remove-if-not 
+		 {test sequence {\key} from-end start end count key}
+		 {result-sequence}
+
+\DefunWithValues delete
+	         {item sequence {\key} from-end test test-not start end count key}
+		 {result-sequence}
+
+\DefunWithValues delete-if
+		 {test sequence {\key} from-end start end count key}
+	         {result-sequence}
+
+\DefunWithValues delete-if-not 
+		 {test sequence {\key} from-end start end count key}
+		 {result-sequence}
+
+\label Arguments and Values::
+
+\param{item}---an \term{object}.
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{test}---a \term{designator} for a \term{function} 
+  of one \term{argument} that returns a \term{generalized boolean}.
+
+\param{from-end}---a \term{generalized boolean}.
+  \Default{\term{false}}
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{sequence}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\issue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER}
+\param{count}---an \term{integer} or \nil.
+\endissue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER}
+  \Default{\nil}
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{result-sequence}---a \term{sequence}.
+
+\label Description::
+
+\funref{remove}, \funref{remove-if}, and \funref{remove-if-not}
+return a \param{sequence} from which 
+the elements that \term{satisfy the test} 
+have been removed.  
+
+\funref{delete}, \funref{delete-if}, and \funref{delete-if-not}
+are like \funref{remove}, \funref{remove-if}, and
+\funref{remove-if-not} respectively, 
+but they may modify \param{sequence}.
+
+%% Moon's suggested interpretation follows:
+
+If \param{sequence} is a \term{vector}, the result is a
+\term{vector} that has the same
+\term{actual array element type} as \param{sequence}.
+%% Moved to notes per Schulenburg #1 (by X3J13 vote at May 4-5, 1994 meeting).
+%% -kmp 9-May-94
+% The result might or might not be simple, 
+% and might or might not be \term{identical} to \param{sequence}.
+%% Another possible interpretation:
+%% The result might or might not be \term{identical} to \param{sequence}.
+%% If the result is  a \term{vector} that is not \term{identical}
+%% to \param{sequence}, the result is a \term{fresh} \term{simple array}
+%% of \term{rank} one.
+If \param{sequence} is a \term{list}, the result is a \term{list}. 
+%% End Moon's suggested interpretation.
+
+%% 14.3.0 8
+%% 14.3.0 11
+Supplying a \param{from-end} of \term{true} matters only when the
+\param{count} is provided; in that case only the rightmost \param{count} elements 
+\term{satisfying the test} are deleted.
+
+%% 14.3.0 7
+%% 14.3.0 10
+\param{Count}, if supplied, limits the number of elements
+removed or deleted; if more than \param{count} elements \term{satisfy the test},
+then of these elements only the leftmost or rightmost, depending on
+\param{from-end},
+are deleted or removed,
+as many as specified by \param{count}.
+\issue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER}
+If \param{count} is supplied and negative, 
+the behavior is as if zero had been supplied instead.
+\endissue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER}
+If \param{count} is \nil, all matching items are affected.
+
+For all these functions,
+elements 
+not removed or deleted occur in the same order in the result
+as they did in \param{sequence}.
+
+%% 14.3.0 6
+\funref{remove}, \funref{remove-if}, \funref{remove-if-not} return
+a \term{sequence}
+of the same \term{type} as \param{sequence}
+that has the same elements except that those in the subsequence
+\term{bounded} by \param{start} and \param{end} and \term{satisfying the test}
+have been removed.  
+This is a non-destructive operation. If any
+elements need to be removed, the result will be a copy.
+The result of \funref{remove} may share
+with \param{sequence}; 
+the result may be \term{identical} to the input \param{sequence}
+if no elements need to be removed.
+
+%% 14.3.0 9
+\funref{delete}, \funref{delete-if}, and \funref{delete-if-not}
+return a \term{sequence} 
+of the same \term{type} as \param{sequence}
+that has the same elements except that those in the subsequence
+\term{bounded} by \param{start} and \param{end} and \term{satisfying the test}
+have been deleted. 
+\param{Sequence} may be destroyed and used to construct
+the result; however, the result might or might not be \term{identical} 
+to \param{sequence}.
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\funref{delete}, when \param{sequence} is a \term{list}, is permitted to 
+\macref{setf} any part, \funref{car} or \funref{cdr}, of the
+top-level list structure in that \param{sequence}.
+When \param{sequence} is a \term{vector},  \funref{delete} is 
+permitted to change the dimensions of the \term{vector} 
+and to slide its elements into new positions without
+permuting them to produce the resulting \term{vector}.
+
+\funref{delete-if} is constrained to behave exactly as follows:
+
+\code
+ (delete nil \i{sequence}
+             :test #'(lambda (ignore \i{item}) (funcall \i{test} \i{item}))
+             ...)
+\endcode
+ 
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\label Examples::
+\code
+ (remove 4 '(1 3 4 5 9)) \EV (1 3 5 9)
+ (remove 4 '(1 2 4 1 3 4 5)) \EV (1 2 1 3 5)
+ (remove 4 '(1 2 4 1 3 4 5) :count 1) \EV (1 2 1 3 4 5)
+ (remove 4 '(1 2 4 1 3 4 5) :count 1 :from-end t) \EV (1 2 4 1 3 5)
+ (remove 3 '(1 2 4 1 3 4 5) :test #'>) \EV (4 3 4 5)
+ (setq lst '(list of four elements)) \EV (LIST OF FOUR ELEMENTS)
+ (setq lst2 (copy-seq lst)) \EV (LIST OF FOUR ELEMENTS)
+ (setq lst3 (delete 'four lst)) \EV (LIST OF ELEMENTS)
+ (equal lst lst2) \EV \term{false}
+ (remove-if #'oddp '(1 2 4 1 3 4 5)) \EV (2 4 4)
+ (remove-if #'evenp '(1 2 4 1 3 4 5) :count 1 :from-end t) 
+\EV (1 2 4 1 3 5)
+ (remove-if-not #'evenp '(1 2 3 4 5 6 7 8 9) :count 2 :from-end t)
+\EV (1 2 3 4 5 6 8)
+ (setq tester (list 1 2 4 1 3 4 5)) \EV (1 2 4 1 3 4 5)
+ (delete 4 tester) \EV (1 2 1 3 5)
+ (setq tester (list 1 2 4 1 3 4 5)) \EV (1 2 4 1 3 4 5)
+ (delete 4 tester :count 1) \EV (1 2 1 3 4 5)
+ (setq tester (list 1 2 4 1 3 4 5)) \EV (1 2 4 1 3 4 5)
+ (delete 4 tester :count 1 :from-end t) \EV (1 2 4 1 3 5)
+ (setq tester (list 1 2 4 1 3 4 5)) \EV (1 2 4 1 3 4 5)
+ (delete 3 tester :test #'>) \EV (4 3 4 5)
+ (setq tester (list 1 2 4 1 3 4 5)) \EV (1 2 4 1 3 4 5)
+ (delete-if #'oddp tester) \EV (2 4 4)
+ (setq tester (list 1 2 4 1 3 4 5)) \EV (1 2 4 1 3 4 5)
+ (delete-if #'evenp tester :count 1 :from-end t) \EV (1 2 4 1 3 5)    
+ (setq tester (list 1 2 3 4 5 6)) \EV (1 2 3 4 5 6) 
+ (delete-if #'evenp tester) \EV (1 3 5) 
+ tester \EV \term{implementation-dependent}
+\endcode
+
+%!!! This example (with the "or") looks like bad notation AND questionable value
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\code
+ (setq foo (list 'a 'b 'c)) \EV (A B C)
+ (setq bar (cdr foo)) \EV (B C)
+ (setq foo (delete 'b foo)) \EV (A C)
+ bar \EV ((C)) or ...
+ (eq (cdr foo) (car bar)) \EV T or ...
+\endcode
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\label Side Effects::
+
+For \funref{delete}, \funref{delete-if}, and \funref{delete-if-not},
+\param{sequence} may be destroyed and used to construct the result.
+                                                       
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+
+\label See Also::
+
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification},
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+%% Moved from Description per Schulenburg #1 (by X3J13 vote at May 4-5, 1994 meeting).
+%% -kmp 9-May-94
+If \param{sequence} is a \term{vector},
+the result might or might not be simple, 
+and might or might not be \term{identical} to \param{sequence}.
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} \term{argument} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The functions \funref{delete-if-not} and \funref{remove-if-not} are deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\endcom
+
+%%% ========== REMOVE-DUPLICATES
+%%% ========== DELETE-DUPLICATES
+\begincom{remove-duplicates, delete-duplicates}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValuesNewline remove-duplicates 
+			{sequence {\key}
+ 			  \vtop{\hbox{from-end test test-not}
+				\hbox{start end key}}}
+			{result-sequence}
+
+\DefunWithValuesNewline delete-duplicates
+			{sequence {\key} 
+			   \vtop{\hbox{from-end test test-not}
+                                 \hbox{start end key}}}
+			{result-sequence}
+
+\label Arguments and Values::
+
+\param{sequence}---a \term{proper sequence}.
+
+\param{from-end}---a \term{generalized boolean}.
+  \Default{\term{false}}
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{sequence}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{result-sequence}---a \term{sequence}.
+
+\label Description::
+
+\funref{remove-duplicates} returns a modified copy of \param{sequence} 
+from which any element that matches another element occurring in
+\param{sequence} has been removed. 
+
+%% Moon's suggested interpretation follows:
+
+If \param{sequence} is a \term{vector}, the result is a
+\term{vector} that has the same
+\term{actual array element type} as \param{sequence}.
+%% Moved to notes per Schulenburg #1 (by X3J13 vote at May 4-5, 1994 meeting).
+%% -kmp 9-May-94
+% The result might or might not be simple,
+% and might or might not be \term{identical} to \param{sequence}.
+%% Another possible interpretation:
+%% The result might or might not be \term{identical} to \param{sequence}.
+%% If the result is  a \term{vector} that is not \term{identical}
+%% to \param{sequence}, the result is a \term{fresh} \term{simple array}
+%% of \term{rank} one.
+If \param{sequence} is a \term{list}, the result is a \term{list}. 
+%% End Moon's suggested interpretation.
+
+\funref{delete-duplicates} is like \funref{remove-duplicates},
+but \funref{delete-duplicates} may modify \param{sequence}.
+
+%% 14.3.0 13
+The elements of \param{sequence} are compared \term{pairwise}, and if any two match,
+then the one occurring earlier in \param{sequence}
+is discarded, unless \param{from-end} is \term{true}, in which case the one
+later in \param{sequence} is discarded.
+
+\funref{remove-duplicates} and \funref{delete-duplicates} 
+return a \term{sequence} of the same \term{type} as 
+\param{sequence} with enough elements removed so that no two of the remaining
+elements match.  The order of the elements remaining in the result
+is the same as the order in which they appear in \param{sequence}.
+
+\funref{remove-duplicates} returns a \term{sequence}
+%% 14.3.0 14
+that may share
+with \param{sequence} or may be \term{identical} to \param{sequence}
+if no elements need to be removed.
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\funref{delete-duplicates}, when \param{sequence} is a \term{list},
+is permitted to \macref{setf} any part, \funref{car} or \funref{cdr},
+of the top-level list structure in that \param{sequence}.
+When \param{sequence} is a \term{vector}, \funref{delete-duplicates} 
+is permitted to change the dimensions of the \term{vector} 
+and to slide its elements into new positions without
+permuting them to produce the resulting \term{vector}.
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\label Examples::
+
+%% 14.3.0 16
+\code
+ (remove-duplicates "aBcDAbCd" :test #'char-equal :from-end t) \EV "aBcD"
+ (remove-duplicates '(a b c b d d e)) \EV (A C B D E)
+ (remove-duplicates '(a b c b d d e) :from-end t) \EV (A B C D E)
+ (remove-duplicates '((foo #\\a) (bar #\\%) (baz #\\A))
+     :test #'char-equal :key #'cadr) \EV ((BAR #\\%) (BAZ #\\A))
+ (remove-duplicates '((foo #\\a) (bar #\\%) (baz #\\A)) 
+     :test #'char-equal :key #'cadr :from-end t) \EV ((FOO #\\a) (BAR #\\%))
+ (setq tester (list 0 1 2 3 4 5 6))
+ (delete-duplicates tester :key #'oddp :start 1 :end 6) \EV (0 4 5 6)
+\endcode
+
+\label Side Effects::
+
+%% 14.3.0 15
+\funref{delete-duplicates} might destructively modify \param{sequence}.
+
+\label Affected By:\None.                                                      
+
+\label Exceptional Situations::
+
+\Shouldchecktype{sequence}{a \term{proper sequence}}
+
+\label See Also::
+
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification},
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+%% Moved from Description per Schulenburg #1 (by X3J13 vote at May 4-5, 1994 meeting).
+%% -kmp 9-May-94
+If \param{sequence} is a \term{vector},
+the result might or might not be simple, 
+and might or might not be \term{identical} to \param{sequence}.
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} \term{argument} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+%% 14.3.0 17
+These functions are useful for converting \param{sequence} into a canonical
+form suitable for representing a set.
+
+\endcom
+

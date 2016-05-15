@@ -1,0 +1,67 @@
+====== Function RASSOC, RASSOC-IF, RASSOC-IF-NOT ======
+
+====Syntax====
+
+**rassoc {item alist ** //\key} key test test-not// → //entry//
+
+**rassoc-if {predicate alist** //\key} key// → //entry// **rassoc-if-not {predicate alist** //\key} key// → //entry//
+
+====Arguments and Values====
+
+//item// - an //[[CL:Glossary:object]]//.
+
+//alist// - an //[[CL:Glossary:association list]]//.
+
+//predicate// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument, or **[[CL:Constant Variables:nil]]**.
+
+//entry// - a //[[CL:Glossary:cons]]// that is an //[[CL:Glossary:element]]// of the //alist//, or **[[CL:Constant Variables:nil]]**.
+
+====Description====
+
+**[[CL:Functions:rassoc]]**, **[[CL:Functions:rassoc-if]]**, and **[[CL:Functions:rassoc-if-not]]** return the first //[[CL:Glossary:cons]]// whose //[[CL:Glossary:cdr]]// //[[CL:Glossary:satisfies the test]]//. If no such //[[CL:Glossary:cons]]// is found, **[[CL:Constant Variables:nil]]** is returned.
+
+If **[[CL:Constant Variables:nil]]** appears in //alist// in place of a pair, it is ignored.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] alist '((1 . "one") (2 . "two") (3 . 3))) → ((1 . "one") (2 . "two") (3 . 3)) (rassoc 3 alist) → (3 . 3) (rassoc "two" alist) → NIL (rassoc "two" alist :test 'equal) → (2 . "two") (rassoc 1 alist :key #'(lambda (x) (if (numberp x) (/ x 3)))) → (3 . 3) (rassoc 'a '((a . b) (b . c) (c . a) (z . a))) → (C . A) (rassoc-if #'stringp alist) → (1 . "one") (rassoc-if-not #'vectorp alist) → (3 . 3) </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:assoc]]**,
+
+{\secref\TraversalRules}
+
+====Notes====
+
+The **'':test-not''** parameter is deprecated.
+
+The //[[CL:Glossary:function]]// **[[CL:Functions:rassoc-if-not]]** is deprecated.
+
+It is possible to **[[CL:Functions:rplaca]]** the result of **[[CL:Functions:rassoc]]**, provided that it is not **[[CL:Constant Variables:nil]]**, in order to "update" //alist//.
+
+The expressions
+
+<blockquote> (rassoc item list :test fn) </blockquote> and
+
+<blockquote> (find item list :test fn :key #'cdr) </blockquote> are equivalent in meaning, except when the ''item'' is **[[CL:Constant Variables:nil]]** and **[[CL:Constant Variables:nil]]** appears in place of a pair in the //alist//. See the //[[CL:Glossary:function]]// **[[CL:Functions:assoc]]**.
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL} \issue{ASSOC-RASSOC-IF-KEY:YES} \issue{ASSOC-RASSOC-IF-KEY} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{TEST-NOT-IF-NOT:FLUSH-ALL}

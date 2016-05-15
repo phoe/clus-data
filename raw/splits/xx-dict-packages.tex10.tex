@@ -1,0 +1,49 @@
+====== Function SHADOWING-IMPORT ======
+
+====Syntax====
+
+**shadowing-import {symbols** //\opt} package// → //\t//
+
+====Arguments and Values====
+
+//symbols// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:list]]// of //[[CL:Glossary:symbols]]//.
+
+//package// ---a //[[CL:Glossary:package designator]]//.
+
+The default is the //[[CL:Glossary:current package]]//.
+
+====Description====
+
+**[[CL:Functions:shadowing-import]]** is like **[[CL:Functions:import]]**, but it does not signal an error even if the importation of a //[[CL:Glossary:symbol]]// would shadow some //[[CL:Glossary:symbol]]// already //[[CL:Glossary:accessible]]// in //package//.
+
+**[[CL:Functions:shadowing-import]]** inserts each of //symbols// into //package// as an internal symbol, regardless of whether another //[[CL:Glossary:symbol]]// of the same name is shadowed by this action. If a different //[[CL:Glossary:symbol]]// of the same name is already //[[CL:Glossary:present]]// in //package//, that //[[CL:Glossary:symbol]]// is first //[[CL:Glossary:uninterned]]// from //package//. The new //[[CL:Glossary:symbol]]// is added to //package//'s shadowing-symbols list.
+
+**[[CL:Functions:shadowing-import]]** does name-conflict checking to the extent that it checks whether a distinct existing //[[CL:Glossary:symbol]]// with the same name is //[[CL:Glossary:accessible]]//; if so, it is shadowed by the new //[[CL:Glossary:symbol]]//, which implies that it must be uninterned if it was
+
+//[[CL:Glossary:present]]// in //package//.
+
+====Examples==== <blockquote> (in-package "COMMON-LISP-USER") → #<PACKAGE "COMMON-LISP-USER"> ([[CL:Macros:defparameter]] sym (intern "CONFLICT")) → CONFLICT (intern "CONFLICT" (make-package 'temp)) → TEMP::CONFLICT, NIL (package-shadowing-symbols 'temp) → NIL (shadowing-import sym 'temp) → T (package-shadowing-symbols 'temp) → (CONFLICT) </blockquote>
+
+====Side Effects====
+
+**[[CL:Functions:shadowing-import]]** changes the state of the package system in such a way that the consistency rules do not hold across the change.
+
+//package//'s shadowing-symbols list is modified.
+
+====Affected By====
+
+Current state of the package system.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:import]]**, **[[CL:Functions:unintern]]**, **[[CL:Functions:package-shadowing-symbols]]**
+
+====Notes====
+
+None.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}

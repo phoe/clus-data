@@ -1,0 +1,77 @@
+====== Macro DEFPARAMETER, DEFVAR ======
+
+====Syntax====
+
+**defparameter** //name initial-value [documentation] // → //name// **defvar ** //name //[initial-value [documentation]]//// → //name//
+
+====Arguments and Values====
+
+//name// - a //[[CL:Glossary:symbol]]//; \noeval.
+
+//initial-value// - a //[[CL:Glossary:form]]//; for **[[CL:Macros:defparameter]]**, it is always //[[CL:Glossary:evaluated]]//, but for **[[CL:Macros:defvar]]** it is //[[CL:Glossary:evaluated]]// only if //name// is not already //[[CL:Glossary:bound]]//.
+
+//documentation// - a //string//; \noeval.
+
+====Description====
+
+**[[CL:Macros:defparameter]]** and **[[CL:Macros:defvar]]** //[[CL:Glossary:establish]]// //name// as a //[[CL:Glossary:dynamic variable]]//.
+
+**[[CL:Macros:defparameter]]** unconditionally //[[CL:Glossary:assigns]]// the //initial-value// to the //[[CL:Glossary:dynamic variable]]// named //name//. **[[CL:Macros:defvar]]**, by contrast, //[[CL:Glossary:assigns]]// //initial-value// (if supplied) to the //[[CL:Glossary:dynamic variable]]// named //name// only if //name// is not already //[[CL:Glossary:bound]]//.
+
+If no //initial-value// is supplied, **[[CL:Macros:defvar]]** leaves the //[[CL:Glossary:value cell]]// of the //[[CL:Glossary:dynamic variable]]// named //name// undisturbed; if //name// was previously //[[CL:Glossary:bound]]//, its old //[[CL:Glossary:value]]// persists, and if it was previously //[[CL:Glossary:unbound]]//, it remains //[[CL:Glossary:unbound]]//.
+
+If //documentation// is supplied, it is attached to //name// as a //[[CL:Glossary:documentation string]]// of kind \misc{variable}.
+
+**[[CL:Macros:defparameter]]** and **[[CL:Macros:defvar]]** normally appear as a //[[CL:Glossary:top level form]]//, but it is meaningful for them to appear as //[[CL:Glossary:non-top-level forms]]//. However, the compile-time side effects described below only take place when they appear as //[[CL:Glossary:top level forms]]//.
+
+====Examples====
+
+<blockquote> (defparameter *p* 1) → *P* *p* → 1 (constantp '*p*) → //[[CL:Glossary:false]]// ([[CL:Macros:defparameter]] *p* 2) → 2 (defparameter *p* 3) → *P* *p* → 3
+
+(defvar *v* 1) → *V* *v* → 1 (constantp '*v*) → //[[CL:Glossary:false]]// ([[CL:Macros:defparameter]] *v* 2) → 2 (defvar *v* 3) → *V* *v* → 2
+
+(defun foo () (let ((*p* 'p) (*v* 'v)) (bar))) → FOO (defun bar () (list *p* *v*)) → BAR (foo) → (P V) </blockquote>
+
+The principal operational distinction between **[[CL:Macros:defparameter]]** and **[[CL:Macros:defvar]]** is that **[[CL:Macros:defparameter]]** makes an unconditional assignment to //name//, while **[[CL:Macros:defvar]]** makes a conditional one. In practice, this means that **[[CL:Macros:defparameter]]** is useful in situations where loading or reloading the definition would want to pick up a new value of the variable, while **[[CL:Macros:defvar]]** is used in situations where the old value would want to be retained if the file were loaded or reloaded. For example, one might create a file which contained:
+
+<blockquote> (defvar *the-interesting-numbers* '()) (defmacro define-interesting-number (name n) `(progn (defvar ,name ,n) (pushnew ,name *the-interesting-numbers*) ',name)) (define-interesting-number *my-height* 168) ;cm (define-interesting-number *my-weight* 13) ;stones </blockquote>
+
+Here the initial value, ''()'', for the variable ''*the-interesting-numbers*'' is just a seed that we are never likely to want to reset to something else once something has been grown from it. As such, we have used **[[CL:Macros:defvar]]** to avoid having the ''*interesting-numbers*'' information reset if the file is loaded a second time. It is true that the two calls to **[[CL:Macros:define-interesting-number]]** here would be reprocessed, but if there were additional calls in another file, they would not be and that information would be lost. On the other hand, consider the following code:
+
+<blockquote> (defparameter *default-beep-count* 3) (defun beep (&optional (n *default-beep-count*)) (dotimes (i n) (si: </blockquote>
+
+Here we could easily imagine editing the code to change the initial value of ''*default-beep-count*'', and then reloading the file to pick up the new value. In order to make value updating easy, we have used **[[CL:Macros:defparameter]]**.
+
+On the other hand, there is potential value to using **[[CL:Macros:defvar]]** in this situation. For example, suppose that someone had predefined an alternate value for ''*default-beep-count*'', or had loaded the file and then manually changed the value. In both cases, if we had used **[[CL:Macros:defvar]]** instead of **[[CL:Macros:defparameter]]**, those user preferences would not be overridden by (re)loading the file.
+
+The choice of whether to use **[[CL:Macros:defparameter]]** or **[[CL:Macros:defvar]]** has visible consequences to programs, but is nevertheless often made for subjective reasons.
+
+====Side Effects====
+
+If a **[[CL:Macros:defvar]]** or **[[CL:Macros:defparameter]]** //[[CL:Glossary:form]]// appears as a //[[CL:Glossary:top level form]]//, the //[[CL:Glossary:compiler]]// must recognize that the //name// has been proclaimed \declref{special}. However, it must neither //[[CL:Glossary:evaluate]]// the //initial-value// //[[CL:Glossary:form]]// nor //[[CL:Glossary:assign]]// the //[[CL:Glossary:dynamic variable]]// named //name// at compile time.
+
+There may be additional (//[[CL:Glossary:implementation-defined]]//) compile-time or run-time side effects, as long as such effects do not interfere with the correct operation of //[[CL:Glossary:conforming programs]]//.
+
+====Affected By====
+
+**[[CL:Macros:defvar]]** is affected by whether //name// is already //[[CL:Glossary:bound]]//.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:declaim]]**, **[[CL:Macros:defconstant]]**, **[[CL:Functions:documentation]]**, {\secref\Compilation}
+
+====Notes====
+
+It is customary to name //[[CL:Glossary:dynamic variables]]// with an //[[CL:Glossary:asterisk]]// at the beginning and end of the name. e.g., ''*foo*'' is a good name for a //[[CL:Glossary:dynamic variable]]//, but not for a //[[CL:Glossary:lexical variable]]//; ''foo'' is a good name for a //[[CL:Glossary:lexical variable]]//, but not for a //[[CL:Glossary:dynamic variable]]//. This naming convention is observed for all //[[CL:Glossary:defined names]]// in \clisp; however, neither //[[CL:Glossary:conforming programs]]// nor //[[CL:Glossary:conforming implementations]]// are obliged to adhere to this convention.
+
+The intent of the permission for additional side effects is to allow //[[CL:Glossary:implementations]]// to do normal "bookkeeping" that accompanies definitions. For example, the //[[CL:Glossary:macro expansion]]// of a **[[CL:Macros:defvar]]** or **[[CL:Macros:defparameter]]** //[[CL:Glossary:form]]// might include code that arranges to record the name of the source file in which the definition occurs.
+
+**[[CL:Macros:defparameter]]** and **[[CL:Macros:defvar]]** might be defined as follows:
+
+<blockquote> (defmacro defparameter (name initial-value &optional (documentation nil documentation-p)) `(progn (declaim (special ,name)) ([[CL:Macros:setf]] (symbol-value ',name) ,initial-value) ,(when documentation-p `([[CL:Macros:setf]] (documentation ',name 'variable) ',documentation)) ',name)) (defmacro defvar (name &optional (initial-value nil initial-value-p) (documentation nil documentation-p)) `(progn (declaim (special ,name)) ,(when initial-value-p `(unless (boundp ',name) ([[CL:Macros:setf]] (symbol-value ',name) ,initial-value))) ,(when documentation-p `([[CL:Macros:setf]] (documentation ',name 'variable) ',documentation)) ',name)) </blockquote>
+
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY} \issue{DEFVAR-INIT-TIME:NOT-DELAYED} \issue{DEFVAR-DOCUMENTATION:UNEVALUATED} \issue{DEFVAR-INITIALIZATION:CONSERVATIVE} \issue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW}

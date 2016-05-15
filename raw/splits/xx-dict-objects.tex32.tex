@@ -1,0 +1,64 @@
+====== Local Macro CALL-METHOD, MAKE-METHOD ======
+
+====Syntax====
+
+\DefmacWithValues call-method {method {\optional} next-method-list} {\starparam{result}} **make-method** //form// → //method-object//
+
+====Arguments and Values====
+
+
+//method// - a //[[CL:Glossary:method]]// //[[CL:Glossary:object]]//, or a //[[CL:Glossary:list]]// (see below); \noeval.
+
+//method-object// - a //[[CL:Glossary:method]]// //[[CL:Glossary:object]]//.
+
+//next-method-list// - a //[[CL:Glossary:list]]// of //method// //[[CL:Glossary:object|objects]]//; \noeval.
+
+//results// - the //[[CL:Glossary:values]]// returned by the //[[CL:Glossary:method]]// invocation.
+
+====Description====
+
+The macro **[[CL:Macros:call-method]]** is used in method combination. It hides the //[[CL:Glossary:implementation-dependent]]// details of how //[[CL:Glossary:methods]]// are called. The macro **[[CL:Macros:call-method]]** has //[[CL:Glossary:lexical scope]]// and can only be used within an //[[CL:Glossary:effective method]]// //[[CL:Glossary:form]]//.
+
+\editornote{KMP: This next paragraph still needs some work.}
+
+Whether or not **[[CL:Macros:call-method]]** is //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]// is //[[CL:Glossary:implementation-dependent]]//; however, the restrictions on redefinition and //[[CL:Glossary:shadowing]]// of **[[CL:Macros:call-method]]** are the same as for //[[CL:Glossary:symbols]]// in \thepackage{common-lisp} which are //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]//. The consequences of attempting to use **[[CL:Macros:call-method]]** outside of an //[[CL:Glossary:effective method]]// //[[CL:Glossary:form]]// are undefined.
+
+
+The macro **[[CL:Macros:call-method]]** invokes the specified //[[CL:Glossary:method]]//, supplying it with arguments and with definitions for **[[CL:Functions:call-next-method]]** and for **[[CL:Functions:next-method-p]]**. If the invocation of **[[CL:Macros:call-method]]** is lexically inside of a **[[CL:Functions:make-method]]**, the arguments are those that were supplied to that method. Otherwise the arguments are those that were supplied to the generic function. The definitions of **[[CL:Functions:call-next-method]]** and **[[CL:Functions:next-method-p]]** rely on the specified //next-method-list//.
+
+If //method// is a //[[CL:Glossary:list]]//, the first element of the //[[CL:Glossary:list]]// must be the symbol **[[CL:Functions:make-method]]** and the second element must be a //[[CL:Glossary:form]]//. Such a //[[CL:Glossary:list]]// specifies a //[[CL:Glossary:method]]// //[[CL:Glossary:object]]// whose //[[CL:Glossary:method]]// function has a body that is the given //[[CL:Glossary:form]]//.
+
+//Next-method-list// can contain //[[CL:Glossary:method]]// //[[CL:Glossary:object|objects]]// or //[[CL:Glossary:lists]]//, the first element of which must be the symbol **[[CL:Functions:make-method]]** and the second element of which must be a //[[CL:Glossary:form]]//.
+
+
+
+Those are the only two places where **[[CL:Functions:make-method]]** can be used. The //[[CL:Glossary:form]]// used with **[[CL:Functions:make-method]]** is evaluated in the //[[CL:Glossary:null lexical environment]]// augmented with a local macro definition for **[[CL:Macros:call-method]]** and with bindings named by symbols not //[[CL:Glossary:accessible]]// from \thepackage{common-lisp-user}.
+
+The **[[CL:Functions:call-next-method]]** function available to //method// will call the first //[[CL:Glossary:method]]// in //next-method-list//. The **[[CL:Functions:call-next-method]]** function available in that //[[CL:Glossary:method]]//, in turn, will call the second //[[CL:Glossary:method]]// in //next-method-list//, and so on, until the list of next //[[CL:Glossary:methods]]// is exhausted.
+
+
+
+If //next-method-list// is not supplied, the **[[CL:Functions:call-next-method]]** function available to //method// signals an error of type **[[CL:Types:control-error]]** and the **[[CL:Functions:next-method-p]]** function available to //method// returns {**[[CL:Constant Variables:nil]]**}.
+
+====Examples====
+
+
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:call-next-method]]**, **[[CL:Macros:define-method-combination]]**, **[[CL:Functions:next-method-p]]**
+
+====Notes====
+
+None.
+
+
+\issue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}

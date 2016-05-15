@@ -1,0 +1,105 @@
+====== Function COMPILE-FILE ======
+
+====Syntax====
+
+\DefunWithValuesNewline compile-file {input-file ''&key'' output-file verbose print external-format} {output-truename, warnings-p, failure-p}
+
+====Arguments and Values====
+
+//input-file// - a //[[CL:Glossary:pathname designator]]//. (Default fillers for unspecified components are taken from **[[CL:Variables:*default-pathname-defaults*]]**.)
+
+//output-file// - a //[[CL:Glossary:pathname designator]]//. The default is //[[CL:Glossary:implementation-defined]]//.
+
+//verbose// - a //[[CL:Glossary:generalized boolean]]//. \Default{\thevalueof{*compile-verbose*}}
+
+//print// - a //[[CL:Glossary:generalized boolean]]//. \Default{\thevalueof{*compile-print*}}
+
+//external-format// - an //[[CL:Glossary:external file format designator]]//. The default is **'':default''**.
+
+//output-truename// - a //[[CL:Glossary:pathname]]// (the **[[CL:Functions:truename]]** of the output //[[CL:Glossary:file]]//), or **[[CL:Constant Variables:nil]]**.
+
+//warnings-p// - a //[[CL:Glossary:generalized boolean]]//.
+
+//failure-p// - a //[[CL:Glossary:generalized boolean]]//.
+
+
+
+====Description====
+
+**[[CL:Functions:compile-file]]** transforms the contents of the file specified by //input-file// into //[[CL:Glossary:implementation-dependent]]// binary data which are placed in the file specified by //output-file//.
+
+The //[[CL:Glossary:file]]// to which //input-file// refers should be a //[[CL:Glossary:source file]]//.
+
+//output-file// can be used to specify an output //[[CL:Glossary:pathname]]//;
+
+the actual //[[CL:Glossary:pathname]]// of the //[[CL:Glossary:compiled file]]// to which //[[CL:Glossary:compiled code]]// will be output is computed as if by calling **[[CL:Functions:compile-file-pathname]]**.
+
+If //input-file// or //output-file// is a //[[CL:Glossary:logical pathname]]//, it is translated into a //[[CL:Glossary:physical pathname]]// as if by calling **[[CL:Functions:translate-logical-pathname]]**.
+
+If //verbose// is //[[CL:Glossary:true]]//,
+
+**[[CL:Functions:compile-file]]** prints a message in the form of a comment (i.e. with a leading //[[CL:Glossary:semicolon]]//) to //[[CL:Glossary:standard output]]// indicating what //[[CL:Glossary:file]]// is being //[[CL:Glossary:compiled]]// and other useful information. If //verbose// is //[[CL:Glossary:false]]//, **[[CL:Functions:compile-file]]** does not print
+
+this information.
+
+If //print// is //[[CL:Glossary:true]]//, information about //[[CL:Glossary:top level forms]]// in the file being compiled is printed to //[[CL:Glossary:standard output]]//. Exactly what is printed is //[[CL:Glossary:implementation-dependent]]//, but nevertheless some information is printed. If //print// is **[[CL:Constant Variables:nil]]**, no information is printed.
+
+The //external-format// specifies the //[[CL:Glossary:external file format]]// to be used when opening the //[[CL:Glossary:file]]//; see the //[[CL:Glossary:function]]// **[[CL:Functions:open]]**. **[[CL:Functions:compile-file]]** and **[[CL:Functions:load]]** must cooperate in such a way that the resulting //[[CL:Glossary:compiled file]]// can be //[[CL:Glossary:loaded]]// without specifying an //[[CL:Glossary:external file format]]// anew; see the //[[CL:Glossary:function]]// **[[CL:Functions:load]]**.
+
+**[[CL:Functions:compile-file]]** binds **[[CL:Variables:*readtable*]]** and **[[CL:Variables:*package*]]** to the values they held before processing the file.
+
+**[[CL:Variables:*compile-file-truename*]]** is bound by **[[CL:Functions:compile-file]]** to hold the //[[CL:Glossary:truename]]// of the //[[CL:Glossary:pathname]]// of the file being compiled.
+
+**[[CL:Variables:*compile-file-pathname*]]** is bound by **[[CL:Functions:compile-file]]** to hold a //[[CL:Glossary:pathname]]// denoted by the first argument to **[[CL:Functions:compile-file]]**, merged against the defaults; that is, ''(pathname (merge-pathnames //input-file//))''.
+
+The compiled //[[CL:Glossary:functions]]// contained in the //[[CL:Glossary:compiled file]]// become available for use when the //[[CL:Glossary:compiled file]]// is //[[CL:Glossary:loaded]]// into Lisp.
+
+Any function definition that is processed by the compiler, including ''#'(lambda ...)'' forms and local function definitions made by \specref{flet}, \specref{labels} and **[[CL:Macros:defun]]** forms, result in an //[[CL:Glossary:object]]// of type **[[CL:Types:compiled-function]]**.
+
+The //[[CL:Glossary:primary value]]// returned by **[[CL:Functions:compile-file]]**, //output-truename//, is the **[[CL:Functions:truename]]** of the output file, or **[[CL:Constant Variables:nil]]** if the file could not be created.
+
+The //[[CL:Glossary:secondary value]]//, //warnings-p//, is //[[CL:Glossary:false]]//
+
+if no //[[CL:Glossary:conditions]]// of type **[[CL:Types:error]]** or **[[CL:Types:warning]]** were detected by the compiler, and //[[CL:Glossary:true]]// otherwise.
+
+The //[[CL:Glossary:tertiary value]]//, //failure-p//, is //[[CL:Glossary:false]]//
+
+if no //[[CL:Glossary:conditions]]// of type **[[CL:Types:error]]** or **[[CL:Types:warning]]** (other than **[[CL:Types:style-warning]]**) were detected by the compiler, and //[[CL:Glossary:true]]// otherwise.
+
+For general information about how //[[CL:Glossary:files]]// are processed by the //[[CL:Glossary:file compiler]]//, see section {\secref\FileCompilation}.
+
+
+
+//[[CL:Glossary:Programs]]// to be compiled by the //[[CL:Glossary:file compiler]]// must only contain //[[CL:Glossary:externalizable objects]]//; for details on such //[[CL:Glossary:object|objects]]//, see section {\secref\LiteralsInCompiledFiles}. For information on how to extend the set of //[[CL:Glossary:externalizable objects]]//, see the //[[CL:Glossary:function]]// **[[CL:Functions:make-load-form]]** and \secref\CallingMakeLoadForm.
+
+====Examples====
+
+None.
+
+====Affected By====
+
+**[[CL:Variables:*error-output*]]**,
+
+**[[CL:Variables:*standard-output*]]**, **[[CL:Variables:*compile-verbose*]]**, **[[CL:Variables:*compile-print*]]**
+
+The computer's file system. ====Exceptional Situations====
+
+For information about errors detected during the compilation process, see section {\secref\FileCompilerExceptions}.
+
+An error of type **[[CL:Types:file-error]]** might be signaled if **[[CL:Functions:(wild-pathname-p //input-file//)\/]]** returns true.
+
+If either the attempt to open the //[[CL:Glossary:source file]]// for input or the attempt to open the //[[CL:Glossary:compiled file]]// for output fails, an error of type **[[CL:Types:file-error]]** is signaled.
+
+====See Also====
+
+**[[CL:Functions:compile]]**, \misc{declare}, \specref{eval-when}, **[[CL:Types:pathname]]**, **[[CL:Types:logical-pathname]]**,{\secref\FileSystemConcepts},
+
+{\secref\PathnamesAsFilenames}
+
+====Notes====
+
+None.
+
+
+
+\issue{COMPILER-VERBOSITY:LIKE-LOAD} \issue{COMPILER-DIAGNOSTICS:USE-HANDLER} \issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM} \issue{COMPILE-FILE-OUTPUT-FILE-DEFAULTS:INPUT-FILE} \issue{PATHNAME-LOGICAL:ADD} \issue{COMPILER-VERBOSITY:LIKE-LOAD} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92} \issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM} \issue{COMPILE-FILE-PACKAGE} \issue{IN-SYNTAX:MINIMAL} \issue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES} \issue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES} \issue{COMPILED-FUNCTION-REQUIREMENTS:TIGHTEN} \issue{COMPILER-DIAGNOSTICS:USE-HANDLER} \issue{LOAD-OBJECTS:MAKE-LOAD-FORM} \issue{COMPILER-WARNING-STREAM} \issue{COMPILER-VERBOSITY:LIKE-LOAD} \issue{PATHNAME-WILD:NEW-FUNCTIONS} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-LOGICAL:ADD} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES} \issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}

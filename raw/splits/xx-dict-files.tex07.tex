@@ -1,0 +1,59 @@
+====== Function RENAME-FILE ======
+
+====Syntax====
+
+\DefunWithValues rename-file {filespec new-name} {defaulted-new-name, old-truename, new-truename}
+
+====Arguments and Values====
+
+//filespec// - a //[[CL:Glossary:pathname designator]]//.
+
+//new-name// - a //[[CL:Glossary:pathname designator]]//
+
+other than a //[[CL:Glossary:stream]]//.
+
+//defaulted-new-name// - a //[[CL:Glossary:pathname]]//
+
+//old-truename// - a //[[CL:Glossary:physical pathname]]//.
+
+//new-truename// - a //[[CL:Glossary:physical pathname]]//.
+
+====Description====
+
+**[[CL:Functions:rename-file]]** modifies the file system in such a way that the file indicated by //filespec// is renamed to
+
+//defaulted-new-name//.
+
+It is an error to specify a filename containing a //[[CL:Glossary:wild]]// component, for //filespec// to contain a **[[CL:Constant Variables:nil]]** component where the file system does not permit a **[[CL:Constant Variables:nil]]** component, or for the result of defaulting missing components of //new-name// from //filespec// to contain a **[[CL:Constant Variables:nil]]** component where the file system does not permit a **[[CL:Constant Variables:nil]]** component.
+
+If //new-name// is a //[[CL:Glossary:logical pathname]]//, **[[CL:Functions:rename-file]]** returns a //[[CL:Glossary:logical pathname]]// as its //[[CL:Glossary:primary value]]//.
+
+**[[CL:Functions:rename-file]]** returns three values if successful. The //[[CL:Glossary:primary value]]//, //defaulted-new-name//, is the resulting name which is composed of //new-name// with any missing components filled in by performing a **[[CL:Functions:merge-pathnames]]** operation using //filespec// as the defaults. The //[[CL:Glossary:secondary value]]//, //old-truename//, is the //[[CL:Glossary:truename]]// of the //[[CL:Glossary:file]]// before it was renamed. The //[[CL:Glossary:tertiary value]]//, //new-truename//, is the //[[CL:Glossary:truename]]// of the //[[CL:Glossary:file]]// after it was renamed.
+
+If the //filespec// //[[CL:Glossary:designator]]// is an open //[[CL:Glossary:stream]]//, then the //[[CL:Glossary:stream]]// itself and the file associated with it are affected (if the //[[CL:Glossary:file system]]// permits).
+
+====Examples====
+
+<blockquote> ;; An example involving logical pathnames. (with-open-file (stream "sys:chemistry;lead.text" :direction :output :if-exists :error) (princ "eureka" stream) (values (pathname stream) (truename stream))) → #P"SYS:CHEMISTRY;LEAD.TEXT.NEWEST", #P"Q:>sys>chem>lead.text.1" (rename-file "sys:chemistry;lead.text" "gold.text") → #P"SYS:CHEMISTRY;GOLD.TEXT.NEWEST", #P"Q:>sys>chem>lead.text.1", #P"Q:>sys>chem>gold.text.1" </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+If the renaming operation is not successful, an error of type **[[CL:Types:file-error]]** is signaled.
+
+An error of type **[[CL:Types:file-error]]** might be signaled if //filespec// is //[[CL:Glossary:wild]]//.
+
+====See Also====
+
+**[[CL:Functions:truename]]**, **[[CL:Types:pathname]]**, **[[CL:Types:logical-pathname]]**,{\secref\FileSystemConcepts},
+
+{\secref\PathnamesAsFilenames}
+
+====Notes====
+
+None.
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-LOGICAL:ADD} \issue{PATHNAME-LOGICAL:ADD} \issue{PATHNAME-WILD:NEW-FUNCTIONS} \issue{PATHNAME-LOGICAL:ADD}

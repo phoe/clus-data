@@ -1,0 +1,82 @@
+====== Standard Generic Function CHANGE-CLASS ======
+
+====Syntax====
+
+
+\DefgenWithValues change-class {instance new-class ''&key'' {\allowotherkeys}} {instance}
+
+====Method Signatures====
+
+
+\Defmeth {change-class} {\specparam{instance}{standard-object} \specparam{new-class}{standard-class} ''&rest'' initargs}
+
+\Defmeth {change-class} {\specparam{instance}{t} \specparam{new-class}{symbol} ''&rest'' initargs}
+
+====Arguments and Values====
+
+//instance// - an //[[CL:Glossary:object]]//.
+
+//new-class// - a //[[CL:Glossary:class designator]]//.
+
+
+//initargs// - an //[[CL:Glossary:initialization argument list]]//.
+
+====Description====
+
+The //[[CL:Glossary:generic function]]// **[[CL:Functions:change-class]]** changes the //[[CL:Glossary:class]]// of an //instance// to //new-class//. It destructively modifies and returns the //instance//.
+
+If in the old //[[CL:Glossary:class]]// there is any //[[CL:Glossary:slot]]// of the same name as a local //[[CL:Glossary:slot]]// in the //new-class//, the value of that //[[CL:Glossary:slot]]// is retained. This means that if the //[[CL:Glossary:slot]]// has a value, the value returned by **[[CL:Functions:slot-value]]** after **[[CL:Functions:change-class]]** is invoked is **[[CL:Functions:eql]]** to the value returned by **[[CL:Functions:slot-value]]** before **[[CL:Functions:change-class]]** is invoked. Similarly, if the //[[CL:Glossary:slot]]// was unbound, it remains unbound. The other //[[CL:Glossary:slots]]// are initialized as described in \secref\ChangingInstanceClass.
+
+After completing all other actions, **[[CL:Functions:change-class]]** invokes **[[CL:Functions:update-instance-for-different-class]]**. The generic function **[[CL:Functions:update-instance-for-different-class]]** can be used to assign values to slots in the transformed instance.
+
+see section {\secref\InitNewLocalSlots}.
+
+
+
+If the second of the above //[[CL:Glossary:methods]]// is selected, that //[[CL:Glossary:method]]// invokes **[[CL:Functions:change-class]]** on //instance//, ''(find-class //new-class//)'', and the //initargs//.
+
+
+====Examples====
+
+<blockquote>
+
+(defclass position () ())
+
+(defclass x-y-position (position) ((x :initform 0 :initarg :x) (y :initform 0 :initarg :y)))
+
+(defclass rho-theta-position (position) ((rho :initform 0) (theta :initform 0)))
+
+(defmethod update-instance-for-different-class :before ((old x-y-position) (new rho-theta-position) &key) ;; Copy the position information from old to new to make new ;; be a rho-theta-position at the same position as old. (let ((x (slot-value old 'x)) (y (slot-value old 'y))) ([[CL:Macros:setf]] (slot-value new 'rho) (sqrt (+ (* x x) (* y y))) (slot-value new 'theta) (atan y x))))
+
+;;; At this point an instance of the class x-y-position can be ;;; changed to be an instance of the class rho-theta-position using ;;; change-class:
+
+([[CL:Macros:defparameter]] p1 (make-instance 'x-y-position :x 2 :y 0))
+
+(change-class p1 'rho-theta-position)
+
+;;; The result is that the instance bound to p1 is now an instance of ;;; the class rho-theta-position. The update-instance-for-different-class ;;; method performed the initialization of the rho and theta slots based ;;; on the value of the x and y slots, which were maintained by ;;; the old instance.
+
+</blockquote>
+
+====Examples====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:update-instance-for-different-class]]**, {\secref\ChangingInstanceClass}
+
+====Notes====
+
+The generic function **[[CL:Functions:change-class]]** has several semantic difficulties. First, it performs a destructive operation that can be invoked within a //[[CL:Glossary:method]]// on an //[[CL:Glossary:instance]]// that was used to select that //[[CL:Glossary:method]]//. When multiple //[[CL:Glossary:methods]]// are involved because //[[CL:Glossary:methods]]// are being combined, the //[[CL:Glossary:methods]]// currently executing or about to be executed may no longer be applicable. Second, some implementations might use compiler optimizations of slot //[[CL:Glossary:access]]//, and when the //[[CL:Glossary:class]]// of an //[[CL:Glossary:instance]]// is changed the assumptions the compiler made might be violated. This implies that a programmer must not use **[[CL:Functions:change-class]]** inside a //[[CL:Glossary:method]]// if any //[[CL:Glossary:methods]]// for that //[[CL:Glossary:generic function]]// //[[CL:Glossary:access]]// any //[[CL:Glossary:slots]]//, or the results are undefined.
+
+
+\issue{CHANGE-CLASS-INITARGS:PERMIT} \issue{CHANGE-CLASS-INITARGS:PERMIT} \issue{CHANGE-CLASS-INITARGS:PERMIT} \issue{CHANGE-CLASS-INITARGS:PERMIT} \issue{CHANGE-CLASS-INITARGS:PERMIT}

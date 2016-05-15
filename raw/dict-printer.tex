@@ -1,0 +1,2688 @@
+% -*- Mode: TeX -*-
+
+% Pretty Printer Concepts
+% Printer
+%  Printer Variables
+
+\def\writekeys#1{\vtop{\hbox{array base case circle escape gensym}
+		       \hbox{length level lines miser-width pprint-dispatch}
+		       \hbox{pretty radix readably right-margin #1}}}
+
+\def\writekeydescriptions#1{\param{array}---a \term{generalized boolean}.
+
+\param{base}---a \term{radix}.
+
+\param{case}---a \term{symbol} of \term{type} \f{(member :upcase :downcase :capitalize)}.
+
+\param{circle}---a \term{generalized boolean}.
+
+\param{escape}---a \term{generalized boolean}.
+
+\param{gensym}---a \term{generalized boolean}.
+
+\param{length}---a non-negative \term{integer}, or \nil.
+
+\param{level}---a non-negative \term{integer}, or \nil.
+
+\param{lines}---a non-negative \term{integer}, or \nil.
+
+\param{miser-width}---a non-negative \term{integer}, or \nil.
+
+\param{pprint-dispatch}---a \term{pprint dispatch table}.
+
+\param{pretty}---a \term{generalized boolean}.
+
+\param{radix}---a \term{generalized boolean}.
+
+\param{readably}---a \term{generalized boolean}.
+
+\param{right-margin}---a non-negative \term{integer}, or \nil.
+
+#1}
+
+
+%-------------------- Printer --------------------
+
+%%% ========== COPY-PPRINT-DISPATCH
+
+\begincom{copy-pprint-dispatch}\ftype{Function}
+
+%KMP: I'd like to change the name of this function to COPY-PPRINT-DISPATCH-TABLE.
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Syntax::
+
+\DefunWithValues copy-pprint-dispatch {{\opt} table} {new-table}
+
+\label Arguments and Values::
+
+\param{table}---a \term{pprint dispatch table}, or \nil.
+
+\param{new-table}---a \term{fresh} \term{pprint dispatch table}.
+
+\label Description::
+
+Creates and returns a copy of the specified \param{table}, 
+or of \thevalueof{*print-pprint-dispatch*} if no \param{table} is specified,
+or of the initial \term{value} of \varref{*print-pprint-dispatch*} if \nil\ is specified.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+%% Sandra thinks this is excessive.
+%Creates a \term{pprint dispatch table}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Should signal an error \oftype{type-error} if \param{table} 
+is not a \term{pprint dispatch table}.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== FORMATTER
+\begincom{formatter}\ftype{Macro}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Syntax::
+
+\DefmacWithValues formatter {control-string} {function}
+
+\label Arguments and Values::
+
+\param{control-string}---a \term{format string}; \noeval.
+
+\param{function}---a \term{function}.
+
+\label Description::
+
+Returns a \term{function} which has behavior equivalent to:
+
+\code
+  #'(lambda (*standard-output* &rest arguments)
+      (apply #'format t \i{control-string} arguments)
+      \i{arguments-tail})
+\endcode
+
+where \i{arguments-tail} is either the tail of \i{arguments} 
+which has as its \term{car} the argument that would be processed next 
+if there were more format directives in the \param{control-string}, 
+or else \nil\ if no more \i{arguments} follow the most recently
+processed argument.
+
+\label Examples::
+
+%This doesn't look like valid syntax to me.  --sjl 16 mar 92
+%\code
+%((formatter "~&~A~A") *standard-output* 'a 'b 'c)
+%\OUT AB
+%\EV (C)
+\code
+(funcall (formatter "~&~A~A") *standard-output* 'a 'b 'c)
+\OUT AB
+\EV (C)
+
+(format t (formatter "~&~A~A") 'a 'b 'c)
+\OUT AB
+\EV NIL
+\endcode
+
+\label Side Effects:\None.
+
+%% Sandra thinks this is excessive.
+%Might create a \term{closure} at run time.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Might signal an error (at macro expansion time or at run time) if the argument
+is not a valid \term{format string}.
+
+\label See Also::
+
+\funref{format}
+
+\label Notes:\None.
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== PPRINT-DISPATCH
+
+\begincom{pprint-dispatch}\ftype{Function}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Syntax::
+
+\DefunWithValues pprint-dispatch {object {\opt} table} {function, found-p}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+%!!! pprint dispatch table designator?? -kmp 16-Oct-91
+\param{table}---a \term{pprint dispatch table}, or \nil.
+ \Default{\thevalueof{*print-pprint-dispatch*}}
+
+% It wasn't obvious if this should be a "function" or "function designator".
+% I asked x3j13 with issue PPRINT-DISPATCH-RETURN-VALUE, but rather than vote
+% on it, they just told me to use my discretion.  Which is basically the same
+% as if they had approved the issue.  "function designator" it is. -kmp 11-Feb-92
+\param{function}---a \term{function designator}.
+
+\param{found-p}---a \term{generalized boolean}.
+
+\label Description::
+
+Retrieves the highest priority function in \param{table} that is
+associated with a \term{type specifier} that matches \param{object}.
+The function is chosen by finding all of the \term{type specifiers} in \param{table}
+that match the \param{object} and 
+selecting the highest priority function associated with any of these
+\term{type specifiers}.  If there is more than one highest priority function,
+an arbitrary choice is made.  If no \term{type specifiers} match the 
+\param{object}, a function is returned that prints \param{object} 
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+%with \varref{*print-pretty*} bound to \nil.
+using \funref{print-object}.
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+
+The \term{secondary value}, \param{found-p}, is \term{true} if a matching
+\term{type specifier} was found in \param{table}, or \term{false} otherwise.
+
+If \param{table} is \nil,
+retrieval is done in the
+%initial value of \varref{*print-pprint-dispatch*}.
+\term{initial pprint dispatch table}.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The state of the \param{table}.
+
+\label Exceptional Situations::
+
+Should signal an error \oftype{type-error} if \term{table} is neither a
+\term{pprint-dispatch-table} nor \nil.
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+(let ((*print-pretty* t))
+  (write object :stream s))
+\EQ (funcall (pprint-dispatch object) s object)
+\endcode
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== PPRINT-EXIT-IF-LIST-EXHAUSTED
+\begincom{pprint-exit-if-list-exhausted}\ftype{Local Macro}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Syntax::
+
+\DefmacWithValues pprint-exit-if-list-exhausted {\noargs} {\nil}
+
+\label Arguments and Values:\None.
+
+\label Description::
+
+Tests whether or not the \param{list} passed to 
+the \term{lexically current logical block}
+has been exhausted; \seesection\DynamicControlofOutput.
+If this \param{list} has been
+reduced to \nil, \funref{pprint-exit-if-list-exhausted} terminates the execution
+of the \term{lexically current logical block} except for the printing
+of the suffix.  Otherwise \funref{pprint-exit-if-list-exhausted} returns \nil. 
+
+\issue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+Whether or not \macref{pprint-exit-if-list-exhausted} is \term{fbound} in the
+\term{global environment} is \term{implementation-dependent};
+however, the restrictions on redefinition and \term{shadowing} of
+\macref{pprint-exit-if-list-exhausted} are the same as for \term{symbols} in \thepackage{common-lisp}
+which are \term{fbound} in the \term{global environment}.
+The consequences of attempting to use \macref{pprint-exit-if-list-exhausted} outside
+of \macref{pprint-logical-block} are undefined.
+\endissue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+An error is signaled (at macro expansion time or at run time) if
+\funref{pprint-exit-if-list-exhausted} is used anywhere other than
+%syntactically nested
+lexically within a call on \macref{pprint-logical-block}.  
+% It is undefined what happens if \funref{pprint-if-list-exhausted} is executed outside
+% of the dynamic extent of this \funref{pprint-logical-block}.
+Also, the consequences of executing \funref{pprint-if-list-exhausted} outside
+of the dynamic extent of the \macref{pprint-logical-block} which lexically
+contains it are undefined.
+
+\label See Also::
+
+\macref{pprint-logical-block}, \funref{pprint-pop}.
+
+\label Notes:\None.
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== PPRINT-FILL
+%%% ========== PPRINT-LINEAR
+%%% ========== PPRINT-TABULAR
+
+\begincom{pprint-fill, pprint-linear, pprint-tabular}\ftype{Function}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Syntax::
+
+\DefunWithValues pprint-fill    {stream object {\opt} colon-p at-sign-p} {\nil}
+\DefunWithValues pprint-linear  {stream object {\opt} colon-p at-sign-p} {\nil}
+\DefunWithValues pprint-tabular {stream object {\opt} colon-p at-sign-p tabsize} {\nil}
+
+\label Arguments and Values::
+
+\param{stream}---an \term{output} \term{stream designator}.
+
+\param{object}---an \term{object}.
+
+\param{colon-p}---a \term{generalized boolean}.
+  \Default{\term{true}}
+
+\param{at-sign-p}---a \term{generalized boolean}.
+  \Default{\term{implementation-dependent}}
+
+\param{tabsize}---a non-negative \term{integer}.
+  \Default{\f{16}}
+
+\label Description::
+
+The functions \funref{pprint-fill}, \funref{pprint-linear}, and
+\funref{pprint-tabular} specify particular ways of \term{pretty printing}
+a \term{list} to \param{stream}. 
+Each function prints parentheses around the output if and only
+if \param{colon-p} is \term{true}.
+Each function ignores its \param{at-sign-p} argument.
+(Both arguments are included even though only one is needed
+so that these functions can be used via \formatOp{/.../}
+and as \funref{set-pprint-dispatch} functions, as well as directly.)
+Each function handles abbreviation and the detection of circularity
+and sharing correctly, and uses \funref{write} to print \param{object}
+when it is a \term{non-list}.
+% KMP: The pretty printer proposal as adopted was ambiguous 
+%  in the preceding sentence.  I tried to resolve the ambiguity
+%  by changing the argument name and doing some rewording.
+%  Dick Waters should double-check this interpretation.
+% Waters: Is ok.
+
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+If \param{object} is a \term{list} and 
+if \thevalueof{*print-pretty*} is \term{false},
+each of these functions prints \param{object}
+using a minimum of \term{whitespace},
+as described in \secref\PrintingListsAndConses.
+Otherwise (if \param{object} is a \term{list} and 
+	   if \thevalueof{*print-pretty*} is \term{true}):
+
+\beginlist
+
+\itemitem{\bull}
+\Thefunction{pprint-linear} prints a \term{list} either all on one line, 
+or with each \term{element} on a separate line.  
+
+\itemitem{\bull}
+\Thefunction{pprint-fill} prints a \term{list} with as many \term{elements}
+as possible on each line.
+
+\itemitem{\bull}
+\Thefunction{pprint-tabular} is the same as \funref{pprint-fill}
+except that it prints the \term{elements} so that they line up in columns.
+The \param{tabsize} specifies the column spacing in \term{ems},
+% KMP: Is this (1) the minimum intercolumn spacing, or 
+%  (2) the total spacing from the left edge of one column 
+%      to the left edge of the next?
+% Waters: (2)
+which is the total spacing from the leading edge of one column to
+the leading edge of the next.
+\endlist
+
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+
+\label Examples::
+
+Evaluating the following with a line length of \f{25} produces the output shown.
+ 
+\code
+(progn (princ "Roads ") 
+       (pprint-tabular *standard-output* '(elm main maple center) nil nil 8))
+Roads ELM     MAIN
+      MAPLE   CENTER
+\endcode
+
+\label Side Effects::
+
+Performs output to the indicated \term{stream}.
+
+\label Affected By::
+
+The cursor position on the indicated \term{stream}, if it can be determined.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes::
+
+\Thefunction{pprint-tabular} could be defined as follows:
+
+\code
+(defun pprint-tabular (s list &optional (colon-p t) at-sign-p (tabsize nil))
+  (declare (ignore at-sign-p))
+  (when (null tabsize) (setq tabsize 16))
+  (pprint-logical-block (s list :prefix (if colon-p "(" "")
+                                :suffix (if colon-p ")" ""))
+    (pprint-exit-if-list-exhausted)
+    (loop (write (pprint-pop) :stream s)
+          (pprint-exit-if-list-exhausted)
+          (write-char #\\Space s)
+          (pprint-tab :section-relative 0 tabsize s)
+          (pprint-newline :fill s))))
+\endcode
+
+Note that it would have been inconvenient to specify this function
+using \funref{format}, because of the need to pass its \param{tabsize} argument
+through to a \formatdirective{:T} nested within an iteration over a list.
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== PPRINT-INDENT
+
+\begincom{pprint-indent}\ftype{Function}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Syntax::
+
+\DefunWithValues pprint-indent {relative-to n {\opt} stream} {\nil}
+
+\label Arguments and Values::
+
+\param{relative-to}---either \kwd{block} or \kwd{current}.
+
+\param{n}---a \term{real}.
+
+\param{stream}---an \term{output} \term{stream designator}.
+  \Default{\term{standard output}}
+
+\label Description::
+
+\funref{pprint-indent} specifies the indentation to use in a logical block on \term{stream}.
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+If \param{stream} is a \term{pretty printing stream}
+   and \thevalueof{*print-pretty*} is \term{true},
+\funref{pprint-indent} sets the indentation in the innermost 
+dynamically enclosing logical block;
+otherwise, \funref{pprint-indent} has no effect.
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+
+\param{N} specifies the indentation in
+\term{ems}.  If \param{relative-to} is \kwd{block}, the indentation is set
+to the horizontal position of the first character in the \term{dynamically current logical block} plus \param{n} 
+\term{ems}. If \param{relative-to} is \kwd{current}, the indentation is set
+to the current output position plus \param{n} \term{ems}. (For robustness
+in the face of variable-width fonts, it is advisable to use \kwd{current}
+with an \param{n} of zero whenever possible.)
+
+\param{N} can be negative;
+however, the total indentation cannot be moved 
+left of the beginning of the line 
+or left of the end of the rightmost per-line prefix---an attempt to move beyond
+one of these limits is treated
+% KMP: How?
+%     (1) Is an error signaled, 
+%  or (2) or do we just min out at 0?
+% Waters: (2).
+the same as an attempt to move to that limit.
+Changes in indentation caused by \param{pprint-indent}
+do not take effect until after the next line break.  In addition, in 
+miser mode all calls to \funref{pprint-indent} are ignored, forcing the lines 
+corresponding to the logical block to line up under the first character in
+the block.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+An error is signaled if \param{relative-to} is any \term{object} other
+than \kwd{block} or \kwd{current}.
+
+\label See Also::
+
+{\secref\TildeI}
+
+\label Notes:\None.
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== PPRINT-LOGICAL-BLOCK
+
+\begincom{pprint-logical-block}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Syntax::
+
+\DefmacWithValuesNewline pprint-logical-block
+		  	 {\vtop{\hbox{\paren{stream-symbol object 
+					     {\key} prefix per-line-prefix suffix}}
+				\hbox{\starparam{declaration} \starparam{form}}}}
+			 {\nil}
+
+\label Arguments and Values:: 
+
+\param{stream-symbol}---a \term{stream variable designator}.
+
+\param{object}---an \term{object}; \eval.
+
+\kwd{prefix}---a \term{string}; \eval.
+	       \HairyDefault.
+
+\kwd{per-line-prefix}---a \term{string}; \eval.
+		        \HairyDefault.
+
+\kwd{suffix}---a \term{string}; \eval.
+	       \Default{the \term{null} \term{string}}
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{forms}---an \term{implicit progn}.
+
+\label Description::
+
+Causes printing to be grouped into a logical block.
+
+The logical block is printed to the \term{stream} that is the \term{value}
+of the \term{variable} denoted by \param{stream-symbol}.
+During the execution of the \term{forms},
+that \term{variable} is \term{bound} to a \term{pretty printing stream}
+that supports decisions about the arrangement of output
+and then forwards the output to the destination stream.
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+% If, during that context, \varref{*print-pretty*} becomes bound to \nil, 
+% the stream ceases to behave as a \term{pretty printing stream}.
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+All the standard printing functions 
+  (\eg \funref{write},
+       \funref{princ},
+   and \funref{terpri})
+can be used to print output to the \term{pretty printing stream}.
+All and only the output sent to this \term{pretty printing stream}
+is treated as being in the logical block.
+ 
+The \param{prefix} specifies a prefix to be printed before the beginning of
+the logical block.
+The \param{per-line-prefix} specifies a prefix that is printed before the block
+and at the beginning of each new line in the block.
+The \kwd{prefix} and \kwd{pre-line-prefix} \term{arguments} are mutually exclusive.
+If neither \kwd{prefix} nor \kwd{per-line-prefix} is specified,
+a \param{prefix} of the \term{null} \term{string} is assumed.
+
+The \param{suffix} specifies a suffix that is printed just after the logical block.
+
+The \param{object} is 
+%interpreted as 
+normally 
+a \term{list} that the body \param{forms} are responsible for printing.
+If \param{object} is not a \term{list},
+it is printed using \funref{write}.
+(This makes it easier to write printing functions that are robust
+ in the face of malformed arguments.)
+If \varref{*print-circle*}
+%%There's no such var. -kmp 14-Jan-91
+%(and possibly \varref{*print-shared*}) 
+is \term{non-nil} and \param{object} is a circular (or shared) reference to a \term{cons},
+then an appropriate ``\f{\#\i{n}\#}'' marker is printed.  (This
+makes it easy to write printing functions that provide full support
+for circularity and sharing abbreviation.)  If \varref{*print-level*} is not
+\nil\ and the logical block is at a dynamic nesting depth of greater
+than \varref{*print-level*} in logical blocks, ``\f{\#}'' is printed.
+(This makes easy to write printing functions that provide full support for depth
+abbreviation.)
+ 
+If either of the three conditions above occurs, the indicated output is
+printed on \param{stream-symbol} and the body \param{forms} are skipped 
+along with the printing of the \kwd{prefix} and \kwd{suffix}.
+(If the body \param{forms} are not to be responsible for printing a list,
+then the first two tests above can be turned off by supplying \nil\ for
+the \param{object} argument.)
+ 
+In addition to the \param{object} argument of \macref{pprint-logical-block},
+the arguments of the standard printing functions (such as \funref{write}, 
+\funref{print}, \funref{prin1}, and \funref{pprint}, as well as the arguments
+of the standard \term{format directives} such as \formatOp{A}, \formatOp{S},
+(and \formatOp{W}) are all checked (when necessary) for circularity and sharing.
+However, such checking is not applied to the arguments of the
+functions \funref{write-line}, \funref{write-string}, and \funref{write-char}
+or to the literal text output by \funref{format}.  A consequence of this is
+that you must use one of the latter functions if you want to print some 
+literal text in the output that is not supposed to be checked for circularity
+or sharing.
+% (See the examples below.)
+
+The body \param{forms} of a \macref{pprint-logical-block} \term{form}
+must not perform any side-effects on the surrounding environment; for 
+example, no \term{variables} must be assigned which have not been
+\term{bound} within its scope.  
+% (See notes below for rationale.)
+
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+\Themacro{pprint-logical-block} may be used regardless of \thevalueof{*print-pretty*}.
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\varref{*print-circle*}, \varref{*print-level*}.
+
+\label Exceptional Situations::
+
+An error \oftype{type-error} is signaled if any of the \kwd{suffix}, 
+\kwd{prefix}, or \kwd{per-line-prefix} is supplied but does not evaluate 
+to a \term{string}.
+
+An error is signaled if \kwd{prefix} and \kwd{pre-line-prefix} are both used.
+
+\macref{pprint-logical-block} and the \term{pretty printing stream} it creates 
+have \term{dynamic extent}.  The consequences are undefined if, outside
+of this extent, output is attempted to the \term{pretty printing stream} it creates.
+
+It is also unspecified what happens if, within this extent, any output is 
+sent directly to the underlying destination stream.
+
+\label See Also::
+
+\macref{pprint-pop},
+\macref{pprint-exit-if-list-exhausted},
+{\secref\TildeLessThanLogicalBlock}
+
+\label Notes::
+
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+One reason for using \themacro{pprint-logical-block} when \thevalueof{*print-pretty*}
+is \nil\ would be to allow it to perform checking for \term{dotted lists}, 
+as well as (in conjunction with \macref{pprint-pop}) 
+checking for \varref{*print-level*} or \varref{*print-length*} being exceeded.
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+
+Detection of circularity and sharing is supported by the \term{pretty printer}
+by in essence performing requested output twice.  On the first pass,
+circularities and sharing are detected and the actual outputting of characters
+is suppressed.  On the second pass, the appropriate ``\f{\#\param{n}=}'' 
+and ``\f{\#\param{n}\#}'' markers are inserted and characters are output.
+This is why the restriction on side-effects is necessary.
+Obeying this restriction is facilitated by using \macref{pprint-pop},
+instead of an ordinary \macref{pop} when traversing a list being printed by 
+the body \param{forms} of the \macref{pprint-logical-block} \term{form}.)
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== PPRINT-NEWLINE
+
+\begincom{pprint-newline}\ftype{Function}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Syntax::
+
+\DefunWithValues pprint-newline {kind {\opt} stream} {\nil}
+
+\label Arguments and Values::
+
+\param{kind}---one of \kwd{linear}, \kwd{fill}, \kwd{miser}, or \kwd{mandatory}.
+
+\param{stream}---a \term{stream designator}.
+ \Default{\term{standard output}}
+
+\label Description::
+
+%% This follows from being a stream designator. -kmp 27-Aug-93
+% \param{Stream} defaults to \term{standard output}.
+% If it is \nil, \term{standard output} is used instead.
+% If it is \t, \term{terminal I/O} is used instead.
+
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+If \param{stream} is a \term{pretty printing stream}
+   and \thevalueof{*print-pretty*} is \term{true},
+a line break is inserted in the output 
+when the appropriate condition below is satisfied;
+otherwise, \funref{pprint-newline} has no effect.
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+
+\param{Kind} specifies the style of conditional newline.
+This \term{parameter} is treated as follows:
+
+\beginlist
+
+\item{\kwd{linear}}
+
+This specifies a
+``linear-style'' \term{conditional newline}.\idxtext{linear-style conditional newline}
+A line break is inserted 
+if and only if the immediately containing \term{section}
+cannot be printed on one line.
+The effect of this is that line breaks are
+either inserted at every linear-style conditional newline in a logical block
+or at none of them.
+
+\item{\kwd{miser}}
+
+This specifies a 
+``miser-style'' \term{conditional newline}.\idxtext{miser-style conditional newline}
+A line break is inserted
+if and only if the immediately containing \term{section}
+cannot be printed on one line
+and miser style is in effect in the immediately containing logical block.
+The effect of this is that miser-style conditional newlines
+act like linear-style conditional newlines,
+but only when miser style is in effect.
+Miser style is in effect for a logical block if and only if 
+the starting position of the logical block
+is less than or equal to
+\varref{*print-miser-width*} \term{ems} from the right margin.
+
+\item{\kwd{fill}}
+
+This specifies a
+``fill-style'' \term{conditional newline}.\idxtext{fill-style conditional newline}
+A line break is inserted if and only if
+either (a) the following \term{section} cannot be printed 
+	   on the end of the current line,
+       (b) the preceding \term{section} was not printed on a single line,
+    or (c) the immediately containing \term{section} cannot
+	   be printed on one line and miser style is in effect
+	   in the immediately containing logical block.
+If a logical block is broken up into a number of subsections
+by fill-style conditional newlines,
+the basic effect is that the logical block
+is printed with as many subsections as possible on each line.
+However, if miser style is in effect,
+fill-style conditional newlines act like linear-style conditional newlines.
+
+\item{\kwd{mandatory}}
+
+This specifies a
+``mandatory-style'' \term{conditional newline}.\idxtext{mandatory-style conditional newline}
+A line break is always inserted.
+This implies that  none of the containing \term{sections}
+can be printed on a single line and 
+will therefore trigger the insertion of line breaks 
+at linear-style conditional newlines in these \term{sections}.
+
+\endlist
+
+When a line break is inserted by any type of conditional newline, 
+any blanks that immediately precede the conditional newline are omitted 
+from the output and indentation is introduced at the beginning of the next line.
+By default, the indentation causes the following line to begin 
+in the same horizontal position 
+as the first character in the immediately containing logical block.
+(The indentation can be changed via \funref{pprint-indent}.)
+
+There are a variety of ways unconditional newlines can be introduced into
+the output (\ie via \funref{terpri} or by printing a string containing a newline
+character).  As with mandatory conditional newlines, this prevents any of
+the containing \term{sections} from being printed on one line.  In general, when
+an unconditional newline is encountered, it is printed out without
+suppression of the preceding blanks and without any indentation following
+it.  However, if a per-line prefix has been specified (see
+\macref{pprint-logical-block}), this prefix will always be printed no matter 
+how a newline originates.
+
+\label Examples::
+
+\Seesection\PrettyPrinterExamples.
+
+\label Side Effects::
+
+Output to \param{stream}.
+
+\label Affected By::
+
+\varref{*print-pretty*}, \varref{*print-miser*}.
+The presence of containing logical blocks.
+The placement of newlines and conditional newlines.
+
+\label Exceptional Situations::
+
+An error \oftype{type-error} is signaled if \param{kind} 
+is not one of \kwd{linear}, \kwd{fill}, \kwd{miser}, or \kwd{mandatory}.
+
+\label See Also::
+
+{\secref\TildeUnderscore},
+{\secref\PrettyPrinterExamples}
+
+\label Notes:\None.
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== PPRINT-POP
+
+\begincom{pprint-pop}\ftype{Local Macro}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Syntax::
+
+\DefmacWithValues pprint-pop {\noargs} {object}
+
+\label Arguments and Values::
+
+\param{object}---an \term{element} of the \term{list} 
+		 being printed in the \term{lexically current logical block},
+		 or \nil.
+
+\label Description::
+
+Pops one \term{element} from the \term{list} being printed
+in the \term{lexically current logical block}, obeying \varref{*print-length*}
+and \varref{*print-circle*} as described below.
+
+Each time \macref{pprint-pop} is called, it pops the next value off the
+\term{list} passed to the \term{lexically current logical block} and returns it.
+However, before doing this, it performs three tests:
+
+\beginlist
+ \item{\bull}
+    If the remaining `list' is not a \term{list}, 
+    ``\f{. }''\idxterm{dot} is printed followed by the remaining `list.' 
+    (This makes it easier to write printing functions that 
+    are robust in the face of malformed arguments.)
+
+ \item{\bull}
+    If \varref{*print-length*} is \term{non-nil},
+    and \macref{pprint-pop} has already been called \varref{*print-length*} times 
+    within the immediately containing logical block,
+    ``\f{...}''\idxtext{Dot Dot Dot}\idxcode{...} is printed.
+    (This makes it easy to write printing functions that properly handle
+    \varref{*print-length*}.)
+
+ \item{\bull}
+    If \varref{*print-circle*} is
+    \term{non-nil}, and the remaining list is a circular (or shared) reference,
+    then ``\f{. }'' is printed followed by an appropriate
+    ``\f{\#\i{n}\#}''\idxtext{Sharpsign Sharpsign (reader macro)} marker.
+    (This catches instances of \term{cdr} circularity and sharing in lists.)
+\endlist
+
+If either of the three conditions above occurs, the indicated output is
+printed on the \term{pretty printing stream} created by the immediately containing
+\macref{pprint-logical-block} and the execution of the immediately containing
+\macref{pprint-logical-block} is terminated except for the printing of the suffix.
+
+%KMP: I find this next paragraph fairly undecipherable.
+If \macref{pprint-logical-block} is given a `list' argument of \nil---because
+it is not processing a list---\macref{pprint-pop} can still be used to obtain 
+support for \varref{*print-length*}.  
+In this situation, the first and third tests above are disabled and
+\macref{pprint-pop} always returns \nil.
+\Seesection\PrettyPrinterExamples---specifically, the \funref{pprint-vector} example.
+
+\issue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+Whether or not \macref{pprint-pop} is \term{fbound} in the
+\term{global environment} is \term{implementation-dependent};
+however, the restrictions on redefinition and \term{shadowing} of
+\macref{pprint-pop} are the same as for \term{symbols} in \thepackage{common-lisp}
+which are \term{fbound} in the \term{global environment}.
+The consequences of attempting to use \macref{pprint-pop} outside
+of \macref{pprint-logical-block} are undefined.
+\endissue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+
+
+\label Examples:\None.
+
+\label Side Effects::
+
+Might cause output
+%This next info supplied by Waters. -kmp 16-Oct-91
+to the \term{pretty printing stream} associated with the lexically current logical block.
+
+\label Affected By::
+
+\varref{*print-length*}, \varref{*print-circle*}.
+
+\label Exceptional Situations::
+
+An error is signaled (either at macro expansion time or at run time)
+if a usage of \macref{pprint-pop} occurs where there is no lexically
+containing \macref{pprint-logical-block} \term{form}.
+
+The consequences are undefined if \macref{pprint-pop} is executed outside
+of the \term{dynamic extent} of this \macref{pprint-logical-block}.
+
+\label See Also::
+
+\macref{pprint-exit-if-list-exhausted}, \macref{pprint-logical-block}.
+
+\label Notes::
+
+It is frequently a good idea to call \macref{pprint-exit-if-list-exhausted} 
+before calling \macref{pprint-pop}.
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== PPRINT-TAB
+
+\begincom{pprint-tab}\ftype{Function}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Syntax::
+
+\DefunWithValues pprint-tab {kind colnum colinc {\opt} stream} {\nil}
+
+\label Arguments and Values::
+
+\param{kind}---one of \kwd{line}, \kwd{section}, \kwd{line-relative},
+	       or \kwd{section-relative}.
+
+\param{colnum}---a non-negative \term{integer}.
+
+\param{colinc}---a non-negative \term{integer}.
+
+\param{stream}---an \term{output} \term{stream designator}.
+
+\label Description::
+
+Specifies tabbing to \param{stream} as performed by the standard \formatdirective{T}.
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+If \param{stream} is a \term{pretty printing stream} and
+   \thevalueof{*print-pretty*} is \term{true},
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+tabbing is performed;
+otherwise, \funref{pprint-tab} has no effect.
+
+The arguments \param{colnum} and \param{colinc} correspond to the two 
+\param{parameters} to \formatOp{T} and are in terms of \term{ems}.
+The \param{kind} argument specifies the style of tabbing.  It must be one of
+  \kwd{line} (tab as by \formatOp{T}),
+  \kwd{section} (tab as by \formatOp{:T}, 
+		 but measuring horizontal positions relative to 
+		 the start of the dynamically enclosing section),
+  \kwd{line-relative} (tab as by \formatOp{@T}), or
+  \kwd{section-relative} (tab as by \formatOp{:@T}, 
+			  but measuring horizontal positions relative to
+			  the start of the dynamically enclosing section).
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+An error is signaled if \param{kind} is not one of \kwd{line},
+\kwd{section}, \kwd{line-relative}, or \kwd{section-relative}.
+
+\label See Also::
+
+\macref{pprint-logical-block}
+
+\label Notes:\None.
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== PRINT-OBJECT
+\begincom{print-object}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\DefgenWithValues print-object {object stream} {object}
+ 
+\label Method Signatures::
+ 
+\Defmeth {print-object} {\paren{\param{object} standard-object} \param{stream}}
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+\Defmeth {print-object} {\paren{\param{object} structure-object} \param{stream}}
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+
+\label Arguments and Values::
+                                
+\param{object}---an \term{object}.
+ 
+\param{stream}---a \term{stream}.
+%% KMP: It should not be necessary to say this.
+% it cannot be the \term{symbols} \t\ or \nil. 
+ 
+\label Description::
+ 
+\TheGF{print-object} writes the printed representation of \param{object}
+to \param{stream}.
+\Thefunction{print-object} is called by the \term{Lisp printer}; 
+it should not be called by the user.
+
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+Each implementation is required to provide a \term{method} on
+\theclass{standard-object} and on \theclass{structure-object}.
+In addition, each \term{implementation} must provide 
+\term{methods} on enough other \term{classes} 
+so as to ensure that there is always an applicable \term{method}.
+Implementations are free to add \term{methods} for other \term{classes}.
+Users may write \term{methods} for \funref{print-object} for their own
+\term{classes} if they do not wish to inherit an 
+\term{implementation-dependent} \term{method}.
+
+The \term{method} on \theclass{structure-object} prints the object in the
+default \f{\#S} notation; \seesection\PrintingStructures.
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+
+%\term{Methods} on \funref{print-object} must 
+%obey the print control special variables.
+%The specific details are the following:
+
+\term{Methods} on \funref{print-object} are responsible for implementing
+their part of the semantics of the \term{printer control variables}, as follows:
+ 
+\beginlist
+ 
+\issue{DATA-IO:ADD-SUPPORT}
+
+\item{\varref{*print-readably*}}
+
+All methods for \funref{print-object} must obey \varref{*print-readably*}.
+This includes both user-defined methods and \term{implementation-defined} methods.
+Readable printing of \term{structures} and \term{standard objects} 
+is controlled by their \funref{print-object} method, 
+not by their \funref{make-load-form} \term{method}.
+\term{Similarity} for these \term{objects} is application dependent
+and hence is defined to be whatever these \term{methods} do; 
+\seesection\Similarity.
+ 
+\endissue{DATA-IO:ADD-SUPPORT}
+
+\item{\varref{*print-escape*}}
+
+Each \term{method} must implement \varref{*print-escape*}. 
+ 
+\item{\varref{*print-pretty*}} 
+
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+% The \varref{*print-pretty*} control variable can be ignored
+% by most \term{methods} other than the one for \term{lists}.
+The \term{method} may wish to perform specialized line breaking
+or other output conditional on \thevalueof{*print-pretty*}.
+For further information,
+see (for example) the \term{macro} \macref{pprint-fill}.
+See also \secref\PPrintDispatchTables\ and \secref\PrettyPrinterExamples.
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+ 
+\item{\varref{*print-length*}}
+
+\term{Methods} that produce output of indefinite length must obey
+\varref{*print-length*}.
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+%, but most \term{methods} other than the one for 
+%\term{lists} can ignore it.
+For further information,
+see (for example) the \term{macros} \macref{pprint-logical-block}
+and \macref{pprint-pop}.
+See also \secref\PPrintDispatchTables\ and \secref\PrettyPrinterExamples.
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY} 
+
+\item{\varref{*print-level*}}
+
+The printer takes care of \varref{*print-level*} automatically,
+provided that each \term{method} handles exactly one level of structure and
+calls \funref{write} (or an equivalent \term{function}) recursively if
+there are more structural levels.  The printer's decision of whether an
+\term{object} has components (and therefore should not be printed when the
+printing depth is not less than \varref{*print-level*}) is
+\term{implementation-dependent}.  In some implementations its 
+\funref{print-object} \term{method} is not called; 
+in others the \term{method} is called, 
+and the determination that the \term{object} has components is based on what
+it tries to write to the \param{stream}.
+     
+\item{\varref{*print-circle*}}
+
+\issue{PRINT-CIRCLE-STRUCTURE:USER-FUNCTIONS-WORK}
+When \thevalueof{*print-circle*} is \term{true},
+a user-defined 
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+%print function
+\funref{print-object} \term{method}
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+can print \term{objects} to the supplied \term{stream} 
+using \funref{write},
+      \funref{prin1},
+      \funref{princ},
+   or \funref{format}
+and expect circularities to be detected 
+and printed using the \f{\#\i{n}\#} syntax.
+If a user-defined
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+%print function
+\funref{print-object} \term{method}
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+prints to a \term{stream} other than the one
+that was supplied, then circularity detection starts over for that
+\term{stream}.  See \varref{*print-circle*}.
+\endissue{PRINT-CIRCLE-STRUCTURE:USER-FUNCTIONS-WORK}
+
+\item{\varref{*print-base*},
+      \varref{*print-radix*},
+      \varref{*print-case*}, 
+      \varref{*print-gensym*},
+  and \varref{*print-array*}}
+
+These \term{printer control variables} apply to specific types of \term{objects}
+and are handled by the \term{methods} for those \term{objects}.
+
+\endlist
+ 
+If these rules are not obeyed, the results are undefined.
+ 
+%!!! What is the motivation for this?
+In general, the printer and the \funref{print-object} methods should not
+rebind the print control variables as they operate recursively through the
+structure, but this is \term{implementation-dependent}.
+ 
+In some implementations the \param{stream} argument passed to a 
+\funref{print-object} \term{method} is not the original \term{stream}, 
+but is an intermediate \term{stream} that implements part of the printer.
+\term{methods} should therefore not depend on the identity of this \term{stream}.
+ 
+%All of the existing printing functions (\funref{write}, 
+%\funref{prin1}, \funref{print}, \funref{princ}, \funref{pprint},
+%\funref{write-to-string}, \funref{prin1-to-string}, 
+%\funref{princ-to-string}, the \formatOp{S} and \formatOp{A}
+%format operations, and the \formatOp{B}, \formatOp{D},
+%\formatOp{E}, \formatOp{F}, \formatOp{G}, \formatOp{\$},
+%\formatOp{O}, \formatOp{R}, and \formatOp{X}
+%format operations when they encounter a non-numeric
+%value) are required to be changed to go through the \funref{print-object}
+%generic function.  Each implementation is required to
+%replace its former implementation of printing with one or more
+%\funref{print-object} methods.  
+%% Flushed per X3J13. -kmp 05-Oct-93
+% Exactly which \term{classes} have \term{methods} for \funref{print-object} 
+% is not specified; it would be valid for an implementation to have one
+% default \term{method} that is inherited by all system-defined \term{classes}.
+ 
+%% Per X3J13. -kmp 05-Oct-93
+\label Examples:\None.
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+ 
+\funref{pprint-fill},
+\macref{pprint-logical-block},
+\macref{pprint-pop},
+\funref{write},
+\varref{*print-readably*},
+\varref{*print-escape*},
+\varref{*print-pretty*},
+\varref{*print-length*},
+{\secref\DefaultPrintObjMeths},
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+{\secref\PrintingStructures},
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+{\secref\PPrintDispatchTables},
+{\secref\PrettyPrinterExamples}
+
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== PRINT-UNREADABLE-OBJECT
+\begincom{print-unreadable-object}\ftype{Macro}
+\issue{DATA-IO:ADD-SUPPORT}
+
+\label Syntax::
+
+\DefmacWithValues print-unreadable-object
+		  {\paren{object stream {\key} type identity} \starparam{form}}
+		  {\nil}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}; \eval.
+
+\param{stream}---%
+%% Changed per Barrett #8 (first public review) -kmp 14-May-93
+% the \term{name} of a \term{lexical variable} or \term{dynamic variable},
+% 		 the \term{value} of which is a \term{stream}; 
+% 		 used both unevaluated and evaluated.
+a \term{stream designator}; \eval.
+
+\param{type}---a \term{generalized boolean}; \eval.
+
+\param{identity}---a \term{generalized boolean}; \eval.
+
+\param{forms}---an \term{implicit progn}.
+%!!! it is evaluated. also used unevaluated to determine if any forms were present. hmmm...
+
+\label Description::
+
+Outputs a printed representation of \param{object} on \param{stream},
+beginning with ``\f{\#<}'' and ending with ``\f{>}''.  
+Everything output to \param{stream} by the body \param{forms}
+is enclosed in the the angle brackets.
+If \param{type} is \term{true}, the output from \param{forms}
+is preceded by a brief description of the \param{object}'s
+\term{type} and a space character.
+If \param{identity} is \term{true},
+the output from \param{forms} is followed by a space character
+and a representation of the \param{object}'s identity, 
+typically a storage address.
+ 
+If either \param{type} or \param{identity} is not supplied, 
+its value is \term{false}.  It is valid to omit the body \param{forms}.  
+If \param{type} and \param{identity} are both true and there are no
+body \param{forms}, only one space character separates the type 
+and the identity.
+ 
+\label Examples::
+ 
+;; Note that in this example, the precise form of the output
+;; is \term{implementation-dependent}.
+
+\code
+ (defmethod print-object ((obj airplane) stream)
+   (print-unreadable-object (obj stream :type t :identity t)
+     (princ (tail-number obj) stream)))
+
+ (prin1-to-string my-airplane)
+\EV "#<Airplane NW0773 36000123135>"
+\OV "#<FAA:AIRPLANE NW0773 17>"
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+If \varref{*print-readably*} is \term{true}, \funref{print-unreadable-object}
+signals an error \oftype{print-not-readable} without printing anything.
+ 
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endissue{DATA-IO:ADD-SUPPORT}
+
+\endcom
+
+%%% ========== SET-PPRINT-DISPATCH
+\begincom{set-pprint-dispatch}\ftype{Function}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Syntax::
+
+\DefunWithValues set-pprint-dispatch {type-specifier function {\opt} priority table} {\nil}
+
+\label Arguments and Values:: 
+
+\param{type-specifier}---a \term{type specifier}.
+% %This is now a valid type specifier! -kmp 30-Apr-91
+% 		         or a list of the form 
+% 			  \f{(cons \param{type-specifier} \param{type-specifier})}
+% 			 or {\tt (cons \param{type-specifier})}.
+%    \editornote{KMP: Can the type-specifier in a cons specifier also be a 
+% 		    usage of CONS?  Why don't we extend the CONS type specifier
+% 		    rather than make this special case?}
+
+\param{function}---a \term{function}, a \term{function name}, or \nil.
+
+\param{priority}---a \term{real}.
+ \Default{\f{0}}
+
+\param{table}---a \term{pprint dispatch table}.
+ \Default{\thevalueof{*print-pprint-dispatch*}}
+
+\label Description::
+
+Installs an entry into the \term{pprint dispatch table} which is \param{table}.
+
+\param{Type-specifier} 
+%% already said above. -kmp
+%must be a valid \term{type specifier} and
+is the \term{key}
+of the entry.  The first action of \funref{set-pprint-dispatch} is to remove any
+pre-existing entry associated with \param{type-specifier}.  This guarantees that
+there will never be two entries associated with the same \term{type specifier} 
+in a given \term{pprint dispatch table}.  Equality of \term{type specifiers} is
+tested by \funref{equal}.
+
+Two values are associated with each \term{type specifier} in a 
+\term{pprint dispatch table}: a \param{function} and a \param{priority}.
+The \param{function} must accept two arguments: the \term{stream} to which output
+is sent and the \term{object} to be printed.  The \param{function} should
+\term{pretty print} the \term{object} to the \param{stream}.  The \param{function}
+can assume that object satisfies the \term{type} given by \term{type-specifier}.
+The \param{function} must obey \varref{*print-readably*}.
+%(see issue DATA-IO)
+Any values returned by the \param{function} are ignored.
+
+\param{Priority} is a priority to resolve conflicts
+when an object matches more than one entry.
+
+It is permissible for \param{function} to be \nil.  In this situation, 
+there will be no \param{type-specifier} entry in \param{table} after
+\funref{set-pprint-dispatch} returns.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+An error is signaled if \param{priority} is not a \term{real}.
+
+\label See Also:\None.
+
+\label Notes::
+
+Since \term{pprint dispatch tables} are often used to control the pretty
+printing of Lisp code, it is common for the \param{type-specifier} to be
+an \term{expression} of the form 
+
+\code
+ (cons \param{car-type} \param{cdr-type})
+\endcode
+
+This signifies that the corresponding object must be a cons cell 
+whose \term{car} matches the \term{type specifier} \param{car-type} 
+and whose \term{cdr} matches the \term{type specifier} \param{cdr-type}.
+The \param{cdr-type} can be omitted in which case it defaults to \misc{t}.
+
+%% I don't think this note had any content. -kmp 13-Jan-91
+% ----------------------------------------------------------------------
+% 
+% Implementation note:  The restriction above is very useful to users
+% without actually limiting what Common Lisp implementors can do.  It is
+% possible for implementors to set up any kind of pretty printing they
+% desire using the range of priorities available to them.
+% 
+% ----------------------------------------------------------------------
+
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== PRIN1
+%%% ========== PRINC
+%%% ========== PRINT
+%%% ========== PPRINT
+%%% ========== WRITE
+\begincom{write, prin1, print, pprint, princ}\ftype{Function}
+
+%% 22.3.1 2
+\label Syntax::
+
+%% 22.3.1 5
+\DefunWithValuesNewline write
+			{\param{object} {\key} \writekeys{stream}}
+			{object}
+
+\DefunWithValues prin1  {object {\opt} output-stream} {object}
+\DefunWithValues princ  {object {\opt} output-stream} {object}
+\DefunWithValues print  {object {\opt} output-stream} {object}
+\DefunWithValues pprint {object {\opt} output-stream} {\novalues}
+
+%% 22.3.1 1                                
+%% 22.3.1 3
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{output-stream}---an \term{output} \term{stream designator}.
+		        \Default{\term{standard output}}
+
+\writekeydescriptions{\param{stream}---an \term{output} \term{stream designator}.
+\Default{\term{standard output}}}
+
+\label Description::
+
+\funref{write}, \funref{prin1}, \funref{princ}, \funref{print}, and \funref{pprint}
+write the printed representation of \param{object} to \param{output-stream}.
+
+%!!! Does WRITE actually bind all the vars?? -kmp 8-May-91
+\funref{write} is the general entry point to the \term{Lisp printer}.
+For each explicitly supplied \term{keyword parameter} named in \thenextfigure,
+the corresponding \term{printer control variable} is dynamically bound to its \term{value}
+while printing goes on;
+for each \term{keyword parameter} in \thenextfigure\ that is not explicitly supplied,
+the value of the corresponding \term{printer control variable} is the same as it was
+at the time \funref{write} was invoked.
+Once the appropriate \term{bindings} are \term{established},
+the \term{object} is output by the \term{Lisp printer}.
+
+\tablefigtwo{Argument correspondences for the WRITE function.}{Parameter}{Corresponding Dynamic Variable}{
+ \param{array} & \varref{*print-array*} \cr
+ \param{base} & \varref{*print-base*} \cr
+ \param{case} & \varref{*print-case*} \cr
+ \param{circle} & \varref{*print-circle*} \cr
+ \param{escape} & \varref{*print-escape*} \cr
+ \param{gensym} & \varref{*print-gensym*} \cr
+ \param{length} & \varref{*print-length*} \cr
+ \param{level} & \varref{*print-level*} \cr
+ \param{lines} & \varref{*print-lines*} \cr
+ \param{miser-width} & \varref{*print-miser-width*} \cr
+ \param{pprint-dispatch} & \varref{*print-pprint-dispatch*} \cr
+ \param{pretty} & \varref{*print-pretty*} \cr
+ \param{radix} & \varref{*print-radix*} \cr
+ \param{readably} & \varref{*print-readably*} \cr
+ \param{right-margin} & \varref{*print-right-margin*} \cr
+}
+
+\issue{PRETTY-PRINT-INTERFACE}
+\funref{prin1}, \funref{princ}, \funref{print}, and \funref{pprint} implicitly 
+\term{bind} certain print parameters to particular values.  The remaining parameter
+values are taken from 
+     \varref{*print-array*},
+     \varref{*print-base*},
+     \varref{*print-case*}, 
+     \varref{*print-circle*},
+     \varref{*print-escape*},
+     \varref{*print-gensym*},
+     \varref{*print-length*},
+     \varref{*print-level*},
+     \varref{*print-lines*},
+     \varref{*print-miser-width*},
+     \varref{*print-pprint-dispatch*},
+     \varref{*print-pretty*}, 
+     \varref{*print-radix*}, 
+ and \varref{*print-right-margin*}.
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\funref{prin1} produces output suitable for input to \funref{read}.  
+It binds \varref{*print-escape*} to \term{true}.
+%% 2.5.2 3
+%% 2.5.3 2
+% I don't think this belongs here.  --sjl 16 Mar 92
+%\funref{prin1} prints any \term{string}
+%or \term{bit vector}, not just a simple one, but \funref{read} will 
+%always construct a \term{simple string} or \term{simple bit vector} 
+%when it reads the appropriate syntax.
+
+%% 22.3.1 8
+\funref{princ} is just like \funref{prin1} except that the
+output has no \term{escape} \term{characters}.
+It binds \varref{*print-escape*}   to \term{false}
+\issue{PRINC-READABLY:X3J13-DEC-91}
+     and \varref{*print-readably*} to \term{false}.
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+% I don't think this belongs here.  --sjl 16 Mar 92
+%A \term{symbol} is printed as the characters of its \term{name};
+%a \term{string} is printed without surrounding \term{double-quotes};
+%and there might be differences for other \term{types} as well.  
+The general rule is that output from \funref{princ} is intended to look
+good to people, while output from \funref{prin1} is intended to
+be acceptable to \funref{read}.
+% I don't think this belongs here.  --sjl 16 Mar 92
+%\issue{PRINC-CHARACTER}
+%For \term{characters},
+%
+%\code
+% (princ character output-stream) \EQ (write-char character output-stream)
+%\endcode
+%\endissue{PRINC-CHARACTER}
+
+%% 22.3.1 6
+\funref{print} is just like \funref{prin1} 
+except that the printed representation
+of \param{object} is preceded by a newline 
+and followed by a space.
+
+%% 22.3.1 7
+\funref{pprint} is just like \funref{print} except that the trailing
+space is omitted and 
+\param{object} is printed with the \varref{*print-pretty*} flag \term{non-nil} 
+to produce pretty output.
+
+\param{Output-stream} specifies the \term{stream} to which 
+output is to be sent.  
+
+\label Affected By::
+
+\varref{*standard-output*},
+\varref{*terminal-io*},
+\varref{*print-escape*},
+\varref{*print-radix*},
+\varref{*print-base*},
+\varref{*print-circle*},
+\varref{*print-pretty*},
+\varref{*print-level*},
+\varref{*print-length*},
+\varref{*print-case*},
+\varref{*print-gensym*},
+\varref{*print-array*},
+\varref{*read-default-float-format*}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{readtable-case},
+{\secref\FORMATPrinterOps}
+
+\label Notes::
+
+\Thefunctions{prin1} and \funref{print} do not bind \varref{*print-readably*}.
+
+\code
+ (prin1 object output-stream)
+\EQ (write object :stream output-stream :escape t)
+\endcode
+
+\issue{PRINC-READABLY:X3J13-DEC-91}
+\code
+ (princ object output-stream)
+\EQ (write object stream output-stream :escape nil :readably nil)
+\endcode
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+
+\code
+ (print object output-stream)
+\EQ (progn (terpri output-stream)
+           (write object :stream output-stream
+                         :escape t)
+           (write-char #\\space output-stream))
+\endcode
+
+\code
+ (pprint object output-stream)
+\EQ (write object :stream output-stream :escape t :pretty t)
+\endcode
+\endcom
+
+%%% ========== PRIN1-TO-STRING
+%%% ========== PRINC-TO-STRING
+%%% ========== WRITE-TO-STRING
+\begincom{write-to-string, prin1-to-string, princ-to-string}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValuesNewline write-to-string
+			{object {\key} \writekeys{}}
+			{string}
+
+\DefunWithValues prin1-to-string {object} {string}
+
+\DefunWithValues princ-to-string {object} {string}
+
+\label Arguments and Values:: 
+
+\param{object}---an \term{object}.
+
+\writekeydescriptions{}
+
+\param{string}---a \term{string}.
+
+\label Description::
+
+\funref{write-to-string}, \funref{prin1-to-string}, and \funref{princ-to-string}
+are used to create a \term{string} consisting of the printed representation 
+of \param{object}.
+%% 22.3.1 11
+\param{Object} is effectively printed as if by \funref{write},
+\funref{prin1}, or \funref{princ}, respectively,
+and the \term{characters} that would be output are made 
+into a \term{string}.
+
+\funref{write-to-string} is the general output function.
+It has the ability to specify all the parameters applicable 
+to the printing of \param{object}.
+
+\funref{prin1-to-string} acts like \funref{write-to-string} with 
+\f{:escape t}, that is, escape characters are written where appropriate.
+
+\funref{princ-to-string} acts like \funref{write-to-string} with 
+\issue{PRINC-READABLY:X3J13-DEC-91}
+\f{:escape nil :readably nil}.  
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+Thus no \term{escape} \term{characters} are written.
+
+All other keywords that would be specified to \funref{write-to-string} 
+are default values when \funref{prin1-to-string}
+or \funref{princ-to-string} is invoked.
+
+The meanings and defaults for the keyword arguments to \funref{write-to-string}
+are the same as those for \funref{write}.
+
+\label Examples::
+
+\code
+ (prin1-to-string "abc") \EV "\\"abc\\""
+ (princ-to-string "abc") \EV "abc"
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\varref{*print-escape*},
+\varref{*print-radix*},
+\varref{*print-base*},
+\varref{*print-circle*},
+\varref{*print-pretty*},
+\varref{*print-level*},
+\varref{*print-length*},
+\varref{*print-case*},
+\varref{*print-gensym*},
+\varref{*print-array*},
+\varref{*read-default-float-format*}.
+
+\label Exceptional Situations:\None.%!!! Not likely.
+
+\label See Also::
+
+\funref{write}
+
+\label Notes::       
+
+\code
+ (write-to-string \param{object} \star{\curly{\param{key} \param{argument}}})
+\EQ (with-output-to-string (#1=#:string-stream) 
+     (write object :stream #1# \star{\curly{\param{key} \param{argument}}}))
+
+ (princ-to-string \param{object})
+\EQ (with-output-to-string (string-stream)
+     (princ \param{object} string-stream))
+
+ (prin1-to-string \param{object})
+\EQ (with-output-to-string (string-stream)
+     (prin1 \param{object} string-stream))
+\endcode
+\endcom
+
+%-------------------- Printer Variables --------------------
+
+%%% ========== *PRINT-ARRAY*
+\begincom{*print-array*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{generalized boolean}.
+
+\label Initial Value::
+
+\term{implementation-dependent}.
+
+\label Description::
+
+%% 22.1.6 55
+
+Controls the format in which \term{arrays} are printed.  
+If it is \term{false}, the contents of \term{arrays} other than \term{strings}
+are never printed.  Instead, \term{arrays} are printed in a concise form using
+\f{\#<} that gives enough information for the user to be able to identify the
+\term{array}, but does not include the entire \term{array} contents.
+If it is \term{true}, non-\term{string} \term{arrays} are printed using
+\f{\#(...)}, \f{\#*}, or \f{\#nA} syntax.
+
+\label Examples:\None.
+
+\label Affected By::
+
+The \term{implementation}.
+
+\label See Also::
+
+{\secref\SharpsignLeftParen},
+{\secref\SharpsignLeftAngle}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== *PRINT-BASE*
+%%% ========== *PRINT-RADIX*
+\begincom{*print-base*, *print-radix*}\ftype{Variable}
+
+\label Value Type::
+
+\varref{*print-base*}---a \term{radix}.
+\varref{*print-radix*}---a \term{generalized boolean}.
+
+\label Initial Value::
+
+The initial \term{value} of \varref{*print-base*} is \f{10}.
+%%It's implied. -kmp 12-Jan-91
+% (decimal radix).
+The initial \term{value} of \varref{*print-radix*} is \term{false}.
+
+\label Description::
+
+\varref{*print-base*} and \varref{*print-radix*} control the printing
+of \term{rationals}.
+\Thevalueof{*print-base*} is called the \newterm{current output base}.
+
+%% 22.1.6 44
+\Thevalueof{*print-base*} is the \term{radix} in which the printer 
+will print \term{rationals}.   For radices above \f{10}, letters of
+the alphabet are used to represent digits above \f{9}.
+
+%% 22.1.6 46
+If \thevalueof{*print-radix*} is \term{true},
+the printer will print a radix specifier to indicate the \term{radix}
+in which it is printing a \term{rational} number.  The radix specifier
+is always printed using lowercase letters.  If \varref{*print-base*}
+is \f{2}, \f{8}, or \f{16}, then the radix specifier used is \f{\#b},
+\f{\#o}, or \f{\#x}, respectively.  For \term{integers}, base ten is
+indicated by a trailing decimal point instead of a leading radix
+specifier; for \term{ratios}, \f{\#10r} is used.  
+                    
+\label Examples::
+
+\code
+ (let ((*print-base* 24.) (*print-radix* t)) 
+   (print 23.))
+\OUT #24rN
+\EV 23
+ (setq *print-base* 10) \EV 10
+ (setq *print-radix* nil) \EV NIL                                          
+ (dotimes (i 35)
+    (let ((*print-base* (+ i 2)))           ;print the decimal number 40 
+      (write 40)                            ;in each base from 2 to 36
+      (if (zerop (mod i 10)) (terpri) (format t " "))))
+\OUT 101000
+\OUT 1111 220 130 104 55 50 44 40 37 34
+\OUT 31 2C 2A 28 26 24 22 20 1J 1I
+\OUT 1H 1G 1F 1E 1D 1C 1B 1A 19 18
+\OUT 17 16 15 14 
+\EV NIL
+ (dolist (pb '(2 3 8 10 16))               
+    (let ((*print-radix* t)                 ;print the integer 10 and 
+          (*print-base* pb))                ;the ratio 1/10 in bases 2, 
+     (format t "~&~S  ~S~%" 10 1/10)))        ;3, 8, 10, 16
+\OUT #b1010  #b1/1010
+\OUT #3r101  #3r1/101
+\OUT #o12  #o1/12
+\OUT 10.  #10r1/10
+\OUT #xA  #x1/A
+\EV NIL
+\endcode
+
+\label Affected By::
+
+Might be \term{bound} by \funref{format}, and \funref{write}, \funref{write-to-string}.
+
+\label See Also::
+
+\funref{format},
+\funref{write},
+\funref{write-to-string}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== *PRINT-CASE*
+\begincom{*print-case*}\ftype{Variable}
+
+\label Value Type::
+
+One of the \term{symbols} \kwd{upcase}, \kwd{downcase}, or \kwd{capitalize}.
+
+\label Initial Value::
+
+The \term{symbol} \kwd{upcase}.
+
+\label Description::
+
+%% 22.1.6 47
+\Thevalueof{*print-case*} controls the case (upper, lower, or mixed) in 
+which to print any uppercase characters in the names of \term{symbols}
+when vertical-bar syntax is not used.
+
+\issue{PRINT-CASE-PRINT-ESCAPE-INTERACTION:VERTICAL-BAR-RULE-NO-UPCASE}
+\issue{JUN90-TRIVIAL-ISSUES:3}
+\varref{*print-case*} has an effect at all times when \thevalueof{*print-escape*}
+is \term{false}. \varref{*print-case*} also has an effect when
+\thevalueof{*print-escape*} is \term{true} unless inside an escape context
+(\ie unless between \term{vertical-bars} or after a \term{slash}).
+\issue{PRINT-CASE-BEHAVIOR:CLARIFY}
+% Under no circumstance is
+% any character that is lowercase in the internal representation ever presented
+% as uppercase due to \varref{*print-case*}.
+\endissue{PRINT-CASE-BEHAVIOR:CLARIFY}
+\endissue{JUN90-TRIVIAL-ISSUES:3}
+\endissue{PRINT-CASE-PRINT-ESCAPE-INTERACTION:VERTICAL-BAR-RULE-NO-UPCASE}
+
+\label Examples::
+
+\code
+ (defun test-print-case ()
+   (dolist (*print-case* '(:upcase :downcase :capitalize))
+     (format t "~&~S ~S~%" 'this-and-that '|And-something-elSE|)))
+\EV TEST-PC
+;; Although the choice of which characters to escape is specified by
+;; *PRINT-CASE*, the choice of how to escape those characters 
+;; (i.e., whether single escapes or multiple escapes are used)
+;; is implementation-dependent.  The examples here show two of the
+;; many valid ways in which escaping might appear.
+ (test-print-case) ;Implementation A
+\OUT THIS-AND-THAT |And-something-elSE|
+\OUT this-and-that a\\n\\d-\\s\\o\\m\\e\\t\\h\\i\\n\\g-\\e\\lse
+\OUT This-And-That A\\n\\d-\\s\\o\\m\\e\\t\\h\\i\\n\\g-\\e\\lse
+\EV NIL
+ (test-print-case) ;Implementation B
+\OUT THIS-AND-THAT |And-something-elSE|
+\OUT this-and-that a|nd-something-el|se
+\OUT This-And-That A|nd-something-el|se
+\EV NIL
+\endcode
+
+\label Affected By:\None.
+
+\label See Also::
+
+\funref{write}
+
+\label Notes::
+
+%!!! Does issue READ-CASE-SENSITIVITY affect any of this?
+
+\funref{read} normally converts lowercase characters appearing 
+in \term{symbols} to corresponding uppercase characters,
+so that internally print names normally contain only uppercase characters.
+
+%% 22.1.6 48
+If \varref{*print-escape*} is \term{true},
+lowercase characters in the \term{name} of a \term{symbol}
+are always printed in lowercase, and
+are preceded by a single escape character 
+or enclosed by multiple escape characters;
+uppercase characters in the \term{name} of a \term{symbol}
+are printed in upper case, in lower case, or in mixed case
+so as to capitalize words, according to the value of
+\varref{*print-case*}.  The convention for what constitutes
+a ``word'' is the same as for \funref{string-capitalize}.
+\endcom
+
+
+%%% ========== *PRINT-CIRCLE*
+\begincom{*print-circle*}\ftype{Variable}
+
+\issue{PRINT-CIRCLE-SHARED:RESPECT-PRINT-CIRCLE}
+
+\label Value Type::
+
+a \term{generalized boolean}.
+
+\label Initial Value::
+
+\term{false}.
+
+\label Description::
+
+%% 22.1.6 42
+Controls the attempt to detect circularity and sharing in an \term{object} 
+being printed.
+
+If \term{false},
+the printing process merely proceeds by recursive descent without attempting 
+to detect circularity and sharing.
+
+%% 22.1.6 43
+If \term{true},
+the printer will endeavor to detect cycles and sharing
+in the structure to be printed, 
+and to use \f{\#\i{n}=} and \f{\#\i{n}\#}
+syntax to indicate the circularities or shared components.
+
+\issue{PRINT-CIRCLE-STRUCTURE:USER-FUNCTIONS-WORK}
+If \term{true}, a user-defined 
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+%print function
+\funref{print-object} \term{method}
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+can print
+\term{objects} to the supplied \term{stream} using \funref{write}, \funref{prin1}, 
+\funref{princ}, or \funref{format} and expect circularities and sharing
+to be detected and printed using the \f{\#\i{n}\#} syntax.
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+%This applies to \term{methods} on \funref{print-object} in addition to
+%\kwd{print-function} options.
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+If a user-defined 
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+%print function
+\funref{print-object} \term{method}
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+prints to a \term{stream} other than the one
+that was supplied, then circularity detection starts over for that \term{stream}. 
+\endissue{PRINT-CIRCLE-STRUCTURE:USER-FUNCTIONS-WORK}
+
+Note that implementations should not use \f{\#\i{n}\#} notation 
+when the \term{Lisp reader} would automatically assure sharing without it
+(\eg as happens with \term{interned} \term{symbols}).
+
+\label Examples::
+
+\code
+ (let ((a (list 1 2 3)))
+   (setf (cdddr a) a)
+   (let ((*print-circle* t))
+     (write a)
+     :done))
+\OUT #1=(1 2 3 . #1#)
+\EV :DONE
+\endcode
+
+\label Affected By:\None.
+
+\label See Also::
+
+\funref{write}
+
+\label Notes::
+
+An attempt to print a circular structure with \varref{*print-circle*} 
+set to \nil\ may lead to looping behavior and failure to terminate.
+
+\endissue{PRINT-CIRCLE-SHARED:RESPECT-PRINT-CIRCLE}
+
+\endcom
+
+
+%%% ========== *PRINT-ESCAPE*
+\begincom{*print-escape*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{generalized boolean}.
+
+\label Initial Value::
+
+%% 22.1.6 38
+\term{true}.
+
+\label Description::
+
+%% 22.1.6 35
+If \term{false},
+escape characters and \term{package prefixes} are not output
+when an expression is printed.
+                      
+%% 22.1.6 36
+If \term{true}, an attempt is made to print an \term{expression}
+in such a way that it can be read again to produce an \funref{equal} \term{expression}.
+(This is only a guideline; not a requirement.  See \varref{*print-readably*}.)
+
+For more specific details of how \thevalueof{*print-escape*}
+affects the printing of certain \term{types},
+\seesection\DefaultPrintObjMeths.
+
+\label Examples::
+\code
+ (let ((*print-escape* t)) (write #\\a))
+\OUT #\\a
+\EV #\\a
+ (let ((*print-escape* nil)) (write #\\a))
+\OUT a
+\EV #\\a
+\endcode
+
+\label Affected By::
+
+\funref{princ}, \funref{prin1}, \funref{format}
+
+\label See Also::
+
+\funref{write}, \funref{readtable-case}
+
+\label Notes::
+
+\funref{princ} effectively binds \varref{*print-escape*} to \term{false}.
+\funref{prin1} effectively binds \varref{*print-escape*} to \term{true}.
+                    
+\endcom
+
+
+%%% ========== *PRINT-GENSYM*
+\begincom{*print-gensym*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{generalized boolean}.
+
+\label Initial Value::
+
+\term{true}.
+
+\label Description::
+
+%% 22.1.6 49
+Controls whether the prefix ``\f{\#:}'' is printed before 
+\term{apparently uninterned} \term{symbols}.  
+The prefix is printed before such \term{symbols} 
+if and only if \thevalueof{*print-gensym*} is \term{true}.
+
+\label Examples::
+
+\code
+ (let ((*print-gensym* nil))
+   (print (gensym)))
+\OUT G6040 
+\EV #:G6040
+\endcode
+
+\label Affected By:\None.
+
+\label See Also::
+
+\funref{write}, \varref{*print-escape*}
+
+\label Notes:\None.
+
+\endcom
+
+
+%%% ========== *PRINT-LEVEL*
+%%% ========== *PRINT-LENGTH*
+\begincom{*print-level*, *print-length*}\ftype{Variable}
+
+\label Value Type::
+
+a non-negative \term{integer}, or \nil.
+
+\label Initial Value::
+
+\nil.
+
+\label Description::
+
+%% 22.1.6 50
+\varref{*print-level*} controls how many levels deep a nested \term{object} will print.
+If it is \term{false}, then no control is exercised.
+Otherwise, it is an \term{integer} indicating the maximum level to be printed.
+An \term{object} to be printed is at level \f{0};
+its components (as of a \term{list} or \term{vector}) are at level \f{1};
+and so on.
+If an \term{object} to be recursively printed has components 
+and is at a level equal to or greater than \thevalueof{*print-level*}, 
+then the \term{object} is printed as ``\f{\#}''.
+
+%% 22.1.6 51
+\varref{*print-length*} controls how many elements at a given level are printed.
+If it is \term{false}, there is no limit to the number of components printed.
+Otherwise, it is an \term{integer} indicating the maximum number of \term{elements} 
+of an \term{object} to be printed.  If exceeded, the printer will print 
+``\f{...}'' in place of the other \term{elements}.  In the case of a \term{dotted list},
+if the \term{list} contains exactly as many \term{elements} as \thevalueof{*print-length*},
+the terminating \term{atom} is printed rather than printing ``\f{...}''
+
+%% 22.1.6 52
+\varref{*print-level*} and \varref{*print-length*} affect the printing 
+of an any \term{object} printed with a list-like syntax.  They do not affect
+the printing of \term{symbols}, \term{strings}, and \term{bit vectors}.
+
+\label Examples::
+
+%% 22.1.6 54
+\medbreak
+\code
+ (setq a '(1 (2 (3 (4 (5 (6))))))) \EV (1 (2 (3 (4 (5 (6))))))
+ (dotimes (i 8) 
+   (let ((*print-level* i)) 
+     (format t "~&~D -- ~S~%" i a)))
+\OUT 0 -- #
+\OUT 1 -- (1 #)
+\OUT 2 -- (1 (2 #))
+\OUT 3 -- (1 (2 (3 #)))
+\OUT 4 -- (1 (2 (3 (4 #))))
+\OUT 5 -- (1 (2 (3 (4 (5 #)))))
+\OUT 6 -- (1 (2 (3 (4 (5 (6))))))
+\OUT 7 -- (1 (2 (3 (4 (5 (6))))))
+\EV NIL
+\medbreak
+ (setq a '(1 2 3 4 5 6)) \EV (1 2 3 4 5 6)
+ (dotimes (i 7) 
+   (let ((*print-length* i)) 
+     (format t "~&~D -- ~S~%" i a))) 
+\OUT 0 -- (...)
+\OUT 1 -- (1 ...)
+\OUT 2 -- (1 2 ...)
+\OUT 3 -- (1 2 3 ...)
+\OUT 4 -- (1 2 3 4 ...)
+\OUT 5 -- (1 2 3 4 5 6)
+\OUT 6 -- (1 2 3 4 5 6)
+\EV NIL
+\medbreak
+(dolist (level-length '((0 1) (1 1) (1 2) (1 3) (1 4) 
+                        (2 1) (2 2) (2 3) (3 2) (3 3) (3 4)))
+ (let ((*print-level*  (first  level-length))
+       (*print-length* (second level-length)))
+   (format t "~&~D ~D -- ~S~%"
+           *print-level* *print-length* 
+           '(if (member x y) (+ (car x) 3) '(foo . #(a b c d "Baz"))))))
+\OUT 0 1 -- #
+\OUT 1 1 -- (IF ...)
+\OUT 1 2 -- (IF # ...)
+\OUT 1 3 -- (IF # # ...)
+\OUT 1 4 -- (IF # # #)
+\OUT 2 1 -- (IF ...)
+\OUT 2 2 -- (IF (MEMBER X ...) ...)
+\OUT 2 3 -- (IF (MEMBER X Y) (+ # 3) ...)
+\OUT 3 2 -- (IF (MEMBER X ...) ...)
+\OUT 3 3 -- (IF (MEMBER X Y) (+ (CAR X) 3) ...)
+\OUT 3 4 -- (IF (MEMBER X Y) (+ (CAR X) 3) '(FOO . #(A B C D ...)))
+\EV NIL
+\endcode
+
+\label Affected By:\None.
+
+\label See Also::
+
+\funref{write}
+
+\label Notes:\None.
+
+% KMP:
+%   There has been some debate about how strictly these abbreviation guidelines
+%   should be applied.
+%
+%      (write '(1 2 3) :length 1) prints (1 ...)   or (1 2 3)?
+%      (write '(1 2 3) :length 2) prints (1 2 ...) or (1 2 3)?
+%
+% Barmar:
+%   While I've always secretly wished that these limits were defined such
+%   that they would be ignored when the length of the thing being replaced
+%   with "..."  or "#" is less than or equal to the replacement text, I
+%   don't seriously believe there's really a need for implementation
+%   flexibility.  This is a fairly straightforward piece of the language.
+%
+% Dick:
+%   As the original author of GPRINT, I am probably partly responsible for
+%   the behavior you see.  I deliberately tried to do better than the
+%   default length and depth processing did.  I was however copying what
+%   the standard Lispm software did at the time.
+%   Nevertheless, I agree with the point of view that there is no reason
+%   to make this complicated.  Let's just have a simple abbreviation
+%   algorithm and hold everybody to it.  It is not worth being more
+%   creative than that.
+
+\endcom
+
+%%% ========== *PRINT-LINES*
+\begincom{*print-lines*}\ftype{Variable}
+
+\label Value Type::
+
+a non-negative \term{integer}, or \nil.
+
+\label Initial Value::
+
+\nil.
+
+\label Description::
+
+When \thevalueof{*print-lines*} is other than \nil,
+it is a limit on the number of output lines produced when something is pretty
+printed.  If an attempt is made to go beyond that many lines,
+``\f{..}''\idxtext{Dot Dot}\idxcode{..}
+is printed at the end of the last line followed by all of the
+suffixes (closing delimiters) that are pending to be printed.
+
+\label Examples::
+
+\code
+ (let ((*print-right-margin* 25) (*print-lines* 3))
+   (pprint '(progn (setq a 1 b 2 c 3 d 4))))
+\OUT (PROGN (SETQ A 1
+\OUT              B 2
+\OUT              C 3 ..))
+\EV \novalues
+\endcode
+
+\label See Also:\None.
+
+\label Notes::
+
+The ``\f{..}'' notation is intentionally different than
+the ``\f{...}'' notation used for level abbreviation, so that the two
+different situations can be visually distinguished.
+
+This notation is used to increase the likelihood that the \term{Lisp reader}
+will signal an error if an attempt is later made to read the abbreviated output.
+Note however that if the truncation occurs in a \term{string}, 
+as in \f{"This string has been trunc.."}, the problem situation cannot be
+detected later and no such error will be signaled.
+
+\endcom
+
+%%% ========== *PRINT-MISER-WIDTH*
+\begincom{*print-miser-width*}\ftype{Variable}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Value Type::
+
+a non-negative \term{integer}, or \nil.
+
+\label Initial Value::
+
+\term{implementation-dependent}
+
+\label Description::
+
+If it is not \nil, the \term{pretty printer} switches to a compact
+style of output (called miser style) whenever the width available for
+printing a substructure is less than or equal to this many \term{ems}.
+
+\label Examples:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== *PRINT-PPRINT-DISPATCH*
+\begincom{*print-pprint-dispatch*}\ftype{Variable}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Value Type::
+
+a \term{pprint dispatch table}.
+
+\label Initial Value::
+
+\term{implementation-dependent}, but the initial entries all use a 
+special class of priorities that have the property that they are less
+than every priority that can be specified using \funref{set-pprint-dispatch},
+so that the initial contents of any entry can be overridden.
+
+\label Description::
+
+The \term{pprint dispatch table} which currently controls the \term{pretty printer}.
+
+\label Examples:\None.
+
+\label See Also::
+
+\varref{*print-pretty*},
+{\secref\PPrintDispatchTables}
+
+\label Notes::
+
+The intent is that the initial \term{value} of this \term{variable} should
+cause `traditional' \term{pretty printing} of \term{code}.
+% Added on advice of Dick Waters:
+In general, however, you can put a value in \varref{*print-pprint-dispatch*}
+that makes pretty-printed output look exactly like non-pretty-printed output.
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+% Setting \varref{*print-pretty*} to \term{true} means having \varref{*print-pprint-dispatch*}
+% control printing---nothing more, and nothing less.
+Setting \varref{*print-pretty*} to \term{true} 
+just causes the functions contained in the \term{current pprint dispatch table} 
+to have priority over normal \funref{print-object} methods;
+it has no magic way of enforcing that those functions actually produce pretty
+output.  For details, \seesection\PPrintDispatchTables.
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%%% ========== *PRINT-PRETTY*
+\begincom{*print-pretty*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{generalized boolean}.
+
+\label Initial Value::
+
+%% 22.1.6 41
+\term{implementation-dependent}.
+
+\label Description::
+
+Controls whether the \term{Lisp printer} calls the \term{pretty printer}.
+
+%% 22.1.6 39
+If it is \term{false},
+the \term{pretty printer} is not used and 
+\issue{PRINTER-WHITESPACE:JUST-ONE-SPACE}
+a minimum
+%only a small amount 
+\endissue{PRINTER-WHITESPACE:JUST-ONE-SPACE}
+of \term{whitespace}\meaning{1}
+is output when printing an expression.
+
+%% 22.1.6 40
+If it is \term{true},
+the \term{pretty printer} is used, and the \term{Lisp printer} will endeavor
+to insert extra \term{whitespace}\meaning{1} where appropriate to make \term{expressions} 
+more readable.
+
+\varref{*print-pretty*} has an effect even when \thevalueof{*print-escape*}
+is \term{false}.
+
+\label Examples::
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\code
+ (setq *print-pretty* 'nil) \EV NIL
+ (progn (write '(let ((a 1) (b 2) (c 3)) (+ a b c))) nil)
+\OUT (LET ((A 1) (B 2) (C 3)) (+ A B C))
+\EV NIL
+ (let ((*print-pretty* t))
+   (progn (write '(let ((a 1) (b 2) (c 3)) (+ a b c))) nil))
+\OUT (LET ((A 1)
+\OUT       (B 2)
+\OUT       (C 3))
+\OUT   (+ A B C))
+\EV NIL
+;; Note that the first two expressions printed by this next form
+;; differ from the second two only in whether escape characters are printed.
+;; In all four cases, extra whitespace is inserted by the pretty printer.
+ (flet ((test (x)
+          (let ((*print-pretty* t))
+            (print x)
+            (format t "~%~S " x)
+            (terpri) (princ x) (princ " ")
+            (format t "~%~A " x))))
+  (test '#'(lambda () (list "a" #\b 'c #'d))))
+\OUT #'(LAMBDA ()
+\OUT     (LIST "a" #\b 'C #'D))
+\OUT #'(LAMBDA ()
+\OUT     (LIST "a" #\b 'C #'D))
+\OUT #'(LAMBDA ()
+\OUT     (LIST a b 'C #'D)) 
+\OUT #'(LAMBDA ()
+\OUT     (LIST a b 'C #'D))
+\EV NIL
+\endcode
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\label Affected By:\None.
+
+\label See Also::
+
+\funref{write}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== *PRINT-READABLY*
+\begincom{*print-readably*}\ftype{Variable}
+\issue{DATA-IO:ADD-SUPPORT}
+
+\label Value Type::
+
+a \term{generalized boolean}.
+
+\label Initial Value::
+
+%% 22.1.6 38
+\term{false}.
+
+\label Description::
+
+%% 22.1.6 36
+If \varref{*print-readably*} is \term{true},
+some special rules for printing \term{objects} go into effect.
+Specifically, printing any \term{object} $O\sub 1$ produces a printed 
+representation that, when seen by the \term{Lisp reader} 
+%% This additional restriction added in response to Loosemore #14, first public review
+while the \term{standard readtable} is in effect,
+will produce 
+an \term{object} $O\sub 2$ that is \term{similar} to $O\sub 1$.
+The printed representation produced might or might not be the same as
+the printed representation produced when \varref{*print-readably*} is \term{false}.
+% If printing a readable printed representation of an \term{object} is not possible,
+If printing an \term{object} \term{readably} is not possible,
+an error \oftype{print-not-readable} is signaled rather than 
+using a syntax (\eg the ``\f{\#<}'' syntax) that would not be readable by
+the same \term{implementation}.
+If the \term{value} of some other \term{printer control variable} is such
+that these requirements would be violated, the \term{value} of that other
+\term{variable} is ignored.
+
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%%!!! Glag.  I can't believe we voted this in.
+%%    I want (and *print-readably* *print-escape*) implies ...!
+%%    Grumbling mail sent to X3J13.
+%%    -kmp 22-Aug-93
+Specifically, if \varref{*print-readably*} is \term{true},
+printing proceeds as if
+      \varref{*print-escape*},
+      \varref{*print-array*},
+  and \varref{*print-gensym*} were also \term{true},
+and as if 
+      \varref{*print-length*},
+      \varref{*print-level*},
+  and \varref{*print-lines*} were \term{false}.
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+
+If \varref{*print-readably*} is \term{false},
+the normal rules for printing and the normal interpretations
+of other \term{printer control variables} are in effect.
+
+Individual \term{methods} for \funref{print-object}, including user-defined
+\term{methods}, are responsible for implementing these requirements.
+
+If \varref{*read-eval*} is \term{false} and \varref{*print-readably*} is \term{true},
+any such method that would output a reference to the ``\f{\#.}'' \term{reader macro}
+will either output something else or will signal an error (as described above).
+
+\label Examples::
+
+\code
+ (let ((x (list "a" '\\a (gensym) '((a (b (c))) d e f g)))
+       (*print-escape* nil)
+       (*print-gensym* nil)
+       (*print-level* 3)
+       (*print-length* 3))
+   (write x)
+   (let ((*print-readably* t))
+     (terpri)
+     (write x)
+     :done))
+\OUT (a a G4581 ((A #) D E ...))
+\OUT ("a" |a| #:G4581 ((A (B (C))) D E F G))
+\EV :DONE
+
+;; This is setup code is shared between the examples
+;; of three hypothetical implementations which follow.
+ (setq table (make-hash-table)) \EV #<HASH-TABLE EQL 0/120 32005763> 
+ (setf (gethash table 1) 'one) \EV ONE
+ (setf (gethash table 2) 'two) \EV TWO
+
+;; Implementation A
+ (let ((*print-readably* t)) (print table))
+ Error: Can't print #<HASH-TABLE EQL 0/120 32005763> readably.
+
+;; Implementation B
+;; No standardized #S notation for hash tables is defined, 
+;; but there might be an implementation-defined notation.
+ (let ((*print-readably* t)) (print table))
+\OUT #S(HASH-TABLE :TEST EQL :SIZE 120 :CONTENTS (1 ONE 2 TWO))
+\EV #<HASH-TABLE EQL 0/120 32005763>
+
+;; Implementation C
+;; Note that #. notation can only be used if *READ-EVAL* is true.
+;; If *READ-EVAL* were false, this same implementation might have to
+;; signal an error unless it had yet another printing strategy to fall
+;; back on.
+ (let ((*print-readably* t)) (print table))
+\OUT #.(LET ((HASH-TABLE (MAKE-HASH-TABLE)))
+\OUT     (SETF (GETHASH 1 HASH-TABLE) ONE)
+\OUT     (SETF (GETHASH 2 HASH-TABLE) TWO)
+\OUT     HASH-TABLE)
+\EV #<HASH-TABLE EQL 0/120 32005763>
+\endcode
+
+\label Affected By:\None.
+
+\label See Also::
+
+\funref{write}, \macref{print-unreadable-object}
+
+\label Notes::
+
+The rules for ``\term{similarity}'' imply that 
+\f{\#A} or \f{\#(} % )
+syntax cannot be used for \term{arrays} of \term{element type}
+other than \typeref{t}.  
+An implementation will have to use another syntax 
+or signal an error \oftype{print-not-readable}.  
+
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+% The printing of interned \term{symbols}, of \term{strings}, 
+% and of \term{bit vectors} is not affected by \varref{*print-readably*}.
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+
+\endissue{DATA-IO:ADD-SUPPORT}
+
+\endcom
+
+%%% ========== *PRINT-RIGHT-MARGIN*
+
+\begincom{*print-right-margin*}\ftype{Variable}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\label Value Type::
+
+a non-negative \term{integer}, or \nil.
+
+\label Initial Value::
+
+\nil.
+
+\label Description::
+
+If it is \term{non-nil}, it specifies the right margin (as \term{integer}
+number of \term{ems}) to use when the \term{pretty printer} is making
+layout decisions.
+
+If it is \nil, the right margin is taken to be the maximum line length 
+such that output can be displayed without wraparound or truncation.
+If this cannot be determined, an \term{implementation-dependent} value is used.
+
+\label Examples:\None.
+
+\label See Also:\None.
+
+\label Notes::
+
+This measure is in units of \term{ems} in order to be compatible with
+\term{implementation-defined} variable-width fonts while still not 
+requiring the language to provide support for fonts.
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endcom
+
+%-------------------- Printer Errors --------------------
+
+
+%%% ========== PRINT-NOT-READABLE
+\begincom{print-not-readable}\ftype{Condition Type}
+
+\issue{DATA-IO:ADD-SUPPORT}
+\label Class Precedence List::
+\typeref{print-not-readable},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{print-not-readable} consists of error conditions that occur during
+output while \varref{*print-readably*} is \term{true}, as a result of attempting
+to write a printed representation with the \term{Lisp printer}
+that would not be correctly read back with the \term{Lisp reader}.
+The object which could not be printed is initialized by 
+\theinitkeyarg{object} to \funref{make-condition}, and is \term{accessed} by 
+\thefunction{print-not-readable-object}.
+\endissue{DATA-IO:ADD-SUPPORT}
+
+\label See Also::
+
+\funref{print-not-readable-object}
+
+\endcom%{print-not-readable}\ftype{Condition Type}
+
+%%% ========== PRINT-NOT-READABLE-OBJECT
+\begincom{print-not-readable-object}\ftype{Function}
+\issue{DATA-IO:ADD-SUPPORT}
+\label Syntax::
+
+\DefunWithValues print-not-readable-object {condition} {object}
+
+\label Arguments and Values::
+
+\param{condition}---a \term{condition} \oftype{print-not-readable}.
+
+\param{object}---an \term{object}.
+
+\label Description::
+
+Returns the \term{object} that could not be printed readably 
+in the situation represented by \param{condition}.
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\typeref{print-not-readable},
+{\secref\Conditions}
+
+\label Notes:\None.
+
+%% Should not be needed.
+%It is an error to use \macref{setf} with \funref{print-not-readable-object}. 
+
+\endissue{DATA-IO:ADD-SUPPORT}
+\endcom
+
+%%% ========== FORMAT
+\begincom{format}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {format} {destination control-string {\rest} args} {result}
+
+\label Arguments and Values:: 
+
+\param{destination}---\nil,
+		      \t,
+		      a \term{stream},
+		   or a \term{string} with a \term{fill pointer}.
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\param{control-string}---a \term{format control}.
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+\param{args}---\term{format arguments} for \param{control-string}.
+
+\param{result}---if \param{destination} is \term{non-nil}, then \nil;
+		 otherwise, a \term{string}.
+
+\label Description::
+
+%% 22.3.2 6
+\funref{format} produces formatted output by outputting the characters
+of \param{control-string} and observing that a \term{tilde}
+introduces a directive.  The character after the tilde, possibly preceded 
+by prefix parameters and modifiers, specifies what kind of formatting 
+is desired.  Most directives use one or more elements of \param{args} to
+create their output.
+
+If \param{destination} is a \term{string}, a \term{stream}, or \t, 
+then the \param{result} is \nil.  Otherwise, the \param{result} is
+a \term{string} containing the `output.'
+
+%% 22.3.1 21
+\funref{format} is useful for producing nicely formatted text, producing
+good-looking messages, and so on.  \funref{format} can generate and return
+a \term{string} or output to \param{destination}.
+
+For details on how the \param{control-string} is interpreted,
+\seesection\FormattedOutput.
+
+\label Examples:\None.
+
+\label Affected By::
+
+\varref{*standard-output*},
+\varref{*print-escape*},
+\varref{*print-radix*},
+\varref{*print-base*},
+\varref{*print-circle*},
+\varref{*print-pretty*},
+\varref{*print-level*},
+\varref{*print-length*},
+\varref{*print-case*},
+\varref{*print-gensym*},
+\varref{*print-array*}.
+
+\label Exceptional Situations::
+
+\issue{STRING-OUTPUT-STREAM-BASHING:UNDEFINED}
+If \param{destination} is a \term{string} with a \term{fill pointer},
+the consequences are undefined if destructive modifications are performed
+directly on the \term{string} during the \term{dynamic extent} of the call.
+\endissue{STRING-OUTPUT-STREAM-BASHING:UNDEFINED}
+
+\label See Also::
+
+\funref{write},
+{\secref\ImplementationDefinedScripts}
+
+\label Notes:\None.
+
+\endcom

@@ -1,0 +1,49 @@
+====== Function RENAME-PACKAGE ======
+
+====Syntax====
+
+**rename-package {package new-name** //\opt} new-nicknames// → //package-object//
+
+====Arguments and Values====
+
+//package// - a //[[CL:Glossary:package designator]]//.
+
+//new-name// - a //[[CL:Glossary:package designator]]//.
+
+//new-nicknames// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:\packagenamedesignators]]//. The default is the //[[CL:Glossary:empty list]]//.
+
+//package-object// - the renamed //package// //[[CL:Glossary:object]]//.
+
+====Description====
+
+Replaces the name and nicknames of //package//.
+
+The old name and all of the old nicknames of //package// are eliminated and are replaced by //new-name// and //new-nicknames//.
+
+The consequences are undefined if //new-name// or any //new-nickname// conflicts with any existing package names.
+
+====Examples====
+
+<blockquote> (make-package 'temporary :nicknames '("TEMP")) → #<PACKAGE "TEMPORARY"> (rename-package 'temp 'ephemeral) → #<PACKAGE "EPHEMERAL"> (package-nicknames (find-package 'ephemeral)) → () (find-package 'temporary) → NIL (rename-package 'ephemeral 'temporary '(temp fleeting)) → #<PACKAGE "TEMPORARY"> (package-nicknames (find-package 'temp)) → ("TEMP" "FLEETING") </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:make-package]]**
+
+====Notes====
+
+None.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE} \issue{RETURN-VALUES-UNSPECIFIED:SPECIFY}

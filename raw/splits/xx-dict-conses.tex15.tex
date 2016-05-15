@@ -1,0 +1,48 @@
+====== Function LIST, LIST* ======
+
+====Syntax====
+
+**{list} ** //''&rest'' objects// → //list// **{list*}** //''&rest'' objects''+''// → //result//
+
+====Arguments and Values====
+
+//object// - an //[[CL:Glossary:object]]//.
+
+//list// - a //[[CL:Glossary:list]]//.
+
+//result// - an //[[CL:Glossary:object]]//.
+
+====Description====
+
+**[[CL:Functions:list]]** returns a //[[CL:Glossary:list]]// containing the supplied //objects//.
+
+**[[CL:Functions:list*]]** is like **[[CL:Functions:list]]** except that the last //[[CL:Glossary:argument]]// to **[[CL:Functions:list]]** becomes the //[[CL:Glossary:car]]// of the last //[[CL:Glossary:cons]]// constructed, while the last //[[CL:Glossary:argument]]// to **[[CL:Functions:list*]]** becomes the //[[CL:Glossary:cdr]]// of the last //[[CL:Glossary:cons]]// constructed. Hence, any given call to **[[CL:Functions:list*]]** always produces one fewer //[[CL:Glossary:conses]]// than a call to **[[CL:Functions:list]]** with the same number of arguments.
+
+If the last //[[CL:Glossary:argument]]// to **[[CL:Functions:list*]]** is a //[[CL:Glossary:list]]//, the effect is to construct a new //[[CL:Glossary:list]]// which is similar, but which has additional elements added to the front corresponding to the preceding //[[CL:Glossary:arguments]]// of **[[CL:Functions:list*]]**.
+
+If **[[CL:Functions:list*]]** receives only one //object//, that //object// is returned, regardless of whether or not it is a //[[CL:Glossary:list]]//.
+
+====Examples====
+
+<blockquote> (list 1) → (1) (list* 1) → 1 ([[CL:Macros:defparameter]] a 1) → 1 (list a 2) → (1 2) '(a 2) → (A 2) (list 'a 2) → (A 2) (list* a 2) → (1 . 2) (list) → NIL ;i.e. () ([[CL:Macros:defparameter]] a '(1 2)) → (1 2) (eq a (list* a)) → //[[CL:Glossary:true]]// (list 3 4 'a (car '(b . c)) (+ 6 -2)) → (3 4 A B 4) (list* 'a 'b 'c 'd) ≡ (cons 'a (cons 'b (cons 'c 'd))) → (A B C . D) (list* 'a 'b 'c '(d e f)) → (A B C D E F) </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:cons]]**
+
+====Notes====
+
+<blockquote> (list* //x//) ≡ //x// </blockquote>
+

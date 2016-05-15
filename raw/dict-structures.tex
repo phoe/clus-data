@@ -1,0 +1,1388 @@
+% -*- Mode: TeX -*-
+
+%!!! Need a glossary term which refers to un-:type'd `structures'. -kmp 6-Jun-91
+
+%%% ========== DEFSTRUCT
+\begincom{defstruct}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValuesNewline defstruct
+		  {name-and-options \brac{documentation} \stardown{slot-description}}
+		  {structure-name}
+
+\auxbnf{name-and-options}{structure-name |
+			  \paren{structure-name \interleave{\down{options}}}}
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+\auxbnf{options}{\down{conc-name-option}          |\CR
+                 \stardown{constructor-option}    |\CR
+                 \down{copier-option}             |\CR
+                 \down{include-option}            |\CR
+                 \down{initial-offset-option}     |\CR
+                 \down{named-option}	          |\CR
+                 \down{predicate-option}          |\CR
+                 \down{printer-option}            |\CR
+                 \down{type-option}}
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+\auxbnf{conc-name-option}{\kwd{conc-name}         | 
+		   	  \paren{\kwd{conc-name}} |
+		   	  \paren{\kwd{conc-name} \param{conc-name}}}
+\auxbnf{constructor-option}{\kwd{constructor}         |\CR
+			    \paren{\kwd{constructor}} |\CR
+			    \paren{\kwd{constructor} \param{constructor-name}} |\CR
+			    \paren{\kwd{constructor} 
+				   \param{constructor-name}
+				   \param{constructor-arglist}}}
+\auxbnf{copier-option}{\kwd{copier}         | 
+		       \paren{\kwd{copier}} |
+		       \paren{\kwd{copier} \param{copier-name}}}
+\auxbnf{predicate-option}{\kwd{predicate}         |
+			  \paren{\kwd{predicate}} |
+			  \paren{\kwd{predicate} \param{predicate-name}}}
+\auxbnf{include-option}{\paren{\kwd{include} \param{included-structure-name}
+					     \stardown{slot-description}}}
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+\auxbnf{printer-option}{\down{print-object-option} | \down{print-function-option}}
+\auxbnf{print-object-option}{\paren{\kwd{print-object} \param{printer-name}} |
+			     \paren{\kwd{print-object}}}
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+\auxbnf{print-function-option}{\paren{\kwd{print-function} \param{printer-name}} |
+			       \paren{\kwd{print-function}}}
+\auxbnf{type-option}{\paren{\kwd{type} \param{type}}}
+\auxbnf{named-option}{\kwd{named}}
+\auxbnf{initial-offset-option}{\paren{\kwd{initial-offset} \param{initial-offset}}}
+%% 19.2.0 6
+\auxbnf{slot-description}{\param{slot-name} | \CR
+			  \paren{\param{slot-name}
+				 \brac{\param{slot-initform}
+				       \interleave{\down{slot-option}}}}}
+\auxbnf{slot-option}{\kwd{type} \param{slot-type} | \CR
+		     \kwd{read-only} \param{slot-read-only-p}}
+
+\label Arguments and Values::
+
+\param{conc-name}---a \term{\symbolnamedesignator}.
+
+\param{constructor-arglist}---a \term{boa lambda list}.
+
+\param{constructor-name}---a \term{symbol}.
+
+\param{copier-name}---a \term{symbol}.
+
+\param{included-structure-name}---an already-defined \term{structure name}.
+\issue{DEFSTRUCT-INCLUDE-DEFTYPE:EXPLICITLY-UNDEFINED}
+% or a \term{type specifier} \term{symbol}.
+Note that a \term{derived type} is not permissible, 
+even if it would expand into a \term{structure name}.
+% or a \term{type specifier} \term{symbol}.)
+\endissue{DEFSTRUCT-INCLUDE-DEFTYPE:EXPLICITLY-UNDEFINED}
+
+\param{initial-offset}---a non-negative \term{integer}.
+
+\param{predicate-name}---a \term{symbol}.
+
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+\param{printer-name}---a \term{function name} or a \term{lambda expression}.
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+
+%% Per X3J13. -kmp 05-Oct-93
+\param{slot-name}---a \term{symbol}.
+
+\param{slot-initform}---a \term{form}.
+
+\param{slot-read-only-p}---a \term{generalized boolean}.
+
+\param{structure-name}---a \term{symbol}.
+
+\param{type}---one of the \term{type specifiers}
+		    \typeref{list},
+		    \typeref{vector},
+	         or \f{(vector \param{size})},
+		 or some other \term{type specifier} defined 
+		    by the \term{implementation} to be appropriate.
+
+
+%% 19.2.0 3
+% Removed redundant syntax presentation. -kmp
+
+%% 19.2.0 4
+\param{documentation}---a \term{string}; \noeval.
+
+\label Description::
+
+\macref{defstruct} defines a structured \term{type}, named \param{structure-type},
+with named slots as specified by the \param{slot-options}.
+
+%% 19.2.0 8
+\macref{defstruct} defines \term{readers} for the slots and
+arranges for \macref{setf} to work properly on such
+\term{reader} functions.
+Also, unless overridden, it
+     defines a predicate named \f{\param{name}-p},
+     defines a constructor function named \f{make-\param{constructor-name}},
+ and defines a copier function named \f{copy-\param{constructor-name}}.
+%All names of automatically created functions are interned
+%in whatever package is current at the time the \macref{defstruct}
+%form is expanded.
+All names of automatically created functions might automatically
+be declared \declref{inline} (at the discretion of the \term{implementation}).
+
+%% 19.2.0 5
+If \param{documentation} is supplied, it is attached to \param{structure-name}
+as a \term{documentation string} of kind \misc{structure},
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+and unless \kwd{type} is used, the \param{documentation} is also attached 
+to \param{structure-name} as a \term{documentation string} of kind
+\misc{type} and as a \term{documentation string} to the \term{class} \term{object} 
+for the \term{class} named \param{structure-name}.
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+
+%% 19.3.0 1
+\macref{defstruct} defines a constructor function that is used to
+create instances of the structure created by \macref{defstruct}.
+The default name is \f{make-\param{structure-name}}.
+A different name can be supplied
+by giving the name as the argument to the \param{constructor} option.
+\nil\ indicates that no constructor function will be created.
+
+%% 19.3.0 2
+After a new structure type has been defined, instances of that type
+normally can be created by using the constructor function for the
+type.
+A call to a constructor function is of the following form:
+
+
+\Vskip 1pc!
+\settabs\+\hskip\leftskip&(&\cr
+\+&(&{\tt constructor-function-name}\cr
+\+&&{\tt slot-keyword-1 form-1}\cr
+\+&&{\tt slot-keyword-2 form-2}\cr
+\+&&$\ldots$)\cr
+\Vskip 1pc!                            
+\rm
+                          
+%% 19.3.0 3
+The arguments to the constructor function are all keyword arguments.  Each
+slot keyword argument must  be 
+a keyword whose name corresponds to the name of a structure slot.  
+All the \param{keywords} and \param{forms}
+are evaluated.  
+% If a slot is not initialized in this way, 
+% it is initialized by evaluating \param{slot-initform} in the 
+% slot description.
+% \param{Slot-initform} is evaluated
+% \issue{DEFSTRUCT-DEFAULT-VALUE-EVALUATION:IFF-NEEDED}
+% each time its value is to be used as the initial value of a slot.
+% 
+% %The following will be deleted:
+% %
+% %If no \param{slot-initform} is
+% %supplied, the contents of the slot are \term{implementation-dependent}.
+% \endissue{DEFSTRUCT-DEFAULT-VALUE-EVALUATION:IFF-NEEDED}
+%% Rewritten for Barmar:
+If a slot is not initialized in this way, 
+it is initialized by evaluating \param{slot-initform} in the slot description
+\issue{DEFSTRUCT-DEFAULT-VALUE-EVALUATION:IFF-NEEDED}
+at the time the constructor function is called.
+%If no \param{slot-initform} is
+%supplied, the contents of the slot are \term{implementation-dependent}.
+\endissue{DEFSTRUCT-DEFAULT-VALUE-EVALUATION:IFF-NEEDED}
+\issue{UNITIALIZED-ELEMENTS:CONSEQUENCES-UNDEFINED}
+% Refer to discussion of failed issue UNINITIALIZED-ELEMENTS for an explanation
+% of how the next sentence came to be. -kmp 9-Feb-92
+% This issue later actually passed at the Mar-93 meeting,
+% affirming the wording here but making changes elsewhere (in MAKE-ARRAY and ADJUST-ARRAY).
+%  -kmp 5-May-93
+If no \param{slot-initform} is supplied, 
+the consequences are undefined if an attempt is later made to read the slot's value
+before a value is explicitly assigned.
+\endissue{UNITIALIZED-ELEMENTS:CONSEQUENCES-UNDEFINED}
+
+%% 19.3.0 4
+Each \param{slot-initform} supplied for a \macref{defstruct} component,
+when used by the constructor function for an otherwise unsupplied
+component, is re-evaluated on every call to the
+constructor function.  
+\issue{DEFSTRUCT-DEFAULT-VALUE-EVALUATION:IFF-NEEDED}
+The \param{slot-initform} is not evaluated 
+        unless it is needed in the creation of a particular structure
+        instance.  If it is never needed, there can be no type-mismatch
+        error, even if the \term{type} 
+of the slot is specified; no warning
+        should be issued in this case.
+\endissue{DEFSTRUCT-DEFAULT-VALUE-EVALUATION:IFF-NEEDED}
+%!!! Barmar: What if no initial value is specified when creating an instance??
+For example, in the following sequence, only the last call is an error.
+ 
+\code
+ (defstruct person (name 007 :type string)) 
+ (make-person :name "James")
+ (make-person)
+\endcode
+ 
+It is as if the \param{slot-initforms} were 
+used as \term{initialization forms} for the \term{keyword parameters} 
+of the constructor function.
+ 
+\issue{DEFSTRUCT-CONSTRUCTOR-SLOT-VARIABLES:NOT-BOUND}
+The \term{symbols} which name the slots must not be used by the 
+\term{implementation} as the \term{names} for the \term{lambda variables}
+in the constructor function, since one or more of those \term{symbols}
+might have been proclaimed \declref{special} or might be defined as
+the name of a \term{constant variable}.
+The slot default init forms are evaluated 
+in the \term{lexical environment} in which the \macref{defstruct} form itself appears and
+in the \term{dynamic environment} in which the call to the constructor function appears.
+\endissue{DEFSTRUCT-CONSTRUCTOR-SLOT-VARIABLES:NOT-BOUND}
+
+For example, if the form \f{(gensym)} were used as an initialization form,
+either in the constructor-function call or as the default initialization form
+in \macref{defstruct}, then every call to the constructor function would call
+\funref{gensym} once to generate a new \term{symbol}.
+
+\issue{DEFSTRUCT-SLOTS-CONSTRAINTS-NUMBER}
+%% 19.4.0 1
+Each \param{slot-description} in \macref{defstruct} can specify zero or more
+\param{slot-options}.  
+\endissue{DEFSTRUCT-SLOTS-CONSTRAINTS-NUMBER}
+A \param{slot-option} consists of a pair of a keyword and a value
+(which is not a form to be evaluated, but the value itself).  For example:
+
+\code
+ (defstruct ship
+   (x-position 0.0 :type short-float)
+   (y-position 0.0 :type short-float)
+   (x-velocity 0.0 :type short-float)
+   (y-velocity 0.0 :type short-float)
+   (mass *default-ship-mass* :type short-float :read-only t))
+\endcode
+This specifies that each slot always contains a \term{short float},
+and that the last slot cannot be altered once a ship is constructed.
+
+  
+%% 19.4.0 2
+The available slot-options are:
+\beginlist
+%% 19.4.0 3
+\itemitem{\tt \kwd{type} \param{type}} 
+                   
+This specifies that the contents of the
+slot is always of type \param{type}.  This is entirely
+analogous to the declaration of a variable or function; it
+effectively declares the result type of the \term{reader} function.  
+% Whether an \term{implementation} chooses to check the type of the new \term{object}
+% when initializing or assigning to a slot is \term{implementation-dependent}.
+%% Rewritten for Barmar:
+It is \term{implementation-dependent} whether the \term{type} is checked 
+    when initializing a slot
+ or when assigning to it.
+\param{Type} is not evaluated; it must be a valid \term{type specifier}.
+
+%% 19.4.0 4
+\itemitem{\tt \kwd{read-only} \param{x}}
+                   
+When \param{x} is \term{true},
+this specifies that this slot cannot be
+altered; it will always contain the value supplied at construction time.
+\macref{setf} will not accept the \term{reader} function for this slot.
+If \param{x} is \term{false}, this slot-option has no effect.
+\param{X} is not evaluated.
+
+\issue{SETF-FUNCTIONS-AGAIN:MINIMAL-CHANGES}
+When this option is \term{false} or unsupplied,
+it is \term{implementation-dependent} whether the ability to \term{write}
+the slot is implemented by a \term{setf function} or a \term{setf expander}.
+\endissue{SETF-FUNCTIONS-AGAIN:MINIMAL-CHANGES}
+
+\endlist
+
+%% 19.5.0 3
+The following keyword options are available for use with \macref{defstruct}.  
+A \macref{defstruct} option can be either a keyword or a \term{list}
+of a keyword and arguments for that keyword; 
+% This part added at Barmar's suggestion.  Quinquevirate appeared to concur. -kmp 30-Aug-91
+specifying the keyword by itself is equivalent to specifying a list consisting of
+the keyword and no arguments.
+The syntax for \macref{defstruct} options differs from the pair syntax 
+used for slot-options.  No part of any of these options is evaluated.
+\beginlist
+
+%% 19.5.0 4
+\itemitem{\kwd{conc-name}}
+
+This provides for automatic prefixing of names of \term{reader} (or \term{access}) functions.
+The default behavior is to begin the names of all the \term{reader} functions of
+a structure with the name of the structure followed by a hyphen.
+
+%% 19.5.0 5
+\kwd{conc-name} supplies an alternate
+prefix to be used.  If a hyphen is to be used as a separator,
+it must be supplied as part of the prefix.
+If \kwd{conc-name} is \nil\ or no argument is supplied, 
+then no prefix is used;
+then the names of the \term{reader} functions
+are the same as the slot names.
+If a \term{non-nil} prefix is given,
+the name of the \term{reader} \term{function} for each slot is constructed by
+concatenating that prefix and the name of the slot, and interning the resulting
+\term{symbol} in the \term{package} that is current at the time the 
+\macref{defstruct} form is expanded.
+
+%% 19.5.0 6
+Note that no matter what is supplied for \kwd{conc-name},
+slot keywords that match the slot names with no prefix attached are used
+with a constructor function.
+The \term{reader} function name is used
+in conjunction with \macref{setf}.  Here is an example:
+
+% \code
+%  (defstruct door knob-color width material) \EV DOOR
+%  (setq my-door (make-door :knob-color 'red :width 5.0)) 
+% \EV #S(DOOR :KNOB-COLOR RED :WIDTH 5.0 :MATERIAL NIL)
+%  (door-width my-door) \EV 5.0
+%  (setf (door-width my-door) 43.7)
+%  (door-width my-door) \EV 43.7
+% \endcode
+%
+% Barmar observes that the above didn't demonstrate use of :CONC-NAME...
+
+\code
+ (defstruct (door (:conc-name dr-)) knob-color width material) \EV DOOR
+ (setq my-door (make-door :knob-color 'red :width 5.0)) 
+\EV #S(DOOR :KNOB-COLOR RED :WIDTH 5.0 :MATERIAL NIL)
+ (dr-width my-door) \EV 5.0
+ (setf (dr-width my-door) 43.7) \EV 43.7
+ (dr-width my-door) \EV 43.7
+\endcode
+
+Whether or not the \kwd{conc-name} option is explicitly supplied, 
+the following rule governs name conflicts of generated \term{reader}
+(or \term{accessor}) names:
+For any \term{structure} \term{type} $S\sub 1$ 
+having a \term{reader} function named $R$ for a slot named $X\sub 1$
+that is inherited by another \term{structure} \term{type} $S\sub 2$ 
+that would have a \term{reader} function with the same name $R$ for a slot named $X\sub 2$,
+no definition for $R$ is generated by the definition of $S\sub 2$;
+instead, the definition of $R$ is inherited from the definition of $S\sub 1$.
+(In such a case, if $X\sub 1$ and $X\sub 2$ are different slots,
+the \term{implementation} might signal a style warning.)
+
+\itemitem{\kwd{constructor}}
+
+%% 19.5.0 7
+This option takes zero, one, or two arguments.
+If at least one argument is supplied and the first argument is not \nil, then
+that argument is a \term{symbol} which specifies the name of the 
+constructor function.  If the argument is not supplied (or if the option itself is not
+supplied), the name of the constructor is produced by concatenating the
+string \f{"MAKE-"} and the name of the structure, interning the name
+in whatever \term{package} is current at the time \macref{defstruct}
+is expanded.  If the argument is provided and is \nil,
+no constructor function is defined.
+
+%% 19.5.0 8
+%% 19.6.0 1
+If \kwd{constructor} is given as
+\f{(:constructor \param{name} \param{arglist})}, 
+then instead of making a keyword
+driven constructor function, \macref{defstruct} 
+defines a ``positional'' constructor function,
+taking arguments whose meaning is determined by the argument's position
+and possibly by keywords.
+\param{Arglist} is used to describe what the arguments to the
+constructor will be. In the simplest case something like
+\f{(:constructor make-foo (a b c))} defines \f{make-foo} to be
+a three-argument 
+constructor function whose arguments are used to initialize the
+slots named \f{a}, \f{b}, and \f{c}.
+
+%% 19.6.0 7
+Because a constructor of this type operates ``By Order of Arguments,''
+it is sometimes known as a ``boa constructor.''
+
+For information on how the \param{arglist} for a ``boa constructor'' is
+processed, \seesection\BoaLambdaLists.
+
+%% 19.6.0 5
+It is permissible to use the
+\kwd{constructor} option more than once, so that you can define several
+different constructor functions, each taking different parameters.
+
+\reviewer{Barmar: What about (:constructor) and (:constructor nil).
+		  Should we worry about it?}%!!!
+
+% I think Barmar was referring to issue DEFSTRUCT-CONSTRUCTOR-OPTIONS,
+% which had not been incorporated into the draft.  I have added the
+% clarification below.  --sjl 4 Mar 92
+
+\issue{DEFSTRUCT-CONSTRUCTOR-OPTIONS:EXPLICIT}
+\macref{defstruct} creates the default-named keyword constructor function
+only if no explicit \kwd{constructor} options are specified, or if the
+\kwd{constructor} option is specified without a \param{name} argument.
+
+\f{(:constructor nil)} is meaningful only when there are no other
+\kwd{constructor} options specified.  It prevents \macref{defstruct}
+from generating any constructors at all.
+
+Otherwise, \macref{defstruct} creates a constructor function corresponding
+to each supplied \kwd{constructor} option.  It is permissible to specify
+multiple keyword constructor functions as well as multiple 
+``boa constructors''.
+\endissue{DEFSTRUCT-CONSTRUCTOR-OPTIONS:EXPLICIT}
+
+
+\itemitem{\kwd{copier}}
+
+%% 19.5.0 9
+This option takes one argument, a \term{symbol},
+which specifies the name of the copier
+function.  If the argument is not provided or if the option itself is not
+provided, the name of the copier is produced by concatenating the
+string \f{"COPY-"} and the name of the structure, interning the name
+in whatever \term{package} is current at the time \macref{defstruct}
+is expanded.
+If the argument is provided and is \nil, no copier function is defined.
+
+%% 19.5.0 10
+\issue{DEFSTRUCT-COPIER:ARGUMENT-TYPE}
+% The automatically defined copier function 
+% makes a new structure
+% and transfers all components verbatim from the argument into the
+% newly created structure.  No attempt is made to make copies
+% of the components.  Corresponding components of the old and
+% new structures are \funref{eql}.
+The automatically defined copier function is a function of
+one \term{argument},
+\issue{DEFSTRUCT-COPIER-ARGUMENT-TYPE:RESTRICT}
+which must be of the structure type being defined.
+\endissue{DEFSTRUCT-COPIER-ARGUMENT-TYPE:RESTRICT}
+The copier function creates a \term{fresh} 
+structure that has the same \term{type} as its \term{argument},
+and that has the \term{same} component values as the original 
+structure; that is, the component values are not copied recursively.
+\issue{DEFSTRUCT-COPIER-ARGUMENT-TYPE:RESTRICT}
+If the \macref{defstruct} \kwd{type} option was not used,
+% the copier function has the same effect as \funref{copy-structure},
+% except that additional type-checking might be performed 
+% to make sure that the \term{argument} to the copier is
+% of \term{type} \param{structure-name}.
+the following equivalence applies:
+
+\code
+ (\param{copier-name} x) = (copy-structure (the \param{structure-name} x))
+\endcode
+\endissue{DEFSTRUCT-COPIER-ARGUMENT-TYPE:RESTRICT}
+\endissue{DEFSTRUCT-COPIER:ARGUMENT-TYPE}
+
+\itemitem{\kwd{include}}
+
+%% 19.5.0 12
+This option is used for building a new structure definition as
+an extension of another structure definition.  For example:
+
+\code
+ (defstruct person name age sex)
+\endcode
+To make a new structure to represent an astronaut
+that has the
+attributes of name, age, and sex, and \term{functions}
+that operate on \f{person} structures, \f{astronaut} is defined
+with \kwd{include} as follows:
+
+%% 19.5.0 13
+\code
+ (defstruct (astronaut (:include person)
+                       (:conc-name astro-))
+    helmet-size
+    (favorite-beverage 'tang))
+\endcode
+
+%% 19.5.0 14
+\kwd{include} causes the structure being defined
+to have the same slots as the included structure.
+This is done in such a way
+that the \term{reader} functions for the included
+structure also work on the structure being defined.
+In this example, an
+\f{astronaut} therefore has five slots: the three defined in
+\f{person} and the two defined in \f{astronaut}
+itself.  The \term{reader} functions defined by the \f{person} structure
+can be applied to instances of the \f{astronaut} structure, and they
+work correctly.
+Moreover, \f{astronaut} has its own \term{reader} functions for
+components defined by the \f{person} structure.
+The following examples illustrate the 
+use of \f{astronaut} structures:
+
+%% 19.5.0 16
+\code
+ (setq x (make-astronaut :name 'buzz
+                         :age 45.
+                         :sex t
+                         :helmet-size 17.5))
+ (person-name x) \EV BUZZ
+ (astro-name x) \EV BUZZ
+ (astro-favorite-beverage x) \EV TANG
+\endcode
+\issue{REDUCE-ARGUMENT-EXTRACTION}
+\code
+ (reduce #'+ astros :key #'person-age) ; obtains the total of the ages 
+                                       ; of the possibly empty
+                                       ; sequence of astros
+\endcode
+\endissue{REDUCE-ARGUMENT-EXTRACTION}
+The difference between the \term{reader} functions \f{person-name} and \f{astro-name}
+is that \f{person-name} can be correctly applied to any \f{person},
+including an \f{astronaut}, while \f{astro-name} can be correctly
+applied only to an \f{astronaut}.  An implementation might 
+check for incorrect use of \term{reader} functions.
+
+%% 19.5.0 17                          
+At most one \kwd{include} can be supplied in a single \macref{defstruct}.
+The argument to \kwd{include} is required and must be the
+name of some previously defined structure.  If the structure being
+defined has no \kwd{type} option, then the included structure must
+also have had no \kwd{type} option supplied for it.
+If the structure being defined has a \kwd{type} option,
+then the included structure must have been declared with a \kwd{type}
+option specifying the same representation \term{type}.
+
+%% 19.5.0 18
+If no \kwd{type} option is involved, then
+the structure name of the including structure definition
+becomes the name of a \term{data type}, and therefore
+a valid \term{type specifier} recognizable by \funref{typep}; it becomes
+a \term{subtype} of the included structure.  
+In the above example,
+\f{astronaut} is a \term{subtype} of \f{person}; hence
+
+\code
+ (typep (make-astronaut) 'person) \EV \term{true}
+\endcode
+indicating that all operations on persons also
+work on astronauts.
+
+%% 19.5.0 19
+The structure using \kwd{include} can specify default values or
+slot-options for the included slots different from those the included
+structure specifies, by giving the \kwd{include} option as:
+
+\code
+ (:include \param{included-structure-name} \starparam{slot-description})
+\endcode
+Each \param{slot-description} must have a \param{slot-name} 
+%% What was this about? -kmp 9-Feb-92
+%or \param{slot-keyword}
+that is the same
+as that of some slot in the included structure.
+If a \param{slot-description} has no \param{slot-initform},
+then in the new structure the slot has no initial value.
+Otherwise its initial value form is replaced by
+the \param{slot-initform} in the \param{slot-description}.
+A normally writable slot can be made read-only.
+If a slot is read-only in the included structure, then it
+must also be so in the including structure.
+If a \term{type} is supplied for a slot, it must be 
+%% Redundant.  "subtype" includes "same type". -kmp 30-Aug-91
+%the same as, or
+a \term{subtype} of
+%,
+the
+\term{type} specified in the included structure.
+%%Barmar and I couldn't figure out what this contributed.  The implementation
+%%can do this anyway, subtype or no.  Removed as confusing. -kmp 28-Dec-90
+% If it is a strict \term{subtype}, the implementation might choose to
+% error-check assignments.
+
+%% 19.5.0 20
+For example, if the
+default age for an astronaut is \f{45}, then 
+
+\code
+ (defstruct (astronaut (:include person (age 45)))
+    helmet-size
+    (favorite-beverage 'tang))
+\endcode
+
+%% 19.7.3 1
+
+If \kwd{include} is used with the \kwd{type}
+option, then the effect is first to skip over as many representation
+elements as needed to represent the included structure, then to
+skip over any additional elements supplied by the \kwd{initial-offset}
+option, and then to begin allocation of elements from that point.
+For example:
+
+\code
+ (defstruct (binop (:type list) :named (:initial-offset 2))
+   (operator '? :type symbol)   
+   operand-1
+   operand-2) \EV BINOP
+ (defstruct (annotated-binop (:type list)
+                             (:initial-offset 3)
+                             (:include binop))
+  commutative associative identity) \EV ANNOTATED-BINOP
+ (make-annotated-binop :operator '*
+                       :operand-1 'x
+                       :operand-2 5
+                       :commutative t
+                       :associative t
+                       :identity 1)
+   \EV (NIL NIL BINOP * X 5 NIL NIL NIL T T 1)
+\endcode
+The first two \nil\ elements stem from the \kwd{initial-offset} of \f{2}
+in the definition of \f{binop}.  The next four elements contain the
+structure name and three slots for \f{binop}.  The next three \nil\ elements
+stem from the \kwd{initial-offset} of \f{3} in the definition of
+\f{annotated-binop}.  The last three list elements contain the additional
+slots for an \f{annotated-binop}.
+
+
+\itemitem{\kwd{initial-offset}}
+
+%% 19.5.0 31
+\kwd{initial-offset} instructs \macref{defstruct} to skip over a certain
+number of slots before it starts allocating the slots described in the
+body.  This option's argument is the number of slots \macref{defstruct} 
+should skip.  \kwd{initial-offset} can be used only if \kwd{type} is also supplied.
+
+\reviewer{Barmar: What are initial values of the skipped slots?}%!!!
+
+%% 19.7.3 1
+\kwd{initial-offset} allows 
+slots to be allocated beginning at a representational
+element other than the first.  For example, the form
+
+\code
+ (defstruct (binop (:type list) (:initial-offset 2))
+   (operator '? :type symbol)
+   operand-1
+   operand-2) \EV BINOP
+\endcode
+would result in the following behavior for \f{make-binop}:
+
+\code
+ (make-binop :operator '+ :operand-1 'x :operand-2 5)
+\EV (NIL NIL + X 5)
+ (make-binop :operand-2 4 :operator '*)
+\EV (NIL NIL * NIL 4)
+\endcode
+The selector functions
+\f{binop-operator}, \f{binop-operand-1},
+and {\tt binop-operand-2} would be essentially equivalent to \funref{third},
+\funref{fourth}, and \funref{fifth}, respectively.
+Similarly, the form
+
+\code
+ (defstruct (binop (:type list) :named (:initial-offset 2))
+   (operator '? :type symbol)
+   operand-1
+   operand-2) \EV BINOP
+\endcode
+would result in the following behavior for \f{make-binop}:
+                    
+\code
+ (make-binop :operator '+ :operand-1 'x :operand-2 5) \EV (NIL NIL BINOP + X 5)
+ (make-binop :operand-2 4 :operator '*) \EV (NIL NIL BINOP * NIL 4)
+\endcode
+
+The first two \nil\ elements stem from the \kwd{initial-offset} of \f{2}
+in the definition of \f{binop}.  The next four elements contain the
+structure name and three slots for \f{binop}.  
+
+\itemitem{\kwd{named}}
+
+%% 19.5.0 29
+\kwd{named} specifies that the structure is named.
+If no \kwd{type} is supplied,
+then the structure is always named.
+
+%% 19.7.0 1
+%% this paragraph was left out
+
+%% 19.7.1 1
+For example:
+
+\code
+ (defstruct (binop (:type list))
+   (operator '? :type symbol)
+   operand-1
+   operand-2) \EV BINOP
+\endcode
+This defines a constructor function \f{make-binop} and three
+selector functions, namely \f{binop-operator}, \f{binop-operand-1},
+and \f{binop-operand-2}.  (It does not, however, define a predicate
+\f{binop-p}, for reasons explained below.)
+
+%% 19.7.1 2
+The effect of \f{make-binop} is simply to construct a list of length three:
+
+\code
+ (make-binop :operator '+ :operand-1 'x :operand-2 5) \EV (+ X 5)  
+ (make-binop :operand-2 4 :operator '*) \EV (* NIL 4)
+\endcode
+It is just like the function \f{list} except that it takes
+keyword arguments and performs slot defaulting appropriate to the \f{binop}
+conceptual data type.  Similarly, the selector functions
+\f{binop-operator}, \f{binop-operand-1},
+and \f{binop-operand-2} are essentially equivalent to \funref{car},
+\funref{cadr}, and \funref{caddr}, respectively.  They might not be
+completely equivalent because,
+for example, an implementation would be justified in adding error-checking
+code to ensure that the argument to each selector function is a length-3
+list.
+
+%% 19.7.1 3
+\f{binop} is a conceptual data type in that it is not made a part of
+the \clisp\ type system.  \funref{typep} does not recognize \f{binop} as
+a \term{type specifier}, and \funref{type-of} returns \f{list} when
+given a \f{binop} structure.  There is no way to distinguish a data
+structure constructed by \f{make-binop} from any other \term{list} that 
+happens to have the correct structure.
+
+%% 19.7.1 4
+There is not any way to recover the structure name \f{binop} from
+a structure created by \f{make-binop}.  This can only be done
+if the structure is named.
+A named structure has the property that, given an instance of the
+structure, the structure name (that names the type) can be reliably
+recovered.  For structures defined
+with no \kwd{type} option, the structure name actually becomes part
+of the \clisp\ data-type system.  \funref{type-of},
+when applied to such a structure, returns the structure name
+as the \term{type} of the \term{object};
+\funref{typep} recognizes
+the structure name as a valid \term{type specifier}.
+
+For structures defined with a \kwd{type} option, \funref{type-of} 
+returns a \term{type specifier} such as \f{list} or \f{(vector t)},
+depending on the type supplied to the \kwd{type} option.
+The structure name does not become a valid \term{type specifier}.
+However,
+if the \kwd{named} option is also supplied, then the first component
+of the structure (as created by a \macref{defstruct} constructor function)
+always contains the structure name.  This allows the structure name
+to be recovered from an instance of the structure and allows a reasonable
+predicate for the conceptual type to be defined:
+the automatically defined
+\param{name-p} predicate for the structure operates by first
+checking that its argument is of the proper type (\typeref{list}, 
+\f{(vector t)},
+or whatever) and then checking whether the first component contains
+the appropriate type name.
+
+Consider the \f{binop} example shown above, modified only to
+include the \kwd{named} option:
+
+\code
+ (defstruct (binop (:type list) :named)
+   (operator '? :type symbol)
+   operand-1
+   operand-2) \EV BINOP
+\endcode
+As before, this defines a constructor function \f{make-binop} and three
+selector functions \f{binop-operator}, \f{binop-operand-1},
+and \f{binop-operand-2}.  It also defines a predicate \f{binop-p}.
+The effect of \f{make-binop} is now to construct a list of length four:
+
+\code
+ (make-binop :operator '+ :operand-1 'x :operand-2 5) \EV (BINOP + X 5)
+ (make-binop :operand-2 4 :operator '*) \EV (BINOP * NIL 4)
+\endcode
+The structure has the same layout as before except that the structure name
+\f{binop} is included as the first list element.
+The selector functions
+\f{binop-operator}, \f{binop-operand-1},
+and \f{binop-operand-2} are essentially equivalent to \funref{cadr},
+\funref{caddr}, and \funref{cadddr}, respectively.
+The predicate \f{binop-p} is more or less equivalent to this
+definition:
+
+\code
+ (defun binop-p (x)
+   (and (consp x) (eq (car x) 'binop))) \EV BINOP-P
+\endcode
+The name \f{binop} is still not a valid \term{type specifier} recognizable
+to \funref{typep}, but at least there is a way of distinguishing \f{binop}
+structures from other similarly defined structures.
+
+
+\itemitem{\kwd{predicate}}
+
+%% 19.5.0 11
+This option takes one argument, which specifies the name of the type predicate.
+If the argument is not supplied or if the option itself is not
+supplied, the name of the predicate is made by concatenating the
+name of the structure to the string \f{"-P"}, interning the name
+in whatever \term{package} is current at the time \macref{defstruct}
+is expanded.
+If the argument is provided and is \nil, no predicate is defined.
+A predicate can be defined only if the structure is named;
+if \kwd{type} is supplied and \kwd{named} is not supplied,
+then \kwd{predicate} must either be unsupplied or have the value \nil.
+
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+\itemitem{\kwd{print-function}, \kwd{print-object}}
+
+The \kwd{print-function} and \kwd{print-object} 
+%% Added per X3J13. -kmp 05-Oct-93
+options
+specify that a \funref{print-object}
+\term{method} for \term{structures} of type \param{structure-name} should be generated.
+These options are not synonyms, but do perform a similar service;
+the choice of which option (\kwd{print-function} or \kwd{print-object}) is used 
+affects how the function named \param{printer-name} is called.
+Only one of these options may be used, and
+%% 19.5.0 21
+these options may be used only if \kwd{type} is not supplied.
+
+If the \kwd{print-function} option is used, 
+then when a structure of type \param{structure-name} is to be printed,
+the designated printer function is called on three \term{arguments}:
+
+\beginlist 
+
+\itemitem{--} the structure to be printed
+	      (a \term{generalized instance} of \param{structure-name}).
+
+\itemitem{--} a \term{stream} to print to.
+
+\itemitem{--} an \term{integer} indicating the current depth.
+	      The magnitude of this integer may vary between \term{implementations};
+	      however, it can reliably be compared against \varref{*print-level*}
+	      to determine whether depth abbreviation is appropriate.
+
+\endlist
+
+Specifying \f{(:print-function \param{printer-name})}
+is approximately equivalent to specifying:
+
+\code
+ (defmethod print-object ((object \param{structure-name}) stream)
+   (funcall (function \param{printer-name}) object stream \metaparam{current-print-depth}))
+\endcode
+
+where the \metaparam{current-print-depth} represents the printer's belief of
+how deep it is currently printing.  It is \term{implementation-dependent}
+whether \metaparam{current-print-depth} is always 0 and \param{*print-level*},
+if \term{non-nil}, is re-bound to successively smaller values as printing
+descends recursively, or whether \param{current-print-depth} varies in 
+value as printing descends recursively and \param{*print-level*} remains
+constant during the same traversal.
+
+If the \kwd{print-object} option is used, then
+when a structure of type \param{structure-name} is to be printed,
+the designated printer function is called on two arguments:
+
+\beginlist
+
+\itemitem{--} the structure to be printed.
+
+\itemitem{--} the stream to print to.
+
+\endlist
+
+Specifying \f{(:print-object \param{printer-name})} is equivalent to specifying:
+
+\code
+ (defmethod print-object ((object \param{structure-name}) stream)
+   (funcall (function \param{printer-name}) object stream))
+\endcode
+
+%% 19.5.0 22
+\issue{DEFSTRUCT-PRINT-FUNCTION-INHERITANCE:YES}
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+    If no \kwd{type} option is supplied,
+and if either a \kwd{print-function} or a \kwd{print-object} option is supplied,
+and if no \param{printer-name} is supplied,
+then a \funref{print-object} \term{method} \term{specialized} for \param{structure-name}
+is generated that calls a function that implements the default printing behavior for
+structures using \f{\#S} notation; \seesection\PrintingStructures.
+
+If neither a \kwd{print-function} 
+       nor a \kwd{print-object} option 
+is supplied,
+then \macref{defstruct} does not generate a \funref{print-object} \term{method}
+\term{specialized} for \param{structure-name} and some default behavior is inherited
+either from a structure named in an \kwd{include} option 
+    or from the default behavior for printing structures;
+\seefun{print-object} and \secref\PrintingStructures.
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+\endissue{DEFSTRUCT-PRINT-FUNCTION-INHERITANCE:YES}
+
+\issue{PRINT-CIRCLE-STRUCTURE:USER-FUNCTIONS-WORK}
+When \varref{*print-circle*} is \term{true},
+a user-defined print function can print \term{objects} 
+to the supplied \term{stream} using  
+    \funref{write},
+    \funref{prin1},
+    \funref{princ}, 
+ or \funref{format}
+and expect circularities to be detected and printed using the \f{\#\i{n}\#} syntax.
+This applies to \term{methods} on \funref{print-object} in addition to
+\kwd{print-function} options.
+If a user-defined print function prints to a \term{stream} other than the one
+that was supplied, then circularity detection starts over for that \term{stream}. 
+\Seevar{*print-circle*}.
+\endissue{PRINT-CIRCLE-STRUCTURE:USER-FUNCTIONS-WORK}
+ 
+%!!! Barmar:
+%      Are side effects in :PRINT-FUNCTIONs ok?  I guess this implies so.
+%      We should then require that the implementation only call them once.
+%  KMP: I'm not so sure.  Mail sent to Barmar contesting this. -kmp 30-Aug-91
+
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+
+\itemitem{\kwd{type}}
+
+%% 19.5.0 23
+\kwd{type} explicitly specifies the representation to be used for
+the structure.  Its argument must be one of these \term{types}:
+
+\beginlist
+%% 19.5.0 26
+\itemitem{\typeref{vector}}
+
+This produces the same result as specifying {\tt (vector t)}.
+The structure is represented
+as a general \term{vector}, storing components as vector elements.
+The first component is vector 
+element 1 if the structure is \kwd{named}, and element 0 otherwise.
+
+\reviewer{Barmar: Do any implementations create non-simple vectors?}%!!!
+
+%% 19.5.0 27
+\itemitem{\f{(vector \param{element-type})}}
+
+The structure is represented as a (possibly specialized) \term{vector}, storing
+components as vector elements.  Every component must be of a \term{type} 
+that can be stored in a \term{vector} of the \term{type} specified.  
+The first component is vector
+element 1 if the structure is \kwd{named}, and element 0 otherwise.
+The structure can be \kwd{named} only if \thetype{symbol} 
+is a \term{subtype} of the supplied \param{element-type}.
+
+%% 19.5.0 28
+
+\itemitem{\typeref{list}}
+
+The structure is represented as a \term{list}.
+The first component is the \term{cadr} if the structure is \kwd{named},
+and the \term{car} if it is not \kwd{named}.
+\endlist                           
+
+%% 19.5.0 24
+Specifying this option has the effect of forcing
+a specific representation and of forcing the components to be
+stored in the order specified in \macref{defstruct} 
+in corresponding successive elements of the specified representation.
+It also prevents the structure name from becoming a valid
+\term{type specifier} recognizable by \funref{typep}.
+
+%% The following is an RPG response to a question about a KCL bug.
+For example:
+
+\code
+ (defstruct (quux (:type list) :named) x y)
+\endcode
+
+should make a constructor that builds a \term{list} exactly like the one
+that \funref{list} produces, 
+with {\tt quux} as its \term{car}.
+ 
+If this type is defined:
+ 
+\code
+ (deftype quux () '(satisfies quux-p))
+\endcode
+then this form
+ 
+\code
+ (typep (make-quux) 'quux)
+\endcode
+should return precisely what this one does
+ 
+\code
+ (typep (list 'quux nil nil) 'quux)
+\endcode
+%% end of RPG comment
+
+
+%% 19.5.0 25
+If \kwd{type} is not supplied,
+%the structure is represented in an \term{implementation-dependent} manner.
+the structure is represented as an \term{object} \oftype{structure-object}.
+
+%%Barmar wanted to just strike this.  I couldn't figure out what it was trying to say either,
+% so I went along with it. -kmp 28-Dec-90
+% \issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+% Except where explicitly allowed, the consequences are undefined if
+% a \term{symbol} in \thepackage{common-lisp}
+% is defined as the name of a structure type.
+% using \macref{defstruct} with no \kwd{type} option.
+% \endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+%% Need more infor about how this interacts with CLOS
+\macref{defstruct} without a \kwd{type} option defines a \term{class} with
+the structure name as its name. The \term{metaclass} of structure
+\term{instances} is \typeref{structure-class}.  
+
+\endlist
+
+\issue{DEFSTRUCT-REDEFINITION:ERROR}
+The consequences of redefining a \macref{defstruct} structure are undefined.
+\endissue{DEFSTRUCT-REDEFINITION:ERROR}
+
+
+In the case where no \macref{defstruct} options have been supplied, 
+the following functions are automatically defined to operate 
+on instances of the new structure:
+
+\beginlist
+\itemitem{\bf Predicate}
+
+A predicate with the name \f{\param{structure-name}-p} is defined to
+test membership in the structure type.  The predicate 
+\f{(\param{structure-name}-p \param{object})} is \term{true} if an \param{object} 
+is of this \term{type}; otherwise it is \term{false}.  \funref{typep} can also
+be used with the name of the new \term{type} to test whether an 
+\term{object}
+belongs to the \term{type}. 
+Such a function call has the form 
+\hbox{\f{(typep \param{object} '\param{structure-name})}}.
+
+\itemitem{\bf Component reader functions}
+
+\term{Reader} functions are defined to \term{read} the components of the
+structure.  For each slot name, there is a corresponding
+\term{reader} function with the name \f{\param{structure-name}-\param{slot-name}}.
+This function \term{reads} the contents of that slot.  
+Each \term{reader} function takes one argument, which is
+an instance of the structure type.  
+\macref{setf} can be used with any of these \term{reader} functions
+to alter the slot contents.
+
+\itemitem{\bf Constructor function}
+
+A constructor function with the name \f{make-\param{structure-name}}
+is defined.  This function creates and returns new 
+instances of the structure type.
+
+\itemitem{\bf Copier function}
+
+A copier function with the name \f{copy-\param{structure-name}} is defined.
+The copier function takes an object of the structure type and creates a
+new object of the same  type that is a copy of the first.  The copier
+function creates a new structure with the same component entries
+as the original.  Corresponding components of the two structure instances
+are \funref{eql}.
+\endlist
+
+%The predicate, \term{reader} function, constructor function, and copier function
+%names are all interned in whatever package is current at the 
+%time \macref{defstruct} is expanded.
+
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+% added qualification about top-level-ness  --sjl 5 Mar 92
+If a \macref{defstruct} \term{form} appears as a \term{top level form},
+the \term{compiler} must make the \term{structure} \term{type} name recognized
+as a valid \term{type} name in subsequent declarations (as for \macref{deftype})
+and make the structure slot readers known to \macref{setf}.  In addition, the
+\term{compiler} must save enough information about the \term{structure} \term{type}
+so that further \macref{defstruct} definitions can use \kwd{include} in a subsequent
+\macref{deftype} in the same \term{file} to refer to the \term{structure} \term{type} name.
+The functions which \macref{defstruct} generates are not defined 
+in the compile time environment, although the \term{compiler} may save enough
+information about the functions to code subsequent calls inline.
+The \f{\#S} \term{reader macro} might or might not recognize the newly defined 
+\term{structure} \term{type} name at compile time.  
+\endissue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+
+\label Examples::
+%% 19.1.0 5
+An example of a structure definition follows:
+
+\code
+ (defstruct ship
+   x-position
+   y-position
+   x-velocity
+   y-velocity
+   mass)
+\endcode
+This declares that every \f{ship} is an \term{object} 
+with five named components.
+The evaluation of this form does the following:
+
+%% 19.1.0 6
+\beginlist
+\itemitem{1.}
+It defines \f{ship-x-position} to be a function
+of one argument, a ship, that returns the \f{x-position}
+of the ship; \f{ship-y-position}
+and the other components are given similar function definitions.
+These functions are called the \term{access} functions, as they
+are used to \term{access} elements of the structure.
+
+%% 19.1.0 7
+\itemitem{2.}
+\f{ship} becomes the name of a \term{type} of which instances
+of ships are elements.  \f{ship} becomes acceptable to \funref{typep},
+for example; \f{(typep x 'ship)} is \term{true} if \f{x} is a ship
+and false if \f{x} is any \term{object} other than a ship.
+%%Moreover, all ships are instances of the type \f{structure}, because
+%%\f{ship} is a subtype of \f{structure}.
+
+%% 19.1.0 8
+\itemitem{3.}
+A function named \f{ship-p} of 
+one argument is defined; it is a predicate
+that is \term{true} if its argument is a ship and is \term{false} otherwise.
+
+%% 19.1.0 9
+\itemitem{4.}
+A function called \f{make-ship} is defined that, when invoked,
+creates a data structure with five components, suitable for use with
+the \term{access} functions.  Thus executing
+
+\code
+ (setq ship2 (make-ship))
+\endcode
+sets \f{ship2} to a newly created \f{ship} \term{object}.
+One can supply the initial values of any desired component in the call
+to \f{make-ship} by using keyword arguments in this way:
+
+\code
+ (setq ship2 (make-ship :mass *default-ship-mass*
+                        :x-position 0
+                        :y-position 0))
+\endcode
+This constructs a new ship and initializes three of its components.
+This function is called the ``constructor function''
+because it constructs a new structure.
+
+%% 19.1.0 11
+\itemitem{5.}
+A function called \f{copy-ship} of one argument
+is defined that, when given a \f{ship} \term{object},
+creates a new \f{ship} \term{object} that is a copy of the given one.
+This function is called the ``copier function.''
+\endlist
+
+%% 19.1.0 12
+\macref{setf} can be used to alter the components of a \f{ship}:
+
+\code
+ (setf (ship-x-position ship2) 100)
+\endcode
+This alters the \f{x-position} of \f{ship2} to be \f{100}.
+This works because \macref{defstruct} behaves as if
+it generates an appropriate \macref{defsetf}
+for each \term{access} function.
+
+%% 19.1.0 13
+%% this paragraph left out
+
+
+\code
+;;;
+;;; Example 1
+;;; define town structure type
+;;; area, watertowers, firetrucks, population, elevation are its components
+;;;
+ (defstruct town
+             area
+             watertowers
+             (firetrucks 1 :type fixnum)    ;an initialized slot
+             population 
+             (elevation 5128 :read-only t)) ;a slot that can't be changed
+\EV TOWN
+;create a town instance
+ (setq town1 (make-town :area 0 :watertowers 0)) \EV #S(TOWN...)
+;town's predicate recognizes the new instance
+ (town-p town1) \EV \term{true}
+;new town's area is as specified by make-town
+ (town-area town1) \EV 0
+;new town's elevation has initial value
+ (town-elevation town1) \EV 5128
+;setf recognizes reader function
+ (setf (town-population town1) 99) \EV 99
+ (town-population town1) \EV 99
+;copier function makes a copy of town1
+ (setq town2 (copy-town town1)) \EV #S(TOWN...)
+ (= (town-population town1) (town-population town2))  \EV \term{true}
+;since elevation is a read-only slot, its value can be set only
+;when the structure is created
+ (setq town3 (make-town :area 0 :watertowers 3 :elevation 1200))
+\EV #S(TOWN...)
+;;;
+;;; Example 2
+;;; define clown structure type
+;;; this structure uses a nonstandard prefix
+;;;
+ (defstruct (clown (:conc-name bozo-))
+             (nose-color 'red)         
+             frizzy-hair-p polkadots) \EV CLOWN
+ (setq funny-clown (make-clown)) \EV #S(CLOWN)
+;use non-default reader name
+ (bozo-nose-color funny-clown) \EV RED        
+ (defstruct (klown (:constructor make-up-klown) ;similar def using other
+             (:copier clone-klown)              ;customizing keywords
+             (:predicate is-a-bozo-p))
+             nose-color frizzy-hair-p polkadots) \EV klown
+;custom constructor now exists
+ (fboundp 'make-up-klown) \EV \term{true}
+;;;
+;;; Example 3
+;;; define a vehicle structure type
+;;; then define a truck structure type that includes 
+;;; the vehicle structure
+;;;
+ (defstruct vehicle name year (diesel t :read-only t)) \EV VEHICLE
+ (defstruct (truck (:include vehicle (year 79)))
+             load-limit                          
+             (axles 6)) \EV TRUCK
+ (setq x (make-truck :name 'mac :diesel t :load-limit 17))
+\EV #S(TRUCK...)
+;vehicle readers work on trucks
+ (vehicle-name x)
+\EV MAC
+;default taken from :include clause 
+ (vehicle-year x)
+\EV 79 
+ (defstruct (pickup (:include truck))     ;pickup type includes truck
+             camper long-bed four-wheel-drive) \EV PICKUP
+ (setq x (make-pickup :name 'king :long-bed t)) \EV #S(PICKUP...)
+;:include default inherited
+ (pickup-year x) \EV 79
+;;;
+;;; Example 4
+;;; use of BOA constructors
+;;;
+ (defstruct (dfs-boa                      ;BOA constructors
+               (:constructor make-dfs-boa (a b c)) 
+               (:constructor create-dfs-boa
+                 (a &optional b (c 'cc) &rest d &aux e (f 'ff))))
+             a b c d e f) \EV DFS-BOA
+;a, b, and c set by position, and the rest are uninitialized
+ (setq x (make-dfs-boa 1 2 3)) \EV #(DFS-BOA...)
+ (dfs-boa-a x) \EV 1
+;a and b set, c and f defaulted
+ (setq x (create-dfs-boa 1 2)) \EV #(DFS-BOA...)
+ (dfs-boa-b x) \EV 2
+ (eq (dfs-boa-c x) 'cc) \EV \term{true}
+;a, b, and c set, and the rest are collected into d
+ (setq x (create-dfs-boa 1 2 3 4 5 6)) \EV #(DFS-BOA...)
+ (dfs-boa-d x) \EV (4 5 6)
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+% Adequately addressed in the packages chapter --sjl 5 Mar 92.
+%\issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+%The consequences are undefined if a \term{symbol} in \thepackage{common-lisp}
+%is used as the \param{structure-name} argument, or if any of the automatically-created
+%\term{functions} have \term{names} in \thepackage{common-lisp}.
+%\endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+\issue{DEFSTRUCT-SLOTS-CONSTRAINTS-NAME:DUPLICATES-ERROR}
+% The consequences are undefined if two slots in a structure type have
+% the same \param{slot-name}; that is, the \funref{symbol-name} of the
+% \param{slot-names} should not be \funref{string=}.
+% This holds when
+% they were both named directly by the same call to \macref{defstruct}
+% or when one is present by virtue of being in an included structure.
+% The situation of expanding a \macref{defstruct} macro with a duplicate 
+% slot name should signal an error \oftype{program-error}. 
+%% Rewritten for Barmar:
+If any two slot names (whether present directly or inherited by the \kwd{include} option)
+are the \term{same} under \funref{string=},
+\macref{defstruct} should signal an error \oftype{program-error}.
+%(While not yet formally defined, the intent is that 
+%the error signaling may occur when compiling a file that contains
+%duplicate names or when evaluating a DEFSTRUCT form with duplicate names
+%in an interpreter.)
+\endissue{DEFSTRUCT-SLOTS-CONSTRAINTS-NAME:DUPLICATES-ERROR}
+
+\issue{DATA-TYPES-HIERARCHY-UNDERSPECIFIED}
+The consequences are undefined if the \param{included-structure-name} 
+does not name a \term{structure type}.
+\endissue{DATA-TYPES-HIERARCHY-UNDERSPECIFIED}
+
+\label See Also::
+
+\funref{documentation},
+\funref{print-object},
+\macref{setf},
+\funref{subtypep},
+\funref{type-of},
+\funref{typep},
+{\secref\Compilation}
+
+\label Notes::
+                                        
+%\funref{typep} will accept and use the name returned by \macref{defstruct}.
+
+%% 19.7.2 1
+The \param{printer-name} should observe the values of
+such printer-control variables as \varref{*print-escape*}.
+
+The restriction against issuing a warning for type mismatches between
+a \param{slot-initform} and the corresponding slot's \kwd{type} option is
+necessary because a \param{slot-initform} must be specified in order to
+specify slot options; in some cases, no suitable default may exist.
+
+The mechanism by which \macref{defstruct} arranges for slot accessors to
+be usable with \macref{setf} is \term{implementation-dependent}; 
+for example, it may use \term{setf functions}, \term{setf expanders}, or
+some other \term{implementation-dependent} mechanism known to that
+\term{implementation}'s \term{code} for \macref{setf}.
+
+\endcom
+
+%%% ========== DEFSTRUCT
+\begincom{copy-structure}\ftype{Function}
+
+\issue{DEFSTRUCT-COPIER:ARGUMENT-TYPE}
+
+\label Syntax::
+
+\DefunWithValues copy-structure {structure} {copy}
+
+\label Arguments and Values::
+
+\param{structure}---a \term{structure}.
+
+\param{copy}---a copy of the \param{structure}.
+
+\label Description::
+
+%% 15.2.0 23
+
+Returns a \term{copy}\meaning{6} of the \param{structure}.
+
+Only the \param{structure} itself is copied; not the values of the slots.
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+the \kwd{copier} option to \funref{defstruct}
+
+\label Notes::
+
+The \param{copy} is the \term{same} as the given \param{structure}
+under \funref{equalp}, but not under \funref{equal}.
+
+\endissue{DEFSTRUCT-COPIER:ARGUMENT-TYPE}
+
+\endcom

@@ -1,0 +1,61 @@
+====== Macro PUSHNEW ======
+
+====Syntax====
+
+**pushnew** //item place ''&key'' key test test-not// → //new-place-value//
+
+====Arguments and Values====
+
+//item// - an //[[CL:Glossary:object]]//.
+
+//place// - a //[[CL:Glossary:place]]//, the //[[CL:Glossary:value]]// of which is a //[[CL:Glossary:proper list]]//.
+
+//test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument, or **[[CL:Constant Variables:nil]]**.
+
+//new-place-value// - a //[[CL:Glossary:list]]// (the new //[[CL:Glossary:value]]// of //place//).
+
+====Description====
+
+**[[CL:Macros:pushnew]]** tests whether //item// is the same as any existing element of the //[[CL:Glossary:list]]// stored in //place//. If //item// is not, it is prepended to the //[[CL:Glossary:list]]//, and the new //[[CL:Glossary:list]]// is stored in //place//.
+
+**[[CL:Macros:pushnew]]** returns the new //[[CL:Glossary:list]]// that is stored in //place//.
+
+Whether or not //item// is already a member of the //[[CL:Glossary:list]]// that is in //place// is determined by comparisons using **'':test''** or **'':test-not''**. The first argument to the **'':test''** or **'':test-not''** function is //item//; the second argument is an element of the //[[CL:Glossary:list]]// in //place// as returned by the **'':key''** function (if supplied).
+
+If **'':key''** is supplied, it is used to extract the part to be tested from both //item// and the //[[CL:Glossary:list]]// element, as for **[[CL:Functions:adjoin]]**.
+
+The argument to the **'':key''** function is an element of the //[[CL:Glossary:list]]// stored in //place//. The **'':key''** function typically returns part part of the element of the //[[CL:Glossary:list]]//. If **'':key''** is not supplied or **[[CL:Constant Variables:nil]]**, the //[[CL:Glossary:list]]// element is used.
+
+For information about the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subforms]]// of //place//, see section {\secref\GenRefSubFormEval}.
+
+It is //[[CL:Glossary:implementation-dependent]]// whether or not **[[CL:Macros:pushnew]]** actually executes the storing form for its //place// in the situation where the //item// is already a member of the //[[CL:Glossary:list]]// held by //place//.
+
+====Examples==== <blockquote> ([[CL:Macros:defparameter]] x '(a (b c) d)) → (A (B C) D) (pushnew 5 (cadr x)) → (5 B C) x → (A (5 B C) D) (pushnew 'b (cadr x)) → (5 B C) x → (A (5 B C) D) ([[CL:Macros:defparameter]] lst '((1) (1 2) (1 2 3))) → ((1) (1 2) (1 2 3)) (pushnew '(2) lst) → ((2) (1) (1 2) (1 2 3)) (pushnew '(1) lst) → ((1) (2) (1) (1 2) (1 2 3)) (pushnew '(1) lst :test 'equal) → ((1) (2) (1) (1 2) (1 2 3)) (pushnew '(1) lst :key #'car) → ((1) (2) (1) (1 2) (1 2 3)) </blockquote>
+
+====Side Effects====
+
+The contents of //place// may be modified.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Macros:push]]**, **[[CL:Functions:adjoin]]**, {\secref\GeneralizedReference}
+
+====Notes====
+
+The effect of <blockquote> (pushnew item place :test p) </blockquote> is roughly equivalent to <blockquote> ([[CL:Macros:setf]] place (adjoin item place :test p)) </blockquote>
+
+except that the //[[CL:Glossary:subforms]]// of ''place'' are evaluated only once, and ''item'' is evaluated before ''place''.
+
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM} \issue{PUSHNEW-STORE-REQUIRED:UNSPECIFIED} \issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}

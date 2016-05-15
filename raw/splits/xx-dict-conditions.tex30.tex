@@ -1,0 +1,54 @@
+====== Function MAKE-CONDITION ======
+
+====Syntax====
+
+**make-condition {type** //\rest} slot-initializations// → //condition//
+
+====Arguments and Values====
+
+//type// - a //[[CL:Glossary:type specifier]]// (for a //[[CL:Glossary:subtype]]// of **[[CL:Types:condition]]**).
+
+//slot-initializations// - an //[[CL:Glossary:initialization argument list]]//.
+
+//condition// - a //[[CL:Glossary:condition]]//.
+
+====Description====
+
+Constructs and returns a //[[CL:Glossary:condition]]// of type //type// using //slot-initializations// for the initial values of the slots. The newly created //[[CL:Glossary:condition]]// is returned.
+
+====Examples====
+
+<blockquote> (defvar *oops-count* 0)
+
+([[CL:Macros:defparameter]] a (make-condition 'simple-error :format-control "This is your ~:R error." :format-arguments (list (incf *oops-count*)))) → #<SIMPLE-ERROR 32245104>
+
+(format t "~&~A~
+▷ This is your first error. → NIL
+
+(error a)
+▷ Error: This is your first error.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Return to Lisp Toplevel.
+▷ Debug> </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+The set of defined //[[CL:Glossary:condition]]// //[[CL:Glossary:types]]//.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Macros:define-condition]]**, {\secref\ConditionSystemConcepts}
+
+====Notes====
+
+None.
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}

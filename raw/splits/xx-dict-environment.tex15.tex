@@ -1,0 +1,124 @@
+====== Standard Generic Function DOCUMENTATION, (SETF DOCUMENTATION) ======
+
+
+====Syntax====
+
+\DefgenWithValues documentation {x doc-type} {documentation}
+
+\DefgenWithValues {(setf documentation)} {new-value x doc-type} {new-value}
+
+====Argument Precedence Order====
+
+//doc-type//, //object//
+
+====Method Signatures====
+
+\def\DocMethods#1#2{{ {\bf #1:}\par \def\Meth##1##2{\Defmeth{documentation} {\specparam{x}{##1} \specparam{doc-type}{''(eql '##2)''}}\idxref{##2}\par} #2\par \def\Meth##1##2{\Defmeth{(setf documentation)} {//new-value// \specparam{x}{##1} \specparam{doc-type}{''(eql '##2)''}}\idxref{##2}\par} #2\par}}
+
+
+
+\DocMethods{Functions, Macros, and Special Forms}{ \Meth{function}{t} \Meth{function}{function} \Meth{list}{function} \Meth{list}{compiler-macro} \Meth{symbol}{function} \Meth{symbol}{compiler-macro} \Meth{symbol}{setf}}
+
+\DocMethods{Method Combinations}{ \Meth{method-combination}{t} \Meth{method-combination}{method-combination} \Meth{symbol}{method-combination}}
+
+\DocMethods{Methods}{ \Meth{standard-method}{t}}
+
+\DocMethods{Packages}{ \Meth{package}{t}}
+
+\DocMethods{Types, Classes, and Structure Names}{ \Meth{standard-class}{t} \Meth{standard-class}{type} \Meth{structure-class}{t} \Meth{structure-class}{type} \Meth{symbol}{type} \Meth{symbol}{structure}}
+
+\DocMethods{Variables}{ \Meth{symbol}{variable}}
+
+====Arguments and Values====
+
+
+//x// - an //[[CL:Glossary:object]]//.
+
+//doc-type// - a //[[CL:Glossary:symbol]]//.
+
+
+//documentation// - a //[[CL:Glossary:string]]//, or **[[CL:Constant Variables:nil]]**.
+
+//new-value// - a //[[CL:Glossary:string]]//.
+
+====Description====
+
+\TheGF{documentation} returns the //[[CL:Glossary:documentation string]]// associated with the given //[[CL:Glossary:object]]// if it is available; otherwise it returns **[[CL:Constant Variables:nil]]**.
+
+The //[[CL:Glossary:generic function]]// ''(setf documentation)'' updates the //[[CL:Glossary:documentation string]]// associated with //x// to //new-value//. If //x// is a //[[CL:Glossary:list]]//, it must be of the form ''(setf //symbol//)''.
+
+//[[CL:Glossary:Documentation strings]]// are made available for debugging purposes. //[[CL:Glossary:Conforming programs]]// are permitted to use //[[CL:Glossary:documentation strings]]// when they are present, but should not depend for their correct behavior on the presence of those //[[CL:Glossary:documentation strings]]//. An //[[CL:Glossary:implementation]]// is permitted to discard //[[CL:Glossary:documentation strings]]// at any time for //[[CL:Glossary:implementation-defined]]// reasons.
+
+The nature of the //[[CL:Glossary:documentation string]]// returned depends on the //doc-type//, as follows:
+
+\beginlist
+
+\itemitem{\misc{compiler-macro}}
+
+Returns the //[[CL:Glossary:documentation string]]// of the //[[CL:Glossary:compiler macro]]// whose //[[CL:Glossary:name]]// is the //[[CL:Glossary:function name]]// //x//.
+
+\itemitem{\misc{function}}
+
+If //x// is a //[[CL:Glossary:function name]]//, returns the //[[CL:Glossary:documentation string]]// of the //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]//, or //[[CL:Glossary:special operator]]// whose //[[CL:Glossary:name]]// is //x//.
+
+If //x// is a //[[CL:Glossary:function]]//, returns the //[[CL:Glossary:documentation string]]// associated with //x//.
+
+\itemitem{\misc{method-combination}}
+
+If //x// is a //[[CL:Glossary:symbol]]//, returns the //[[CL:Glossary:documentation string]]// of the //[[CL:Glossary:method combination]]// whose //[[CL:Glossary:name]]// is //x//.
+
+If //x// is a //[[CL:Glossary:method combination]]//, returns the //[[CL:Glossary:documentation string]]// associated with //x//.
+
+\itemitem{\misc{setf}}
+
+Returns the //[[CL:Glossary:documentation string]]// of
+
+the //[[CL:Glossary:setf expander]]//
+
+whose //[[CL:Glossary:name]]// is the //[[CL:Glossary:symbol]]// //x//.
+
+\itemitem{\misc{structure}}
+
+Returns the //[[CL:Glossary:documentation string]]// associated with the //[[CL:Glossary:structure name]]// //x//.
+
+\itemitem{\misc{t}}
+
+Returns a //[[CL:Glossary:documentation string]]// specialized on the //[[CL:Glossary:class]]// of the argument //x// itself. For example, if //x// is a //[[CL:Glossary:function]]//, the //[[CL:Glossary:documentation string]]// associated with the //[[CL:Glossary:function]]// //x// is returned.
+
+\itemitem{\misc{type}}
+
+If //x// is a //[[CL:Glossary:symbol]]//, returns the //[[CL:Glossary:documentation string]]// of the //[[CL:Glossary:class]]// whose //[[CL:Glossary:name]]// is the //[[CL:Glossary:symbol]]// //x//, if there is such a //[[CL:Glossary:class]]//. Otherwise, it returns the //[[CL:Glossary:documentation string]]// of the //[[CL:Glossary:type]]// which is the //[[CL:Glossary:type specifier]]// //[[CL:Glossary:symbol]]// //x//.
+
+If //x// is a //[[CL:Glossary:structure class]]// or //[[CL:Glossary:standard class]]//, returns the //[[CL:Glossary:documentation string]]// associated with the //[[CL:Glossary:class]]// //x//.
+
+\itemitem{\misc{variable}}
+
+Returns the //[[CL:Glossary:documentation string]]// of the //[[CL:Glossary:dynamic variable]]// or //[[CL:Glossary:constant variable]]// whose //[[CL:Glossary:name]]// is the //[[CL:Glossary:symbol]]// //x//.
+
+\endlist
+
+A //[[CL:Glossary:conforming implementation]]// or a //[[CL:Glossary:conforming program]]// may extend the set of //[[CL:Glossary:symbols]]// that are acceptable as the //doc-type//.
+
+====Examples====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+
+
+====See Also====
+
+None.
+
+====Notes====
+
+This standard prescribes no means to retrieve the //[[CL:Glossary:documentation strings]]// for individual slots specified in a **[[CL:Macros:defclass]]** form, but //[[CL:Glossary:implementations]]// might still provide debugging tools and/or programming language extensions which manipulate this information. Implementors wishing to provide such support are encouraged to consult the //[[CL:Glossary:Metaobject Protocol]]// for suggestions about how this might be done.
+
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX} \issue{DOCUMENTATION-FUNCTION-BUGS:FIX} \issue{DOCUMENTATION-FUNCTION-BUGS:FIX} \issue{DOCUMENTATION-FUNCTION-BUGS:FIX} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}

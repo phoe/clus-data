@@ -1,0 +1,5831 @@
+% -*- Mode: TeX -*-
+
+\def\realtypespec#1{
+\label Compound Type Specifier Kind::
+
+Abbreviating.
+
+\label Compound Type Specifier Syntax::
+
+\Deftype{#1}{\ttbrac{lower-limit \brac{upper-limit}}}
+
+\label Compound Type Specifier Arguments::
+
+\param{lower-limit}, \param{upper-limit}---\term{interval designators} 
+					   for \term{type} \typeref{#1}.
+ \DefaultEach{\param{lower-limit} and \param{upper-limit}}{the \term{symbol} \misc{*}}
+
+\label Compound Type Specifier Description::
+
+This denotes the \term{#1s} on the interval described by
+\param{lower-limit} and \param{upper-limit}.
+}
+
+% Numbers
+%  Numeric Comparison
+%  Rounding
+%  Trig
+%  Hyperbolic Trig
+%  Arithmetic
+%  Random Numbers
+%  Numeric Types
+%   Complex
+%   Real
+%    Rational
+%     Integer
+%      Integer Bits
+%      Integer Bytes
+%       Fixnum
+%     Ratio
+%    Float
+%     Float Subtypes
+
+%-------------------- Numeric Types --------------------
+\begincom{number}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{number},
+\typeref{t}
+
+\label Description::
+ 
+%%The following seems to fluffy to me.  Besides you can find the same info elsewhere
+%%in more rigorous form. -kmp 13-Nov-90
+% There are \term{real} and \term{complex} \term{numbers}.
+% \term{Real} numbers are further divided into \term{floats},
+% \term{rationals}, and \term{integers}.
+%%Replaced by:
+\Thetype{number} contains \term{objects} which represent
+mathematical numbers.
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+The \term{types} \typeref{real} and \typeref{complex} are \term{disjoint} 
+\term{subtypes} of \typeref{number}.
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+
+%I added this: -kmp 15-Nov-90
+\Thefunction{=} tests for numerical equality.
+\Thefunction{eql}, when its arguments are both \term{numbers}, 
+tests that they have both the same \term{type} and numerical value.
+%% 12.0.0 4
+Two \term{numbers} that are the \term{same} under \funref{eql} or \funref{=}
+are not necessarily the \term{same} under \funref{eq}.
+
+%% 2.1.4 1
+%% 2.1.4 4
+
+\label Notes::
+
+\clisp\ differs from mathematics on some naming issues.  In mathematics,
+the set of real numbers is traditionally described as a subset of the
+complex numbers, but in \clisp, \thetype{real} and \thetype{complex} are
+disjoint.  The \clisp\ type which includes all mathematical complex
+numbers is called \typeref{number}.  The reasons for these differences
+include historical precedent, compatibility with most other popular
+computer languages, and various issues of time and space efficiency.
+
+%RWK notes:
+% Another way of describing this is that fundamental number types
+% fixnum, bignum, xxx-float, ratio, complex, ... all name representations
+% and are names for finite subsets of the corresponding mathematical concepts.
+% Thus, complex is a type which can represent complex numbers.
+% The extra capability of this type means that even if the imaginary part is 0.0,
+% it is not a member of the more restrictive representation real.
+%
+%Ultimately I didn't buy this because it presumes that types are only about
+%how a number is represented.  But 1.0 is not represented as a real.  In fact,
+%no number is.  Rather, they are represented as subtypes of reals, and so real
+%is available only for categorization.  Anyway, I decided to just let things stand
+%as they are for brevity and let others intuit other explanations that make them happy.
+
+\endcom%{number}\ftype{System Class}
+\begincom{complex}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{complex},
+\typeref{number},
+\typeref{t}
+
+\label Description::
+
+%RWK: Again, describe it as a representation which is -capable- of representing
+%     complex numbers.  1.0 has a different, more restricted representation.
+
+\Thetype{complex} includes all mathematical complex numbers
+other than those included in \thetype{rational}.
+\term{Complexes} are 
+%"represented" -> "expressed".  Some reviewer had problems with "represented". -kmp
+expressed
+in Cartesian form with a
+real part and an imaginary part, each of which is a \term{real}.
+The real part and imaginary part are either both
+\term{rational} or both of the same \term{float} \term{type}.
+The imaginary part can be a \term{float} zero, but can never
+be a \term{rational} zero, for such a number is always represented
+by \clisp\ as a \term{rational} rather than a \term{complex}.
+
+\label Compound Type Specifier Kind::
+
+Specializing.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.5.0 11
+\Deftype{complex}{\ttbrac{typespec | \misc{*}}}
+
+\label Compound Type Specifier Arguments::
+
+\param{typespec}---a \term{type specifier} that denotes a \subtypeof{real}.
+
+\label Compound Type Specifier Description::
+
+\editornote{KMP: If you ask me, this definition is a complete mess.  Looking at
+issue ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING does not help me figure 
+it out, either.  Anyone got any suggestions?}
+
+Every element of this \term{type} is a \term{complex} whose
+real part and imaginary part are each of type
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+\f{(upgraded-complex-part-type \param{typespec})}.
+%The following will be left out:
+%\param{type}.
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+This \term{type} encompasses those \term{complexes}
+that can result by giving numbers of \term{type} \param{typespec}
+to \funref{complex}.
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+%The following will be deleted:
+%
+%This might be different
+%from what the \term{type} means for discrimination purposes.
+%For example, Gaussian integers might be   
+%described as the type {\tt (complex integer)}, even in implementations
+%where giving two \term{integers} to \funref{complex} results
+%in an \term{object} of type {\tt (complex rational)}.
+%
+%%%% 2.1.4 3
+%%The type of a specific \term{complex} is indicated by a list
+%%of the word \misc{complex} and the type of the components; for example,
+%%a specialized representation for \typeref{complex} 
+%%numbers with \term{short float}
+%%parts would be of type {\tt (complex short-float)}.  \Thetype{complex}
+%%encompasses all complex representations.
+%
+%End of deletion.
+
+{\tt (complex \param{type-specifier})}
+refers to all \term{complexes} that can result from giving
+\term{numbers} of \param{type} \param{type-specifier} to \thefunction{complex}, 
+plus all other \term{complexes} of the same specialized representation.      
+%% Must fix the following according to Moon's 7-jul mail
+%% will fix for next edition.
+%Both the real and the imaginary parts of any such 
+%\term{complex} must satisfy:
+%
+%{\tt  (typep \lbracket \param{realpart} $\vert$ \param{imagpart}
+%\rbracket\ '\param{type-specifier})}
+ 
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+\label See Also::
+
+{\secref\RuleOfCanonRepForComplexRationals},
+{\secref\NumsFromTokens},
+{\secref\PrintingComplexes}
+
+\label Notes::
+
+The input syntax for a \term{complex} with real part $r$ and 
+imaginary part $i$ is \f{\#C($r$ $i$)}.  
+For further details, \seesection\StandardMacroChars.
+
+For every \term{float}, $n$, there is a \term{complex}
+which represents the same mathematical number 
+and which can be obtained by {\tt (COERCE $n$ 'COMPLEX)}.
+
+\endcom%{complex}\ftype{System Class}
+\begincom{real}\ftype{System Class}
+
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+
+\label Class Precedence List::
+\typeref{real},
+\typeref{number},
+\typeref{t}
+
+\label Description::
+
+\Thetype{real} includes all \term{numbers} that
+represent mathematical real numbers, though there are mathematical real
+numbers (\eg irrational numbers) that do not have an exact representation 
+in \clisp.  Only \term{reals} can be ordered using the
+\funref{<}, \funref{>}, \funref{<=}, and \funref{>=} functions.
+
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+The \term{types} \typeref{rational} and \typeref{float} are \term{disjoint}
+\subtypesof{real}.
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+
+\realtypespec{real}
+
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+
+\endcom%{real}\ftype{System Class}
+\begincom{float}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{float},
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{number},
+\typeref{t}
+
+\label Description::
+
+A \term{float}
+is a mathematical rational (but \i{not} a \clisp\ \term{rational})
+of the form
+$s\cdot f\cdot b^{e-p}$,
+where $s$ is $+1$ or $-1$, the \i{sign};
+$b$ is an \term{integer} 
+greater than~1, the \i{base} or \i{radix} of the representation;
+$p$ is a positive \term{integer}, 
+the \i{precision} (in base-$b$ digits) of the \term{float};
+$f$ is a positive \term{integer} 
+between $b^{p-1}$ and
+$b^p-1$ (inclusive), the significand;
+and $e$ is an \term{integer}, the exponent.
+The value of $p$ and the range of~$e$
+depends on the implementation and on the type of \term{float} 
+within that implementation. In addition, there is a floating-point zero;
+depending on the implementation, there can also be a ``minus zero''. If there
+is no minus zero, then $0.0$ and~$-0.0$ are both interpreted as simply a
+floating-point zero.
+{\tt (= 0.0 -0.0)} is always true.  
+If there is a minus zero, {\tt (eql -0.0 0.0)} is \term{false},
+otherwise it is \term{true}.
+
+%!!!
+\reviewer{Barmar: What about IEEE NaNs and infinities?}
+
+%!!!
+\reviewer{RWK: In the following, what is the ``ordering''?  precision? range?
+	  Can there be additional subtypes of float or does ``others'' in the
+	  list of four?}
+
+%% 2.15.0 12
+The \term{types} \typeref{short-float}, \typeref{single-float}, \typeref{double-float}, 
+and \typeref{long-float} are \subtypesof{float}.  Any two of them must be
+either \term{disjoint} \term{types} or the \term{same} \term{type};
+if the \term{same} \term{type}, then any other \term{types} between them in the
+above ordering must also be the \term{same} \term{type}.  For example, 
+if \thetype{single-float} and \thetype{long-float} are the \term{same} \term{type},
+then \thetype{double-float} must be the \term{same} \term{type} also.
+
+\realtypespec{float}
+
+\label See Also::
+
+{\figref\SyntaxForNumericTokens},
+{\secref\NumsFromTokens},
+{\secref\PrintingFloats}
+
+\label Notes::
+
+Note that all mathematical integers are representable not only as
+\clisp\ \term{reals}, but also as \term{complex floats}.  For example,
+possible representations of the mathematical number $1$ 
+include the \term{integer} \f{1},
+        the \term{float} \f{1.0},
+     or the \term{complex} \f{\#C(1.0 0.0)}.  
+
+\endcom%{float}\ftype{System Class}
+\begincom{short-float, single-float, double-float, long-float}\ftype{Type}
+
+\label Supertypes:: 
+
+\typeref{short-float}: 
+ \typeref{short-float},
+ \typeref{float}, 
+ \issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+ \typeref{real},
+ \endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+ \typeref{number},
+ \typeref{t}
+
+\typeref{single-float}: 
+ \typeref{single-float},
+ \typeref{float}, 
+ \issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+ \typeref{real},
+ \endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+ \typeref{number},
+ \typeref{t}
+
+\typeref{double-float}: 
+ \typeref{double-float},
+ \typeref{float}, 
+ \issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+ \typeref{real},
+ \endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+ \typeref{number},
+ \typeref{t}
+
+\typeref{long-float}: 
+ \typeref{long-float},
+ \typeref{float}, 
+ \issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+ \typeref{real},
+ \endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+ \typeref{number},
+ \typeref{t}
+
+\label Description::
+
+For the four defined \subtypesof{float}, it is true that
+%% 2.1.3 6
+intermediate between \thetype{short-float} and \thetype{long-float} are
+\thetype{single-float} and \thetype{double-float}.
+The precise definition of these categories is 
+%Changed from CLtL "\term{implementation-dependent}" by KMP per suggestion of Barmar.
+%Every implementation has to implement all the float-xxx inspection functions
+%anyway, so it's not really possible for an implementation to be wishy-washy
+%on this issue.
+\term{implementation-defined}.
+The precision (measured in ``bits'', computed as $p\log\sub{2}b$)
+and the exponent size (also measured in ``bits,'' computed as
+$\log\sub{2}(n+1)$, where $n$ is the maximum exponent value) is recommended
+to be at least as great
+as the values in \thenextfigure. 
+Each of the defined \subtypesof{float} might or might not have a minus zero.
+
+\showthree{Recommended Minimum Floating-Point Precision and Exponent Size}{
+\hfil\b{Format}&
+     \b{Minimum Precision}&
+     \b{Minimum Exponent Size}\cr
+\noalign{\vskip 2pt\hrule\vskip 2pt}
+Short  & 13 bits & 5 bits\cr
+Single & 24 bits & 8 bits\cr                             
+Double & 50 bits & 8 bits\cr                         
+Long   & 50 bits & 8 bits\cr
+}
+
+%% 2.1.3 10
+%% 2.1.3 11
+%% 2.1.3 18
+There can be fewer than four internal 
+representations for \term{floats}. 
+If there are fewer distinct representations, the following rules apply:
+\beginlist
+\itemitem{--} If there is only one, it is 
+%"of" removed -kmp 6-Jan-91
+\thetype{single-float}.
+In this representation, an \term{object} is simultaneously of \term{types} 
+\typeref{single-float}, \typeref{double-float}, \typeref{short-float}, 
+and \typeref{long-float}.
+\itemitem{--} Two internal representations can be arranged in either of the
+following ways:
+\beginlist
+\itemitem{\bull} Two \term{types} are provided: \typeref{single-float} and
+\typeref{short-float}.  An \term{object} is simultaneously 
+of \term{types} \typeref{single-float}, \typeref{double-float}, and \typeref{long-float}.
+\itemitem{\bull} Two \term{types} are provided: \typeref{single-float} and
+\typeref{double-float}. An \term{object} is simultaneously of \term{types}
+\typeref{single-float} and \typeref{short-float}, or
+\typeref{double-float} and \typeref{long-float}.
+\endlist
+\itemitem{--} Three internal representations can be arranged in either
+of the following ways:
+\beginlist
+\itemitem{\bull} Three \term{types} are provided: \typeref{short-float}, 
+\typeref{single-float}, and \typeref{double-float}.
+An \term{object} can simultaneously be of \term{type} \typeref{double-float}
+and \typeref{long-float}.
+\itemitem{\bull} Three \term{types} are provided: 
+\typeref{single-float}, \typeref{double-float},
+and \typeref{long-float}. An \term{object} can simultaneously
+be of \term{types} \typeref{single-float} and \typeref{short-float}.
+\endlist
+\endlist          
+
+\label Compound Type Specifier Kind::
+
+Abbreviating.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.6.0 8                         
+%% 4.6.0 9
+
+\Deftype{short-float}{\ttbrac{short-lower-limit   \brac{short-upper-limit}}}
+\Deftype{single-float}{\ttbrac{single-lower-limit \brac{single-upper-limit}}}
+\Deftype{double-float}{\ttbrac{double-lower-limit \brac{double-upper-limit}}}
+\Deftype{long-float}{\ttbrac{long-lower-limit     \brac{long-upper-limit}}}
+
+\label Compound Type Specifier Arguments::
+
+\param{short-lower-limit}, \param{short-upper-limit}---\term{interval designators} 
+					   for \term{type} \typeref{short-float}.
+ \DefaultEach{\param{lower-limit} and \param{upper-limit}}{the \term{symbol} \misc{*}}
+
+\param{single-lower-limit}, \param{single-upper-limit}---\term{interval designators} 
+					   for \term{type} \typeref{single-float}.
+ \DefaultEach{\param{lower-limit} and \param{upper-limit}}{the \term{symbol} \misc{*}}
+
+\param{double-lower-limit}, \param{double-upper-limit}---\term{interval designators} 
+					   for \term{type} \typeref{double-float}.
+ \DefaultEach{\param{lower-limit} and \param{upper-limit}}{the \term{symbol} \misc{*}}
+
+\param{long-lower-limit}, \param{long-upper-limit}---\term{interval designators} 
+					   for \term{type} \typeref{long-float}.
+ \DefaultEach{\param{lower-limit} and \param{upper-limit}}{the \term{symbol} \misc{*}}
+
+\label Compound Type Specifier Description::
+                                                   
+Each of these denotes the set of \term{floats} of the indicated \term{type} 
+that are on the interval specified by the \term{interval designators}.
+
+\endcom%{short-float, single-float, double-float, long-float}\ftype{Type}
+\begincom{rational}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{rational},
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{number},
+\typeref{t}
+
+\label Description::
+
+The canonical representation of a \term{rational} 
+is as an \term{integer} if its value is integral,
+and otherwise as a \term{ratio}.
+
+%% 2.15.0 8            
+The \term{types} \typeref{integer} and \typeref{ratio} 
+are \term{disjoint} \subtypesof{rational}.
+
+\realtypespec{rational}
+
+\endcom%{rational}\ftype{System Class}
+\begincom{ratio}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{ratio},
+\typeref{rational},
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{number},
+\typeref{t}
+
+\label Description::
+
+A \term{ratio} is a \term{number} 
+representing the mathematical ratio of two non-zero integers,
+the numerator and denominator,
+whose greatest common divisor is one,
+and of which the denominator is positive and greater than one.
+            
+\label See Also::
+
+{\figref\SyntaxForNumericTokens},
+{\secref\NumsFromTokens},
+{\secref\PrintingRatios}
+
+%% 2.1.1 1
+
+\endcom%{ratio}\ftype{System Class}
+\begincom{integer}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{integer},
+\typeref{rational},
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{number},
+\typeref{t}
+
+\label Description::
+
+An \term{integer} is a mathematical integer. There is no limit on the 
+magnitude of an \term{integer}.
+
+\issue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+%% 2.15.0 10                                
+The \term{types} \typeref{fixnum} and \typeref{bignum} 
+form an \term{exhaustive partition} of \term{type} \typeref{integer}.
+%are \term{disjoint} \subtypesof{integer}.
+\endissue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+
+%% 2.1.1 2
+
+\realtypespec{integer}
+
+\label See Also::
+
+{\figref\SyntaxForNumericTokens},
+{\secref\NumsFromTokens},
+{\secref\PrintingIntegers}
+
+\label Notes::
+
+The \term{type} \f{(integer \i{lower} \i{upper})},
+where \i{lower} and \i{upper} 
+are \funref{most-negative-fixnum} and \funref{most-positive-fixnum}, respectively,
+is also called \typeref{fixnum}.
+
+The \term{type} \f{(integer 0 1)} is also called \typeref{bit}.
+The \term{type} \f{(integer 0 *)} is also called \typeref{unsigned-byte}.
+
+\endcom%{integer}\ftype{System Class}
+\begincom{signed-byte}\ftype{Type}
+
+%Added per Barrett's suggestion. -kmp 23-Oct-90
+
+\label Supertypes:: 
+
+\typeref{signed-byte},
+\typeref{integer},
+\typeref{rational},
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{number},
+\typeref{t}
+
+\label Description::
+
+The atomic \term{type specifier} \typeref{signed-byte} denotes the same 
+type as is denoted by the \term{type specifier} \typeref{integer};
+however, the list forms of these two \term{type specifiers} have different semantics.
+
+%!!! Barrett thinks this syntax spec needs work.
+
+\label Compound Type Specifier Kind::
+
+Abbreviating.
+
+\label Compound Type Specifier Syntax::
+
+\Deftype{signed-byte}{\ttbrac{s | \misc{*}}}
+
+\label Compound Type Specifier Arguments::
+
+\param{s}---a positive \term{integer}.
+
+\label Compound Type Specifier Description::
+
+%% 4.6.0 5                             
+%\itemitem{\f{(signed-byte \param{s})}}
+
+This denotes the set of \term{integers} that can be represented
+in two's-complement form in a \term{byte} of \param{s} bits.  This is
+equivalent to \f{(integer $-2^{s-1}$ $2^{s-1}-1$)}.  The type
+\typeref{signed-byte} or the type \f{(signed-byte *)} is the same
+as \thetype{integer}.
+
+
+\endcom%{signed-byte}\ftype{Type}
+\begincom{unsigned-byte}\ftype{Type}
+
+%Added per Barrett's suggestion. -kmp 23-Oct-90
+
+\label Supertypes:: 
+
+\typeref{unsigned-byte},
+\typeref{signed-byte},
+\typeref{integer},
+\typeref{rational},
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{number},
+\typeref{t}
+
+\label Description::
+
+%!!! Barrett thinks this should be more consistent with presentation of signed-byte.
+%!!! Barrett thinks we should be more careful about whitespace in the exponents here.
+The atomic \term{type specifier} \typeref{unsigned-byte} denotes the same 
+type as is denoted by the \term{type specifier} \f{(integer 0 *)}.  
+%% Barmar notes that this is redundant with what's said below.
+% The \term{type specifier} {\tt (unsigned-byte \param{s})} is equivalent to 
+% {\tt (integer 0 $2^s-1$)}.
+
+\label Compound Type Specifier Kind::
+
+Abbreviating.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.6.0 6
+\Deftype{unsigned-byte}{\ttbrac{\param{s} | \misc{*}}}
+
+\label Compound Type Specifier Arguments::
+
+% The "positive" was suggested by Barmar, and seems consistent with signed-byte.
+%  -kmp 20-Oct-91
+\param{s}---a positive \term{integer}.
+
+\label Compound Type Specifier Description::
+
+This denotes the set of non-negative \term{integers} that can be
+represented in a byte of size \param{s} (bits).  
+This is equivalent 
+to \f{(mod \param{m})} for $\hbox{\param{m}}=2^s$, or
+to \f{(integer 0 \param{n})} for $\hbox{\param{n}}=2^s-1$.
+\Thetype{unsigned-byte} or 
+the type \f{(unsigned-byte *)} is the same as
+the type \f{(integer 0 *)}, the set of non-negative \term{integers}.
+
+\label Notes::
+
+The \term{type} \f{(unsigned-byte 1)} is also called \typeref{bit}.
+
+\endcom%{unsigned-byte}\ftype{Type}
+
+%%% ========== MOD
+\begincom{mod}\ftype{Type Specifier}
+
+\label Compound Type Specifier Kind::
+
+Abbreviating.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.6.0 4
+\Deftype{mod}{n}
+
+\label Compound Type Specifier Arguments::
+
+\param{n}---a positive \term{integer}.
+
+\label Compound Type Specifier Description::
+                                                         
+This denotes the set of non-negative \term{integers} less than \param{n}.
+This is equivalent to 
+  \f{(integer 0 (\param{n}))}
+or to
+  \f{(integer 0 \param{m})},
+where $\hbox{\param{m}}=\hbox{\param{n}}-1$.
+
+\issue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+The argument is required, and cannot be \misc{*}.
+
+The symbol \typeref{mod} is not valid as a \term{type specifier}.
+\endissue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+
+\endcom%{mod}\ftype{Type Specifier}
+
+%%% ========== BIT
+\begincom{bit}\ftype{Type}
+
+%Added per Barrett's suggestion. -kmp 23-Oct-90
+
+\label Supertypes:: 
+
+\typeref{bit},
+\typeref{unsigned-byte},
+\typeref{signed-byte},
+\typeref{integer},
+\typeref{rational},
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{number},
+\typeref{t}
+
+\label Description::
+
+\Thetype{bit} is equivalent to the \term{type} \f{(integer 0 1)}
+and \f{(unsigned-byte 1)}.
+
+\endcom%{bit}\ftype{Type}
+
+%%% ========== FIXNUM
+\begincom{fixnum}\ftype{Type}
+
+\label Supertypes:: 
+
+\typeref{fixnum},
+\typeref{integer},
+\typeref{rational},
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{number},
+\typeref{t}
+
+\label Description::
+
+A \term{fixnum} is an \term{integer} whose value is between 
+\conref{most-negative-fixnum} and \conref{most-positive-fixnum} inclusive.
+Exactly which \term{integers} are \term{fixnums} is 
+% CLtL said "\term{implementation-dependent}" but Barmar suggested (and I agree)
+% that implementations should say. -kmp 10-Oct-90
+\term{implementation-defined}.
+\issue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+The \term{type} \typeref{fixnum} is required to be a supertype of
+\f{(signed-byte 16)}.
+\endissue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+
+%Barrett thinks maybe some intentional information about fixnums
+%(e.g., about efficiency) might belong here.  I don't that kind of thing is
+%appropriate so I haven't added it. -kmp 23-Oct-90
+
+\endcom%{fixnum}\ftype{Type}
+
+%%% ========== BIGNUM
+\begincom{bignum}\ftype{Type}
+
+\label Supertypes:: 
+
+\typeref{bignum},
+\typeref{integer},
+\typeref{rational},
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\typeref{number},
+\typeref{t}
+
+\label Description::
+
+\issue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+\Thetype{bignum} is defined to be exactly \f{(and integer (not fixnum))}.
+\endissue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+
+%% 2.2.4 1
+
+\endcom%{bignum}\ftype{Type}
+
+%-------------------- Numeric Comparison --------------------
+
+%%% ========== =
+%%% ========== /=
+%%% ========== <
+%%% ========== >
+%%% ========== >=
+%%% ========== <=
+\begincom{=, /=, <, >, <=, >=}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues  = {{\rest} \plus{numbers}} {generalized-boolean}
+\DefunWithValues /= {{\rest} \plus{numbers}} {generalized-boolean}
+\DefunWithValues  < {{\rest} \plus{numbers}} {generalized-boolean}
+\DefunWithValues  > {{\rest} \plus{numbers}} {generalized-boolean}
+\DefunWithValues <= {{\rest} \plus{numbers}} {generalized-boolean}
+\DefunWithValues >= {{\rest} \plus{numbers}} {generalized-boolean}
+
+%!!! Issue CONTAGION-ON-NUMERICAL-COMPARISONS still needs to be merged? -kmp 9-Aug-91
+
+\label Arguments and Values::
+
+\param{number}---for \funref{<}, \funref{>}, \funref{<=}, \funref{>=}: a \term{real};
+		 for \funref{=}, \funref{/=}: a \term{number}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+\funref{=}, \funref{/=}, \funref{<}, \funref{>}, \funref{<=}, and \funref{>=} 
+perform arithmetic comparisons on their arguments as follows:
+
+\beginlist
+\itemitem{\funref{=}} 
+
+The value of \funref{=} is \term{true} if all \param{numbers} are the same in value;
+otherwise it is \term{false}.
+Two \term{complexes} are considered equal by \funref{=}
+if their real and imaginary parts are equal according to \funref{=}.
+                                         
+\itemitem{\funref{/=}} 
+
+The value of \funref{/=} is \term{true} if no two \param{numbers} are the same in value;
+otherwise it is \term{false}.
+
+\itemitem{\funref{<}} 
+
+The value of \funref{<} is \term{true} if the \param{numbers} are in monotonically increasing order;
+otherwise it is \term{false}.
+
+\itemitem{\funref{>}} 
+
+The value of \funref{>} is \term{true} if the \param{numbers} are in monotonically decreasing order;
+otherwise it is \term{false}.
+
+\itemitem{\funref{<=}} 
+
+The value of \funref{<=} is \term{true} if the \param{numbers} are in monotonically 
+ nondecreasing order;
+otherwise it is \term{false}.
+
+\itemitem{\funref{>=}} 
+
+The value of \funref{>=} is \term{true} if the \param{numbers} are in monotonically
+ nonincreasing order;
+otherwise it is \term{false}.
+\endlist
+
+\funref{=}, \funref{/=}, \funref{<}, \funref{>}, \funref{<=}, and \funref{>=} 
+perform necessary type conversions. 
+
+\label Examples::
+
+The uses of these functions are illustrated in \thenextfigure.
+%% 12.3.0 4
+
+\showtwo{Uses of /=, =, <, >, <=, and >=}{
+\f{(= 3 3)} is \term{true}.              & \f{(/= 3 3)} is \term{false}.            \cr
+\f{(= 3 5)} is \term{false}.             & \f{(/= 3 5)} is \term{true}.             \cr
+\f{(= 3 3 3 3)} is \term{true}.          & \f{(/= 3 3 3 3)} is \term{false}.        \cr
+\f{(= 3 3 5 3)} is \term{false}.         & \f{(/= 3 3 5 3)} is \term{false}.        \cr
+\f{(= 3 6 5 2)} is \term{false}.         & \f{(/= 3 6 5 2)} is \term{true}.         \cr
+\f{(= 3 2 3)} is \term{false}.           & \f{(/= 3 2 3)} is \term{false}.          \cr
+\f{(< 3 5)} is \term{true}.              & \f{(<= 3 5)} is \term{true}.             \cr
+\f{(< 3 -5)} is \term{false}.            & \f{(<= 3 -5)} is \term{false}.           \cr
+\f{(< 3 3)} is \term{false}.             & \f{(<= 3 3)} is \term{true}.             \cr
+\f{(< 0 3 4 6 7)} is \term{true}.        & \f{(<= 0 3 4 6 7)} is \term{true}.       \cr
+\f{(< 0 3 4 4 6)} is \term{false}.       & \f{(<= 0 3 4 4 6)} is \term{true}.       \cr
+\f{(> 4 3)} is \term{true}.              & \f{(>= 4 3)} is \term{true}.             \cr
+\f{(> 4 3 2 1 0)} is \term{true}.        & \f{(>= 4 3 2 1 0)} is \term{true}.       \cr
+\f{(> 4 3 3 2 0)} is \term{false}.       & \f{(>= 4 3 3 2 0)} is \term{true}.       \cr
+\f{(> 4 3 1 2 0)} is \term{false}.       & \f{(>= 4 3 1 2 0)} is \term{false}.      \cr
+\f{(= 3)} is \term{true}.                & \f{(/= 3)} is \term{true}.               \cr
+\f{(< 3)} is \term{true}.                & \f{(<= 3)} is \term{true}.               \cr
+\f{(= 3.0 \#c(3.0 0.0))} is \term{true}. & \f{(/= 3.0 \#c(3.0 1.0))} is \term{true}.\cr
+\f{(= 3 3.0)} is \term{true}.            & \f{(= 3.0s0 3.0d0)} is \term{true}.      \cr
+\f{(= 0.0 -0.0)} is \term{true}.         & \f{(= 5/2 2.5)} is \term{true}.          \cr
+\f{(> 0.0 -0.0)} is \term{false}.        & \f{(= 0 -0.0)} is \term{true}.           \cr
+\f{(<= 0 x 9)}          is \term{true} if \f{x} is between \f{0} and \f{9}, 
+			 inclusive\span\cr
+\f{(< 0.0 x 1.0)}       is \term{true} if \f{x} is between \f{0.0} and \f{1.0}, 
+			 exclusive\span\cr
+\f{(< -1 j (length v))} is \term{true} if \f{j} is a \term{valid array index} for
+			 a \term{vector} \f{v}\span\cr
+}
+
+\label Affected By:\None.                 
+
+\label Exceptional Situations::
+
+Might signal \typeref{type-error} if some \term{argument} is not a \term{real}.
+Might signal \typeref{arithmetic-error} if otherwise unable to fulfill its contract.
+
+\label See Also:\None.
+
+\label Notes::
+
+\funref{=} differs from \funref{eql} in that
+\f{(= 0.0 -0.0)} is always true,
+because \funref{=} compares the mathematical values of its operands,
+whereas \funref{eql} compares the representational values, so to speak.
+
+\endcom
+
+%%% ========== MAX
+%%% ========== MIN
+\begincom{max, min}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues max {{\rest} \plus{reals}} {max-real}
+\DefunWithValues min {{\rest} \plus{reals}} {min-real}
+
+\label Arguments and Values::
+
+\param{real}---a \term{real}.
+
+\param{max-real}, \param{min-real}---a \term{real}.
+
+\label Description::
+
+%% 12.3.0 8
+\funref{max} returns the \param{real} that is greatest (closest to positive infinity).
+\funref{min} returns the \param{real} that is least (closest to negative infinity).
+
+For \funref{max},
+the implementation has the choice of returning the largest
+argument as is or applying the rules of floating-point \term{contagion},
+taking all the arguments into consideration for \term{contagion} purposes.
+Also, if one or more of the arguments are \funref{=}, then any one
+of them may be chosen as the value to return.
+For example, if the \param{reals} are a mixture of \term{rationals} and \term{floats},
+and the largest argument is a \term{rational},
+then the implementation is free to
+produce either that \term{rational} 
+or its \term{float} approximation;
+if the largest argument is a 
+\term{float} of a smaller format
+than the largest format of any \term{float} argument,
+then the implementation is free to
+return the argument in its given format or expanded to the larger format.
+Similar remarks apply to \funref{min} 
+(replacing ``largest argument'' by ``smallest argument'').
+
+\label Examples::
+
+%% 12.3.0 9
+\code
+ (max 3) \EV 3 
+ (min 3) \EV 3
+ (max 6 12) \EV 12 
+ (min 6 12) \EV 6
+ (max -6 -12) \EV -6 
+ (min -6 -12) \EV -12
+ (max 1 3 2 -7) \EV 3 
+ (min 1 3 2 -7) \EV -7
+ (max -2 3 0 7) \EV 7 
+ (min -2 3 0 7) \EV -2
+ (max 5.0 2) \EV 5.0 
+ (min 5.0 2)
+\EV 2
+\OV 2.0
+ (max 3.0 7 1)
+\EV 7
+\OV 7.0 
+ (min 3.0 7 1)
+\EV 1
+\OV 1.0
+ (max 1.0s0 7.0d0) \EV 7.0d0
+ (min 1.0s0 7.0d0)
+\EV 1.0s0
+\OV 1.0d0
+ (max 3 1 1.0s0 1.0d0)
+\EV 3
+\OV 3.0d0
+ (min 3 1 1.0s0 1.0d0)
+\EV 1
+\OV 1.0s0 
+\OV 1.0d0
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldcheckanytype{number}{a \term{real}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom                 
+
+%%% ========== MINUSP
+%%% ========== PLUSP
+\begincom{minusp, plusp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues minusp {real} {generalized-boolean}
+
+\DefunWithValues plusp {real} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{real}---a \term{real}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 12.2.0 4
+%% 12.2.0 5
+\NamedPredicate{minusp}{real}{less than zero}
+                  
+\NamedPredicate{plusp}{real}{greater than zero}
+
+Regardless of whether an \term{implementation} provides distinct
+representations for positive and negative \term{float} zeros,
+\f{(minusp -0.0)} always returns \term{false}.
+
+\label Examples::
+\code
+ (minusp -1) \EV \term{true}
+ (plusp 0) \EV \term{false}
+ (plusp least-positive-single-float) \EV \term{true}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{real}{a \term{real}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== ZEROP
+\begincom{zerop}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues zerop {number} {generalized-boolean}
+
+\label Pronunciation::
+
+\pronounced{\Stress{z\harde}(\stress{})r\hardo{}(\stress{})p\harde}
+
+\label Arguments and Values::
+
+\param{number}---a \term{number}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 12.2.0 3
+\Predicate{number}{zero (\term{integer}, \term{float}, or \term{complex})}
+
+Regardless of whether an \term{implementation} provides distinct representations
+for positive and negative floating-point zeros, \f{(zerop -0.0)} 
+always returns \term{true}.
+
+\label Examples::
+
+\code
+ (zerop 0) \EV \term{true}
+ (zerop 1) \EV \term{false}
+ (zerop -0.0) \EV \term{true}
+ (zerop 0/100) \EV \term{true}
+ (zerop #c(0 0.0)) \EV \term{true}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{number}{a \term{number}}
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (zerop \param{number}) \EQ (= \param{number} 0)
+\endcode
+
+\endcom
+
+%-------------------- Rounding --------------------
+
+%%% ========== FLOOR
+%%% ========== CEILING
+%%% ========== TRUNCATE
+%%% ========== ROUND
+%%% ========== FFLOOR
+%%% ========== FCEILING
+%%% ========== FTRUNCATE
+%%% ========== FROUND
+\begincom{floor, ffloor, ceiling, fceiling,
+	  truncate, ftruncate, round, fround}\ftype{Function}
+
+\label Syntax::
+
+\DefunMultiWithValues {number {\opt} divisor} {quotient, remainder}
+  {\entry{floor}
+   \entry{ffloor}
+   \entry{ceiling}
+   \entry{fceiling}
+   \entry{truncate}
+   \entry{ftruncate}
+   \entry{round}
+   \entry{fround}}
+
+\label Arguments and Values::
+
+\param{number}---a \term{real}.
+
+\param{divisor}---a non-zero \term{real}.
+ \Default{the \term{integer} \f{1}}
+
+\param{quotient}---for \funref{floor}, \funref{ceiling}, 
+		       \funref{truncate}, and \funref{round}: an \term{integer};
+		   for \funref{ffloor}, \funref{fceiling}, 
+		       \funref{ftruncate}, and \funref{fround}: a \term{float}.
+
+\param{remainder}---a \term{real}.
+
+\label Description::
+
+%% 12.6.0 16
+These functions divide \param{number} by \param{divisor}, 
+returning a \param{quotient} and \param{remainder}, such that 
+
+\quad\param{quotient}\centerdot \param{divisor}+\param{remainder}=\param{number}
+
+The \param{quotient} always represents a mathematical integer.
+% For \funref{floor}, \funref{ceiling}, \funref{truncate}, and \funref{floor},
+% the \param{quotient} is represented as an \term{integer}.
+% For \funref{ffloor}, \funref{fceiling}, \funref{ftruncate}, and \funref{ffloor},
+% the \param{quotient} is represented as a \term{float}.
+When more than one mathematical integer might be possible
+ (\ie when the remainder is not zero),
+the kind of rounding or truncation depends on the \term{operator}:
+
+\beginlist
+
+\itemitem{\funref{floor}, \funref{ffloor}}
+
+%% 12.6.0 11
+\funref{floor} and \funref{ffloor} produce a \param{quotient} 
+that has been truncated toward negative infinity;
+that is, the \param{quotient} represents the largest mathematical integer
+that is not larger than the mathematical quotient.
+
+\itemitem{\funref{ceiling}, \funref{fceiling}}
+
+%% 12.6.0 12
+\funref{ceiling} and \funref{fceiling} produce a \param{quotient}
+that has been truncated toward positive infinity;
+that is, the \param{quotient} represents the smallest mathematical integer
+that is not smaller than the mathematical result.
+
+\itemitem{\funref{truncate}, \funref{ftruncate}}
+
+%% 12.6.0 13
+\funref{truncate} and \funref{ftruncate} produce a \param{quotient}
+that has been truncated towards zero;
+that is, the \param{quotient} represents the mathematical integer
+of the same sign as the mathematical quotient, and
+that has the greatest integral magnitude not greater than that of the mathematical quotient.
+
+\itemitem{\funref{round}, \funref{fround}}
+
+%% 12.6.0 14
+\funref{round} and \funref{fround} produce a \param{quotient}
+that has been rounded to the nearest mathematical integer;
+if the mathematical quotient is exactly halfway between two integers,
+(that is, it has the form \i{integer}+$1\over2$),
+then the \param{quotient} has been rounded to the even (divisible by two) integer.
+
+\endlist
+
+%!!! Cross reference
+All of these functions perform type conversion operations on \param{numbers}.
+
+The \param{remainder}
+is an \term{integer}  if both   \f{x} and \f{y} are \term{integers},
+is a  \term{rational} if both   \f{x} and \f{y} are \term{rationals}, and
+is a  \term{float}    if either \f{x} or  \f{y} is  a \term{float}.
+
+\funref{ffloor}, \funref{fceiling}, \funref{ftruncate}, and \funref{fround} 
+handle arguments of different \term{types} in the following way:
+If  \param{number}  is     a \term{float},
+and \param{divisor} is not a \term{float} of longer format,
+then the first result is a \term{float} of the same \term{type} as \param{number}.
+Otherwise, the first result is of the \term{type} determined by \term{contagion} rules;
+\seesection\NumericContagionRules.
+
+\label Examples::
+
+\code
+ (floor 3/2) \EV 1, 1/2
+ (ceiling 3 2) \EV 2, -1
+ (ffloor 3 2) \EV 1.0, 1
+ (ffloor -4.7) \EV -5.0, 0.3
+ (ffloor 3.5d0) \EV 3.0d0, 0.5d0
+ (fceiling 3/2) \EV 2.0, -1/2
+ (truncate 1) \EV 1, 0
+ (truncate .5) \EV 0, 0.5
+ (round .5) \EV 0, 0.5
+ (ftruncate -7 2) \EV -3.0, -1
+ (fround -7 2) \EV -4.0, 1
+ (dolist (n '(2.6 2.5 2.4 0.7 0.3 -0.3 -0.7 -2.4 -2.5 -2.6))
+   (format t "~&~4,1@F ~2,' D ~2,' D ~2,' D ~2,' D"
+           n (floor n) (ceiling n) (truncate n) (round n)))
+\OUT +2.6  2  3  2  3
+\OUT +2.5  2  3  2  2
+\OUT +2.4  2  3  2  2
+\OUT +0.7  0  1  0  1
+\OUT +0.3  0  1  0  0
+\OUT -0.3 -1  0  0  0
+\OUT -0.7 -1  0  0 -1
+\OUT -2.4 -3 -2 -2 -2
+\OUT -2.5 -3 -2 -2 -2
+\OUT -2.6 -3 -2 -2 -3
+\EV NIL
+\endcode
+%% ^-- 12.6.0 15
+
+\label Side Effects:\None.             
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes::
+
+%% 12.6.0 18
+When only \param{number} is given, the two results are exact;
+the mathematical sum of the two results is always equal to the
+mathematical value of \param{number}.
+
+%% 12.6.0 17
+\f{(\i{function} \param{number} \param{divisor})}
+and \f{(\i{function} (/ \param{number} \param{divisor}))}
+(where \i{function} is any of one
+of \funref{floor}, \funref{ceiling}, \funref{ffloor}, 
+\funref{fceiling}, \funref{truncate}, 
+\funref{round}, \funref{ftruncate}, and \funref{fround})
+return the same first value, but
+they return different remainders as the second value. For example:
+
+\code
+ (floor 5 2) \EV 2, 1
+ (floor (/ 5 2)) \EV 2, 1/2
+\endcode
+
+If an effect is desired that is similar to \funref{round},
+but that always rounds up or down (rather than toward the nearest even integer) 
+if the mathematical quotient is exactly halfway between two integers, 
+the programmer should consider a construction such as
+    \f{(floor (+ x 1/2))}
+ or \f{(ceiling (- x 1/2))}.
+
+\endcom
+
+
+%-------------------- Trig --------------------
+
+%%% ========== SIN
+%%% ========== COS
+%%% ========== TAN
+\begincom{sin, cos, tan}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues sin {radians} {number}
+\DefunWithValues cos {radians} {number}
+\DefunWithValues tan {radians} {number}
+
+\label Arguments and Values::
+
+\param{radians}---a \term{number} given in radians.
+
+\param{number}---a \term{number}.
+
+\label Description::
+
+%% 12.5.2 14
+\funref{sin}, \funref{cos}, and \funref{tan} 
+return the sine, cosine, and tangent, respectively, of \param{radians}.
+
+\label Examples::
+
+\code
+ (sin 0) \EV 0.0
+ (cos 0.7853982) \EV 0.707107
+ (tan #c(0 1)) \EV #C(0.0 0.761594)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{radians}{a \term{number}}
+Might signal \typeref{arithmetic-error}.
+
+\label See Also::
+
+
+\funref{asin},
+\funref{acos},
+\funref{atan},
+{\secref\FloatSubstitutability}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== ACOS
+%%% ========== ASIN
+%%% ========== ATAN
+\begincom{asin, acos, atan}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues asin {number} {radians}
+\DefunWithValues acos {number} {radians}
+\DefunWithValues atan {number1 {\opt} number2} {radians}
+
+\label Arguments and Values::
+
+\param{number}---a \term{number}.
+
+\param{number1}---a \term{number} if \param{number2} is not supplied,
+	       or a \term{real}   if \param{number2} is     supplied.
+
+\param{number2}---a \term{real}.
+
+\param{radians}---a \term{number} (of radians).
+
+\label Description::
+
+%% 12.5.2 17
+\funref{asin}, \funref{acos}, and \funref{atan}
+compute the arc sine, arc cosine, and arc tangent respectively.
+
+%% 12.5.2 18
+The arc sine, arc cosine, and arc tangent (with only \param{number1} supplied)
+functions can be defined mathematically for
+\param{number} or \param{number1} specified as \i{x} as in \thenextfigure.
+
+\issue{COMPLEX-ATANH-BOGUS-FORMULA:TWEAK-MORE}
+\tablefigtwo{Mathematical definition of arc sine, arc cosine, and arc tangent}%
+{Function}{Definition}{
+Arc sine    & $ -i\ \ff{log} \bigl(ix+     \sqrt{1-x^2}     \bigr) $ \cr
+% --sjl 4 Mar 92
+%Arc cosine  & $ -i\ \ff{log} \bigl(x+i\    \sqrt{1-x^2}     \bigr) $ \cr
+Arc cosine  & $ (\pi/2) - \ff{arcsin} x $ \cr
+Arc tangent & $ -i\ \ff{log} \bigl((1+ix)\ \sqrt{1/(1+x^2)} \bigr) $ \cr
+}
+\endissue{COMPLEX-ATANH-BOGUS-FORMULA:TWEAK-MORE}
+
+%% Barmar points out that these definitions are already given in the definitions
+%  of log and sqrt, so there's no need to repeat them here. -kmp 19-Dec-90
+% where
+% \issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+% \f{(log \i{x}) = (complex (log (abs \i{x})) (phase \i{x}))} and
+% \f{(sqrt \i{x}) = (exp (/ (log \i{x}) 2))}.
+% \endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+
+%% 12.5.2 19
+These formulae are mathematically correct, assuming
+completely accurate computation. They are not necessarily
+the simplest ones for real-valued computations. 
+
+%% 12.5.2 21
+%% 12.5.2 23
+If both \param{number1} and \param{number2} are supplied
+for \funref{atan}, the result is the arc tangent 
+of \hbox{\param{number1}/\param{number2}}.
+The value of \funref{atan} is always between
+$-\pi$ (exclusive) and~$\pi$ (inclusive)
+\issue{COMPLEX-ATAN-BRANCH-CUT:TWEAK}                
+ when minus zero is not supported.
+The range of the two-argument arc tangent when minus zero is supported
+includes $-\pi$.
+\endissue{COMPLEX-ATAN-BRANCH-CUT:TWEAK}                
+
+For a 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{real}
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\param{number1}, 
+the result is 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+a \term{real}
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+and lies between
+$-\pi/2$ and~$\pi/2$ (both exclusive).
+\param{number1} can be a \term{complex} if \param{number2}
+is not supplied. If both are supplied, \param{number2} can be zero provided
+\param{number1} is not zero.  
+\reviewer{Barmar: Should add ``However, if the implementation distinguishes 
+		  positive and negative zero, both may be signed zeros, 
+		  and limits are used to define the result.''}
+
+%% 12.5.3 11
+The following definition for arc sine determines the range and
+branch cuts:
+
+$$ \ff{arcsin} z = -i\ \ff{log} \Bigl(iz+\sqrt{1-z^2}\Bigr) $$
+
+The branch cut for the arc sine function is in two pieces:
+one along the negative real axis to the left of~$-1$
+(inclusive), continuous with quadrant II, and one along the positive real
+axis to the right of~$1$ (inclusive), continuous with quadrant IV.  The
+range is that strip of the complex plane containing numbers whose real
+part is between $-\pi/2$ and~$\pi/2$.  A number with real
+part equal to $-\pi/2$ is in the range if and only if its imaginary
+part is non-negative; a number with real part equal to $\pi/2$ is in
+the range if and only if its imaginary part is non-positive.
+
+%% 12.5.3 12
+The following definition for arc cosine determines the range and
+branch cuts:
+
+% --sjl 4 Mar 92
+\issue{COMPLEX-ATANH-BOGUS-FORMULA:TWEAK-MORE}
+% $$ \ff{arccos} z = -i\ \ff{log} \Bigl(z+i\ \sqrt{1-z^2}\Bigr) $$
+%
+%or, which is equivalent,
+%
+% $$ \ff{arccos} z = {\pi\over2}- \ff{arcsin} z.$$
+
+$$ \ff{arccos} z = {\pi\over2}- \ff{arcsin} z$$
+
+or, which are equivalent,
+
+$$ \ff{arccos} z = -i\ \ff{log} \Bigl(z+i\ \sqrt{1-z^2}\Bigr) $$
+
+$$ \ff{arccos} z = {{2\ \ff{log} \bigl(\sqrt{(1+z)/2} + i\ \sqrt{(1-z)/2}\bigr)}\over{i}}$$
+\endissue{COMPLEX-ATANH-BOGUS-FORMULA:TWEAK-MORE}
+
+The branch cut for the arc cosine function is in two pieces:
+one along the negative real axis to the left of~$-1$
+(inclusive), continuous with quadrant II, and one along the positive real
+axis to the right of~$1$ (inclusive), continuous with quadrant IV.  
+This is the same branch cut as for arc sine.
+The range is that strip of the complex plane containing numbers whose real
+part is between 0 and~$\pi$.  A number with real
+part equal to 0 is in the range if and only if its imaginary
+part is non-negative; a number with real part equal to $\pi$ is in
+the range if and only if its imaginary part is non-positive.
+
+%% 12.5.3 13
+The following definition for (one-argument) arc tangent determines the
+range and branch cuts:
+
+\issue{COMPLEX-ATAN-BRANCH-CUT:TWEAK}                
+$$ \ff{arctan} z = {{\ff{log} (1+iz) - \ff{log} (1-iz)}\over{2i}} $$
+\endissue{COMPLEX-ATAN-BRANCH-CUT:TWEAK}                
+
+Beware of simplifying this formula; ``obvious'' simplifications are likely
+to alter the branch cuts or the values on the branch cuts incorrectly.
+The branch cut for the arc tangent function is in two pieces:
+one along the positive imaginary axis above $i$
+(exclusive), continuous with quadrant II, and one along the negative imaginary
+axis below $-i$ (exclusive), continuous with quadrant IV.  
+The points $i$ and~$-i$ are excluded from the domain.
+The range is that strip of the complex plane containing numbers whose real
+part is between $-\pi/2$ and~$\pi/2$.  A number with real
+part equal to $-\pi/2$ is in the range if and only if its imaginary
+part is strictly positive; a number with real part equal to $\pi/2$ is in
+the range if and only if its imaginary part is strictly negative.  Thus the range of
+arc tangent is identical to that of arc sine with the points
+$-\pi/2$ and~$\pi/2$ excluded.
+
+For \funref{atan},
+the signs of \param{number1} (indicated as \i{x})
+and \param{number2} (indicated as \i{y}) are used to derive quadrant
+information. \Thenextfigure\ details various special cases.
+\issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+The asterisk (*) indicates that the entry in the figure applies to
+implementations that support minus zero.
+
+\def\Result{\hbox{result}}
+\def\starY{\hbox to 1pc{*\hfil}}
+\def\starN{\hbox to 1pc{\hfil}}
+\tablefigfour{Quadrant information for arc tangent}%
+{\starN\i{y} Condition}{\i{x} Condition}{Cartesian locus}{Range of result}{
+\starN$ y =  0 $ & $ x >  0 $ & Positive x-axis & $ 0$                       \cr
+\starY$ y = +0 $ & $ x >  0 $ & Positive x-axis & $+0$                       \cr
+\starY$ y = -0 $ & $ x >  0 $ & Positive x-axis & $-0$                       \cr
+\starN$ y >  0 $ & $ x >  0 $ & Quadrant I      & $0 < \Result < \pi/2 $     \cr
+\starN$ y >  0 $ & $ x =  0 $ & Positive y-axis & $\pi/2$                    \cr
+\starN$ y >  0 $ & $ x <  0 $ & Quadrant II     & $\pi/2 < \Result < \pi$    \cr
+\starN$ y =  0 $ & $ x <  0 $ & Negative x-axis & $ \pi$                     \cr
+\starY$ y = +0 $ & $ x <  0 $ & Negative x-axis & $+\pi$                     \cr
+\starY$ y = -0 $ & $ x <  0 $ & Negative x-axis & $-\pi$                     \cr
+\starN$ y <  0 $ & $ x <  0 $ & Quadrant III    & $-\pi < \Result < -\pi/2$  \cr
+\starN$ y <  0 $ & $ x =  0 $ & Negative y-axis & $-\pi/2$                   \cr
+\starN$ y <  0 $ & $ x >  0 $ & Quadrant IV     & $-\pi/2 < \Result < 0 $    \cr
+\starN$ y =  0 $ & $ x =  0 $ & Origin          & undefined consequences     \cr
+\starY$ y = +0 $ & $ x = +0 $ & Origin          & $+0$                       \cr
+\starY$ y = -0 $ & $ x = +0 $ & Origin          & $-0$                       \cr
+\starY$ y = +0 $ & $ x = -0 $ & Origin          & $+\pi$                     \cr
+\starY$ y = -0 $ & $ x = -0 $ & Origin          & $-\pi$                     \cr
+}
+\endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+
+\label Examples::
+
+\issue{COMPLEX-ATAN-BRANCH-CUT:TWEAK}
+\code
+ (asin 0) \EV 0.0 
+ (acos #c(0 1))  \EV #C(1.5707963267948966 -0.8813735870195432)
+ (/ (atan 1 (sqrt 3)) 6)  \EV 0.087266 
+ (atan #c(0 2)) \EV #C(-1.5707964 0.54930615)
+\endcode
+\endissue{COMPLEX-ATAN-BRANCH-CUT:TWEAK}                
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\funref{acos} and \funref{asin} \shouldchecktype{number}{a \term{number}}
+\funref{atan} should signal \typeref{type-error} if
+  one argument is supplied and that argument is not a \term{number},
+  or if two arguments are supplied and both of those arguments are not \term{reals}.
+
+\funref{acos}, \funref{asin}, and \funref{atan} might signal \typeref{arithmetic-error}.
+
+\label See Also::
+
+\funref{log},
+\funref{sqrt},
+{\secref\FloatSubstitutability}
+
+\label Notes::
+
+The result of either \funref{asin} or \funref{acos} can be a \term{complex}
+even if \param{number} is not a \term{complex}; this occurs when the 
+absolute value of \param{number} is greater than one.
+
+\endcom
+
+%%% ========== PI
+\begincom{pi}\ftype{Constant Variable}
+
+\label Value:: 
+
+an \term{implementation-dependent} \term{long float}.
+
+\label Description::
+
+%% 12.5.2 28
+The best \term{long float} approximation to the mathematical constant $\pi$.
+
+\label Examples::
+
+\code
+ ;; In each of the following computations, the precision depends 
+ ;; on the implementation.  Also, if `long float' is treated by 
+ ;; the implementation as equivalent to some other float format 
+ ;; (e.g., `double float') the exponent marker might be the marker
+ ;; for that equivalent (e.g., `D' instead of `L').
+ pi \EV 3.141592653589793L0
+ (cos pi) \EV -1.0L0
+
+ (defun sin-of-degrees (degrees)
+   (let ((x (if (floatp degrees) degrees (float degrees pi))))
+     (sin (* x (/ (float pi x) 180)))))
+\endcode
+
+\label See Also:\None.
+
+\label Notes::
+
+An approximation to $\pi$ in some other precision can be obtained
+by writing \f{(float pi x)}, where \f{x} is a \term{float} of the
+desired precision, or by writing \f{(coerce pi \i{type})}, 
+where \i{type} is the desired type, such as \typeref{short-float}.
+
+\endcom
+
+%-------------------- Hyperbolic Trig --------------------
+
+%%% ========== SINH
+%%% ========== COSH
+%%% ========== TANH
+%%% ========== ASINH
+%%% ========== ACOSH
+%%% ========== ATANH
+\begincom{sinh, cosh, tanh, asinh, acosh, atanh}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues sinh  {number} {result}
+\DefunWithValues cosh  {number} {result}
+\DefunWithValues tanh  {number} {result}
+\DefunWithValues asinh {number} {result}
+\DefunWithValues acosh {number} {result}
+\DefunWithValues atanh {number} {result}
+
+\label Arguments and Values:: 
+
+\param{number}---a \term{number}.
+
+\param{result}---a \term{number}.
+
+\label Description::
+
+These functions compute the hyperbolic sine, cosine, tangent,
+arc sine, arc cosine, and arc tangent functions, 
+which are mathematically defined for an argument \i{x}
+as given in \thenextfigure.
+
+\issue{COMPLEX-ATANH-BOGUS-FORMULA:TWEAK-MORE}
+\tablefigtwo{Mathematical definitions for hyperbolic functions}%
+{Function}{Definition}{
+Hyperbolic sine        & $ (e^x-e^{-x})/2                       $ \cr
+Hyperbolic cosine      & $ (e^x+e^{-x})/2                       $ \cr
+Hyperbolic tangent     & $ (e^x-e^{-x})/(e^x+e^{-x})            $ \cr
+Hyperbolic arc sine    & $ \ff{log} (x+\sqrt{1+x^2})            $ \cr
+% --sjl 4 Mar 92
+%Hyperbolic arc cosine  & $ \ff{log} (x+(x+1)\sqrt{(x-1)/(x+1)}) $ \cr
+Hyperbolic arc cosine  & $ 2\ \ff{log} (\sqrt{(x+1)/2} + \sqrt{(x-1)/2}) $ \cr
+% --sjl 4 Mar 92
+%Hyperbolic arc tangent & $ \ff{log} ((1+x)\sqrt{1-1/x^2})       $ \cr
+Hyperbolic arc tangent & $ (\ff{log} (1+x) - \ff{log}(1-x))/2   $ \cr
+}
+\endissue{COMPLEX-ATANH-BOGUS-FORMULA:TWEAK-MORE}
+
+
+%% Not needed. These are defined in the LOG and SQRT functions. -kmp 22-Jan-92
+% where
+% \issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+% \f{(log \i{x}) = (complex (log (abs \i{x})) (phase \i{x}))} and
+% \f{(sqrt \i{x}) = (exp (/ (log \i{x}) 2))}.
+% \endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+
+%% 12.5.3 15
+The following definition for the inverse hyperbolic cosine
+determines the range and branch cuts:
+
+% --sjl 4 mar 92
+\issue{COMPLEX-ATANH-BOGUS-FORMULA:TWEAK-MORE}
+%$$ \ff{arccosh} z = \ff{log} \Bigl(z+(z+1)\sqrt{{{(z-1)}/{(z+1)}}}\Bigr). $$
+$$ \ff{arccosh} z = 2\ \ff{log} \Bigl(\sqrt{(z+1)/2} + \sqrt{(z-1)/2}\Bigr). $$
+\endissue{COMPLEX-ATANH-BOGUS-FORMULA:TWEAK-MORE}
+
+%% This is said in the definitions of LOG and SQRT. -kmp 19-Jan-92
+% where
+% \issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+% \f{(log \i{x}) = (complex (log (abs \i{x})) (phase \i{x}))} and
+% \f{(sqrt \i{x}) = (exp (/ (log \i{x}) 2))}.
+% \endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+
+The branch cut for the inverse hyperbolic cosine function
+lies along the real axis to the left of~$1$ (inclusive), extending
+indefinitely along the negative real axis, continuous with quadrant II
+and (between $0$ and~$1$) with quadrant I.
+The range is that half-strip of the complex plane containing numbers whose
+real part is non-negative and whose imaginary
+part is between $-\pi$ (exclusive) and~$\pi$ (inclusive).
+A number with real part zero is in the range 
+if its imaginary part is between zero (inclusive) and~$\pi$ (inclusive).
+
+%% 12.5.3 14
+The following definition for the inverse hyperbolic sine determines
+the range and branch cuts:
+
+%{\tt arcsinh \i{z}=log (\i{z}+$\sqrt{1+\i{z}^2}$)\/}
+
+$$ \ff{arcsinh} z = \ff{log} \Bigl(z+\sqrt{1+z^2}\Bigr). $$
+
+%% This is said in the definitions of LOG and SQRT. -kmp 19-Jan-92
+% where
+% \issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+% {\tt (log \i{x}) = (complex (log (abs \i{x})) (phase \i{x}))\/} and
+% {\tt (sqrt \i{x}) = (exp (/ (log \i{x}) 2))\/}.
+% \endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+
+
+The branch cut for the inverse hyperbolic sine function is in two pieces:
+one along the positive imaginary axis above $i$
+(inclusive), continuous with quadrant I, and one along the negative imaginary
+axis below $-i$ (inclusive), continuous with quadrant III.
+The range is that strip of the complex plane containing numbers whose imaginary
+part is between $-\pi/2$ and~$\pi/2$.  A number with imaginary
+part equal to $-\pi/2$ is in the range if and only if its real
+part is non-positive; a number with imaginary part equal to $\pi/2$ is in
+the range if and only if its imaginary part is non-negative.
+
+%% 12.5.3 16
+The following definition for the inverse hyperbolic tangent
+determines the range and branch cuts:
+
+% --sjl 4 mar 92
+\issue{COMPLEX-ATANH-BOGUS-FORMULA:TWEAK-MORE}
+%$$ \ff{arctanh} z = \ff{log} \Bigl((1+z) \sqrt{1-1/z^2}\Bigr). $$ 
+$$ \ff{arctanh} z = {{\ff{log} (1+z) - \ff{log} (1-z)}\over{2}}. $$ 
+
+Note that:
+
+$$ i\ \ff{arctan} z = \ff{arctanh} iz. $$
+\endissue{COMPLEX-ATANH-BOGUS-FORMULA:TWEAK-MORE}
+
+%% This is said in the definitions of LOG and SQRT. -kmp 19-Jan-92
+% where
+% \issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+% \f{(log \i{x}) = (complex (log (abs \i{x})) (phase \i{x}))} and
+% \f{(sqrt \i{x}) = (exp (/ (log \i{x}) 2))}.
+% \endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+
+% I believe this first sentence applied to the old, bogus formula.
+% -- sjl 4 mar 92
+%Beware of simplifying this formula; ``obvious'' simplifications are
+%likely to alter the branch cuts or the values on the branch cuts
+%incorrectly.  
+The branch cut for the inverse hyperbolic tangent function
+is in two pieces: one along the negative real axis to the left of
+$-1$ (inclusive), continuous with quadrant III, and one along
+the positive real axis to the right of~$1$ (inclusive), continuous with
+quadrant I.  The points $-1$ and~$1$ are excluded from the
+domain.
+The range is that strip of the complex plane containing
+numbers whose imaginary part is between $-\pi/2$ and
+$\pi/2$.  A number with imaginary part equal to $-\pi/2$
+is in the range if and only if its real part is strictly negative; a number with
+imaginary part equal to $\pi/2$ is in the range if and only if its imaginary
+part is strictly positive.  
+Thus the range of the inverse hyperbolic tangent function is identical to
+that of the inverse hyperbolic sine function with the points
+$-\pi i/2$ and~$\pi i/2$ excluded.
+
+\label Examples::
+
+\code
+ (sinh 0) \EV 0.0 
+ (cosh (complex 0 -1)) \EV #C(0.540302 -0.0)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{number}{a \term{number}}
+Might signal \typeref{arithmetic-error}.
+
+\label See Also::
+
+\funref{log},
+\funref{sqrt},
+{\secref\FloatSubstitutability}
+
+\label Notes::
+
+The result of \funref{acosh} may be a \term{complex} even if \param{number} 
+is not a \term{complex}; this occurs when \param{number} is less than one.
+Also, the result of \funref{atanh} may be a \term{complex} even if \param{number} 
+is not a \term{complex}; this occurs when the absolute value of \param{number} 
+is greater than one.
+
+%% 12.5.2 29
+The branch cut formulae are mathematically correct, assuming
+completely accurate computation.  
+Implementors should consult a good text on
+numerical analysis.  The formulae given above are not necessarily
+the simplest ones for real-valued computations; they are chosen
+to define the branch cuts in desirable ways for the complex case.
+
+\endcom
+
+%-------------------- Arithmetic --------------------
+
+%%% ========== * (Function)
+\begincom{*}\ftype{Function}
+
+%% 12.4.0 8
+
+\label Syntax::
+
+\DefunWithValues * {{\rest} numbers} {product}
+
+\label Arguments and Values::
+
+\param{number}---a \term{number}.
+
+\param{product}---a \term{number}.
+
+\label Description::
+
+Returns the product of \param{numbers},
+performing any necessary type conversions in the process.
+If no \param{numbers} are supplied, \f{1} is returned.
+
+\label Examples::
+
+\code
+ (*) \EV 1
+ (* 3 5) \EV 15
+ (* 1.0 #c(22 33) 55/98) \EV #C(12.346938775510203 18.520408163265305)
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Might signal \typeref{type-error} if some \term{argument} is not a \term{number}.
+Might signal \typeref{arithmetic-error}.
+
+\label See Also::
+
+{\secref\NumericOperations},
+{\secref\RationalComputations},
+{\secref\FloatingPointComputations},
+{\secref\ComplexComputations}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== + (Function)
+\begincom{+}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues + {{\rest} numbers} {sum}
+
+\label Arguments and Values::
+
+\param{number}---a \term{number}.
+
+\param{sum}---a \term{number}.
+
+\label Description::
+
+%% 12.4.0 3
+Returns the sum of \param{numbers},
+performing any necessary type conversions in the process.
+If no \param{numbers} are supplied, \f{0} is returned.
+
+\label Examples::
+\code
+ (+) \EV 0
+ (+ 1) \EV 1
+ (+ 31/100 69/100) \EV 1
+ (+ 1/5 0.8) \EV 1.0
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Might signal \typeref{type-error} if some \term{argument} is not a \term{number}.
+Might signal \typeref{arithmetic-error}.
+
+\label See Also::
+
+{\secref\NumericOperations},
+{\secref\RationalComputations},
+{\secref\FloatingPointComputations},
+{\secref\ComplexComputations}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== - (Function)
+\begincom{$-$}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {$-$} {number} {negation}
+
+\DefunWithValues {$-$} {minuend {\rest} \plus{subtrahends}} {difference}
+
+\label Arguments and Values::
+
+\param{number}, \param{minuend}, \param{subtrahend}---a \term{number}.
+
+\param{negation}, \param{difference}---a \term{number}.
+
+\label Description::
+
+\Thefunction{-} performs arithmetic subtraction and negation.
+
+%% 12.4.0 5
+If only one \param{number} is supplied,
+the negation of that \param{number} is returned.
+
+%% 12.4.0 6
+If more than one \term{argument} is given, 
+it subtracts all of the \param{subtrahends} from the \param{minuend}
+and returns the result.
+
+\Thefunction{-} performs necessary type conversions. 
+
+\label Examples::
+
+\code
+ (- 55.55) \EV -55.55
+ (- #c(3 -5)) \EV #C(-3 5)
+ (- 0) \EV 0
+ (eql (- 0.0) -0.0) \EV \term{true}
+ (- #c(100 45) #c(0 45)) \EV 100
+ (- 10 1 2 3 4) \EV 0
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Might signal \typeref{type-error} if some \term{argument} is not a \term{number}.
+Might signal \typeref{arithmetic-error}.
+
+\label See Also::
+
+{\secref\NumericOperations},
+{\secref\RationalComputations},
+{\secref\FloatingPointComputations},
+{\secref\ComplexComputations}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== / (Function)
+\begincom{/}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues / {number} {reciprocal}
+\DefunWithValues / {numerator {\rest} \plus{denominators}} {quotient}
+
+\label Arguments and Values::
+
+\param{number}, \param{denominator}---a non-zero \term{number}.
+
+\param{numerator}, \param{quotient}, \param{reciprocal}---a \term{number}.
+
+\label Description::
+
+%% 12.4.0 10
+\Thefunction{/} performs division or reciprocation.
+
+%% 12.4.0 11
+If no \param{denominators} are supplied,
+\thefunction{/} returns the reciprocal of \param{number}.
+
+If at least one \param{denominator} is supplied,
+\thefunction{/} divides the \param{numerator} by all of the \param{denominators} 
+and returns the resulting \param{quotient}.
+
+%% 12.4.0 12
+If each \term{argument} is either an \term{integer} or a \term{ratio},
+and the result is not an \term{integer}, then it is a \term{ratio}.
+
+\Thefunction{/} performs necessary type conversions.
+
+%% 12.4.0 14
+
+If any \param{argument} is a \term{float} then 
+the rules of floating-point contagion apply;
+\seesection\FloatingPointComputations.
+
+\label Examples::
+
+\code
+ (/ 12 4) \EV 3
+ (/ 13 4) \EV 13/4
+ (/ -8) \EV -1/8
+ (/ 3 4 5) \EV 3/20
+ (/ 0.5) \EV 2.0
+ (/ 20 5) \EV 4
+ (/ 5 20) \EV 1/4
+ (/ 60 -2 3 5.0) \EV -2.0
+ (/ 2 #c(2 2)) \EV #C(1/2 -1/2)
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+The consequences are unspecified if any \term{argument} other than the first is zero.
+If there is only one \term{argument}, the consequences are unspecified if it is zero.
+
+Might signal \typeref{type-error} if some \term{argument} is not a \term{number}.
+Might signal \typeref{division-by-zero} if division by zero is attempted.
+Might signal \typeref{arithmetic-error}.
+
+\label See Also::
+
+\funref{floor}, \funref{ceiling}, \funref{truncate}, \funref{round}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== 1+
+%%% ========== 1-
+\begincom{1+, 1$-$}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues 1+   {number} {successor}
+\DefunWithValues 1$-$ {number} {predecessor}
+
+\label Arguments and Values:: 
+
+\param{number}---a \term{number}.
+
+\param{successor}, \param{predecessor}---a \term{number}.
+
+\label Description::
+
+%%12.4.0 17
+\funref{1+} returns a \term{number} that is one more than its argument \param{number}.
+\funref{1-} returns a \term{number} that is one less than its argument \param{number}.
+
+\label Examples::
+
+\code
+ (1+ 99) \EV 100 
+ (1- 100) \EV 99 
+ (1+ (complex 0.0)) \EV #C(1.0 0.0) 
+ (1- 5/3) \EV 2/3 
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Might signal \typeref{type-error} if its \term{argument} is not a \term{number}.
+Might signal \typeref{arithmetic-error}.
+
+\label See Also::
+
+\macref{incf}, \macref{decf}
+
+\label Notes::
+
+\code
+ (1+ \param{number}) \EQ (+ \param{number} 1)
+ (1- \param{number}) \EQ (- \param{number} 1)
+\endcode
+Implementors are encouraged to make the performance of both the previous
+expressions be the same.
+
+\endcom
+
+%%% ========== ABS
+\begincom{abs}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues abs {number} {absolute-value}
+
+\label Arguments and Values::
+
+\param{number}---a \term{number}.
+
+\param{absolute-value}---a non-negative \term{real}.
+
+\label Description::
+
+%% 12.5.2 3
+\funref{abs} returns the absolute value of \param{number}.
+%% 12.5.2 4
+
+If \param{number} is 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+a \term{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+the result is  of the same \term{type} as \param{number}.
+
+If \param{number} is a \term{complex}, 
+the result is a positive 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{real}
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+with
+the same magnitude as \param{number}.  
+The result can be a \term{float} 
+\reviewer{Barmar: Single-float.}%!!! What to do here? -kmp 17-Dec-90
+even if \param{number}'s components are \term{rationals} 
+and an exact rational result
+would have been possible.
+%% 12.5.2 7
+Thus the result of \f{(abs \#c(3 4))} can be either \f{5} or \f{5.0},
+depending on the implementation.
+
+
+\label Examples::
+
+\issue{COMPLEX-RATIONAL-RESULT:EXTEND}
+\code
+ (abs 0) \EV 0
+ (abs 12/13) \EV 12/13
+ (abs -1.09) \EV 1.09
+ (abs #c(5.0 -5.0)) \EV 7.071068
+ (abs #c(5 5)) \EV 7.071068
+ (abs #c(3/5 4/5)) \EV 1 or approximately 1.0
+ (eql (abs -0.0) -0.0) \EV \term{true}
+\endcode
+\endissue{COMPLEX-RATIONAL-RESULT:EXTEND}
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+{\secref\FloatSubstitutability}
+
+\label Notes::
+
+%% 12.5.2 5
+If \param{number} is a \term{complex}, 
+the result is equivalent to the following: 
+%\hfil\break
+
+\f{(sqrt (+ (expt (realpart \param{number}) 2)  (expt (imagpart \param{number}) 2)))}
+%%Barmar says ``SQRT is a defined name, so there's no need to redefine it here.''
+% -kmp 17-Dec-90
+% , where 
+% \issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+% \f{(sqrt \i{x}) = (exp (/ (log \i{x}) 2))}
+% \endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+
+%% 12.5.2 6
+An implementation should not use this formula directly
+for all \term{complexes}
+but should handle very large or very small components specially
+to avoid intermediate overflow or underflow.
+
+\endcom
+
+%%% ========== EVENP
+%%% ========== ODDP
+\begincom{evenp, oddp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues evenp {integer} {generalized-boolean}
+\DefunWithValues oddp  {integer} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{integer}---an \term{integer}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 12.2.0 7
+\NamedPredicate{evenp}{integer}{even (divisible by two)}
+
+%% 12.2.0 6
+\NamedPredicate{oddp}{integer}{odd (not divisible by two)}
+
+\label Examples::
+
+\code
+ (evenp 0) \EV \term{true}
+ (oddp 10000000000000000000000) \EV \term{false}
+ (oddp -1) \EV \term{true}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{integer}{an \term{integer}}
+                       
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (evenp \param{integer}) \EQ (not (oddp \param{integer}))
+ (oddp \param{integer})  \EQ (not (evenp \param{integer}))
+\endcode
+
+\endcom
+
+%%% ========== EXP
+%%% ========== EXPT
+\begincom{exp, expt}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues exp  {number} {result}
+\DefunWithValues expt {base-number power-number} {result}
+
+
+\label Arguments and Values::
+
+\param{number}---a \term{number}.
+
+\param{base-number}---a \term{number}.
+
+\param{power-number}---a \term{number}.
+
+\param{result}---a \term{number}.
+
+\label Description::
+
+\funref{exp} and \funref{expt} perform exponentiation.
+
+%% 12.5.1 2
+\funref{exp} returns \i{e} raised to the power \param{number},
+where \i{e} is the base of the natural logarithms.
+%% 12.5.3 9
+\funref{exp} has no branch cut.
+
+%% 12.5.0 5
+%% 12.5.1 3
+\funref{expt} returns \param{base-number} 
+raised to the power \param{power-number}.
+If the \param{base-number} is a \term{rational} 
+and \param{power-number} is
+an \term{integer},
+the calculation is exact and the result will be \oftype{rational};
+otherwise a floating-point approximation might result.
+\issue{COMPLEX-RATIONAL-RESULT:EXTEND}
+For \funref{expt} of a \term{complex rational} to an \term{integer} power,
+the calculation must be exact and the result is
+of type \f{(or rational (complex rational))}.
+\endissue{COMPLEX-RATIONAL-RESULT:EXTEND}
+ 
+%% 12.5.1 6
+The result of \funref{expt} can be a \term{complex},
+even when neither argument is a \term{complex},
+if \param{base-number} is negative and \param{power-number}
+is not an \term{integer}. 
+The result is always the \term{principal} \term{complex} \term{value}.
+For example, \f{(expt -8 1/3)} is not permitted to return \f{-2},
+even though \f{-2} is one of the cube roots of \f{-8}. 
+The \term{principal} cube root is a \term{complex}
+approximately equal to \f{\#C(1.0 1.73205)}, not \f{-2}.
+
+%% 12.5.3 10
+\funref{expt} is defined
+as \i{$b^x$ = $e^{x log b\/}$}.
+%%Barmar thinks this should just cross-reference the LOG function. (I agree.) -kmp 22-Jan-92
+%% This is defined in LOG.
+% , where
+% \issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+% \f{(log \i{b}) = (complex (log (abs \i{b})) (phase \i{b}))}.
+% \endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+This defines the \term{principal} \term{values} precisely.  The range of
+\funref{expt} is the entire complex plane.  Regarded
+as a function of \i{x}, with \i{b} fixed, there is no branch cut.
+Regarded as a function of \i{b}, with \i{x} fixed, there is in general
+a branch cut along the negative real axis, continuous with quadrant II.
+The domain excludes the origin.
+By definition, $0^0$=1.  If \i{b}=0 and the real part of \i{x} is strictly
+positive, then 
+\i{$b^x$}=0. For all other values of \i{x}, $0^\i{x}$ 
+is an error.
+
+%% 12.5.1 4
+When \param{power-number} is an \term{integer} \f{0},
+then the result is always the value one in the \term{type} 
+of \param{base-number},
+even if the \param{base-number} is zero (of any \term{type}).  That is:
+
+\code
+ (expt x 0) \EQ (coerce 1 (type-of x))
+\endcode
+If \param{power-number} is a zero of any other \term{type},
+then the result is also the value one, in the \term{type} of the arguments
+after the application of the contagion rules in \secref\NumericContagionRules,
+with one exception:
+the consequences are undefined if \param{base-number} is zero when \param{power-number}
+is zero and not \oftype{integer}.
+
+\label Examples::
+
+\issue{COMPLEX-RATIONAL-RESULT:EXTEND}
+\code
+ (exp 0) \EV 1.0
+ (exp 1) \EV 2.718282
+ (exp (log 5)) \EV 5.0 
+ (expt 2 8) \EV 256
+ (expt 4 .5) \EV 2.0
+ (expt #c(0 1) 2) \EV -1
+ (expt #c(2 2) 3) \EV #C(-16 16)
+ (expt #c(2 2) 4) \EV -64 
+\endcode
+\endissue{COMPLEX-RATIONAL-RESULT:EXTEND}
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{log},
+{\secref\FloatSubstitutability}
+
+\label Notes::
+
+
+%% 12.5.1 5
+Implementations of \funref{expt} are permitted to use different algorithms
+for the cases of a \param{power-number} \oftype{rational} 
+	     and a \param{power-number} \oftype{float}.
+
+\issue{EXPT-RATIO:P.211}
+ 
+  Note that by the following logic, 
+\f{(sqrt (expt \i{x} 3))} is not equivalent to 
+\f{(expt \i{x} 3/2)}.
+
+%!!! Figure out some way to notate these `precise approximations'
+\code
+ (setq x (exp (/ (* 2 pi #c(0 1)) 3)))         ;exp(2.pi.i/3)
+ (expt x 3) \EV 1 ;except for round-off error
+ (sqrt (expt x 3)) \EV 1 ;except for round-off error
+ (expt x 3/2) \EV -1 ;except for round-off error
+\endcode
+\endissue{EXPT-RATIO:P.211}
+
+\endcom
+
+%%% ========== GCD
+\begincom{gcd}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues gcd {{\rest} integers} {greatest-common-denominator}
+
+\label Arguments and Values::
+
+\param{integer}---an \term{integer}.
+
+\param{greatest-common-denominator}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 12.4.0 22
+Returns the greatest common divisor of \param{integers}.
+If only one \param{integer} is supplied, its absolute value is returned.
+If no \param{integers} are given, \funref{gcd} returns \f{0},
+which is an identity for this operation.
+
+\label Examples::
+
+%% 12.4.0 23
+\code
+ (gcd) \EV 0
+ (gcd 60 42) \EV 6
+ (gcd 3333 -33 101) \EV 1
+ (gcd 3333 -33 1002001) \EV 11
+ (gcd 91 -49) \EV 7
+ (gcd 63 -42 35) \EV 7
+ (gcd 5) \EV 5
+ (gcd -4) \EV 4
+\endcode
+
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldcheckanytype{integer}{an \term{integer}}
+
+\label See Also::
+
+\funref{lcm}
+
+\label Notes::
+For three or more arguments,
+
+\code
+ (gcd b c ... z) \EQ (gcd (gcd a b) c ... z)
+\endcode
+\endcom
+
+%%% ========== INCF
+%%% ========== DECF
+\begincom{incf, decf}\ftype{Macro}                         
+
+\label Syntax::
+
+\DefmacWithValues incf {place \brac{delta-form}} {new-value}
+\DefmacWithValues decf {place \brac{delta-form}} {new-value}
+
+\label Arguments and Values:: 
+
+\param{place}---a \term{place}.
+
+\param{delta-form}---a \term{form}; evaluated to produce a \param{delta}.
+ \Default{\f{1}}
+
+\param{delta}---a \term{number}.
+
+\param{new-value}---a \term{number}.
+
+\label Description::
+
+\macref{incf} and \macref{decf} are used for incrementing and
+decrementing the \term{value} of \param{place}, respectively.
+
+The \param{delta} is 
+    added to        (in the case of \macref{incf})
+ or subtracted from (in the case of \macref{decf})
+the number in \param{place} and the result is stored in \param{place}.
+
+Any necessary type conversions are performed automatically.
+
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+For information about the \term{evaluation} of \term{subforms} of \param{places},
+\seesection\GenRefSubFormEval.  
+\endissue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+
+\label Examples::
+\code
+ (setq n 0)
+ (incf n) \EV 1      
+ n \EV 1
+ (decf n 3) \EV -2   
+ n \EV -2
+ (decf n -5) \EV 3      
+ (decf n) \EV 2      
+ (incf n 0.5) \EV 2.5
+ (decf n) \EV 1.5
+ n \EV 1.5
+\endcode
+
+\label Side Effects::
+
+\param{Place} is modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{+}, \funref{-}, \funref{1+}, \funref{1-}, \macref{setf}
+
+\label Notes:\None.
+
+%% Removed in response to Kawabe's comment #, first public review.
+%
+% The effect of \f{(incf \param{place} \param{delta})} is roughly equivalent to
+% 
+% \code
+%  (setf \param{place} (+ \param{place} \param{delta}))
+% \endcode
+% except that the latter would evaluate any \term{subforms} of \param{place}
+% twice, whereas \macref{incf} takes care to evaluate them only once.
+       
+\endcom
+
+%%% ========== LCM
+\begincom{lcm}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues lcm {{\rest} integers} {least-common-multiple}
+
+\label Arguments and Values::
+
+\param{integer}---an \term{integer}.
+
+\param{least-common-multiple}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 12.4.0 24
+\funref{lcm} returns the least common multiple of the \param{integers}.
+
+\issue{LCM-NO-ARGUMENTS:1}
+%% 12.4.0 27
+%\funref{lcm} requires at least one argument.
+If no \param{integer} is supplied, the \term{integer} \f{1} is returned.
+\endissue{LCM-NO-ARGUMENTS:1}
+
+If only one \param{integer} is supplied, 
+the absolute value of that \param{integer} is returned.
+
+For two arguments that are not both zero,
+
+\code
+ (lcm a b) \EQ (/ (abs (* a b)) (gcd a b))
+\endcode
+
+If one or both arguments are zero,
+
+\code
+ (lcm a 0) \EQ (lcm 0 a) \EQ 0
+\endcode
+
+%% 12.4.0 25
+For three or more arguments,
+
+\code
+ (lcm a b c ... z) \EQ (lcm (lcm a b) c ... z)
+\endcode
+
+\label Examples::
+%% 12.4.0 26
+\code
+ (lcm 10) \EV 10
+ (lcm 25 30) \EV 150
+ (lcm -24 18 10) \EV 360
+ (lcm 14 35) \EV 70
+ (lcm 0 5) \EV 0
+ (lcm 1 2 3 4 5 6) \EV 60
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Should signal \typeref{type-error} if any argument is not an \term{integer}.
+
+\label See Also::
+
+\funref{gcd}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== LOG
+\begincom{log}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues log {number {\opt} base} {logarithm}
+
+\label Arguments and Values::
+
+\param{number}---a non-zero \term{number}.
+
+\param{base}---a \term{number}.
+
+\param{logarithm}---a \term{number}.
+
+\label Description::
+
+%% 12.5.1 7
+\funref{log} returns the logarithm of \param{number} in base \param{base}.
+If \param{base} is not supplied its value is \i{e}, 
+the base of the natural logarithms.
+
+%% 12.5.1 8
+\funref{log} may return a \term{complex} when given a 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{real}
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+negative \param{number}.
+
+\code
+ (log -1.0) \EQ (complex 0.0 (float pi 0.0))
+\endcode
+
+If \param{base} is zero,
+%%Removed as unnecessary per Barmar since \param{number} is described above as non-zero.
+%and \param{number} is non-zero
+\funref{log} returns zero.
+
+The result of \f{(log 8 2)} may be either \f{3} or \f{3.0}, depending on the
+implementation. An implementation can use floating-point calculations
+even if an exact integer result is possible.
+
+%% 12.5.3 7
+The branch cut for the logarithm function of one argument (natural
+logarithm) lies along the negative real axis, continuous with quadrant II.
+The domain excludes the origin.
+
+%%Per Barmar, this is removed since the above note from IEEE-ATAN-BRANCH-CUT
+%%already says the same thing.
+% When \param{number} is a \term{complex},
+% 
+% %{\tt log \param{number}
+% %  \EQ\ (log $\vert$\param{number}$\vert$)+\i{i} \i{phase}(\param{number})\/}.
+% \code
+%  (log \param{complex})
+%  \EQ (+ (log (abs \param{complex})) (* (phase \param{complex}) #c(0 1)))
+% \endcode
+
+\issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+The mathematical definition of a complex logarithm 
+is as follows, whether or not minus zero is supported by the
+implementation:
+
+\code
+(log \i{x}) \EQ (complex (log (abs \i{x})) (phase \i{x}))
+\endcode
+\endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+
+Therefore the range of the one-argument logarithm function is that strip
+of the complex plane containing numbers with imaginary parts between
+\issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+$-\pi$ (exclusive) and~$\pi$ (inclusive) if minus zero is not supported,
+or $-\pi$ (inclusive) and~$\pi$ (inclusive) if minus zero is supported.
+\endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+
+%% 12.5.3 8
+The two-argument logarithm function is defined as 
+
+\code
+ (log \param{base} \param{number})
+ \EQ (/ (log \param{number}) (log \param{base}))
+\endcode
+
+This defines the \term{principal} \term{values} precisely.  
+The range of the two-argument logarithm function is the entire complex plane.
+
+\label Examples::
+
+\code
+ (log 100 10)
+\EV 2.0
+\EV 2
+ (log 100.0 10) \EV 2.0
+ (log #c(0 1) #c(0 -1))
+\EV #C(-1.0 0.0)
+\OV #C(-1 0)
+ (log 8.0 2) \EV 3.0
+\endcode
+
+\issue{COMPLEX-RATIONAL-RESULT:EXTEND}
+%!!! Figure out some way to notate these `precise approximations'
+\code
+ (log #c(-16 16) #c(2 2)) \EV 3 or approximately #c(3.0 0.0)
+                               or approximately 3.0 (unlikely)
+\endcode
+\endissue{COMPLEX-RATIONAL-RESULT:EXTEND}
+
+\label Affected By::
+
+The implementation.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{exp},
+\funref{expt},
+{\secref\FloatSubstitutability}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== MOD
+%%% ========== REM
+\begincom{mod, rem}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues mod {number divisor} {modulus}
+\DefunWithValues rem {number divisor} {remainder}
+
+\label Arguments and Values::
+
+\param{number}---a \term{real}.
+
+\param{divisor}---a \term{real}.
+
+\param{modulus}, \param{remainder}---a \term{real}.
+
+\label Description::
+
+%% 12.6.0 22
+\funref{mod} and \funref{rem} are generalizations of the modulus
+and remainder functions respectively.
+
+\funref{mod} performs the operation \funref{floor} 
+on \param{number} and \param{divisor} 
+and returns the remainder of the \funref{floor} operation.
+
+\funref{rem} performs the operation \funref{truncate} 
+on \param{number} and \param{divisor}
+and returns the remainder of the \funref{truncate} operation.
+
+\funref{mod} and \funref{rem} are 
+%!!! Is this something from mathematics?? -kmp 24-Apr-91
+the modulus and remainder functions 
+when \param{number} and \param{divisor} are \term{integers}.
+
+\label Examples::
+\code
+ (rem -1 5) \EV -1
+ (mod -1 5) \EV 4
+ (mod 13 4) \EV 1
+ (rem 13 4) \EV 1
+ (mod -13 4) \EV 3
+ (rem -13 4) \EV -1
+ (mod 13 -4) \EV -3
+ (rem 13 -4) \EV 1
+ (mod -13 -4) \EV -1
+ (rem -13 -4) \EV -1
+ (mod 13.4 1) \EV 0.4
+ (rem 13.4 1) \EV 0.4
+ (mod -13.4 1) \EV 0.6
+ (rem -13.4 1) \EV -0.4
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{floor}, \funref{truncate}
+
+\label Notes::
+
+The result of \funref{mod} is either zero or a 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{real}
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+with the same sign as \param{divisor}.
+\endcom
+
+%%% ========== SIGNUM
+\begincom{signum}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues signum {number} {signed-prototype}
+
+\label Arguments and Values::
+
+\param{number}---a \term{number}.
+
+\param{signed-prototype}---a \term{number}.
+
+\label Description::
+
+\funref{signum} determines a numerical value that indicates whether
+\param{number} is negative, zero, or positive.
+
+%% 12.5.2 12
+For a \term{rational},
+\funref{signum} returns one of \f{-1}, \f{0}, or \f{1}
+according to whether \param{number} is negative, zero, or positive.
+For a \term{float}, 
+the result is a \term{float} of the same format
+whose value is minus one, zero, or one.
+For a \term{complex} number \f{z},
+\f{(signum \i{z})} is a complex number of the same phase but with unit magnitude,
+unless \f{z} is a complex zero, in which case the result is \f{z}.
+
+%% 12.5.2 13
+%%Rewritten to avoid a suggestion that there might be complex rationals. -kmp 2-Jan-91
+% For non-\term{complex} \term{rationals}, \funref{signum} 
+% is a rational function, but it may be irrational for \term{complex} arguments.
+For \term{rational} \term{arguments}, \funref{signum} is a rational function,
+but it may be irrational for \term{complex} \term{arguments}.
+
+If \param{number} is a \term{float}, the result is a \term{float}.
+If \param{number} is a \term{rational}, the result is a \term{rational}.
+If \param{number} is a \term{complex float}, the result is a \term{complex float}.
+If \param{number} is a \term{complex rational}, the result is a \term{complex}, 
+but it is \term{implementation-dependent} whether that result is a
+\term{complex rational} or a \term{complex float}.
+
+\label Examples::
+
+\code
+ (signum 0) \EV 0
+ (signum 99) \EV 1
+ (signum 4/5) \EV 1
+ (signum -99/100) \EV -1
+ (signum 0.0) \EV 0.0
+ (signum #c(0 33)) \EV #C(0.0 1.0)
+ (signum #c(7.5 10.0)) \EV #C(0.6 0.8)
+ (signum #c(0.0 -14.7)) \EV #C(0.0 -1.0)
+ (eql (signum -0.0) -0.0) \EV \term{true}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+{\secref\FloatSubstitutability}
+
+\label Notes::
+%% 12.5.2 11
+\code
+ (signum x) \EQ (if (zerop x) x (/ x (abs x)))
+\endcode
+
+\endcom
+
+%%% ========== SQRT
+%%% ========== ISQRT
+\begincom{sqrt, isqrt}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues sqrt  {number}  {root}
+\DefunWithValues isqrt {natural} {natural-root}
+
+\label Arguments and Values:: 
+
+\param{number}, \param{root}---a \term{number}.
+
+\param{natural}, \param{natural-root}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 12.5.1 1
+\funref{sqrt} and \funref{isqrt} compute square roots.
+
+%% 12.5.1 9                                        
+\funref{sqrt} returns the \term{principal} square root of \param{number}.
+If the \param{number} is not a \term{complex} but is negative,
+then the result is a \term{complex}.
+
+%% 12.5.1 10
+\funref{isqrt} returns the greatest \term{integer} 
+less than or equal to the exact positive square root of \param{natural}.
+
+If \param{number} is a positive \term{rational},
+it is \term{implementation-dependent} 
+whether \param{root} is a \term{rational} or a \term{float}.
+If \param{number} is a negative \term{rational},
+it is \term{implementation-dependent} 
+whether \param{root} is a \term{complex rational} or a \term{complex float}.
+
+\issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+The mathematical definition of complex square root (whether or not
+minus zero is supported) follows:
+
+\f{(sqrt \i{x}) = (exp (/ (log \i{x}) 2))}
+
+%% This is said in the definition of LOG. -kmp 19-Jan-92
+% where
+% \f{(log \i{x}) = (complex (log (abs \i{x})) (phase \i{x}))}.
+\endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+
+The branch cut for square root lies along the negative real axis,
+continuous with quadrant II.
+The range consists of the right half-plane, including the non-negative
+imaginary axis and excluding the negative imaginary axis.
+
+
+\label Examples::
+
+\code
+ (sqrt 9.0) \EV 3.0
+ (sqrt -9.0) \EV #C(0.0 3.0)
+ (isqrt 9) \EV 3
+ (sqrt 12) \EV 3.4641016
+ (isqrt 12) \EV 3
+ (isqrt 300) \EV 17
+ (isqrt 325) \EV 18
+ (sqrt 25)
+\EV 5
+\OV 5.0
+ (isqrt 25) \EV 5
+ (sqrt -1) \EV #C(0.0 1.0)
+ (sqrt #c(0 2)) \EV #C(1.0 1.0)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Thefunction{sqrt} should signal \typeref{type-error} if its argument 
+is not a \term{number}.
+
+\Thefunction{isqrt} should signal \typeref{type-error} if its argument 
+is not a non-negative \term{integer}.
+
+The functions \funref{sqrt} and \funref{isqrt} might signal \typeref{arithmetic-error}.
+
+\label See Also::
+
+\funref{exp},
+\funref{log},
+{\secref\FloatSubstitutability}
+
+\label Notes::
+
+\code
+ (isqrt x) \EQ (values (floor (sqrt x))) 
+\endcode
+but it is potentially more efficient.
+
+\endcom
+
+%-------------------- Random Numbers --------------------
+
+%% 2.11.0 1
+\begincom{random-state}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{random-state},
+\typeref{t}
+
+\label Description::
+
+A \term{random state} \term{object} contains state
+information used by the pseudo-random number generator.
+%% 12.9.0 1
+%The pseudo-random numbers 
+%in a random number series are \term{implementation-dependent},
+%but the distribution of the numbers should
+%machine-independent.
+The nature of a \term{random state} \term{object} is \term{implementation-dependent}.
+It can be printed out and successfully read back in by the same \term{implementation},
+but might not function correctly as a \term{random state} in another \term{implementation}.
+
+%%% 12.9.0 20
+%
+%A recommended way to implement \thetype{random-state}
+%is effectively to use the machinery for \macref{defstruct}.
+
+%% 12.9.0 18
+\term{Implementations} are required to provide a read syntax for
+\term{objects} \oftype{random-state}, but the specific nature of that syntax 
+is \term{implementation-dependent}.
+
+\label See Also::
+
+\varref{*random-state*},
+\funref{random},
+{\secref\PrintingRandomStates}
+
+\endcom%{random-state}\ftype{System Class}
+
+
+%%% ========== MAKE-RANDOM-STATE
+\begincom{make-random-state}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-random-state {{\opt} state} {new-state}
+
+\label Arguments and Values::
+
+% This isn't quite susceptible to being called a designator, I think.
+% The uses are too idiosyncratic to the fact that this is a creation operator.
+% If another function took the same arguments, it would use them differently,
+% so the ideas don't generalize well. -kmp 12-Sep-91
+\param{state}---a \term{random state}, or \nil, or \t.
+ \Default{\nil}
+
+\param{new-state}---a \term{random state} \term{object}.
+
+\label Description::
+
+%% 12.9.0 12
+Creates a \term{fresh} \term{object} \oftype{random-state} suitable
+for use as \thevalueof{*random-state*}.
+
+If \param{state} is a \term{random state} \term{object},
+the \param{new-state} is a \term{copy}\meaning{5} of that \term{object}.
+If \param{state} is \nil,
+the \param{new-state} is a \term{copy}\meaning{5} of the \term{current random state}.
+If \param{state} is \t,
+the \param{new-state} is a \term{fresh} \term{random state} \term{object}
+that has been randomly initialized by some means.
+
+\label Examples::
+
+\code
+ (let* ((rs1 (make-random-state nil))
+        (rs2 (make-random-state t))
+        (rs3 (make-random-state rs2))
+        (rs4 nil))
+   (list (loop for i from 1 to 10 
+               collect (random 100)
+               when (= i 5)
+                do (setq rs4 (make-random-state)))
+         (loop for i from 1 to 10 collect (random 100 rs1))
+         (loop for i from 1 to 10 collect (random 100 rs2))
+         (loop for i from 1 to 10 collect (random 100 rs3))
+         (loop for i from 1 to 10 collect (random 100 rs4))))
+\EV ((29 25 72 57 55 68 24 35 54 65)
+    (29 25 72 57 55 68 24 35 54 65)
+    (93 85 53 99 58 62 2 23 23 59)
+    (93 85 53 99 58 62 2 23 23 59)
+    (68 24 35 54 65 54 55 50 59 49))
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{state}{a \term{random state}, or \nil, or \t}
+
+\label See Also::
+
+\funref{random}, \varref{*random-state*}
+
+\label Notes::
+
+%% 12.9.0 19
+One important use of \funref{make-random-state} is to allow the same
+series of pseudo-random \term{numbers} to be generated many times within a 
+single program.
+
+\endcom
+
+%%% ========== RANDOM
+\begincom{random}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues random {limit {\opt} random-state} {random-number}
+
+\label Arguments and Values::
+
+\param{limit}---a positive \term{integer},
+	     or a positive \term{float}.
+
+%% 12.9.0 3
+\param{random-state}---a \term{random state}.
+ \Default{the \term{current random state}}
+
+\param{random-number}---a non-negative \term{number}
+			less than \param{limit} 
+		    and of the same \term{type} as \param{limit}.
+
+\label Description::
+
+%% 12.9.0 2
+%% 12.9.0 5
+%% 12.9.0 6
+%% 12.9.0 7
+%% 12.9.0 8
+%% 12.9.0 9
+%% 12.9.0 10
+
+Returns a pseudo-random number that is a non-negative \term{number}
+less than \param{limit} and of the same \term{type} as \param{limit}.
+
+The \param{random-state}, which is modified by this function,
+encodes the internal state maintained by the random number generator.
+
+An approximately uniform choice distribution is used.  If \param{limit}
+is an \term{integer}, each of the possible results occurs with
+(approximate) probability 1/\param{limit}.
+
+\label Examples::
+
+\code
+ (<= 0 (random 1000) 1000) \EV \term{true}
+ (let ((state1 (make-random-state))
+       (state2 (make-random-state)))
+   (= (random 1000 state1) (random 1000 state2))) \EV \term{true}
+\endcode
+
+\label Side Effects::
+
+The \param{random-state} is modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{limit}{a positive \term{integer} or a positive \term{real}}
+
+\label See Also::
+
+\funref{make-random-state}, \varref{*random-state*}
+
+\label Notes::
+
+See \CLtL\ for information about generating random numbers.
+
+\endcom
+
+%%% ========== RANDOM-STATE-P
+\begincom{random-state-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues random-state-p {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 12.9.0 21
+\TypePredicate{object}{random-state}
+
+\label Examples::
+
+\code
+ (random-state-p *random-state*) \EV \term{true}
+ (random-state-p (make-random-state)) \EV \term{true}
+ (random-state-p 'test-function) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{make-random-state}, \varref{*random-state*}
+
+\label Notes::
+
+\code
+ (random-state-p \param{object}) \EQ (typep \param{object} 'random-state)
+\endcode
+
+\endcom
+
+%%% ========== *RANDOM-STATE*
+\begincom{*random-state*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{random state}.
+
+\label Initial Value::
+
+\term{implementation-dependent}.
+
+\label Description::
+
+%% 12.9.0 11
+The \term{current random state}, which is used, for example,
+by \thefunction{random} when a \term{random state} is not explicitly supplied.
+
+\label Examples::      
+
+\code
+ (random-state-p *random-state*) \EV \term{true}
+ (setq snap-shot (make-random-state))
+ ;; The series from any given point is random,
+ ;; but if you backtrack to that point, you get the same series.
+ (list (loop for i from 1 to 10 collect (random))
+       (let ((*random-state* snap-shot))
+         (loop for i from 1 to 10 collect (random)))
+       (loop for i from 1 to 10 collect (random))
+       (let ((*random-state* snap-shot))
+         (loop for i from 1 to 10 collect (random))))
+\EV ((19 16 44 19 96 15 76 96 13 61)
+    (19 16 44 19 96 15 76 96 13 61)
+    (16 67 0 43 70 79 58 5 63 50)
+    (16 67 0 43 70 79 58 5 63 50))
+\endcode
+
+\label Affected By::
+
+The \term{implementation}.
+
+\funref{random}.
+
+\label See Also::
+
+\funref{make-random-state},
+\funref{random},
+\typeref{random-state}
+
+\label Notes::
+
+\term{Binding} \varref{*random-state*} to a different 
+\term{random state} \term{object} correctly saves and 
+restores the old \term{random state} \term{object}.
+
+\endcom
+
+%-------------------- Numeric Types --------------------
+
+%%% ========== NUMBERP
+\begincom{numberp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues numberp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 11
+\TypePredicate{object}{number}
+
+\label Examples::
+
+\code
+ (numberp 12) \EV \term{true}
+ (numberp (expt 2 130)) \EV \term{true}
+ (numberp #c(5/3 7.2)) \EV \term{true}
+ (numberp nil) \EV \term{false}
+ (numberp (cons 1 2)) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (numberp \param{object}) \EQ (typep \param{object} 'number)
+\endcode
+
+\endcom
+
+%-------------------- Complex --------------------
+
+%%% ========== CIS
+\begincom{cis}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues cis {radians} {number}
+
+\label Arguments and Values::
+
+\param{radians}---a \term{real}.
+
+\param{number}---a \term{complex}.
+
+\label Description::
+
+%% 12.5.2 15
+\funref{cis} returns the value of~$\i{e}^{i\cdot\ \i{radians}}$,
+which is a \term{complex} in which the
+real part is equal to the cosine of \param{radians}, and the 
+imaginary part is equal to the sine of \param{radians}.
+
+\label Examples::
+\code
+ (cis 0) \EV #C(1.0 0.0)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+{\secref\FloatSubstitutability}
+
+\label Notes:\None.
+
+%The result is a complex number whose
+%phase is the equal to the argument (mod 2$\pi$)
+%and whose magnitude is unity.
+
+\endcom
+
+%%% ========== COMPLEX
+\begincom{complex}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues complex {realpart {\opt} imagpart} {complex}
+
+\label Arguments and Values::
+
+\param{realpart}---a \term{real}.
+
+\param{imagpart}---a \term{real}.
+
+\param{complex}---a \term{rational} or a \term{complex}.
+
+\label Description::
+
+\funref{complex} returns a \term{number} 
+    whose real      part is \param{realpart} 
+and whose imaginary part is \param{imagpart}.
+
+If \param{realpart} is a \term{rational}
+and \param{imagpart} is the \term{rational} number zero, 
+the result of \funref{complex} is \param{realpart}, a \term{rational}.
+Otherwise, the result is a \term{complex}.
+
+%% 12.6.0 38
+If either \param{realpart} or \param{imagpart} is a \term{float},
+the non-\term{float} is converted to a \term{float} 
+before the \term{complex} is created.
+If \param{imagpart} is not supplied, the imaginary part is a 
+zero of the same \term{type} as \param{realpart}; \ie
+{\tt (coerce 0 (type-of \param{realpart}))} is
+effectively used.  
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+Type upgrading implies a movement upwards in the type 
+hierarchy lattice.  
+%!!! Barmar asks: ``What type specifier are you talking about?''
+In the case of \term{complexes}, the \param{type-specifier} 
+\reviewer{Barmar: What type specifier?}
+must be a subtype of 
+{\tt (upgraded-complex-part-type \param{type-specifier})}.
+If \param{type-specifier1} is a subtype of \param{type-specifier2}, then
+{\tt (upgraded-complex-element-type '\param{type-specifier1})}
+must also be a subtype of
+{\tt (upgraded-complex-element-type '\param{type-specifier2})}.  
+Two disjoint types can be upgraded into 
+the same thing.
+ 
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+\label Examples::
+\code
+ (complex 0) \EV 0
+ (complex 0.0) \EV #C(0.0 0.0)
+ (complex 1 1/2) \EV #C(1 1/2)
+ (complex 1 .99) \EV #C(1.0 0.99)
+ (complex 3/2 0.0) \EV #C(1.5 0.0)
+\endcode
+
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{realpart},
+\funref{imagpart},
+%% Added per Boyer/Kaufmann/Moore #15 (by X3J13 vote at May 4-5, 1994 meeting)
+%% -kmp 9-May-94
+{\secref\SharpsignC}
+
+\label Notes:\None.
+
+%% Removed per Boyer/Kaufmann/Moore #15 (by X3J13 vote at May 4-5, 1994 meeting)
+%% -kmp 9-May-94
+% \code
+%  #c(a b) \EQ #.(complex a b)
+% \endcode
+
+\endcom
+
+%%% ========== COMPLEXP
+\begincom{complexp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues complexp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 16
+\TypePredicate{object}{complex}
+
+\label Examples::
+\code
+ (complexp 1.2d2) \EV \term{false}
+ (complexp #c(5/3 7.2)) \EV \term{true}
+
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{complex} (\term{function} and \term{type}), \funref{typep}
+
+\label Notes::
+
+\code
+ (complexp \param{object}) \EQ (typep \param{object} 'complex)
+\endcode
+
+\endcom
+
+%%% ========== CONJUGATE
+\begincom{conjugate}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues conjugate {number} {conjugate}
+
+\label Arguments and Values::
+
+\param{number}---a \term{number}.
+
+\param{conjugate}---a \term{number}.
+
+\label Description::
+
+%% 12.4.0 21
+Returns the complex conjugate of \param{number}.
+The conjugate of a 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{real}
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+number is itself.  
+
+\label Examples::
+
+\code
+ (conjugate #c(0 -1)) \EV #C(0 1)
+ (conjugate #c(1 1)) \EV #C(1 -1)
+ (conjugate 1.5) \EV 1.5
+ (conjugate #C(3/5 4/5)) \EV #C(3/5 -4/5)
+ (conjugate #C(0.0D0 -1.0D0)) \EV #C(0.0D0 1.0D0)
+ (conjugate 3.7) \EV 3.7
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes::
+
+For a \term{complex} number \f{z},
+
+\code
+ (conjugate z) \EQ (complex (realpart z) (- (imagpart z)))
+\endcode
+
+\endcom
+
+%%% ========== PHASE
+\begincom{phase}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues phase {number} {phase}
+
+\label Arguments and Values::
+
+\param{number}---a \term{number}.
+
+\param{phase}---a \term{number}.
+
+\label Description::
+
+%% 12.5.2 8
+%% 12.5.2 9
+\funref{phase} 
+returns the phase 
+of \param{number} (the angle part of its polar representation)
+in radians, in the range 
+\issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+$-\pi$ (exclusive) if minus zero is not supported, or 
+$-\pi$ (inclusive) if minus zero is supported, 
+\endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+to $\pi$ (inclusive).  The phase of a positive 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{real}
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+number
+is zero; that of a negative 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{real}
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+number is $\pi$.
+The phase of zero is defined to be zero.
+
+%% 12.5.2 10
+If \param{number} is a \term{complex float},  
+the result is a \term{float} of the same \term{type} 
+as the components of \param{number}.
+If \param{number} is a \term{float}, the result is a
+\term{float} of the same \term{type}.
+If \param{number} is a \term{rational} or a \term{complex rational},
+the result is a \term{single float}.  
+
+%% 12.5.3 6
+The branch cut for \funref{phase} lies along the negative real
+axis, continuous with quadrant II.  The range consists of that portion of
+the real axis between $-\pi$ (exclusive) and~$\pi$ (inclusive).
+
+\issue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+The mathematical definition of \funref{phase} is as follows:
+
+\f{(phase \i{x}) = (atan (imagpart \i{x}) (realpart \i{x}))}
+\endissue{IEEE-ATAN-BRANCH-CUT:SPLIT}
+ 
+\label Examples::
+
+\code
+ (phase 1) \EV 0.0s0
+ (phase 0) \EV 0.0s0
+ (phase (cis 30)) \EV -1.4159266
+ (phase #c(0 1)) \EV 1.5707964
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Should signal \typeref{type-error} if its argument is not a \term{number}.
+Might signal \typeref{arithmetic-error}.
+
+\label See Also::
+
+{\secref\FloatSubstitutability}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== REALPART
+%%% ========== IMAGPART
+\begincom{realpart, imagpart}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues realpart {number} {real}
+\DefunWithValues imagpart {number} {real}
+
+\label Arguments and Values:: 
+
+\param{number}---a \term{number}.
+
+\param{real}---a \term{real}.
+
+\label Description::
+
+\funref{realpart} and \funref{imagpart} return the real and
+imaginary parts of \param{number} respectively.
+%% 12.6.0 39
+If \param{number} is 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+then \funref{realpart} returns \param{number} and \funref{imagpart}
+returns \f{(* 0 \param{number})}, which has the effect that the
+imaginary part of a \term{rational} is \f{0} and that of
+a \term{float} is a floating-point zero of the same format.
+
+\label Examples::
+
+\code
+ (realpart #c(23 41)) \EV 23
+ (imagpart #c(23 41.0)) \EV 41.0
+ (realpart #c(23 41.0)) \EV 23.0
+ (imagpart 23.0) \EV 0.0
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{number}{a \term{number}}
+
+\label See Also::
+
+\funref{complex}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== UPGRADED-COMPLEX-PART-TYPE
+\begincom{upgraded-complex-part-type}\ftype{Function}
+
+\issue{SUBTYPEP-ENVIRONMENT:ADD-ARG}
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+\label Syntax::
+
+\DefunWithValues upgraded-complex-part-type
+		 {typespec {\opt} environment}
+       	         {upgraded-typespec}
+
+\label Arguments and Values:: 
+
+\param{typespec}---a \term{type specifier}.
+
+\param{environment}---an \term{environment} \term{object}.
+  \Default{\nil, denoting the \term{null lexical environment}
+	   and the and current \term{global environment}}
+%!!! Need to say what happens with the environment.
+
+\param{upgraded-typespec}---a \term{type specifier}.
+
+\label Description::
+
+\funref{upgraded-complex-part-type} returns the part type of the
+most specialized \term{complex} number representation that can
+hold parts of \term{type} \term{typespec}.
+
+%Added by KMP in response to a Barmar comment. -kmp 29-Jul-91
+The \param{typespec} is a \term{subtype} of 
+(and possibly \term{type equivalent} to)
+the \param{upgraded-typespec}.
+
+The purpose of \funref{upgraded-complex-part-type}
+is to reveal how an implementation does its \term{upgrading}.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{complex} (\term{function} and \term{type})
+
+\label Notes::
+
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+\endissue{SUBTYPEP-ENVIRONMENT:ADD-ARG}
+
+\endcom
+
+%-------------------- Real --------------------
+
+%%% ========== REALP
+\begincom{realp}\ftype{Function}
+
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+
+\label Syntax::
+
+\DefunWithValues realp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 11
+\TypePredicate{object}{real}
+
+\label Examples::
+\code
+ (realp 12) \EV \term{true}
+ (realp #c(5/3 7.2)) \EV \term{false}
+ (realp nil) \EV \term{false}
+ (realp (cons 1 2)) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (realp \param{object}) \EQ (typep \param{object} 'real)
+\endcode
+
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\endcom
+
+%-------------------- Rational --------------------
+
+%%% ========== NUMERATOR
+%%% ========== DENOMINATOR
+\begincom{numerator, denominator}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues numerator   {rational} {numerator}
+\DefunWithValues denominator {rational} {denominator}
+
+\label Arguments and Values::
+
+\param{rational}---a \term{rational}.
+
+\param{numerator}---an \term{integer}.
+
+\param{denominator}---a positive \term{integer}.
+
+\label Description::
+
+%% 12.6.0 8
+\funref{numerator} and \funref{denominator} reduce \param{rational}
+to canonical form and compute the numerator or denominator of that number.
+
+\funref{numerator} and \funref{denominator} return the numerator 
+or denominator of the canonical form of \param{rational}.
+
+If \param{rational} is an \term{integer}, 
+\funref{numerator} returns \param{rational}
+and \funref{denominator} returns 1.
+
+\label Examples::
+\code
+ (numerator 1/2) \EV 1
+ (denominator 12/36) \EV 3
+ (numerator -1) \EV -1
+ (denominator (/ -33)) \EV 33
+ (numerator (/ 8 -6)) \EV -4
+ (denominator (/ 8 -6)) \EV 3
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{/}
+
+\label Notes::
+\code
+ (gcd (numerator x) (denominator x)) \EV 1
+\endcode
+
+\endcom
+
+%%% ========== RATIONAL
+%%% ========== RATIONALIZE
+\begincom{rational, rationalize}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues rational    {number} {rational}
+\DefunWithValues rationalize {number} {rational}
+
+\label Arguments and Values::
+
+\param{number}---a \term{real}.
+
+\param{rational}---a \term{rational}.
+
+\label Description::
+
+%% 12.6.0 5
+\funref{rational} and \funref{rationalize} convert 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{reals}
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+to \term{rationals}.
+
+If \param{number} is already \term{rational}, it is returned.
+
+If \param{number} is a \term{float}, 
+\funref{rational} returns a \term{rational} 
+that is mathematically equal in value to the \term{float}. 
+\funref{rationalize} returns a \term{rational} that
+approximates the \term{float} to the accuracy of 
+the underlying floating-point representation. 
+
+\funref{rational} assumes that the \term{float} is completely accurate.
+
+%% 12.6.0 6
+\funref{rationalize} assumes that the
+\term{float} is accurate only to the precision of the
+floating-point representation.
+
+\label Examples::
+\code
+ (rational 0) \EV 0
+ (rationalize -11/100) \EV -11/100
+ (rational .1) \EV 13421773/134217728 ;implementation-dependent
+ (rationalize .1) \EV 1/10
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The \term{implementation}.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{number}{a \term{real}}
+Might signal \typeref{arithmetic-error}.
+
+\label See Also:\None.
+
+\label Notes::
+%% 12.6.0 7
+
+It is always the case that
+
+\code
+ (float (rational x) x) \EQ x
+\endcode
+and
+
+\code
+ (float (rationalize x) x) \EQ x
+\endcode
+That is, rationalizing a \term{float} by either method
+and then converting it back
+to a \term{float} 
+of the same format produces the original \param{number}.
+\endcom
+
+%%% ========== RATIONALP
+\begincom{rationalp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues rationalp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 14
+\TypePredicate{object}{rational}
+
+\label Examples::
+
+\code
+ (rationalp 12) \EV \term{true}
+ (rationalp 6/5) \EV \term{true}
+ (rationalp 1.212) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{rational}
+
+\label Notes::
+\code
+ (rationalp \param{object}) \EQ (typep \param{object} 'rational)
+\endcode
+
+\endcom
+
+%-------------------- Integer --------------------
+
+%%% ========== ASH
+\begincom{ash}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues ash {integer count} {shifted-integer}
+
+\label Arguments and Values::
+
+\param{integer}---an \term{integer}.
+
+\param{count}---an \term{integer}.
+
+\param{shifted-integer}---an \term{integer}.
+
+\label Description::
+
+%% 12.7.0 18
+\funref{ash} performs the arithmetic shift operation on the binary
+representation of \param{integer}, which is treated as if it were binary.
+
+
+\funref{ash} shifts \param{integer} arithmetically left by \param{count} bit
+positions if \param{count} is positive,
+or right \param{count} bit positions if \param{count} is negative.
+The shifted value of the same sign 
+as \param{integer} is returned.
+
+Mathematically speaking, \funref{ash} performs the computation
+\f{floor}(\param{integer}\centerdot $2^\param{count}$).
+%% 12.7.0 20
+Logically, \funref{ash} 
+moves all of the bits in \param{integer} to the left,
+adding zero-bits at the right, or moves them to the right,
+discarding bits.  
+
+\funref{ash} is defined to behave as if \param{integer} were 
+represented in two's complement form, regardless of
+how \term{integers} are represented internally.
+\label Examples::
+\code
+ (ash 16 1) \EV 32
+ (ash 16 0) \EV 16
+ (ash 16 -1) \EV 8
+ (ash -100000000000000000000000000000000 -100) \EV -79
+\endcode
+
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{integer}{an \term{integer}}
+\Shouldchecktype{count}{an \term{integer}}
+Might signal \typeref{arithmetic-error}.
+
+\label See Also:\None.
+
+\label Notes::
+%% 12.7.0 19
+
+\code
+ (logbitp \param{j} (ash \param{n} \param{k}))
+ \EQ (and (>= \param{j} \param{k}) (logbitp (- \param{j} \param{k}) \param{n}))
+\endcode
+\endcom
+
+%%% ========== INTEGER-LENGTH
+\begincom{integer-length}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues integer-length {integer} {number-of-bits}
+
+\label Arguments and Values::
+
+\param{integer}---an \term{integer}.
+
+\param{number-of-bits}---a non-negative \term{integer}.
+                                                                               
+\label Description::
+
+%% 12.7.0 22
+Returns the number of bits needed to represent \param{integer}
+in binary two's-complement format.
+
+\label Examples::
+
+%% 12.7.0 23
+\code
+ (integer-length 0) \EV 0
+ (integer-length 1) \EV 1
+ (integer-length 3) \EV 2
+ (integer-length 4) \EV 3
+ (integer-length 7) \EV 3
+ (integer-length -1) \EV 0
+ (integer-length -4) \EV 2
+ (integer-length -7) \EV 3
+ (integer-length -8) \EV 3
+ (integer-length (expt 2 9)) \EV 10
+ (integer-length (1- (expt 2 9))) \EV 9
+ (integer-length (- (expt 2 9))) \EV 9
+ (integer-length (- (1+ (expt 2 9)))) \EV 10
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{integer}{an \term{integer}}
+
+\label See Also:\None.
+
+\label Notes::
+
+This function could have been defined by:
+
+\code
+(defun integer-length (integer)
+  (ceiling (log (if (minusp integer)
+                    (- integer)
+                    (1+ integer))
+                2)))
+\endcode
+
+If \param{integer} is non-negative, then its value can be represented
+in unsigned binary form in a field whose width in bits is
+no smaller than {\tt (integer-length \param{integer})}.
+Regardless of the sign of \param{integer}, its value can be
+represented in signed binary two's-complement form in a field
+whose width in bits is no smaller than {\tt (+ (integer-length \param{integer}) 1)}.
+
+\endcom
+
+%%% ========== INTEGERP
+\begincom{integerp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues integerp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 12
+\TypePredicate{object}{integer}
+
+\label Examples::
+\code
+ (integerp 1) \EV \term{true}
+ (integerp (expt 2 130)) \EV \term{true}
+ (integerp 6/5) \EV \term{false}
+ (integerp nil) \EV \term{false}
+
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (integerp \param{object}) \EQ (typep \param{object} 'integer)
+\endcode
+
+\endcom
+
+%%% ========== PARSE-INTEGER
+\begincom{parse-integer}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {parse-integer} {string {\key} start end radix junk-allowed} {integer, pos}
+
+\label Arguments and Values::
+
+\param{string}---a \term{string}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{string}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{radix}---a \term{radix}.
+ \Default{\f{10}}
+
+\param{junk-allowed}---a \term{generalized boolean}.
+ \Default{\term{false}}
+
+\param{integer}---an \term{integer} or \term{false}.
+
+\param{pos}---a \term{bounding index} of \param{string}.
+
+\label Description::
+
+%% 22.2.1 45
+\funref{parse-integer} parses an \term{integer} in the specified \param{radix}
+from the substring of \param{string} delimited by \param{start} and \param{end}.
+
+%% 22.2.1 49
+\funref{parse-integer} expects an optional sign (\f{+} or \f{-}) followed by
+a a non-empty sequence of digits to be interpreted in the specified \param{radix}.
+Optional leading and trailing \term{whitespace}\meaning{1} is ignored.
+
+\funref{parse-integer} does not recognize the syntactic radix-specifier
+prefixes \f{\#O}, \f{\#B}, \f{\#X}, and \f{\#\i{n}R}, 
+nor does it recognize a trailing decimal point.
+
+If \param{junk-allowed} is \term{false}, an error \oftype{parse-error} is 
+signaled if substring does not consist entirely of the representation of a 
+signed \term{integer}, possibly surrounded on either side by \term{whitespace}\meaning{1} 
+\term{characters}.
+
+%% 22.2.1 46
+The first \term{value} returned is either
+    the \term{integer} that was parsed,
+ or else \nil\ if no syntactically correct \term{integer} 
+    was seen but \param{junk-allowed} was \term{true}.
+
+%% 22.2.1 48
+The second \term{value} is either 
+    the index into the \term{string} of the delimiter that terminated the parse,
+ or the upper \term{bounding index} of the substring if the parse terminated at
+    the end of the substring (as is always the case if \param{junk-allowed} 
+    is \term{false}).
+
+% KMP:
+%  This is actually somewhat ambiguous.
+%   A. (parse-integer "3 5" :junk-allowed nil :end 2) \EV 3,1 or 3,2 ??
+%   B. (parse-integer "3 5" :junk-allowed t :end 2)   \EV 3,1 or 3,2 ??
+%   C. (parse-integer "3 a" :junk-allowed t)          \EV 3,1 or 3,2 ??
+% Mail sent to Quinquevirate asking if anyone had any thoughts on this.
+
+\label Examples::
+\code
+ (parse-integer "123") \EV 123, 3
+ (parse-integer "123" :start 1 :radix 5) \EV 13, 3
+ (parse-integer "no-integer" :junk-allowed t) \EV NIL, 0
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+If \param{junk-allowed} is \term{false}, 
+an error is signaled if substring does not consist entirely of
+the representation of an \term{integer}, 
+possibly surrounded on either side by
+\term{whitespace}\meaning{1} characters.
+
+%% Per X3J13. -kmp 05-Oct-93
+\label See Also:\None.
+                      
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Integer Bits --------------------
+
+%%% ========== BOOLE
+\begincom{boole}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues boole {op integer-1 integer-2} {result-integer}
+
+\label Arguments and Values:: 
+
+\param{Op}---a \term{bit-wise logical operation specifier}.
+
+\param{integer-1}---an \term{integer}.
+
+\param{integer-2}---an \term{integer}.
+
+\param{result-integer}---an \term{integer}.
+
+\label Description::
+
+%% 12.7.0 12
+\funref{boole} performs bit-wise logical operations on
+\param{integer-1} and \param{integer-2}, which are treated as if
+they were binary and in two's complement representation.
+
+The operation to be performed and the return value are determined by 
+\param{op}.  
+
+\funref{boole} returns the values 
+specified for any \param{op} in \thenextfigure.
+
+{
+\def\zz{0\ \ \ 0}
+\def\ww{1\ \ \ 1}
+\def\zw{0\ \ \ 1}
+\def\wz{1\ \ \ 0}
+\def\sp{\ \ \ }
+
+\tablefigtwo{Bit-Wise Logical Operations}{Op}{Result}{
+ \varref{boole-1}     & \param{integer-1}                                          \cr
+ \varref{boole-2}     & \param{integer-2}                                          \cr
+ \varref{boole-andc1} & and complement of \param{integer-1} with \param{integer-2} \cr
+ \varref{boole-andc2} & and \param{integer-1} with complement of \param{integer-2} \cr
+ \varref{boole-and}   & and                                                        \cr
+ \varref{boole-c1}    & complement of \param{integer-1}                            \cr
+ \varref{boole-c2}    & complement of \param{integer-2}                            \cr
+ \varref{boole-clr}   & always 0 (all zero bits)                                   \cr
+ \varref{boole-eqv}   & equivalence (exclusive nor)                                \cr
+ \varref{boole-ior}   & inclusive or                                               \cr
+ \varref{boole-nand}  & not-and                                                    \cr
+ \varref{boole-nor}   & not-or                                                     \cr
+ \varref{boole-orc1}  & or complement of \param{integer-1} with \param{integer-2}  \cr
+ \varref{boole-orc2}  & or \param{integer-1} with complement of \param{integer-2}  \cr
+ \varref{boole-set}   & always -1 (all one bits)                                   \cr
+ \varref{boole-xor}   & exclusive or                                               \cr
+}
+}
+
+\label Examples::
+
+\code
+ (boole boole-ior 1 16) \EV 17
+ (boole boole-and -2 5) \EV 4
+ (boole boole-eqv 17 15) \EV -31
+
+;;; These examples illustrate the result of applying BOOLE and each
+;;; of the possible values of OP to each possible combination of bits.
+ (progn
+   (format t "~&Results of (BOOLE <op> #b0011 #b0101) ...~
+           ~%---Op-------Decimal-----Binary----Bits---~%")
+   (dolist (symbol '(boole-1     boole-2    boole-and  boole-andc1
+                     boole-andc2 boole-c1   boole-c2   boole-clr
+                     boole-eqv   boole-ior  boole-nand boole-nor
+                     boole-orc1  boole-orc2 boole-set  boole-xor))
+     (let ((result (boole (symbol-value symbol) #b0011 #b0101)))
+       (format t "~& ~A~13T~3,' D~23T~:*~5,' B~31T ...~4,'0B~%" 
+               symbol result (logand result #b1111)))))
+\OUT Results of (BOOLE <op> #b0011 #b0101) ...
+\OUT ---Op-------Decimal-----Binary----Bits---
+\OUT  BOOLE-1       3          11    ...0011
+\OUT  BOOLE-2       5         101    ...0101
+\OUT  BOOLE-AND     1           1    ...0001
+\OUT  BOOLE-ANDC1   4         100    ...0100
+\OUT  BOOLE-ANDC2   2          10    ...0010
+\OUT  BOOLE-C1     -4        -100    ...1100
+\OUT  BOOLE-C2     -6        -110    ...1010
+\OUT  BOOLE-CLR     0           0    ...0000
+\OUT  BOOLE-EQV    -7        -111    ...1001
+\OUT  BOOLE-IOR     7         111    ...0111
+\OUT  BOOLE-NAND   -2         -10    ...1110
+\OUT  BOOLE-NOR    -8       -1000    ...1000
+\OUT  BOOLE-ORC1   -3         -11    ...1101
+\OUT  BOOLE-ORC2   -5        -101    ...1011
+\OUT  BOOLE-SET    -1          -1    ...1111
+\OUT  BOOLE-XOR     6         110    ...0110
+\EV NIL
+\endcode
+
+%\filbreak
+
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Should signal \typeref{type-error} if its first argument is not a 
+\term{bit-wise logical operation specifier} or if any subsequent argument is not
+an \term{integer}.
+
+\label See Also::
+
+\funref{logand}
+
+\label Notes::  
+
+%% 12.7.0 14
+In general,
+
+\code
+ (boole boole-and x y) \EQ (logand x y)
+\endcode
+
+%% The following example contributed by Dan Hoey (hoey@AIC.NRL.Navy.Mil)
+\term{Programmers} who would prefer to use numeric indices rather than 
+\term{bit-wise logical operation specifiers} can get an equivalent effect
+by a technique such as the following:
+
+\code
+;; The order of the values in this `table' are such that
+;; (logand (boole (elt boole-n-vector n) #b0101 #b0011) #b1111) => n
+ (defconstant boole-n-vector
+    (vector boole-clr   boole-and  boole-andc1 boole-2
+            boole-andc2 boole-1    boole-xor   boole-ior
+            boole-nor   boole-eqv  boole-c1    boole-orc1
+            boole-c2    boole-orc2 boole-nand  boole-set))
+\EV BOOLE-N-VECTOR
+ (proclaim '(inline boole-n))
+\EV \term{implementation-dependent}
+ (defun boole-n (n integer &rest more-integers)
+   (apply #'boole (elt boole-n-vector n) integer more-integers))
+\EV BOOLE-N
+ (boole-n #b0111 5 3) \EV 7
+ (boole-n #b0001 5 3) \EV 1
+ (boole-n #b1101 5 3) \EV -3
+ (loop for n from #b0000 to #b1111 collect (boole-n n 5 3))
+\EV (0 1 2 3 4 5 6 7 -8 -7 -6 -5 -4 -3 -2 -1)
+\endcode
+
+\endcom
+
+%%% ========== BOOLE-1
+%%% ========== BOOLE-2
+%%% ========== BOOLE-AND
+%%% ========== BOOLE-ANDC1
+%%% ========== BOOLE-ANDC2
+%%% ========== BOOLE-C1
+%%% ========== BOOLE-C2
+%%% ========== BOOLE-CLR
+%%% ========== BOOLE-EQV
+%%% ========== BOOLE-IOR
+%%% ========== BOOLE-NAND
+%%% ========== BOOLE-NOR
+%%% ========== BOOLE-ORC1
+%%% ========== BOOLE-ORC2
+%%% ========== BOOLE-SET
+%%% ========== BOOLE-XOR
+\begincom{boole-1,    boole-2,   boole-and,  boole-andc1, boole-andc2,
+	  boole-c1,   boole-c2,  boole-clr,  boole-eqv,   boole-ior,
+          boole-nand, boole-nor, boole-orc1, boole-orc2,  boole-set, 
+	  boole-xor}\ftype{Constant Variable}
+
+\label Constant Value::
+
+The identity and nature of the \term{values} of each of these \term{variables} 
+is \term{implementation-dependent},
+except that it must be \term{distinct} from each of the \term{values} of the others,
+and it must be a valid first \term{argument} to \thefunction{boole}.
+
+\label Description::
+
+Each of these \term{constants} has a \term{value} which is one of the 
+sixteen possible \term{bit-wise logical operation specifiers}.
+
+\label Examples::
+\code
+ (boole boole-ior 1 16) \EV 17
+ (boole boole-and -2 5) \EV 4
+ (boole boole-eqv 17 15) \EV -31
+\endcode
+
+\label See Also::
+
+\funref{boole}
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.  
+
+\endcom
+
+%%% ========== LOGNAND
+%%% ========== LOGEQV
+%%% ========== LOGNOT
+%%% ========== LOGIOR
+%%% ========== LOGXOR
+%%% ========== LOGNAND
+%%% ========== LOGNOR
+%%% ========== LOGANDC1
+%%% ========== LOGANDC2
+%%% ========== LOGORC1
+%%% ========== LOGORC2
+\begincom{logand,  logandc1, logandc2, logeqv,  logior,
+	  lognand, lognor,   lognot,   logorc1, logorc2,
+	  logxor}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues logand {{\rest} integers} {result-integer}
+\DefunWithValues logandc1 {integer-1 integer-2} {result-integer}
+\DefunWithValues logandc2 {integer-1 integer-2} {result-integer}
+\DefunWithValues logeqv {{\rest} integers} {result-integer}
+\DefunWithValues logior {{\rest} integers} {result-integer}
+\DefunWithValues lognand  {integer-1 integer-2} {result-integer}
+\DefunWithValues lognor   {integer-1 integer-2} {result-integer}
+\DefunWithValues lognot {integer} {result-integer}
+\DefunWithValues logorc1  {integer-1 integer-2} {result-integer}
+\DefunWithValues logorc2  {integer-1 integer-2} {result-integer}
+\DefunWithValues logxor {{\rest} integers} {result-integer}
+
+\label Arguments and Values::
+
+\param{integers}---\term{integers}.
+
+\param{integer}---an \term{integer}.
+
+\param{integer-1}---an \term{integer}.
+
+\param{integer-2}---an \term{integer}.
+
+\param{result-integer}---an \term{integer}.
+
+\label Description::
+
+The \term{functions}
+       \funref{logandc1},
+       \funref{logandc2},
+       \funref{logand},
+       \funref{logeqv},
+       \funref{logior},
+       \funref{lognand},
+       \funref{lognor}, 
+       \funref{lognot},
+       \funref{logorc1}, 
+       \funref{logorc2},
+   and \funref{logxor}
+perform bit-wise logical operations on their \term{arguments},
+that are treated as if they were binary.
+
+\Thenextfigure\ lists the meaning of each of the \term{functions}.
+Where an `identity' is shown, it indicates the \term{value} \term{yielded}
+by the \term{function} when no \term{arguments} are supplied.
+%% 12.7.0 11
+%% 12.7.0 8
+%% 12.7.0 15
+%% 12.7.0 5
+%% 12.7.0 6
+%% 12.7.0 7
+
+\tablefigthree{Bit-wise Logical Operations on Integers}%
+{Function}{Identity}{Operation performed}{
+ \funref{logandc1} & ---    & and complement of \param{integer-1} with \param{integer-2} \cr
+ \funref{logandc2} & ---    & and \param{integer-1} with complement of \param{integer-2} \cr
+ \funref{logand}   & \f{-1} & and                                                        \cr
+ \funref{logeqv}   & \f{-1} & equivalence (exclusive nor)                                \cr
+ \funref{logior}   & \f{0}  & inclusive or                                               \cr
+ \funref{lognand}  & ---    & complement of \param{integer-1} and \param{integer-2}      \cr
+ \funref{lognor}   & ---    & complement of \param{integer-1} or \param{integer-2}       \cr
+ \funref{lognot}   & ---    & complement                                                 \cr
+ \funref{logorc1}  & ---    & or complement of \param{integer-1} with \param{integer-2}  \cr
+ \funref{logorc2}  & ---    & or \param{integer-1} with complement of \param{integer-2}  \cr
+ \funref{logxor}   & \f{0}  & exclusive or                                               \cr
+}
+
+Negative \param{integers} are treated as if they were in two's-complement notation.
+
+\label Examples::
+
+\code
+ (logior 1 2 4 8) \EV 15
+ (logxor 1 3 7 15) \EV 10
+ (logeqv) \EV -1
+ (logand 16 31) \EV 16
+ (lognot 0) \EV -1
+ (lognot 1) \EV -2
+ (lognot -1) \EV 0
+ (lognot (1+ (lognot 1000))) \EV 999
+
+;;; In the following example, m is a mask.  For each bit in
+;;; the mask that is a 1, the corresponding bits in x and y are
+;;; exchanged.  For each bit in the mask that is a 0, the 
+;;; corresponding bits of x and y are left unchanged.
+ (flet ((show (m x y)
+          (format t "~%m = #o~6,'0O~%x = #o~6,'0O~%y = #o~6,'0O~%"
+                  m x y)))
+   (let ((m #o007750)
+         (x #o452576)
+         (y #o317407))
+     (show m x y)
+     (let ((z (logand (logxor x y) m)))
+       (setq x (logxor z x))
+       (setq y (logxor z y))
+       (show m x y))))
+\OUT m = #o007750
+\OUT x = #o452576
+\OUT y = #o317407
+\OUT 
+\OUT m = #o007750
+\OUT x = #o457426
+\OUT y = #o312557
+\EV NIL
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Should signal \typeref{type-error} if any argument is not an \term{integer}.
+
+\label See Also::
+
+\funref{boole}
+
+\label Notes::
+
+%Per Barmar.
+\f{(logbitp \param{k} -1)} returns \term{true} for all values of \param{k}.
+
+%% 12.7.0 9
+Because the following functions are not associative,
+they take exactly two arguments rather than any number
+of arguments.
+
+\code
+ (lognand \param{n1} \param{n2}) \EQ (lognot (logand \param{n1} \param{n2}))
+ (lognor \param{n1} \param{n2}) \EQ (lognot (logior \param{n1} \param{n2}))
+ (logandc1 \param{n1} \param{n2}) \EQ (logand (lognot \param{n1}) \param{n2})
+ (logandc2 \param{n1} \param{n2}) \EQ (logand \param{n1} (lognot \param{n2}))
+ (logiorc1 \param{n1} \param{n2}) \EQ (logior (lognot \param{n1}) \param{n2})
+ (logiorc2 \param{n1} \param{n2}) \EQ (logior \param{n1} (lognot \param{n2}))
+ (logbitp \param{j} (lognot \param{x})) \EQ (not (logbitp \param{j} \param{x}))
+\endcode
+
+\endcom
+
+%%% ========== LOGBITP
+\begincom{logbitp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues logbitp {index integer} {generalized-boolean}
+
+\label Arguments and Values::
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{index}---a non-negative \term{integer}.
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\param{integer}---an \term{integer}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+\funref{logbitp} is used to test the value of a particular bit 
+in \param{integer}, that is treated as if it were binary.
+%% 12.7.0 17
+The value of \funref{logbitp} is \term{true} if the bit in \param{integer} 
+whose index is \param{index} (that is, its weight is $2^\i{index}$) 
+is a one-bit; otherwise it is \term{false}.
+
+Negative \param{integers} are treated as if they were in 
+two's-complement notation.
+
+\label Examples::
+\code
+ (logbitp 1 1) \EV \term{false}
+ (logbitp 0 1) \EV \term{true}
+ (logbitp 3 10) \EV \term{true}
+ (logbitp 1000000 -1) \EV \term{true}
+ (logbitp 2 6) \EV \term{true}
+ (logbitp 0 6) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{index}{a non-negative \term{integer}}
+\Shouldchecktype{integer}{an \term{integer}}
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (logbitp \param{k} \param{n}) \EQ (ldb-test (byte 1 \param{k}) \param{n})
+\endcode
+
+\endcom
+
+%%% ========== LOGCOUNT
+\begincom{logcount}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues logcount {integer} {number-of-on-bits}
+
+\label Arguments and Values:: 
+
+\param{integer}---an \term{integer}.
+
+\param{number-of-on-bits}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 12.7.0 21
+Computes and returns the number of bits 
+in the two's-complement binary representation of \param{integer}
+that are `on' or `set'.
+If \param{integer} is negative, the \f{0} bits are counted;
+otherwise, the \f{1} bits are counted.
+
+\label Examples::
+
+\code
+ (logcount 0) \EV 0
+ (logcount -1) \EV 0
+ (logcount 7) \EV 3
+ (logcount  13) \EV 3 ;Two's-complement binary: ...0001101
+ (logcount -13) \EV 2 ;Two's-complement binary: ...1110011
+ (logcount  30) \EV 4 ;Two's-complement binary: ...0011110
+ (logcount -30) \EV 4 ;Two's-complement binary: ...1100010
+ (logcount (expt 2 100)) \EV 1
+ (logcount (- (expt 2 100))) \EV 100
+ (logcount (- (1+ (expt 2 100)))) \EV 1
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Should signal \typeref{type-error} if its argument is not an \term{integer}.
+
+\label See Also:\None.
+
+\label Notes::
+
+Even if the \term{implementation} does not represent \term{integers} internally
+in two's complement binary, \funref{logcount} behaves as if it did.
+
+The following identity always holds:
+
+\code
+    (logcount \param{x})
+ \EQ (logcount (- (+ \param{x} 1)))
+ \EQ (logcount (lognot \param{x}))
+\endcode
+
+\endcom
+
+%%% ========== LOGTEST
+\begincom{logtest}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues logtest {integer-1 integer-2} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{integer-1}---an \term{integer}.
+
+\param{integer-2}---an \term{integer}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 12.7.0 16
+Returns \term{true} if any of the bits designated by the 1's 
+in \param{integer-1} is 1 in \param{integer-2};
+otherwise it is \term{false}.
+\param{integer-1} and \param{integer-2} are treated as if they were binary.
+
+Negative \param{integer-1} and \param{integer-2} are treated as if
+they were represented in two's-complement binary.
+
+\label Examples::
+
+\code
+ (logtest 1 7) \EV \term{true}
+ (logtest 1 2) \EV \term{false}
+ (logtest -2 -1) \EV \term{true}
+ (logtest 0 -1) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{integer-1}{an \term{integer}}
+\Shouldchecktype{integer-2}{an \term{integer}}
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (logtest \param{x} \param{y}) \EQ (not (zerop (logand \param{x} \param{y})))
+\endcode
+
+\endcom
+
+%-------------------- Integer Bytes --------------------
+
+%%% ========== BYTE
+%%% ========== BYTE-SIZE
+%%% ========== BYTE-POSITION
+\begincom{byte, byte-size, byte-position}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues byte {size position} {bytespec}
+
+\DefunWithValues byte-size     {bytespec} {size}
+\DefunWithValues byte-position {bytespec} {position}
+
+\label Arguments and Values::
+
+%% 12.8.0 2
+
+\param{size}, \param{position}---a non-negative \term{integer}.
+
+\param{bytespec}---a \term{byte specifier}.
+
+\label Description::
+
+%% 12.8.0 3
+%% 12.8.0 2                 
+\funref{byte} returns a \term{byte specifier} that indicates
+a \term{byte} of width \param{size} and whose bits have weights            
+$2^{\param{position} + \param{size} - 1\/}$ through $2^\param{position}$,
+and whose representation is
+\term{implementation-dependent}.                 
+
+\funref{byte-size} returns the number of bits specified by \param{bytespec}.
+
+\funref{byte-position} returns the position specified by \param{bytespec}.
+
+\label Examples::
+
+\code
+ (setq b (byte 100 200)) \EV #<BYTE-SPECIFIER size 100 position 200>
+ (byte-size b) \EV 100
+ (byte-position b) \EV 200
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{ldb}, \funref{dpb}
+
+\label Notes::
+%% 12.8.0 4
+
+\code
+ (byte-size (byte \param{j} \param{k})) \EQ \param{j}
+ (byte-position (byte \param{j} \param{k})) \EQ \param{k}
+\endcode
+
+A \term{byte} of \term{size} of \f{0} is permissible; 
+it refers to a \term{byte} of width zero.  For example,
+
+\code
+ (ldb (byte 0 3) #o7777) \EV 0
+ (dpb #o7777 (byte 0 3) 0) \EV 0
+\endcode
+
+\endcom
+
+%%% ========== DEPOSIT-FIELD
+\begincom{deposit-field}\ftype{Function}
+
+%% 12.8.0 12
+\label Syntax::
+
+\DefunWithValues deposit-field {newbyte bytespec integer} {result-integer}
+
+\label Arguments and Values::
+
+\param{newbyte}---an \term{integer}.
+
+\param{bytespec}---a \term{byte specifier}.
+
+\param{integer}---an \term{integer}.
+
+\param{result-integer}---an \term{integer}.
+
+\label Description::
+
+%% 12.8.0 13
+Replaces a field of bits within \param{integer}; specifically,
+returns an \term{integer} that contains the bits of \param{newbyte}
+within the \term{byte} specified by \param{bytespec},
+and elsewhere contains the bits of \param{integer}.  
+
+\label Examples::
+
+\code
+ (deposit-field 7 (byte 2 1) 0) \EV 6
+ (deposit-field -1 (byte 4 0) 0) \EV 15
+ (deposit-field 0 (byte 2 1) -3) \EV -7
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{byte},
+\funref{dpb}
+
+\label Notes::
+
+\code
+ (logbitp \param{j} (deposit-field \param{m} (byte \param{s} \param{p}) \param{n}))
+ \EQ (if (and (>= \param{j} \param{p}) (< \param{j} (+ \param{p} \param{s})))
+        (logbitp \param{j} \param{m})
+        (logbitp \param{j} \param{n}))
+\endcode
+
+   \funref{deposit-field} is to \funref{mask-field} 
+as \funref{dpb}           is to \funref{ldb}.
+
+\endcom
+
+%%% ========== DPB
+\begincom{dpb}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues dpb {newbyte bytespec integer} {result-integer}
+
+\label Pronunciation::
+
+    \pronounced{\stress{d\schwa }\Stress{pib}}
+ or \pronounced{\stress{d\schwa }\Stress{p\schwa b}}
+ or \pronounced{\Stress{d\harde}\Stress{p\harde}\Stress{b\harde}}
+
+\label Arguments and Values::
+
+\param{newbyte}---an \term{integer}.
+
+\param{bytespec}---a \term{byte specifier}.
+
+\param{integer}---an \term{integer}.
+
+\param{result-integer}---an \term{integer}.
+
+\label Description::
+
+%% 12.8.0 11
+\funref{dpb} (deposit byte) is used to 
+replace a field of bits within \param{integer}.  
+\funref{dpb} returns an \term{integer} that is 
+the same as \param{integer} except in the bits specified by \param{bytespec}.
+
+Let \f{s} be the size specified
+by \param{bytespec}; then the low \f{s} bits of \param{newbyte} appear in
+the result in the byte specified by \param{bytespec}.
+\param{Newbyte} is interpreted as
+being right-justified, as if it were the result of \funref{ldb}.
+
+\label Examples::
+
+\code
+ (dpb 1 (byte 1 10) 0) \EV 1024
+ (dpb -2 (byte 2 10) 0) \EV 2048
+ (dpb 1 (byte 2 10) 2048) \EV 1024
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{byte}, \funref{deposit-field}, \funref{ldb}
+
+\label Notes::
+
+\code
+ (logbitp \param{j} (dpb \param{m} (byte \param{s} \param{p}) \param{n}))
+ \EQ (if (and (>= \param{j} \param{p}) (< \param{j} (+ \param{p} \param{s})))
+        (logbitp (- \param{j} \param{p}) \param{m})
+        (logbitp \param{j} \param{n}))
+\endcode
+
+In general,
+
+\code
+ (dpb \param{x} (byte 0 \param{y}) \param{z}) \EV \param{z}
+\endcode
+
+for all valid values of \param{x}, \param{y}, and \param{z}.
+
+Historically, the name ``dpb'' comes from a DEC PDP-10 assembly language
+instruction meaning ``deposit byte.''
+
+\endcom
+
+%%% ========== LDB
+\begincom{ldb}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues ldb {bytespec integer} {byte}
+
+\Defsetf ldb {bytespec place} {new-byte}
+
+\label Pronunciation::
+
+    \pronounced{\Stress{lid}ib}
+ or \pronounced{\Stress{lid}\schwa b}
+ or \pronounced{\Stress{el}\Stress{d\harde}\Stress{b\harde}}
+
+\label Arguments and Values::
+
+\param{bytespec}---a \term{byte specifier}.
+
+\param{integer}---an \term{integer}.
+
+\param{byte}, \param{new-byte}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 12.8.0 5
+\funref{ldb} extracts and returns the \term{byte} of \param{integer}
+specified by \param{bytespec}.
+
+\funref{ldb} returns an \term{integer} in which the bits with weights 
+$2^{(\i{s}-1)}$ through $2^{0}$ are the same as those in 
+\param{integer} with weights $2^{(\i{p}+\i{s}-1)}$ 
+through $2^\i{p}$, and all other bits zero; \i{s} is
+\f{(byte-size \param{bytespec})} 
+and \i{p} is \f{(byte-position \param{bytespec})}.
+
+%% 12.8.0 7
+
+\macref{setf} may be used with \funref{ldb} to modify
+a byte within the \param{integer} that is stored
+in a given \param{place}.
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+The order of evaluation, when an \funref{ldb} form is supplied
+to \macref{setf}, is exactly left-to-right.
+\idxtext{order of evaluation}\idxtext{evaluation order}%
+\endissue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+The effect is to perform a \funref{dpb} operation
+and then store the result back into the \param{place}.
+
+\label Examples::
+
+\code
+ (ldb (byte 2 1) 10) \EV 1
+ (setq a (list 8)) \EV (8)
+ (setf (ldb (byte 2 1) (car a)) 1) \EV 1
+ a \EV (10)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{byte},
+\funref{byte-position},
+\funref{byte-size},
+\funref{dpb}
+
+\label Notes::
+
+\code
+ (logbitp \param{j} (ldb (byte \param{s} \param{p}) \param{n}))
+    \EQ (and (< \param{j} \param{s}) (logbitp (+ \param{j} \param{p}) \param{n}))
+\endcode
+
+In general,
+
+\code
+ (ldb (byte 0 \param{x}) \param{y}) \EV 0
+\endcode
+
+for all valid values of \param{x} and \param{y}.
+
+Historically, the name ``ldb'' comes from a DEC PDP-10 assembly language
+instruction meaning ``load byte.''
+
+\endcom
+
+%%% ========== LDB-TEST
+\begincom{ldb-test}\ftype{Function}              
+
+\label Syntax::
+
+\DefunWithValues ldb-test {bytespec integer} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{bytespec}---a \term{byte specifier}.
+
+\param{integer}---an \term{integer}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 12.8.0 8
+Returns \term{true} if any of the bits of the byte in \param{integer}
+specified by \param{bytespec} is non-zero; otherwise returns \term{false}.
+
+\label Examples::
+
+\code
+ (ldb-test (byte 4 1) 16) \EV \term{true}
+ (ldb-test (byte 3 1) 16) \EV \term{false}
+ (ldb-test (byte 3 2) 16) \EV \term{true}
+\endcode
+
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{byte}, \funref{ldb}, \funref{zerop}
+
+\label Notes::
+\code
+ (ldb-test bytespec n) \EQ
+ (not (zerop (ldb bytespec n))) \EQ
+ (logtest (ldb bytespec -1) n)
+\endcode
+%Item 3 of that equivalence contributed by Barmar. -kmp 16-Jul-91
+
+\endcom
+
+%%% ========== MASK-FIELD
+\begincom{mask-field}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues mask-field {bytespec integer} {masked-integer}
+\Defsetf         mask-field {bytespec place}   {new-masked-integer}
+
+\label Arguments and Values::
+
+\param{bytespec}---a \term{byte specifier}.
+
+\param{integer}---an \term{integer}.
+
+\param{masked-integer}, \param{new-masked-integer}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 12.8.0 9
+\funref{mask-field} performs a ``mask'' operation on \param{integer}.
+It returns an \term{integer} that has the same bits as \param{integer} in 
+the \term{byte} specified by \param{bytespec}, but that has zero-bits everywhere else.
+
+%% 12.8.0 10
+\macref{setf} may be used with \funref{mask-field}
+to modify a byte within the \term{integer} that is stored
+in a given \param{place}.
+The effect is to perform a \funref{deposit-field} operation
+and then store the result back into the \param{place}.
+
+\label Examples::
+
+\code
+ (mask-field (byte 1 5) -1) \EV 32
+ (setq a 15) \EV 15
+ (mask-field (byte 2 0) a) \EV 3
+ a \EV 15
+ (setf (mask-field (byte 2 0) a) 1) \EV 1
+ a \EV 13
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{byte},
+\funref{ldb}
+
+\label Notes::
+
+\code
+ (ldb \param{bs} (mask-field \param{bs} \param{n})) \EQ (ldb \param{bs} \param{n})
+ (logbitp \param{j} (mask-field (byte \param{s} \param{p}) \param{n}))
+   \EQ (and (>= \param{j} \param{p}) (< \param{j} \param{s}) (logbitp \param{j} \param{n}))
+ (mask-field \param{bs} \param{n}) \EQ (logand \param{n} (dpb -1 \param{bs} 0))
+\endcode
+
+\endcom
+
+%-------------------- Fixnum --------------------
+
+%%% ========== MOST-POSITIVE-FIXNUM
+%%% ========== MOST-NEGATIVE-FIXNUM
+\begincom{most-positive-fixnum, most-negative-fixnum}\ftype{Constant Variable}
+
+\label Constant Value::
+
+\term{implementation-dependent}.
+
+\label Description::
+
+%% 12.10.0 1
+%% 12.10.0 2
+\conref{most-positive-fixnum} is that \term{fixnum} closest in value 
+to positive infinity provided by the implementation,
+\issue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+and greater than or equal to both $2^{15}$ - 1 and 
+\conref{array-dimension-limit}.
+\endissue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+
+%% 12.10.0 4
+\conref{most-negative-fixnum} is that \term{fixnum} closest in value
+to negative infinity provided by the implementation,
+\issue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+and less than or equal to $-2^{15}$.
+\endissue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+
+\label Examples:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Ratio --------------------
+
+
+
+%-------------------- Float --------------------
+
+%%% ========== DECODE-FLOAT
+%%% ========== SCALE-FLOAT
+%%% ========== FLOAT-RADIX
+%%% ========== FLOAT-SIGN
+%%% ========== FLOAT-DIGITS
+%%% ========== FLOAT-PRECISION
+%%% ========== INTEGER-DECODE-FLOAT
+\begincom{decode-float, scale-float, float-radix, float-sign, 
+	  float-digits, float-precision, integer-decode-float}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues decode-float {float} {significand, exponent, sign}
+
+\DefunWithValues scale-float {float integer} {scaled-float}
+
+\DefunWithValues float-radix {float} {float-radix}
+
+\DefunWithValues float-sign {float-1 {\opt} float-2} {signed-float}
+
+\DefunWithValues float-digits {float} {digits1}
+
+\DefunWithValues float-precision {float} {digits2}
+
+\DefunWithValues integer-decode-float {float} {significand, exponent, integer-sign}
+
+\label Arguments and Values::
+
+\param{digits1}---a non-negative \term{integer}.
+
+\param{digits2}---a non-negative \term{integer}.
+
+\param{exponent}---an \term{integer}.
+
+\param{float}---a \term{float}.
+
+\param{float-1}---a \term{float}.
+
+\param{float-2}---a \term{float}.
+
+\param{float-radix}---an \term{integer}.
+
+\param{integer}---a non-negative \term{integer}.
+
+\param{integer-sign}---the \term{integer} \f{-1},
+		    or the \term{integer} \f{1}.
+
+\param{scaled-float}---a \term{float}.
+
+\param{sign}---A \term{float} of the same \term{type} as \param{float}
+	       but numerically equal to \f{1.0} or \f{-1.0}.
+
+\param{signed-float}---a \term{float}.
+                          
+\param{significand}---a \term{float}.
+
+\label Description::
+
+%% 12.6.0 27
+%% 12.6.0 28
+\funref{decode-float} computes three values that characterize
+\param{float}.
+The first value is of the same \term{type}
+as \param{float} and 
+represents the significand.
+The second value represents the exponent
+to which the radix (notated in this description by \i{b}) must
+be raised to obtain the value that, when multiplied with the first
+result, produces the absolute value of \param{float}.
+If \param{float} is zero, any \term{integer} value may be returned, 
+provided that the identity shown for \funref{scale-float} holds.
+The third value
+is of the same \term{type} as \param{float}
+and is 1.0 if \param{float} is greater
+than or equal to zero or -1.0 otherwise.
+
+\funref{decode-float} 
+divides \param{float} by an integral power of \i{b}
+so as to bring its value between $1/\i{b}$ (inclusive) and~$1$ (exclusive),
+and returns the quotient as the first value.
+If \param{float} is zero, however, the result
+equals the absolute value of \param{float} (that is, if there is a negative
+zero, its significand is considered to be a positive zero).
+
+%% 12.6.0 29
+\funref{scale-float} returns
+{\tt (* \param{float} (expt (float \i{b} \param{float}) 
+\param{integer}))\/}, where \i{b} is the radix of the floating-point
+representation. \param{float} is not necessarily between $1/\i{b}$ and~$1$.
+ 
+
+%% 12.6.0 31              
+\funref{float-radix} returns 
+the radix of \param{float}.
+
+%% 12.6.0 32
+\funref{float-sign} returns a number \f{z} such
+that \f{z} and \param{float-1} have the same sign and also such that
+\f{z} and \param{float-2} have the same absolute value.
+If \param{float-2} is not supplied, its value is \f{(float 1 \param{float-1})}.
+%% Barmar says this is redundant. I agree. -kmp 28-Dec-90
+% \f{(float-sign x)} produces a \f{1.0} or \f{-1.0}
+% of appropriate format
+% according to the sign of \f{x} if \param{float-2} is not supplied.
+If an implementation
+has distinct representations for negative zero and positive zero,
+then \f{(float-sign -0.0)} \EV\ \f{-1.0}.
+
+%% 12.6.0 33
+\funref{float-digits} returns
+the number of radix \i{b} digits
+used in the representation of \param{float} (including any implicit
+digits, such as a ``hidden bit'').
+
+\funref{float-precision}
+returns
+the number of significant radix \i{b} digits present in \param{float};
+if \param{float} is a \term{float}
+zero, then the result is an \term{integer} zero.
+
+For \term{normalized} \term{floats},
+the results of \funref{float-digits} and \funref{float-precision} are the same,
+but the precision is less than the number of representation digits 
+for a \term{denormalized} or zero number.
+
+%% 12.6.0 34
+%% 12.6.0 35
+%% 12.6.0 36
+\funref{integer-decode-float} computes three values that characterize
+\param{float} - 
+the significand scaled so as to be an \term{integer},
+and the same last two
+values that are returned by \funref{decode-float}.
+If \param{float} is zero, \funref{integer-decode-float} returns 
+zero as the first value.
+The second value bears the same relationship to the first value
+as for \funref{decode-float}:
+
+\code
+ (multiple-value-bind (signif expon sign)
+                      (integer-decode-float f)
+   (scale-float (float signif f) expon)) \EQ (abs f)
+\endcode
+
+\label Examples::
+
+\code
+ ;; Note that since the purpose of this functionality is to expose
+ ;; details of the implementation, all of these examples are necessarily
+ ;; very implementation-dependent.  Results may vary widely.
+ ;; Values shown here are chosen consistently from one particular implementation.
+ (decode-float .5) \EV 0.5, 0, 1.0
+ (decode-float 1.0) \EV 0.5, 1, 1.0
+ (scale-float 1.0 1) \EV 2.0
+ (scale-float 10.01 -2) \EV 2.5025
+ (scale-float 23.0 0) \EV 23.0
+ (float-radix 1.0) \EV 2
+ (float-sign 5.0) \EV 1.0
+ (float-sign -5.0) \EV -1.0
+ (float-sign 0.0) \EV 1.0
+ (float-sign 1.0 0.0) \EV 0.0
+ (float-sign 1.0 -10.0) \EV 10.0
+ (float-sign -1.0 10.0) \EV -10.0
+ (float-digits 1.0) \EV 24
+ (float-precision 1.0) \EV 24
+ (float-precision least-positive-single-float) \EV 1
+ (integer-decode-float 1.0) \EV 8388608, -23, 1
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The implementation's representation for \term{floats}.
+
+\label Exceptional Situations::
+
+The functions \funref{decode-float}, \funref{float-radix}, \funref{float-digits},
+\funref{float-precision}, and \funref{integer-decode-float} should signal an error
+if their only argument is not a \term{float}.
+
+\Thefunction{scale-float} should signal an error if its first argument
+is not a \term{float} or if its second argument is not an \term{integer}.
+
+\Thefunction{float-sign} should signal an error if its first argument
+is not a \term{float} or if its second argument is supplied but is 
+not a \term{float}.
+
+\label See Also:\None.
+
+\label Notes::
+
+The product of the first result of \funref{decode-float} or \funref{integer-decode-float},
+of the radix raised to the power of the second result, and of the third result
+is exactly equal to the value of \param{float}.
+
+%% 12.6.0 30
+\code
+ (multiple-value-bind (signif expon sign)
+                      (decode-float f)
+   (scale-float signif expon))
+\EQ (abs f)
+\endcode
+and
+
+\code
+ (multiple-value-bind (signif expon sign)
+                      (decode-float f)
+   (* (scale-float signif expon) sign))
+\EQ f
+\endcode
+\endcom
+
+%%% ========== FLOAT
+\begincom{float}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues float {number {\opt} prototype} {float}
+
+\label Arguments and Values::
+
+\param{number}---a \term{real}.
+
+\param{prototype}---a \term{float}.
+
+\param{float}---a \term{float}.
+
+\label Description::
+
+%% 12.6.0 4
+\funref{float} converts a 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{real}
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+number to a \term{float}.
+
+If a \param{prototype} is supplied,
+a \term{float} is returned that is mathematically equal to \param{number}
+but has the same format as \param{prototype}.
+
+If \param{prototype} is not supplied,
+then if the \param{number} is already a \term{float}, it is returned;
+otherwise, a \term{float} is returned that is mathematically equal to \param{number}
+but is a \term{single float}.
+
+\label Examples:: 
+
+\code
+ (float 0) \EV 0.0
+ (float 1 .5) \EV 1.0
+ (float 1.0) \EV 1.0
+ (float 1/2) \EV 0.5
+\EV 1.0d0
+\OV 1.0
+ (eql (float 1.0 1.0d0) 1.0d0) \EV \term{true}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{coerce}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== FLOATP
+\begincom{floatp}\ftype{Function}
+
+\label Syntax::
+
+\Defun floatp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 15
+\TypePredicate{object}{float}
+
+\label Examples::
+
+\code
+ (floatp 1.2d2) \EV \term{true}
+ (floatp 1.212) \EV \term{true}
+ (floatp 1.2s2) \EV \term{true}
+ (floatp (expt 2 130)) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (floatp \param{object}) \EQ (typep \param{object} 'float)
+\endcode
+
+\endcom
+
+%-------------------- Float Subtypes --------------------
+
+%%% ========== LEAST-NEGATIVE-DOUBLE-FLOAT
+%%% ========== LEAST-NEGATIVE-NORMALIZED-DOUBLE-FLOAT
+%%% ========== LEAST-NEGATIVE-LONG-FLOAT
+%%% ========== LEAST-NEGATIVE-NORMALIZED-LONG-FLOAT
+%%% ========== LEAST-NEGATIVE-SHORT-FLOAT
+%%% ========== LEAST-NEGATIVE-NORMALIZED-SHORT-FLOAT
+%%% ========== LEAST-NEGATIVE-SINGLE-FLOAT
+%%% ========== LEAST-NEGATIVE-NORMALIZED-SINGLE-FLOAT
+%%% ========== LEAST-POSITIVE-DOUBLE-FLOAT
+%%% ========== LEAST-POSITIVE-NORMALIZED-DOUBLE-FLOAT
+%%% ========== LEAST-POSITIVE-LONG-FLOAT
+%%% ========== LEAST-POSITIVE-NORMALIZED-LONG-FLOAT
+%%% ========== LEAST-POSITIVE-SHORT-FLOAT
+%%% ========== LEAST-POSITIVE-NORMALIZED-SHORT-FLOAT
+%%% ========== LEAST-POSITIVE-SINGLE-FLOAT
+%%% ========== LEAST-POSITIVE-NORMALIZED-SINGLE-FLOAT
+%%% ========== MOST-NEGATIVE-DOUBLE-FLOAT
+%%% ========== MOST-NEGATIVE-LONG-FLOAT
+%%% ========== MOST-NEGATIVE-SHORT-FLOAT
+%%% ========== MOST-NEGATIVE-SINGLE-FLOAT
+%%% ========== MOST-POSITIVE-DOUBLE-FLOAT
+%%% ========== MOST-POSITIVE-LONG-FLOAT
+%%% ========== MOST-POSITIVE-SHORT-FLOAT
+%%% ========== MOST-POSITIVE-SINGLE-FLOAT
+\begincom{most-positive-short-float, least-positive-short-float,
+	  least-positive-normalized-short-float,
+          most-positive-double-float, least-positive-double-float,
+	  least-positive-normalized-double-float,
+          most-positive-long-float, least-positive-long-float, 
+	  least-positive-normalized-long-float,
+          most-positive-single-float, least-positive-single-float,
+	  least-positive-normalized-single-float,
+          most-negative-short-float, least-negative-short-float,
+	  least-negative-normalized-short-float,
+          most-negative-single-float, least-negative-single-float,
+	  least-negative-normalized-single-float,
+          most-negative-double-float, least-negative-double-float,
+	  least-negative-normalized-double-float,
+          most-negative-long-float, least-negative-long-float,
+	  least-negative-normalized-long-float}\ftype{Constant Variable}
+
+\issue{FLOAT-UNDERFLOW:ADD-VARIABLES}
+
+\label Constant Value::
+
+\term{implementation-dependent}.
+
+\label Description::
+%% 12.10.0 9
+
+These \term{constant variables} provide a way for programs to examine
+the \term{implementation-defined} limits for the various float formats.
+
+Of these \term{variables},
+ each which has ``\f{-normalized}'' in its \term{name}
+  must have a \term{value} which is a \term{normalized} \term{float}, and
+ each which does not have ``\f{-normalized}'' in its name
+  may have a \term{value} which is either a \term{normalized} \term{float} 
+  or a \term{denormalized} \term{float}, as appropriate.
+
+Of these \term{variables},
+ each which has ``\f{short-float}'' in its name
+  must have a \term{value} which is a \term{short float},
+ each which has ``\f{single-float}'' in its name
+  must have a \term{value} which is a \term{single float},
+ each which has ``\f{double-float}'' in its name
+  must have a \term{value} which is a \term{double float}, and
+ each which has ``\f{long-float}'' in its name
+  must have a \term{value} which is a \term{long float}.
+
+\beginlist
+
+\itemitem{\bull} 
+  \vtop{\hbox{\conref{most-positive-short-float},
+              \conref{most-positive-single-float},}
+        \hbox{\conref{most-positive-double-float},
+	      \conref{most-positive-long-float}}}
+\Vskip 18pt!
+
+  Each of these \term{constant variables} has as its \term{value} 
+  the positive \term{float} of the largest magnitude 
+  (closest in value to, but not equal to, positive infinity)
+  for the float format implied by its name.
+
+\itemitem{\bull}
+  \vtop{\hbox{\conref{least-positive-short-float},
+	      \conref{least-positive-normalized-short-float},}
+	\hbox{\conref{least-positive-single-float},
+	      \conref{least-positive-normalized-single-float},}
+	\hbox{\conref{least-positive-double-float},
+	      \conref{least-positive-normalized-double-float},}
+	\hbox{\conref{least-positive-long-float},
+	      \conref{least-positive-normalized-long-float}}}
+\Vskip 42pt!
+
+  Each of these \term{constant variables} has as its \term{value}
+  the smallest positive (nonzero) \term{float}
+  for the float format implied by its name.
+
+\itemitem{\bull}
+  \vtop{\hbox{\conref{least-negative-short-float},
+	      \conref{least-negative-normalized-short-float},}
+        \hbox{\conref{least-negative-single-float},
+	      \conref{least-negative-normalized-single-float},}
+        \hbox{\conref{least-negative-double-float},
+	      \conref{least-negative-normalized-double-float},}
+        \hbox{\conref{least-negative-long-float},
+	      \conref{least-negative-normalized-long-float}}}
+\Vskip 42pt!
+
+  Each of these \term{constant variables} has as its \term{value}
+  the negative (nonzero) \term{float} of the smallest magnitude
+  for the float format implied by its name.
+  (If an implementation supports minus zero as a \term{different} 
+   \term{object} from positive zero, this value must not be minus zero.)
+
+\itemitem{\bull}
+  \vtop{\hbox{\conref{most-negative-short-float},
+	      \conref{most-negative-single-float},}
+	\hbox{\conref{most-negative-double-float},
+	      \conref{most-negative-long-float}}}
+\Vskip 18pt!
+
+  Each of these \term{constant variables} has as its \term{value}
+  the negative \term{float} of the largest magnitude 
+  (closest in value to, but not equal to, negative infinity)
+  for the float format implied by its name.
+
+\endlist
+
+\label Examples:\None.
+
+\label See Also:\None.
+
+\label Notes::
+
+\endissue{FLOAT-UNDERFLOW:ADD-VARIABLES}
+
+\endcom
+
+%%% ========== SHORT-FLOAT-EPSILON
+%%% ========== SHORT-FLOAT-NEGATIVE-EPSILON
+%%% ========== SINGLE-FLOAT-EPSILON
+%%% ========== SINGLE-FLOAT-NEGATIVE-EPSILON
+%%% ========== DOUBLE-FLOAT-EPSILON
+%%% ========== DOUBLE-FLOAT-NEGATIVE-EPSILON
+%%% ========== LONG-FLOAT-EPSILON
+%%% ========== LONG-FLOAT-NEGATIVE-EPSILON
+\begincom{short-float-epsilon, short-float-negative-epsilon,
+          single-float-epsilon, single-float-negative-epsilon,
+          double-float-epsilon, double-float-negative-epsilon,
+          long-float-epsilon, long-float-negative-epsilon}\ftype{Constant Variable}
+
+\label Constant Value::
+
+%% 12.10.0 10
+\term{implementation-dependent}.
+
+\label Description::
+
+The value of each of the constants \conref{short-float-epsilon}, 
+\conref{single-float-epsilon},
+\conref{double-float-epsilon}, and \conref{long-float-epsilon} is 
+the smallest positive \term{float} $\epsilon$ of the given format, 
+such that the following expression is \term{true} when evaluated:
+
+{\tt (not (= (float 1 $\epsilon$) (+ (float 1 $\epsilon$) $\epsilon$)))\/}
+
+
+The value of each of the constants \conref{short-float-negative-epsilon}, 
+\conref{single-float-negative-epsilon},
+\conref{double-float-negative-epsilon}, and  
+\conref{long-float-negative-epsilon} is the smallest positive
+\term{float} $\epsilon$ of the given format, such that the following
+expression is \term{true} when evaluated:
+
+{\tt (not (= (float 1 $\epsilon$) (- (float 1 $\epsilon$) $\epsilon$)))\/}
+
+
+\label Examples:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== ARITHMETIC-ERROR
+\begincom{arithmetic-error}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{arithmetic-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{arithmetic-error} consists of error conditions
+that occur during arithmetic operations.
+The operation and operands are initialized with
+\theinitkeyargs{operation} and \kwd{operands} to \funref{make-condition},
+and are \term{accessed} by
+the functions \funref{arithmetic-error-operation} and 
+\funref{arithmetic-error-operands}.
+
+\label See Also::
+
+\funref{arithmetic-error-operation}, \funref{arithmetic-error-operands}
+
+\endcom%{arithmetic-error}\ftype{Condition Type}
+
+%%% ========== ARITHMETIC-ERROR-OPERANDS
+\begincom{arithmetic-error-operands, arithmetic-error-operation}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues arithmetic-error-operands {condition} {operands}
+\DefunWithValues arithmetic-error-operation {condition} {operation}
+
+\label Arguments and Values::
+
+\param{condition}---a \term{condition} \oftype{arithmetic-error}.
+
+\param{operands}---a \term{list}.
+
+\param{operation}---a \term{function designator}.
+
+\label Description::
+
+\funref{arithmetic-error-operands} returns a \term{list} of the operands 
+which were used in the offending call to the operation that signaled 
+the \param{condition}.
+
+\funref{arithmetic-error-operation} returns a \term{list} of 
+the offending operation in the offending call that signaled the \param{condition}.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None!
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\typeref{arithmetic-error},
+{\chapref\Conditions}
+
+\label Notes::
+
+%%Shouldn't be needed any more. -kmp 1-Sep-91
+%It is an error to use \macref{setf} with \funref{arithmetic-error-operands}.
+
+\endcom
+
+\begincom{division-by-zero}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{division-by-zero},
+\typeref{arithmetic-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{division-by-zero} consists of error conditions that
+occur because of division by zero.
+
+\endcom%{division-by-zero}\ftype{Condition Type}
+
+%!!! ACW: A statement of the intended difference between
+%         FLOATING-POINT-INVALID-OPERATION and FLOATING-POINT-INEXACT would be helpful.
+\begincom{floating-point-invalid-operation}\ftype{Condition Type}
+
+\issue{FLOATING-POINT-CONDITION-NAMES:X3J13-NOV-89}
+
+\label Class Precedence List::
+\typeref{floating-point-invalid-operation},
+\typeref{arithmetic-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{floating-point-invalid-operation} consists of
+error conditions that occur because of certain 
+%!!! Barmar: which?
+floating point traps. 
+
+It is \term{implementation-dependent} whether floating point traps
+occur, and whether or how they may be enabled or disabled.  Therefore,
+conforming code may establish handlers for this condition, but must not
+depend on its being \term{signaled}.
+
+\endissue{FLOATING-POINT-CONDITION-NAMES:X3J13-NOV-89}
+
+\endcom%{floating-point-invalid-operation}\ftype{Condition Type}
+
+\begincom{floating-point-inexact}\ftype{Condition Type}
+
+\issue{FLOATING-POINT-CONDITION-NAMES:X3J13-NOV-89}
+
+\label Class Precedence List::
+\typeref{floating-point-inexact},
+\typeref{arithmetic-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{floating-point-inexact} consists of 
+error conditions that occur because of certain 
+%!!! Barmar: Which?
+floating point traps.
+
+It is \term{implementation-dependent} whether floating point traps
+occur, and whether or how they may be enabled or disabled.  Therefore,
+conforming code may establish handlers for this condition, but must not
+depend on its being \term{signaled}.
+
+\endissue{FLOATING-POINT-CONDITION-NAMES:X3J13-NOV-89}
+
+\endcom%{floating-point-inexact}\ftype{Condition Type}
+
+\begincom{floating-point-overflow}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{floating-point-overflow},
+\typeref{arithmetic-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{floating-point-overflow} consists of error
+conditions that occur because of floating-point overflow.
+
+\endcom%{floating-point-overflow}\ftype{Condition Type}
+
+\begincom{floating-point-underflow}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{floating-point-underflow},
+\typeref{arithmetic-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{floating-point-underflow} consists of 
+error conditions that occur because of floating-point underflow.
+
+\endcom%{floating-point-underflow}\ftype{Condition Type}
+

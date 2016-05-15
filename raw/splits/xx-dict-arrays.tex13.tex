@@ -1,0 +1,41 @@
+====== Function ARRAY-ELEMENT-TYPE ======
+
+====Syntax====
+
+**array-element-type** //array// → //typespec//
+
+====Arguments and Values====
+
+//array// - an //[[CL:Glossary:array]]//.
+
+//typespec// - a //[[CL:Glossary:type specifier]]//.
+
+====Description====
+
+Returns a //[[CL:Glossary:type specifier]]// which represents the //[[CL:Glossary:actual array element type]]// of the array, which is the set of //[[CL:Glossary:object|objects]]// that such an //array// can hold.
+
+(Because of //[[CL:Glossary:array]]// //[[CL:Glossary:upgrade|upgrading]]//, this //[[CL:Glossary:type specifier]]// can in some cases denote a //[[CL:Glossary:supertype]]// of the //[[CL:Glossary:expressed array element type]]// of the //array//.)
+
+====Examples====
+
+<blockquote> (array-element-type (make-array 4)) → T (array-element-type (make-array 12 :element-type '(unsigned-byte 8))) → //[[CL:Glossary:implementation-dependent]]// (array-element-type (make-array 12 :element-type '(unsigned-byte 5))) → //[[CL:Glossary:implementation-dependent]]// </blockquote>
+
+<blockquote> (array-element-type (make-array 5 :element-type '(mod 5))) </blockquote> could be ''(mod 5)'', ''(mod 8)'', ''fixnum'', ''t'', or any other type of which ''(mod 5)'' is a //[[CL:Glossary:subtype]]//.
+
+====Affected By====
+
+The //[[CL:Glossary:implementation]]//.
+
+====Exceptional Situations====
+
+Should signal an error of type **[[CL:Types:type-error]]** if its argument is not an //[[CL:Glossary:array]]//.
+
+====See Also====
+
+**[[CL:Types:array]]**, **[[CL:Functions:make-array]]**, **[[CL:Functions:subtypep]]**, **[[CL:Functions:upgraded-array-element-type]]**
+
+====Notes====
+
+None.
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}

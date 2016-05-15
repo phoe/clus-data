@@ -1,0 +1,62 @@
+====== Function FUNCTION-LAMBDA-EXPRESSION ======
+
+====Syntax====
+
+\DefunWithValuesNewline function-lambda-expression {function} {lambda-expression, closure-p, name}
+
+====Arguments and Values====
+
+//function// - a //[[CL:Glossary:function]]//.
+
+//lambda-expression// - a //[[CL:Glossary:lambda expression]]// or **[[CL:Constant Variables:nil]]**.
+
+//closure-p// - a //[[CL:Glossary:generalized boolean]]//.
+
+//name// - an //[[CL:Glossary:object]]//.
+
+====Description====
+
+Returns information about //function// as follows:
+
+The //[[CL:Glossary:primary value]]//, //lambda-expression//, is //function//'s defining //[[CL:Glossary:lambda expression]]//, or **[[CL:Constant Variables:nil]]** if the information is not available. The //[[CL:Glossary:lambda expression]]// may have been pre-processed in some ways, but it should remain a suitable argument to **[[CL:Functions:compile]]** or \specref{function}. Any //[[CL:Glossary:implementation]]// may legitimately return **[[CL:Constant Variables:nil]]** as the //lambda-expression// of any //function//.
+
+The //[[CL:Glossary:secondary value]]//, //closure-p//, is **[[CL:Constant Variables:nil]]** if //function//'s definition was enclosed in the //[[CL:Glossary:null lexical environment]]// or something //[[CL:Glossary:non-nil]]// if //function//'s definition might have been enclosed in some //[[CL:Glossary:non-null lexical environment]]//. Any //[[CL:Glossary:implementation]]// may legitimately return //[[CL:Glossary:true]]// as the //closure-p// of any //function//.
+
+The //[[CL:Glossary:tertiary value]]//, //name//, is the "name" of //function//. The name is intended for debugging only and is not necessarily one that would be valid for use as a name in **[[CL:Macros:defun]]** or \specref{function}, for example. By convention, **[[CL:Constant Variables:nil]]** is used to mean that //function// has no name. Any //[[CL:Glossary:implementation]]// may legitimately return **[[CL:Constant Variables:nil]]** as the //name// of any //function//.
+
+
+====Examples====
+
+The following examples illustrate some possible return values, but are not intended to be exhaustive:
+
+<blockquote> (function-lambda-expression #'(lambda (x) x)) → NIL, //[[CL:Glossary:false]]//, NIL //or// → NIL, //[[CL:Glossary:true]]//, NIL //or// → (LAMBDA (X) X), //[[CL:Glossary:true]]//, NIL //or// → (LAMBDA (X) X), //[[CL:Glossary:false]]//, NIL
+
+(function-lambda-expression (funcall #'(lambda () #'(lambda (x) x)))) → NIL, //[[CL:Glossary:false]]//, NIL //or// → NIL, //[[CL:Glossary:true]]//, NIL //or// → (LAMBDA (X) X), //[[CL:Glossary:true]]//, NIL //or// → (LAMBDA (X) X), //[[CL:Glossary:false]]//, NIL
+
+(function-lambda-expression (funcall #'(lambda (x) #'(lambda () x)) nil)) → NIL, //[[CL:Glossary:true]]//, NIL //or// → (LAMBDA () X), //[[CL:Glossary:true]]//, NIL \NV NIL, //[[CL:Glossary:false]]//, NIL \NV (LAMBDA () X), //[[CL:Glossary:false]]//, NIL
+
+(flet ((foo (x) x)) ([[CL:Macros:setf]] (symbol-function 'bar) #'foo) (function-lambda-expression #'bar)) → NIL, //[[CL:Glossary:false]]//, NIL //or// → NIL, //[[CL:Glossary:true]]//, NIL //or// → (LAMBDA (X) (BLOCK FOO X)), //[[CL:Glossary:true]]//, NIL //or// → (LAMBDA (X) (BLOCK FOO X)), //[[CL:Glossary:false]]//, FOO //or// → (SI::BLOCK-LAMBDA FOO (X) X), //[[CL:Glossary:false]]//, FOO
+
+(defun foo () (flet ((bar (x) x)) #'bar)) (function-lambda-expression (foo)) → NIL, //[[CL:Glossary:false]]//, NIL //or// → NIL, //[[CL:Glossary:true]]//, NIL //or// → (LAMBDA (X) (BLOCK BAR X)), //[[CL:Glossary:true]]//, NIL //or// → (LAMBDA (X) (BLOCK BAR X)), //[[CL:Glossary:true]]//, (:INTERNAL FOO 0 BAR) //or// → (LAMBDA (X) (BLOCK BAR X)), //[[CL:Glossary:false]]//, "BAR in FOO" </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+None.
+
+====Notes====
+
+Although //[[CL:Glossary:implementations]]// are free to return "**[[CL:Constant Variables:nil]]**, //[[CL:Glossary:true]]//, **[[CL:Constant Variables:nil]]**" in all cases, they are encouraged to return a //[[CL:Glossary:lambda expression]]// as the //[[CL:Glossary:primary value]]// in the case where the argument was created by a call to **[[CL:Functions:compile]]** or **[[CL:Functions:eval]]** (as opposed to being created by //[[CL:Glossary:loading]]// a //[[CL:Glossary:compiled file]]//).
+
+\issue{FUNCTION-DEFINITION:JAN89-X3J13}

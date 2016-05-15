@@ -1,0 +1,2562 @@
+% -*- Mode: TeX -*-
+
+%-------------------- Package Type --------------------
+
+%% 2.8.0 1
+\begincom{package}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{package},
+\typeref{t}
+
+\label Description::
+                       
+A \term{package} is a \term{namespace} that maps \term{symbol} \term{names}
+to \term{symbols}; \seesection\PackageConcepts.
+
+\label See Also::
+
+{\secref\PackageConcepts},
+{\secref\PrintingOtherObjects},
+{\secref\SymbolTokens}
+
+\endcom%{package}\ftype{System Class}
+
+
+%%% ========== EXPORT
+\begincom{export}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues export {symbols {\opt} package} {\t}
+
+\label Arguments and Values::
+
+\param{symbols}---a \term{designator} for a \term{list} of \term{symbols}.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+  \Default{the \term{current package}}
+
+\label Description::
+
+%% 11.0.0 44
+%% 11.2.0 28
+\funref{export} makes one or more \param{symbols} that are \term{accessible} 
+in \param{package} (whether directly or by inheritance) be \term{external symbols}
+of that \param{package}. 
+
+If any of the \param{symbols} is already \term{accessible} as 
+an \term{external symbol} of \param{package},
+\funref{export} has no effect on that \term{symbol}.
+If the \param{symbol} is 
+%directly
+\term{present} in \param{package} 
+as an internal symbol, it is simply changed to external status.  
+If it is \term{accessible} as an \term{internal symbol} via \funref{use-package}, 
+%one of \param{symbols} 
+it
+is first \term{imported} into \param{package},
+then \term{exported}.
+(The \param{symbol} is then \term{present} in the \param{package} 
+whether or not \param{package} continues to use the \term{package} through 
+which the \term{symbol} was originally inherited.)  
+
+%% 11.0.0 50
+\funref{export} makes 
+%one of \param{symbols} at a time 
+each \param{symbol}
+\term{accessible} to all the \term{packages} that use \param{package}.
+All of these \term{packages} are checked for name conflicts:
+\f{(export \i{s} \i{p})} does
+\f{(find-symbol (symbol-name \i{s}) \i{q})} for each package \i{q}
+in \f{(package-used-by-list \i{p})}.  Note that in the usual case of
+an \funref{export} during the initial definition of a \term{package}, 
+the
+result of \funref{package-used-by-list}
+is \nil\ and the name-conflict checking
+takes negligible time.
+When multiple changes are to be made,
+%however, 
+for example when \funref{export} 
+is given a \param{list} of \param{symbols}, it is
+permissible for the implementation to process each change separately,
+so that aborting from a name
+conflict caused by any but the first \param{symbol} in the 
+\term{list} does not unexport the
+first \param{symbol} in the \param{list}. 
+However, aborting from a name-conflict error
+caused by \funref{export} 
+of one of \param{symbols} does not leave that \term{symbol} 
+\term{accessible}
+to some \term{packages} 
+and \term{inaccessible} to others; with respect to
+each of \param{symbols} processed, \funref{export}
+behaves as if it were as an atomic operation.
+
+%% 11.0.0 59
+A name conflict in \funref{export} between one of
+\param{symbols} being exported and a
+\term{symbol} already \term{present} in a \term{package} 
+that would inherit the
+newly-exported \term{symbol} 
+may be resolved in favor of the exported \term{symbol}
+by uninterning the other one, or in favor of the already-present
+\term{symbol} by making it a shadowing symbol.
+
+\label Examples::
+
+\code
+ (make-package 'temp :use nil) \EV #<PACKAGE "TEMP">
+ (use-package 'temp) \EV T
+ (intern "TEMP-SYM" 'temp) \EV TEMP::TEMP-SYM, NIL
+ (find-symbol "TEMP-SYM") \EV NIL, NIL
+ (export (find-symbol "TEMP-SYM" 'temp) 'temp) \EV T
+ (find-symbol "TEMP-SYM") \EV TEMP-SYM, :INHERITED
+\endcode
+
+\label Side Effects::
+
+The package system is modified.
+
+\label Affected By::
+
+\term{Accessible} \term{symbols}.
+
+\label Exceptional Situations::
+
+If any of the \param{symbols} is not \term{accessible} at all in \param{package},
+an error \oftype{package-error} is signaled that is \term{correctable} 
+by permitting the \term{user}
+to interactively specify whether that \term{symbol} should be \term{imported}.
+
+%!!! Sandra: Something about name conflicts here?
+
+\label See Also::
+
+\funref{import},
+\funref{unexport},
+{\secref\PackageConcepts}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== FIND-SYMBOL
+\begincom{find-symbol}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues find-symbol {string {\opt} package} {symbol, status}
+
+\label Arguments and Values:: 
+
+\param{string}---a \term{string}.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+  \Default{the \term{current package}}
+
+\param{symbol}---a \term{symbol} accessible in the \param{package}, 
+		 or \nil.
+
+\param{status}---one of \kwd{inherited}, \kwd{external}, \kwd{internal}, or \nil.
+
+\label Description::
+
+%% 11.2.0 24
+\funref{find-symbol} locates a \term{symbol} whose \term{name} is
+\param{string} in a \term{package}.
+If a \term{symbol} named \param{string} is found in \param{package},
+directly or by inheritance, the \term{symbol} 
+found is returned as the first
+value; the second value is as follows:
+
+\beginlist
+\itemitem{\kwd{internal}}
+
+If the \term{symbol} is \term{present} in \param{package}
+as an \term{internal symbol}.
+
+\itemitem{\kwd{external}}
+
+If the \term{symbol} is \term{present} in \param{package}
+as an \term{external symbol}.
+
+\itemitem{\kwd{inherited}}
+
+If the \term{symbol} is inherited by \param{package} 
+through \funref{use-package},
+% Added for Sandra:
+but is not \term{present} in \param{package}.
+
+\endlist
+
+If no such \term{symbol} is \term{accessible} in \param{package},
+both values are \nil.
+
+\label Examples::
+
+\code
+ (find-symbol "NEVER-BEFORE-USED") \EV NIL, NIL
+ (find-symbol "NEVER-BEFORE-USED") \EV NIL, NIL
+ (intern "NEVER-BEFORE-USED") \EV NEVER-BEFORE-USED, NIL
+ (intern "NEVER-BEFORE-USED") \EV NEVER-BEFORE-USED, :INTERNAL
+ (find-symbol "NEVER-BEFORE-USED") \EV NEVER-BEFORE-USED, :INTERNAL
+ (find-symbol "never-before-used") \EV NIL, NIL
+ (find-symbol "CAR" 'common-lisp-user) \EV CAR, :INHERITED
+ (find-symbol "CAR" 'common-lisp) \EV CAR, :EXTERNAL
+ (find-symbol "NIL" 'common-lisp-user) \EV NIL, :INHERITED
+ (find-symbol "NIL" 'common-lisp) \EV NIL, :EXTERNAL
+ (find-symbol "NIL" (prog1 (make-package "JUST-TESTING" :use '())
+                           (intern "NIL" "JUST-TESTING")))
+\EV JUST-TESTING::NIL, :INTERNAL
+ (export 'just-testing::nil 'just-testing)
+ (find-symbol "NIL" 'just-testing) \EV JUST-TESTING:NIL, :EXTERNAL
+ (find-symbol "NIL" "KEYWORD")
+\EV NIL, NIL
+\OV :NIL, :EXTERNAL
+ (find-symbol (symbol-name :nil) "KEYWORD") \EV :NIL, :EXTERNAL
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\funref{intern},
+\funref{import},
+\funref{export},
+\funref{use-package},
+\funref{unintern},
+\funref{unexport},
+\funref{unuse-package}
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{intern}, \funref{find-all-symbols}
+
+\label Notes::
+
+\funref{find-symbol} is operationally equivalent to \funref{intern}, 
+except that it never creates a new \term{symbol}.
+
+\endcom
+
+%%% ========== FIND-PACKAGE
+
+\begincom{find-package}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues find-package {name} {package}
+
+\label Arguments and Values::
+
+%% Text of this dictionary entry slightly rearranged
+%% per Margolin #13 (first public review). -kmp 1-Jul-93
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{name}---a \term{string designator} or a \term{package} \term{object}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\param{package}---a \term{package} \term{object} or \nil.
+
+\label Description::
+
+%% 11.2.0 12
+If \param{name} is a \term{string designator},
+\funref{find-package} locates and returns the
+\term{package} whose name or nickname is \param{name}.
+%% 11.0.0 21
+%The \funref{find-package} 
+This
+search is case sensitive.
+If there is no such \term{package},
+\funref{find-package} returns \nil.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+If \param{name} is a \term{package} \term{object},
+that \term{package} \term{object} is returned.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\label Examples::
+
+\code
+ (find-package 'common-lisp) \EV #<PACKAGE "COMMON-LISP">
+ (find-package "COMMON-LISP-USER") \EV #<PACKAGE "COMMON-LISP-USER">
+ (find-package 'not-there) \EV NIL
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The set of \term{packages} created by the \term{implementation}.
+
+\macref{defpackage},
+\funref{delete-package},
+\funref{make-package},
+\funref{rename-package}
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{make-package}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== FIND-ALL-SYMBOLS
+\begincom{find-all-symbols}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues find-all-symbols {string} {symbols}
+
+\label Arguments and Values::
+
+\param{string}---a \term{\symbolnamedesignator}.
+
+\param{symbols}---a \term{list} of \term{symbols}.
+
+\label Description::
+
+%% 11.2.0 38
+\funref{find-all-symbols} searches
+\issue{PACKAGE-DELETION:NEW-FUNCTION} every \term{registered package}
+\endissue{PACKAGE-DELETION:NEW-FUNCTION} for \term{symbols} that have a
+\term{name} that is the \term{same} (under \funref{string=}) as
+\param{string}.  A \term{list} of all such \term{symbols} is returned.
+Whether or how the \term{list} is ordered is
+\term{implementation-dependent}.
+
+\label Examples::
+
+\code
+ (find-all-symbols 'car)
+\EV (CAR)
+\OV (CAR VEHICLES:CAR)
+\OV (VEHICLES:CAR CAR)
+ (intern "CAR" (make-package 'temp :use nil)) \EV TEMP::CAR, NIL
+ (find-all-symbols 'car)
+\EV (TEMP::CAR CAR)
+\OV (CAR TEMP::CAR)
+\OV (TEMP::CAR CAR VEHICLES:CAR)
+\OV (CAR TEMP::CAR VEHICLES:CAR)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{find-symbol}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== IMPORT
+\begincom{import}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues import {symbols {\opt} package} {\t}
+
+\label Arguments and Values::
+
+\param{symbols}---a \term{designator} for a \term{list} of \term{symbols}.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+ \Default{the \term{current package}}
+
+\label Description::
+
+%% 11.2.0 31
+%% 11.0.0 50
+\funref{import} adds \param{symbol} or
+\param{symbols} to the internals of \param{package}, checking for name
+conflicts with existing \term{symbols} either \term{present} in \param{package}
+or \term{accessible} to it.  Once the \param{symbols} have been
+\term{imported}, they may be referenced in the \term{importing}
+\param{package} without the use of a \term{package prefix} when using the \term{Lisp reader}.
+
+%% 11.0.0 61 
+A name conflict in \funref{import} between the
+\param{symbol} being imported and a symbol inherited from some other \term{package} can 
+be resolved in favor of the
+\param{symbol} being \term{imported} 
+by making it a shadowing symbol, or in favor
+of the \term{symbol} already \term{accessible} by 
+not doing the \funref{import}.  A
+name conflict in \funref{import} with a \term{symbol} 
+already \term{present} in the
+\param{package} 
+may be resolved by uninterning that \term{symbol}, or by not
+doing the \funref{import}.
+
+
+The imported \term{symbol} is
+not automatically exported from the \term{current package}, but if it is
+already \term{present} and external, then the fact that it
+is external is not changed.  
+\issue{IMPORT-SETF-SYMBOL-PACKAGE}
+If any \term{symbol} to be \term{imported} has no home
+package (\ie {\tt (symbol-package \param{symbol}) \EV\ nil}), 
+\funref{import} sets the \term{home package}
+of the \param{symbol} to \param{package}.
+\endissue{IMPORT-SETF-SYMBOL-PACKAGE}
+
+
+%% 11.0.0 37
+If the \param{symbol} is already \term{present} in the importing \param{package},
+\funref{import} has no effect.  
+
+\label Examples::
+
+\code
+ (import 'common-lisp::car (make-package 'temp :use nil)) \EV T
+ (find-symbol "CAR" 'temp) \EV CAR, :INTERNAL
+ (find-symbol "CDR" 'temp) \EV NIL, NIL 
+\endcode
+
+The form \f{(import 'editor:buffer)} takes the external symbol named 
+\f{buffer} in \thepackage{editor} (this symbol was located when the form
+was read by the \term{Lisp reader}) and adds it to the \term{current package}
+as an \term{internal symbol}. The symbol \f{buffer} is then \term{present} in
+the \term{current package}.
+
+\label Side Effects::
+
+The package system is modified.
+
+\label Affected By::
+
+Current state of the package system.
+
+\label Exceptional Situations::
+
+\funref{import} signals a \term{correctable} error \oftype{package-error}
+if any of the \param{symbols} to be \term{imported} has the \term{same} \term{name}
+(under \funref{string=}) as some distinct \term{symbol} (under \funref{eql})
+already \term{accessible} in the \param{package}, even if the conflict is
+with a \term{shadowing symbol} of the \param{package}.
+
+\label See Also::
+                     
+\funref{shadow}, \funref{export}
+
+\label Notes:\None.
+
+\endcom
+
+
+%%% ========== LIST-ALL-PACKAGES
+\begincom{list-all-packages}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues list-all-packages {\noargs} {packages}
+
+\label Arguments and Values:: 
+
+\param{packages}---a \term{list} of \term{package} \term{objects}.
+
+\label Description::
+
+%% 11.2.0 19
+\funref{list-all-packages} returns a 
+\issue{RESULT-LISTS-SHARED:SPECIFY}
+\term{fresh}
+\endissue{RESULT-LISTS-SHARED:SPECIFY}
+\term{list} of 
+\issue{PACKAGE-DELETION:NEW-FUNCTION}
+all \term{registered packages}.
+\endissue{PACKAGE-DELETION:NEW-FUNCTION}
+
+\label Examples::
+
+\code
+ (let ((before (list-all-packages)))
+    (make-package 'temp)
+    (set-difference (list-all-packages) before)) \EV (#<PACKAGE "TEMP">)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\macref{defpackage},
+\funref{delete-package},
+\funref{make-package}
+
+\label Exceptional Situations:\None.
+
+%% Sandra thinks this is excessive.
+%Might signal \typeref{storage-condition}.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== RENAME-PACKAGE
+\begincom{rename-package}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues rename-package {package new-name {\opt} new-nicknames} {package-object}
+
+\label Arguments and Values:: 
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\param{new-name}---a \term{package designator}.
+
+\param{new-nicknames}---a \term{list} of \term{\packagenamedesignators}.
+ \Default{the \term{empty list}}
+
+\issue{RETURN-VALUES-UNSPECIFIED:SPECIFY}
+\param{package-object}---the renamed \param{package} \term{object}.
+\endissue{RETURN-VALUES-UNSPECIFIED:SPECIFY}
+
+\label Description::
+
+Replaces the name and nicknames of \param{package}.
+%% 11.2.0 15
+The old name and all of the old nicknames of \param{package} are eliminated
+and are replaced by \param{new-name} and \param{new-nicknames}.
+
+The consequences are undefined if \param{new-name} or any \param{new-nickname}
+conflicts with any existing package names.
+
+\label Examples::
+
+\code
+ (make-package 'temporary :nicknames '("TEMP")) \EV #<PACKAGE "TEMPORARY">
+ (rename-package 'temp 'ephemeral) \EV #<PACKAGE "EPHEMERAL">
+ (package-nicknames (find-package 'ephemeral)) \EV ()
+ (find-package 'temporary) \EV NIL
+ (rename-package 'ephemeral 'temporary '(temp fleeting))
+\EV #<PACKAGE "TEMPORARY">
+ (package-nicknames (find-package 'temp)) \EV ("TEMP" "FLEETING")
+\endcode
+
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{make-package}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== SHADOW
+\begincom{shadow}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues shadow {symbol-names {\opt} package} {\t}
+
+\label Arguments and Values:: 
+
+\issue{SHADOW-ALREADY-PRESENT:WORKS}
+\param{symbol-names}---a \term{designator} for 
+		       a \term{list} of \term{\symbolnamedesignators}.
+\endissue{SHADOW-ALREADY-PRESENT:WORKS}
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+ \Default{the \term{current package}}
+
+\label Description::
+
+\funref{shadow} assures that \term{symbols} with names given 
+by \param{symbol-names} are \term{present} 
+%as \term{internal symbols} of
+in
+the \param{package}.
+
+%% 11.2.0 34
+Specifically, \param{package} is searched for \term{symbols} 
+with the \term{names} supplied by \param{symbol-names}.
+\issue{SHADOW-ALREADY-PRESENT:WORKS}
+For each such \term{name}, if a corresponding \term{symbol} 
+% oops!  --sjl 7 Mar 92
+%is \term{present} in \param{package} (directly, not by inheritance), 
+is not \term{present} in \param{package} (directly, not by inheritance), 
+then a corresponding \term{symbol} is created with that \term{name},
+and inserted into \param{package} as an \term{internal symbol}.
+The corresponding \term{symbol}, whether pre-existing or newly created,
+is then added, if not already present, to the \term{shadowing symbols list}
+of \param{package}.
+\endissue{SHADOW-ALREADY-PRESENT:WORKS}
+              
+\label Examples::
+
+\code
+ (package-shadowing-symbols (make-package 'temp)) \EV NIL
+ (find-symbol 'car 'temp) \EV CAR, :INHERITED
+ (shadow 'car 'temp) \EV T
+ (find-symbol 'car 'temp) \EV TEMP::CAR, :INTERNAL
+ (package-shadowing-symbols 'temp) \EV (TEMP::CAR)
+\endcode
+
+%!!! What is this "should not error" biz, and what does USE-PACKAGE return...?
+\issue{SHADOW-ALREADY-PRESENT}
+\code
+ (make-package 'test-1) \EV #<PACKAGE "TEST-1">
+ (intern "TEST" (find-package 'test-1)) \EV TEST-1::TEST, NIL
+ (shadow 'test-1::test (find-package 'test-1)) \EV T
+ (shadow 'TEST (find-package 'test-1)) \EV T
+ (assert (not (null (member 'test-1::test (package-shadowing-symbols
+                                            (find-package 'test-1))))))
+ 
+ (make-package 'test-2) \EV #<PACKAGE "TEST-2">
+ (intern "TEST" (find-package 'test-2)) \EV TEST-2::TEST, NIL
+ (export 'test-2::test (find-package 'test-2)) \EV T
+ (use-package 'test-2 (find-package 'test-1))    ;should not error
+ 
+\endcode
+\endissue{SHADOW-ALREADY-PRESENT}
+
+\label Side Effects::
+
+%% 11.2.0 35
+\funref{shadow} changes the state of the package system in such a 
+way that the package consistency rules do not hold across the change.
+
+\label Affected By::
+
+Current state of the package system.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{package-shadowing-symbols},
+%% ?? Ref ?? -kmp 22-Oct-91
+%``Character Reader'',
+{\secref\PackageConcepts}
+
+\label Notes::
+
+%% 11.0.0 52
+% \funref{shadow} does name-conflict checking to the extent that it
+% checks whether a distinct existing \term{symbol} with the same name
+% as one of \param{symbol-names} is \term{accessible} and, if so, whether 
+% it is directly \term{present} in \param{package} or inherited.  In the 
+% latter case, a new \term{symbol} is created to shadow it.  
+
+If a \term{symbol} with a name in \param{symbol-names} already exists
+in \param{package}, but by inheritance, the inherited symbol becomes
+\term{shadowed}\meaning{3} by a newly created \term{internal symbol}.
+
+\endcom
+
+
+%%% ========== SHADOWING-IMPORT
+\begincom{shadowing-import}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues shadowing-import {symbols {\opt} package} {\t}
+
+\label Arguments and Values::
+
+\param{symbols}---a \term{designator} for a \term{list} of \term{symbols}.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package} ---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+ \Default{the \term{current package}}
+
+\label Description::
+
+%% 11.2.0 32
+\funref{shadowing-import} is like \funref{import}, 
+but it does not signal an error even if the importation of a \term{symbol} 
+would shadow some \term{symbol} already \term{accessible} in \param{package}.  
+
+%% 11.0.0 38
+\funref{shadowing-import} inserts each of \param{symbols} 
+into \param{package} as an internal symbol, regardless
+of whether another \term{symbol} of the same name is shadowed by this
+action.
+If a different \term{symbol} of the same name is already \term{present}
+in \param{package},
+that \term{symbol} is first \term{uninterned} from \param{package}.
+The new \term{symbol} is added to \param{package}'s shadowing-symbols list.  
+
+%% 11.0.0 52
+\funref{shadowing-import} does name-conflict
+checking to the extent that it checks whether a distinct existing
+\term{symbol} with the same name is \term{accessible}; if so, it is shadowed by
+the new \term{symbol}, which implies that it must be uninterned
+if it was 
+%directly
+\term{present} in \param{package}.
+
+
+\label Examples::
+\code
+ (in-package "COMMON-LISP-USER") \EV #<PACKAGE "COMMON-LISP-USER">
+ (setq sym (intern "CONFLICT")) \EV CONFLICT
+ (intern "CONFLICT" (make-package 'temp)) \EV TEMP::CONFLICT, NIL
+ (package-shadowing-symbols 'temp) \EV NIL
+ (shadowing-import sym 'temp) \EV T 
+ (package-shadowing-symbols 'temp) \EV (CONFLICT)
+\endcode
+
+
+\label Side Effects::
+
+%% 11.2.0 33
+\funref{shadowing-import} 
+changes the state of the package system in such a way that
+the consistency rules do not hold across the change.
+
+\param{package}'s shadowing-symbols list is modified.
+
+\label Affected By::
+
+Current state of the package system.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{import}, \funref{unintern}, \funref{package-shadowing-symbols}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== DELETE-PACKAGE
+\begincom{delete-package}\ftype{Function}
+
+\issue{PACKAGE-DELETION:NEW-FUNCTION}
+
+\label Syntax::
+
+\DefunWithValues delete-package {package} {generalized-boolean}
+
+\label Arguments and Values::
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+\funref{delete-package} deletes \param{package} from all package system
+data structures. 
+%% KC addition
+If the operation is successful, \funref{delete-package} returns
+true, otherwise \nil.
+%% end KC addition
+The effect of \funref{delete-package} is that the name and nicknames
+of \param{package} cease to be recognized package names.
+The package \term{object} is still a \term{package} 
+(\ie \funref{packagep} is \term{true} of it)
+but \funref{package-name} returns \nil.
+%% KC addition
+The consequences of deleting \thepackage{common-lisp} or \thepackage{keyword} are undefined.
+%% end KC addition
+The consequences of invoking any other package operation on \param{package}
+once it has been deleted are unspecified.
+In particular, the consequences of invoking \funref{find-symbol},
+\funref{intern} and other functions that look for a symbol name in
+a \term{package} are unspecified if they are called with \varref{*package*}
+bound to the deleted \param{package} or with the deleted \param{package} 
+as an argument.
+
+If \param{package} is a \term{package} \term{object} that has already
+been deleted, \funref{delete-package} immediately returns \nil.
+ 
+After this operation completes, the 
+%contents of the \funref{symbol-package} slot
+\term{home package}
+of any \term{symbol} whose \term{home package} 
+%is
+had previously been
+\param{package} 
+%are
+is
+%unspecified
+\term{implementation-dependent}.
+Except for this, \term{symbols} \term{accessible}
+in \param{package} are not modified in any other way;
+\term{symbols} whose \term{home package} is not \param{package} remain unchanged.
+
+\label Examples::
+
+\code
+ (setq *foo-package* (make-package "FOO" :use nil))
+ (setq *foo-symbol*  (intern "FOO" *foo-package*))
+ (export *foo-symbol* *foo-package*)
+
+ (setq *bar-package* (make-package "BAR" :use '("FOO")))
+ (setq *bar-symbol*  (intern "BAR" *bar-package*))
+ (export *foo-symbol* *bar-package*)
+ (export *bar-symbol* *bar-package*)
+
+ (setq *baz-package* (make-package "BAZ" :use '("BAR")))
+
+ (symbol-package *foo-symbol*) \EV #<PACKAGE "FOO">
+ (symbol-package *bar-symbol*) \EV #<PACKAGE "BAR">
+
+ (prin1-to-string *foo-symbol*) \EV "FOO:FOO"
+ (prin1-to-string *bar-symbol*) \EV "BAR:BAR"
+
+ (find-symbol "FOO" *bar-package*) \EV FOO:FOO, :EXTERNAL
+
+ (find-symbol "FOO" *baz-package*) \EV FOO:FOO, :INHERITED
+ (find-symbol "BAR" *baz-package*) \EV BAR:BAR, :INHERITED
+
+ (packagep *foo-package*) \EV \term{true}
+ (packagep *bar-package*) \EV \term{true}
+ (packagep *baz-package*) \EV \term{true}
+
+ (package-name *foo-package*) \EV "FOO"
+ (package-name *bar-package*) \EV "BAR"
+ (package-name *baz-package*) \EV "BAZ"
+
+ (package-use-list *foo-package*) \EV ()
+ (package-use-list *bar-package*) \EV (#<PACKAGE "FOO">)
+ (package-use-list *baz-package*) \EV (#<PACKAGE "BAR">)
+
+ (package-used-by-list *foo-package*) \EV (#<PACKAGE "BAR">)
+ (package-used-by-list *bar-package*) \EV (#<PACKAGE "BAZ">)
+ (package-used-by-list *baz-package*) \EV ()
+
+ (delete-package *bar-package*)
+\OUT Error: Package BAZ uses package BAR.
+\OUT If continued, BAZ will be made to unuse-package BAR,
+\OUT and then BAR will be deleted.
+\OUT Type :CONTINUE to continue.
+\OUT Debug> \IN{:CONTINUE}
+\EV T
+
+ (symbol-package *foo-symbol*) \EV #<PACKAGE "FOO">
+ (symbol-package *bar-symbol*) is unspecified
+
+ (prin1-to-string *foo-symbol*) \EV "FOO:FOO"
+ (prin1-to-string *bar-symbol*) is unspecified
+
+ (find-symbol "FOO" *bar-package*) is unspecified
+
+ (find-symbol "FOO" *baz-package*) \EV NIL, NIL
+ (find-symbol "BAR" *baz-package*) \EV NIL, NIL
+
+ (packagep *foo-package*) \EV T
+ (packagep *bar-package*) \EV T
+ (packagep *baz-package*) \EV T
+
+ (package-name *foo-package*) \EV "FOO"
+ (package-name *bar-package*) \EV NIL
+ (package-name *baz-package*) \EV "BAZ"
+
+ (package-use-list *foo-package*) \EV ()
+ (package-use-list *bar-package*) is unspecified
+ (package-use-list *baz-package*) \EV ()
+
+ (package-used-by-list *foo-package*) \EV ()
+ (package-used-by-list *bar-package*) is unspecified
+ (package-used-by-list *baz-package*) \EV ()
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+If the \param{package} \term{designator} is a \term{name} that does not 
+currently name a \term{package}, 
+a \term{correctable} error \oftype{package-error} is signaled.
+If correction is attempted, no deletion action is attempted; 
+instead, \funref{delete-package} immediately returns \nil.
+
+If \param{package} is used by other \term{packages}, 
+a \term{correctable} error \oftype{package-error} is signaled.
+If correction is attempted,
+\funref{unuse-package} is effectively called to remove any dependencies, 
+causing \param{package}'s \term{external symbols} to cease being \term{accessible} to those 
+\term{packages} that use \param{package}. 
+\funref{delete-package} then deletes \param{package} just as it would have had 
+there been no \term{packages} that used it.
+ 
+\label See Also::
+
+\funref{unuse-package}
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.
+ 
+\endissue{PACKAGE-DELETION:NEW-FUNCTION}
+
+\endcom                              
+
+%%% ========== MAKE-PACKAGE
+\begincom{make-package}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-package {package-name {\key} nicknames use} {package}
+
+\label Arguments and Values::
+
+\param{package-name}---a \term{\packagenamedesignator}.
+
+\param{nicknames}---a \term{list} of \term{\packagenamedesignators}.
+  \Default{the \term{empty list}}
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+%% 11.2.0 9
+\param{use}---%
+%a \term{designator} for 
+a \term{list} of \term{package designators}.
+\issue{MAKE-PACKAGE-USE-DEFAULT:IMPLEMENTATION-DEPENDENT}
+  \Default{\term{implementation-defined}}
+\endissue{MAKE-PACKAGE-USE-DEFAULT:IMPLEMENTATION-DEPENDENT}
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\param{package}---a \term{package}.
+
+\label Description::
+
+%% 11.2.0 8                                   
+Creates a new \term{package} with the name \param{package-name}.  
+
+\param{Nicknames} are additional \term{names} which may be used
+to refer to the new \term{package}.
+
+\param{use} specifies zero or more \term{packages} 
+the \term{external symbols} of which are to be inherited by
+the new \term{package}.  \Seefun{use-package}.
+
+\label Examples::                       
+
+\code
+ (make-package 'temporary :nicknames '("TEMP" "temp")) \EV #<PACKAGE "TEMPORARY">
+ (make-package "OWNER" :use '("temp")) \EV #<PACKAGE "OWNER">
+ (package-used-by-list 'temp) \EV (#<PACKAGE "OWNER">)
+ (package-use-list 'owner) \EV (#<PACKAGE "TEMPORARY">)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The existence of other \term{packages} in the system.
+
+\label Exceptional Situations::
+
+The consequences are unspecified if \term{packages} denoted by \param{use}
+do not exist.
+
+A \term{correctable} error is signaled if the \param{package-name} 
+or any of the \param{nicknames} is already 
+the \term{name} or \term{nickname} of an existing \term{package}.
+
+\label See Also::
+
+\macref{defpackage},
+\funref{use-package}
+
+\label Notes::
+
+In situations where the \term{packages} to be used contain symbols which would conflict,
+it is necessary to first create the package with \f{:use '()},
+then to use \funref{shadow} or \funref{shadowing-import} to address the conflicts,
+and then after that to use \funref{use-package} once the conflicts have been addressed.
+
+When packages are being created as part of the static definition of a program
+rather than dynamically by the program, it is generally considered more stylistically
+appropriate to use \macref{defpackage} rather than \funref{make-package}.
+
+\endcom
+
+%%% ========== WITH-PACKAGE-ITERATOR
+\begincom{with-package-iterator}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\issue{HASH-TABLE-PACKAGE-GENERATORS:ADD-WITH-WRAPPER}
+
+\label Syntax::
+
+\DefmacWithValuesNewline with-package-iterator
+		  {\paren{name package-list-form {\rest} {symbol-types}}
+ 		   \starparam{declaration} \starparam{form}}
+		  {\starparam{result}}
+
+\label Arguments and Values::
+
+% ughh.  -sjl 7 Mar 92
+%\param{name}---a name suitable for the first argument to \specref{macrolet}.
+\param{name}---a \term{symbol}.
+
+\param{package-list-form}---a \term{form}; evaluated once to produce a \param{package-list}.
+
+\param{package-list}---a \term{designator} for a list of \term{package designators}.
+
+\param{symbol-type}---one of the \term{symbols} 
+		      \kwd{internal}, \kwd{external}, or \kwd{inherited}.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{forms}---an \term{implicit progn}.
+                                   
+\param{results}---the \term{values} of the \param{forms}.
+
+\label Description::
+
+Within the lexical scope of the body \param{forms},
+the \param{name} is defined via \specref{macrolet} 
+such that successive invocations of {\tt (\param{name})}
+will return the \term{symbols}, one by one, 
+from the \term{packages} in \param{package-list}. 
+ 
+It is unspecified whether \term{symbols} inherited from
+multiple \term{packages} are returned more than once.  
+The order of \term{symbols} returned does not necessarily reflect the order
+of \term{packages} in \param{package-list}.  When \param{package-list} has 
+more than one element, it is unspecified whether duplicate \term{symbols} are
+returned once or more than once.  
+
+\param{Symbol-types} controls which \term{symbols} that are \term{accessible}
+in a \term{package} are returned as follows:
+
+\beginlist
+\itemitem{\kwd{internal}}
+
+  The \term{symbols} that are \term{present} in the \term{package},
+  but that are not \term{exported}.
+
+\itemitem{\kwd{external}}
+
+  The \term{symbols} that are \term{present} in the \term{package}
+  and are \term{exported}.
+
+\itemitem{\kwd{inherited}}
+
+  The \term{symbols} that are \term{exported} by used \term{packages}
+  and that are not \term{shadowed}.
+\endlist
+
+When more than one argument is supplied for \param{symbol-types}, 
+a \term{symbol} is returned if its \term{accessibility} matches 
+any one of the \param{symbol-types} supplied.  
+Implementations may extend this syntax by recognizing additional 
+symbol accessibility types.
+ 
+An invocation of {\tt (\param{name})} returns four values as follows:
+
+\beginlist
+\itemitem{1.} A flag that indicates whether a \term{symbol} is returned
+	      (true means that a \term{symbol} is returned).
+\itemitem{2.} A \term{symbol} that is \term{accessible} in one the
+	      indicated \term{packages}.
+\itemitem{3.} The accessibility type for that \term{symbol}; 
+	      \ie one of the symbols \kwd{internal}, \kwd{external}, or \kwd{inherited}.
+\itemitem{4.} The \term{package} from which the \term{symbol} was obtained.
+	      The \term{package} is one of the \term{packages} present 
+	      or named in \param{package-list}.
+\endlist
+
+After all \term{symbols} have been returned by successive invocations of
+{\tt (\param{name})}, then only one value is returned, namely \nil.
+ 
+The meaning of the second, third, and fourth \term{values} is that the returned 
+\term{symbol} is \term{accessible} in the returned \term{package}
+in the way indicated by the second return value as follows:
+
+\beginlist
+\itemitem{\kwd{internal}}
+
+Means \term{present} and not \term{exported}.
+
+\itemitem{\kwd{external}}
+
+Means \term{present} and \term{exported}.
+
+\itemitem{\kwd{inherited}}
+
+Means not \term{present} (thus not \term{shadowed}) but inherited
+from some used \term{package}.
+\endlist
+ 
+It is unspecified what happens if any of the implicit interior state 
+of an iteration is returned outside the dynamic extent of the 
+\macref{with-package-iterator}
+form such as by returning some \term{closure} over the invocation \term{form}.
+ 
+Any number of invocations of \macref{with-package-iterator} 
+can be nested, and the body of the innermost one can invoke all of the
+locally \term{established} \term{macros}, provided all those \term{macros}
+have distinct names.
+
+\label Examples::
+
+The following function should return \t\ on any \term{package}, and signal
+an error if the usage of \macref{with-package-iterator} does not agree
+with the corresponding usage of \macref{do-symbols}.
+ 
+\code
+ (defun test-package-iterator (package)
+   (unless (packagep package)
+     (setq package (find-package package)))
+   (let ((all-entries '())
+         (generated-entries '()))
+     (do-symbols (x package) 
+       (multiple-value-bind (symbol accessibility) 
+           (find-symbol (symbol-name x) package)
+         (push (list symbol accessibility) all-entries)))
+     (with-package-iterator (generator-fn package 
+                             :internal :external :inherited)
+       (loop     
+         (multiple-value-bind (more? symbol accessibility pkg)
+             (generator-fn)
+           (unless more? (return))
+           (let ((l (multiple-value-list (find-symbol (symbol-name symbol) 
+                                                      package))))
+             (unless (equal l (list symbol accessibility))
+               (error "Symbol ~S not found as ~S in package ~A [~S]"
+                      symbol accessibility (package-name package) l))
+             (push l generated-entries)))))
+     (unless (and (subsetp all-entries generated-entries :test #'equal)
+                  (subsetp generated-entries all-entries :test #'equal))
+      (error "Generated entries and Do-Symbols entries don't correspond"))
+     t))
+\endcode
+ 
+The following function prints out every \term{present} \term{symbol} 
+(possibly more than once):
+ 
+\code
+ (defun print-all-symbols () 
+   (with-package-iterator (next-symbol (list-all-packages)
+                           :internal :external)
+     (loop
+       (multiple-value-bind (more? symbol) (next-symbol)
+         (if more? 
+            (print symbol)
+            (return))))))
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\macref{with-package-iterator} signals an error \oftype{program-error} if 
+no \param{symbol-types} are supplied or if a \param{symbol-type} is not
+recognized  by the implementation is supplied.  
+
+The consequences are undefined if the local function named \param{name}
+\term{established} by \macref{with-package-iterator} is called after it 
+has returned \term{false} as its \term{primary value}.
+
+\label See Also::
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes:\None.
+
+\endissue{HASH-TABLE-PACKAGE-GENERATORS:ADD-WITH-WRAPPER}
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== UNEXPORT
+\begincom{unexport}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues unexport {symbols {\opt} package} {\t}
+
+\label Arguments and Values:: 
+
+\param{symbols}---a \term{designator} for a \term{list} of \term{symbols}.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+  \Default{the \term{current package}}
+
+\label Description::
+
+%% 11.2.0 30
+\funref{unexport} reverts external \param{symbols} in \param{package} to
+internal status; it undoes the effect of \funref{export}.
+
+%% 11.0.0 45
+%!!! Can this really be true? -kmp 25-Apr-91
+\funref{unexport} works only on \term{symbols} 
+%directly
+\term{present}
+in \param{package}, switching them back to internal status.
+If \funref{unexport} is given a \term{symbol} that is 
+already \term{accessible} as an \term{internal symbol} in \param{package},
+it does nothing.
+
+\label Examples::
+
+\code
+ (in-package "COMMON-LISP-USER") \EV #<PACKAGE "COMMON-LISP-USER">
+ (export (intern "CONTRABAND" (make-package 'temp)) 'temp) \EV T
+ (find-symbol "CONTRABAND") \EV NIL, NIL 
+ (use-package 'temp) \EV T 
+ (find-symbol "CONTRABAND") \EV CONTRABAND, :INHERITED
+ (unexport 'contraband 'temp) \EV T
+ (find-symbol "CONTRABAND") \EV NIL, NIL
+\endcode
+
+\label Side Effects::
+
+Package system is modified.
+
+\label Affected By::
+
+Current state of the package system.
+
+\label Exceptional Situations::
+
+If \funref{unexport} is given a \term{symbol}
+not \term{accessible} in \param{package} at all, 
+an error \oftype{package-error} is signaled.
+
+The consequences are undefined if \param{package} is \thepackage{keyword}
+%added for Sandra:
+or \thepackage{common-lisp}.
+
+\label See Also::
+
+\funref{export}, {\secref\PackageConcepts}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== UNINTERN
+\begincom{unintern}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues unintern {symbol {\opt} package} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{symbol}---a \term{symbol}.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+  \Default{the \term{current package}}
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::                      
+\funref{unintern} removes \param{symbol} from \param{package}.
+%% 11.2.0 25
+If \param{symbol} is \term{present} in \param{package}, it is
+removed from \param{package} and also from \param{package}'s 
+\term{shadowing symbols list} if it is present there.  If \param{package} is the
+\term{home package} for \param{symbol}, \param{symbol} is made to have no 
+\term{home package}.
+\param{Symbol} may continue to be \term{accessible}
+in \param{package} by inheritance.
+
+
+Use of \funref{unintern} can result in a \term{symbol} 
+that has no
+recorded \term{home package},
+but that in fact is \term{accessible} in some \term{package}.
+\clisp\ does not check for this pathological case, 
+and such \term{symbols}
+are always printed preceded by \f{\#:}.
+
+\funref{unintern} returns \term{true} if it removes \param{symbol}, and \nil\ otherwise.
+
+\label Examples::
+
+\code
+ (in-package "COMMON-LISP-USER") \EV #<PACKAGE "COMMON-LISP-USER">
+ (setq temps-unpack (intern "UNPACK" (make-package 'temp))) \EV TEMP::UNPACK 
+ (unintern temps-unpack 'temp) \EV T
+ (find-symbol "UNPACK" 'temp) \EV NIL, NIL 
+ temps-unpack \EV #:UNPACK 
+\endcode
+
+\label Side Effects::
+
+%% 11.2.0 26
+\funref{unintern} changes the state of the
+package system in such a way that the consistency rules do not hold
+across the change.
+
+\label Affected By::
+Current state of the package system.
+
+\label Exceptional Situations::
+%% 11.0.0 54
+Giving a shadowing symbol to \funref{unintern} 
+can uncover a name conflict that had
+previously been resolved by the shadowing.  If package A uses packages
+B and C, A contains a shadowing symbol \f{x}, and B and C each contain external
+symbols named \f{x}, then removing the shadowing symbol \f{x}
+from A will reveal a name
+conflict between \f{b:x} and \f{c:x} if those two \term{symbols} are distinct.
+In this case \funref{unintern} will signal an error.
+%!!! Barmar: Of type??
+
+\label See Also::
+
+{\secref\PackageConcepts}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== IN-PACKAGE
+\begincom{in-package}\ftype{Macro}
+
+\issue{IN-PACKAGE-FUNCTIONALITY:MAR89-X3J13}
+
+\label Syntax::
+
+\DefmacWithValues in-package {name} {package}
+
+\label Arguments and Values::
+
+\param{name}---a \term{\packagenamedesignator}; \noeval.
+
+\param{package}---the \term{package} named by \param{name}.
+
+\label Description::
+
+%%% 11.2.0 10
+%%% 11.2.0 11
+%%% Issue MAKE-PACKAGE-USE-DEFAULT IN-PACKAGE-FUNCTIONALITY:MAR89-X3J13.
+
+Causes the the \term{package} named by \param{name} 
+to become the \term{current package}---that is, \thevalueof{*package*}.
+If no such \term{package} already exists, an error \oftype{package-error} is signaled.
+
+Everything \macref{in-package} does is also performed at compile time
+if the call appears as a \term{top level form}.
+
+\label Examples:\None.
+                         
+%Old examples removed as irrelevant.
+%Need to come up with something new. -kmp 25-Apr-91
+
+\label Side Effects::
+
+\Thevariable{*package*} is assigned.
+If the \macref{in-package} \term{form} is a \term{top level form}, 
+this assignment also occurs at compile time.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+An error \oftype{package-error} is signaled if the specified \term{package} does not exist.
+
+\label See Also::
+
+\varref{*package*}
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.
+
+\endissue{IN-PACKAGE-FUNCTIONALITY:MAR89-X3J13}
+
+\endcom
+
+%%% ========== UNUSE-PACKAGE
+\begincom{unuse-package}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues unuse-package {packages-to-unuse {\opt} package} {\t}
+
+\label Arguments and Values::
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{packages-to-unuse}---a \term{designator} for
+			    a \term{list} of \term{package designators}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+% Issue PACKAGE-FUNCTION-CONSISTENCY is silent on whether a "package designator"
+% is really the right thing here, but KAB, Sandra, and KMP agree that this is what
+% was probably intended.
+\param{package}---a \term{package designator}.
+ \Default{the \term{current package}}
+
+\label Description::
+
+%% 11.2.0 37
+\funref{unuse-package} causes \param{package} to cease inheriting
+all the \term{external symbols} of 
+\param{packages-to-unuse}; \funref{unuse-package} undoes
+the effects of \funref{use-package}.   The 
+\param{packages-to-unuse} 
+are removed from the \term{use list} of \param{package}.
+
+%% Sandra: Redundant.
+% The \term{external symbols} of the \param{packages-to-unuse} are no longer inherited.
+% However,
+Any \term{symbols} that have been
+\term{imported} into \param{package} continue to be \term{present} in \param{package}.
+
+\label Examples::
+
+\code
+ (in-package "COMMON-LISP-USER") \EV #<PACKAGE "COMMON-LISP-USER">
+ (export (intern "SHOES" (make-package 'temp)) 'temp) \EV T
+ (find-symbol "SHOES") \EV NIL, NIL
+ (use-package 'temp) \EV T
+ (find-symbol "SHOES") \EV SHOES, :INHERITED
+ (find (find-package 'temp) (package-use-list 'common-lisp-user)) \EV #<PACKAGE "TEMP">
+ (unuse-package 'temp) \EV T
+ (find-symbol "SHOES") \EV NIL, NIL
+\endcode
+
+\label Side Effects::
+
+The \term{use list} of \param{package} is modified.
+
+\label Affected By::
+Current state of the package system.
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{use-package}, \funref{package-use-list}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== USE-PACKAGE
+\begincom{use-package}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues use-package {packages-to-use {\opt} package} {\t}
+
+\label Arguments and Values::
+%% 11.0.0 27
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{packages-to-use}---a \term{designator} for 
+			  a \term{list} of \term{package designators}.
+  \Thepackage{keyword} may not be supplied.
+
+% Issue PACKAGE-FUNCTION-CONSISTENCY is silent on whether a "package designator"
+% is really the right thing here, but KAB, Sandra, and KMP agree that this is what
+% was probably intended.
+\param{package}---a \term{package designator}.
+  \Default{the \term{current package}}
+%% Next sentence reworded and moved per Boyer/Kaufmann/Moore #12
+%% (by X3J13 vote at May 4-5, 1994 meeting)
+%% -kmp 9-May-94
+% \Thepackage{keyword} cannot be supplied.
+  The \param{package} cannot be \thepackage{keyword}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\label Description::
+
+\funref{use-package} causes \param{package} to inherit all the
+\term{external symbols} of \param{packages-to-use}.
+The inherited \term{symbols} become \term{accessible} as 
+\term{internal symbols} of \param{package}.  
+
+%% 11.2.0 36
+\param{Packages-to-use} are added to the \term{use list} of \param{package}
+if they are not there already.  All \term{external symbols} in
+\param{packages-to-use} become \term{accessible} in \param{package}
+as \term{internal symbols}.
+%% 11.0.0 50
+%% Sandra thinks this follows form what it is to be accessible as internal symbols.
+% The new \term{symbols} can be referred to without a \term{package prefix}
+% while \param{package} is current, but they are not passed along to any
+% other \term{package} that uses \param{package}. 
+\funref{use-package} does not cause any new \term{symbols} to be \term{present}
+in \param{package} but only makes them \term{accessible} by inheritance.
+
+%% 11.0.0 39
+\funref{use-package} checks for
+name conflicts between the newly imported symbols and those already
+\term{accessible} in \param{package}.  
+%% 11.0.0 58
+A name conflict in \funref{use-package} 
+between two external symbols inherited
+by \param{package} from \param{packages-to-use} may be resolved in favor of
+either \term{symbol} 
+by \term{importing} one of them into \param{package} and making it a
+shadowing symbol. 
+                                                           
+\label Examples::
+
+\code
+ (export (intern "LAND-FILL" (make-package 'trash)) 'trash) \EV T
+ (find-symbol "LAND-FILL" (make-package 'temp)) \EV NIL, NIL
+ (package-use-list 'temp) \EV (#<PACKAGE "TEMP">)
+ (use-package 'trash 'temp) \EV T
+ (package-use-list 'temp) \EV (#<PACKAGE "TEMP"> #<PACKAGE "TRASH">)
+ (find-symbol "LAND-FILL" 'temp) \EV TRASH:LAND-FILL, :INHERITED
+\endcode
+
+\label Side Effects::
+                        
+The \term{use list} of \param{package} may be modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.%!!! Barmar: What about name conflicts?
+
+\label See Also::
+
+\funref{unuse-package},
+\funref{package-use-list},
+{\secref\PackageConcepts}
+
+\label Notes::
+
+It is permissible for a \term{package} $P\sub 1$ 
+to \term{use} a \term{package} $P\sub 2$
+even if $P\sub 2$ already uses $P\sub 1$.
+The using of \term{packages} is not transitive, 
+so no problem results from the apparent circularity.
+
+\endcom
+
+%%% ========== DEFPACKAGE
+\begincom{defpackage}\ftype{Macro}
+
+\issue{DEFPACKAGE:ADDITION}
+
+%!!! Interchange param names "defined-package-name" and "package-name" here.
+
+\label Syntax::
+
+\DefmacWithValues defpackage
+	   	  {defined-package-name \interleave{\down{option}}}
+		  {package}
+
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+% All options except :size can appear more than once.
+\auxbnf{option}{\starparen{\kwd{nicknames} \starparam{nickname}} | \CR
+		\paren{\kwd{documentation} \i{string}}           | \CR
+		\starparen{\kwd{use} \starparam{package-name}}   | \CR
+		\starparen{\kwd{shadow} \stardown{symbol-name}}  | \CR
+		\starparen{\kwd{shadowing-import-from} 
+			   \param{package-name}
+			   \stardown{symbol-name}}               | \CR
+	        \starparen{\kwd{import-from}
+			   \param{package-name}
+			   \stardown{symbol-name}}               | \CR
+	        \starparen{\kwd{export} \stardown{symbol-name}}  | \CR
+		\starparen{\kwd{intern} \stardown{symbol-name}}  | \CR
+		\paren{\kwd{size} \term{integer}}}
+%% Removed per Pitman #2 (by X3J13 vote at May 4-5, 1994 meeting)
+%% -kmp 9-May-94
+%\auxbnf{symbol-name}{(\term{symbol} | \term{string})}
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+
+\label Arguments and Values::
+
+\param{defined-package-name}---a \term{\packagenamedesignator}.
+
+%!!!! Sandra wonders if this shouldn't be renamed to just "package".
+%     But be sure to see the argument named "package" below.
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package-name}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\param{nickname}---a \term{\packagenamedesignator}.
+
+\param{symbol-name}---a \term{\symbolnamedesignator}.
+
+\param{package}---the \term{package} named \param{package-name}.
+
+\label Description::
+
+\macref{defpackage} creates a \term{package} as specified and returns 
+the \term{package}.
+ 
+If \param{defined-package-name} already refers to an existing 
+\term{package}, the name-to-package mapping for that name is not changed.
+If the new definition is at variance with the current state of that
+\term{package}, the consequences are undefined;  an implementation
+might choose to modify the existing \term{package} to reflect the
+new definition.  If \param{defined-package-name} is a \term{symbol},
+its \term{name} is used.
+
+The standard \i{options} are described below. 
+%% Sandra: Implied by package designator above. 
+% In the following
+% descriptions, \param{package-name} is a \term{package}, 
+% a \term{string} or a \term{symbol} (whose \term{name} is used)
+% that names a \term{package}.
+
+\beginlist
+\itemitem{\kwd{nicknames}}
+
+The arguments to \kwd{nicknames} set the \term{package}'s nicknames to the
+supplied names.
+%% Sandra: Implied by {\symbolnamedesignator}.
+% If \param{nicknames} are \term{symbols}, their \term{names} 
+% are used.
+ 
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+\itemitem{\kwd{documentation}}
+
+The argument to \kwd{documentation} specifies a \term{documentation string};
+it is attached as a \term{documentation string} to the \term{package}.
+At most one \kwd{documentation} option 
+can appear in a single \macref{defpackage} \term{form}.
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+
+\itemitem{\kwd{use}}
+
+The arguments to \kwd{use} set the \term{packages} that the \term{package}
+named by \param{package-name}
+will inherit from. If \kwd{use} is not supplied,
+\issue{MAKE-PACKAGE-USE-DEFAULT:IMPLEMENTATION-DEPENDENT}
+% its value is \term{implementation-dependent}, and must be the same as that
+% for \funref{make-package}.
+%% Rewritten for Sandra:
+it defaults to the same \term{implementation-dependent} value as \thekeyarg{use} to
+\funref{make-package}.
+\endissue{MAKE-PACKAGE-USE-DEFAULT:IMPLEMENTATION-DEPENDENT}
+%\thepackage{common-lisp} only is inherited.
+ 
+\itemitem{\kwd{shadow}}
+
+The arguments to \kwd{shadow}, \param{symbol-names}, name \term{symbols} 
+that are to be created in the \term{package} being defined.
+These \term{symbols} are added to the list of shadowing
+\term{symbols} effectively as if by \funref{shadow}.
+ 
+\itemitem{\kwd{shadowing-import-from}}
+
+The \term{symbols} named by the argument \param{symbol-names}
+are found (involving a lookup as if by \funref{find-symbol})
+in the specified \param{package-name}.  The resulting \term{symbols}
+are \term{imported} into the \term{package} being defined, and 
+placed on the shadowing symbols list as if by \funref{shadowing-import}.
+In no case are \term{symbols} created in any \term{package}
+other than the one being defined.
+ 
+\itemitem{\kwd{import-from}}
+
+The \term{symbols} named by the argument \param{symbol-names}
+are found in the \term{package} named by \param{package-name} and 
+they are \term{imported} into the \term{package} being defined.
+In no case are \term{symbols} created in any \term{package}
+other than the one being defined.
+ 
+\itemitem{\kwd{export}}
+
+The \term{symbols} named by
+the argument \param{symbol-names}  are found 
+or created in the \term{package} being defined
+and \term{exported}.
+The \kwd{export} option interacts
+with the \kwd{use} option, since inherited \term{symbols} 
+        can be used rather than new ones created.
+The \kwd{export} option interacts
+        with the 
+\kwd{import-from} and \kwd{shadowing-import-from} options, since 
+	\term{imported} 
+symbols can be used rather than new ones created.
+If an argument to the \kwd{export} option is \term{accessible} as
+an (inherited) \term{internal symbol} via \funref{use-package}, that the
+\term{symbol} named by \param{symbol-name}
+is first \term{imported} into the \term{package} being
+defined, and is then \term{exported} from that \term{package}.
+ 
+\itemitem{\kwd{intern}}
+
+The \term{symbols} named by the argument \param{symbol-names} 
+are found or created in the \term{package} being defined.
+The \kwd{intern} option interacts with the 
+\kwd{use} option, since inherited \term{symbols} 
+can be used rather than new ones created.  
+
+\itemitem{\kwd{size}}
+
+The argument to the \kwd{size} option
+declares the approximate number of \term{symbols} expected in the 
+\term{package}.
+        This is an efficiency hint only and might be ignored by an
+implementation.
+\endlist
+ 
+The order in which the options appear in a 
+\macref{defpackage} form is irrelevant.
+The order in which they are executed is as follows:
+\beginlist
+\itemitem{1.}
+\kwd{shadow} and \kwd{shadowing-import-from}.
+\itemitem{2.}
+\kwd{use}. 
+\itemitem{3.}
+\kwd{import-from} and \kwd{intern}.
+\itemitem{4.}
+\kwd{export}.
+\endlist
+Shadows are established first, since they might  be necessary to block 
+spurious name conflicts when the \kwd{use} 
+option is processed. The \kwd{use} option is executed
+next so that \kwd{intern} and \kwd{export} options can refer to normally 
+inherited \term{symbols}.  
+The \kwd{export} option is executed last so that it can refer to 
+\term{symbols} created by any of the other options; in 
+particular, \term{shadowing symbols} and 
+\term{imported} \term{symbols} can be made external.  
+ 
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+% added top-level clarification --sjl 7 Mar 92
+If a {defpackage} \term{form} appears as a \term{top level form},
+all of the actions normally performed by this \term{macro} 
+at load time must also be performed at compile time.
+\endissue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}    
+
+\label Examples::
+
+\code
+ (defpackage "MY-PACKAGE"
+   (:nicknames "MYPKG" "MY-PKG")
+   (:use "COMMON-LISP")
+   (:shadow "CAR" "CDR")
+   (:shadowing-import-from "VENDOR-COMMON-LISP"  "CONS")
+   (:import-from "VENDOR-COMMON-LISP"  "GC")
+   (:export "EQ" "CONS" "FROBOLA")
+   )
+ 
+ 
+ (defpackage my-package
+   (:nicknames mypkg :MY-PKG)  ; remember Common Lisp conventions for case
+   (:use common-lisp)          ; conversion on symbols
+   (:shadow CAR :cdr #:cons)                              
+   (:export "CONS")            ; this is the shadowed one.
+   )
+\endcode
+ 
+\label Affected By::
+
+Existing \term{packages}.
+
+\label Exceptional Situations::
+
+If one of the supplied \kwd{nicknames} already
+refers to an existing \term{package}, 
+an error \oftype{package-error} is signaled.
+
+An error \oftype{program-error} should be signaled if \kwd{size} or \kwd{documentation}
+appears more than once.
+
+Since \term{implementations} might allow extended \i{options}
+an error \oftype{program-error} should be signaled
+if an \i{option} is present that is not 
+actually supported in the host \term{implementation}.
+
+The collection of \param{symbol-name} arguments given to the options 
+      \kwd{shadow}, \kwd{intern}, 
+\kwd{import-from}, and \kwd{shadowing-import-from} must 
+      all be disjoint; additionally, the \param{symbol-name} arguments given to 
+      \kwd{export} and \kwd{intern} 
+must be disjoint. 
+Disjoint in this context is defined as no two of the \param{symbol-names}
+being \funref{string=} with each other. If either condition is 
+      violated, an error \oftype{program-error} should be signaled.
+ 
+For the \kwd{shadowing-import-from} and \kwd{import-from} options,
+a \term{correctable} \term{error} \oftype{package-error}
+        is signaled if no \term{symbol} is 
+\term{accessible} in the \term{package} named by
+        \param{package-name} for one of the argument \param{symbol-names}.
+
+Name conflict errors are handled by the underlying calls to 
+\funref{make-package}, \funref{use-package}, \funref{import}, and 
+\funref{export}. \Seesection\PackageConcepts.
+
+\label See Also::
+
+\funref{documentation},
+{\secref\PackageConcepts},
+{\secref\Compilation}
+
+\label Notes::
+
+%\macref{defpackage} does not alter the \term{current package}.
+%\funref{compile-file} should treat \macref{defpackage} \term{forms}
+%that are \term{top level forms} in the same way
+%as it treats the other \term{package}-affecting functions.
+
+The \kwd{intern} option is useful if an \kwd{import-from} or a 
+\kwd{shadowing-import-from} option in a subsequent call to \macref{defpackage} 
+(for some other \term{package}) expects to find
+these \term{symbols} \term{accessible} but not necessarily external.
+ 
+
+It is recommended that the entire \term{package} definition is put
+in a single place, and that all the \term{package} definitions of a
+program are in a single file.  This file can be \term{loaded} before
+\term{loading} or compiling anything else that depends on those 
+\term{packages}. Such a file can be read in \thepackage{common-lisp-user},
+avoiding any initial state issues.
+ 
+\macref{defpackage} cannot be used to create two ``mutually
+recursive'' packages, such as:
+
+\code
+ (defpackage my-package
+   (:use common-lisp your-package)    ;requires your-package to exist first
+   (:export "MY-FUN"))                
+ (defpackage your-package
+   (:use common-lisp)
+   (:import-from my-package "MY-FUN") ;requires my-package to exist first
+   (:export "MY-FUN"))
+\endcode
+
+However, nothing prevents the user from using the 
+\term{package}-affecting functions 
+such as \funref{use-package}, 
+\funref{import}, and \funref{export} to establish such links
+after a more standard use of \macref{defpackage}.
+ 
+The macroexpansion of \macref{defpackage} 
+could usefully canonicalize the names
+into \term{strings}, 
+so that even if a source file has random \term{symbols} in the
+\macref{defpackage} form, the compiled file would only contain 
+\term{strings}.
+ 
+Frequently additional \term{implementation-dependent} options take the
+form of a \term{keyword} standing by itself as an abbreviation for a list
+{\tt (keyword T)}; this syntax should be properly reported as an unrecognized
+option in implementations that do not support it.
+ 
+\endissue{DEFPACKAGE:ADDITION}
+\endcom
+
+%%% ========== DO-ALL-SYMBOLS
+%%% ========== DO-EXTERNAL-SYMBOLS
+%%% ========== DO-SYMBOLS
+\begincom{do-symbols, do-external-symbols, do-all-symbols}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\DefmacWithValuesNewline do-symbols
+		  {\vtop{\hbox{\paren{var \brac{package \brac{result-form}}}}
+			 \hbox{\starparam{declaration}
+			       \star{\curly{tag | statement}}}}}
+		  {\starparam{result}}
+
+\DefmacWithValuesNewline do-external-symbols
+		  {\vtop{\hbox{\paren{var \brac{package \brac{result-form}}}}
+			 \hbox{\starparam{declaration}
+			       \star{\curly{tag | statement}}}}}
+		  {\starparam{result}}
+
+\DefmacWithValuesNewline do-all-symbols
+		  {\vtop{\hbox{\paren{var \brac{result-form}}}
+			 \hbox{\starparam{declaration}
+		    	       \star{\curly{tag | statement}}}}}
+		  {\starparam{result}}
+
+\label Arguments and Values:: 
+
+\param{var}---a \term{variable} \term{name}; \noeval.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}  
+\param{package}---a \term{package designator}; \eval.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+  \DefaultIn{\macref{do-symbols} and \macref{do-external-symbols}}{the \term{current package}}
+
+\param{result-form}---a \term{form}; \evalspecial.
+ \Default{\nil}
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{tag}---a \term{go tag}; \noeval.
+
+\param{statement}---a \term{compound form}; \evalspecial.
+
+\param{results}---the \term{values} returned by the \param{result-form} 
+            if a \term{normal return} occurs,
+   or else, if an \term{explicit return} occurs, the \term{values} that were transferred.
+
+\label Description::
+
+\macref{do-symbols},
+\macref{do-external-symbols}, and
+\macref{do-all-symbols} iterate over the \term{symbols} 
+of \term{packages}.
+For each \term{symbol} in the set of \term{packages} chosen,
+the \param{var} is bound to the \term{symbol},
+and the \param{statements} in the body are executed.  
+When all the \term{symbols} have been processed,
+\param{result-form} is evaluated and returned as the value of the macro.  
+
+%!!! Barmar: Is there a different lexical environment for each symbol??
+
+%% 11.2.0 39
+\macref{do-symbols} iterates 
+over the \term{symbols} \term{accessible} in
+\param{package}.
+\issue{DO-SYMBOLS-DUPLICATES}
+\param{Statements} may execute more than once for \term{symbols} 
+that are inherited from multiple \term{packages}.
+\endissue{DO-SYMBOLS-DUPLICATES}
+
+%% 11.2.0 41
+\macref{do-all-symbols} iterates on every \term{registered package}. 
+\macref{do-all-symbols} will not process every \term{symbol}
+whatsoever, because a \term{symbol} not \term{accessible} in any
+\term{registered package} will not be processed.
+\macref{do-all-symbols} may cause a \term{symbol} that is \term{present} in
+several \term{packages} to be processed more than once.
+
+%% 11.2.0 40
+\macref{do-external-symbols} iterates on the external symbols of \param{package}.
+
+When \param{result-form} is evaluated, \param{var} is bound and has the value \nil.
+
+\issue{DO-SYMBOLS-BLOCK-SCOPE:ENTIRE-FORM}
+An \term{implicit block} named \nil\ surrounds the entire \macref{do-symbols},
+\macref{do-external-symbols}, or \macref{do-all-symbols} \term{form}.
+\endissue{DO-SYMBOLS-BLOCK-SCOPE:ENTIRE-FORM}
+\macref{return} or \specref{return-from} may be used to terminate the 
+iteration prematurely.  
+
+If execution of the body affects which \term{symbols} 
+are contained in the set of \term{packages} over which iteration
+is occurring, other than to
+remove the \term{symbol} 
+currently the value of \param{var} by using \funref{unintern},
+the consequences are undefined.
+
+For each of these macros, the 
+\term{scope} of the name binding does not include any
+initial value form, but the optional result forms are included.
+
+%Better than nothing for now, I guess. -kmp 14-Feb-92
+Any \param{tag} in the body is treated as with \specref{tagbody}.
+
+\label Examples::
+
+\code
+ (make-package 'temp :use nil) \EV #<PACKAGE "TEMP">
+ (intern "SHY" 'temp) \EV TEMP::SHY, NIL ;SHY will be an internal symbol
+                                         ;in the package TEMP
+ (export (intern "BOLD" 'temp) 'temp)  \EV T  ;BOLD will be external  
+ (let ((lst ()))
+   (do-symbols (s (find-package 'temp)) (push s lst))
+   lst)
+\EV (TEMP::SHY TEMP:BOLD)
+\OV (TEMP:BOLD TEMP::SHY)
+ (let ((lst ()))
+   (do-external-symbols (s (find-package 'temp) lst) (push s lst))
+   lst) 
+\EV (TEMP:BOLD)
+ (let ((lst ()))                                                     
+   (do-all-symbols (s lst)
+     (when (eq (find-package 'temp) (symbol-package s)) (push s lst)))
+   lst)
+\EV (TEMP::SHY TEMP:BOLD)
+\OV (TEMP:BOLD TEMP::SHY)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{intern},
+\funref{export},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+    
+\label Notes:\None.
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== INTERN
+\begincom{intern}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues intern {string {\opt} package} {symbol, status}
+
+\label Arguments and Values::
+
+\param{string}---a \term{string}.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+  \Default{the \term{current package}}
+
+\param{symbol}---a \term{symbol}.
+
+\param{status}---one of \kwd{inherited}, \kwd{external}, \kwd{internal}, or \nil.
+
+\label Description::
+
+%% 11.2.0 20
+\funref{intern} enters a \term{symbol} named \param{string} into \param{package}.
+If a \term{symbol} whose name is the same as \param{string} 
+is already \term{accessible} in \param{package}, it is returned.
+If no such \term{symbol} is \term{accessible} in \param{package}, 
+a new \term{symbol} with the given name is created 
+and entered into \param{package} as an \term{internal symbol},
+or as an \term{external symbol} if the \param{package} is \thepackage{keyword}; 
+\param{package} becomes the \term{home package} of the created \term{symbol}.
+
+%% 11.2.0 21
+%% 11.2.0 22
+The first value returned by \funref{intern}, \param{symbol},
+is the \term{symbol} that was found or
+created.  
+%% Sandra thinks, and I agree, that this is confused and doesn't belong here. -kmp 14-Feb-92
+% \issue{CHARACTER-PROPOSAL:2-1-1}
+% It is \term{implementation-dependent}
+% %but consistent with \funref{read},
+% which \term{implementation-defined} \term{attributes} are removed.
+% \endissue{CHARACTER-PROPOSAL:2-1-1}
+The meaning of the \term{secondary value}, \param{status}, is as follows:
+\beginlist
+\itemitem{\kwd{internal}}
+
+The \term{symbol} was found 
+and is
+%directly
+\term{present} in \param{package} as an \term{internal symbol}.
+
+\itemitem{\kwd{external}}
+
+The \term{symbol} was found
+and is
+%directly
+\term{present} as an \term{external symbol}.
+
+\itemitem{\kwd{inherited}}
+
+The \term{symbol} was found
+and is inherited via \funref{use-package} 
+(which implies that the \term{symbol} is internal).
+
+\itemitem{\nil}
+
+No pre-existing \term{symbol} was found,
+so one was created.
+
+%% 10.3.0 6
+%% On Sandra's advice, I stole this paragraph from MAKE-SYMBOL with mods to make
+%% it fit better here. -kmp 14-Feb-92
+It is \term{implementation-dependent} whether the \term{string} 
+that becomes the new \term{symbol}'s \term{name} is the given
+\param{string} or a copy of it.  Once a \term{string}
+has been given as the \param{string} \term{argument} to
+\term{intern} in this situation where a new \term{symbol} is created,
+the consequences are undefined if a
+subsequent attempt is made to alter that \term{string}.
+
+\endlist
+
+
+\label Examples::
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\code
+ (in-package "COMMON-LISP-USER") \EV #<PACKAGE "COMMON-LISP-USER">
+ (intern "Never-Before") \EV |Never-Before|, NIL
+ (intern "Never-Before") \EV |Never-Before|, :INTERNAL 
+ (intern "NEVER-BEFORE" "KEYWORD") \EV :NEVER-BEFORE, NIL
+ (intern "NEVER-BEFORE" "KEYWORD") \EV :NEVER-BEFORE, :EXTERNAL
+\endcode
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{find-symbol},
+\funref{read},
+\typeref{symbol},
+\funref{unintern},
+{\secref\SymbolTokens}
+
+\label Notes::
+
+%% 11.0.0 51
+\funref{intern} does not need to do any name conflict checking 
+because it never creates a new \term{symbol} 
+if there is already an \term{accessible} \term{symbol} with the name given.
+
+\endcom
+
+%%% ========== PACKAGE-NAME
+\begincom{package-name}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues package-name {package} {name}
+
+\label Arguments and Values::
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\param{name}---a \term{string} 
+\issue{PACKAGE-DELETION:NEW-FUNCTION}
+or \nil.
+\endissue{PACKAGE-DELETION:NEW-FUNCTION}
+
+\label Description::
+
+%% 11.2.0 13
+\funref{package-name} returns the \term{string} that names \param{package},
+\issue{PACKAGE-DELETION:NEW-FUNCTION}
+or \nil\ if the \param{package} \term{designator}
+is a \term{package} \term{object} that has no name (\seefun{delete-package}).
+\endissue{PACKAGE-DELETION:NEW-FUNCTION}
+
+\label Examples::
+
+\code
+ (in-package "COMMON-LISP-USER") \EV #<PACKAGE "COMMON-LISP-USER">
+ (package-name *package*) \EV "COMMON-LISP-USER"
+ (package-name (symbol-package :test)) \EV "KEYWORD"
+ (package-name (find-package 'common-lisp)) \EV "COMMON-LISP"
+\endcode
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\code
+ (defvar *foo-package* (make-package "FOO"))
+ (rename-package "FOO" "FOO0")
+ (package-name *foo-package*) \EV "FOO0"
+\endcode
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\label Side Effects:\None.                                                          
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{package}{a \term{package designator}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== PACKAGE-NICKNAMES
+\begincom{package-nicknames}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues package-nicknames {package} {nicknames}
+
+\label Arguments and Values:: 
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\param{nicknames}---a \term{list} of \term{strings}.
+
+\label Description::
+
+%% 11.2.0 14
+Returns the \term{list} of nickname \term{strings}
+for \param{package}, not including the name of \param{package}.
+
+%!!! Can it be "a" list instead of "the" list?  Must it be cached? -kmp 25-Apr-91
+
+\label Examples::
+
+\code
+ (package-nicknames (make-package 'temporary
+                                   :nicknames '("TEMP" "temp")))
+\EV ("temp" "TEMP") 
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{package}{a \term{package designator}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== PACKAGE-SHADOWING-SYMBOLS
+\begincom{package-shadowing-symbols}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues package-shadowing-symbols {package} {symbols}
+
+\label Arguments and Values:: 
+
+% Issue PACKAGE-FUNCTION-CONSISTENCY is silent on whether a "package designator"
+% is really the right thing here, but KAB, Sandra, and KMP agree that this is what
+% was probably intended.
+\param{package}---a \term{package designator}.
+
+\param{symbols}---a \term{list} of \term{symbols}.
+
+\label Description::
+
+%% 11.2.0 18
+%% Sandra: Must this list be freshly consed?
+%Creates
+Returns a \term{list} of \term{symbols} that have been declared 
+as \term{shadowing symbols} in \param{package} by \funref{shadow} 
+or \funref{shadowing-import} (or the equivalent \macref{defpackage} options).
+All \term{symbols} on this \term{list} are \term{present} in \param{package}.
+
+\label Examples::
+
+\code
+ (package-shadowing-symbols (make-package 'temp)) \EV ()
+ (shadow 'cdr 'temp) \EV T
+ (package-shadowing-symbols 'temp) \EV (TEMP::CDR)
+ (intern "PILL" 'temp) \EV TEMP::PILL, NIL
+ (shadowing-import 'pill 'temp) \EV T
+ (package-shadowing-symbols 'temp) \EV (PILL TEMP::CDR)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{package}{a \term{package designator}}
+
+\label See Also::
+
+\funref{shadow},
+\funref{shadowing-import}
+
+\label Notes::
+
+%Is the list fresh every time, or can it be cached? -kmp 25-Apr-91
+%Sandra thinks it might be, so I added this not. -kmp 13-Feb-92
+Whether the list of \param{symbols} is \term{fresh} is \term{implementation-dependent}.
+
+\endcom
+
+%%% ========== PACKAGE-USE-LIST
+\begincom{package-use-list}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues package-use-list {package} {use-list}
+
+\label Arguments and Values:: 
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\param{use-list}---a \term{list} of \term{package} \term{objects}.
+
+\label Description::
+
+%% 11.2.0 16                                               
+%!!! Is the word "other" really needed here? -kmp 25-Apr-91
+Returns a \term{list} of other \term{packages} used by \param{package}.
+
+\label Examples::
+
+\code
+ (package-use-list (make-package 'temp)) \EV (#<PACKAGE "COMMON-LISP">)
+ (use-package 'common-lisp-user 'temp) \EV T
+ (package-use-list 'temp) \EV (#<PACKAGE "COMMON-LISP"> #<PACKAGE "COMMON-LISP-USER">)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{package}{a \term{package designator}}
+
+\label See Also::
+
+\funref{use-package},
+\funref{unuse-package}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== PACKAGE-USED-BY-LIST
+\begincom{package-used-by-list}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues package-used-by-list {package} {used-by-list}
+
+\label Arguments and Values:: 
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+\param{package}---a \term{package designator}.
+\endissue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}
+
+\param{used-by-list}---a \term{list} of \term{package} \term{objects}.
+
+\label Description::
+
+%% 11.2.0 17
+\funref{package-used-by-list} returns a \term{list} 
+of other \term{packages} that use \param{package}.
+
+\label Examples::
+
+\code
+ (package-used-by-list (make-package 'temp)) \EV ()
+ (make-package 'trash :use '(temp)) \EV #<PACKAGE "TRASH">
+ (package-used-by-list 'temp) \EV (#<PACKAGE "TRASH">)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{package}{a \term{package}}
+
+\label See Also::
+
+\funref{use-package},
+\funref{unuse-package}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== PACKAGEP
+\begincom{packagep}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues packagep {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 25
+\TypePredicate{object}{package}
+
+\label Examples::
+\code
+ (packagep *package*) \EV \term{true} 
+ (packagep 'common-lisp) \EV \term{false} 
+ (packagep (find-package 'common-lisp)) \EV \term{true} 
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (packagep \param{object}) \EQ (typep \param{object} 'package)
+\endcode
+
+\endcom
+
+%%% ========== *PACKAGE*
+\begincom{*package*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{package} \term{object}.
+
+\label Initial Value::
+
+\thepackage{common-lisp-user}.
+
+%% 11.2.0 6
+%% 11.0.0 23
+\label Description::
+
+Whatever \term{package} \term{object} is currently 
+\thevalueof{*package*} is referred to as the \term{current package}.
+
+\label Examples::
+
+\code
+ (in-package "COMMON-LISP-USER") \EV #<PACKAGE "COMMON-LISP-USER">
+ *package* \EV #<PACKAGE "COMMON-LISP-USER">
+ (make-package "SAMPLE-PACKAGE" :use '("COMMON-LISP"))
+\EV #<PACKAGE "SAMPLE-PACKAGE">
+ (list 
+   (symbol-package
+     (let ((*package* (find-package 'sample-package)))
+       (setq *some-symbol* (read-from-string "just-testing"))))
+   *package*)
+\EV (#<PACKAGE "SAMPLE-PACKAGE"> #<PACKAGE "COMMON-LISP-USER">)
+ (list (symbol-package (read-from-string "just-testing"))
+       *package*)
+\EV (#<PACKAGE "COMMON-LISP-USER"> #<PACKAGE "COMMON-LISP-USER">)
+ (eq 'foo (intern "FOO")) \EV \term{true}
+ (eq 'foo (let ((*package* (find-package 'sample-package)))
+            (intern "FOO")))
+\EV \term{false}
+\endcode
+
+\label Affected By::
+
+\funref{load},
+\funref{compile-file},
+\funref{in-package}
+
+\label See Also::
+
+\funref{compile-file},
+\macref{in-package},
+\funref{load},
+\funref{package}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Package Errors --------------------
+
+\begincom{package-error}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{package-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{package-error} consists of \term{error} \term{conditions}
+related to operations on \term{packages}.
+The offending \term{package} (or \term{package} \term{name})
+is initialized by \theinitkeyarg{package} to \funref{make-condition}, 
+and is \term{accessed} by \thefunction{package-error-package}.
+
+\label See Also::
+
+\funref{package-error-package},
+{\secref\Conditions}
+
+\endcom%{package-error}\ftype{Condition Type}
+
+%%% ========== PACKAGE-ERROR-PACKAGE
+\begincom{package-error-package}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues package-error-package {condition} {package}
+
+\label Arguments and Values::
+
+\param{condition}---a \term{condition} \oftype{package-error}.
+
+\param{package}---a \term{package designator}.
+
+\label Description::
+
+Returns a \term{designator} for the offending \term{package}
+in the \term{situation} represented by the \param{condition}.
+
+\label Examples::
+
+\code
+ (package-error-package 
+   (make-condition 'package-error
+     :package (find-package "COMMON-LISP")))
+\EV #<Package "COMMON-LISP">
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\typeref{package-error}
+
+\label Notes:\None.
+
+%% This shouldn't be needed.
+%It is an error to use \macref{setf} with \funref{package-error-package}.
+
+\endcom

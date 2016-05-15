@@ -1,0 +1,44 @@
+====== Function INVOKE-DEBUGGER ======
+
+====Syntax====
+
+\DefunNoReturn invoke-debugger {condition}
+
+====Arguments and Values====
+
+//condition// - a //[[CL:Glossary:condition]]// //[[CL:Glossary:object]]//.
+
+====Description====
+
+**[[CL:Functions:invoke-debugger]]** attempts to enter the debugger with //condition//.
+
+If **[[CL:Variables:*debugger-hook*]]** is not **[[CL:Constant Variables:nil]]**, it should be a //[[CL:Glossary:function]]// (or the name of a //[[CL:Glossary:function]]//) to be called prior to entry to the standard debugger. The //[[CL:Glossary:function]]// is called with **[[CL:Variables:*debugger-hook*]]** bound to **[[CL:Constant Variables:nil]]**, and the //[[CL:Glossary:function]]// must accept two arguments: the //condition// and \thevalueof{*debugger-hook*} prior to binding it to **[[CL:Constant Variables:nil]]**. If the //[[CL:Glossary:function]]// returns normally, the standard debugger is entered.
+
+
+The standard debugger never directly returns. Return can occur only by a non-local transfer of control, such as the use of a restart function.
+
+====Examples====
+
+<blockquote> (ignore-errors ;Normally, this would suppress debugger entry (handler-bind ((error #'invoke-debugger)) ;But this forces debugger entry (error "Foo."))) Debug: Foo. To continue, type :CONTINUE followed by an option number: 1: Return to Lisp Toplevel. Debug> </blockquote>
+
+
+====Side Effects====
+
+**[[CL:Variables:*debugger-hook*]]** is bound to **[[CL:Constant Variables:nil]]**, program execution is discontinued, and the debugger is entered.
+
+====Affected By====
+
+**[[CL:Variables:*debug-io*]]** and **[[CL:Variables:*debugger-hook*]]**.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:error]]**, **[[CL:Functions:break]]**
+
+====Notes====
+
+None.
+

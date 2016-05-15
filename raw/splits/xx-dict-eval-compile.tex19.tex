@@ -1,0 +1,57 @@
+====== Symbol DECLARE ======
+
+====Syntax====
+
+\Defspec declare {\starparam{declaration-specifier}}
+
+====Arguments====
+
+//declaration-specifier// - a //[[CL:Glossary:declaration specifier]]//; \noeval.
+
+====Description====
+
+A \misc{declare} //[[CL:Glossary:expression]]//, sometimes called a //[[CL:Glossary:declaration]]//, can occur only at the beginning of the bodies of certain //[[CL:Glossary:forms]]//; that is, it may be preceded only by other \misc{declare} //[[CL:Glossary:expressions]]//, or by a //[[CL:Glossary:documentation string]]// if the context permits.
+
+A \misc{declare} //[[CL:Glossary:expression]]// can occur in a //[[CL:Glossary:lambda expression]]// or in any of the //[[CL:Glossary:forms]]// listed in \thenextfigure.
+
+\displaythree{Standardized Forms In Which Declarations Can Occur}{ defgeneric&do-external-symbols&prog\cr define-compiler-macro&do-symbols&prog*\cr define-method-combination&dolist&restart-case\cr define-setf-expander&dotimes&symbol-macrolet\cr defmacro&flet&with-accessors\cr defmethod&handler-case&with-hash-table-iterator\cr defsetf&labels&with-input-from-string\cr deftype&let&with-open-file\cr defun&let*&with-open-stream\cr destructuring-bind&locally&with-output-to-string\cr do&macrolet&with-package-iterator\cr do*&multiple-value-bind&with-slots\cr do-all-symbols&pprint-logical-block&\cr }
+
+A \misc{declare} //[[CL:Glossary:expression]]// can only occur where specified by the syntax of these //[[CL:Glossary:forms]]//.
+
+The consequences of attempting to evaluate a \misc{declare} //[[CL:Glossary:expression]]// are undefined. In situations where such //[[CL:Glossary:expressions]]// can appear, explicit checks are made for their presence and they are never actually evaluated; it is for this reason that they are called "\misc{declare} //[[CL:Glossary:expressions]]//" rather than "\misc{declare} //[[CL:Glossary:forms]]//."
+
+//[[CL:Glossary:Macro forms]]// cannot expand into declarations; \misc{declare} //[[CL:Glossary:expressions]]// must appear as actual //[[CL:Glossary:subexpressions]]// of the //[[CL:Glossary:form]]// to which they refer.
+
+\Thenextfigure\ shows a list of //[[CL:Glossary:declaration identifiers]]// that can be used with \misc{declare}.
+
+\displaythree{Local Declaration Specifiers}{ dynamic-extent&ignore&optimize\cr ftype&inline&special\cr ignorable&notinline&type\cr }
+
+An implementation is free to support other (//[[CL:Glossary:implementation-defined]]//) //[[CL:Glossary:declaration identifiers]]// as well.
+
+====Examples====
+
+<blockquote> (defun nonsense (k x z) (foo z x) ;First call to foo (let ((j (foo k x)) ;Second call to foo (x (* k k))) (declare (inline foo) (special x z)) (foo x j z))) ;Third call to foo </blockquote>
+
+In this example, the \declref{inline} declaration applies only to the third call to ''foo'', but not to the first or second ones. The \declref{special} declaration of ''x'' causes \specref{let} to make a dynamic //[[CL:Glossary:binding]]// for ''x'', and causes the reference to ''x'' in the body of \specref{let} to be a dynamic reference. The reference to ''x'' in the second call to ''foo'' is a local reference to the second parameter of **[[CL:Functions:nonsense]]**. The reference to ''x'' in the first call to ''foo'' is a local reference, not a \declref{special} one. The \declref{special} declaration of ''z'' causes the reference to ''z'' in the
+
+third call to ''foo'' to be a dynamic reference; it does not refer to the parameter to ''nonsense'' named ''z'', because that parameter //[[CL:Glossary:binding]]// has not been declared to be \declref{special}. (The \declref{special} declaration of ''z'' does not appear in the body of **[[CL:Macros:defun]]**, but in an inner //[[CL:Glossary:form]]//, and therefore does not affect the //[[CL:Glossary:binding]]// of the //[[CL:Glossary:parameter]]//.)
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+The consequences of trying to use a \misc{declare} //[[CL:Glossary:expression]]// as a //[[CL:Glossary:form]]// to be //[[CL:Glossary:evaluated]]// are undefined.
+
+\editornote{KMP: Probably we need to say something here about ill-formed declare expressions.}
+
+====See Also====
+
+**[[CL:Functions:proclaim]]**, \secref\TypeSpecifiers, \declref{declaration}, \declref{dynamic-extent}, \declref{ftype}, \declref{ignorable}, \declref{ignore}, \declref{inline}, \declref{notinline}, \declref{optimize}, \declref{type}
+
+====Notes====
+
+None.
+
+\issue{DECLS-AND-DOC} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{SYMBOL-MACROLET-DECLARE:ALLOW} \issue{WITH-ADDED-METHODS:DELETE} \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE} \issue{DECLARE-MACROS:FLUSH} \issue{DYNAMIC-EXTENT:NEW-DECLARATION} \issue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}

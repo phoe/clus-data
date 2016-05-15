@@ -1,0 +1,52 @@
+====== Function EQL ======
+
+====Syntax====
+
+**eql** //x y// → //generalized-boolean//
+
+====Arguments and Values====
+
+//x// - an //[[CL:Glossary:object]]//.
+
+//y// - an //[[CL:Glossary:object]]//.
+
+//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+The value of **[[CL:Functions:eql]]** is //[[CL:Glossary:true]]// of two objects, //x// and //y//, in the folowing cases: \beginlist \itemitem{1.} If //x// and //y// are **[[CL:Functions:eq]]**. \itemitem{2.} If //x// and //y// are both //[[CL:Glossary:numbers]]// of the same //[[CL:Glossary:type]]// and the same value. \itemitem{3.} If they are both //[[CL:Glossary:characters]]// that represent the same character. \endlist
+
+Otherwise the value of **[[CL:Functions:eql]]** is //[[CL:Glossary:false]]//.
+
+If an implementation supports positive and negative zeros as //[[CL:Glossary:distinct]]// values, then ''(eql 0.0 -0.0)'' returns //[[CL:Glossary:false]]//. Otherwise, when the syntax ''-0.0'' is read it is interpreted as the value ''0.0'', and so ''(eql 0.0 -0.0)'' returns //[[CL:Glossary:true]]//.
+
+====Examples====
+
+<blockquote> (eql 'a 'b) → //[[CL:Glossary:false]]// (eql 'a 'a) → //[[CL:Glossary:true]]// (eql 3 3) → //[[CL:Glossary:true]]// (eql 3 3.0) → //[[CL:Glossary:false]]// (eql 3.0 3.0) → //[[CL:Glossary:true]]// (eql #c(3 -4) #c(3 -4)) → //[[CL:Glossary:true]]// (eql #c(3 -4.0) #c(3 -4)) → //[[CL:Glossary:false]]// (eql (cons 'a 'b) (cons 'a 'c)) → //[[CL:Glossary:false]]// (eql (cons 'a 'b) (cons 'a 'b)) → //[[CL:Glossary:false]]// (eql '(a . b) '(a . b)) → //[[CL:Glossary:true]]// //or// → //[[CL:Glossary:false]]// (progn ([[CL:Macros:defparameter]] x (cons 'a 'b)) (eql x x)) → //[[CL:Glossary:true]]// (progn ([[CL:Macros:defparameter]] x '(a . b)) (eql x x)) → //[[CL:Glossary:true]]// (eql #\\A #\\A) → //[[CL:Glossary:true]]// (eql "Foo" "Foo") → //[[CL:Glossary:true]]// //or// → //[[CL:Glossary:false]]// (eql "Foo" (copy-seq "Foo")) → //[[CL:Glossary:false]]// (eql "FOO" "foo") → //[[CL:Glossary:false]]// </blockquote>
+
+Normally ''(eql 1.0s0 1.0d0)'' is false, under the assumption that ''1.0s0'' and ''1.0d0'' are of distinct data types. However, implementations that do not provide four distinct floating-point formats are permitted to "collapse" the four formats into some smaller number of them; in such an implementation ''(eql 1.0s0 1.0d0)'' might be true.
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:eq]]**, **[[CL:Functions:equal]]**, **[[CL:Functions:equalp]]**, **[[CL:Functions:=]]**, **[[CL:Functions:char=]]**
+
+====Notes====
+
+**[[CL:Functions:eql]]** is the same as **[[CL:Functions:eq]]**, except that if the arguments are //[[CL:Glossary:characters]]// or //[[CL:Glossary:numbers]]// of the same type then their values are compared. Thus **[[CL:Functions:eql]]** tells whether two //[[CL:Glossary:object|objects]]// are conceptually the same, whereas **[[CL:Functions:eq]]** tells whether two //[[CL:Glossary:object|objects]]// are implementationally identical. It is for this reason that **[[CL:Functions:eql]]**, not **[[CL:Functions:eq]]**, is the default comparison predicate for //[[CL:Glossary:operators]]// that take //[[CL:Glossary:sequences]]// as arguments.
+
+**[[CL:Functions:eql]]** may not be true of two //[[CL:Glossary:floats]]// even when they represent the same value. **[[CL:Functions:=]]** is used to compare mathematical values.
+
+Two //[[CL:Glossary:complex]]// numbers are considered to be **[[CL:Functions:eql]]** if their real parts are **[[CL:Functions:eql]]** and their imaginary parts are **[[CL:Functions:eql]]**. For example, ''(eql #C(4 5) #C(4 5))'' is //[[CL:Glossary:true]]// and ''(eql #C(4 5) #C(4.0 5.0))'' is //[[CL:Glossary:false]]//. Note that while ''(eql #C(5.0 0.0) 5.0)'' is //[[CL:Glossary:false]]//, ''(eql #C(5 0) 5)'' is //[[CL:Glossary:true]]//. In the case of ''(eql #C(5.0 0.0) 5.0)'' the two arguments are of different types, and so cannot satisfy **[[CL:Functions:eql]]**. In the case of ''(eql #C(5 0) 5)'', ''#C(5 0)'' is not a //[[CL:Glossary:complex]]// number, but is automatically reduced to the //[[CL:Glossary:integer]]// ''5''.
+

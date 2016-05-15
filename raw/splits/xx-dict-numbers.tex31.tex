@@ -1,0 +1,66 @@
+====== Function EXP, EXPT ======
+
+====Syntax====
+
+**exp ** //number// → //result// **expt** //base-number power-number// → //result//
+
+====Arguments and Values====
+
+//number// - a //[[CL:Glossary:number]]//.
+
+//base-number// - a //[[CL:Glossary:number]]//.
+
+//power-number// - a //[[CL:Glossary:number]]//.
+
+//result// - a //[[CL:Glossary:number]]//.
+
+====Description====
+
+**[[CL:Functions:exp]]** and **[[CL:Functions:expt]]** perform exponentiation.
+
+**[[CL:Functions:exp]]** returns ''e'' raised to the power //number//, where ''e'' is the base of the natural logarithms.
+
+**[[CL:Functions:exp]]** has no branch cut.
+
+**[[CL:Functions:expt]]** returns //base-number// raised to the power //power-number//. If the //base-number// is a //[[CL:Glossary:rational]]// and //power-number// is an //[[CL:Glossary:integer]]//, the calculation is exact and the result will be of type **[[CL:Types:rational]]**; otherwise a floating-point approximation might result.
+
+For **[[CL:Functions:expt]]** of a //[[CL:Glossary:complex rational]]// to an //[[CL:Glossary:integer]]// power, the calculation must be exact and the result is of type ''(or rational (complex rational))''.
+
+
+
+The result of **[[CL:Functions:expt]]** can be a //[[CL:Glossary:complex]]//, even when neither argument is a //[[CL:Glossary:complex]]//, if //base-number// is negative and //power-number// is not an //[[CL:Glossary:integer]]//. The result is always the //[[CL:Glossary:principal]]// //[[CL:Glossary:complex]]// //[[CL:Glossary:value]]//. For example, ''(expt -8 1/3)'' is not permitted to return ''-2'', even though ''-2'' is one of the cube roots of ''-8''. The //[[CL:Glossary:principal]]// cube root is a //[[CL:Glossary:complex]]// approximately equal to ''#C(1.0 1.73205)'', not ''-2''.
+
+**[[CL:Functions:expt]]** is defined as \i{''b^x'' = ''e^{x log b\/}''}.
+
+This defines the //[[CL:Glossary:principal]]// //[[CL:Glossary:values]]// precisely. The range of **[[CL:Functions:expt]]** is the entire complex plane. Regarded as a function of ''x'', with ''b'' fixed, there is no branch cut. Regarded as a function of ''b'', with ''x'' fixed, there is in general a branch cut along the negative real axis, continuous with quadrant II. The domain excludes the origin. By definition, ''0^0''=1. If ''b''=0 and the real part of ''x'' is strictly positive, then ''''b^x''''=0. For all other values of ''x'', ''0^''x'''' is an error.
+
+When //power-number// is an //[[CL:Glossary:integer]]// ''0'', then the result is always the value one in the //[[CL:Glossary:type]]// of //base-number//, even if the //base-number// is zero (of any //[[CL:Glossary:type]]//). That is:
+
+<blockquote> (expt x 0) ≡ (coerce 1 (type-of x)) </blockquote> If //power-number// is a zero of any other //[[CL:Glossary:type]]//, then the result is also the value one, in the //[[CL:Glossary:type]]// of the arguments after the application of the contagion rules in \secref\NumericContagionRules, with one exception: the consequences are undefined if //base-number// is zero when //power-number// is zero and not of type **[[CL:Types:integer]]**.
+
+====Examples====
+
+<blockquote> (exp 0) → 1.0 (exp 1) → 2.718282 (exp (log 5)) → 5.0 (expt 2 8) → 256 (expt 4 .5) → 2.0 (expt #c(0 1) 2) → -1 (expt #c(2 2) 3) → #C(-16 16) (expt #c(2 2) 4) → -64 </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:log]]**, {\secref\FloatSubstitutability}
+
+====Notes====
+
+Implementations of **[[CL:Functions:expt]]** are permitted to use different algorithms for the cases of a //power-number// of type **[[CL:Types:rational]]** and a //power-number// of type **[[CL:Types:float]]**.
+
+
+Note that by the following logic, ''(sqrt (expt ''x'' 3))'' is not equivalent to ''(expt ''x'' 3/2)''.
+
+<blockquote> ([[CL:Macros:defparameter]] x (exp (/ (* 2 pi #c(0 1)) 3))) ;exp(2.pi.i/3) (expt x 3) → 1 ;except for round-off error (sqrt (expt x 3)) → 1 ;except for round-off error (expt x 3/2) → -1 ;except for round-off error </blockquote>
+
+\issue{COMPLEX-RATIONAL-RESULT:EXTEND} \issue{COMPLEX-RATIONAL-RESULT:EXTEND} \issue{EXPT-RATIO:P.211}

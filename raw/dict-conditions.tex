@@ -1,0 +1,4080 @@
+% -*- Mode: TeX -*-
+
+% Conditions
+%  Conditions
+%   Signaling
+%   Debugger
+%   Handling
+%   Condition Types
+%    Condition Type Definition
+%    Condition Instantiation
+%    Condition Types/Accessors
+%  Restarts
+%   PreDefined Restarts
+
+
+%%% ========== CONDITION
+\begincom{condition}\ftype{Condition Type}
+
+\issue{CONDITION-RESTARTS:BUGGY}
+\reviewer{Barrett: I think CONDITION-RESTARTS is not fully integrated.}
+\endissue{CONDITION-RESTARTS:BUGGY}
+
+%!!! Barrett notes of the condition types:
+%  There is little discussion in this descriptions of what the values 
+%  of the initargs ought to be.  For example, package-error permits name
+%  or package object.
+
+\label Class Precedence List::
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+All types of \term{conditions}, whether error or
+non-error, must inherit from this \term{type}.
+\issue{CLOS-CONDITIONS-AGAIN:ALLOW-SUBSET}
+\issue{CLOS-CONDITIONS:INTEGRATE}
+%%As noted by Symbolics, these just repeat the obvious:
+%All types of \term{conditions} are \term{classes}.  
+%All \term{condition} \term{objects} are \term{generalized instances} of one
+%or more \term{classes}.
+%    Barmar thinks the next statement is unnecessary and incomplete.
+%    I think there's also a later cleanup issue which undoes it.  Work on this more. -kmp
+%    Barrett also asks what about SLOT-VALUE and its setf.
+%% Removed. This is explained better below.  -kmp 1-Oct-91
+% \term{Slots} in \term{condition} \term{objects} can be accessed
+% using \macref{with-slots}.
+\endissue{CLOS-CONDITIONS:INTEGRATE}
+\endissue{CLOS-CONDITIONS-AGAIN:ALLOW-SUBSET}
+
+% %!!! Barrett points out that these look a little lonely all by themselves. -kmp 23-Oct-90
+% %    (Well, they used to be somewhere different, so maybe they are not so 
+% %    lonely now, but I'll leave the comment and think more about it later. -kmp 13-Nov-90)
+% %!!! Barrett thinks this "disjointness" is probably false  and in any case uninteresting.
+%% Finally commented out for Barrett. -kmp 2-Feb-92
+% The \term{types} \typeref{simple-condition}, \typeref{warning}, 
+% and \typeref{serious-condition} are \term{pairwise} \term{disjoint}.
+
+No additional \term{subtype} relationships among the specified \subtypesof{condition}
+are allowed, except when explicitly mentioned in the text; however
+implementations are permitted to introduce additional \term{types}
+and one of these \term{types} can be a \term{subtype} of any
+number of the \subtypesof{condition}.
+
+\issue{CONDITION-SLOTS:HIDDEN}
+Whether a user-defined \term{condition} \term{type} has \term{slots} 
+that are accessible by \term{with-slots} is \term{implementation-dependent}.
+Furthermore, even in an \term{implementation} 
+in which user-defined \term{condition} \term{types} would have \term{slots}, 
+it is \term{implementation-dependent} whether any \term{condition}
+\term{types} defined in this document have such \term{slots} or, 
+if they do, what their \term{names} might be;
+only the reader functions documented by this specification may be relied
+upon by portable code.
+\endissue{CONDITION-SLOTS:HIDDEN}
+
+\issue{CLOS-CONDITIONS-AGAIN:ALLOW-SUBSET}
+\term{Conforming code} must observe the following restrictions related to
+\term{conditions}:
+
+\beginlist
+\itemitem{\bull}
+ \macref{define-condition}, not \macref{defclass}, must be used
+ to define new \term{condition} \term{types}.
+
+\itemitem{\bull}
+ \macref{make-condition}, not \funref{make-instance}, must be used to
+ create \term{condition} \term{objects} explicitly.
+
+\itemitem{\bull}
+ The \kwd{report} option of \macref{define-condition}, not \macref{defmethod}
+ for \funref{print-object}, must be used to define a condition reporter.
+
+\itemitem{\bull}
+ \funref{slot-value}, \funref{slot-boundp}, \funref{slot-makunbound},
+ and \macref{with-slots} must not be used on \term{condition} \term{objects}.
+ Instead, the appropriate accessor functions (defined by \macref{define-condition})
+ should be used.
+\endlist
+\endissue{CLOS-CONDITIONS-AGAIN:ALLOW-SUBSET}
+
+\endcom%{condition}\ftype{Condition Type}
+
+\begincom{warning}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{warning},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{warning} consists of all types of warnings.
+
+\label See Also::
+
+\typeref{style-warning}
+
+\endcom%{warning}\ftype{Condition Type}
+
+\issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+\begincom{style-warning}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{style-warning},
+\typeref{warning},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{style-warning} includes those \term{conditions} 
+that represent \term{situations} involving \term{code} 
+that is \term{conforming code} but that is nevertheless 
+considered to be faulty or substandard.
+
+\label See Also::
+
+\funref{muffle-warning}
+
+\label Notes::
+
+An \term{implementation} might signal such a \term{condition}
+if it encounters \term{code}
+     that uses deprecated features 
+  or that appears unaesthetic or inefficient.
+
+An `unused variable' warning must be \oftype{style-warning}.
+
+In general, the question of whether \term{code} is faulty or substandard
+is a subjective decision to be made by the facility processing that \term{code}.
+The intent is that whenever such a facility wishes to complain about
+\term{code} on such subjective grounds, it should use this 
+\term{condition} \term{type} so that any clients who wish to redirect or
+muffle superfluous warnings can do so without risking that they will be
+redirecting or muffling other, more serious warnings.
+
+\endcom%{style-warning}\ftype{Condition Type}
+\endissue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+
+\begincom{serious-condition}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+All \term{conditions} serious enough to require interactive intervention 
+if not handled should inherit from \thetype{serious-condition}.
+This condition type is provided
+%for terminological convenience.
+primarily so that it may be included as
+a \term{superclass} of other \term{condition} \term{types};
+it is not intended to be signaled directly.
+
+\label Notes::
+
+% It is
+% conventional to use \funref{error} (or something built on
+% \funref{error}) to \term{signal} \term{conditions} that are \oftype{serious-condition},
+% and to use \funref{signal} to \term{signal} \term{conditions} 
+% that are not of this \term{type}.
+
+Signaling a \term{serious condition} does not itself force entry into
+the debugger.   However, except in the unusual situation where the
+programmer can assure that no harm will come from failing to
+\term{handle} a \term{serious condition}, such a \term{condition} is
+usually signaled with \funref{error} rather than \funref{signal} in
+order to assure that the program does not continue without
+\term{handling} the \term{condition}.  (And conversely, it is
+conventional to use \funref{signal} rather than \funref{error} to signal
+conditions which are not \term{serious conditions}, since normally the
+failure to handle a non-serious condition is not reason enough for the
+debugger to be entered.)
+
+\endcom%{serious-condition}\ftype{Condition Type}
+
+\begincom{error}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{error} consists of all \term{conditions} that represent \term{errors}.
+
+\endcom%{error}\ftype{Condition Type}
+
+\begincom{cell-error}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{cell-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{cell-error} consists of error conditions that occur during 
+a location \term{access}.   The name of the offending cell is initialized by 
+\theinitkeyarg{name} to \funref{make-condition},
+and is \term{accessed} by \thefunction{cell-error-name}.
+
+\label See Also::
+
+\funref{cell-error-name}
+
+\endcom%{cell-error}\ftype{Condition Type}
+
+%%% ========== CELL-ERROR-NAME
+\begincom{cell-error-name}\ftype{Function}
+
+\issue{ACCESS-ERROR-NAME}
+
+\label Syntax::
+
+\DefunWithValues cell-error-name {condition} {name}
+
+\label Arguments and Values::
+
+\param{condition}---a \term{condition} \oftype{cell-error}.
+
+\param{name}---an \term{object}.
+
+\label Description::
+
+Returns the \term{name} of the offending cell involved in the \term{situation}
+represented by \param{condition}.
+
+The nature of the result depends on the specific \term{type} of \param{condition}.
+For example,
+    if the \param{condition} is \oftype{unbound-variable}, the result is
+     the \term{name} of the \term{unbound variable} which was being \term{accessed},
+    if the \param{condition} is \oftype{undefined-function}, this is
+     the \term{name} of the \term{undefined function} which was being \term{accessed},
+and if the \param{condition} is \oftype{unbound-slot}, this is
+     the \term{name} of the \term{slot} which was being \term{accessed}.
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\typeref{cell-error},
+\typeref{unbound-slot},
+\typeref{unbound-variable},
+\typeref{undefined-function},
+{\secref\ConditionSystemConcepts}
+
+\label Notes:\None.
+
+%Barmar: This should be ``consequences are unspecified.''
+%Shouldn't be needed anyway--we don't provide an operator.
+%It is an error to use \macref{setf} with \funref{cell-error-name}.
+
+\endissue{ACCESS-ERROR-NAME}
+
+\endcom
+
+\begincom{parse-error}\ftype{Condition Type}
+
+\issue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\issue{READER-ERROR:NEW-TYPE}
+
+\label Class Precedence List::
+
+\typeref{parse-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{parse-error} consists of 
+error conditions that are related to parsing.
+
+\label See Also::
+
+\funref{parse-namestring},
+\funref{reader-error}
+
+\endissue{READER-ERROR:NEW-TYPE}
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\endissue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+
+\endcom%{parse-error}\ftype{Condition Type}
+
+\begincom{storage-condition}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{storage-condition},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{storage-condition} consists of serious conditions that 
+relate to problems with memory management that are potentially due to
+\term{implementation-dependent} limits rather than semantic errors
+in \term{conforming programs}, and that typically warrant entry to the 
+debugger if not handled.  Depending on the details of the \term{implementation}, 
+these might include such problems as 
+  stack overflow,
+  memory region overflow, 
+and
+  storage exhausted.
+
+\label Notes::
+
+While some \clisp\ operations might signal \term{storage-condition}
+because they are defined to create \term{objects},
+it is unspecified whether operations that are not defined to create
+\term{objects} create them anyway 
+and so might also signal \typeref{storage-condition}.
+Likewise, the evaluator itself might create \term{objects}
+and so might signal \typeref{storage-condition}.
+(The natural assumption might be that such 
+\term{object} creation is naturally inefficient, 
+but even that is \term{implementation-dependent}.)
+In general, the entire question of how storage allocation is done is
+\term{implementation-dependent}, 
+and so any operation might signal \typeref{storage-condition} at any time.
+Because such a \term{condition} is indicative of a limitation 
+   of the \term{implementation} 
+or of the \term{image}
+rather than an error in a \term{program},
+\term{objects} \oftype{storage-condition} are not \oftype{error}.
+
+\endcom%{storage-condition}\ftype{Condition Type}
+
+%-------------------- Signaling --------------------
+
+%%% ========== ASSERT
+\begincom{assert}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValuesNewline assert 
+		  	 {test-form \brac{\paren{\starparam{place}}
+                                          \brac{datum-form
+                                                \starparam{argument-form}}}}
+		         {\nil}
+
+\label Arguments and Values:: 
+
+\param{test-form}---a \term{form}; always evaluated.
+
+\param{place}---a \term{place}; evaluated if an error is signaled.
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\param{datum-form}---a \term{form} that evaluates to a \param{datum}.
+  Evaluated each time an error is to be signaled, 
+  or not at all if no error is to be signaled.
+
+\param{argument-form}---a \term{form} that evaluates to an \param{argument}.
+  Evaluated each time an error is to be signaled, 
+  or not at all if no error is to be signaled.
+
+\issue{ASSERT-ERROR-TYPE:ERROR}
+\param{datum}, \param{arguments}---\term{designators} for a \term{condition} 
+ of default type \typeref{error}.  (These \term{designators} are the
+ result of evaluating \param{datum-form} and each of the \param{argument-forms}.)
+\endissue{ASSERT-ERROR-TYPE:ERROR}
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+
+\label Description::
+
+\funref{assert} assures that \param{test-form} evaluates to \term{true}.
+If \param{test-form} evaluates to \term{false}, \macref{assert} signals a
+\term{correctable} \term{error} (denoted by \param{datum} and \param{arguments}).
+Continuing from this error using \therestart{continue} makes it possible
+for the user to alter the values of the \param{places} before
+\macref{assert} evaluates \param{test-form} again.
+If the value of \param{test-form} is \term{non-nil},
+\funref{assert} returns \nil.
+
+The \param{places} are \term{generalized references} to data
+upon which \param{test-form} depends, 
+whose values can be changed by the user in attempting to correct the error.
+\term{Subforms} of each \param{place} are only evaluated if an error is signaled, 
+and might be re-evaluated if the error is re-signaled (after continuing without
+actually fixing the problem).
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+The order of evaluation of the \param{places} is not specified;
+\seesection\GenRefSubFormEval.\idxtext{order of evaluation}\idxtext{evaluation order}
+\endissue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+\issue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW}
+If a \param{place} \term{form} is supplied that produces more values than there
+are store variables, the extra values are ignored. If the supplied 
+\term{form} produces fewer values than there are store variables, 
+the missing values are set to \nil.
+\endissue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW}
+                                                        
+\label Examples::
+\code
+ (setq x (make-array '(3 5) :initial-element 3))
+\EV #2A((3 3 3 3 3) (3 3 3 3 3) (3 3 3 3 3))
+ (setq y (make-array '(3 5) :initial-element 7))
+\EV #2A((7 7 7 7 7) (7 7 7 7 7) (7 7 7 7 7))
+ (defun matrix-multiply (a b)
+   (let ((*print-array* nil))
+     (assert (and (= (array-rank a) (array-rank b) 2)
+                  (= (array-dimension a 1) (array-dimension b 0)))
+             (a b)
+             "Cannot multiply ~S by ~S." a b)
+            (really-matrix-multiply a b))) \EV MATRIX-MULTIPLY
+ (matrix-multiply x y)
+\OUT Correctable error in MATRIX-MULTIPLY: 
+\OUT Cannot multiply #<ARRAY ...> by #<ARRAY ...>.
+\OUT Restart options:
+\OUT  1: You will be prompted for one or more new values.
+\OUT  2: Top level.
+\OUT Debug> \IN{:continue 1}
+\OUT Value for A: \IN{x}
+\OUT Value for B: \IN{(make-array '(5 3) :initial-element 6)}
+\EV #2A((54 54 54 54 54)
+       (54 54 54 54 54)
+       (54 54 54 54 54)
+       (54 54 54 54 54)
+       (54 54 54 54 54))
+\endcode
+
+\code
+ (defun double-safely (x) (assert (numberp x) (x)) (+ x x))
+ (double-safely 4) 
+\EV 8
+ 
+ (double-safely t)
+\OUT Correctable error in DOUBLE-SAFELY: The value of (NUMBERP X) must be non-NIL.
+\OUT Restart options:
+\OUT  1: You will be prompted for one or more new values.
+\OUT  2: Top level.
+\OUT Debug> \IN{:continue 1}
+\OUT Value for X: \IN{7}
+\EV 14
+\endcode
+
+\label Affected By::
+
+\varref{*break-on-signals*}
+% Barrett thinks that \varref{*debug-io*} and others don't belong here because
+% debugger might not be reached, and anyway it is a full turing machine and might
+% depend on virtually anything.
+
+The set of active \term{condition handlers}.
+
+\label Exceptional Situations:\None.
+
+%% Barrett says, and I agree, that this isn't an exceptional situation.
+%% Anyway, it's said above. -kmp 2-Sep-91
+% If the value of \param{test-form} is \nil,
+% \macref{assert} signals a user-specified \term{condition},
+% which defaults to \typeref{simple-error}.
+
+\label See Also::
+
+\funref{check-type}, \funref{error}, {\secref\GeneralizedReference}
+
+\label Notes::
+
+The debugger need not include the \param{test-form} in the error message,
+and the \param{places} should not be included in the message, but they
+should be made available for the user's perusal.  If the user gives the
+``continue'' command, the values of any of the references can be altered.
+The details of this depend on the implementation's style of user interface.
+\endcom
+
+%%% ========== ERROR
+\begincom{error}\ftype{Function}
+
+\label Syntax::
+
+\DefunNoReturn error {datum {\rest} arguments}
+
+\label Arguments and Values:: 
+
+\param{datum}, \param{arguments}---\term{designators} for a \term{condition} 
+ of default type \typeref{simple-error}.
+
+\label Description::
+
+\funref{error} effectively invokes \funref{signal} on the denoted \term{condition}.
+
+If the \term{condition} is not handled, \f{(invoke-debugger \i{condition})} is done.  
+As a consequence of calling \funref{invoke-debugger}, \funref{error} 
+cannot directly return; the only exit from \funref{error}
+can come by non-local transfer of control in a handler or by use of
+an interactive debugging command.
+
+\label Examples::
+
+\code
+ (defun factorial (x)
+   (cond ((or (not (typep x 'integer)) (minusp x))
+          (error "~S is not a valid argument to FACTORIAL." x))
+         ((zerop x) 1)
+         (t (* x (factorial (- x 1))))))
+\EV FACTORIAL
+(factorial 20)
+\EV 2432902008176640000
+(factorial -1)
+\OUT Error: -1 is not a valid argument to FACTORIAL.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Return to Lisp Toplevel.
+\OUT Debug> 
+\endcode
+
+\code
+ (setq a 'fred)
+\EV FRED
+ (if (numberp a) (1+ a) (error "~S is not a number." A))
+\OUT Error: FRED is not a number.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Return to Lisp Toplevel.
+\OUT Debug> \IN{:Continue 1}
+\OUT Return to Lisp Toplevel.
+ 
+ (define-condition not-a-number (error) 
+                   ((argument :reader not-a-number-argument :initarg :argument))
+   (:report (lambda (condition stream)
+              (format stream "~S is not a number."
+                      (not-a-number-argument condition)))))
+\EV NOT-A-NUMBER
+ 
+ (if (numberp a) (1+ a) (error 'not-a-number :argument a))
+\OUT Error: FRED is not a number.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Return to Lisp Toplevel.
+\OUT Debug> \IN{:Continue 1}
+\OUT Return to Lisp Toplevel.
+\endcode
+
+\label Side Effects::
+
+\term{Handlers} for the specified condition, if any, are invoked 
+and might have side effects.
+Program execution might stop, and the debugger might be entered.
+
+\label Affected By::
+
+Existing handler bindings.
+
+\varref{*break-on-signals*}
+%\varref{*debug-io*}.
+
+\label Exceptional Situations:\None.
+
+%% Not exceptional.
+% The reason for using \funref{error} is to signal a \term{condition},
+% the exact nature of which is specified by the arguments;  however,
+% that situation is not considered exceptional.
+
+\Checktypes{\param{datum} and \param{arguments}}{\term{designators} for a \term{condition}}
+
+\label See Also::
+
+\funref{cerror}, \funref{signal}, \funref{format}, 
+\macref{ignore-errors}, \varref{*break-on-signals*}, 
+\macref{handler-bind}, {\secref\ConditionSystemConcepts}
+
+\label Notes::
+
+Some implementations may provide debugger
+commands for interactively returning from individual stack frames.
+However, it should be possible for the programmer to feel confident
+about writing code like:
+
+\code
+ (defun wargames:no-win-scenario ()
+   (if (error "pushing the button would be stupid."))
+   (push-the-button))
+\endcode
+In this scenario, there should be no chance that
+\funref{error} will return
+and the button will get pushed.
+ 
+While the meaning of this program is clear and it might be proven `safe'
+by a formal theorem prover, such a proof is no guarantee that the
+program is safe to execute.  Compilers have been known to have bugs,
+computers to have signal glitches, and human beings to manually
+intervene in ways that are not always possible to predict.  Those kinds
+of errors, while beyond the scope of the condition system to formally
+model, are not beyond the scope of things that should seriously be
+considered when writing code that could have the kinds of sweeping
+effects hinted at by this example.
+
+\endcom
+
+%%% ========== CERROR
+\begincom{cerror}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues cerror {continue-format-control datum {\rest} arguments} {\nil}
+
+\label Arguments and Values:: 
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\param{Continue-format-control}---a \term{format control}.
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+\reviewer{Barmar: What is continue-format-control used for??}
+
+\param{datum}, \param{arguments}---\term{designators} for a \term{condition} 
+ of default type \typeref{simple-error}.
+
+\label Description::
+
+\funref{cerror} effectively invokes \funref{error} on the
+\term{condition} named by \param{datum}.  As with any function that
+implicitly calls \funref{error}, if the \term{condition} is not handled,
+\f{(invoke-debugger \i{condition})} is executed.  While signaling is going on,
+and while in the debugger if it is reached, it is possible to continue
+code execution (\ie to return from \funref{cerror}) using \therestart{continue}.
+% If the debugger is interactively instructed to continue,
+% the call to \funref{cerror} returns \nil.
+
+If \param{datum} is a \term{condition}, \param{arguments} can be supplied,
+but are used only in conjunction with the \param{continue-format-control}.
+
+\label Examples::
+
+%!!! I don't like the debugger typeout format here. -kmp 3-Sep-91
+\code
+ (defun real-sqrt (n)
+   (when (minusp n)
+     (setq n (- n))
+     (cerror "Return sqrt(~D) instead." "Tried to take sqrt(-~D)." n))
+   (sqrt n))
+
+ (real-sqrt 4)
+\EV 2.0
+
+ (real-sqrt -9)
+\OUT Correctable error in REAL-SQRT: Tried to take sqrt(-9).
+\OUT Restart options:
+\OUT  1: Return sqrt(9) instead.
+\OUT  2: Top level.
+\OUT Debug> \IN{:continue 1}
+\EV 3.0
+ 
+ (define-condition not-a-number (error)
+   ((argument :reader not-a-number-argument :initarg :argument))
+   (:report (lambda (condition stream)
+              (format stream "~S is not a number." 
+                      (not-a-number-argument condition)))))
+ 
+ (defun assure-number (n)
+   (loop (when (numberp n) (return n))
+         (cerror "Enter a number."
+                 'not-a-number :argument n)
+         (format t "~&Type a number: ")
+         (setq n (read))
+         (fresh-line)))
+
+ (assure-number 'a)
+\OUT Correctable error in ASSURE-NUMBER: A is not a number.
+\OUT Restart options:
+\OUT  1: Enter a number.
+\OUT  2: Top level.
+\OUT Debug> \IN{:continue 1}
+\OUT Type a number: \IN{1/2}
+\EV 1/2
+
+ (defun assure-large-number (n)
+   (loop (when (and (numberp n) (> n 73)) (return n))
+         (cerror "Enter a number~:[~; a bit larger than ~D~]."
+                 "~*~A is not a large number." 
+                 (numberp n) n)
+         (format t "~&Type a large number: ")
+         (setq n (read))
+         (fresh-line)))
+ 
+ (assure-large-number 10000)
+\EV 10000
+
+ (assure-large-number 'a)
+\OUT Correctable error in ASSURE-LARGE-NUMBER: A is not a large number.
+\OUT Restart options:
+\OUT  1: Enter a number.
+\OUT  2: Top level.
+\OUT Debug> \IN{:continue 1}
+\OUT Type a large number: \IN{88}
+\EV 88
+
+ (assure-large-number 37)
+\OUT Correctable error in ASSURE-LARGE-NUMBER: 37 is not a large number.
+\OUT Restart options:
+\OUT  1: Enter a number a bit larger than 37.
+\OUT  2: Top level.
+\OUT Debug> \IN{:continue 1}
+\OUT Type a large number: \IN{259}
+\EV 259
+ 
+ (define-condition not-a-large-number (error)
+   ((argument :reader not-a-large-number-argument :initarg :argument))
+   (:report (lambda (condition stream)
+              (format stream "~S is not a large number." 
+                      (not-a-large-number-argument condition)))))
+ 
+ (defun assure-large-number (n)
+   (loop (when (and (numberp n) (> n 73)) (return n))
+         (cerror "Enter a number~3*~:[~; a bit larger than ~*~D~]."
+                 'not-a-large-number
+                 :argument n 
+                 :ignore (numberp n)
+                 :ignore n
+                 :allow-other-keys t)
+         (format t "~&Type a large number: ")
+         (setq n (read))
+         (fresh-line)))
+ 
+
+ (assure-large-number 'a)
+\OUT Correctable error in ASSURE-LARGE-NUMBER: A is not a large number.
+\OUT Restart options:
+\OUT  1: Enter a number.
+\OUT  2: Top level.
+\OUT Debug> \IN{:continue 1}
+\OUT Type a large number: \IN{88}
+\EV 88
+ 
+ (assure-large-number 37)
+\OUT Correctable error in ASSURE-LARGE-NUMBER: A is not a large number.
+\OUT Restart options:
+\OUT  1: Enter a number a bit larger than 37.
+\OUT  2: Top level.
+\OUT Debug> \IN{:continue 1}
+\OUT Type a large number: \IN{259}
+\EV 259
+\endcode
+
+\label Affected By::
+
+\varref{*break-on-signals*}.
+%\varref{*debug-io*}.
+
+Existing handler bindings.
+
+\label Exceptional Situations:\None.
+
+% The reason for using \funref{cerror} is to signal a \term{condition},
+% the exact nature of which is specified by the arguments.
+
+%!!! Was this saying anything useful??? -kmp 3-Sep-91
+% An error \oftype{type-error} is signaled if the \term{condition} 
+% named by \param{datum} is not handled.
+
+\label See Also::
+
+\funref{error}, \funref{format}, \macref{handler-bind},
+\varref{*break-on-signals*}, \typeref{simple-type-error}
+
+\label Notes::
+
+If \param{datum} is a \term{condition} \term{type} rather than a 
+\term{string}, the \funref{format} directive {\tt ~*} may be especially
+useful in the \param{continue-format-control} in order to ignore the
+\term{keywords} in the \term{initialization argument list}.  For example:
+ 
+\code
+(cerror "enter a new value to replace ~*~s" 
+        'not-a-number
+        :argument a)
+\endcode
+ 
+\endcom
+
+%%% ========== CHECK-TYPE
+\begincom{check-type}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValues check-type {place typespec {\brac{\param{string}}}} {\nil}
+
+\label Arguments and Values:: 
+
+\param{place}---a \term{place}.
+
+\param{typespec}---a \term{type specifier}.
+
+\param{string}---a \term{string}; \eval. %!!! Really??
+
+\label Description::
+
+\funref{check-type} signals a \term{correctable} \term{error} 
+\oftype{type-error} if the contents of \param{place} are not 
+of the type \param{typespec}.
+
+\macref{check-type} can return only if \therestart{store-value} is invoked,
+either explicitly from a handler 
+    or implicitly as one of the options offered by the debugger.
+If \therestart{store-value} is invoked,
+\macref{check-type} stores the new value 
+that is the argument to the \term{restart} invocation 
+(or that is prompted for interactively by the debugger)
+in \param{place} and starts over, 
+checking the type of the new value
+and signaling another error if it is still not of the desired \term{type}.
+
+% This used to say:
+%   The \term{subforms} of \param{place} are evaluated once in the 
+%   order specified as follows: ...
+% Barmar said this is wrong. The first time the PLACE is evaluated, it is
+% evaluated using normal evaluation.  It is only evaluated as a SETF place if
+% the type check fails and \therestart{store-value} is used.
+% Barrett concurs.  Rewritten...
+
+The first time \param{place} is \term{evaluated}, 
+it is \term{evaluated} by normal evaluation rules.
+It is later \term{evaluated} as a \term{place} 
+if the type check fails and \therestart{store-value} is used;
+\seesection\GenRefSubFormEval.
+
+%% I think this is now unnecessary due to the previous paragraph. -kmp 21-Nov-91
+% The \param{place} and its \term{subforms} might be evaluated again if
+% the type check fails.
+
+\term{string} should be an English description of the type, 
+starting with an indefinite article (``a'' or ``an'').
+If \term{string} is not supplied,
+it is computed automatically from \param{typespec}.
+The automatically generated message mentions
+      \param{place},
+      its contents,
+  and the desired type.
+An implementation may choose to generate 
+a somewhat differently worded error message 
+if it recognizes that \param{place} is of a particular form, 
+such as one of the arguments to the function that called \macref{check-type}.
+\term{string} is allowed because some applications of \macref{check-type} 
+may require a more specific description of what is wanted
+than can be generated automatically from \param{typespec}.
+
+\label Examples::
+
+\code
+ (setq aardvarks '(sam harry fred))
+\EV (SAM HARRY FRED)
+ (check-type aardvarks (array * (3)))
+\OUT Error: The value of AARDVARKS, (SAM HARRY FRED),
+\OUT        is not a 3-long array.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Specify a value to use instead.
+\OUT  2: Return to Lisp Toplevel.
+\OUT Debug> \IN{:CONTINUE 1}
+\OUT Use Value: \IN{#(SAM FRED HARRY)}
+\EV NIL
+ aardvarks
+\EV #<ARRAY-T-3 13571>
+ (map 'list #'identity aardvarks)
+\EV (SAM FRED HARRY)
+ (setq aardvark-count 'foo)
+\EV FOO
+ (check-type aardvark-count (integer 0 *) "A positive integer")
+\OUT Error: The value of AARDVARK-COUNT, FOO, is not a positive integer.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Specify a value to use instead.
+\OUT  2: Top level.
+\OUT Debug> \IN{:CONTINUE 2}
+\endcode
+
+\code
+ (defmacro define-adder (name amount)
+   (check-type name (and symbol (not null)) "a name for an adder function")
+   (check-type amount integer)
+   `(defun ,name (x) (+ x ,amount)))
+  
+ (macroexpand '(define-adder add3 3))
+\EV (defun add3 (x) (+ x 3))
+ 
+ (macroexpand '(define-adder 7 7))
+\OUT Error: The value of NAME, 7, is not a name for an adder function.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Specify a value to use instead.
+\OUT  2: Top level.
+\OUT Debug> \IN{:Continue 1}
+\OUT Specify a value to use instead.
+\OUT Type a form to be evaluated and used instead: \IN{'ADD7}
+\EV (defun add7 (x) (+ x 7))
+ 
+ (macroexpand '(define-adder add5 something))
+\OUT Error: The value of AMOUNT, SOMETHING, is not an integer.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Specify a value to use instead.
+\OUT  2: Top level.
+\OUT Debug> \IN{:Continue 1}
+\OUT Type a form to be evaluated and used instead: \IN{5}
+\EV (defun add5 (x) (+ x 5))
+ 
+\endcode
+ 
+Control is transferred to a handler.
+
+\label Side Effects::
+
+The debugger might be entered.
+
+\label Affected By::
+
+\varref{*break-on-signals*}
+%\varref{*debug-io*}
+
+The implementation.
+
+\label Exceptional Situations:\None.
+
+%% Barrett: Not exceptional.
+% An error \oftype{type-error} is signaled 
+% if the contents of \param{place} are not 
+% of the \term{type} specified by \param{typespec}.
+
+\label See Also::
+
+{\secref\ConditionSystemConcepts}
+
+\label Notes::
+
+\code
+ (check-type \param{place} \param{typespec})
+ \EQ (assert (typep \param{place} '\param{typespec}) (\param{place})
+            'type-error :datum \param{place} :expected-type '\param{typespec})
+\endcode
+
+\endcom
+
+\begincom{simple-error}\ftype{Condition Type}
+
+\label Class Precedence List::
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{simple-error},
+\typeref{simple-condition},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\label Description::
+
+\Thetype{simple-error} consists of \term{conditions} that
+are signaled by \funref{error} or \funref{cerror} when a
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}%
+\term{format control}
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}%
+is supplied as the function's first argument.
+%The default condition type for \funref{error} and 
+%\funref{cerror} is \typeref{simple-error}.
+
+\endcom%{simple-error}\ftype{Condition Type}
+
+
+%%% ========== INVALID-METHOD-ERROR
+\begincom{invalid-method-error}\ftype{Function}
+ 
+\label Syntax::
+ 
+\DefunWithValues invalid-method-error 
+	         {method format-control {\rest} args}
+		 {\term{implementation-dependent}}
+
+\label Arguments and Values::
+ 
+\param{method}---a \term{method}.
+ 
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\param{format-control}---a \term{format control}.
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+ 
+\param{args}---\term{format arguments} for the \param{format-control}.
+ 
+\label Description::
+ 
+\Thefunction{invalid-method-error} is used to signal an error \oftype{error}
+when there is an applicable \term{method} whose \term{qualifiers} are not valid for
+the method combination type.  The error message is constructed by
+using the \param{format-control} suitable for \funref{format}
+and any \param{args} to it.  Because an
+implementation may need to add additional contextual information to
+the error message, \funref{invalid-method-error} should be called only
+within the dynamic extent of a method combination function.
+ 
+\Thefunction{invalid-method-error} is called automatically when a
+\term{method} fails to satisfy every \term{qualifier} pattern and predicate in a
+\macref{define-method-combination} \term{form}.  A method combination function
+that imposes additional restrictions should call 
+\funref{invalid-method-error} explicitly if it encounters a \term{method} 
+it cannot accept.
+ 
+%!!! What does this mean? -kmp 13-Feb-91
+Whether \funref{invalid-method-error} returns to its caller or exits via
+\specref{throw} is \term{implementation-dependent}.
+
+\label Examples:\None.
+ 
+\label Side Effects::
+
+The debugger might be entered.
+
+\label Affected By::
+
+\varref{*break-on-signals*}
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also:: 
+ 
+\macref{define-method-combination}
+                           
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== METHOD-COMBINATION-ERROR
+\begincom{method-combination-error}\ftype{Function}
+ 
+\label Syntax::
+ 
+\DefunWithValues {method-combination-error} 
+		 {format-control {\rest} args}
+	         {\term{implementation-dependent}}
+
+\label Arguments and Values:: 
+ 
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\param{format-control}---a \term{format control}.
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+ 
+\param{args}---\term{format arguments} for \param{format-control}.
+ 
+\label Description::
+ 
+\Thefunction{method-combination-error} is used to signal an error
+in method combination.  
+ 
+The error message is constructed by using a \param{format-control} suitable
+for \funref{format} and any \param{args} to it.  Because an implementation may
+need to add additional contextual information to the error message,
+\funref{method-combination-error} should be called only within the
+dynamic extent of a method combination function.
+ 
+%!!! What does this mean? -kmp 13-Feb-91
+Whether \funref{method-combination-error} returns to its caller or exits
+via \specref{throw} is \term{implementation-dependent}.
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Examples:\None.
+ 
+\label Side Effects::
+
+The debugger might be entered.
+
+\label Affected By::
+
+\varref{*break-on-signals*}
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also:: 
+ 
+\macref{define-method-combination}
+ 
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== SIGNAL
+\begincom{signal}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues signal {datum {\rest} arguments} {\nil}
+
+\label Arguments and Values::                                               
+
+\param{datum}, \param{arguments}---\term{designators} for a \term{condition} 
+ of default type \typeref{simple-condition}.
+
+\label Description::
+
+\term{Signals} the \term{condition} denoted by the given \param{datum} and \param{arguments}.
+If the \term{condition} is not handled, \funref{signal} returns \nil.
+
+\label Examples::
+
+\code
+ (defun handle-division-conditions (condition)
+   (format t "Considering condition for division condition handling~%")
+   (when (and (typep condition 'arithmetic-error)
+              (eq '/ (arithmetic-error-operation condition)))
+     (invoke-debugger condition)))
+HANDLE-DIVISION-CONDITIONS
+ (defun handle-other-arithmetic-errors (condition)
+   (format t "Considering condition for arithmetic condition handling~%")
+   (when (typep condition 'arithmetic-error)
+     (abort)))
+HANDLE-OTHER-ARITHMETIC-ERRORS
+ (define-condition a-condition-with-no-handler (condition) ())
+A-CONDITION-WITH-NO-HANDLER
+ (signal 'a-condition-with-no-handler)
+NIL
+ (handler-bind ((condition #'handle-division-conditions)
+                  (condition #'handle-other-arithmetic-errors))
+   (signal 'a-condition-with-no-handler))
+Considering condition for division condition handling
+Considering condition for arithmetic condition handling
+NIL
+ (handler-bind ((arithmetic-error #'handle-division-conditions)
+                  (arithmetic-error #'handle-other-arithmetic-errors))
+   (signal 'arithmetic-error :operation '* :operands '(1.2 b)))
+Considering condition for division condition handling
+Considering condition for arithmetic condition handling
+Back to Lisp Toplevel
+\endcode
+
+\label Side Effects::
+
+The debugger might be entered due to \varref{*break-on-signals*}.
+
+Handlers for the condition being signaled might transfer control.
+
+\label Affected By::
+
+Existing handler bindings.
+
+\varref{*break-on-signals*}
+%\varref{*debug-io*}
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\varref{*break-on-signals*},
+\funref{error},
+\typeref{simple-condition},
+{\secref\CondSignalHandle}
+
+\label Notes::
+
+If \f{(typep \param{datum} *break-on-signals*)} \term{yields} \term{true},
+the debugger is entered prior to beginning the signaling process.  
+\Therestart{continue} can be used to continue with the signaling process.
+This is also true for all other \term{functions} and \term{macros} that
+should, might, or must \term{signal} \term{conditions}.
+
+\endcom
+
+%----------------------------------------
+
+\begincom{simple-condition}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{simple-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{simple-condition} represents \term{conditions} that are
+signaled by \funref{signal} whenever a \param{format-control} is
+supplied as the function's first argument.
+%The default \term{condition} \term{type} for \funref{signal} 
+%and \funref{warn} is \typeref{simple-condition}.
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+The \term{format control} and \term{format arguments} are initialized with 
+\theinitkeyargs{format-control} 
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+and \kwd{format-arguments} to \funref{make-condition}, and are
+\term{accessed} by the \term{functions}
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\funref{simple-condition-format-control}
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+and \funref{simple-condition-format-arguments}.
+If format arguments are not supplied to \funref{make-condition},
+\nil\ is used as a default.
+
+\label See Also::
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\funref{simple-condition-format-control},
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\funref{simple-condition-format-arguments}
+
+\endcom%{simple-condition}\ftype{Condition Type}
+
+%%% ========== SIMPLE-CONDITION-FORMAT-ARGUMENTS
+\begincom{simple-condition-format-control, simple-condition-format-arguments}\ftype{Function}
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+\label Syntax::
+
+\DefunWithValues simple-condition-format-control {condition} {format-control}
+\DefunWithValues simple-condition-format-arguments {condition} {format-arguments}
+
+\label Arguments and Values:: 
+
+\param{condition}---a \term{condition} of \term{type} \typeref{simple-condition}.
+%% Barmar: These are all subtypes of simple-condition...
+% 				    or \typeref{simple-warning}
+% 				    or \typeref{simple-error}
+% 				    or \typeref{simple-type-error}.
+
+\param{format-control}---a \term{format control}.
+
+\param{format-arguments}---a \term{list}.
+
+\label Description::
+
+\funref{simple-condition-format-control} returns the \term{format control} needed to 
+process the \param{condition}'s \term{format arguments}.
+
+\funref{simple-condition-format-arguments} returns a \term{list} of \term{format arguments} 
+needed to process the \param{condition}'s \term{format control}.
+
+\label Examples::
+
+\code
+ (setq foo (make-condition 'simple-condition
+                          :format-control "Hi ~S"
+                          :format-arguments '(ho)))
+\EV #<SIMPLE-CONDITION 26223553>
+ (apply #'format nil (simple-condition-format-control foo)
+                     (simple-condition-format-arguments foo))
+\EV "Hi HO"
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{simple-condition},
+{\secref\ConditionSystemConcepts}
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.
+
+%% Shouldn't be needed. -kmp 1-Sep-91
+%It is an error to use \macref{setf} with \funref{simple-condition-format-arguments}.
+%It is an error to use \macref{setf} with \funref{simple-condition-format-control}.
+
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+\endcom
+
+%%% ========== WARN
+\begincom{warn}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues warn {datum {\rest} arguments} {\nil}
+
+\label Arguments and Values:: 
+
+\param{datum}, \param{arguments}---\term{designators} for a \term{condition} 
+ of default type \typeref{simple-warning}.
+
+\label Description::
+
+\term{Signals} a \term{condition} \oftype{warning}.
+If the \term{condition} is not \term{handled},
+reports the \term{condition} to \term{error output}.
+
+The precise mechanism for warning is as follows:
+
+\issue{BREAK-ON-WARNINGS-OBSOLETE:REMOVE}
+%Discussion of *BREAK-ON-WARNINGS* removed.
+\endissue{BREAK-ON-WARNINGS-OBSOLETE:REMOVE}
+
+%!!! Barret wonders whether stylistically it wouldn't be better to have just
+%    normal text instead of this indented stuff.
+\beginlist
+
+\itemitem{{\bf The warning condition is signaled}}
+
+While the \typeref{warning} \term{condition} is being signaled,
+\therestart{muffle-warning} is established for use by a \term{handler}.
+If invoked, this \term{restart} bypasses further action by \funref{warn},
+which in turn causes \funref{warn} to immediately return \nil.
+
+\itemitem{{\bf If no handler for the warning condition is found}}
+
+If no handlers for the warning condition are found,
+or if all such handlers decline,
+then the \term{condition} is reported to \term{error output}
+by \funref{warn} in an \term{implementation-dependent} format.
+%% Barrett points out that the details of this are already said elsewhere in
+%% the concept info for conditions.
+% (with possible implementation-specific extra
+% output such as motion to a fresh line before and/or after the display
+% of the warning, or supplying some introductory text that might mention
+% the name of the function which called \funref{warn} 
+% and/or the fact that this is a warning).
+
+\itemitem{{\bf \nil\ is returned}}
+
+The value returned by \funref{warn} if it returns is \nil.
+\endlist
+
+\label Examples::
+
+\code
+  (defun foo (x)
+    (let ((result (* x 2)))
+      (if (not (typep result 'fixnum))
+          (warn "You're using very big numbers."))
+      result))
+\EV FOO
+ 
+  (foo 3)
+\EV 6
+ 
+  (foo most-positive-fixnum)
+\OUT Warning: You're using very big numbers.
+\EV 4294967294
+ 
+  (setq *break-on-signals* t)
+\EV T
+ 
+  (foo most-positive-fixnum)
+\OUT Break: Caveat emptor.
+\OUT To continue, type :CONTINUE followed by an option number.
+\OUT  1: Return from Break.
+\OUT  2: Abort to Lisp Toplevel.
+\OUT Debug> :continue 1
+\OUT Warning: You're using very big numbers.
+\EV 4294967294
+\endcode
+ 
+\label Side Effects::
+
+A warning is issued.  The debugger might be entered.
+
+\label Affected By::
+
+Existing handler bindings.
+
+\varref{*break-on-signals*},
+\varref{*error-output*}.         
+
+\label Exceptional Situations::
+
+If \param{datum} is a \term{condition}
+and if the \term{condition} is not \oftype{warning},
+or \param{arguments} is \term{non-nil}, an error \oftype{type-error} is signaled.
+
+If \param{datum} is a condition type, 
+the result of {\tt (apply #'make-condition datum arguments)} 
+must be \oftype{warning} or an error \oftype{type-error} is signaled.
+
+\label See Also::
+
+\varref{*break-on-signals*},
+\funref{muffle-warning},
+\funref{signal}
+
+\label Notes:\None.
+
+\endcom
+
+\begincom{simple-warning}\ftype{Condition Type}
+
+\label Class Precedence List::
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{simple-warning},
+\typeref{simple-condition},
+\typeref{warning},
+\typeref{condition},
+\typeref{t}
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\label Description::
+
+\Thetype{simple-warning} represents \term{conditions} that 
+are signaled by \funref{warn} whenever a 
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\term{format control} 
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+is supplied as the function's first argument.
+
+\endcom%{simple-warning}\ftype{Condition Type}
+
+%-------------------- Debugger --------------------
+
+%%% ========== INVOKE-DEBUGGER
+\begincom{invoke-debugger}\ftype{Function}
+
+\label Syntax::
+
+\DefunNoReturn invoke-debugger {condition}
+
+\label Arguments and Values:: 
+
+\param{condition}---a \term{condition} \term{object}.
+
+\label Description::
+
+\funref{invoke-debugger} attempts to enter the debugger with \param{condition}.
+
+If \varref{*debugger-hook*} is not \nil, it should be a \term{function} 
+(or the name of a \term{function}) to be called prior to entry to 
+the standard debugger.  The \term{function} is called with
+\varref{*debugger-hook*} bound to \nil, and the \term{function} 
+must accept two arguments: the \param{condition} 
+and \thevalueof{*debugger-hook*} prior to binding it to \nil. 
+If the \term{function} returns normally,
+the standard debugger is entered.
+ 
+%!!! KMP: Maybe make glossary term of "standard debugger"?
+The standard debugger never directly returns.  Return can occur only by a
+non-local transfer of control, such as the use of a restart function.
+
+\label Examples::
+
+\code
+ (ignore-errors ;Normally, this would suppress debugger entry
+   (handler-bind ((error #'invoke-debugger)) ;But this forces debugger entry
+     (error "Foo.")))
+Debug: Foo.
+To continue, type :CONTINUE followed by an option number:
+ 1: Return to Lisp Toplevel.
+Debug>
+\endcode
+ 
+
+\label Side Effects::
+
+\varref{*debugger-hook*} is bound to \nil,
+program execution is discontinued,
+and the debugger is entered.
+
+\label Affected By::
+
+\varref{*debug-io*} and \varref{*debugger-hook*}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{error}, \funref{break}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== BREAK
+\begincom{break}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues break {{\opt} format-control {\rest} format-arguments} {\nil}
+
+\label Arguments and Values:: 
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\param{format-control}---a \term{format control}.
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+ \Default{\term{implementation-dependent}}
+
+\param{format-arguments}---\term{format arguments} for the \param{format-control}.
+
+\label Description::
+
+%% 24.0.0 29
+
+\funref{break} \term{formats} \param{format-control} and \param{format-arguments}
+and then goes directly into the debugger without allowing any possibility of
+interception by programmed error-handling facilities.
+
+If \therestart{continue} is used while in the debugger,
+\funref{break} immediately returns \nil\ without taking any unusual recovery action.
+
+\issue{DEBUGGER-HOOK-VS-BREAK:CLARIFY}
+\funref{break} binds \varref{*debugger-hook*} to \nil\ 
+before attempting to enter the debugger.
+\endissue{DEBUGGER-HOOK-VS-BREAK:CLARIFY}
+
+\label Examples::
+
+\code
+ (break "You got here with arguments: ~:S." '(FOO 37 A))
+\OUT BREAK: You got here with these arguments: FOO, 37, A.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Return from BREAK.
+\OUT  2: Top level.
+\OUT Debug> :CONTINUE 1
+\OUT Return from BREAK.
+\EV NIL
+ 
+\endcode
+ 
+\label Side Effects::
+
+The debugger is entered.
+
+\label Affected By::
+
+\varref{*debug-io*}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{error}, \funref{invoke-debugger}.
+
+\label Notes::
+
+%% 24.0.0 30
+\funref{break} is used as a way of inserting temporary debugging
+``breakpoints'' in a program, not as a way of signaling errors.  
+For this reason, \funref{break} does not take the \param{continue-format-control}
+\term{argument} that \funref{cerror} takes.
+This and the lack of any possibility of interception by
+\term{condition} \term{handling} are the only program-visible 
+differences between \funref{break} and \funref{cerror}.
+
+The user interface aspects of \funref{break} and \funref{cerror} are
+permitted to vary more widely, in order to accomodate the interface
+needs of the \term{implementation}. For example, it is permissible for a
+\term{Lisp read-eval-print loop} to be entered by \funref{break} rather
+than the conventional debugger.
+
+\funref{break} could be defined by:
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\code
+ (defun break (&optional (format-control "Break") &rest format-arguments)
+   (with-simple-restart (continue "Return from BREAK.")
+     (let ((*debugger-hook* nil))
+       (invoke-debugger
+           (make-condition 'simple-condition
+                           :format-control format-control
+                           :format-arguments format-arguments))))
+   nil)
+\endcode
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+\endcom
+
+%%% ========== *DEBUGGER-HOOK*
+\begincom{*debugger-hook*}\ftype{Variable}
+
+\label Value Type::
+
+%!!! Barrett: What if this is invoked directly instead of from invoke-debugger?
+a \term{designator} for a \term{function} of two \term{arguments}
+  (a \term{condition} and \thevalueof{*debugger-hook*} at the time 
+   the debugger was entered),
+or \nil.
+
+\label Initial Value::
+
+\nil.
+
+\label Description::
+
+When \thevalueof{*debugger-hook*} is \term{non-nil}, it is called prior to
+normal entry into the debugger, either due to a call to \funref{invoke-debugger} 
+or due to automatic entry into the debugger from a call to \funref{error} 
+or \funref{cerror} with a condition that is not handled.  
+The \term{function} may either handle the \term{condition}
+(transfer control) or return normally (allowing the standard debugger to run).
+To minimize recursive errors while debugging,
+\varref{*debugger-hook*} is bound to \nil\ by \funref{invoke-debugger} 
+prior to calling the \term{function}.
+
+\label Examples::
+
+\code
+ (defun one-of (choices &optional (prompt "Choice"))
+   (let ((n (length choices)) (i))
+     (do ((c choices (cdr c)) (i 1 (+ i 1)))
+         ((null c))
+       (format t "~&[~D] ~A~%" i (car c)))
+     (do () ((typep i `(integer 1 ,n)))
+       (format t "~&~A: " prompt)
+       (setq i (read))
+       (fresh-line))
+     (nth (- i 1) choices)))
+
+ (defun my-debugger (condition me-or-my-encapsulation)
+   (format t "~&Fooey: ~A" condition)
+   (let ((restart (one-of (compute-restarts))))
+     (if (not restart) (error "My debugger got an error."))
+     (let ((*debugger-hook* me-or-my-encapsulation))
+       (invoke-restart-interactively restart))))
+ 
+ (let ((*debugger-hook* #'my-debugger))
+   (+ 3 'a))
+\OUT Fooey: The argument to +, A, is not a number.
+\OUT  [1] Supply a replacement for A.
+\OUT  [2] Return to Cloe Toplevel.
+\OUT Choice: 1
+\OUT  Form to evaluate and use: (+ 5 'b)
+\OUT  Fooey: The argument to +, B, is not a number.
+\OUT  [1] Supply a replacement for B.
+\OUT  [2] Supply a replacement for A.
+\OUT  [3] Return to Cloe Toplevel.
+\OUT Choice: 1
+\OUT  Form to evaluate and use: 1
+\EV 9
+\endcode
+
+\label Affected By::
+
+\funref{invoke-debugger}
+
+\label See Also:\None.
+
+\label Notes::
+
+When evaluating code typed in by the user interactively, it is sometimes
+useful to have the hook function bind \varref{*debugger-hook*} to the
+\term{function} that was its second argument so that recursive errors
+can be handled using the same interactive facility.
+                                            
+\endcom
+
+%%% ========== *BREAK-ON-SIGNALS*
+\begincom{*break-on-signals*}\ftype{Variable}
+ 
+\label Value Type::
+
+a \term{type specifier}.
+
+\label Initial Value::
+
+\nil.
+
+\label Description::
+
+%!!! Does this get involved in *debugger-hook*?  What kind of break is entered?
+When \f{(typep \i{condition} *break-on-signals*)} returns \term{true},
+calls to \funref{signal}, and to other \term{operators} such as \funref{error}
+that implicitly call \funref{signal}, enter the debugger prior to
+\term{signaling} the \term{condition}.
+
+\Therestart{continue} can be used to continue with the normal
+\term{signaling} process when a break occurs process due to
+\varref{*break-on-signals*}.
+
+\label Examples::
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\code
+ *break-on-signals* \EV NIL
+ (ignore-errors (error 'simple-error :format-control "Fooey!"))
+\EV NIL, #<SIMPLE-ERROR 32207172>
+
+ (let ((*break-on-signals* 'error))
+   (ignore-errors (error 'simple-error :format-control "Fooey!")))
+\OUT Break: Fooey!
+\OUT BREAK entered because of *BREAK-ON-SIGNALS*.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Continue to signal.
+\OUT  2: Top level.
+\OUT Debug> \IN{:CONTINUE 1}
+\OUT Continue to signal.
+\EV NIL, #<SIMPLE-ERROR 32212257>
+
+ (let ((*break-on-signals* 'error))
+   (error 'simple-error :format-control "Fooey!"))
+\OUT Break: Fooey!
+\OUT BREAK entered because of *BREAK-ON-SIGNALS*.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Continue to signal.
+\OUT  2: Top level.
+\OUT Debug> \IN{:CONTINUE 1}
+\OUT Continue to signal.
+\OUT Error: Fooey!
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Top level.
+\OUT Debug> \IN{:CONTINUE 1}
+\OUT Top level.
+\endcode
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+\label Affected By:\None.
+
+\label See Also::
+
+\funref{break},
+\funref{signal}, \funref{warn}, \funref{error}, 
+\funref{typep}, 
+{\secref\ConditionSystemConcepts}
+
+\label Notes::
+
+\varref{*break-on-signals*} is intended primarily for use in debugging code that
+does signaling.   When setting \varref{*break-on-signals*}, the user is
+encouraged to choose the most restrictive specification that suffices.
+Setting \varref{*break-on-signals*} effectively violates the modular handling of 
+\term{condition} signaling.  In practice, the complete effect of setting
+\varref{*break-on-signals*} might be unpredictable in some cases since the user
+might not be aware of the variety or number of calls to \funref{signal} 
+that are used in code called only incidentally.
+
+\issue{BREAK-ON-WARNINGS-OBSOLETE:REMOVE}
+% Reference to *BREAK-ON-WARNINGS* removed.
+\endissue{BREAK-ON-WARNINGS-OBSOLETE:REMOVE}
+
+\varref{*break-on-signals*} enables an early entry to the debugger but such an
+entry does not preclude an additional entry to the debugger in the case of
+operations such as \funref{error} and \funref{cerror}.
+
+\endcom
+
+%-------------------- Handling --------------------
+
+%%% ========== HANDLER-BIND
+\begincom{handler-bind}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValues handler-bind
+		  {\paren{\stardown{binding}} 
+		   \starparam{form}}
+		  {\starparam{result}}
+
+\auxbnf{binding}{\paren{type handler}}
+
+\label Arguments and Values:: 
+
+\param{type}---a \term{type specifier}.
+
+\param{handler}---a \term{form}; evaluated to produce a \param{handler-function}.
+                     
+\param{handler-function}---a \term{designator} for a \term{function} of one \term{argument}.
+
+\param{forms}---an \term{implicit progn}.
+
+\param{results}---the \term{values} returned by the \term{forms}.
+
+\label Description::
+
+Executes \param{forms} in a \term{dynamic environment} where the indicated
+\param{handler} \term{bindings} are in effect.
+
+Each \param{handler} should evaluate to a \term{handler-function},
+which is used to handle \term{conditions} of the given \param{type}
+during execution of the \param{forms}.  This \term{function} should
+take a single argument, the \term{condition} being signaled.
+
+%!!! Barmar: The next two paragraphs belong in description of signaling,
+%      not handling. [I agree. -kmp]
+If more than one \param{handler} \term{binding} is supplied, 
+the \param{handler} \term{bindings} are searched sequentially from 
+top to bottom in search of a match (by visual analogy with \macref{typecase}).  
+If an appropriate \term{type} is found, 
+the associated handler is run in a \term{dynamic environment} where none of these
+\param{handler} bindings are visible (to avoid recursive errors).  
+If the \term{handler} \term{declines}, the search continues for another \term{handler}.
+
+If no appropriate \term{handler} is found, other \term{handlers} are sought
+from dynamically enclosing contours.  If no \term{handler} is found outside, 
+then \funref{signal} returns or \funref{error} enters the debugger. 
+
+\label Examples::
+ 
+%Here's an example to think about as a possible replacement for the next
+%couple of paragraphs...
+% (defun test (x)
+%   (handler-bind ((unbound-variable #'(lambda (c) (use-value 'unbound c)))
+%                  (undefined-function 
+%                    #'(lambda (c) 
+%                        (use-value #'(lambda (&rest x) (cons (cell-error-name c) x)) c))))
+%     (eval x)))
+% (test '(frob (+ 1 2) hunoz))
+
+In the following code, if an unbound variable error is
+signaled in the body (and not handled by an intervening handler), 
+the first function is called.  
+
+\code
+ (handler-bind ((unbound-variable #'(lambda ...))
+                (error #'(lambda ...)))
+   ...)
+\endcode
+
+If any other kind of error is signaled, the second function is called.
+In either case, neither handler is active while executing the code
+in the associated function.
+
+\code
+ (defun trap-error-handler (condition)
+   (format *error-output* "~&~A~&" condition)
+   (throw 'trap-errors nil))
+
+ (defmacro trap-errors (&rest forms)
+   `(catch 'trap-errors
+      (handler-bind ((error #'trap-error-handler))
+        ,@forms)))
+ 
+ (list (trap-errors (signal "Foo.") 1)
+       (trap-errors (error  "Bar.") 2)
+       (+ 1 2))
+\OUT Bar.
+\EV (1 NIL 3)
+\endcode
+
+Note that ``Foo.'' is not printed because the condition made
+by \funref{signal} is a \term{simple condition}, which is not \oftype{error}, 
+so it doesn't trigger the handler for \typeref{error} set up by \f{trap-errors}.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{handler-case}
+
+\label Notes:\None.
+
+\endcom
+
+
+%%% ========== HANDLER-CASE
+\begincom{handler-case}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+ 
+%!!! "expression" is a bad var name to use here.
+\DefmacWithValues handler-case
+		  {\param{expression}
+		   \interleave{\stardown{error-clause} | \down{no-error-clause}}}
+		  {\starparam{result}}
+ 
+\auxbnf{clause}{\down{error-clause} | \down{no-error-clause}}
+\auxbnf{error-clause}{\paren{typespec \paren{\ttbrac{var}} 
+		      \starparam{declaration} \starparam{form}}}
+\auxbnf{no-error-clause}{\paren{\kwd{no-error} \param{lambda-list} 
+			 \starparam{declaration} \starparam{form}}}
+
+%This should follow from the above BNF.
+%Note: There can be no more than one \i{no-error-clause}.
+
+\label Arguments and Values::
+
+\param{expression}---a \term{form}.
+
+\param{typespec}---a \term{type specifier}.
+
+\param{var}---a \term{variable} \term{name}. 
+
+\param{lambda-list}---an \term{ordinary lambda list}.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{form}---a \term{form}.
+
+\param{results}---In the normal situation, the values returned are those that result from
+   the evaluation of \param{expression};
+   in the exceptional situation when control is transferred to a \param{clause},
+   the value of the last \param{form} in that \param{clause} is returned.
+ 
+\label Description::
+
+\macref{handler-case} executes \param{expression} in a \term{dynamic environment} where
+various handlers are active.  Each \i{error-clause} specifies how to 
+handle a \term{condition} matching the indicated \param{typespec}. 
+A \i{no-error-clause} allows the specification of a particular action
+if control returns normally.
+ 
+%!!! It would be nice if this reference to (TYPEP ...) and all others
+%    were rewritten in text fashion.
+If a \term{condition} is signaled for which there is an appropriate
+\i{error-clause} during the execution of \param{expression}
+(\ie one for which \f{(typep \term{condition} '\param{typespec})}
+returns \term{true}) and if there is no intervening handler for a 
+\term{condition} of that \term{type}, then control is transferred to
+the body of the relevant \i{error-clause}.  In this case, the 
+dynamic state is unwound appropriately (so that the handlers established
+around the \param{expression} are no longer active), and \param{var} is bound to
+the \term{condition} that had been signaled.
+%!!! Barmar: HANDLER-BIND describes this better...
+If more than one case is provided, those cases are made accessible
+in parallel.  That is, in
+ 
+\code
+  (handler-case \i{form}
+    (\i{typespec1} (\i{var1}) \i{form1})
+    (\i{typespec2} (\i{var2}) \i{form2}))
+\endcode
+
+if the first \i{clause} (containing \i{form1}) has been selected, 
+the handler for the second is no longer visible (or vice versa).
+ 
+   The \i{clauses}
+are searched sequentially from top to bottom. If there is \term{type}
+   overlap between \param{typespecs}, 
+the earlier of the \i{clauses} is selected.
+ 
+   If \param{var} 
+is not needed, it can be omitted. That is, a \i{clause} such as:
+
+\code
+  (\param{typespec} (\param{var}) (declare (ignore \param{var})) \param{form})
+\endcode
+
+can be written
+ \f{(\param{typespec} () \param{form})}.
+ 
+%% Per X3J13. -kmp 05-Oct-93
+%% 3 uses of HANDLER-BIND to be replaced by HANDLER-CASE in last para on page.
+   If there are no \param{forms} in a selected \i{clause}, the case, and therefore
+   \macref{handler-case}, returns \nil.
+    If execution of \param{expression} 
+returns normally and no \i{no-error-clause}
+   exists, the values returned by 
+\param{expression} are returned by \macref{handler-case}.
+   If execution of 
+\param{expression} returns normally and a \i{no-error-clause}
+   does exist, the values returned are used as arguments to the function
+   described by constructing
+ \f{(lambda \param{lambda-list} \starparam{form})}
+   from the \i{no-error-clause}, and the \term{values} of that function call are
+   returned by \macref{handler-case}.
+%The following was added to make Barmar happy. -kmp 1-Sep-91
+The handlers which were established around the \param{expression} are no longer active at the time of this call.
+
+\label Examples::
+
+\code
+ (defun assess-condition (condition)
+   (handler-case (signal condition)
+     (warning () "Lots of smoke, but no fire.")
+     ((or arithmetic-error control-error cell-error stream-error)
+        (condition)
+       (format nil "~S looks especially bad." condition))
+     (serious-condition (condition)
+       (format nil "~S looks serious." condition))
+     (condition () "Hardly worth mentioning.")))
+\EV ASSESS-CONDITION
+ (assess-condition (make-condition 'stream-error :stream *terminal-io*))
+\EV "#<STREAM-ERROR 12352256> looks especially bad."
+ (define-condition random-condition (condition) () 
+   (:report (lambda (condition stream)
+              (declare (ignore condition))
+              (princ "Yow" stream))))
+\EV RANDOM-CONDITION
+ (assess-condition (make-condition 'random-condition))
+\EV "Hardly worth mentioning."
+\endcode
+ 
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{handler-bind},
+\macref{ignore-errors},
+{\secref\ConditionSystemConcepts}
+
+\label Notes::
+
+\code
+ (handler-case form
+   (\i{type1} (\i{var1}) . \i{body1})
+   (\i{type2} (\i{var2}) . \i{body2}) ...)
+\endcode
+is approximately equivalent to:
+
+\code
+ (block #1=#:g0001
+   (let ((#2=#:g0002 nil))
+     (tagbody
+       (handler-bind ((\i{type1} #'(lambda (temp)
+                                       (setq #1# temp)
+                                       (go #3=#:g0003)))
+                      (\i{type2} #'(lambda (temp)
+                                       (setq #2# temp)
+                                       (go #4=#:g0004))) ...)
+       (return-from #1# form))
+         #3# (return-from #1# (let ((\i{var1} #2#)) . \i{body1}))
+         #4# (return-from #1# (let ((\i{var2} #2#)) . \i{body2})) ...)))
+\endcode
+
+\code
+ (handler-case form
+   (\i{type1} \i{(var1)} . \i{body1})
+   ...
+   (:no-error (\i{varN-1} \i{varN-2} ...) . \i{bodyN}))
+\endcode
+is approximately equivalent to:
+
+\code
+
+ (block #1=#:error-return
+  (multiple-value-call #'(lambda (\i{varN-1} \i{varN-2} ...) . \i{bodyN})
+     (block #2=#:normal-return
+       (return-from #1#
+         (handler-case (return-from #2# form)
+           (\i{type1} (\i{var1}) . \i{body1}) ...)))))
+\endcode
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== IGNORE-ERRORS
+\begincom{ignore-errors}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValues ignore-errors 
+		  {\starparam{form}}
+		  {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{forms}---an \term{implicit progn}.
+ 
+\param{results}---In the normal situation,
+		  the \term{values} of the \term{forms} are returned;
+		  in the exceptional situation,
+		  two values are returned: \nil\ and the \term{condition}.
+
+\label Description::
+
+\macref{ignore-errors} is used to prevent \term{conditions} \oftype{error}
+from causing entry into the debugger.
+
+Specifically, \macref{ignore-errors} \term{executes} \term{forms}
+in a \term{dynamic environment} where a \term{handler} for 
+\term{conditions} \oftype{error} has been established;
+if invoked, it \term{handles} such \term{conditions} by
+returning two \term{values}, \nil\ and the \term{condition} that was \term{signaled},
+from the \macref{ignore-errors} \term{form}.
+
+If a \term{normal return} from the \term{forms} occurs, 
+any \term{values} returned are returned by \macref{ignore-errors}.
+
+\label Examples::
+
+\code
+ (defun load-init-file (program)
+   (let ((win nil))
+     (ignore-errors ;if this fails, don't enter debugger
+       (load (merge-pathnames (make-pathname :name program :type :lisp)
+                              (user-homedir-pathname)))
+       (setq win t))
+     (unless win (format t "~&Init file failed to load.~%"))
+     win))
+ 
+ (load-init-file "no-such-program")
+\OUT Init file failed to load.
+NIL
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{handler-case}, {\secref\ConditionSystemConcepts}
+
+\label Notes::
+
+\code
+ (ignore-errors . \i{forms})
+\endcode
+ 
+   is equivalent to:
+ 
+\code
+ (handler-case (progn . \i{forms})
+   (error (condition) (values nil condition)))
+\endcode
+
+Because the second return value is a \term{condition}
+in the exceptional case, it is common (but not required) to arrange
+for the second return value in the normal case to be missing or \nil\ so
+that the two situations can be distinguished.
+ 
+\endcom
+
+%-------------------- Condition Type Definition --------------------
+
+%%% ========== DEFINE-CONDITION
+\begincom{define-condition}\ftype{Macro}
+
+\issue{DEFINE-CONDITION-SYNTAX:INCOMPATIBLY-MORE-LIKE-DEFCLASS+EMPHASIZE-READ-ONLY}
+
+\editornote{KMP: This syntax stuff is still very confused and needs lots of work.}
+
+\label Syntax::
+
+%!!! Consider renaming "parent-type" to "supertype".
+\DefmacWithValuesNewline define-condition
+		  {name \paren{\starparam{parent-type}}
+	                \paren{\stardown{slot-spec}}
+                        \starparam{option}}
+		  {name}
+
+\auxbnf{slot-spec}{slot-name | \paren{slot-name \down{slot-option}}}
+\auxbnf{slot-option}{\begininterleave
+		     \star{\curly{\kwd{reader}     \term{symbol}}}         | \CR
+		     \star{\curly{\kwd{writer}     \down{function-name}}}  | \CR
+		     \star{\curly{\kwd{accessor}   \term{symbol}}}         | \CR
+		           \curly{\kwd{allocation} \down{allocation-type}} | \CR
+		     \star{\curly{\kwd{initarg}    \term{symbol}}}         | \CR
+                           \curly{\kwd{initform}   \term{form}}            | \CR
+		           \curly{\kwd{type}       \param{type-specifier}} 
+		     \endinterleave}
+\auxbnf{option}{\begininterleave
+		\paren{\kwd{default-initargs} \f{.} \param{initarg-list}} | \CR
+		\paren{\kwd{documentation} \term{string}} | \CR
+		\paren{\kwd{report}        \i{report-name}} \endinterleave}
+\auxbnf{function-name}{\curly{\term{symbol} | {\tt (setf \term{symbol})}}}
+\auxbnf{allocation-type}{\kwd{instance} | \kwd{class}}
+\auxbnf{report-name}{\term{string} | \term{symbol} | \term{lambda expression}}
+
+\label Arguments and Values::
+
+\param{name}---a \term{symbol}.
+
+%% Reworded per Barmar #9, First Public Review.
+\param{parent-type}---a \term{symbol} naming a \term{condition} \term{type}.
+  If no \param{parent-types} are supplied,
+  the \param{parent-types} default to \f{(condition)}.
+                     
+\param{default-initargs}---a \term{list} of \term{keyword/value pairs}.
+
+\editornote{KMP: This is all mixed up as to which is a slot option and which is
+		 a main option.  I'll sort that out.  Also, some of this is implied
+		 by the bnf and needn't be stated explicitly.}%!!!
+
+\issue{CLOS-CONDITIONS:INTEGRATE}
+
+\param{Slot-spec} -- the \term{name} of a \term{slot} or a \term{list}
+consisting of the \param{slot-name} followed by zero or more \param{slot-options}.
+ 
+\param{Slot-name} -- a slot name (a \term{symbol}), 
+the \term{list} of a slot name, or the 
+\term{list} of slot name/slot form pairs.
+ 
+\param{Option} -- Any of the following:
+ 
+\beginlist
+ 
+\itemitem{\kwd{reader}}
+            
+\kwd{reader} can be supplied more than once for a given \term{slot} 
+and cannot be \nil.
+ 
+\itemitem{\kwd{writer}}
+          
+\kwd{writer} can be supplied more than once for a given \term{slot}
+and must name a \term{generic function}.
+ 
+\itemitem{\kwd{accessor}}
+ 
+\kwd{accessor} can be supplied more than once for a given \term{slot}
+and cannot be \nil.
+ 
+\itemitem{\kwd{allocation}}
+ 
+\kwd{allocation} can be supplied once at most for a given \term{slot}.
+The default if \kwd{allocation} is not supplied is \kwd{instance}.
+ 
+\itemitem{\kwd{initarg}} 
+                                                           
+\kwd{initarg} can be supplied more than once for a given \term{slot}.  
+ 
+\itemitem{\kwd{initform}}  
+     
+\kwd{initform} can be supplied once at most for a given \term{slot}.  
+ 
+\itemitem{\kwd{type}} 
+ 
+\kwd{type} can be supplied once at most for a given \term{slot}. 
+ 
+\itemitem{\kwd{documentation}} 
+ 
+\kwd{documentation} can be supplied once at most for a given \term{slot}. 
+
+\itemitem{\kwd{report}}
+
+\kwd{report} can be supplied once at most.
+
+% Removed:
+%  \itemitem{\kwd{conc-name}} ...
+%  \itemitem{\kwd{documentation}} ...
+\endlist
+\endissue{CLOS-CONDITIONS:INTEGRATE}
+
+\label Description::
+
+%!!! Barrett: Some of this stuff
+\macref{define-condition} defines a new condition type called \param{name}, 
+which is a \term{subtype} of 
+\issue{CLOS-CONDITIONS:INTEGRATE}
+the \term{type} or \term{types} named by
+  \param{parent-type}.  
+Each \param{parent-type} argument specifies a direct \term{supertype}
+of the new \term{condition}. The new \term{condition}
+inherits \term{slots} and \term{methods} from each of its direct
+\term{supertypes}, and so on.
+\endissue{CLOS-CONDITIONS:INTEGRATE}
+%% Redundant. -kmp 3-Sep-91
+% \term{Objects} of this \term{condition} type have all of the 
+% indicated \param{slots}, plus
+%   any additional slots that would be available in \term{objects}
+% of type \param{parent-type}.
+
+  If a slot name/slot form pair is supplied,
+the slot form is a \term{form} that 
+can be evaluated by \funref{make-condition} to
+  produce a default value when an explicit value is not provided.  If no 
+slot form
+is supplied, the contents of the \param{slot} 
+is initialized in an 
+  \term{implementation-dependent} way.  
+
+  If the \term{type} being defined and some other 
+\term{type} from which it inherits
+  have a slot by the same name, only one slot is allocated in the
+  \term{condition}, 
+but the supplied slot form overrides any slot form
+  that might otherwise have been inherited from a \param{parent-type}.  If no 
+slot form is supplied, the inherited slot form (if any) is still visible.
+
+%% This looks suspicious to me. -kmp 14-May-91
+%  Barrett agrees. -kmp 3-Sep-91
+% Once the \term{condition} is defined,
+% \funref{make-condition} accepts keywords (from \thepackage{keyword}) with the
+% \term{name} of any of the designated \param{slots},
+% and will initialize the corresponding \param{slots} in \term{conditions} it creates.
+
+Accessors are created according to the same rules as used by 
+%\macref{defstruct}.
+\macref{defclass}.
+
+A description of \param{slot-options} follows:
+
+\issue{CLOS-CONDITIONS:INTEGRATE}
+
+%!!! Isn't there a way of contracting this?
+
+\beginlist
+   
+\itemitem{\kwd{reader}}
+
+The \kwd{reader} slot option specifies that an \term{unqualified method} is
+to be defined on the \term{generic function} named by the argument
+to \kwd{reader} to read the value of the given \term{slot}.
+ 
+% Removed:
+% \itemitem{\kwd{writer}} 
+% \itemitem{\kwd{accessor}} 
+% \itemitem{\kwd{allocation}} 
+
+\itemitem{\bull} The \kwd{initform} slot option is used to provide a default
+initial value form to be used in the initialization of the \term{slot}.  This
+\term{form} is evaluated every time it is used to initialize the 
+\term{slot}.  The
+\term{lexical environment} 
+in which this \term{form} is evaluated is the lexical
+\term{environment} in which the \macref{define-condition} 
+form was evaluated.
+Note that the \term{lexical environment} refers both to variables and to
+\term{functions}.  
+For \term{local slots}, the \term{dynamic environment} is the dynamic
+\term{environment} 
+in which \funref{make-condition} was called; for 
+\term{shared slots}, the \term{dynamic environment} 
+is the \term{dynamic environment} in which the
+\macref{define-condition} form was evaluated.  
+%\Seesection\ObjectCreationAndInit.
+ 
+\reviewer{Barmar: Issue CLOS-CONDITIONS doesn't say this.}
+No implementation is permitted to extend the syntax of \macref{define-condition}
+to allow \f{(\param{slot-name} \param{form})} as an abbreviation for
+\f{(\param{slot-name} :initform \param{form})}.
+ 
+\itemitem{\kwd{initarg}}
+
+The \kwd{initarg} slot option declares an initialization
+argument named by its \term{symbol} argument
+and specifies that this
+initialization argument initializes the given \term{slot}.  If the
+initialization argument has a value in the call to 
+\funref{initialize-instance}, the value is stored into the given \term{slot},
+and the slot's \kwd{initform} slot option, if any, is not
+evaluated.  If none of the initialization arguments specified for a
+given \term{slot} has a value, the \term{slot} is initialized according to the
+\kwd{initform} slot option, if specified.  
+ 
+\itemitem{\kwd{type}}
+
+The \kwd{type} slot option specifies that the contents of the
+\term{slot} is always of the specified \term{type}.  It effectively
+declares the result type of the reader generic function when applied
+to an \term{object} of this \term{condition} type.  
+The consequences of attempting to store in a
+\term{slot} a value that 
+does not satisfy the type of the \term{slot} is undefined.
+%The \kwd{type} slot option is further discussed in \secref\SlotInheritance.
+ 
+\itemitem{\kwd{default-initargs}}
+
+\editornote{KMP: This is an option, not a slot option.}%!!!
+
+This option is treated the same as it would be \macref{defclass}.
+
+\itemitem{\kwd{documentation}}
+
+\editornote{KMP: This is both an option and a slot option.}%!!!
+
+The \kwd{documentation} slot option provides a \term{documentation string}
+for the \term{slot}.
+
+%Removed:
+%  \itemitem{\kwd{documentation}} ...
+%  \itemitem{\kwd{conc-name}} ...
+\endissue{CLOS-CONDITIONS:INTEGRATE}
+\itemitem{\kwd{report}}
+
+\editornote{KMP: This is an option, not a slot option.}%!!!
+
+\term{Condition} reporting is mediated through the \funref{print-object}
+method for the \term{condition} type in question, with \varref{*print-escape*}
+always being \nil. Specifying \f{(:report \param{report-name})} 
+in the definition of a condition type \f{C} is equivalent to:
+
+\code
+ (defmethod print-object ((x c) stream)
+   (if *print-escape* (call-next-method) (\param{report-name} x stream)))
+\endcode
+ 
+     If the value supplied by the argument to \kwd{report} (\param{report-name})
+is a \term{symbol} or a \term{lambda expression}, 
+it must be acceptable to 
+     \specref{function}. \f{(function \param{report-name})} 
+is evaluated
+     in the current \term{lexical environment}.  
+It should return a \term{function} 
+of two
+     arguments, a \term{condition} and a \term{stream}, 
+that prints on the \term{stream} a
+     description of the \term{condition}. 
+ This \term{function} is called whenever the
+     \term{condition} is printed while \varref{*print-escape*} is \nil.
+
+If \param{report-name} is a \term{string}, it is a shorthand for 
+
+\code
+ (lambda (condition stream)
+   (declare (ignore condition))
+   (write-string \param{report-name} stream))
+\endcode
+
+This option is processed after the new \term{condition} type has been defined,
+so use of the \param{slot} accessors within the \kwd{report} function is permitted.
+If this option is not supplied, information about how to report this
+type of \term{condition} is inherited from the \param{parent-type}.
+
+\endlist
+
+% !!! Barmar: This is redundant because CLOS already says this.
+%     KMP: I think that until the connection between conditions and standard-class is
+%          clearer, it doesn't hurt to say it redundantly.
+The consequences are unspecifed if an attempt is made to \term{read} a 
+\param{slot} that has not been explicitly initialized and that has not 
+been given a default value.
+
+The consequences are unspecified if an attempt is made to assign the
+\param{slots} by using \macref{setf}.
+
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+% added qualification about top-level-ness  --sjl 5 Mar 92
+If a \macref{define-condition} \term{form} appears as a \term{top level form},
+the \term{compiler} must make \param{name} recognizable as a valid \term{type} name,
+and it must be possible to reference the \term{condition} \term{type} as the
+\param{parent-type} of another \term{condition} \term{type} in a subsequent
+\macref{define-condition} \term{form} in the \term{file} being compiled.
+\endissue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+
+\label Examples::
+
+The following form defines a condition of \term{type} 
+\f{peg/hole-mismatch} which inherits from a condition type
+called \f{blocks-world-error}:
+
+\code
+(define-condition peg/hole-mismatch 
+                  (blocks-world-error)
+                  ((peg-shape  :initarg :peg-shape
+                               :reader peg/hole-mismatch-peg-shape)
+                   (hole-shape :initarg :hole-shape
+                               :reader peg/hole-mismatch-hole-shape))
+  (:report (lambda (condition stream)
+             (format stream "A ~A peg cannot go in a ~A hole."
+                     (peg/hole-mismatch-peg-shape  condition)
+                     (peg/hole-mismatch-hole-shape condition)))))
+\endcode
+
+The new type has slots \f{peg-shape} and \f{hole-shape}, 
+so \funref{make-condition} accepts \f{:peg-shape} and \f{:hole-shape} keywords.  
+The \term{readers} \f{peg/hole-mismatch-peg-shape} and \f{peg/hole-mismatch-hole-shape} 
+apply to objects of this type, as illustrated in the \kwd{report} information.
+
+The following form defines a \term{condition} \term{type} named \f{machine-error}
+which inherits from \typeref{error}: 
+
+\code
+(define-condition machine-error 
+                  (error)
+                  ((machine-name :initarg :machine-name
+                                 :reader machine-error-machine-name))
+  (:report (lambda (condition stream)
+             (format stream "There is a problem with ~A."
+                     (machine-error-machine-name condition)))))
+\endcode
+
+Building on this definition, a new error condition can be defined which
+is a subtype of \f{machine-error} for use when machines are not available: 
+
+\code
+(define-condition machine-not-available-error (machine-error) ()
+  (:report (lambda (condition stream)
+             (format stream "The machine ~A is not available."
+                     (machine-error-machine-name condition)))))
+\endcode
+
+This defines a still more specific condition, built upon 
+\f{machine-not-available-error}, which provides a slot initialization form
+for \f{machine-name} but which does not provide any new slots or report
+information.  It just gives the \f{machine-name} slot a default initialization:
+
+\code
+(define-condition my-favorite-machine-not-available-error
+                  (machine-not-available-error)
+  ((machine-name :initform "mc.lcs.mit.edu")))
+\endcode
+
+Note that since no \kwd{report} clause was given, the information 
+inherited from \f{machine-not-available-error} is used to
+report this type of condition.
+
+\code
+ (define-condition ate-too-much (error) 
+     ((person :initarg :person :reader ate-too-much-person)
+      (weight :initarg :weight :reader ate-too-much-weight)
+      (kind-of-food :initarg :kind-of-food
+                    :reader :ate-too-much-kind-of-food)))
+\EV ATE-TOO-MUCH
+ (define-condition ate-too-much-ice-cream (ate-too-much)
+   ((kind-of-food :initform 'ice-cream)
+    (flavor       :initarg :flavor
+                  :reader ate-too-much-ice-cream-flavor
+                  :initform 'vanilla ))
+   (:report (lambda (condition stream)
+              (format stream "~A ate too much ~A ice-cream"
+                      (ate-too-much-person condition)
+                      (ate-too-much-ice-cream-flavor condition)))))
+\EV ATE-TOO-MUCH-ICE-CREAM
+ (make-condition 'ate-too-much-ice-cream
+                 :person 'fred
+                 :weight 300
+                 :flavor 'chocolate)
+\EV #<ATE-TOO-MUCH-ICE-CREAM 32236101>
+ (format t "~A" *)
+\OUT FRED ate too much CHOCOLATE ice-cream
+\EV NIL
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{make-condition}, \macref{defclass}, {\secref\ConditionSystemConcepts}
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.
+
+\endissue{DEFINE-CONDITION-SYNTAX:INCOMPATIBLY-MORE-LIKE-DEFCLASS+EMPHASIZE-READ-ONLY}
+
+\endcom
+
+%-------------------- Condition Instantiation --------------------
+
+%%% ========== MAKE-CONDITION
+\begincom{make-condition}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-condition {type {\rest} slot-initializations} {condition}
+
+\label Arguments and Values::
+
+%Barmar: a condition type or condition type name ?
+%Barrett worried about the same thing.  I think the intent was that it be a subtype of
+%condition, so I've required that explicitly. -kmp 3-Sep-91
+\param{type}---a \term{type specifier} (for a \term{subtype} of \typeref{condition}).
+
+\param{slot-initializations}---an \term{initialization argument list}.
+
+\param{condition}---a \term{condition}.
+
+\label Description::
+
+Constructs and returns a \term{condition} of type \param{type} 
+using \param{slot-initializations} for the initial values of the slots.  
+The newly created \term{condition} is returned.
+
+\label Examples::
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\code
+ (defvar *oops-count* 0)
+
+ (setq a (make-condition 'simple-error
+                         :format-control "This is your ~:R error."
+                         :format-arguments (list (incf *oops-count*))))
+\EV #<SIMPLE-ERROR 32245104>
+ 
+ (format t "~&~A~%" a)
+\OUT This is your first error.
+\EV NIL
+ 
+ (error a)
+\OUT Error: This is your first error.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Return to Lisp Toplevel.
+\OUT Debug> 
+\endcode
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+\label Side Effects:\None.
+
+%% Sandra thinks this is excessive.
+%Creates a \term{condition}.
+
+\label Affected By::
+
+The set of defined \term{condition} \term{types}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{define-condition}, {\secref\ConditionSystemConcepts}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Restarts --------------------
+
+\begincom{restart}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{restart},
+\typeref{t}
+
+\label Description::
+
+An \term{object} \oftype{restart} represents a \term{function} that can be
+called to perform some form of recovery action, usually a transfer of control 
+to an outer point in the running program.
+
+An \term{implementation} is free to implement a \term{restart} in whatever 
+manner is most convenient; a \term{restart} has only \term{dynamic extent}
+relative to the scope of the binding \term{form} which \term{establishes} it.
+
+\endcom%{restart}\ftype{System Class}
+
+%%% ========== COMPUTE-RESTARTS
+\begincom{compute-restarts}\ftype{Function}
+
+\label Syntax::
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\DefunWithValues compute-restarts {{\opt} condition} {restarts}
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\label Arguments and Values::
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\param{condition}---a \term{condition} \term{object}, or \nil.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\param{restarts}---a \term{list} of \term{restarts}.
+
+\label Description::
+
+\funref{compute-restarts} uses the dynamic state of the program to compute 
+a \term{list} of the \term{restarts} which are currently active.
+
+The resulting \term{list} is ordered so that the innermost
+(more-recently established) restarts are nearer the head of the \term{list}.
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+When \param{condition} is \term{non-nil}, only those \term{restarts}
+are considered that are either explicitly associated with that \param{condition},
+or not associated with any \term{condition}; that is, the excluded \term{restarts} 
+are those that are associated with a non-empty set of \term{conditions} of 
+which the given \param{condition} is not an \term{element}.
+If \param{condition} is \nil, all \term{restarts} are considered.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\funref{compute-restarts} returns all 
+%"valid" -> "applicable" per Barrett
+\term{applicable restarts}, 
+including anonymous ones, even if some of them have the same name as 
+others and would therefore not be found by \funref{find-restart} 
+when given a \term{symbol} argument.
+
+Implementations are permitted, but not required, to return \term{distinct}
+\term{lists} from repeated calls to \funref{compute-restarts} while in
+the same dynamic environment.  
+The consequences are undefined if the \term{list} returned by
+\funref{compute-restarts} is every modified.
+
+\label Examples::
+
+\code
+ ;; One possible way in which an interactive debugger might present
+ ;; restarts to the user.
+ (defun invoke-a-restart ()
+   (let ((restarts (compute-restarts)))
+     (do ((i 0 (+ i 1)) (r restarts (cdr r))) ((null r))
+       (format t "~&~D: ~A~%" i (car r)))
+     (let ((n nil) (k (length restarts)))
+       (loop (when (and (typep n 'integer) (>= n 0) (< n k))
+               (return t))
+             (format t "~&Option: ")
+             (setq n (read))
+             (fresh-line))
+       (invoke-restart-interactively (nth n restarts)))))
+
+ (restart-case (invoke-a-restart)
+   (one () 1)
+   (two () 2)
+   (nil () :report "Who knows?" 'anonymous)
+   (one () 'I)
+   (two () 'II))
+\OUT 0: ONE
+\OUT 1: TWO
+\OUT 2: Who knows?
+\OUT 3: ONE
+\OUT 4: TWO
+\OUT 5: Return to Lisp Toplevel.
+\OUT Option: \IN{4}
+\EV II
+ 
+ ;; Note that in addition to user-defined restart points, COMPUTE-RESTARTS
+ ;; also returns information about any system-supplied restarts, such as
+ ;; the "Return to Lisp Toplevel" restart offered above.
+ 
+\endcode
+ 
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+Existing restarts.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{find-restart},
+\funref{invoke-restart},
+\funref{restart-bind}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== FIND-RESTART
+\begincom{find-restart}\ftype{Function}
+
+\label Syntax::
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\Defun find-restart {identifier {\opt} condition} {restart}
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\label Arguments and Values::
+
+\param{identifier}---a \term{non-nil} \term{symbol}, or a \term{restart}.
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\param{condition}---a \term{condition} \term{object}, or \nil.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\param{restart}---a \term{restart} or \nil.
+
+\label Description::
+
+\funref{find-restart} searches for a particular \term{restart} in the 
+current \term{dynamic environment}.
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+When \param{condition} is \term{non-nil}, only those \term{restarts}
+are considered that are either explicitly associated with that \param{condition},
+or not associated with any \term{condition}; that is, the excluded \term{restarts} 
+are those that are associated with a non-empty set of \term{conditions} of 
+which the given \param{condition} is not an \term{element}.
+If \param{condition} is \nil, all \term{restarts} are considered.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+If \param{identifier} is a \term{symbol}, then the innermost 
+(most recently established) \term{applicable restart} with that \term{name} is returned.
+\nil\ is returned if no such restart is found.
+
+If \param{identifier} is a currently active restart, then it is returned.
+Otherwise, \nil\ is returned.
+
+\label Examples::
+
+\code
+ (restart-case
+     (let ((r (find-restart 'my-restart)))
+       (format t "~S is named ~S" r (restart-name r)))
+   (my-restart () nil))
+\OUT #<RESTART 32307325> is named MY-RESTART
+\EV NIL
+ (find-restart 'my-restart)
+\EV NIL
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+Existing restarts.
+
+\macref{restart-case}, \macref{restart-bind}, \macref{with-condition-restarts}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{compute-restarts}
+
+\label Notes::
+
+\code
+ (find-restart \param{identifier})
+ \EQ (find \param{identifier} (compute-restarts) :key :restart-name)
+\endcode
+
+Although anonymous restarts have a name of \nil,
+the consequences are unspecified if \nil\ is given as an \param{identifier}.  
+Occasionally, programmers lament that \nil\ is not permissible as an
+\param{identifier} argument.  In most such cases, \funref{compute-restarts}
+can probably be used to simulate the desired effect.
+
+\endcom
+
+%%% ========== INVOKE-RESTART
+\begincom{invoke-restart}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues invoke-restart
+		 {restart {\rest} arguments}
+		 {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{restart}---a \term{restart designator}.
+
+\param{argument}---an \term{object}.
+
+\param{results}---the \term{values} returned by the \term{function}
+		   associated with \param{restart}, if that \term{function} returns.
+
+\label Description::
+
+Calls the \term{function} associated with \param{restart},
+passing \param{arguments} to it.  
+\param{Restart} must be valid in the current \term{dynamic environment}.  
+
+\label Examples::
+\code
+ (defun add3 (x) (check-type x number) (+ x 3))
+ 
+ (foo 'seven)
+\OUT Error: The value SEVEN was not of type NUMBER.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Specify a different value to use.
+\OUT  2: Return to Lisp Toplevel.
+\OUT Debug> \IN{(invoke-restart 'store-value 7)}
+\EV 10
+\endcode
+
+\label Side Effects::
+
+%!!! Barmar: This is true whenever calling random functions.
+A non-local transfer of control might be done by the restart.
+
+\label Affected By::
+
+Existing restarts.
+
+\label Exceptional Situations::
+
+If \param{restart} is not valid, an error \oftype{control-error} is signaled.
+
+\label See Also::
+
+\funref{find-restart},
+\macref{restart-bind},
+\macref{restart-case},
+\funref{invoke-restart-interactively}
+
+\label Notes::
+
+The most common use for \funref{invoke-restart} is in a \term{handler}.
+It might be used explicitly, or implicitly through \funref{invoke-restart-interactively}
+or a \term{restart function}.
+
+\term{Restart functions} call \funref{invoke-restart}, not vice versa.  That is,
+\term{invoke-restart} provides primitive functionality, and \term{restart functions}
+are non-essential ``syntactic sugar.''
+
+\endcom
+
+%%% ========== INVOKE-RESTART-INTERACTIVELY
+\begincom{invoke-restart-interactively}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues invoke-restart-interactively {restart} {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{restart}---a \term{restart designator}.
+
+\param{results}---the \term{values} returned by the \term{function} 
+		   associated with \param{restart}, if that \term{function} returns.
+
+\label Description::
+
+\funref{invoke-restart-interactively} calls the \term{function} associated
+with \param{restart}, prompting for any necessary arguments. 
+If \param{restart} is a name, it must be valid in the current \term{dynamic environment}.  
+
+  \funref{invoke-restart-interactively} 
+prompts for arguments by executing
+  the code provided in the \kwd{interactive} keyword to 
+\macref{restart-case} or 
+  \kwd{interactive-function} keyword to \macref{restart-bind}.
+
+%!!! Barrett: Make consistent with wrong # of args errors.
+If no such options have been supplied in the corresponding
+\macref{restart-bind} or \macref{restart-case}, 
+then the consequences are undefined if the \param{restart} takes
+  required arguments.  If the arguments are optional, an argument list of
+  \nil\ is used.
+
+  Once the arguments have been determined, 
+\funref{invoke-restart-interactively}
+  executes the following:
+
+\code
+ (apply #'invoke-restart \i{restart} \i{arguments})
+\endcode
+ 
+
+\label Examples::
+
+\code
+ (defun add3 (x) (check-type x number) (+ x 3))
+ 
+ (add3 'seven)
+\OUT Error: The value SEVEN was not of type NUMBER.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Specify a different value to use.
+\OUT  2: Return to Lisp Toplevel.
+\OUT Debug> \IN{(invoke-restart-interactively 'store-value)}
+\OUT Type a form to evaluate and use: \IN{7}
+\EV 10
+\endcode
+ 
+\label Side Effects::
+
+If prompting for arguments is necesary,
+some typeout may occur (on \term{query I/O}).
+ 
+%!!! Barmar: This is true whenever calling random functions.
+A non-local transfer of control might be done by the restart.
+
+\label Affected By::
+
+\varref{*query-io*}, active \term{restarts}
+
+\label Exceptional Situations::
+
+If \param{restart} is not valid, an error \oftype{control-error}
+is signaled.
+
+\label See Also::
+
+\funref{find-restart},
+\funref{invoke-restart},
+\macref{restart-case},
+\macref{restart-bind}
+
+\label Notes::
+
+\funref{invoke-restart-interactively} is used internally by the debugger
+and may also be useful in implementing other portable, interactive debugging 
+tools.
+
+\endcom
+
+%%% ========== RESTART-BIND
+\begincom{restart-bind}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValuesNewline restart-bind 
+		  {\paren{\curly{\paren{name function
+				        \stardown{key-val-pair}}}}
+		   \starparam{form}}
+		  {\starparam{result}}
+
+%!!! Barmar: Somehow indicate that each may be supplied at most once.
+\auxbnf{key-val-pair}{\kwd{interactive-function} {interactive-function} | \CR
+		      \kwd{report-function} {report-function}           | \CR
+		      \kwd{test-function} {test-function}}
+
+\label Arguments and Values::
+
+\param{name}---a \term{symbol}; \noeval.
+
+\param{function}---a \term{form}; \eval.
+
+\param{forms}---an \term{implicit progn}.
+
+\param{interactive-function}---a \term{form}; \eval.
+
+\param{report-function}---a \term{form}; \eval.
+
+\param{test-function}---a \term{form}; \eval.
+
+\param{results}---the \term{values} returned by the \term{forms}.
+
+\label Description::
+
+\macref{restart-bind} executes the body of \param{forms} 
+in a \term{dynamic environment} where \term{restarts} with the given \param{names} are in effect.
+ 
+If a \param{name} is \nil, it indicates an anonymous restart;
+if a \param{name} is a \term{non-nil} \term{symbol}, it indicates a named restart.
+ 
+The \param{function}, \param{interactive-function}, and \param{report-function}
+are unconditionally evaluated in the current lexical and dynamic environment
+prior to evaluation of the body. Each of these \term{forms} must evaluate to
+a \term{function}.
+ 
+If \funref{invoke-restart} is done on that restart,
+the \term{function} which resulted from evaluating \param{function} 
+is called, in the \term{dynamic environment} of the \funref{invoke-restart},
+with the \term{arguments} given to \funref{invoke-restart}. 
+The \term{function} may either perform a non-local transfer of control or may return normally.
+ 
+If the restart is invoked interactively from the debugger 
+(using \funref{invoke-restart-interactively}), 
+the arguments are defaulted by calling the \term{function} 
+which resulted from evaluating \param{interactive-function}.
+That \term{function} may optionally prompt interactively on \term{query I/O}, 
+and should return a \term{list} of arguments to be used by
+\funref{invoke-restart-interactively} when invoking the restart. 
+ 
+If a restart is invoked interactively but no \param{interactive-function} is used,
+then an argument list of \nil\ is used. In that case, the \term{function}
+must be compatible with an empty argument list.
+ 
+If the restart is presented interactively (\eg by the debugger),
+the presentation is done by calling the \term{function} which resulted
+from evaluating \param{report-function}.
+This \term{function} must be a \term{function} of one argument, a \term{stream}. 
+It is expected to print a description of the action that the restart takes
+to that \term{stream}. 
+This \term{function} is called any time the restart is printed 
+while \varref{*print-escape*} is \nil.
+ 
+In the case of interactive invocation, 
+the result is dependent on the value of \kwd{interactive-function}
+as follows.
+
+\beginlist
+\itemitem{\kwd{interactive-function}}
+
+  \param{Value} is evaluated in the current lexical environment and
+  should return a \term{function} of no arguments which constructs a 
+  \term{list} of arguments to be used by \funref{invoke-restart-interactively} 
+  when invoking this restart.  The \term{function} may prompt interactively
+  using \term{query I/O} if necessary.
+
+\itemitem{\kwd{report-function}}
+
+  \param{Value} is evaluated in the current lexical environment and
+  should return a \term{function} of one argument, a \term{stream}, which
+  prints on the \term{stream} a summary of the action that this restart
+  takes.  This \term{function} is called whenever the restart is
+  reported (printed while \varref{*print-escape*} is \nil).
+% This next was added for Barmar. -kmp 1-Sep-91
+  If no \kwd{report-function} option is provided, the manner in which the
+  \term{restart} is reported is \term{implementation-dependent}.
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\itemitem{\kwd{test-function}}
+
+  \param{Value} is evaluated in the current lexical environment and
+  should return a \term{function} of one argument, a \term{condition}, which
+  returns \term{true} if the restart is to be considered visible.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\endlist
+
+% \label Examples::
+% 
+%\code
+% (defun choose-an-interactive-restart ()
+%   (restart-bind
+%       ((optional-value
+%          #'(lambda (&optional (x 'default)) x)
+%          :report-function #'(lambda (stream)
+%                               (format stream "Return an optional value")))\kern-3pt
+%        (return-value
+%          #'identity
+%          :report-function #'(lambda (stream)
+%                               (format stream "Return the given value"))
+%          :interactive-function #'(lambda ()
+%                                    (format t "Enter a value to return: ")
+%                                  (list (eval (read))))))
+%     (let ((cases (compute-restarts))
+%           (*print-structure* t)
+%           (index -1))
+%       (dolist (case cases)
+%         (format t "~&~D: ~A~%" (incf index) case))
+%       (format t "Please enter restart to invoke: ")
+%       (invoke-restart-interactively (nth (eval (read)) cases)))))
+%\EV\ CHOOSE-AN-INTERACTIVE-RESTART
+% (choose-an-interactive-restart)
+%\EV\ 0: Return an optional value
+%1: Return the given value
+%2: Abort to Lisp Top Level
+%Please enter restart to invoke: 0
+%DEFAULT
+% (choose-an-interactive-restart)
+%\EV\ 0: Return an optional value
+%1: Return the given value
+%2: Abort to Lisp Top Level
+%Please enter restart to invoke: 1
+%Enter a value to return: t
+%T
+%\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\varref{*query-io*}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{restart-case}, \macref{with-simple-restart}
+
+\label Notes::
+
+\macref{restart-bind} is primarily intended to be used to implement
+\macref{restart-case} and  might be useful in implementing other
+macros. Programmers who are uncertain about whether to use \macref{restart-case}
+or \macref{restart-bind} should prefer \macref{restart-case} for the cases where
+it is powerful enough, using \macref{restart-bind} only in cases where its full
+generality is really needed.
+ 
+\endcom
+
+%%% ========== RESTART-CASE
+\begincom{restart-case}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\DefmacWithValues restart-case 
+		  {restartable-form {\curly{\down{clause}}}}
+		  {\starparam{result}}
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\auxbnf{clause}{\lparen case-name lambda-list			       \CR
+	        \ \interleave{\kwd{interactive} interactive-expression |
+		      	      \kwd{report} report-expression           |
+			      \kwd{test} test-expression}              \CR
+		\ \starparam{declaration} \starparam{form}\rparen}
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\label Arguments and Values::
+
+\param{restartable-form}---a \term{form}.
+
+\param{case-name}---a \term{symbol} or \nil.
+
+\param{lambda-list}---an \term{ordinary lambda list}.
+
+\param{interactive-expression}---a \term{symbol} or a \term{lambda expression}.
+
+\param{report-expression}---a \term{string},
+			     a \term{symbol},
+			     or a \term{lambda expression}.                                 
+
+\param{test-expression}---a \term{symbol} or a \term{lambda expression}.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{form}---a \term{form}.
+
+\param{results}---the \term{values} resulting from the \term{evaluation}
+		   of \param{restartable-form}, 
+		  or the \term{values} returned by the last \param{form}
+		   executed in a chosen \term{clause},
+		  or \nil.
+
+\label Description::
+
+\macref{restart-case} evaluates \param{restartable-form} in a \term{dynamic environment}
+where the clauses have special meanings as points to which control may be transferred.  
+If \param{restartable-form} finishes executing and returns any values, 
+all values returned are returned by \macref{restart-case} and 
+processing has completed. While \param{restartable-form} is executing, any code may
+  transfer control to one of the clauses (see \funref{invoke-restart}).  
+If a transfer
+  occurs, the forms in the body of that clause is evaluated and any values
+  returned by the last such form are returned by 
+\macref{restart-case}.
+In this case, the 
+dynamic state is unwound appropriately (so that the restarts established
+around the \param{restartable-form} are no longer active) prior to execution of the
+clause.
+
+  If there are no \param{forms} 
+in a selected clause, \macref{restart-case} returns \nil.
+
+If \param{case-name} is a \term{symbol}, it names this restart.
+
+It is possible to have more than one clause use the same \param{case-name}.
+In this case, the first clause with that name is found by \funref{find-restart}.  
+The other clauses are accessible using \funref{compute-restarts}.
+
+Each \param{arglist} is an \term{ordinary lambda list} to be bound during the 
+execution of its corresponding \param{forms}.  These parameters are used 
+by the \macref{restart-case} clause to receive any necessary data from a call
+to \funref{invoke-restart}.
+
+By default, \funref{invoke-restart-interactively} passes no arguments and
+all arguments must be optional in order to accomodate interactive
+restarting.  However, the arguments need not be optional if the
+\kwd{interactive} 
+keyword has been used to inform \funref{invoke-restart-interactively}
+  about how to compute a proper argument list.
+
+\param{Keyword} options have the following meaning.
+\beginlist
+\itemitem{\kwd{interactive}}
+   
+The \param{value} supplied by \f{:interactive \param{value}}
+must be a suitable argument to \specref{function}. 
+\f{(function \param{value})} is evaluated in the current lexical
+    environment.  It should return a \term{function} of no arguments which 
+    returns arguments to be used by 
+\funref{invoke-restart-interactively} when it is invoked.
+\funref{invoke-restart-interactively} 
+is called in the dynamic
+    environment available prior to any restart attempt, and uses 
+\term{query I/O} for user interaction.
+
+    If a restart is invoked interactively but no \kwd{interactive} option
+    was supplied, the argument list used in the invocation is the empty
+    list.
+
+\itemitem{\kwd{report}}
+
+If the \param{value} supplied by \f{:report \param{value}}
+is a \term{lambda expression} or a \term{symbol}, it 
+must be acceptable to \specref{function}.
+\f{(function \param{value})} is evaluated in the current lexical
+environment.  It should return a \term{function} of one
+argument, a \term{stream}, which prints on the \term{stream} a 
+description of the restart.  This \term{function} is called 
+whenever the restart is printed while \varref{*print-escape*} is \nil.
+
+If \param{value} is a \term{string}, it is a shorthand for
+
+\code
+ (lambda (stream) (write-string value stream))
+\endcode
+
+    If a named restart is asked to report but no report information has been
+    supplied, the name of the restart is used in generating default report text.
+  
+    When \varref{*print-escape*} is \nil, the 
+printer uses the report information for
+    a restart.  For example, a debugger might announce the action of typing
+    a ``continue'' command by:
+
+\code
+ (format t "~&~S -- ~A~%" ':continue some-restart)
+\endcode
+    which might then display as something like:
+
+\code
+ :CONTINUE -- Return to command level
+\endcode
+
+The consequences are unspecified if an unnamed restart is specified
+but no \kwd{report} option is provided.
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\itemitem{\kwd{test}}
+
+The \param{value} supplied by \f{:test \param{value}}
+must be a suitable argument to \specref{function}. 
+\f{(function \param{value})} is evaluated in the current lexical
+    environment.  It should return a \term{function} of one \term{argument}, the
+\term{condition}, that
+returns \term{true} if the restart is to be considered visible.
+
+The default for this option is equivalent to \f{(lambda (c) (declare (ignore c)) t)}.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\endlist
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+If the \param{restartable-form} is a \term{list} whose \term{car} is any of
+the \term{symbols} \funref{signal}, \funref{error}, \funref{cerror},
+or \funref{warn} (or is a \term{macro form} which macroexpands into such a
+\term{list}), then \macref{with-condition-restarts} is used implicitly
+to associate the indicated \term{restarts} with the \term{condition} to be
+signaled.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\label Examples::
+
+\code
+ (restart-case
+     (handler-bind ((error #'(lambda (c)
+                             (declare (ignore condition))
+                             (invoke-restart 'my-restart 7))))
+       (error "Foo."))
+   (my-restart (&optional v) v))
+\EV 7
+
+ (define-condition food-error (error) ())
+\EV FOOD-ERROR
+ (define-condition bad-tasting-sundae (food-error) 
+   ((ice-cream :initarg :ice-cream :reader bad-tasting-sundae-ice-cream)
+    (sauce :initarg :sauce :reader bad-tasting-sundae-sauce)
+    (topping :initarg :topping :reader bad-tasting-sundae-topping))
+   (:report (lambda (condition stream)
+              (format stream "Bad tasting sundae with ~S, ~S, and ~S"
+                      (bad-tasting-sundae-ice-cream condition)
+                      (bad-tasting-sundae-sauce condition)
+                      (bad-tasting-sundae-topping condition)))))
+\EV BAD-TASTING-SUNDAE
+ (defun all-start-with-same-letter (symbol1 symbol2 symbol3)
+   (let ((first-letter (char (symbol-name symbol1) 0)))
+     (and (eql first-letter (char (symbol-name symbol2) 0))
+          (eql first-letter (char (symbol-name symbol3) 0)))))
+\EV ALL-START-WITH-SAME-LETTER
+ (defun read-new-value ()
+   (format t "Enter a new value: ")
+   (multiple-value-list (eval (read))))
+\EV READ-NEW-VALUE\eject
+ (defun verify-or-fix-perfect-sundae (ice-cream sauce topping)
+   (do ()
+      ((all-start-with-same-letter ice-cream sauce topping))
+     (restart-case
+       (error 'bad-tasting-sundae
+              :ice-cream ice-cream
+              :sauce sauce
+              :topping topping)
+       (use-new-ice-cream (new-ice-cream)
+         :report "Use a new ice cream."
+         :interactive read-new-value  
+         (setq ice-cream new-ice-cream))
+       (use-new-sauce (new-sauce)
+         :report "Use a new sauce."
+         :interactive read-new-value
+         (setq sauce new-sauce))
+       (use-new-topping (new-topping)
+         :report "Use a new topping."
+         :interactive read-new-value
+         (setq topping new-topping))))
+   (values ice-cream sauce topping))
+\EV VERIFY-OR-FIX-PERFECT-SUNDAE
+ (verify-or-fix-perfect-sundae 'vanilla 'caramel 'cherry)
+\OUT Error: Bad tasting sundae with VANILLA, CARAMEL, and CHERRY.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Use a new ice cream.
+\OUT  2: Use a new sauce.
+\OUT  3: Use a new topping.
+\OUT  4: Return to Lisp Toplevel.
+\OUT Debug> \IN{:continue 1}
+\OUT Use a new ice cream.
+\OUT Enter a new ice cream: \IN{'chocolate}
+\EV CHOCOLATE, CARAMEL, CHERRY
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{restart-bind}, \macref{with-simple-restart}.
+
+\label Notes::
+
+\code
+ (restart-case \i{expression}
+    (\i{name1} \i{arglist1} ...\i{options1}... . \i{body1})
+    (\i{name2} \i{arglist2} ...\i{options2}... . \i{body2}))
+\endcode
+  is essentially equivalent to
+
+\code
+ (block #1=#:g0001
+   (let ((#2=#:g0002 nil))
+        (tagbody
+        (restart-bind ((name1 #'(lambda (&rest temp)
+                                (setq #2# temp)
+                                (go #3=#:g0003))
+                          ...\i{slightly-transformed-options1}...)
+                       (name2 #'(lambda (&rest temp)
+                                (setq #2# temp)
+                                (go #4=#:g0004))
+                          ...\i{slightly-transformed-options2}...))
+        (return-from #1# \i{expression}))
+          #3# (return-from #1#
+                  (apply #'(lambda \i{arglist1} . \i{body1}) #2#))
+          #4# (return-from #1#
+                  (apply #'(lambda \i{arglist2} . \i{body2}) #2#)))))
+\endcode
+
+Unnamed restarts are generally only useful interactively
+    and an interactive option which has no description is of little value.
+    Implementations are encouraged to warn if 
+an unnamed restart is used and no report information
+    is provided
+at compilation    time.  
+At runtime, this error might be noticed when entering
+      the debugger.  Since signaling an error would probably cause recursive
+      entry into the debugger (causing yet another recursive error, etc.) it is
+      suggested that the debugger print some indication of such problems when
+      they occur but not actually signal errors.
+  
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\code
+ (restart-case (signal fred)
+   (a ...)
+   (b ...))
+ \EQ
+ (restart-case
+     (with-condition-restarts fred 
+                              (list (find-restart 'a) 
+                                    (find-restart 'b))
+       (signal fred))
+   (a ...)
+   (b ...))
+\endcode
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\endissue{DECLS-AND-DOC}
+
+\endcom 
+
+%%% ========== RESTART-NAME
+\begincom{restart-name}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues restart-name {restart} {name}
+
+\label Arguments and Values:: 
+
+\param{restart}---a \term{restart}.
+
+\param{name}---a \term{symbol}.
+
+\label Description::
+
+Returns the name of the \param{restart},
+or \nil\ if the \param{restart} is not named.
+
+\label Examples::
+
+\code
+ (restart-case 
+     (loop for restart in (compute-restarts)
+               collect (restart-name restart))
+   (case1 () :report "Return 1." 1)
+   (nil   () :report "Return 2." 2)
+   (case3 () :report "Return 3." 3)
+   (case1 () :report "Return 4." 4))
+\EV (CASE1 NIL CASE3 CASE1 ABORT)
+ ;; In the example above the restart named ABORT was not created
+ ;; explicitly, but was implicitly supplied by the system.
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{compute-restarts}
+\funref{find-restart}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== WITH-CONDITION-RESTARTS
+
+\begincom{with-condition-restarts}\ftype{Macro}
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\label Syntax::
+
+\DefmacWithValuesNewline with-condition-restarts
+		  {condition-form restarts-form \starparam{form}}
+		  {\starparam{result}}
+
+\label Arguments and Values::
+ 
+\param{condition-form}---a \term{form}; \term{evaluated} to produce a \param{condition}.
+
+\param{condition}---a \term{condition} \term{object} resulting from the 
+		    \term{evaluation} of \param{condition-form}.
+
+\param{restart-form}---a \term{form}; \term{evaluated} to produce a \param{restart-list}.
+
+\param{restart-list}---a \term{list} of \term{restart} \term{objects} resulting 
+		       from the \term{evaluation} of \param{restart-form}.
+
+\param{forms}---an \term{implicit progn}; \eval.
+
+\param{results}---the \term{values} returned by \param{forms}.
+
+\label Description::
+
+First, the \param{condition-form} and \param{restarts-form} are \term{evaluated}
+in normal left-to-right order; the \term{primary values} yielded by these
+\term{evaluations} are respectively called the \param{condition} 
+and the \param{restart-list}.
+
+Next, the \param{forms} are \term{evaluated} in a \term{dynamic environment}
+in which each \term{restart} in \param{restart-list} is associated with
+the \param{condition}.  \Seesection\AssocRestartWithCond.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{restart-case}
+
+\label Notes::
+
+Usually this \term{macro} is not used explicitly in code, 
+since \macref{restart-case} handles most of the common cases
+in a way that is syntactically more concise.
+
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\endcom
+
+
+%%% ========== WITH-SIMPLE-RESTART
+\begincom{with-simple-restart}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValuesNewline with-simple-restart 
+		  {\paren{name format-control \starparam{format-argument}}
+		   \starparam{form}}
+		  {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{name}---a \term{symbol}.
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\param{format-control}---a \term{format control}.
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+\param{format-argument}---an \term{object} (\ie a \term{format argument}).
+
+\param{forms}---an \term{implicit progn}.
+ 
+\param{results}---in the normal situation,
+   the \term{values} returned by the \param{forms};
+   in the exceptional situation where the \term{restart} named \param{name} is invoked,
+   two values---\nil\ and \t.
+ 
+\label Description::
+
+\macref{with-simple-restart} establishes a restart.  
+
+If the restart designated by \param{name} is not invoked while executing \param{forms},
+all values returned by the last of \param{forms} are returned. 
+If the restart designated by \param{name} is invoked,
+control is transferred to \macref{with-simple-restart},
+which returns two values, \nil\ and \t.
+
+If \param{name} is \nil, an anonymous restart is established.
+
+The \param{format-control} and \param{format-arguments} are used 
+report the \term{restart}.
+
+\label Examples::
+
+\code
+ (defun read-eval-print-loop (level)
+   (with-simple-restart (abort "Exit command level ~D." level)
+     (loop
+       (with-simple-restart (abort "Return to command level ~D." level)
+         (let ((form (prog2 (fresh-line) (read) (fresh-line))))
+           (prin1 (eval form)))))))
+\EV READ-EVAL-PRINT-LOOP
+ (read-eval-print-loop 1)
+ (+ 'a 3)
+\OUT Error: The argument, A, to the function + was of the wrong type.
+\OUT        The function expected a number.
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Specify a value to use this time.
+\OUT  2: Return to command level 1.
+\OUT  3: Exit command level 1.
+\OUT  4: Return to Lisp Toplevel.
+\endcode
+
+\code
+ (defun compute-fixnum-power-of-2 (x)
+   (with-simple-restart (nil "Give up on computing 2{\hat}~D." x)
+     (let ((result 1))
+       (dotimes (i x result)
+         (setq result (* 2 result))
+         (unless (fixnump result)
+           (error "Power of 2 is too large."))))))
+COMPUTE-FIXNUM-POWER-OF-2
+ (defun compute-power-of-2 (x)
+   (or (compute-fixnum-power-of-2 x) 'something big))
+COMPUTE-POWER-OF-2
+ (compute-power-of-2 10)
+1024
+ (compute-power-of-2 10000)
+\OUT Error: Power of 2 is too large.
+\OUT To continue, type :CONTINUE followed by an option number.
+\OUT  1: Give up on computing 2{\hat}10000.
+\OUT  2: Return to Lisp Toplevel
+\OUT Debug> \IN{:continue 1}
+\EV SOMETHING-BIG
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{restart-case}
+
+\label Notes::
+
+\macref{with-simple-restart} is shorthand for one of the most
+common uses of \macref{restart-case}.
+
+\macref{with-simple-restart} could be defined by:
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\code
+ (defmacro with-simple-restart ((restart-name format-control
+                                              &rest format-arguments)
+                                &body forms)
+   `(restart-case (progn ,@forms)
+      (,restart-name ()
+          :report (lambda (stream)
+                    (format stream ,format-control ,@format-arguments))
+         (values nil t))))
+\endcode
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+Because the second return value is \t\ in the exceptional case,
+it is common (but not required) to arrange for the second return value
+in the normal case to be missing or \nil\ so that the two situations
+can be distinguished.
+
+\endcom
+
+%-------------------- Pre-Defined Restarts --------------------
+
+
+%%% ========== ABORT
+\begincom{abort}\ftype{Restart}
+
+\label Data Arguments Required::
+
+None.
+
+\label Description::
+
+The intent of the \misc{abort} restart is to allow return to the
+innermost ``command level.''  Implementors are encouraged to make 
+sure that there is always a restart named \funref{abort} 
+around any user code so that user code can call \funref{abort} 
+at any time and expect something reasonable to happen;
+exactly what the reasonable thing is may vary somewhat.  Typically,
+in an interactive listener, the invocation of \funref{abort}
+returns to the \term{Lisp reader} phase of the \term{Lisp read-eval-print loop},
+though in some batch or multi-processing
+situations there may be situations in which having it kill the running 
+process is more appropriate.
+
+\label See Also::
+
+\secref\Restarts,
+{\secref\InterfacesToRestarts},
+\funref{invoke-restart},
+\funref{abort} (\term{function})
+
+\endcom%{abort}
+
+%%% ========== CONTINUE
+\begincom{continue}\ftype{Restart}
+
+\label Data Arguments Required::
+
+None.
+
+\label Description::
+
+\Therestart{continue} is generally part of protocols where there is
+  a single ``obvious'' way to continue, such as in 
+\funref{break} and \funref{cerror}.  Some
+  user-defined protocols may also wish to incorporate it for similar reasons.
+  In general, however, it is more reliable to design a special purpose restart
+  with a name that more directly suits the particular application.
+
+\label Examples::
+
+\code
+ (let ((x 3))
+   (handler-bind ((error #'(lambda (c)
+                             (let ((r (find-restart 'continue c)))
+                               (when r (invoke-restart r))))))
+     (cond ((not (floatp x))
+            (cerror "Try floating it." "~D is not a float." x)
+            (float x))
+           (t x)))) \EV 3.0
+\endcode   
+
+\label See Also::
+
+\secref\Restarts,
+{\secref\InterfacesToRestarts},
+\funref{invoke-restart},
+\funref{continue} (\term{function}),
+\macref{assert},
+\funref{cerror}
+
+\endcom%{continue}
+
+%%% ========== MUFFLE-WARNING
+\begincom{muffle-warning}\ftype{Restart}
+
+\label Data Arguments Required::
+
+None.
+
+\label Description::
+
+This \term{restart} is established by \funref{warn} so that \term{handlers}
+of \typeref{warning} \term{conditions} have a way to tell \funref{warn} 
+that a warning has already been dealt with and that no further action is warranted.
+
+\label Examples::
+
+\code
+ (defvar *all-quiet* nil) \EV *ALL-QUIET*
+ (defvar *saved-warnings* '()) \EV *SAVED-WARNINGS*
+ (defun quiet-warning-handler (c)
+   (when *all-quiet*
+     (let ((r (find-restart 'muffle-warning c)))
+       (when r 
+         (push c *saved-warnings*)
+         (invoke-restart r)))))
+\EV CUSTOM-WARNING-HANDLER
+ (defmacro with-quiet-warnings (&body forms)
+   `(let ((*all-quiet* t)
+          (*saved-warnings* '()))
+      (handler-bind ((warning #'quiet-warning-handler))
+        ,@forms
+        *saved-warnings*)))
+\EV WITH-QUIET-WARNINGS
+ (setq saved
+   (with-quiet-warnings
+     (warn "Situation #1.")
+     (let ((*all-quiet* nil))
+       (warn "Situation #2."))
+     (warn "Situation #3.")))
+\OUT Warning: Situation #2.
+\EV (#<SIMPLE-WARNING 42744421> #<SIMPLE-WARNING 42744365>)
+ (dolist (s saved) (format t "~&~A~%" s))
+\OUT Situation #3.
+\OUT Situation #1.
+\EV NIL
+\endcode
+
+\label See Also::
+
+\secref\Restarts,
+{\secref\InterfacesToRestarts},
+\funref{invoke-restart},
+\funref{muffle-warning} (\term{function}),
+\funref{warn}
+
+\endcom%{muffle-warning}
+
+%%% ========== STORE-VALUE
+\begincom{store-value}\ftype{Restart}
+
+\label Data Arguments Required::
+
+a value to use instead (on an ongoing basis).
+
+\label Description::
+
+\Therestart{store-value} is generally used by \term{handlers}
+trying to recover from errors of \term{types} such as \typeref{cell-error} 
+or \typeref{type-error}, which may wish to supply a replacement datum to
+be stored permanently.
+
+\label Examples::
+
+\code
+ (defun type-error-auto-coerce (c)
+   (when (typep c 'type-error)
+     (let ((r (find-restart 'store-value c)))
+       (handler-case (let ((v (coerce (type-error-datum c)
+                                      (type-error-expected-type c))))
+                       (invoke-restart r v))
+         (error ()))))) \EV TYPE-ERROR-AUTO-COERCE
+ (let ((x 3))
+   (handler-bind ((type-error #'type-error-auto-coerce))
+     (check-type x float)
+     x)) \EV 3.0
+\endcode   
+
+\label See Also::
+
+{\secref\Restarts},
+{\secref\InterfacesToRestarts},
+\funref{invoke-restart},
+\funref{store-value} (\term{function}),
+\macref{ccase},
+\macref{check-type},
+\macref{ctypecase},
+\funref{use-value} (\term{function} and \term{restart})
+
+\endcom%{store-value}
+
+
+%%% ========== USE-VALUE
+\begincom{use-value}\ftype{Restart}
+
+\label Data Arguments Required::
+
+a value to use instead (once).
+
+\label Description::
+
+\Therestart{use-value} is generally used by \term{handlers} trying 
+to recover from errors of \term{types} such as \typeref{cell-error}, 
+where the handler may wish to supply a replacement datum for one-time use.
+
+\label See Also::
+
+{\secref\Restarts},
+{\secref\InterfacesToRestarts},
+\funref{invoke-restart},
+\funref{use-value} (\term{function}),
+\funref{store-value} (\term{function} and \term{restart})
+
+\endcom%{use-value}
+
+%%% ========== ABORT
+%%% ========== CONTINUE
+%%% ========== MUFFLE-WARNING
+%%% ========== STORE-VALUE
+%%% ========== USE-VALUE
+\begincom{abort, continue, muffle-warning, store-value, use-value}\ftype{Function}
+\idxref{abort}\idxref{continue}\idxref{muffle-warning}\idxref{store-value}\idxref{use-value}
+
+\label Syntax::
+
+%!!! KMP: Issue CONDITION-RESTARTS forgot to add the condition argument here,
+%         but I have added it tentatively (pending x3j13 approval) since I'm 
+%         sure it was intended.  (MUFFLE-WARNING-CONDITION-ARGUMENT was the technical
+%         issue that was raised to fix this, but it was never voted upon.)
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\DefunNoReturn abort {{\opt} condition}
+\DefunWithValues continue {{\opt} condition} {\nil}
+\DefunNoReturn muffle-warning {{\opt} condition}
+\DefunWithValues store-value {value {\opt} condition} {\nil}
+\DefunWithValues use-value {value {\opt} condition} {\nil}
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\label Arguments and Values::
+
+\param{value}---an \term{object}.
+
+\issue{MUFFLE-WARNING-CONDITION-ARGUMENT}
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\param{condition}---a \term{condition} \term{object}, or \nil.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\endissue{MUFFLE-WARNING-CONDITION-ARGUMENT}
+
+\label Description::
+
+Transfers control to the most recently established \term{applicable restart}
+having the same name as the function.  That is,
+  \thefunction{abort}    searches for an \term{applicable} \misc{abort}    \term{restart}, 
+  \thefunction{continue} searches for an \term{applicable} \misc{continue} \term{restart},
+and so on.
+
+If no such \term{restart} exists, 
+the functions
+     \funref{continue},
+     \funref{store-value}, 
+ and \funref{use-value}
+return \nil, and 
+the functions
+     \funref{abort}
+ and \funref{muffle-warning}
+signal an error \oftype{control-error}.
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+When \param{condition} is \term{non-nil},
+only those \term{restarts} are considered that are 
+  either explicitly associated with that \param{condition},
+      or not associated with any \term{condition};
+that is, the excluded \term{restarts} are 
+those that are associated with a non-empty set of \term{conditions}
+of which the given \param{condition} is not an \term{element}.
+If \param{condition} is \nil, all \term{restarts} are considered.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\label Examples::
+
+\code
+;;; Example of the ABORT retart
+
+ (defmacro abort-on-error (&body forms)
+   `(handler-bind ((error #'abort))
+      ,@forms)) \EV ABORT-ON-ERROR
+ (abort-on-error (+ 3 5)) \EV 8
+ (abort-on-error (error "You lose."))
+\OUT Returned to Lisp Top Level.
+
+;;; Example of the CONTINUE restart
+
+ (defun real-sqrt (n)
+   (when (minusp n)
+     (setq n (- n))
+     (cerror "Return sqrt(~D) instead." "Tried to take sqrt(-~D)." n))
+   (sqrt n))
+
+ (real-sqrt 4) \EV 2
+ (real-sqrt -9)
+\OUT Error: Tried to take sqrt(-9).
+\OUT To continue, type :CONTINUE followed by an option number:
+\OUT  1: Return sqrt(9) instead.
+\OUT  2: Return to Lisp Toplevel.
+\OUT Debug> \IN{(continue)}
+\OUT Return sqrt(9) instead.
+\EV 3
+ 
+ (handler-bind ((error #'(lambda (c) (continue))))
+   (real-sqrt -9)) \EV 3
+
+;;; Example of the MUFFLE-WARNING restart
+
+ (defun count-down (x)
+   (do ((counter x (1- counter)))
+       ((= counter 0) 'done)
+     (when (= counter 1)
+       (warn "Almost done"))
+     (format t "~&~D~%" counter)))
+\EV COUNT-DOWN
+ (count-down 3)
+\OUT 3
+\OUT 2
+\OUT Warning: Almost done
+\OUT 1
+\EV DONE
+ (defun ignore-warnings-while-counting (x)
+   (handler-bind ((warning #'ignore-warning))
+     (count-down x)))
+\EV IGNORE-WARNINGS-WHILE-COUNTING
+ (defun ignore-warning (condition)
+   (declare (ignore condition))
+   (muffle-warning))
+\EV IGNORE-WARNING
+ (ignore-warnings-while-counting 3)
+\OUT 3
+\OUT 2
+\OUT 1
+\EV DONE
+
+;;; Example of the STORE-VALUE and USE-VALUE restarts
+
+ (defun careful-symbol-value (symbol)
+   (check-type symbol symbol)
+   (restart-case (if (boundp symbol)
+                     (return-from careful-symbol-value 
+                                  (symbol-value symbol))
+                     (error 'unbound-variable
+                            :name symbol))
+     (use-value (value)
+       :report "Specify a value to use this time."
+       value)
+     (store-value (value)
+       :report "Specify a value to store and use in the future."
+       (setf (symbol-value symbol) value))))
+ (setq a 1234) \EV 1234
+ (careful-symbol-value 'a) \EV 1234
+ (makunbound 'a) \EV A
+ (careful-symbol-value 'a)
+\OUT Error: A is not bound.
+\OUT To continue, type :CONTINUE followed by an option number.
+\OUT  1: Specify a value to use this time.
+\OUT  2: Specify a value to store and use in the future.
+\OUT  3: Return to Lisp Toplevel.
+\OUT Debug> \IN{(use-value 12)}
+\EV 12
+ (careful-symbol-value 'a)
+\OUT Error: A is not bound.
+\OUT To continue, type :CONTINUE followed by an option number.
+\OUT   1: Specify a value to use this time.
+\OUT   2: Specify a value to store and use in the future.
+\OUT   3: Return to Lisp Toplevel.
+\OUT Debug> \IN{(store-value 24)}
+\EV 24
+ (careful-symbol-value 'a)
+\EV 24
+
+;;; Example of the USE-VALUE restart
+
+ (defun add-symbols-with-default (default &rest symbols)
+   (handler-bind ((sys:unbound-symbol
+                    #'(lambda (c)
+                        (declare (ignore c)) 
+                        (use-value default))))
+     (apply #'+ (mapcar #'careful-symbol-value symbols))))
+\EV ADD-SYMBOLS-WITH-DEFAULT
+ (setq x 1 y 2) \EV 2
+ (add-symbols-with-default 3 'x 'y 'z) \EV 6
+
+
+\endcode
+ 
+\label Side Effects::
+
+A transfer of control may occur if an appropriate \term{restart} is available,
+or (in the case of \thefunction{abort} or \thefunction{muffle-warning})
+execution may be stopped.
+
+\label Affected By::
+
+Each of these functions can be affected by 
+the presence of a \term{restart} having the same name.
+
+\label Exceptional Situations::
+
+If an appropriate \misc{abort} \term{restart}
+ is not available for \thefunction{abort},
+or an appropriate \misc{muffle-warning} \term{restart} 
+ is not available for \thefunction{muffle-warning},
+an error \oftype{control-error} is signaled.
+
+\label See Also::
+
+\funref{invoke-restart},
+{\secref\Restarts},
+{\secref\InterfacesToRestarts},
+\macref{assert},
+\macref{ccase},
+\funref{cerror},
+\macref{check-type},
+\macref{ctypecase},
+\funref{use-value},
+\funref{warn}
+
+\label Notes::
+
+\code
+ (abort condition) \EQ (invoke-restart 'abort)
+ (muffle-warning)  \EQ (invoke-restart 'muffle-warning)
+ (continue)        \EQ (let ((r (find-restart 'continue))) (if r (invoke-restart r)))
+ (use-value \param{x}) \EQ (let ((r (find-restart 'use-value))) (if r (invoke-restart r \param{x})))
+ (store-value x) \EQ (let ((r (find-restart 'store-value))) (if r (invoke-restart r \param{x})))
+\endcode
+
+No functions defined in this specification are required to provide
+a \misc{use-value} \term{restart}.
+
+\endcom

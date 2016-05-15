@@ -1,0 +1,48 @@
+====== Macro DESTRUCTURING-BIND ======
+
+
+====Syntax====
+
+\DefmacWithValuesNewline destructuring-bind {lambda-list expression \starparam{declaration} \starparam{form}} {\starparam{result}}
+
+====Arguments and Values====
+
+
+//lambda-list// - a //[[CL:Glossary:destructuring lambda list]]//.
+
+//expression// - a //[[CL:Glossary:form]]//.
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//forms// - an //[[CL:Glossary:implicit progn]]//.
+
+//results// - the //[[CL:Glossary:values]]// returned by the //[[CL:Glossary:forms]]//.
+
+====Description====
+
+**[[CL:Macros:destructuring-bind]]** binds the variables specified in //lambda-list// to the corresponding values in the tree structure resulting from the evaluation of //expression//; then **[[CL:Macros:destructuring-bind]]** evaluates //forms//.
+
+
+The //lambda-list// supports destructuring as described in \secref\DestructuringLambdaLists.
+
+====Examples==== <blockquote> (defun iota (n) (loop for i from 1 to n collect i)) ;helper (destructuring-bind ((a &optional (b 'bee)) one two three) `((alpha) ,@(iota 3)) (list a b three two one)) → (ALPHA BEE 3 2 1) </blockquote>
+
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+If the result of evaluating the //expression// does not match the destructuring pattern, an error of type **[[CL:Types:error]]** should be signaled.
+
+====See Also====
+
+\specref{macrolet}, **[[CL:Macros:defmacro]]**
+
+====Notes====
+
+None.
+
+
+\issue{DECLS-AND-DOC} \issue{DESTRUCTURING-BIND:NEW-MACRO}

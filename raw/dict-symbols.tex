@@ -1,0 +1,1577 @@
+% -*- Mode: TeX -*-
+
+%!!! Sandra: Avoid talking about "symbols in the foo package"
+%      This is ambiguous.  Does it mean "accessible in", "external in", 
+%      "whose home package is", ...?
+
+% Symbol Types
+% Symbol Creation
+% Symbol Accessors
+% Symbol Properties
+% Symbol Function/Value
+
+%-------------------- Symbol Types --------------------
+
+\begincom{symbol}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{symbol},
+\typeref{t}
+
+\label Description::
+
+%% 11.0.0 11
+%% 10.3.0 2
+%% 10.3.0 3                                
+%%% 11.0.0 12
+% Some stuff about INTERN, IMPORT, SHADOWING-IMPORT, UNINTERN, etc. was commented out.
+
+\term{Symbols} are used for their \term{object} identity to name various entities
+in \clisp, including (but not limited to) linguistic entities such as
+\term{variables} and \term{functions}.
+
+\term{Symbols} can be collected together into \term{packages}.
+A \term{symbol} is said to be \term{interned} in a \term{package} 
+if it is \term{accessible} in that \term{package};
+the same \term{symbol} can be \term{interned} in more than one \term{package}.
+If a \term{symbol} is not \term{interned} in any \term{package}, 
+it is called \term{uninterned}.
+
+An \term{interned} \term{symbol} is uniquely identifiable by its \term{name} from 
+any \term{package} in which it is \term{accessible}.
+
+%!!! Sandra: I REALLY dislike this terminology.  Can't we call these "attributes" 
+%     rather than "components" and leave out the discussion of "cells" entirely?
+
+% My attempt at simplifying some of this convoluted discussion of ``cells''
+% follows.  --sjl 16 Mar 92
+%\term{Symbols} have the following components, or \term{cells}.
+%(In each case, it is \term{implementation-dependent} how these \term{cells}
+%are represented.  For example, they might be explicitly represented as a ``slots''
+%in the \term{symbol} itself, or they might be represented as external associations 
+%between the \term{symbol} and the \term{cell} \term{value} (if any) in some 
+%\term{environment} or table, or in some cases they might not be explicitly
+%represented at all.)
+
+\term{Symbols} have the following attributes. 
+%% "historically" => "historical" per Boyer/Kaufmann/Moore #11 (by X3J13 vote at May 4-5, 1994 meeting)
+%% -kmp 9-May-94
+For historical reasons,
+these are sometimes referred to as \term{cells}, although the actual
+internal representation of \term{symbols} and their attributes is
+\term{implementation-dependent}.
+
+\beginlist
+
+%% 10.0.0 5
+%% 10.2.0 1
+\itemitem{\b{Name}}
+ 
+The \term{name} of a \term{symbol} is a \term{string} used to identify the \term{symbol}.
+Every \term{symbol} has a \term{name}, 
+\issue{CHARACTER-PROPOSAL:2-6-3}
+and the consequences are undefined if that \term{name} is altered.  
+\endissue{CHARACTER-PROPOSAL:2-6-3}
+The \term{name} is used as part of the external, printed representation of
+the \term{symbol}; \seesection\CharacterSyntax.
+\Thefunction{symbol-name} returns the \term{name} of a given \term{symbol}.
+\issue{CHARACTER-PROPOSAL:2-6-2}
+%% I replaced this on suggestion of KAB.  It doesn't match CHARACTER-PROPOSAL 2.6.2,
+%% so who knows how it got here. -kmp 21-Jan-92
+% The \term{characters} in a \term{symbol}'s \term{name} must be \term{graphic},
+% and may come from any supported \term{character} \term{repertoire}.
+A \term{symbol} may have any \term{character} in its \term{name}.
+\endissue{CHARACTER-PROPOSAL:2-6-2}
+
+%% 10.3.0 1
+%% 10.0.0 3
+%% 10.0.0 4
+%% 10.1.0 1
+%% 10.1.0 2
+%% 10.1.0 3
+
+%% 10.0.0 4
+%% 10.3.0 4
+%% 11.0.0 8
+%% 11.0.0 10
+%% 11.0.0 28
+\itemitem{\b{Package}}
+
+The \term{object} in this \term{cell} is called the \term{home package} 
+of the \term{symbol}.  If the \term{home package} is \nil, the \term{symbol}
+is sometimes said to have no \term{home package}.
+
+When a \term{symbol} is first created, it has no \term{home package}.
+When it is first \term{interned}, the \term{package} in which it is
+initially \term{interned} becomes its \term{home package}.
+The \term{home package} of a \term{symbol} can be \term{accessed}
+by using \thefunction{symbol-package}.
+
+If a \term{symbol} is \term{uninterned} from the \term{package} 
+which is its \term{home package}, its \term{home package} is set to \nil.
+Depending on whether there is another \term{package} in which the \term{symbol}
+is \term{interned}, the symbol might or might not really be an \term{uninterned} \term{symbol}.
+A \term{symbol} with no \term{home package} is therefore called 
+\term{apparently uninterned}.
+
+\issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+The consequences are undefined if an attempt is made to alter the \term{home package}
+of a \term{symbol} 
+%Added per Sandra -kmp 13-Dec-91
+% ``accessible'' is wrong here -- sjl 16 Mar 92
+%accessible
+external
+in \thepackage{common-lisp} or \thepackage{keyword}.
+\endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+%% 10.1.0 4
+\itemitem{\b{Property list}}
+
+The \term{property list} of a \term{symbol} provides a mechanism for
+associating named attributes with that \term{symbol}.
+The operations for adding and removing entries are \term{destructive}
+to the \term{property list}.  \clisp\ provides \term{operators} both for
+direct manipulation of \term{property list} \term{objects} 
+ (\eg see \funref{getf}, \funref{remf}, and \funref{symbol-plist})
+and for implicit manipulation of a \term{symbol}'s \term{property list} 
+by reference to the \term{symbol} 
+ (\eg see \funref{get} and \funref{remprop}).
+The \term{property list} associated with a \term{fresh} \term{symbol} is 
+initially \term{null}.
+%!!! Sandra: What about the property list of symbols in the COMMON-LISP package?
+
+%% 10.0.0 8                  
+\itemitem{\b{Value}}
+
+%!!! Sandra: You could avoid this awkwardness [in sentence 1] by not talking about
+%     cells at all!  All you have to say is:
+%      "If a symbol has a value attribute, it is said to be bound ..."
+%!!! KAB: Does this first sentence really have to be said?
+% My attempt at rewording this is below.  --sjl 16 Mar 92
+%Conceptually, every \term{symbol} has a \term{value cell}, although
+%no \term{implementation} is required to explicitly represent it as an \term{object}.
+%A \term{symbol}'s \term{value cell} might or might not contain an \term{object}.
+%If it does contain an \term{object}, it is said to be \term{bound},
+If a symbol has a value attribute, it is said to be \term{bound},
+and that fact can be detected by \thefunction{boundp}.
+The \term{object} contained in the \term{value cell} of a \term{bound} \term{symbol}
+is the \term{value} of the \term{global variable} named by that \term{symbol}, 
+and can be \term{accessed} by \thefunction{symbol-value}.
+A \term{symbol} can be made to be \term{unbound} by \thefunction{makunbound}.
+
+The consequences are undefined if an attempt is made to change the \term{value}
+of a \term{symbol} that names a \term{constant variable}, or to make such a 
+\term{symbol} be \term{unbound}.
+
+\itemitem{\b{Function}}
+
+%!!! Sandra: See comment on "Value" above.
+%!!! KAB: Does this first sentence really have to be said?
+% My attempt at rewording this is below.  --sjl 16 Mar 92
+%Conceptually, every \term{symbol} has a \term{function cell}, although
+%no \term{implementation} is required to explicitly represent it as an \term{object}.
+%A \term{symbol}'s \term{function cell} might or might not contain an \term{object}.
+%If it does contain an \term{object}, it is said to be \term{fbound}, 
+If a symbol has a function attribute, it is said to be \term{fbound},
+and that fact can be detected by \thefunction{fboundp}.
+If the \term{symbol} is the \term{name} of a \term{function} in the \term{global environment},
+the \term{function cell} contains the \term{function}, 
+and can be \term{accessed} by \thefunction{symbol-function}.
+If the \term{symbol} is the \term{name} of either
+   a \term{macro} in the \term{global environment} (see \funref{macro-function})
+or a \term{special operator} (see \funref{special-operator-p}),
+the \term{symbol} is \term{fbound}, 
+and can be \term{accessed} by \thefunction{symbol-function},
+but the \term{object} which the \term{function cell}
+contains is of \term{implementation-dependent} \term{type} and purpose.
+A \term{symbol} can be made to be \term{funbound} by \thefunction{fmakunbound}.
+
+The consequences are undefined if an attempt is made to change the \term{functional value}
+of a \term{symbol} that names a \term{special form}.
+
+\endlist 
+
+Operations on a \term{symbol}'s \term{value cell} and \term{function cell} are
+sometimes described in terms of their effect on the \term{symbol} itself, but 
+the user should keep in mind that there is an intimate relationship between the
+contents of those \term{cells} and the \term{global variable} or 
+global \term{function} definition, respectively.
+
+\term{Symbols} are used as identifiers for \term{lexical variables} and 
+lexical \term{function} definitions, but in that role, only their \term{object}
+identity is significant.  \clisp\ provides no operation on a \term{symbol} that
+can have any effect on a \term{lexical variable} or 
+on a lexical \term{function} definition.
+
+\label See Also::
+
+{\secref\SymbolTokens},
+{\secref\PotentialNumbersAsTokens},
+{\secref\PrintingSymbols}
+
+\endcom%{symbol}\ftype{System Class}
+
+\begincom{keyword}\ftype{Type}
+
+%Added per Barrett's suggestion. -kmp 23-Oct-90
+
+\label Supertypes:: 
+
+\typeref{keyword},
+\typeref{symbol},
+\typeref{t}
+
+\label Description::
+
+\Thetype{keyword} includes all \term{symbols} \term{interned} \thepackage{keyword}.
+
+%!!! Non-standard use of "intern"?
+\term{Interning} a \term{symbol} in \thepackage{keyword} has three automatic effects:
+
+\beginlist
+\item{1.} It causes the \term{symbol} to become \term{bound} to itself.
+\item{2.} It causes the \term{symbol} to become an \term{external symbol}
+	  of \thepackage{keyword}.
+\item{3.} It causes the \term{symbol} to become a \term{constant variable}.
+\endlist
+ 
+\label See Also::
+
+\funref{keywordp}
+
+\endcom%{keyword}\ftype{Type}
+
+%%% ========== SYMBOLP
+\begincom{symbolp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues symbolp {object} {generalized-boolean}
+
+\label Arguments and Values:: 
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 4
+\TypePredicate{object}{symbol}
+
+\label Examples::
+
+\code
+ (symbolp 'elephant) \EV \term{true}
+ (symbolp 12) \EV \term{false}
+ (symbolp nil) \EV \term{true}
+ (symbolp '()) \EV \term{true}
+ (symbolp :test) \EV \term{true}
+ (symbolp "hello") \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{keywordp},
+\typeref{symbol},
+\funref{typep}
+
+\label Notes::
+
+\code
+ (symbolp \param{object}) \EQ (typep \param{object} 'symbol)
+\endcode
+
+\endcom
+
+%%% ========== KEYWORDP
+\begincom{keywordp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues keywordp {object} {generalized-boolean}
+
+\label Arguments and Values:: 
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 10.3.0 15
+\Predicate{object}{a \term{keyword}\meaning{1}}
+
+\label Examples::
+
+\code
+ (keywordp 'elephant) \EV \term{false}
+ (keywordp 12) \EV \term{false}
+ (keywordp :test) \EV \term{true}
+ (keywordp ':test) \EV \term{true}
+ (keywordp nil) \EV \term{false}
+ (keywordp :nil) \EV \term{true}
+ (keywordp '(:test)) \EV \term{false}
+ (keywordp "hello") \EV \term{false}
+ (keywordp ":hello") \EV \term{false}
+ (keywordp '&optional) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{constantp},
+\funref{keyword},
+\funref{symbolp},
+\funref{symbol-package}
+                                               
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Symbol Creation --------------------
+
+%%% ========== MAKE-SYMBOL
+\begincom{make-symbol}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-symbol {name} {new-symbol}
+
+\label Arguments and Values:: 
+
+%"simple string" => "string" per Barrett. -kmp 14-Feb-92
+\param{name}---a \term{string}.
+
+\param{new-symbol}---a \term{fresh}, \term{uninterned} \term{symbol}.
+
+\label Description::
+
+%% 10.3.0 5
+\funref{make-symbol} creates and returns a \term{fresh}, \term{uninterned}
+\term{symbol} whose \term{name} is the given \param{name}.
+The \param{new-symbol} is neither \term{bound} nor \term{fbound} 
+and has a \term{null} \term{property list}.
+
+%% 10.3.0 6
+It is \term{implementation-dependent} whether the \term{string} 
+that becomes the \param{new-symbol}'s \term{name} is the given
+\param{name} or a copy of it.  Once a \term{string}
+has been given as the \param{name} \term{argument} to
+\term{make-symbol}, the consequences are undefined if a
+subsequent attempt is made to alter that \term{string}.
+
+\label Examples::
+
+\code
+ (setq temp-string "temp") \EV "temp"
+ (setq temp-symbol (make-symbol temp-string)) \EV #:|temp|
+ (symbol-name temp-symbol) \EV "temp"
+ (eq (symbol-name temp-symbol) temp-string) \EV \term{implementation-dependent}
+ (find-symbol "temp") \EV NIL, NIL
+ (eq (make-symbol temp-string) (make-symbol temp-string)) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+% This sentence seems totally misplaced.  --sjl 16 Mar 92
+%The \term{value} of the \term{place} named by \param{index}, if any, is modified.
+
+%% Sandra thinks this is excessive.
+%Creates a \term{fresh} \term{symbol}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+%"simple string" => "string" per Barrett. -kmp 14-Feb-92
+\Shouldchecktype{name}{a \term{string}}
+
+\label See Also::
+
+\funref{copy-symbol}
+
+\label Notes::
+
+No attempt is made by \funref{make-symbol} to convert the case
+of the \term{name} to uppercase.  The only case conversion which ever 
+occurs for \term{symbols} is done by the \term{Lisp reader}.
+The program interface to \term{symbol} creation retains case,
+and the program interface to interning symbols is case-sensitive.
+
+\endcom
+
+%%% ========== COPY-SYMBOL
+\begincom{copy-symbol}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues copy-symbol {symbol {\opt} copy-properties} {new-symbol}
+
+\label Arguments and Values::
+
+\param{symbol}---a \term{symbol}.
+
+\param{copy-properties}---a \term{generalized boolean}.
+  \Default{\term{false}}
+
+\param{new-symbol}---a \term{fresh}, \term{uninterned} \term{symbol}.
+
+\label Description::
+
+%% 10.3.0 8
+\issue{COPY-SYMBOL-PRINT-NAME:EQUAL}
+\funref{copy-symbol} returns a \term{fresh}, \term{uninterned} \term{symbol},
+the \term{name} of which is \funref{string=} to and possibly the \term{same} as
+the \term{name} of the given \param{symbol}.
+\endissue{COPY-SYMBOL-PRINT-NAME:EQUAL}
+
+If \param{copy-properties} is \term{false},
+the \param{new-symbol} is neither \term{bound} nor \term{fbound} 
+and has a \term{null} \term{property list}.
+If \param{copy-properties} is \term{true}, then
+the initial \term{value} of \param{new-symbol} is
+ the \term{value} of \param{symbol},
+the initial \term{function} definition of \param{new-symbol} is
+ the \term{functional value} of \param{symbol},
+and the \term{property list} of \param{new-symbol} is
+\issue{COPY-SYMBOL-COPY-PLIST:COPY-LIST}
+ a \term{copy}\meaning{2} of the \term{property list} of \param{symbol}.
+\endissue{COPY-SYMBOL-COPY-PLIST:COPY-LIST}
+
+\label Examples::
+
+\code
+ (setq fred 'fred-smith) \EV FRED-SMITH
+ (setf (symbol-value fred) 3) \EV 3
+ (setq fred-clone-1a (copy-symbol fred nil)) \EV #:FRED-SMITH
+ (setq fred-clone-1b (copy-symbol fred nil)) \EV #:FRED-SMITH
+ (setq fred-clone-2a (copy-symbol fred t))   \EV #:FRED-SMITH
+ (setq fred-clone-2b (copy-symbol fred t))   \EV #:FRED-SMITH
+ (eq fred fred-clone-1a) \EV \term{false}
+ (eq fred-clone-1a fred-clone-1b) \EV \term{false}
+ (eq fred-clone-2a fred-clone-2b) \EV \term{false}
+ (eq fred-clone-1a fred-clone-2a) \EV \term{false}
+ (symbol-value fred) \EV 3
+ (boundp fred-clone-1a) \EV \term{false}
+ (symbol-value fred-clone-2a) \EV 3
+ (setf (symbol-value fred-clone-2a) 4) \EV 4
+ (symbol-value fred) \EV 3
+ (symbol-value fred-clone-2a) \EV 4
+ (symbol-value fred-clone-2b) \EV 3
+ (boundp fred-clone-1a) \EV \term{false}
+ (setf (symbol-function fred) #'(lambda (x) x)) \EV #<FUNCTION anonymous>
+ (fboundp fred) \EV \term{true}
+ (fboundp fred-clone-1a) \EV \term{false}
+ (fboundp fred-clone-2a) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+%% Sandra thinks this is excessive.
+%Creates a \term{fresh} \term{symbol}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{symbol}{a \term{symbol}}
+
+\label See Also::
+
+\funref{make-symbol}
+
+\label Notes::
+
+Implementors are encouraged not to copy the \term{string} 
+which is the \term{symbol}'s \term{name} unnecessarily.  
+Unless there is a good reason to do so, the normal implementation
+strategy is for the \param{new-symbol}'s \term{name} to
+be \term{identical} to the given \param{symbol}'s \term{name}.
+
+%% Barrett: This is only true if the implementation of MAKE-SYMBOL 
+%   doesn't copy, which it might.
+%
+% \code
+% (copy-symbol \param{x} nil) \EQ (make-symbol (symbol-name \param{x}))
+% \endcode
+
+\endcom
+
+%%% ========== GENSYM
+\begincom{gensym}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues gensym {{\opt} x} {new-symbol}
+
+\label Arguments and Values::
+
+\param{x}---a \term{string} or a non-negative \term{integer}.
+	    \HairyDefault.
+
+\param{new-symbol}---a \term{fresh}, \term{uninterned} \term{symbol}.
+
+\label Description::
+
+%% 10.3.0 9
+%% 10.3.0 10
+%% 10.3.0 11
+
+Creates and returns a \term{fresh}, \term{uninterned} \term{symbol},
+as if by calling \funref{make-symbol}.  (The only difference between
+\funref{gensym} and \funref{make-symbol} is in how the \param{new-symbol}'s 
+\term{name} is determined.)
+
+The \term{name} of the \param{new-symbol} is the concatenation 
+of a prefix, which defaults to \f{"G"}, and
+\issue{GENSYM-NAME-STICKINESS:LIKE-TEFLON}
+a suffix, which is the decimal representation of a number that
+defaults to \thevalueof{*gensym-counter*}.
+
+If \param{x} is supplied, and is a \term{string}, then that \term{string} 
+is used as a prefix instead of \f{"G"} for this call to \funref{gensym} only.
+
+If \param{x} is supplied, and is an \term{integer}, then that \term{integer},
+instead of \thevalueof{*gensym-counter*}, is used as the suffix
+for this call to \funref{gensym} only.
+
+If and only if no explicit suffix is supplied,
+\varref{*gensym-counter*} is incremented after it is used.
+\endissue{GENSYM-NAME-STICKINESS:LIKE-TEFLON}
+
+\label Examples::
+
+\code
+ (setq sym1 (gensym)) \EV #:G3142
+ (symbol-package sym1) \EV NIL
+ (setq sym2 (gensym 100)) \EV #:G100
+ (setq sym3 (gensym 100)) \EV #:G100
+ (eq sym2 sym3) \EV \term{false}
+ (find-symbol "G100") \EV NIL, NIL
+ (gensym "T") \EV #:T3143
+ (gensym) \EV #:G3144
+\endcode
+
+\label Side Effects::
+
+%% Sandra thinks this is excessive.
+%Creates a \term{fresh} \term{symbol}.
+
+Might increment \varref{*gensym-counter*}.
+
+\label Affected By::
+
+\varref{*gensym-counter*}
+
+\label Exceptional Situations::
+
+\Shouldchecktype{x}{a \term{string} or a non-negative \term{integer}}
+
+\label See Also::
+
+\funref{gentemp},
+\varref{*gensym-counter*}
+
+\label Notes::
+
+The ability to pass a numeric argument to \funref{gensym} has been deprecated;
+explicitly \term{binding} \varref{*gensym-counter*} is now stylistically preferred.
+(The somewhat baroque conventions for the optional argument are historical
+in nature, and supported primarily for compatibility with older dialects
+of \Lisp.   In modern code, it is recommended that the only kind of argument
+used be a string prefix.  In general, though, to obtain more flexible control
+of the \param{new-symbol}'s \term{name}, consider using \funref{make-symbol} instead.)
+
+\endcom
+
+%%% ========== *GENSYM-COUNTER*
+\begincom{*gensym-counter*}\ftype{Variable}
+\issue{GENSYM-NAME-STICKINESS:LIKE-TEFLON}
+
+\label Value Type::
+
+a non-negative \term{integer}.
+
+\label Initial Value::
+
+%A non-negative \term{integer}, the magnitude of which is 
+\term{implementation-dependent}.
+
+\label Description::
+
+A number which will be used in constructing the \term{name} of 
+the next \term{symbol} generated by \thefunction{gensym}.
+
+\varref{*gensym-counter*} can be either \term{assigned} or \term{bound}
+at any time, but its value must always be a non-negative \term{integer}.
+ 
+\label Examples:\None.
+
+\label Affected By::
+
+\funref{gensym}.
+
+\label See Also::
+
+\funref{gensym}
+
+\label Notes::
+
+The ability to pass a numeric argument to \funref{gensym} has been deprecated;
+explicitly \term{binding} \varref{*gensym-counter*} is now stylistically preferred.
+\endissue{GENSYM-NAME-STICKINESS:LIKE-TEFLON}
+\endcom
+
+%%% ========== GENTEMP
+\begincom{gentemp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues gentemp {{\opt} prefix package} {new-symbol}
+
+\label Arguments and Values::
+
+\param{prefix}---a \term{string}.
+ \Default{\f{"T"}}
+
+\param{package}---a \term{package designator}.
+ \Default{the \term{current package}}
+
+\param{new-symbol}---a \term{fresh}, \term{interned} \term{symbol}.
+
+\label Description::
+
+%% 10.3.0 14
+\funref{gentemp} creates and returns a \term{fresh} \term{symbol},
+\term{interned} in the indicated \param{package}.
+%The \term{symbol} is guaranteed to be one that did not previously 
+%exist in \param{package}. 
+The \term{symbol} is guaranteed to be one that was not previously
+\term{accessible} in \param{package}.
+It is neither \term{bound} nor \term{fbound}, and has a \term{null}
+\term{property list}.
+
+The \term{name} of the \param{new-symbol} is the concatenation 
+of the \param{prefix} and a suffix, which is taken from an internal
+counter used only by \funref{gentemp}.  (If a \term{symbol} by that name
+% already exists in \param{package}, the counter is incremented as
+is already \term{accessible} in \param{package}, the counter is incremented as
+many times as is necessary to produce a \term{name} that is not already the
+\term{name} of a \term{symbol} \term{accessible} in \param{package}.)
+
+\label Examples::
+
+\code
+ (gentemp) \EV T1298
+ (gentemp "FOO") \EV FOO1299
+ (find-symbol "FOO1300") \EV NIL, NIL
+ (gentemp "FOO") \EV FOO1300
+ (find-symbol "FOO1300") \EV FOO1300, :INTERNAL
+ (intern "FOO1301") \EV FOO1301, :INTERNAL
+ (gentemp "FOO") \EV FOO1302
+ (gentemp) \EV T1303
+\endcode
+
+\label Side Effects::
+
+Its internal counter is incremented one or more times.
+
+\term{Interns} the \param{new-symbol} in \param{package}.
+
+\label Affected By::
+
+The current state of its internal counter, and
+the current state of the \param{package}.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{prefix}{a \term{string}}
+\Shouldchecktype{package}{a \term{package designator}}
+
+\label See Also::
+
+\funref{gensym}
+
+\label Notes::
+
+The function \funref{gentemp} is deprecated.
+
+If \param{package} is \thepackage{keyword},
+the result is an \term{external symbol} of \param{package}.
+Otherwise, the result is an \term{internal symbol} of \param{package}.
+
+The \funref{gentemp} internal counter is independent of
+\varref{*gensym-counter*}, the counter used by \funref{gensym}.  
+There is no provision for accessing the \funref{gentemp} internal counter.
+
+Just because \funref{gentemp} creates a \term{symbol} which did not
+previously exist does not mean that such a \term{symbol} might not be
+seen in the future (\eg in a data file---perhaps even created by the
+same program in another session).  As such, this symbol is not truly
+unique in the same sense as a \term{gensym} would be.  In particular,
+programs which do automatic code generation should be careful not to
+attach global attributes to such generated \term{symbols} (\eg
+\declref{special} \term{declarations}) and then write them into a file
+because such global attributes might, in a different session, end up
+applying to other \term{symbols} that were automatically generated on
+another day for some other purpose.
+
+\endcom
+
+%-------------------- Symbol Accessors --------------------
+
+%%% ========== SYMBOL-FUNCTION
+\begincom{symbol-function}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues symbol-function {symbol} {contents}
+\Defsetf         symbol-function {symbol} {new-contents}
+
+\label Arguments and Values:: 
+
+\issue{FUNCTION-TYPE:X3J13-MARCH-88}
+% The symbol need not be fbound for the SETF form.  --sjl 16 Mar 92
+%\param{symbol}---an \term{fbound} \term{symbol}.
+\param{symbol}---a \term{symbol}.
+\endissue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+\param{contents}---
+\issue{FUNCTION-TYPE:X3J13-MARCH-88}
+If the \param{symbol} is globally defined as a \term{macro} or a \term{special operator},
+%% Removed per Barrett. -kmp 14-Feb-92
+%and if the \param{symbol} is \term{fbound}, 
+an \term{object} of \term{implementation-dependent} nature and identity is returned.
+If the \param{symbol} is not globally defined as 
+ either a \term{macro} or a \term{special operator},
+and
+ if the \param{symbol} is \term{fbound},
+a \term{function} \term{object} is returned.
+\endissue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+\issue{FUNCTION-TYPE:X3J13-MARCH-88}
+\param{new-contents}---a \term{function}.
+\endissue{FUNCTION-TYPE:X3J13-MARCH-88}
+%% This shouldn't be needed, actually.
+% \issue{FUNCTION-TYPE:X3J13-MARCH-88}
+% The consequences of attempting to make the global \term{function} definition
+% of a \term{symbol} be a \term{symbol}, a \term{list}, or the value returned
+% by \funref{symbol-function} on the name of a \term{macro} or a
+% \term{special form} are unspecified.
+% \endissue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+\label Description::
+
+%% 7.1.1 14
+\term{Accesses} the \term{symbol}'s \term{function cell}.
+
+\label Examples::
+
+%Some examples involving FBOUNDP simplified/corrected per Moore #2 (first public review)
+% -kmp 12-May-93
+\code
+ (symbol-function 'car) \EV #<FUNCTION CAR>
+ (symbol-function 'twice) is an error   ;because TWICE isn't defined.
+ (defun twice (n) (* n 2)) \EV TWICE
+ (symbol-function 'twice) \EV #<FUNCTION TWICE>
+ (list (twice 3)
+       (funcall (function twice) 3)
+       (funcall (symbol-function 'twice) 3))
+\EV (6 6 6)
+ (flet ((twice (x) (list x x)))
+   (list (twice 3)
+         (funcall (function twice) 3)
+         (funcall (symbol-function 'twice) 3)))
+\EV ((3 3) (3 3) 6)   
+ (setf (symbol-function 'twice) #'(lambda (x) (list x x)))
+\EV #<FUNCTION anonymous>
+ (list (twice 3)
+       (funcall (function twice) 3)
+       (funcall (symbol-function 'twice) 3))
+\EV ((3 3) (3 3) (3 3))
+ (fboundp 'defun) \EV \term{true}
+ (symbol-function 'defun)
+\EV \term{implementation-dependent}
+ (functionp (symbol-function 'defun))
+\EV \term{implementation-dependent}
+ (defun symbol-function-or-nil (symbol)
+   (if (and (fboundp symbol) 
+            (not (macro-function symbol))
+            (not (special-operator-p symbol)))
+       (symbol-function symbol)
+       nil)) \EV SYMBOL-FUNCTION-OR-NIL
+ (symbol-function-or-nil 'car) \EV #<FUNCTION CAR>
+ (symbol-function-or-nil 'defun) \EV NIL
+\endcode 
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\macref{defun}
+
+\label Exceptional Situations::
+
+\Shouldchecktype{symbol}{a \term{symbol}}
+
+Should signal \typeref{undefined-function} if \param{symbol} is not \term{fbound}
+and an attempt is made to \term{read} its definition.  (No such error is signaled
+on an attempt to \term{write} its definition.)
+
+\label See Also::
+
+\funref{fboundp},
+\funref{fmakunbound},
+\funref{macro-function},
+\issue{SPECIAL-FORM-P-MISNOMER:RENAME}
+\funref{special-operator-p}
+\endissue{SPECIAL-FORM-P-MISNOMER:RENAME}
+
+\label Notes::
+%% 7.1.1 16
+\funref{symbol-function} cannot \term{access} the value of a lexical function name
+produced by \specref{flet} or \specref{labels}; it can \term{access} only
+the global function value.
+
+%!!! Sandra thinks this should be in the Description.  I'm not so sure. -kmp 13-Dec-91
+\macref{setf} may be used with 
+\funref{symbol-function} to replace a global function
+definition when the \term{symbol}'s function definition 
+does not represent a \term{special operator}.
+ 
+\code
+(symbol-function \param{symbol}) \EQ (fdefinition \param{symbol})
+\endcode
+However, \funref{fdefinition} accepts arguments other than just \term{symbols}.
+
+\endcom
+
+%%% ========== SYMBOL-NAME
+\begincom{symbol-name}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues symbol-name {symbol} {name}
+
+\label Arguments and Values:: 
+
+\param{symbol}---a \term{symbol}.
+
+%"simple string" => "string" per Barrett. -kmp 14-Feb-92
+\param{name}---a \term{string}.
+
+\label Description::
+
+%% 10.2.0 2
+\funref{symbol-name} returns the \term{name} of \param{symbol}.
+\issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+The consequences are undefined if \param{name} is ever modified.
+\endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+\label Examples::
+
+\code
+ (symbol-name 'temp) \EV "TEMP" 
+ (symbol-name :start) \EV "START"
+ (symbol-name (gensym)) \EV "G1234" ;for example
+\endcode
+
+\label Side Effects:\None.                                 
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{symbol}{a \term{symbol}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== SYMBOL-PACKAGE
+\begincom{symbol-package}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues symbol-package {symbol} {contents}
+
+\label Arguments and Values:: 
+
+\param{symbol}---a \term{symbol}.
+
+\param{contents}---a \term{package} \term{object} or \nil.
+
+\label Description::
+
+%% 10.3.0 15
+Returns the \term{home package} of \param{symbol}.
+
+\label Examples::
+
+\code
+ (in-package "CL-USER") \EV #<PACKAGE "COMMON-LISP-USER">
+ (symbol-package 'car) \EV #<PACKAGE "COMMON-LISP">
+ (symbol-package 'bus) \EV #<PACKAGE "COMMON-LISP-USER">
+ (symbol-package :optional) \EV #<PACKAGE "KEYWORD">
+ ;; Gensyms are uninterned, so have no home package.
+ (symbol-package (gensym)) \EV NIL
+ (make-package 'pk1) \EV #<PACKAGE "PK1">
+ (intern "SAMPLE1" "PK1") \EV PK1::SAMPLE1, NIL
+ (export (find-symbol "SAMPLE1" "PK1") "PK1") \EV T
+ (make-package 'pk2 :use '(pk1)) \EV #<PACKAGE "PK2">
+ (find-symbol "SAMPLE1" "PK2") \EV PK1:SAMPLE1, :INHERITED
+ (symbol-package 'pk1::sample1) \EV #<PACKAGE "PK1">
+ (symbol-package 'pk2::sample1) \EV #<PACKAGE "PK1">
+ (symbol-package 'pk1::sample2) \EV #<PACKAGE "PK1">
+ (symbol-package 'pk2::sample2) \EV #<PACKAGE "PK2">
+ ;; The next several forms create a scenario in which a symbol
+ ;; is not really uninterned, but is "apparently uninterned",
+ ;; and so SYMBOL-PACKAGE still returns NIL.
+ (setq s3 'pk1::sample3) \EV PK1::SAMPLE3
+ (import s3 'pk2) \EV T
+ (unintern s3 'pk1) \EV T
+ (symbol-package s3) \EV NIL
+ (eq s3 'pk2::sample3) \EV T
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\funref{import},
+\funref{intern},
+\funref{unintern}
+
+\label Exceptional Situations::
+
+\Shouldchecktype{symbol}{a \term{symbol}}
+
+\label See Also::
+
+\funref{intern}
+
+\label Notes:\None.
+
+\endcom
+
+
+%%% ========== SYMBOL-PLIST
+\begincom{symbol-plist}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues symbol-plist {symbol} {plist}
+\Defsetf         symbol-plist {symbol} {new-plist}
+
+\label Arguments and Values:: 
+
+\param{symbol}---a \term{symbol}.
+
+\param{plist}, \param{new-plist}---a \term{property list}.
+
+\label Description::
+
+%% 10.1.0 14
+%% 10.1.0 16
+\term{Accesses} the \term{property list} of \param{symbol}.
+
+\label Examples::
+
+\code
+ (setq sym (gensym)) \EV #:G9723
+ (symbol-plist sym) \EV ()
+ (setf (get sym 'prop1) 'val1) \EV VAL1
+ (symbol-plist sym) \EV (PROP1 VAL1)
+ (setf (get sym 'prop2) 'val2) \EV VAL2
+ (symbol-plist sym) \EV (PROP2 VAL2 PROP1 VAL1)
+ (setf (symbol-plist sym) (list 'prop3 'val3)) \EV (PROP3 VAL3)
+ (symbol-plist sym) \EV (PROP3 VAL3)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{symbol}{a \term{symbol}}
+
+\label See Also::
+
+\funref{get},
+\funref{remprop}
+%!!! Barmar thinks there should be a concept section describing
+%    the format of a plist.
+
+\label Notes::
+
+The use of \macref{setf} should be avoided, since a \term{symbol}'s
+\term{property list} is a global resource that can contain information 
+established and depended upon by unrelated programs in the same \term{Lisp image}.
+
+\endcom
+
+
+%%% ========== SYMBOL-VALUE
+\begincom{symbol-value}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues symbol-value {symbol} {value}
+\Defsetf         symbol-value {symbol} {new-value}
+
+\label Arguments and Values:: 
+
+\param{symbol}---a \term{symbol} that must have a \term{value}.
+
+\param{value}, \param{new-value}---an \term{object}.
+
+\label Description::
+
+\term{Accesses} the \term{symbol}'s \term{value cell}.
+
+\label Examples::
+
+\code
+ (setf (symbol-value 'a) 1) \EV 1
+ (symbol-value 'a) \EV 1
+ ;; SYMBOL-VALUE cannot see lexical variables.
+ (let ((a 2)) (symbol-value 'a)) \EV 1
+ (let ((a 2)) (setq a 3) (symbol-value 'a)) \EV 1
+ ;; SYMBOL-VALUE can see dynamic variables.
+ (let ((a 2)) 
+   (declare (special a)) 
+   (symbol-value 'a)) \EV 2
+ (let ((a 2)) 
+   (declare (special a)) 
+   (setq a 3)
+   (symbol-value 'a)) \EV 3
+ (let ((a 2))
+   (setf (symbol-value 'a) 3)
+   a) \EV 2
+ a \EV 3
+ (symbol-value 'a) \EV 3
+ (let ((a 4))
+   (declare (special a))
+   (let ((b (symbol-value 'a)))
+     (setf (symbol-value 'a) 5)
+     (values a b))) \EV 5, 4
+ a \EV 3
+ (symbol-value :any-keyword) \EV :ANY-KEYWORD
+ (symbol-value 'nil) \EV NIL
+ (symbol-value '()) \EV NIL
+ ;; The precision of this next one is \term{implementation-dependent}.
+ (symbol-value 'pi) \EV 3.141592653589793d0  
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\funref{makunbound},
+\funref{set},
+\specref{setq}
+
+\label Exceptional Situations::
+
+\Shouldchecktype{symbol}{a \term{symbol}}
+
+Should signal \typeref{unbound-variable} if \param{symbol} is \term{unbound}
+and an attempt is made to \term{read} its \term{value}.  (No such error is signaled
+on an attempt to \term{write} its \term{value}.)
+
+\label See Also::
+
+\funref{boundp}, \funref{makunbound}, \funref{set}, \specref{setq}
+
+\label Notes::
+
+\funref{symbol-value} can be used to get the value of a \term{constant variable}.
+%% 7.1.1 12
+\funref{symbol-value} cannot \term{access} the value of a \term{lexical variable}.
+
+\endcom
+
+%-------------------- Symbol Properties --------------------
+
+%%% ========== GET
+\begincom{get}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues get {symbol indicator {\opt} default} {value}
+\Defsetf         get {symbol indicator {\opt} default} {new-value}
+
+\label Arguments and Values:: 
+
+\param{symbol}---a \term{symbol}.
+
+\param{indicator}---an \term{object}.
+
+\param{default}---an \term{object}.
+ \Default{\nil}
+
+\param{value}---if the indicated property exists,
+		   the \term{object} that is its \term{value};
+		otherwise, the specified \param{default}.
+
+\param{new-value}---an \term{object}.
+
+\label Description::
+
+%% 10.1.0 8
+%% Barrett: Redundant with next paragraph.
+% \funref{get} searches the \term{property list} of \param{symbol} for an
+% indicator \funref{eq} to \param{indicator}.
+
+% \funref{get} returns the corresponding value of an indicator from 
+% the \term{property list} of \param{symbol} \funref{eq} to \param{indicator},
+% if one is found.
+\funref{get} finds a \term{property} 
+on the \term{property list}\meaning{2} of \param{symbol} 
+whose \term{property indicator} is \term{identical} to \param{indicator},
+and returns its corresponding \term{property value}.
+\issue{PLIST-DUPLICATES:ALLOW}
+If there are multiple \term{properties}\meaning{1} with that \term{property indicator},
+\funref{get} uses the first such \term{property}.
+\endissue{PLIST-DUPLICATES:ALLOW}
+If there is no \term{property} with that \term{property indicator},
+\param{default} is returned.
+
+% %% 10.1.0 12
+% \macref{setf} may be used with \funref{get} to create a new property-value
+% pair, possibly replacing an old pair with the same property name.
+\macref{setf} of \funref{get} may be used to associate a new \term{object}
+with an existing indicator already on the \param{symbol}'s \term{property list},
+or to create a new assocation if none exists.
+\issue{PLIST-DUPLICATES:ALLOW}
+If there are multiple \term{properties}\meaning{1} with that \term{property indicator},
+\macref{setf} of \funref{get} associates the \param{new-value} 
+with the first such \term{property}.
+\endissue{PLIST-DUPLICATES:ALLOW}
+\issue{SETF-GET-DEFAULT:EVALUATED-BUT-IGNORED}
+When a \funref{get} \term{form} is used as a \macref{setf} \param{place},
+any \param{default} which is supplied is evaluated according to normal
+left-to-right evaluation rules, but its \term{value} is ignored.
+\endissue{SETF-GET-DEFAULT:EVALUATED-BUT-IGNORED}
+
+\label Examples::
+
+\code
+ (defun make-person (first-name last-name)
+   (let ((person (gensym "PERSON")))
+     (setf (get person 'first-name) first-name)
+     (setf (get person 'last-name) last-name)
+     person)) \EV MAKE-PERSON
+ (defvar *john* (make-person "John" "Dow")) \EV *JOHN*
+ *john* \EV #:PERSON4603
+ (defvar *sally* (make-person "Sally" "Jones")) \EV *SALLY*
+ (get *john* 'first-name) \EV "John"
+ (get *sally* 'last-name) \EV "Jones"
+ (defun marry (man woman married-name)
+   (setf (get man 'wife) woman)
+   (setf (get woman 'husband) man)
+   (setf (get man 'last-name) married-name)
+   (setf (get woman 'last-name) married-name)
+   married-name) \EV MARRY
+ (marry *john* *sally* "Dow-Jones") \EV "Dow-Jones"
+ (get *john* 'last-name) \EV "Dow-Jones"
+ (get (get *john* 'wife) 'first-name) \EV "Sally"
+ (symbol-plist *john*)
+\EV (WIFE #:PERSON4604 LAST-NAME "Dow-Jones" FIRST-NAME "John")
+ (defmacro age (person &optional (default ''thirty-something)) 
+   `(get ,person 'age ,default)) \EV AGE
+ (age *john*) \EV THIRTY-SOMETHING
+ (age *john* 20) \EV 20
+ (setf (age *john*) 25) \EV 25
+ (age *john*) \EV 25
+ (age *john* 20) \EV 25
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{symbol}{a \term{symbol}}
+
+\label See Also::
+
+\funref{getf},
+\funref{symbol-plist},
+\funref{remprop}
+
+\label Notes::
+
+\code
+ (get x y) \EQ (getf (symbol-plist x) y)
+\endcode
+
+\term{Numbers} and \term{characters} are not recommended for use 
+as \param{indicators} in portable code since \funref{get} tests 
+with \funref{eq} rather than \funref{eql}, and consequently 
+the effect of using such \param{indicators} is 
+\term{implementation-dependent}.
+
+% \code
+%  (get 'clyde 'species) \EV NIL
+%  (setf (get 'clyde 'species) 'elephant) \EV elephant
+%  (get 'clyde 'species) \EV ELEPHANT
+% \endcode
+% \param{Default} may be supplied to \funref{get} in this context; 
+% it is ignored by the \macref{setf} expander function
+% for \funref{get}, but
+% may be useful in such macros as \macref{push} 
+% that are related to \macref{setf}:
+% 
+% \code
+%  (push item (get sym 'token-stack '(initial-item)))
+% \endcode
+% means approximately the same as
+% 
+% \code
+%  (setf (get sym 'token-stack '(initial-item))
+%        (cons item (get sym 'token-stack '(initial-item))))
+% \endcode
+% which in turn would be treated as
+% 
+% \code
+%  (setf (get sym 'token-stack)
+%        (cons item (get sym 'token-stack '(initial-item))))
+% \endcode
+% 
+
+There is no way using \funref{get} to distinguish an absent property from
+one whose value is \param{default}.  However, see \funref{get-properties}.
+
+% %% 10.1.0 15
+% Using \funref{get} on the result of \funref{symbol-plist} does not work;
+% the \term{symbol} itself must be given to \funref{get}. \funref{getf} can
+% be used to extract properties from a disembodied property list.
+
+\endcom 
+                                                   
+
+%%% ========== REMPROP
+\begincom{remprop}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues remprop {symbol indicator} {generalized-boolean}
+
+\label Arguments and Values:: 
+
+\param{symbol}---a \term{symbol}.
+
+\param{indicator}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 10.1.0 13
+\funref{remprop} removes from the \term{property list}\meaning{2} of \param{symbol}
+a \term{property}\meaning{1} with a \term{property indicator}
+% EQ => identical -kmp 14-Jul-93
+\term{identical} to \param{indicator}.
+\issue{PLIST-DUPLICATES:ALLOW}
+If there are multiple \term{properties}\meaning{1} with the \term{identical} key,
+\macref{remprop} only removes the first such \term{property}.
+\endissue{PLIST-DUPLICATES:ALLOW}
+\macref{remprop} returns \term{false} if no such \term{property} was found,
+or \term{true} if a property was found.
+
+The \term{property indicator} 
+and the corresponding \term{property value} 
+are removed in an undefined order
+by destructively splicing the property list.  
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+The permissible side-effects correspond to those permitted for \macref{remf},
+such that:
+
+\code
+ (remprop \i{x} \i{y}) \EQ (remf (symbol-plist \i{x}) \i{y})
+\endcode
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\label Examples::
+
+\code
+ (setq test (make-symbol "PSEUDO-PI")) \EV #:PSEUDO-PI
+ (symbol-plist test) \EV ()
+ (setf (get test 'constant) t) \EV T
+ (setf (get test 'approximation) 3.14) \EV 3.14
+ (setf (get test 'error-range) 'noticeable) \EV NOTICEABLE
+ (symbol-plist test) 
+\EV (ERROR-RANGE NOTICEABLE APPROXIMATION 3.14 CONSTANT T)
+ (setf (get test 'approximation) nil) \EV NIL
+ (symbol-plist test) 
+\EV (ERROR-RANGE NOTICEABLE APPROXIMATION NIL CONSTANT T)
+ (get test 'approximation) \EV NIL
+ (remprop test 'approximation) \EV \term{true}
+ (get test 'approximation) \EV NIL
+ (symbol-plist test)
+\EV (ERROR-RANGE NOTICEABLE CONSTANT T)
+ (remprop test 'approximation) \EV NIL
+ (symbol-plist test)
+\EV (ERROR-RANGE NOTICEABLE CONSTANT T)
+ (remprop test 'error-range) \EV \term{true}
+ (setf (get test 'approximation) 3) \EV 3
+ (symbol-plist test)
+\EV (APPROXIMATION 3 CONSTANT T)
+\endcode
+
+\label Side Effects::
+
+The \term{property list} of \param{symbol} is modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{symbol}{a \term{symbol}}
+
+\label See Also::
+
+\macref{remf}, \funref{symbol-plist}
+
+\label Notes::
+
+\term{Numbers} and \term{characters} are not recommended for use as
+\param{indicators} in portable code since \funref{remprop} tests with
+\funref{eq} rather than \funref{eql}, and consequently the effect of
+using such \param{indicators} is \term{implementation-dependent}.  
+Of course, if you've gotten as far as needing to remove such a
+\term{property}, you don't have much choice---the time to have been
+thinking about this was when you used \macref{setf} of \macref{get} to
+establish the \term{property}.
+%Barrett: Bletch.
+
+\endcom
+
+%-------------------- Symbol Function/Value --------------------
+
+%%% ========== BOUNDP
+\begincom{boundp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues boundp {symbol} {generalized-boolean}
+
+\label Arguments and Values:: 
+
+\param{symbol}---a \term{symbol}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 7.1.1 18   
+\Predicate{symbol}{\term{bound}}
+
+\label Examples::
+
+\code
+ (setq x 1) \EV 1
+ (boundp 'x) \EV \term{true}
+ (makunbound 'x) \EV X
+ (boundp 'x) \EV \term{false}
+ (let ((x 2)) (boundp 'x)) \EV \term{false}
+ (let ((x 2)) (declare (special x)) (boundp 'x)) \EV \term{true}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{symbol}{a \term{symbol}}
+
+\label See Also::
+
+\funref{set},
+\specref{setq},
+\funref{symbol-value},
+\funref{makunbound}
+
+\label Notes::
+
+% I see no lexical environment here.  --sjl 16 Mar 92
+%The \term{lexical environment} is ignored.
+\Thefunction{bound} determines only whether a \term{symbol} has a
+value in the \term{global environment}; any \term{lexical bindings}
+are ignored.
+
+\endcom
+
+%%% ========== MAKUNBOUND
+\begincom{makunbound}\ftype{Function}
+
+%!!! Barmar thinks that fmakunbound should move to dict-functions.
+
+\label Syntax::
+
+\DefunWithValues makunbound {symbol} {symbol}
+
+\label Arguments and Values::
+
+\param{symbol}---a \term{symbol}
+
+\label Description::
+
+Makes the \param{symbol} be \term{unbound},
+regardless of whether it was previously \term{bound}.
+
+\label Examples::
+
+\code
+ (setf (symbol-value 'a) 1)
+ (boundp 'a) \EV \term{true}
+ a \EV 1
+ (makunbound 'a) \EV A
+ (boundp 'a) \EV \term{false}
+\endcode
+
+\label Side Effects::
+
+The \term{value cell} of \param{symbol} is modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{symbol}{a \term{symbol}}
+
+\label See Also::
+
+\funref{boundp}, \funref{fmakunbound}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== SET
+\begincom{set}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues set {symbol value} {value}
+
+\label Arguments and Values:: 
+
+\param{symbol}---a \term{symbol}.
+
+%% 7.1.2 9
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{value}---an \term{object}.
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\label Description::
+
+%% 7.1.2 8
+\funref{set} changes the contents of the \term{value cell} of \term{symbol}
+to the given \term{value}.
+
+\code
+(set \param{symbol} \param{value}) \EQ (setf (symbol-value \param{symbol}) \param{value})
+\endcode
+
+\label Examples::
+
+\code
+ (setf (symbol-value 'n) 1) \EV 1
+ (set 'n 2) \EV 2
+ (symbol-value 'n) \EV 2
+ (let ((n 3))
+   (declare (special n))
+   (setq n (+ n 1))
+   (setf (symbol-value 'n) (* n 10))
+   (set 'n (+ (symbol-value 'n) n))
+   n) \EV 80
+ n \EV 2
+ (let ((n 3))
+   (setq n (+ n 1))
+   (setf (symbol-value 'n) (* n 10))
+   (set 'n (+ (symbol-value 'n) n))
+   n) \EV 4
+ n \EV 44
+ (defvar *n* 2)
+ (let ((*n* 3))
+   (setq *n* (+ *n* 1))
+   (setf (symbol-value '*n*) (* *n* 10))
+   (set '*n* (+ (symbol-value '*n*) *n*))
+   *n*) \EV 80
+  *n* \EV 2
+ (defvar *even-count* 0) \EV *EVEN-COUNT*
+ (defvar *odd-count* 0) \EV *ODD-COUNT*
+ (defun tally-list (list)
+   (dolist (element list)
+     (set (if (evenp element) '*even-count* '*odd-count*)
+          (+ element (if (evenp element) *even-count* *odd-count*)))))
+ (tally-list '(1 9 4 3 2 7)) \EV NIL
+ *even-count* \EV 6
+ *odd-count* \EV 20
+\endcode
+
+\label Side Effects::
+
+The \term{value} of \param{symbol} is changed.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\specref{setq}, \specref{progv}, \funref{symbol-value}
+
+\label Notes::
+
+The function \funref{set} is deprecated.
+
+%% 7.1.2 11
+\funref{set} cannot change the value of a \term{lexical variable}.
+
+\endcom
+
+%-------------------- Symbol Errors --------------------
+
+\begincom{unbound-variable}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{unbound-variable},
+\typeref{cell-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{unbound-variable} consists of \term{error} \term{conditions}
+that represent attempts to \term{read} the \term{value} of an \term{unbound variable}.
+%Barrett: "name"?
+%KMP: An "unbound variable" is by definition just a "name".  See glossary.
+
+The name of the cell (see \typeref{cell-error}) is the \term{name} of the 
+\term{variable} that was \term{unbound}.
+
+\label See Also::
+
+\funref{cell-error-name}
+
+\endcom%{unbound-variable}\ftype{Condition Type}

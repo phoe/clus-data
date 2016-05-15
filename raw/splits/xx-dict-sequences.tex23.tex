@@ -1,0 +1,75 @@
+====== Function REMOVE-DUPLICATES, DELETE-DUPLICATES ======
+
+====Syntax====
+
+\DefunWithValuesNewline remove-duplicates {sequence ''&key'' from-end test test-not start end key} {result-sequence}
+
+\DefunWithValuesNewline delete-duplicates {sequence ''&key'' from-end test test-not start end key} {result-sequence}
+
+====Arguments and Values====
+
+//sequence// - a //[[CL:Glossary:proper sequence]]//.
+
+//from-end// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+
+//test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//start//, //end// - //[[CL:Glossary:bounding index designators]]// of //sequence//. \Defaults{//start// and //end//}{''0'' and **[[CL:Constant Variables:nil]]**}
+
+//key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument, or **[[CL:Constant Variables:nil]]**.
+
+//result-sequence// - a //[[CL:Glossary:sequence]]//.
+
+====Description====
+
+**[[CL:Functions:remove-duplicates]]** returns a modified copy of //sequence// from which any element that matches another element occurring in //sequence// has been removed.
+
+If //sequence// is a //[[CL:Glossary:vector]]//, the result is a //[[CL:Glossary:vector]]// that has the same //[[CL:Glossary:actual array element type]]// as //sequence//.
+
+If //sequence// is a //[[CL:Glossary:list]]//, the result is a //[[CL:Glossary:list]]//.
+
+**[[CL:Functions:delete-duplicates]]** is like **[[CL:Functions:remove-duplicates]]**, but **[[CL:Functions:delete-duplicates]]** may modify //sequence//.
+
+The elements of //sequence// are compared //[[CL:Glossary:pairwise]]//, and if any two match, then the one occurring earlier in //sequence// is discarded, unless //from-end// is //[[CL:Glossary:true]]//, in which case the one later in //sequence// is discarded.
+
+**[[CL:Functions:remove-duplicates]]** and **[[CL:Functions:delete-duplicates]]** return a //[[CL:Glossary:sequence]]// of the same //[[CL:Glossary:type]]// as //sequence// with enough elements removed so that no two of the remaining elements match. The order of the elements remaining in the result is the same as the order in which they appear in //sequence//.
+
+**[[CL:Functions:remove-duplicates]]** returns a //[[CL:Glossary:sequence]]//
+
+that may share with //sequence// or may be //[[CL:Glossary:identical]]// to //sequence// if no elements need to be removed.
+
+**[[CL:Functions:delete-duplicates]]**, when //sequence// is a //[[CL:Glossary:list]]//, is permitted to **[[CL:Macros:setf]]** any part, **[[CL:Functions:car]]** or **[[CL:Functions:cdr]]**, of the top-level list structure in that //sequence//. When //sequence// is a //[[CL:Glossary:vector]]//, **[[CL:Functions:delete-duplicates]]** is permitted to change the dimensions of the //[[CL:Glossary:vector]]// and to slide its elements into new positions without permuting them to produce the resulting //[[CL:Glossary:vector]]//.
+
+====Examples====
+
+<blockquote> (remove-duplicates "aBcDAbCd" :test #'char-equal :from-end t) → "aBcD" (remove-duplicates '(a b c b d d e)) → (A C B D E) (remove-duplicates '(a b c b d d e) :from-end t) → (A B C D E) (remove-duplicates '((foo #\\a) (bar #\\ :test #'char-equal :key #'cadr) → ((BAR #\\ (remove-duplicates '((foo #\\a) (bar #\\ :test #'char-equal :key #'cadr :from-end t) → ((FOO #\\a) (BAR #\\ ([[CL:Macros:defparameter]] tester (list 0 1 2 3 4 5 6)) (delete-duplicates tester :key #'oddp :start 1 :end 6) → (0 4 5 6) </blockquote>
+
+====Side Effects====
+
+**[[CL:Functions:delete-duplicates]]** might destructively modify //sequence//.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //sequence// is not a //[[CL:Glossary:proper sequence]]//.
+
+====See Also====
+
+{\secref\ConstantModification},
+
+{\secref\TraversalRules}
+
+====Notes====
+
+If //sequence// is a //[[CL:Glossary:vector]]//, the result might or might not be simple, and might or might not be //[[CL:Glossary:identical]]// to //sequence//.
+
+The **'':test-not''** //[[CL:Glossary:argument]]// is deprecated.
+
+These functions are useful for converting //sequence// into a canonical form suitable for representing a set.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS} \issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL} \issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89} \issue{CONSTANT-MODIFICATION:DISALLOW} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{TEST-NOT-IF-NOT:FLUSH-ALL}

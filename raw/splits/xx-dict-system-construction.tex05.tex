@@ -1,0 +1,73 @@
+====== Variable *FEATURES* ======
+
+====Value Type====
+
+a //[[CL:Glossary:proper list]]//.
+
+====Initial Value====
+
+//[[CL:Glossary:implementation-dependent]]//.
+
+====Description====
+
+\Thevalueof{*features*} is called the //[[CL:Glossary:features list]]//. It is a //[[CL:Glossary:list]]// of //[[CL:Glossary:symbols]]//, called //[[CL:Glossary:features]]//, that correspond to some aspect of the //[[CL:Glossary:implementation]]// or //[[CL:Glossary:environment]]//.
+
+Most //[[CL:Glossary:features]]// have //[[CL:Glossary:implementation-dependent]]// meanings; The following meanings have been assigned to feature names:
+
+\beginlist
+
+\itemitem{**'':cltl1''**}
+
+If present, indicates that \thepackage{lisp} //[[CL:Glossary:purports to conform]]// to the 1984 specification \CLtL. It is possible, but not required, for a //[[CL:Glossary:conforming implementation]]// to have this feature because this specification specifies that its //[[CL:Glossary:symbols]]// are to be in \thepackage{common-lisp}, not the \packref{lisp} package.
+
+\itemitem{**'':cltl2''**}
+
+If present, indicates that the implementation //[[CL:Glossary:purports to conform]]// to \CLtLTwo. This feature must not be present in any //[[CL:Glossary:conforming implementation]]//, since conformance to that document is not compatible with conformance to this specification. The name, however, is reserved by this specification in order to help programs distinguish implementations which conform to that document from implementations which conform to this specification.
+
+\itemitem{**'':ieee-floating-point''**}
+
+If present, indicates that the implementation //[[CL:Glossary:purports to conform]]// to the requirements of \IEEEFloatingPoint.
+
+\itemitem{**'':x3j13''**}
+
+If present, indicates that the implementation conforms to some particular working draft of this specification, or to some subset of features that approximates a belief about what this specification might turn out to contain. A //[[CL:Glossary:conforming implementation]]// might or might not contain such a feature. (This feature is intended primarily as a stopgap in order to provide implementors something to use prior to the availability of a draft standard, in order to discourage them from introducing the **'':draft-ansi-cl''** and **'':ansi-cl''** //[[CL:Glossary:features]]// prematurely.)
+
+\itemitem{**'':draft-ansi-cl''**}
+
+If present, indicates that the //[[CL:Glossary:implementation]]// //[[CL:Glossary:purports to conform]]// to the first full draft of this specification, which went to public review in 1992. A //[[CL:Glossary:conforming implementation]]// which has the **'':draft-ansi-cl-2''** or **'':ansi-cl''** //[[CL:Glossary:feature]]// is not permitted to retain the **'':draft-ansi-cl''** //[[CL:Glossary:feature]]// since incompatible changes were made subsequent to the first draft.
+
+\itemitem{**'':draft-ansi-cl-2''**}
+
+If present, indicates that a second full draft of this specification has gone to public review, and that the //[[CL:Glossary:implementation]]// //[[CL:Glossary:purports to conform]]// to that specification. (If additional public review drafts are produced, this keyword will continue to refer to the second draft, and additional keywords will be added to identify conformance with such later drafts. As such, the meaning of this keyword can be relied upon not to change over time.) A //[[CL:Glossary:conforming implementation]]// which has the **'':ansi-cl''** //[[CL:Glossary:feature]]// is only permitted to retain the **'':draft-ansi-cl''** //[[CL:Glossary:feature]]// if the finally approved standard is not incompatible with the draft standard.
+
+\itemitem{**'':ansi-cl''**}
+
+If present, indicates that this specification has been adopted by ANSI as an official standard, and that the //[[CL:Glossary:implementation]]// //[[CL:Glossary:purports to conform]]//.
+
+\itemitem{**'':common-lisp''**}
+
+This feature must appear in **[[CL:Variables:*features*]]** for any implementation that has one or more of the features **'':x3j13''**, **'':draft-ansi-cl''**, or **'':ansi-cl''**. It is intended that it should also appear in implementations which have the features **'':cltl1''** or **'':cltl2''**, but this specification cannot force such behavior. The intent is that this feature should identify the language family named "Common Lisp," rather than some specific dialect within that family.
+
+\endlist
+
+====Examples====
+
+None.
+
+====Affected By====
+
+None.
+
+====See Also====
+
+{\secref\ReadTimeConditionals}, {\secref\StandardMacroChars}
+
+====Notes====
+
+\Thevalueof{*features*} is used by the ''#+'' and ''#-'' reader syntax.
+
+//[[CL:Glossary:Symbols]]// in the //[[CL:Glossary:features list]]// may be in any //[[CL:Glossary:package]]//, but in practice they are generally in \thepackage{keyword}. This is because \packref{keyword} is the //[[CL:Glossary:package]]// used by default when //[[CL:Glossary:reading]]// //[[CL:Glossary:feature expressions]]// in the ''#+'' and ''#-'' //[[CL:Glossary:reader macros]]//. //[[CL:Glossary:Code]]// that needs to name a //[[CL:Glossary:feature]]// in a //[[CL:Glossary:package]]// ''P'' (other than \packref{keyword}) can do so by making explicit use of a //[[CL:Glossary:package prefix]]// for ''P'', but note that such //[[CL:Glossary:code]]// must also assure that the //[[CL:Glossary:package]]// ''P'' exists in order for the //[[CL:Glossary:feature expression]]// to be //[[CL:Glossary:read]]//---even in cases where the //[[CL:Glossary:feature expression]]// is expected to fail.
+
+It is generally considered wise for an //[[CL:Glossary:implementation]]// to include one or more //[[CL:Glossary:features]]// identifying the specific //[[CL:Glossary:implementation]]//, so that conditional expressions can be written which distinguish idiosyncrasies of one //[[CL:Glossary:implementation]]// from those of another. Since features are normally //[[CL:Glossary:symbols]]// in \thepackage{keyword} where name collisions might easily result, and since no uniquely defined mechanism is designated for deciding who has the right to use which //[[CL:Glossary:symbol]]// for what reason, a conservative strategy is to prefer names derived from one's own company or product name, since those names are often trademarked and are hence less likely to be used unwittingly by another //[[CL:Glossary:implementation]]//.
+
+\issue{COMMON-FEATURES:SPECIFY} \issue{SHARPSIGN-PLUS-MINUS-PACKAGE:KEYWORD} \issue{SHARPSIGN-PLUS-MINUS-PACKAGE:KEYWORD}

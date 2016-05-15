@@ -1,0 +1,81 @@
+====== Macro DO-SYMBOLS, DO-EXTERNAL-SYMBOLS, DO-ALL-SYMBOLS ======
+
+====Syntax====
+
+\DefmacWithValuesNewline do-symbols {\vtop{\hbox{\paren{var \brac{package [result-form]}}} \hbox{\starparam{declaration} \star{{tag | statement}}}}} {\starparam{result}}
+
+\DefmacWithValuesNewline do-external-symbols {\vtop{\hbox{\paren{var \brac{package [result-form]}}} \hbox{\starparam{declaration} \star{{tag | statement}}}}} {\starparam{result}}
+
+\DefmacWithValuesNewline do-all-symbols {\vtop{\hbox{\paren{var [result-form]}} \hbox{\starparam{declaration} \star{{tag | statement}}}}} {\starparam{result}}
+
+====Arguments and Values====
+
+//var// - a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//; \noeval.
+
+
+//package// - a //[[CL:Glossary:package designator]]//; \eval.
+
+\DefaultIn{**[[CL:Macros:do-symbols]]** and **[[CL:Macros:do-external-symbols]]**}{the //[[CL:Glossary:current package]]//}
+
+//result-form// - a //[[CL:Glossary:form]]//; \evalspecial. The default is **[[CL:Constant Variables:nil]]**.
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//tag// - a //[[CL:Glossary:go tag]]//; \noeval.
+
+//statement// - a //[[CL:Glossary:compound form]]//; \evalspecial.
+
+//results// - the //[[CL:Glossary:values]]// returned by the //result-form// if a //[[CL:Glossary:normal return]]// occurs, or else, if an //[[CL:Glossary:explicit return]]// occurs, the //[[CL:Glossary:values]]// that were transferred.
+
+====Description====
+
+**[[CL:Macros:do-symbols]]**, **[[CL:Macros:do-external-symbols]]**, and **[[CL:Macros:do-all-symbols]]** iterate over the //[[CL:Glossary:symbols]]// of //[[CL:Glossary:packages]]//. For each //[[CL:Glossary:symbol]]// in the set of //[[CL:Glossary:packages]]// chosen, the //var// is bound to the //[[CL:Glossary:symbol]]//, and the //statements// in the body are executed. When all the //[[CL:Glossary:symbols]]// have been processed, //result-form// is evaluated and returned as the value of the macro.
+
+**[[CL:Macros:do-symbols]]** iterates over the //[[CL:Glossary:symbols]]// //[[CL:Glossary:accessible]]// in //package//.
+
+//Statements// may execute more than once for //[[CL:Glossary:symbols]]// that are inherited from multiple //[[CL:Glossary:packages]]//.
+
+**[[CL:Macros:do-all-symbols]]** iterates on every //[[CL:Glossary:registered package]]//. **[[CL:Macros:do-all-symbols]]** will not process every //[[CL:Glossary:symbol]]// whatsoever, because a //[[CL:Glossary:symbol]]// not //[[CL:Glossary:accessible]]// in any //[[CL:Glossary:registered package]]// will not be processed. **[[CL:Macros:do-all-symbols]]** may cause a //[[CL:Glossary:symbol]]// that is //[[CL:Glossary:present]]// in several //[[CL:Glossary:packages]]// to be processed more than once.
+
+**[[CL:Macros:do-external-symbols]]** iterates on the external symbols of //package//.
+
+When //result-form// is evaluated, //var// is bound and has the value **[[CL:Constant Variables:nil]]**.
+
+An //[[CL:Glossary:implicit block]]// named **[[CL:Constant Variables:nil]]** surrounds the entire **[[CL:Macros:do-symbols]]**, **[[CL:Macros:do-external-symbols]]**, or **[[CL:Macros:do-all-symbols]]** //[[CL:Glossary:form]]//.
+
+**[[CL:Macros:return]]** or \specref{return-from} may be used to terminate the iteration prematurely.
+
+If execution of the body affects which //[[CL:Glossary:symbols]]// are contained in the set of //[[CL:Glossary:packages]]// over which iteration is occurring, other than to remove the //[[CL:Glossary:symbol]]// currently the value of //var// by using **[[CL:Functions:unintern]]**, the consequences are undefined.
+
+For each of these macros, the //[[CL:Glossary:scope]]// of the name binding does not include any initial value form, but the optional result forms are included.
+
+Any //tag// in the body is treated as with \specref{tagbody}.
+
+====Examples====
+
+<blockquote> (make-package 'temp :use nil) → #<PACKAGE "TEMP"> (intern "SHY" 'temp) → TEMP::SHY, NIL ;SHY will be an internal symbol ;in the package TEMP (export (intern "BOLD" 'temp) 'temp) → T ;BOLD will be external (let ((lst ())) (do-symbols (s (find-package 'temp)) (push s lst)) lst) → (TEMP::SHY TEMP:BOLD) //or// → (TEMP:BOLD TEMP::SHY) (let ((lst ())) (do-external-symbols (s (find-package 'temp) lst) (push s lst)) lst) → (TEMP:BOLD) (let ((lst ())) (do-all-symbols (s lst) (when (eq (find-package 'temp) (symbol-package s)) (push s lst))) lst) → (TEMP::SHY TEMP:BOLD) //or// → (TEMP:BOLD TEMP::SHY) </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:intern]]**, **[[CL:Functions:export]]**,
+
+{\secref\TraversalRules}
+
+
+====Notes====
+
+None.
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{DECLS-AND-DOC} \issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE} \issue{DO-SYMBOLS-DUPLICATES} \issue{DO-SYMBOLS-BLOCK-SCOPE:ENTIRE-FORM}

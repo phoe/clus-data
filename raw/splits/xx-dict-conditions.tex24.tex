@@ -1,0 +1,46 @@
+====== Variable *DEBUGGER-HOOK* ======
+
+====Value Type====
+
+a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// (a //[[CL:Glossary:condition]]// and \thevalueof{*debugger-hook*} at the time the debugger was entered), or **[[CL:Constant Variables:nil]]**.
+
+====Initial Value====
+
+**[[CL:Constant Variables:nil]]**.
+
+====Description====
+
+When \thevalueof{*debugger-hook*} is //[[CL:Glossary:non-nil]]//, it is called prior to normal entry into the debugger, either due to a call to **[[CL:Functions:invoke-debugger]]** or due to automatic entry into the debugger from a call to **[[CL:Functions:error]]** or **[[CL:Functions:cerror]]** with a condition that is not handled. The //[[CL:Glossary:function]]// may either handle the //[[CL:Glossary:condition]]// (transfer control) or return normally (allowing the standard debugger to run). To minimize recursive errors while debugging, **[[CL:Variables:*debugger-hook*]]** is bound to **[[CL:Constant Variables:nil]]** by **[[CL:Functions:invoke-debugger]]** prior to calling the //[[CL:Glossary:function]]//.
+
+====Examples====
+
+<blockquote> (defun one-of (choices &optional (prompt "Choice")) (let ((n (length choices)) (i)) (do ((c choices (cdr c)) (i 1 (+ i 1))) ((null c)) (format t "~&[~D] ~A~ (do () ((typep i `(integer 1 ,n))) (format t "~&~A: " prompt) ([[CL:Macros:defparameter]] i (read)) (fresh-line)) (nth (- i 1) choices)))
+
+(defun my-debugger (condition me-or-my-encapsulation) (format t "~&Fooey: ~A" condition) (let ((restart (one-of (compute-restarts)))) (if (not restart) (error "My debugger got an error.")) (let ((*debugger-hook* me-or-my-encapsulation)) (invoke-restart-interactively restart))))
+
+(let ((*debugger-hook* #'my-debugger)) (+ 3 'a))
+▷ Fooey: The argument to +, A, is not a number.
+▷ [1] Supply a replacement for A.
+▷ [2] Return to Cloe Toplevel.
+▷ Choice: 1
+▷ Form to evaluate and use: (+ 5 'b)
+▷ Fooey: The argument to +, B, is not a number.
+▷ [1] Supply a replacement for B.
+▷ [2] Supply a replacement for A.
+▷ [3] Return to Cloe Toplevel.
+▷ Choice: 1
+▷ Form to evaluate and use: 1 → 9 </blockquote>
+
+====Affected By====
+
+**[[CL:Functions:invoke-debugger]]**
+
+====See Also====
+
+None.
+
+====Notes====
+
+When evaluating code typed in by the user interactively, it is sometimes useful to have the hook function bind **[[CL:Variables:*debugger-hook*]]** to the //[[CL:Glossary:function]]// that was its second argument so that recursive errors can be handled using the same interactive facility.
+
+

@@ -1,0 +1,54 @@
+====== Function DPB ======
+
+====Syntax====
+
+**dpb** //newbyte bytespec integer// → //result-integer//
+
+====Arguments and Values====
+
+//newbyte// - an //[[CL:Glossary:integer]]//.
+
+//bytespec// - a //[[CL:Glossary:byte specifier]]//.
+
+//integer// - an //[[CL:Glossary:integer]]//.
+
+//result-integer// - an //[[CL:Glossary:integer]]//.
+
+====Description====
+
+**[[CL:Functions:dpb]]** (deposit byte) is used to replace a field of bits within //integer//. **[[CL:Functions:dpb]]** returns an //[[CL:Glossary:integer]]// that is the same as //integer// except in the bits specified by //bytespec//.
+
+Let ''s'' be the size specified by //bytespec//; then the low ''s'' bits of //newbyte// appear in the result in the byte specified by //bytespec//. //Newbyte// is interpreted as being right-justified, as if it were the result of **[[CL:Functions:ldb]]**.
+
+====Examples====
+
+<blockquote> (dpb 1 (byte 1 10) 0) → 1024 (dpb -2 (byte 2 10) 0) → 2048 (dpb 1 (byte 2 10) 2048) → 1024 </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:byte]]**, **[[CL:Functions:deposit-field]]**, **[[CL:Functions:ldb]]**
+
+====Notes====
+
+<blockquote> (logbitp //j// (dpb //m// (byte //s// //p//) //n//)) ≡ (if (and (>= //j// //p//) (< //j// (+ //p// //s//))) (logbitp (- //j// //p//) //m//) (logbitp //j// //n//)) </blockquote>
+
+In general,
+
+<blockquote> (dpb //x// (byte 0 //y//) //z//) → //z// </blockquote>
+
+for all valid values of //x//, //y//, and //z//.
+
+Historically, the name "dpb" comes from a DEC PDP-10 assembly language instruction meaning "deposit byte."
+

@@ -1,0 +1,21 @@
+====== Restart MUFFLE-WARNING ======
+
+====Data Arguments Required====
+
+None.
+
+====Description====
+
+This //[[CL:Glossary:restart]]// is established by **[[CL:Functions:warn]]** so that //[[CL:Glossary:handlers]]// of **[[CL:Types:warning]]** //[[CL:Glossary:conditions]]// have a way to tell **[[CL:Functions:warn]]** that a warning has already been dealt with and that no further action is warranted.
+
+====Examples====
+
+<blockquote> (defvar *all-quiet* nil) → *ALL-QUIET* (defvar *saved-warnings* '()) → *SAVED-WARNINGS* (defun quiet-warning-handler (c) (when *all-quiet* (let ((r (find-restart 'muffle-warning c))) (when r (push c *saved-warnings*) (invoke-restart r))))) → CUSTOM-WARNING-HANDLER (defmacro with-quiet-warnings (&body forms) `(let ((*all-quiet* t) (*saved-warnings* '())) (handler-bind ((warning #'quiet-warning-handler)) ,@forms *saved-warnings*))) → WITH-QUIET-WARNINGS ([[CL:Macros:defparameter]] saved (with-quiet-warnings (warn "Situation #1.") (let ((*all-quiet* nil)) (warn "Situation #2.")) (warn "Situation #3.")))
+▷ Warning: Situation #2. → (#<SIMPLE-WARNING 42744421> #<SIMPLE-WARNING 42744365>) (dolist (s saved) (format t "~&~A~
+▷ Situation #3.
+▷ Situation #1. → NIL </blockquote>
+
+====See Also====
+
+\secref\Restarts, {\secref\InterfacesToRestarts}, **[[CL:Functions:invoke-restart]]**, **[[CL:Functions:muffle-warning]]** (//[[CL:Glossary:function]]//), **[[CL:Functions:warn]]**
+

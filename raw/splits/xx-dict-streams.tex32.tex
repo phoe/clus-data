@@ -1,0 +1,74 @@
+====== macro WITH-OPEN-FILE ======
+
+====Syntax====
+
+\DefmacWithValuesNewline with-open-file {\paren{stream filespec \starparam{options}} \starparam{declaration} \starparam{form}} {results}
+
+====Arguments and Values====
+
+//stream// -- a variable.
+
+//filespec// - a //[[CL:Glossary:pathname designator]]//.
+
+//options// -- //[[CL:Glossary:forms]]//; \eval.
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//forms// - an //[[CL:Glossary:implicit progn]]//.
+
+//results// - the //[[CL:Glossary:values]]// returned by the //forms//.
+
+====Description====
+
+**[[CL:Macros:with-open-file]]** uses **[[CL:Functions:open]]** to create a //[[CL:Glossary:file stream]]//
+
+to //[[CL:Glossary:file]]// named by //filespec//.
+
+//Filespec// is the name of the file to be opened. //Options// are used as keyword arguments to **[[CL:Functions:open]]**.
+
+The //[[CL:Glossary:stream]]// //[[CL:Glossary:object]]// to which the //stream// //[[CL:Glossary:variable]]// is //[[CL:Glossary:bound]]// has //[[CL:Glossary:dynamic extent]]//; its //[[CL:Glossary:extent]]// ends when the //[[CL:Glossary:form]]// is exited.
+
+**[[CL:Macros:with-open-file]]** evaluates the //forms// as an //[[CL:Glossary:implicit progn]]// with //stream// bound to
+
+the value returned by **[[CL:Functions:open]]**.
+
+When control leaves the body, either normally or abnormally (such as by use of \specref{throw}), the file is automatically closed. If a new output file is being written, and control leaves abnormally, the file is aborted and the file system is left, so far as possible, as if the file had never been opened.
+
+It is possible by the use of '':if-exists nil'' or '':if-does-not-exist nil'' for //stream// to be bound to **[[CL:Constant Variables:nil]]**.
+
+Users of '':if-does-not-exist nil'' should check for a valid //[[CL:Glossary:stream]]//.
+
+The consequences are undefined if an attempt is made to //[[CL:Glossary:assign]]// the //stream// //[[CL:Glossary:variable]]//. The compiler may choose to issue a warning if such an attempt is detected.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] p (merge-pathnames "test")) → #<PATHNAME :HOST NIL :DEVICE ''device-name'' :DIRECTORY ''directory-name'' :NAME "test" :TYPE NIL :VERSION :NEWEST> (with-open-file (s p :direction :output :if-exists :supersede) (format s "Here are a couple~ (with-open-file (s p) (do ((l (read-line s) (read-line s nil 'eof))) ((eq l 'eof) "Reached end of file.") (format t "~&*** ~A~
+▷ *** Here are a couple
+▷ *** of test data lines → "Reached end of file." </blockquote>
+
+<blockquote> ;; Normally one would not do this intentionally because it is ;; not perspicuous, but beware when using :IF-DOES-NOT-EXIST NIL ;; that this doesn't happen to you accidentally... (with-open-file (foo "no-such-file" :if-does-not-exist nil) (read foo))
+▷ \IN{hello?} → HELLO? ;This value was read from the terminal, not a file!
+
+;; Here's another bug to avoid... (with-open-file (foo "no-such-file" :direction :output :if-does-not-exist nil) (format foo "Hello")) → "Hello" ;FORMAT got an argument of NIL! </blockquote>
+
+====Side Effects====
+
+Creates a //[[CL:Glossary:stream]]// to the //[[CL:Glossary:file]]// named by //filename// (upon entry), and closes the //[[CL:Glossary:stream]]// (upon exit). In some //[[CL:Glossary:implementations]]//, the //[[CL:Glossary:file]]// might be locked in some way while it is open. If the //[[CL:Glossary:stream]]// is an //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]//, a //[[CL:Glossary:file]]// might be created.
+
+====Affected By====
+
+The host computer's file system.
+
+====Exceptional Situations====
+
+See the //[[CL:Glossary:function]]// **[[CL:Functions:open]]**.
+
+====See Also====
+
+**[[CL:Functions:open]]**, **[[CL:Functions:close]]**, **[[CL:Types:pathname]]**, **[[CL:Types:logical-pathname]]**, {\secref\PathnamesAsFilenames}
+
+====Notes====
+
+None.
+
+\issue{DECLS-AND-DOC} \issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS} \issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS} \issue{WITH-OPEN-FILE-STREAM-EXTENT:DYNAMIC-EXTENT} \issue{WITH-OPEN-FILE-DOES-NOT-EXIST:STREAM-IS-NIL} \issue{WITH-OPEN-FILE-DOES-NOT-EXIST:STREAM-IS-NIL} \issue{WITH-OPEN-FILE-SETQ:EXPLICITLY-VAGUE} \issue{WITH-OPEN-FILE-DOES-NOT-EXIST:STREAM-IS-NIL} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-LOGICAL:ADD} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}

@@ -1,0 +1,46 @@
+====== Function EQ ======
+
+====Syntax====
+
+**eq** //x y// → //generalized-boolean//
+
+====Arguments and Values====
+
+//x// - an //[[CL:Glossary:object]]//.
+
+//y// - an //[[CL:Glossary:object]]//.
+
+//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+Returns //[[CL:Glossary:true]]// if its //[[CL:Glossary:arguments]]// are the same, identical //[[CL:Glossary:object]]//; otherwise, returns //[[CL:Glossary:false]]//.
+
+====Examples==== <blockquote> (eq 'a 'b) → //[[CL:Glossary:false]]// (eq 'a 'a) → //[[CL:Glossary:true]]// (eq 3 3) → //[[CL:Glossary:true]]// //or// → //[[CL:Glossary:false]]// (eq 3 3.0) → //[[CL:Glossary:false]]// (eq 3.0 3.0) → //[[CL:Glossary:true]]// //or// → //[[CL:Glossary:false]]// (eq #c(3 -4) #c(3 -4)) → //[[CL:Glossary:true]]// //or// → //[[CL:Glossary:false]]// (eq #c(3 -4.0) #c(3 -4)) → //[[CL:Glossary:false]]// (eq (cons 'a 'b) (cons 'a 'c)) → //[[CL:Glossary:false]]// (eq (cons 'a 'b) (cons 'a 'b)) → //[[CL:Glossary:false]]// (eq '(a . b) '(a . b)) → //[[CL:Glossary:true]]// //or// → //[[CL:Glossary:false]]// (progn ([[CL:Macros:defparameter]] x (cons 'a 'b)) (eq x x)) → //[[CL:Glossary:true]]// (progn ([[CL:Macros:defparameter]] x '(a . b)) (eq x x)) → //[[CL:Glossary:true]]// (eq #\\A #\\A) → //[[CL:Glossary:true]]// //or// → //[[CL:Glossary:false]]// (let ((x "Foo")) (eq x x)) → //[[CL:Glossary:true]]// (eq "Foo" "Foo") → //[[CL:Glossary:true]]// //or// → //[[CL:Glossary:false]]// (eq "Foo" (copy-seq "Foo")) → //[[CL:Glossary:false]]// (eq "FOO" "foo") → //[[CL:Glossary:false]]// (eq "string-seq" (copy-seq "string-seq")) → //[[CL:Glossary:false]]// (let ((x 5)) (eq x x)) → //[[CL:Glossary:true]]// //or// → //[[CL:Glossary:false]]// </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:eql]]**, **[[CL:Functions:equal]]**, **[[CL:Functions:equalp]]**, **[[CL:Functions:=]]**, {\secref\Compilation}
+
+====Notes====
+
+//[[CL:Glossary:object|objects]]// that appear the same when printed are not necessarily **[[CL:Functions:eq]]** to each other. //[[CL:Glossary:Symbols]]// that print the same usually are **[[CL:Functions:eq]]** to each other because of the use of the **[[CL:Functions:intern]]** function. However, //[[CL:Glossary:numbers]]// with the same value need not be **[[CL:Functions:eq]]**, and two similar //[[CL:Glossary:lists]]// are usually not //[[CL:Glossary:identical]]//.
+
+An implementation is permitted to make "copies" of //[[CL:Glossary:characters]]// and //[[CL:Glossary:numbers]]// at any time. The effect is that \clisp\ makes no guarantee that **[[CL:Functions:eq]]** is true even when both its arguments are "the same thing" if that thing is a //[[CL:Glossary:character]]// or //[[CL:Glossary:number]]//.
+
+Most \clisp\ //[[CL:Glossary:operators]]// use **[[CL:Functions:eql]]** rather than **[[CL:Functions:eq]]** to compare objects, or else they default to **[[CL:Functions:eql]]** and only use **[[CL:Functions:eq]]** if specifically requested to do so. However, the following //[[CL:Glossary:operators]]// are defined to use **[[CL:Functions:eq]]** rather than **[[CL:Functions:eql]]** in a way that cannot be overridden by the //[[CL:Glossary:code]]// which employs them:
+
+\displaythree{Operators that always prefer EQ over EQL}{ catch&getf&throw\cr get&remf&\cr get-properties&remprop\cr }
+

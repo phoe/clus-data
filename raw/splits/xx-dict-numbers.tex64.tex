@@ -1,0 +1,44 @@
+====== Function LOGCOUNT ======
+
+====Syntax====
+
+**logcount** //integer// → //number-of-on-bits//
+
+====Arguments and Values====
+
+//integer// - an //[[CL:Glossary:integer]]//.
+
+//number-of-on-bits// - a non-negative //[[CL:Glossary:integer]]//.
+
+====Description====
+
+Computes and returns the number of bits in the two's-complement binary representation of //integer// that are `on' or `set'. If //integer// is negative, the ''0'' bits are counted; otherwise, the ''1'' bits are counted.
+
+====Examples====
+
+<blockquote> (logcount 0) → 0 (logcount -1) → 0 (logcount 7) → 3 (logcount 13) → 3 ;Two's-complement binary: ...0001101 (logcount -13) → 2 ;Two's-complement binary: ...1110011 (logcount 30) → 4 ;Two's-complement binary: ...0011110 (logcount -30) → 4 ;Two's-complement binary: ...1100010 (logcount (expt 2 100)) → 1 (logcount (- (expt 2 100))) → 100 (logcount (- (1+ (expt 2 100)))) → 1 </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should signal **[[CL:Types:type-error]]** if its argument is not an //[[CL:Glossary:integer]]//.
+
+====See Also====
+
+None.
+
+====Notes====
+
+Even if the //[[CL:Glossary:implementation]]// does not represent //[[CL:Glossary:integers]]// internally in two's complement binary, **[[CL:Functions:logcount]]** behaves as if it did.
+
+The following identity always holds:
+
+<blockquote> (logcount //x//) ≡ (logcount (- (+ //x// 1))) ≡ (logcount (lognot //x//)) </blockquote>
+

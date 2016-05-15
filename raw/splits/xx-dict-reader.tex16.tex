@@ -1,0 +1,55 @@
+====== Variable *READ-SUPPRESS* ======
+
+====Value Type====
+
+a //[[CL:Glossary:generalized boolean]]//.
+
+====Initial Value====
+
+//[[CL:Glossary:false]]//.
+
+====Description====
+
+This variable is intended primarily to support the operation of the read-time conditional notations ''#+'' and ''#-''. It is important for the //[[CL:Glossary:reader macros]]// which implement these notations to be able to skip over the printed representation of an //[[CL:Glossary:expression]]// despite the possibility that the syntax of the skipped //[[CL:Glossary:expression]]// may not be entirely valid for the current implementation, since ''#+'' and ''#-'' exist in order to allow the same program to be shared among several Lisp implementations (including dialects other than \clisp) despite small incompatibilities of syntax.
+
+If it is //[[CL:Glossary:false]]//, the //[[CL:Glossary:Lisp reader]]// operates normally.
+
+If \thevalueof{*read-suppress*} is //[[CL:Glossary:true]]//, **[[CL:Functions:read]]**, **[[CL:Functions:read-preserving-whitespace]]**, **[[CL:Functions:read-delimited-list]]**, and **[[CL:Functions:read-from-string]]** all return a //[[CL:Glossary:primary value]]// of **[[CL:Constant Variables:nil]]** when they complete successfully; however, they continue to parse the representation of an //[[CL:Glossary:object]]// in the normal way, in order to skip over the //[[CL:Glossary:object]]//, and continue to indicate //[[CL:Glossary:end of file]]// in the normal way. Except as noted below, any //[[CL:Glossary:standardized]]// //[[CL:Glossary:reader macro]]// that is defined to //[[CL:Glossary:read]]// a following //[[CL:Glossary:object]]// or //[[CL:Glossary:token]]// will do so, but not signal an error if the //[[CL:Glossary:object]]// read is not of an appropriate type or syntax. The //[[CL:Glossary:standard syntax]]// and its associated //[[CL:Glossary:reader macros]]// will not construct any new //[[CL:Glossary:object|objects]]// (//e.g.// when reading the representation of a //[[CL:Glossary:symbol]]//, no //[[CL:Glossary:symbol]]// will be constructed or interned).
+
+\beginlist
+
+\itemitem{Extended tokens}
+
+All extended tokens are completely uninterpreted. Errors such as those that might otherwise be signaled due to detection of invalid //[[CL:Glossary:potential numbers]]//, invalid patterns of //[[CL:Glossary:package markers]]//, and invalid uses of the //[[CL:Glossary:dot]]// character are suppressed.
+
+\itemitem{Dispatching macro characters (including //[[CL:Glossary:sharpsign]]//)}
+
+//[[CL:Glossary:Dispatching macro characters]]// continue to parse an infix numerical argument, and invoke the dispatch function. The //[[CL:Glossary:standardized]]// //[[CL:Glossary:sharpsign]]// //[[CL:Glossary:reader macros]]// do not enforce any constraints on either the presence of or the value of the numerical argument.
+
+\itemitem**[[CL:Functions:#=]]**
+
+The ''#='' notation is totally ignored. It does not read a following //[[CL:Glossary:object]]//. It produces no //[[CL:Glossary:object]]//, but is treated as //[[CL:Glossary:whitespace]]//.
+
+\itemitem**[[CL:Functions:##]]**
+
+The ''##'' notation always produces **[[CL:Constant Variables:nil]]**. \endlist
+
+No matter what \thevalueof{*read-suppress*}, parentheses still continue to delimit and construct //[[CL:Glossary:lists]]//; the ''#('' notation continues to delimit //[[CL:Glossary:vectors]]//; and comments, //[[CL:Glossary:strings]]//, and the //[[CL:Glossary:single-quote]]// and //[[CL:Glossary:backquote]]// notations continue to be interpreted properly. Such situations as ''')'', ''#<'', ''#)'', and ''#\SpaceChar'' continue to signal errors.
+
+====Examples====
+
+<blockquote> (let ((*read-suppress* t)) (mapcar #'read-from-string '("#(foo bar baz)" "#P(:type :lisp)" "#c1.2" "#.(PRINT 'FOO)" "#3AHELLO" "#S(INTEGER)" "#*ABC" "#\\GARBAGE" "#RALPHA" "#3R444"))) → (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL) </blockquote>
+
+====Affected By====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:read]]**, {\chapref\Syntax}
+
+====Notes====
+
+//[[CL:Glossary:Programmers]]// and //[[CL:Glossary:implementations]]// that define additional //[[CL:Glossary:macro characters]]// are strongly encouraged to make them respect **[[CL:Variables:*read-suppress*]]** just as //[[CL:Glossary:standardized]]// //[[CL:Glossary:macro characters]]// do. That is, when \thevalueof{*read-suppress*} is //[[CL:Glossary:true]]//, they should ignore type errors when reading a following //[[CL:Glossary:object]]// and the //[[CL:Glossary:functions]]// that implement //[[CL:Glossary:dispatching macro characters]]// should tolerate **[[CL:Constant Variables:nil]]** as their infix //[[CL:Glossary:parameter]]// value even if a numeric value would ordinarily be required.
+
+\issue{READ-SUPPRESS-CONFUSING:GENERALIZE} \issue{READ-SUPPRESS-CONFUSING:GENERALIZE} \issue{READ-SUPPRESS-CONFUSING:GENERALIZE}

@@ -1,0 +1,51 @@
+====== Function MAKE-SEQUENCE ======
+
+====Syntax====
+
+\DefunWithValues make-sequence {result-type size ''&key'' initial-element} {sequence}
+
+====Arguments and Values====
+
+//result-type// - a **[[CL:Types:sequence]]** //[[CL:Glossary:type specifier]]//.
+
+//size// - a non-negative //[[CL:Glossary:integer]]//.
+
+//initial-element// - an //[[CL:Glossary:object]]//. The default is //[[CL:Glossary:implementation-dependent]]//.
+
+//sequence// - a //[[CL:Glossary:proper sequence]]//.
+
+====Description====
+
+Returns a //[[CL:Glossary:sequence]]// of the type //result-type// and of length //size//, each of the //[[CL:Glossary:element|elements]]// of which has been initialized to //initial-element//.
+
+If the //result-type// is a //[[CL:Glossary:subtype]]// of **[[CL:Types:list]]**,the result will be a //[[CL:Glossary:list]]//.
+
+If the //result-type// is a //[[CL:Glossary:subtype]]// of **[[CL:Types:vector]]**,then if the implementation can determine the element type specified for the //result-type//, the element type of the resulting array is the result of //[[CL:Glossary:upgrade|upgrading]]// that element type; or, if the implementation can determine that the element type is unspecified (or ''*''), the element type of the resulting array is **[[CL:Types:t]]**; otherwise, an error is signaled.
+
+====Examples====
+
+<blockquote> (make-sequence 'list 0) → () (make-sequence 'string 26 :initial-element #\\.) → ".........................." (make-sequence '(vector double-float) 2 :initial-element 1d0) → #(1.0d0 1.0d0) </blockquote>
+
+<blockquote> (make-sequence '(vector * 2) 3) should signal an error (make-sequence '(vector * 4) 3) should signal an error </blockquote>
+
+====Affected By====
+
+The //[[CL:Glossary:implementation]]//.
+
+====Exceptional Situations====
+
+The consequences are unspecified if //initial-element// is not an //[[CL:Glossary:object]]// which can be stored in the resulting //[[CL:Glossary:sequence]]//.
+
+An error of type **[[CL:Types:type-error]]** must be signaled if the //result-type// is neither a //[[CL:Glossary:recognizable subtype]]// of **[[CL:Types:list]]**, nor a //[[CL:Glossary:recognizable subtype]]// of **[[CL:Types:vector]]**.
+
+An error of type **[[CL:Types:type-error]]** should be signaled if //result-type// specifies the number of elements and //size// is different from that number.
+
+====See Also====
+
+**[[CL:Functions:make-array]]**, **[[CL:Functions:make-list]]**
+
+====Notes====
+
+<blockquote> (make-sequence 'string 5) ≡ (make-string 5) </blockquote>
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR} \issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY} \issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY} \issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR} \issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH} \issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR} \issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH} \issue{CHARACTER-PROPOSAL:2-6-5}

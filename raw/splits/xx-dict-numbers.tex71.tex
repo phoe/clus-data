@@ -1,0 +1,44 @@
+====== Accessor MASK-FIELD ======
+
+====Syntax====
+
+**mask-field** //bytespec integer// → //masked-integer// (**setf** (**mask-field** //bytespec place//) //new-masked-integer//)
+
+====Arguments and Values====
+
+//bytespec// - a //[[CL:Glossary:byte specifier]]//.
+
+//integer// - an //[[CL:Glossary:integer]]//.
+
+//masked-integer//, //new-masked-integer// - a non-negative //[[CL:Glossary:integer]]//.
+
+====Description====
+
+**[[CL:Functions:mask-field]]** performs a "mask" operation on //integer//. It returns an //[[CL:Glossary:integer]]// that has the same bits as //integer// in the //[[CL:Glossary:byte]]// specified by //bytespec//, but that has zero-bits everywhere else.
+
+**[[CL:Macros:setf]]** may be used with **[[CL:Functions:mask-field]]** to modify a byte within the //[[CL:Glossary:integer]]// that is stored in a given //place//. The effect is to perform a **[[CL:Functions:deposit-field]]** operation and then store the result back into the //place//.
+
+====Examples====
+
+<blockquote> (mask-field (byte 1 5) -1) → 32 ([[CL:Macros:defparameter]] a 15) → 15 (mask-field (byte 2 0) a) → 3 a → 15 ([[CL:Macros:setf]] (mask-field (byte 2 0) a) 1) → 1 a → 13 </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:byte]]**, **[[CL:Functions:ldb]]**
+
+====Notes====
+
+<blockquote> (ldb //bs// (mask-field //bs// //n//)) ≡ (ldb //bs// //n//) (logbitp //j// (mask-field (byte //s// //p//) //n//)) ≡ (and (>= //j// //p//) (< //j// //s//) (logbitp //j// //n//)) (mask-field //bs// //n//) ≡ (logand //n// (dpb -1 //bs// 0)) </blockquote>
+

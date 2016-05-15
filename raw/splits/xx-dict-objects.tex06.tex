@@ -1,0 +1,56 @@
+====== Standard Generic Function UPDATE-INSTANCE-FOR-DIFFERENT-CLASS ======
+
+====Syntax====
+
+
+\DefgenWithValues update-instance-for-different-class {previous current ''&rest'' initargs ''&key'' {\allowotherkeys}} {//[[CL:Glossary:implementation-dependent]]//}
+
+
+====Method Signatures====
+
+\Defmeth {update-instance-for-different-class} {\vtop{\hbox{\specparam{previous}{standard-object}} \hbox{\specparam{current}{standard-object}} ''&rest'' initargs}}
+
+====Arguments and Values====
+
+//previous// - a copy of the original //[[CL:Glossary:instance]]//.
+
+//current// - the original //[[CL:Glossary:instance]]// (altered).
+
+//initargs// - an //[[CL:Glossary:initialization argument list]]//.
+
+====Description====
+
+The generic function **[[CL:Functions:update-instance-for-different-class]]** is not intended to be called by programmers. Programmers may write //[[CL:Glossary:methods]]// for it. The //[[CL:Glossary:function]]// **[[CL:Functions:update-instance-for-different-class]]** is called only by the function **[[CL:Functions:change-class]]**.
+
+The system-supplied primary //[[CL:Glossary:method]]// on **[[CL:Functions:update-instance-for-different-class]]** checks the validity of //initargs// and signals an error if an //initarg// is supplied that is not declared as valid. This //[[CL:Glossary:method]]// then initializes //[[CL:Glossary:slots]]// with values according to the //initargs//, and initializes the newly added //[[CL:Glossary:slots]]// with values according to their **'':initform''** forms. It does this by calling the generic function **[[CL:Functions:shared-initialize]]** with the following arguments: the instance (//current//), a list of //[[CL:Glossary:names]]// of the newly added //[[CL:Glossary:slots]]//, and the //initargs// it received. Newly added //[[CL:Glossary:slots]]// are those //[[CL:Glossary:local slots]]// for which no //[[CL:Glossary:slot]]// of the same name exists in the //previous// class.
+
+//[[CL:Glossary:Methods]]// for **[[CL:Functions:update-instance-for-different-class]]** can be defined to specify actions to be taken when an //[[CL:Glossary:instance]]// is updated. If only //[[CL:Glossary:after methods]]// for **[[CL:Functions:update-instance-for-different-class]]** are defined, they will be run after the system-supplied primary //[[CL:Glossary:method]]// for initialization and therefore will not interfere with the default behavior of **[[CL:Functions:update-instance-for-different-class]]**.
+
+//[[CL:Glossary:Methods]]// on **[[CL:Functions:update-instance-for-different-class]]** can be defined to initialize //[[CL:Glossary:slots]]// differently from **[[CL:Functions:change-class]]**. The default behavior of **[[CL:Functions:change-class]]** is described in \secref\ChangingInstanceClass.
+
+The arguments to **[[CL:Functions:update-instance-for-different-class]]** are computed by **[[CL:Functions:change-class]]**. When **[[CL:Functions:change-class]]** is invoked on an //[[CL:Glossary:instance]]//, a copy of that //[[CL:Glossary:instance]]// is made; **[[CL:Functions:change-class]]** then destructively alters the original //[[CL:Glossary:instance]]//. The first argument to **[[CL:Functions:update-instance-for-different-class]]**, //previous//, is that copy; it holds the old //[[CL:Glossary:slot]]// values temporarily. This argument has dynamic extent within **[[CL:Functions:change-class]]**; if it is referenced in any way once **[[CL:Functions:update-instance-for-different-class]]** returns, the results are undefined. The second argument to **[[CL:Functions:update-instance-for-different-class]]**, //current//, is the altered original //[[CL:Glossary:instance]]//. The intended use of //previous// is to extract old //[[CL:Glossary:slot]]// values by using **[[CL:Functions:slot-value]]** or **[[CL:Macros:with-slots]]** or by invoking a reader generic function, or to run other //[[CL:Glossary:methods]]// that were applicable to //[[CL:Glossary:instances]]// of the original //[[CL:Glossary:class]]//.
+
+
+
+====Examples====
+
+See the example for the function **[[CL:Functions:change-class]]**.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations==== The system-supplied primary //[[CL:Glossary:method]]// on **[[CL:Functions:update-instance-for-different-class]]** signals an error if an initialization argument is supplied that is not declared as valid.
+
+====See Also====
+
+**[[CL:Functions:change-class]]**, **[[CL:Functions:shared-initialize]]**, {\secref\ChangingInstanceClass}, {\secref\InitargRules}, {\secref\DeclaringInitargValidity}
+
+====Notes====
+
+//Initargs// are declared as valid by using the **'':initarg''** option to **[[CL:Macros:defclass]]**, or by defining //[[CL:Glossary:methods]]// for **[[CL:Functions:update-instance-for-different-class]]** or **[[CL:Functions:shared-initialize]]**. The keyword name of each keyword parameter specifier in the //[[CL:Glossary:lambda list]]// of any //[[CL:Glossary:method]]// defined on **[[CL:Functions:update-instance-for-different-class]]** or **[[CL:Functions:shared-initialize]]** is declared as a valid //initarg// name for all //[[CL:Glossary:classes]]// for which that //[[CL:Glossary:method]]// is applicable.
+
+The value returned by **[[CL:Functions:update-instance-for-different-class]]** is ignored by **[[CL:Functions:change-class]]**.
+
+
+\issue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}

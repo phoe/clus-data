@@ -1,0 +1,68 @@
+====== Function TYPEP ======
+
+====Syntax====
+
+**typep {object type-specifier** //\opt} environment// → //generalized-boolean//
+
+====Arguments and Values====
+
+//object// - an //[[CL:Glossary:object]]//.
+
+//type-specifier// - any //[[CL:Glossary:type specifier]]// except
+
+\misc{values}, or a //[[CL:Glossary:type specifier]]// list whose first element is either \misc{function} or \misc{values}.
+
+//environment// - an //[[CL:Glossary:environment]]// //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**, denoting the //[[CL:Glossary:null lexical environment]]// and the and current //[[CL:Glossary:global environment]]//.
+
+//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+\Predicate{object}{of the //[[CL:Glossary:type]]// specified by //type-specifier//}
+
+A //type-specifier// of the form ''(satisfies fn)'' is handled by applying the function ''fn'' to //object//.
+
+''(typep //object// '(array //type-specifier//))'', where //type-specifier// is not ''*'', returns //[[CL:Glossary:true]]// if and only if //object// is an //[[CL:Glossary:array]]// that could be the result of supplying //type-specifier// as the **'':element-type''** argument to **[[CL:Functions:make-array]]**. ''(array *)'' refers to all //[[CL:Glossary:array|arrays]]// regardless of element type, while ''(array //type-specifier//)'' refers only to those //[[CL:Glossary:array|arrays]]// that can result from giving //type-specifier// as the **'':element-type''** argument to **[[CL:Functions:make-array]]**. A similar interpretation applies to ''(simple-array //type-specifier//)'' and ''(vector //type-specifier//)''. see section {\secref\ArrayUpgrading}.
+
+''(typep //object// '(complex //type-specifier//))'' returns //[[CL:Glossary:true]]// for all //[[CL:Glossary:complex]]// numbers that can result from giving //[[CL:Glossary:numbers]]// of type //type-specifier// to the function **[[CL:Functions:complex]]**, plus all other //[[CL:Glossary:complex]]// numbers of the same specialized representation. Both the real and the imaginary parts of any such //[[CL:Glossary:complex]]// number must satisfy:
+
+<blockquote> (typep realpart 'type-specifier) (typep imagpart 'type-specifier) </blockquote>
+
+See the //[[CL:Glossary:function]]// **[[CL:Functions:upgraded-complex-part-type]]**.
+
+====Examples====
+
+<blockquote> (typep 12 'integer) → //[[CL:Glossary:true]]// (typep (1+ most-positive-fixnum) 'fixnum) → //[[CL:Glossary:false]]// (typep nil t) → //[[CL:Glossary:true]]// (typep nil nil) → //[[CL:Glossary:false]]// (typep 1 '(mod 2)) → //[[CL:Glossary:true]]// (typep #c(1 1) '(complex (eql 1))) → //[[CL:Glossary:true]]// ;; To understand this next example, you might need to refer to ;; \secref\RuleOfCanonRepForComplexRationals. (typep #c(0 0) '(complex (eql 0))) → //[[CL:Glossary:false]]// </blockquote>
+
+Let ''A\sssx'' and ''A\sssy'' be two //[[CL:Glossary:type specifiers]]// that denote different //[[CL:Glossary:types]]//, but for which
+
+<blockquote> (upgraded-array-element-type 'A\sssx) </blockquote> and
+
+<blockquote> (upgraded-array-element-type 'A\sssy) </blockquote> denote the same //[[CL:Glossary:type]]//. Notice that
+
+<blockquote> (typep (make-array 0 :element-type 'A\sssx) '(array A\sssx)) → //[[CL:Glossary:true]]// (typep (make-array 0 :element-type 'A\sssy) '(array A\sssy)) → //[[CL:Glossary:true]]// (typep (make-array 0 :element-type 'A\sssx) '(array A\sssy)) → //[[CL:Glossary:true]]// (typep (make-array 0 :element-type 'A\sssy) '(array A\sssx)) → //[[CL:Glossary:true]]// </blockquote>
+
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+An error of type **[[CL:Types:error]]** is signaled if //type-specifier// is ''values'', or a //[[CL:Glossary:type specifier]]// list whose first element is either \misc{function} or \misc{values}.
+
+The consequences are undefined if the //type-specifier// is not a //[[CL:Glossary:type specifier]]//.
+
+====See Also====
+
+**[[CL:Functions:type-of]]**, **[[CL:Functions:upgraded-array-element-type]]**, **[[CL:Functions:upgraded-complex-part-type]]**, {\secref\TypeSpecifiers}
+
+====Notes====
+
+//[[CL:Glossary:Implementations]]// are encouraged to recognize and optimize the case of ''(typep //x// (the class //y//))'', since it does not involve any need for expansion of **[[CL:Macros:deftype]]** information at runtime.
+
+<blockquote>
+
+</blockquote>
+
+\issue{SUBTYPEP-ENVIRONMENT:ADD-ARG} \issue{FUNCTION-TYPE} \issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING} \issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}

@@ -1,0 +1,104 @@
+====== Function SUBTYPEP ======
+
+====Syntax====
+
+\DefunWithValues subtypep {type-1 type-2 ''&optional'' environment} {subtype-p, valid-p}
+
+====Arguments and Values====
+
+//type-1// - a //[[CL:Glossary:type specifier]]//.
+
+//type-2// - a //[[CL:Glossary:type specifier]]//.
+
+//environment// - an //[[CL:Glossary:environment]]// //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**, denoting the //[[CL:Glossary:null lexical environment]]// and the current //[[CL:Glossary:global environment]]//.
+
+//subtype-p// - a //[[CL:Glossary:generalized boolean]]//.
+
+//valid-p// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+If //type-1// is a //[[CL:Glossary:recognizable subtype]]// of //type-2//, the first //[[CL:Glossary:value]]// is //[[CL:Glossary:true]]//. Otherwise, the first //[[CL:Glossary:value]]// is //[[CL:Glossary:false]]//, indicating that either //type-1// is not a //[[CL:Glossary:subtype]]// of //type-2//, or else //type-1// is a //[[CL:Glossary:subtype]]// of //type-2// but is not a //[[CL:Glossary:recognizable subtype]]//.
+
+A second //[[CL:Glossary:value]]// is also returned indicating the `certainty' of the first //[[CL:Glossary:value]]//. If this value is //[[CL:Glossary:true]]//, then the first value is an accurate indication of the //[[CL:Glossary:subtype]]// relationship. (The second //[[CL:Glossary:value]]// is always //[[CL:Glossary:true]]// when the first //[[CL:Glossary:value]]// is //[[CL:Glossary:true]]//.)
+
+\Thenextfigure\ summarizes the possible combinations of //[[CL:Glossary:values]]// that might result.
+
+\tablefigthree{Result possibilities for subtypep}{Value 1}{Value 2}{Meaning}{ //[[CL:Glossary:true]]// & //[[CL:Glossary:true]]// & //type-1// is definitely a //[[CL:Glossary:subtype]]// of //type-2//.\cr //[[CL:Glossary:false]]// & //[[CL:Glossary:true]]// & //type-1// is definitely not a //[[CL:Glossary:subtype]]// of //type-2//.\cr //[[CL:Glossary:false]]// & //[[CL:Glossary:false]]// & **[[CL:Functions:subtypep]]** could not determine the relationship,\cr & & so //type-1// might or might not be a //[[CL:Glossary:subtype]]// of //type-2//.\cr }
+
+**[[CL:Functions:subtypep]]** is permitted to return the //[[CL:Glossary:values]]// //[[CL:Glossary:false]]// and //[[CL:Glossary:false]]// only when at least one argument involves one of these //[[CL:Glossary:type specifiers]]//: \declref{and},
+
+\declref{eql}, the list form of \declref{function}, \declref{member}, \declref{not}, \declref{or}, \declref{satisfies}, or \declref{values}. (A //[[CL:Glossary:type specifier]]// `involves' such a //[[CL:Glossary:symbol]]// if, after being //[[CL:Glossary:type expanded]]//, it contains that //[[CL:Glossary:symbol]]// in a position that would call for its meaning as a //[[CL:Glossary:type specifier]]// to be used.) One consequence of this is that if neither //type-1// nor //type-2// involves any of these //[[CL:Glossary:type specifiers]]//, then **[[CL:Functions:subtypep]]** is obliged to determine the relationship accurately. In particular, **[[CL:Functions:subtypep]]** returns the //[[CL:Glossary:values]]// //[[CL:Glossary:true]]// and //[[CL:Glossary:true]]// if the arguments are **[[CL:Functions:equal]]** and do not involve any of these //[[CL:Glossary:type specifiers]]//.
+
+**[[CL:Functions:subtypep]]** never returns a second value of **[[CL:Constant Variables:nil]]** when both //type-1// and //type-2// involve only the names in \figref\StandardizedAtomicTypeSpecs, or names of //[[CL:Glossary:types]]// defined by **[[CL:Macros:defstruct]]**, **[[CL:Macros:define-condition]]**, or **[[CL:Macros:defclass]]**, or //[[CL:Glossary:derived types]]// that expand into only those names. While //[[CL:Glossary:type specifiers]]// listed in \figref\StandardizedAtomicTypeSpecs\ and names of **[[CL:Macros:defclass]]** and **[[CL:Macros:defstruct]]** can in some cases be implemented as //[[CL:Glossary:derived types]]//, **[[CL:Functions:subtypep]]** regards them as primitive.
+
+The relationships between //[[CL:Glossary:types]]// reflected by **[[CL:Functions:subtypep]]** are those specific to the particular implementation. For example, if an implementation supports only a single type of floating-point numbers, in that implementation ''(subtypep 'float 'long-float)'' returns the //[[CL:Glossary:values]]// //[[CL:Glossary:true]]// and //[[CL:Glossary:true]]// (since the two //[[CL:Glossary:types]]// are identical).
+
+For all //T1// and //T2// other than ''*'', ''(array //T1//)'' and ''(array //T2//)'' are two different //[[CL:Glossary:type specifiers]]// that always refer to the same sets of things if and only if they refer to //[[CL:Glossary:array|arrays]]// of exactly the same specialized representation, i.e. if ''(upgraded-array-element-type '//T1//)'' and ''(upgraded-array-element-type '//T2//)'' return two different //[[CL:Glossary:type specifiers]]// that always refer to the same sets of //[[CL:Glossary:object|objects]]//. This is another way of saying that ''`(array //type-specifier//)'' and ''`(array ,(upgraded-array-element-type '//type-specifier//))'' refer to the same set of specialized //[[CL:Glossary:array]]// representations. For all //T1// and //T2// other than ''*'',
+
+the intersection of ''(array //T1//)'' and ''(array //T2//)'' is the empty set if and only if they refer to //[[CL:Glossary:array|arrays]]// of different, distinct specialized representations.
+
+Therefore,
+
+<blockquote> (subtypep '(array T1) '(array T2)) → //[[CL:Glossary:true]]// </blockquote> if and only if
+
+<blockquote> (upgraded-array-element-type 'T1) and (upgraded-array-element-type 'T2) </blockquote>
+
+return two different //[[CL:Glossary:type specifiers]]// that always refer to the same sets of //[[CL:Glossary:object|objects]]//.
+
+For all type-specifiers //T1// and //T2// other than ''*'',
+
+<blockquote> (subtypep '(complex T1) '(complex T2)) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// </blockquote>
+
+if: \beginlist \itemitem{1.} ''T1'' is a //[[CL:Glossary:subtype]]// of ''T2'', or \itemitem{2.} ''(upgraded-complex-part-type '//T1//)'' and ''(upgraded-complex-part-type '//T2//)'' return two different //[[CL:Glossary:type specifiers]]// that always refer to the same sets of //[[CL:Glossary:object|objects]]//; in this case, ''(complex //T1//)'' and ''(complex //T2//)'' both refer to the same specialized representation. \endlist The //[[CL:Glossary:values]]// are //[[CL:Glossary:false]]// and //[[CL:Glossary:true]]// otherwise.
+
+The form
+
+<blockquote> (subtypep '(complex single-float) '(complex float)) </blockquote> must return //[[CL:Glossary:true]]// in all implementations, but
+
+<blockquote> (subtypep '(array single-float) '(array float)) </blockquote>
+
+returns //[[CL:Glossary:true]]// only in implementations that do not have a specialized //[[CL:Glossary:array]]// representation for //[[CL:Glossary:single floats]]// distinct from that for other //[[CL:Glossary:floats]]//.
+
+
+
+====Examples====
+
+<blockquote> (subtypep 'compiled-function 'function) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// (subtypep 'null 'list) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// (subtypep 'null 'symbol) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// (subtypep 'integer 'string) → //[[CL:Glossary:false]]//, //[[CL:Glossary:true]]// (subtypep '(satisfies dummy) nil) → //[[CL:Glossary:false]]//, //[[CL:Glossary:implementation-dependent]]// (subtypep '(integer 1 3) '(integer 1 4)) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// (subtypep '(integer (0) (0)) 'nil) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// (subtypep 'nil '(integer (0) (0))) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// (subtypep '(integer (0) (0)) '(member)) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// ;or //[[CL:Glossary:false]]//, //[[CL:Glossary:false]]// (subtypep '(member) 'nil) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// ;or //[[CL:Glossary:false]]//, //[[CL:Glossary:false]]// (subtypep 'nil '(member)) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// ;or //[[CL:Glossary:false]]//, //[[CL:Glossary:false]]// </blockquote>
+
+Let ''<aet-x>'' and ''<aet-y>'' be two distinct //[[CL:Glossary:type specifiers]]// that do not always refer to the same sets of //[[CL:Glossary:object|objects]]// in a given implementation, but for which **[[CL:Functions:make-array]]**, will return an //[[CL:Glossary:object]]// of the same //[[CL:Glossary:array]]// //[[CL:Glossary:type]]//.
+
+Thus, in each case,
+
+<blockquote> (subtypep (array-element-type (make-array 0 :element-type '<aet-x>)) (array-element-type (make-array 0 :element-type '<aet-y>))) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]//
+
+(subtypep (array-element-type (make-array 0 :element-type '<aet-y>)) (array-element-type (make-array 0 :element-type '<aet-x>))) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// </blockquote>
+
+
+If ''(array <aet-x>)'' and ''(array <aet-y>)'' are different names for exactly the same set of //[[CL:Glossary:object|objects]]//, these names should always refer to the same sets of //[[CL:Glossary:object|objects]]//. That implies that the following set of tests are also true:
+
+<blockquote> (subtypep '(array <aet-x>) '(array <aet-y>)) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// (subtypep '(array <aet-y>) '(array <aet-x>)) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+{\secref\Types}
+
+====Notes====
+
+The small differences between the **[[CL:Functions:subtypep]]** specification for the **[[CL:Types:array]]** and **[[CL:Types:complex]]** types are necessary because there is no creation function for //[[CL:Glossary:complexes]]// which allows the specification of the resultant part type independently of the actual types of the parts. Thus in the case of the type **[[CL:Types:complex]]**, the actual type of the parts is referred to, although a //[[CL:Glossary:number]]// can be a member of more than one //[[CL:Glossary:type]]//. For example, ''17'' is of //[[CL:Glossary:type]]// ''(mod 18)'' as well as //[[CL:Glossary:type]]// ''(mod 256)'' and //[[CL:Glossary:type]]// **[[CL:Types:integer]]**; and ''2.3f5'' is of type **[[CL:Types:single-float]]** as well as //[[CL:Glossary:type]]// **[[CL:Types:float]]**.
+
+
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING} \issue{SUBTYPEP-ENVIRONMENT:ADD-ARG} \issue{SUBTYPEP-TOO-VAGUE:CLARIFY-MORE} \issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING} \issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}

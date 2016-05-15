@@ -1,0 +1,41 @@
+====== Function CHAR-UPCASE, CHAR-DOWNCASE ======
+
+====Syntax====
+
+**{char-upcase}** //character// → //corresponding-character// **{char-downcase}** //character// → //corresponding-character//
+
+====Arguments and Values====
+
+//character//, //corresponding-character// - a //[[CL:Glossary:character]]//.
+
+====Description====
+
+If //character// is a //[[CL:Glossary:lowercase]]// //[[CL:Glossary:character]]//, **[[CL:Functions:char-upcase]]** returns the corresponding //[[CL:Glossary:uppercase]]// //[[CL:Glossary:character]]//. Otherwise, **[[CL:Functions:char-upcase]]** just returns the given //character//.
+
+If //character// is an //[[CL:Glossary:uppercase]]// //[[CL:Glossary:character]]//, **[[CL:Functions:char-downcase]]** returns the corresponding //[[CL:Glossary:lowercase]]// //[[CL:Glossary:character]]//. Otherwise, **[[CL:Functions:char-downcase]]** just returns the given //character//.
+
+The result only ever differs from //character// in its //[[CL:Glossary:code]]// //[[CL:Glossary:attribute]]//; all //[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:attributes]]// are preserved.
+
+====Examples====
+
+<blockquote> (char-upcase #\\a) → #\\A (char-upcase #\\A) → #\\A (char-downcase #\\a) → #\\a (char-downcase #\\A) → #\\a (char-upcase #\\9) → #\\9 (char-downcase #\\9) → #\\9 (char-upcase #\\@) → #\\@ (char-downcase #\\@) → #\\@ ;; Note that this next example might run for a very long time in ;; some implementations if CHAR-CODE-LIMIT happens to be very large ;; for that implementation. (dotimes (code char-code-limit) (let ((char (code-char code))) (when char (unless (cond ((upper-case-p char) (char= (char-upcase (char-downcase char)) char)) ((lower-case-p char) (char= (char-downcase (char-upcase char)) char)) (t (and (char= (char-upcase (char-downcase char)) char) (char= (char-downcase (char-upcase char)) char)))) (return char))))) → NIL </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //character// is not a //[[CL:Glossary:character]]//.
+
+====See Also====
+
+**[[CL:Functions:upper-case-p]]**, **[[CL:Functions:alpha-char-p]]**, {\secref\CharactersWithCase}, {\secref\ImplementationDefinedScripts}
+
+====Notes====
+
+If the //corresponding-char// is //[[CL:Glossary:different]]// than //character//, then both the //character// and the //corresponding-char// have //[[CL:Glossary:case]]//.
+
+Since **[[CL:Functions:char-equal]]** ignores the //[[CL:Glossary:case]]// of the //[[CL:Glossary:characters]]// it compares, the //corresponding-character// is always the //[[CL:Glossary:same]]// as //character// under **[[CL:Functions:char-equal]]**.
+
+\issue{CHARACTER-PROPOSAL:2-1-1}

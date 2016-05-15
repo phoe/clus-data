@@ -1,0 +1,4358 @@
+% -*- Mode: TeX -*-
+
+% Evaluation Control
+% Macros
+% Declarations
+% Introspection
+
+%-------------------- Lambda Expressions --------------------
+
+%%% ========== LAMBDA (symbol)
+
+\begincom{lambda}\ftype{Symbol}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\Defspec lambda {lambda-list {\DeclsAndDoc} \starparam{form}}
+
+\label Arguments:: 
+
+\param{lambda-list}---an \term{ordinary lambda list}.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+ 
+\param{documentation}---a \term{string}; \noeval.
+
+\param{form}---a \term{form}.
+
+\label Description::
+
+A \term{lambda expression} is a \term{list} that can be used in place of a
+\term{function name} in certain contexts to denote a \term{function} by 
+directly describing its behavior rather than indirectly by referring to the 
+name of an \term{established} \term{function}.
+
+\param{Documentation} is attached to the denoted \param{function} (if any
+is actually created) as a \term{documentation string}.
+
+\label See Also::
+
+\specref{function},
+\specref{documentation},
+{\secref\LambdaExpressions},
+{\secref\LambdaForms},
+{\secref\DocVsDecls}
+
+\label Notes::
+
+The \term{lambda form}
+
+\code
+ ((lambda \param{lambda-list} . \param{body}) . \param{arguments})
+\endcode
+
+is semantically equivalent to the \term{function form}
+
+\code
+ (funcall #'(lambda \param{lambda-list} . \param{body}) . \param{arguments})
+\endcode
+
+\endissue{DECLS-AND-DOC}
+
+\endcom%{lambda}
+
+%%% ========== LAMBDA (macro)
+
+\issue{ISO-COMPATIBILITY:ADD-SUBSTRATE}
+\begincom{lambda}\ftype{Macro}
+
+\label Syntax::
+
+%% 7.6.0 7
+\DefmacWithValues lambda
+	          {lambda-list {\DeclsAndDoc} \starparam{form}}
+		  {\param{function}}
+
+\label Arguments and Values:: 
+
+\param{lambda-list}---an \term{ordinary lambda list}.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+ 
+\param{documentation}---a \term{string}; \noeval.
+
+\param{form}---a \term{form}.
+
+\param{function}---a \term{function}.
+
+\label Description::
+
+Provides a shorthand notation for a \specref{function} \term{special form}
+involving a \term{lambda expression} such that:
+
+\code
+    (lambda \param{lambda-list} {\DeclsAndDoc} \starparam{form})
+ \EQ (function (lambda \param{lambda-list} {\DeclsAndDoc} \starparam{form}))
+ \EQ #'(lambda \param{lambda-list} {\DeclsAndDoc} \starparam{form})
+\endcode
+
+\label Examples::
+
+\code
+ (funcall (lambda (x) (+ x 3)) 4) \EV 7
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\misc{lambda} (symbol)
+
+\label Notes::
+
+This macro could be implemented by:
+
+\code
+(defmacro lambda (&whole form &rest bvl-decls-and-body)
+  (declare (ignore bvl-decls-and-body))
+  `#',form)
+\endcode
+
+\endcom%{lambda}
+\endissue{ISO-COMPATIBILITY:ADD-SUBSTRATE}
+
+%-------------------- Evaluation Control --------------------
+
+%%% ========== COMPILE
+
+\begincom{compile}\ftype{Function}
+
+\issue{FUNCTION-NAME:LARGE}
+%%\param{Name} has been changed to \param{function-name} throughout.}
+\endissue{FUNCTION-NAME:LARGE}
+
+\label Syntax::
+
+\DefunWithValues compile {name {\opt} definition} {function, warnings-p, failure-p}
+
+\label Arguments and Values::
+
+\param{name}---a \term{function name}, or \nil.
+               
+%% 25.1.0 5
+\param{definition}---a \term{lambda expression} or a \term{function}.
+  \Default{the function definition of \param{name} if it names a \term{function},
+	   or the \term{macro function} of \param{name} if it names a \term{macro}}
+  The consequences are undefined if no \param{definition} is supplied
+  when the \param{name} is \nil.
+
+%% 25.1.0 6
+\param{function}---the \param{function-name},
+\issue{COMPILED-FUNCTION-REQUIREMENTS:TIGHTEN}
+	        or a \term{compiled function}.
+\endissue{COMPILED-FUNCTION-REQUIREMENTS:TIGHTEN}
+
+\param{warnings-p}---a \term{generalized boolean}.
+
+\param{failure-p}---a \term{generalized boolean}.
+
+\label Description::
+
+Compiles an \term{interpreted function}.
+%% Moon: Intent is compilation envirionment = startup environment.
+%%       Just delete this phrase, I think.
+%in the current \term{dynamic environment}.
+
+\funref{compile} produces a \term{compiled function} from \param{definition}.
+If the \param{definition} is a \term{lambda expression},
+it is coerced to a \term{function}.  
+\issue{COMPILE-ARGUMENT-PROBLEMS-AGAIN:FIX}
+If the \param{definition} is already a \term{compiled function},
+\funref{compile} either produces that function itself (\ie is an identity operation)
+or an equivalent function.
+\endissue{COMPILE-ARGUMENT-PROBLEMS-AGAIN:FIX}
+
+\editornote{KMP: There are a number of ambiguities here that still need resolution.}%!!!
+% Cases of interest:
+% Given: (defmacro foist (x) `(car ,x))
+% What do these do:
+%  (compile 'foist (macro-function 'foist))
+%  (compile 'foist (symbol-function 'foist))
+%  (compile 'foist '(lambda (x y) (+ x y)))
+If the \param{name} is \nil,
+the resulting \term{compiled function} is returned directly as the \term{primary value}.
+If a \term{non-nil} \param{name} is given, 
+then the resulting \term{compiled function} replaces 
+the existing \term{function} definition of \param{name}
+and the \param{name} is returned as the \term{primary value};
+if \param{name} is a \term{symbol} that names a \term{macro},
+its \term{macro function} is updated
+and the \param{name} is returned as the \term{primary value}.
+
+% I moved this paragraph so it isn't in the middle of the discussion
+% of compiler diagnostics.  --sjl 7 Mar 92
+\issue{QUOTE-SEMANTICS:NO-COPYING}
+% Constants -> Literal objects. -kmp 15-Jan-91
+\term{Literal objects} appearing in code processed by 
+the \funref{compile} function are neither copied nor \term{coalesced}.
+The code resulting from the execution of \funref{compile} 
+references \term{objects} that are \funref{eql} to the corresponding
+\term{objects} in the source code.  
+\endissue{QUOTE-SEMANTICS:NO-COPYING}
+
+\issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+\funref{compile} is permitted, but not required, to \term{establish}
+a \term{handler} for \term{conditions} \oftype{error}.
+For example, the \term{handler} might issue a warning and 
+restart compilation from some \term{implementation-dependent} point 
+in order to let the compilation proceed without manual intervention.
+\endissue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+
+The \term{secondary value}, \param{warnings-p}, is \term{false}
+% clarify ``compiler diagnostics''  --sjl 7 Mar 92
+%if no compiler diagnostics were issued, and \term{true} otherwise.
+if no \term{conditions} \oftype{error} or \typeref{warning}
+were detected by the compiler, and \term{true} otherwise.
+
+The \term{tertiary value}, \param{failure-p}, is \term{false}
+% clarify ``compiler diagnostics''  --sjl 7 Mar 92
+%if no compiler diagnostics other than \term{style warnings} were issued.
+%A value of \term{true} indicates that there were serious compiler diagnostics
+%issued, or that other \term{conditions} \oftype{error} or \typeref{warning}
+%(but not \oftype{style-warning}) were signaled during compilation.
+if no \term{conditions} \oftype{error} or \typeref{warning}
+(other than \typeref{style-warning})
+were detected by the compiler, and \term{true} otherwise.
+
+\label Examples::
+
+\code
+ (defun foo () "bar") \EV FOO
+ (compiled-function-p #'foo) \EV \term{implementation-dependent}
+ (compile 'foo) \EV FOO 
+ (compiled-function-p #'foo) \EV \term{true}
+ (setf (symbol-function 'foo)
+       (compile nil '(lambda () "replaced"))) \EV #<Compiled-Function>
+ (foo) \EV "replaced"
+\endcode
+% (defun foo ...) \EV foo  ;A function definition.
+% (compile 'foo) \EV foo   ;Compile it.
+%                          ;Now foo runs faster.
+
+\label Affected By::
+
+\issue{COMPILER-WARNING-STREAM}
+\varref{*error-output*},
+\endissue{COMPILER-WARNING-STREAM}
+\varref{*macroexpand-hook*}.
+
+The presence of macro definitions and proclamations.
+
+\label Exceptional Situations::
+
+\issue{COMPILE-ARGUMENT-PROBLEMS-AGAIN:FIX}
+The consequences are undefined if the \term{lexical environment} surrounding the
+\term{function} to be compiled contains any \term{bindings} other than those for
+\term{macros}, \term{symbol macros}, or \term{declarations}.
+
+% The consequences are undefined if the \term{function} to be compiled
+% was defined in a \term{non-null lexical environment}.
+
+% The consequences are unspecified if the \term{function} is already a
+% \term{compiled function}.
+\endissue{COMPILE-ARGUMENT-PROBLEMS-AGAIN:FIX}
+
+%% should be an error signaled if name is nil and no definition is supplied.
+%% also if function is already compiled.
+%ERROR and WARNING conditions may be signaled within 
+%    COMPILE or COMPILE-FILE, including arbitrary errors which may 
+%    occur due to compile-time processing of (EVAL-WHEN (:COMPILE-TOPLEVEL) ...) 
+%    forms or macro expansion.
+% 
+
+% The following information is mostly redundant with info in the chapter 3
+% concept section, and contains some inconsistencies.  Better to just
+% put in a cross-reference.  --sjl 4 mar 92
+% \issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+% The following list considers only 
+% those conditions signaled by the compiler as
+%     opposed to within the compiler.
+%  
+%     An error \oftype{error} might be signaled by the compiler in
+%         situations where the compilation cannot proceed without
+%         intervention.
+%         Examples include
+% 	    file open errors and
+%    	    syntax errors.
+%  
+% An error \oftype{warning} might be signaled by the compiler in 
+% situations where the standard explicitly states 
+% that a warning must, should, or might be signaled.
+% Also, an error \oftype{warning} might be signaled 
+% by the compiler in situations where the compiler can determine 
+% that a situation with undefined consequences or that would cause
+% an error to be signaled would result at runtime.
+% Examples include
+%  violation of type declarations,
+%  \term{assigning} or \term{binding} a \term{constant variable},
+%  calling a built-in Lisp function with the wrong number of arguments
+%    or malformed keyword argument lists,
+%  referencing a variable declared \declref{ignore}, 
+%  and the usage of unrecognized declaration specifiers.
+%  
+% The compiler is permitted to signal errors \oftype{style-warning}
+% about matters of programming style. Although \term{style warnings} might 
+% be signaled in these situations, no implementation is required to 
+% signal them. However, if an implementation does choose to signal an
+% error about matters of programming style, 
+% that error is \oftype{style-warning} and is signaled by a call to \funref{warn}.
+% Examples include
+%  redefinition of a \term{function} with a different argument list,
+%  calling a \term{function} with the wrong number of arguments,
+%  \term{accessing} unreferenced local variables not declared \declref{ignore}, 
+%  and usage of declaration specifiers described in the standard but ignored by the compiler.
+%  
+% \issue{COMPILER-WARNING-STREAM}
+% %%This is now implied by the remarks about using WARN above.
+% %\funref{compile} is permitted to issue warnings through \term{error output}.
+% \endissue{COMPILER-WARNING-STREAM}
+% 
+% \endissue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+
+For information about errors detected during the compilation process, 
+\seesection\FileCompilerExceptions.
+
+\label See Also::
+
+\funref{compile-file}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== EVAL
+\begincom{eval}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues eval {form} {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{form}---a \term{form}.
+
+\param{results}---the \term{values} \term{yielded} by the \term{evaluation} of \param{form}.
+
+%% Goes without saying. -kmp 8-Aug-91
+% %% 7.9.2 4
+% Returns multiple values if \param{form} produces multiple values.
+
+\label Description::                    
+
+%% 20.1.0 2
+Evaluates \param{form} in the current \term{dynamic environment}
+and the \term{null lexical environment}.
+
+
+%% 20.1.0 1
+\funref{eval} is a user interface to the evaluator.
+
+%% 8.2.0 5
+The evaluator expands macro calls as if through the use of \funref{macroexpand-1}.
+
+%%% 9.1.0 3
+%It is an error to attempt to evaluate a declaration.
+%Those \term{forms} that permit declarations to appear
+%perform explicit checks for their presence.
+
+\issue{QUOTE-SEMANTICS:NO-COPYING}
+Constants appearing in code
+processed by \funref{eval} are
+not copied nor coalesced. The code resulting from the execution of 
+\funref{eval}
+references \term{objects} 
+that are \funref{eql} to the corresponding \term{objects} in
+the source code.  
+\endissue{QUOTE-SEMANTICS:NO-COPYING}
+
+%!!! Barmar: What about compiler macros?
+
+\label Examples::
+
+\code
+ (setq form '(1+ a) a 999) \EV 999
+ (eval form) \EV 1000
+ (eval 'form) \EV (1+ A)
+ (let ((a '(this would break if eval used local value))) (eval form))
+\EV 1000
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\issue{EVALHOOK-STEP-CONFUSION:X3J13-NOV-89}
+%\funref{evalhook},
+%\funref{applyhook},
+\endissue{EVALHOOK-STEP-CONFUSION:X3J13-NOV-89}
+\funref{macroexpand-1},
+{\secref\EvaluationModel}
+
+\label Notes::
+
+%% 20.1.0 4
+To obtain the current dynamic value of a \term{symbol}, 
+use of \funref{symbol-value} is equivalent (and usually preferable) 
+to use of \funref{eval}.
+
+%% 20.1.0 3
+Note that an \funref{eval} \term{form} involves two levels of \term{evaluation} 
+for its \term{argument}.  First, \param{form} is \term{evaluated} by the
+normal argument evaluation mechanism as would occur with any \term{call}.
+The \term{object} that results from this normal \term{argument} \term{evaluation} 
+becomes the \term{value} of the \param{form} \term{parameter}, and is then
+\term{evaluated} as part of the \funref{eval} \term{form}.
+For example:
+
+\code
+ (eval (list 'cdr (car '((quote (a . b)) c)))) \EV b
+\endcode
+The \term{argument} \term{form} \f{(list 'cdr (car '((quote (a . b)) c)))} is evaluated
+in the usual way to produce the \term{argument} \f{(cdr (quote (a . b)))}; 
+% this is then given to \funref{eval} 
+% because \funref{eval} is being called explicitly,
+% and 
+\funref{eval} then evaluates its \term{argument}, \f{(cdr (quote (a . b)))}, to produce \f{b}.
+Since a single \term{evaluation} already occurs for any \term{argument} \term{form}
+in any \term{function form},
+\funref{eval} is sometimes said to perform ``an extra level of evaluation.''
+
+\issue{EVALHOOK-STEP-CONFUSION:FIX}
+% Hooks are provided for user-supplied debugging routines
+% to obtain control during the execution of an interpretive evaluator.
+% \funref{evalhook} and \funref{applyhook} provide alternative
+% interfaces to the evaluator mechanism for use by these debugging routines.
+\endissue{EVALHOOK-STEP-CONFUSION:FIX}
+
+\endcom
+
+%%% ========== EVAL-WHEN
+\begincom{eval-when}\ftype{Special Operator}      
+
+\label Syntax::
+
+\DefspecWithValues eval-when
+		   {\paren{\starparam{situation}} \starparam{form}}
+		   {\starparam{result}}
+
+\label Arguments and Values::
+
+\issue{EVAL-WHEN-NON-TOP-LEVEL:GENERALIZE-EVAL-NEW-KEYWORDS}
+\param{situation}---One of the \term{symbols} 
+		    \kwd{compile-toplevel}\idxkwd{compile-toplevel},
+		    \kwd{load-toplevel}\idxkwd{load-toplevel},
+		    \kwd{execute}\idxkwd{execute},
+		    \misc{compile}\idxref{compile},
+		    \misc{load}\idxref{load}, or
+		    \misc{eval}\idxref{eval}.
+
+The use of \misc{eval}, \misc{compile}, and \misc{load} is deprecated.
+\issue{EVAL-WHEN-OBSOLETE-KEYWORDS:X3J13-MAR-1993}
+%They are supported when \specref{eval-when} is a \term{top level form},
+%but their meaning is not defined elsewhere.
+\endissue{EVAL-WHEN-OBSOLETE-KEYWORDS:X3J13-MAR-1993}
+\endissue{EVAL-WHEN-NON-TOP-LEVEL:GENERALIZE-EVAL-NEW-KEYWORDS}
+
+\param{forms}---an \term{implicit progn}.
+
+\param{results}---the \term{values} of the \term{forms} if they are executed,
+		  or \nil\ if they are not. 
+
+\label Description::
+
+%%% 5.3.3 2
+%\specref{eval-when} specifies when a particular body
+%of code is to be evaluated.
+%%% 5.3.3 1.5
+%\specref{eval-when} allows pieces of code to
+%be executed only at compile time, only in compiled code, or
+%when interpreted but not compiled.  
+%If no \param{forms} are executed, \specref{eval-when} returns
+%\nil.
+%
+%%% 5.3.3 3
+%\f{eval} specifies that the interpreter should process the body.
+%\f{compile} specifies that the compiler should evaluate the body
+%at compile time in the compilation context.
+%\f{load} specifies that the compiler should arrange to evaluate
+%the forms in the body when the compiled file containing the
+%\specref{eval-when} form is \term{loaded}.
+%
+%The body of \specref{eval-when} is processed as an implicit
+%\specref{progn}, but only in the allowed \param{situations}.
+%
+%
+\issue{EVAL-WHEN-NON-TOP-LEVEL:GENERALIZE-EVAL-NEW-KEYWORDS}
+The body of an \specref{eval-when} form is processed as an \term{implicit progn}, 
+but only in the \param{situations} listed.  
+%Each \param{situation} must be a symbol,
+%  either COMPILE, LOAD, or EVAL.
+
+% The file compilation section only describe processing by COMPILE-FILE.
+% We must say something explicit here about EVAL and COMPILE.
+% (The last paragraph from the eval-when cleanup has gotten lost.)
+% I have rewritten this below to include the missing info.  --sjl 5 Mar 92
+ 
+%  The use of the \param{situations} \kwd{compile-toplevel} ({\tt compile}) and 
+% \kwd{load-toplevel} ({\tt load}) controls whether and when processing
+%   occurs for \term{top level forms}. The use of 
+% the situation \kwd{execute} ({\tt eval}) controls whether
+%   processing occurs for \term{non-top-level forms}.
+% 
+% For a description of \specref{eval-when} processing, \seesection\FileCompilation.
+
+The use of the \param{situations} \kwd{compile-toplevel} (or {\tt compile}) and
+\kwd{load-toplevel} (or {\tt load}) controls whether and when \term{evaluation}
+occurs when \specref{eval-when} appears as a \term{top level form} in
+code processed by \funref{compile-file}.  \Seesection\FileCompilation.
+
+The use of the \param{situation} \kwd{execute} (or {\tt eval}) controls whether
+evaluation occurs for other \specref{eval-when} \term{forms}; that is, 
+those that are not \term{top level forms}, or those in code processed by
+\funref{eval} or \varref{compile}.  If the \kwd{execute} situation is
+specified in such a \term{form}, then the body \param{forms} are processed as 
+an \term{implicit progn}; otherwise, the \specref{eval-when} \term{form}
+returns \nil.
+ 
+%  The \specref{eval-when} 
+%construct can be more precisely understood in terms of
+%  a model of how the file compiler, COMPILE-FILE, processes forms in a
+%  file to be compiled.
+
+
+%When  successive \term{forms} are 
+%read from the file by \funref{compile-file},
+%these \term{top level forms} are normally processed in 
+%  not-compile-time mode. There is one other mode, called 
+%  compile-time-too mode, that is also used for processing \term{top level forms}.
+%  The \specref{eval-when} special form 
+%is used to annotate a program
+%  in a way that allows the program doing the processing to select
+%  the appropriate mode.
+% 
+%When \funref{compile-file}
+%encounters an \specref{eval-when} form, the \term{form}
+%is handled according to
+%the table in \thenextfigure.
+% 
+%\boxfig
+%{\dimen0=.75pc
+%\tabskip \dimen0 plus .5 fil
+%\halign to \hsize {#\hfil\tabskip \dimen0 plus 1fil&#\hfil\tabskip 
+%\dimen0 plus .5 fil&#\hfil\tabskip \dimen0 plus 1fil&#\hfil\tabskip \dimen0 plus 1fil
+%&#\hfil\cr 
+%\noalign{\vskip -9pt}
+%\hfil{\bf A} & {\bf B} & {\bf C} & {\bf D}& {\bf Action} \cr
+%& & & & \cr
+%   Yes &  Yes  &--     &--             &Process body in compile-time-too
+%mode\cr
+%   No   &Yes  &Yes    &Yes            &Process body in compile-time-too mode\cr
+%   No    &Yes  &Yes    &No             &Process body in not-compile-time mode\cr
+%   No    &Yes  &No     &--             &Process body in not-compile-time mode\cr
+%   Yes   &No   &--     &--             &Evaluate body\cr
+%   No    &No   &Yes    &Yes            &Evaluate body\cr
+%   No    &No   &Yes    &No             &do nothing\cr
+%   No    &No   &No     &--             &do nothing\cr
+%\noalign{\vskip -9pt}
+%}}
+%\caption{\specref{eval-when} processing}
+%\endfig
+%Column A indicates
+%{\tt   :compile-toplevel}  processing.
+%Column B indicates \kwd{load-toplevel} processing.
+%Column C indicates {\tt    :execute} processing.
+%Column D indicates  compile-time-too processing.
+%   
+%  Process body means to process the body (using the procedure 
+%  outlined in this subsection) as an implicit toplevel \specref{progn}.
+% 
+% 
+%  Evaluate body means to evaluate the body \param{forms} as an 
+%  \term{implicit progn} in the
+%  % dynamic execution context
+%  \term{dynamic environment} of the compiler and in the
+%  \term{lexical environment} in which the \specref{eval-when} appears.
+%          
+%  For an \specref{eval-when} 
+%form that is not a \term{top level form},  
+%if the \kwd{execute} situation is specified,
+%the body of the \specref{eval-when}
+%is treated as an \term{implicit progn}.  Otherwise, the 
+%\specref{eval-when}
+%  form returns \nil.
+%An \specref{eval-when} form is a \term{non-top-level form}
+%if it is one of the following: 
+%in the interpreter, in \funref{compile}, or in \funref{compile-file}
+%but not a \term{top level form}. 
+\endissue{EVAL-WHEN-NON-TOP-LEVEL:GENERALIZE-EVAL-NEW-KEYWORDS}
+
+%!!! Barmar: Redundant.  (KMP: I'll have to think about that.)
+\issue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW}
+\specref{eval-when} 
+normally appears as a \term{top level form}, but it is meaningful
+for it to appear as a \term{non-top-level form}.
+However, the compile-time side
+effects described in {\secref\Compilation}
+only take place when \specref{eval-when} appears as a  
+\term{top level form}.
+\endissue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW}
+ 
+%\specref{eval-when} is meaningful only as a \term{top level form}.
+
+\label Examples::
+
+%!!! Are the EVAL-WHEN return values correct?? -kmp 29-Aug-91
+
+%% Moon: Why isn't this compile toplevel? Maybe this example is not portable?
+%%       It's an obfuscating example anyway. Delete it.
+% \code
+%  (setq temp 3) \EV 3 
+%  (eval-when (:compile-toplevel) (setq temp 2)) \EV NIL 
+%  temp \EV 3 
+%  (eval-when (:execute) (setq temp 2)) \EV 2 
+%  temp \EV 2 
+% \endcode
+
+%% 5.3.3 10
+One example of the use of \specref{eval-when} is that for the 
+compiler to be able to read a file properly when it uses user-defined
+\term{reader macros}, it is necessary to write
+
+\code
+ (eval-when (:compile-toplevel :load-toplevel :execute)
+   (set-macro-character #\\$ #'(lambda (stream char)
+                                (declare (ignore char))
+                                (list 'dollar (read stream))))) \EV T
+\endcode
+This causes the call to \funref{set-macro-character} to be executed
+in the compiler's execution environment, thereby modifying its
+reader syntax table.
+
+\code
+;;;     The EVAL-WHEN in this case is not at toplevel, so only the :EXECUTE
+;;;     keyword is considered. At compile time, this has no effect.
+;;;     At load time (if the LET is at toplevel), or at execution time
+;;;     (if the LET is embedded in some other form which does not execute
+;;;     until later) this sets (SYMBOL-FUNCTION 'FOO1) to a function which
+;;;     returns 1.
+ (let ((x 1))
+   (eval-when (:execute :load-toplevel :compile-toplevel)
+     (setf (symbol-function 'foo1) #'(lambda () x))))
+
+;;;     If this expression occurs at the toplevel of a file to be compiled,
+;;;     it has BOTH a compile time AND a load-time effect of setting
+;;;     (SYMBOL-FUNCTION 'FOO2) to a function which returns 2.
+ (eval-when (:execute :load-toplevel :compile-toplevel)
+   (let ((x 2))
+     (eval-when (:execute :load-toplevel :compile-toplevel)
+       (setf (symbol-function 'foo2) #'(lambda () x)))))
+
+;;;     If this expression occurs at the toplevel of a file to be compiled,
+;;;     it has BOTH a compile time AND a load-time effect of setting the
+;;;     function cell of FOO3 to a function which returns 3.
+ (eval-when (:execute :load-toplevel :compile-toplevel)
+   (setf (symbol-function 'foo3) #'(lambda () 3)))
+ 
+;;; #4: This always does nothing. It simply returns NIL.
+ (eval-when (:compile-toplevel)
+   (eval-when (:compile-toplevel) 
+     (print 'foo4)))
+
+;;;     If this form occurs at toplevel of a file to be compiled, FOO5 is
+;;;     printed at compile time. If this form occurs in a non-top-level
+;;;     position, nothing is printed at compile time. Regardless of context,
+;;;     nothing is ever printed at load time or execution time.
+ (eval-when (:compile-toplevel) 
+   (eval-when (:execute)
+     (print 'foo5)))
+ 
+;;;     If this form occurs at toplevel of a file to be compiled, FOO6 is
+;;;     printed at compile time.  If this form occurs in a non-top-level
+;;;     position, nothing is printed at compile time. Regardless of context,
+;;;     nothing is ever printed at load time or execution time.
+ (eval-when (:execute :load-toplevel)
+   (eval-when (:compile-toplevel)
+     (print 'foo6)))
+\endcode
+ 
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{compile-file}, {\secref\Compilation}
+
+\label Notes::
+
+\issue{EVAL-WHEN-NON-TOP-LEVEL:GENERALIZE-EVAL-NEW-KEYWORDS}
+The following effects are logical consequences of the definition of 
+\specref{eval-when}:
+ 
+\beginlist
+\itemitem{\bull}
+Execution of a single \specref{eval-when}
+expression executes the body code at most once.
+ 
+\itemitem{\bull}
+\term{Macros} intended for use in \term{top level forms} 
+should be written so that side-effects are done by the \term{forms}
+in the macro expansion.  The macro-expander itself should not do 
+the side-effects.
+ 
+For example:
+
+       Wrong:  
+
+\code
+ (defmacro foo ()
+   (really-foo)
+   `(really-foo))
+\endcode
+    
+      Right:  
+
+\code
+ (defmacro foo ()
+   `(eval-when (:compile-toplevel :execute :load-toplevel) (really-foo)))
+\endcode
+ 
+Adherence to this convention means that such \term{macros} behave
+intuitively when appearing as \term{non-top-level forms}.
+ 
+\itemitem{\bull}
+Placing a variable binding around an \specref{eval-when} reliably 
+captures the binding because the compile-time-too mode cannot occur 
+ (\ie introducing a variable binding means that the \specref{eval-when}
+      is not a \term{top level form}).
+For example,
+ 
+\code
+ (let ((x 3))
+   (eval-when (:execute :load-toplevel :compile-toplevel) (print x)))
+\endcode
+
+
+prints {\tt 3} 
+at execution (\ie load) time, and does not print anything at
+compile time.  This is important so that expansions of 
+\macref{defun} and 
+\macref{defmacro} 
+can be done in terms of \specref{eval-when} and can correctly capture
+the \term{lexical environment}.
+ 
+\code
+ (defun bar (x) (defun foo () (+ x 3)))
+\endcode
+ 
+might expand into
+ 
+\code
+ (defun bar (x) 
+   (progn (eval-when (:compile-toplevel) 
+            (compiler::notice-function-definition 'foo '(x)))
+          (eval-when (:execute :load-toplevel)
+            (setf (symbol-function 'foo) #'(lambda () (+ x 3))))))
+\endcode
+
+which would be treated by the above rules the same as
+ 
+\code
+ (defun bar (x) 
+   (setf (symbol-function 'foo) #'(lambda () (+ x 3))))
+\endcode
+ 
+when the definition of \f{bar} is not a \term{top level form}.
+\endlist
+ 
+\endissue{EVAL-WHEN-NON-TOP-LEVEL:GENERALIZE-EVAL-NEW-KEYWORDS}
+                                                                        
+\endcom
+
+%% Replaced per X3J13. -kmp 05-Oct-93
+% %%% ========== LOAD-TIME-VALUE
+% \begincom{load-time-value}\ftype{Special Operator}      
+% \issue{LOAD-TIME-EVAL:R**3-NEW-SPECIAL-FORM}
+% 
+% \label Syntax::
+% 
+% \DefspecWithValues load-time-value {form {\opt} read-only-p} {object}
+% 
+% \label Arguments and Values::         
+% 
+% \param{form}---a \term{form}; \evalspecial.
+% 
+% \param{read-only-p}---one of the \term{symbols} \t\ or \nil; \noeval.
+% 
+% \param{object}---the \term{primary value} resulting from evaluating \param{form}.
+% 
+% \label Description::
+% 
+% \specref{load-time-value} provides a mechanism for delaying evaluation of \param{form}
+% until the expression is in the run-time environment; \seesection\Compilation.
+%  
+% \param{Read-only-p} designates whether the result can be considered a
+% \term{constant object}. If \nil\ (the default), the result must be considered 
+% ordinary, modifiable data. If \t, the result is a read-only quantity
+% that can, if appropriate to the \term{implementation}, 
+% be copied into read-only space and/or \term{coalesced} with \term{similar}
+% \term{constant objects} from other \term{programs}.
+% 
+% If a \specref{load-time-value} expression is processed by \funref{compile-file},
+% the compiler performs its normal semantic processing (such as macro expansion 
+% and translation into machine code) on \param{form}, but arranges for the
+% execution of \param{form} to occur at load time in a \term{null lexical environment}, 
+% with the result of this \term{evaluation} then being treated as 
+% %an immediate quantity
+% a \term{literal object}
+% at run time.  It is guaranteed that the evaluation of \param{form} 
+% will take place only once when the \term{file} is \term{loaded}, but 
+% the order of evaluation with respect to the evaluation of
+% \term{top level forms} in the file is \term{implementation-dependent}.
+% \idxtext{order of evaluation}\idxtext{evaluation order}
+%  
+% If a \specref{load-time-value} expression appears within a function compiled
+% with \funref{compile}, the \param{form} is evaluated at compile time in a
+% \term{null lexical environment}.  The result of this compile-time evaluation 
+% is treated as
+% %an immediate quantity
+% a \term{literal object}
+% in the compiled code.  
+%  
+% If a \specref{load-time-value} expression is processed by \funref{eval},
+% \param{form} is evaluated in a \term{null lexical environment}, 
+% and one value is returned.  Implementations that implicitly compile
+% (or partially compile) expressions processed by \funref{eval} 
+% %"can" => "might".  Barrett thought "can" was clumsy.
+% might evaluate \param{form} only once, at the time this compilation is performed.  
+% %This is intentionally similar to the
+% %   freedom which implementations are given for the time of expanding
+% %   macros in interpreted code.
+%  
+% If the \term{same} \term{list} \f{(load-time-value \param{form})} is
+% evaluated or compiled more than once, it is \term{implementation-dependent}
+% whether \param{form} is evaluated only once or is evaluated more than once.
+% This can happen both when an expression being evaluated or compiled shares
+% substructure, and when the \term{same} \term{form} is processed by \funref{eval} or 
+% \funref{compile} multiple times.                               
+% Since a \specref{load-time-value} expression can be
+%   referenced in more than one place and can be evaluated multiple times
+%   by \funref{eval}, it is 
+% \term{implementation-dependent} whether each execution returns
+%   a fresh \term{object} 
+% or returns the same \term{object} as some other execution.
+%   Users must use caution when destructively modifying the resulting
+%   \term{object}.
+% 
+% If two lists \f{(load-time-value \param{form})} 
+% that are the \term{same} under \funref{equal} but are not \term{identical}
+% are evaluated or compiled,
+% their values always come from distinct evaluations of \param{form}.
+% %Per Barrett: "These forms" => "Their values"
+% Their \term{values} may not be coalesced
+% %Added per Barmar:
+% unless \param{read-only-p} is \t.
+%  
+% \label Examples:\None.
+%  
+% \label Affected By:\None.
+% 
+% \label Exceptional Situations:\None.
+% 
+% \label See Also::
+% 
+% \funref{compile-file},
+% \funref{compile},
+% \funref{eval},
+% {\secref\MinimalCompilation},
+% {\secref\Compilation}
+% 
+% \label Notes::
+% 
+% \specref{load-time-value} must appear outside of quoted structure in a
+% ``for \term{evaluation}'' position.  In situations which would appear to call
+% for use of \specref{load-time-value} within a quoted structure, 
+% the \term{backquote} \term{reader macro} is probably called for;
+% \seesection\Backquote.
+% 
+% \endissue{LOAD-TIME-EVAL:R**3-NEW-SPECIAL-FORM}
+%                                                                         
+% \endcom
+
+%%% ========== LOAD-TIME-VALUE
+\begincom{load-time-value}\ftype{Special Operator}      
+\issue{LOAD-TIME-EVAL:R**3-NEW-SPECIAL-FORM}
+
+\label Syntax::
+
+\DefspecWithValues load-time-value {form {\opt} read-only-p} {object}
+
+\label Arguments and Values::         
+
+\param{form}---a \term{form}; \evalspecial.
+
+\param{read-only-p}---a \term{boolean}; \noeval.
+
+\param{object}---the \term{primary value} resulting from evaluating \param{form}.
+
+\label Description::
+
+\specref{load-time-value} provides a mechanism for delaying evaluation of \param{form}
+until the expression is in the run-time environment; \seesection\Compilation.
+ 
+\param{Read-only-p} designates whether the result can be considered a
+\term{constant object}.
+If \t,
+   the result is a read-only quantity that can, 
+   if appropriate to the \term{implementation}, 
+   be copied into read-only space and/or \term{coalesced} with \term{similar}
+   \term{constant objects} from other \term{programs}.
+If \nil\ (the default),
+   the result must be neither copied nor coalesced;
+   it must be considered to be potentially modifiable data.
+
+If a \specref{load-time-value} expression is processed by \funref{compile-file},
+the compiler performs its normal semantic processing (such as macro expansion 
+and translation into machine code) on \param{form}, but arranges for the
+execution of \param{form} to occur at load time in a \term{null lexical environment}, 
+with the result of this \term{evaluation} then being treated as 
+%an immediate quantity
+a \term{literal object}
+at run time.  It is guaranteed that the evaluation of \param{form} 
+will take place only once when the \term{file} is \term{loaded}, but 
+the order of evaluation with respect to the evaluation of
+\term{top level forms} in the file is \term{implementation-dependent}.
+\idxtext{order of evaluation}\idxtext{evaluation order}
+ 
+If a \specref{load-time-value} expression appears within a function compiled
+with \funref{compile}, the \param{form} is evaluated at compile time in a
+\term{null lexical environment}.  The result of this compile-time evaluation 
+is treated as
+%an immediate quantity
+a \term{literal object}
+in the compiled code.  
+ 
+If a \specref{load-time-value} expression is processed by \funref{eval},
+\param{form} is evaluated in a \term{null lexical environment}, 
+and one value is returned.  Implementations that implicitly compile
+(or partially compile) expressions processed by \funref{eval} 
+%"can" => "might".  Barrett thought "can" was clumsy.
+might evaluate \param{form} only once, at the time this compilation is performed.  
+%This is intentionally similar to the
+%   freedom which implementations are given for the time of expanding
+%   macros in interpreted code.
+ 
+If the \term{same} \term{list} \f{(load-time-value \param{form})} is
+evaluated or compiled more than once, it is \term{implementation-dependent}
+whether \param{form} is evaluated only once or is evaluated more than once.
+This can happen both when an expression being evaluated or compiled shares
+substructure, and when the \term{same} \term{form} is processed by \funref{eval} or 
+\funref{compile} multiple times.                               
+Since a \specref{load-time-value} expression can be
+  referenced in more than one place and can be evaluated multiple times
+  by \funref{eval}, it is 
+\term{implementation-dependent} whether each execution returns
+  a fresh \term{object} 
+or returns the same \term{object} as some other execution.
+  Users must use caution when destructively modifying the resulting
+  \term{object}.
+
+If two lists \f{(load-time-value \param{form})} 
+that are the \term{same} under \funref{equal} but are not \term{identical}
+are evaluated or compiled,
+their values always come from distinct evaluations of \param{form}.
+%Per Barrett: "These forms" => "Their values"
+Their \term{values} may not be coalesced
+%Added per Barmar:
+unless \param{read-only-p} is \t.
+ 
+\label Examples::
+
+\code
+;;; The function INCR1 always returns the same value, even in different images.
+;;; The function INCR2 always returns the same value in a given image, 
+;;; but the value it returns might vary from image to image.
+(defun incr1 (x) (+ x #.(random 17)))
+(defun incr2 (x) (+ x (load-time-value (random 17))))
+
+;;; The function FOO1-REF references the nth element of the first of 
+;;; the *FOO-ARRAYS* that is available at load time.  It is permissible for
+;;; that array to be modified (e.g., by SET-FOO1-REF); FOO1-REF will see the
+;;; updated values.
+(defvar *foo-arrays* (list (make-array 7) (make-array 8)))
+(defun foo1-ref (n) (aref (load-time-value (first *my-arrays*) nil) n))
+(defun set-foo1-ref (n val) 
+  (setf (aref (load-time-value (first *my-arrays*) nil) n) val))
+
+;;; The function BAR1-REF references the nth element of the first of 
+;;; the *BAR-ARRAYS* that is available at load time.  The programmer has
+;;; promised that the array will be treated as read-only, so the system 
+;;; can copy or coalesce the array.
+(defvar *bar-arrays* (list (make-array 7) (make-array 8)))
+(defun bar1-ref (n) (aref (load-time-value (first *my-arrays*) t) n))
+
+;;; This use of LOAD-TIME-VALUE permits the indicated vector to be coalesced
+;;; even though NIL was specified, because the object was already read-only
+;;; when it was written as a literal vector rather than created by a constructor.
+;;; User programs must treat the vector v as read-only.
+(defun baz-ref (n)
+  (let ((v (load-time-value #(A B C) nil)))
+    (values (svref v n) v)))
+
+;;; This use of LOAD-TIME-VALUE permits the indicated vector to be coalesced
+;;; even though NIL was specified in the outer situation because T was specified
+;;; in the inner situation.  User programs must treat the vector v as read-only.
+(defun baz-ref (n)
+  (let ((v (load-time-value (load-time-value (vector 1 2 3) t) nil)))
+    (values (svref v n) v)))
+\endcode
+ 
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{compile-file},
+\funref{compile},
+\funref{eval},
+{\secref\MinimalCompilation},
+{\secref\Compilation}
+
+\label Notes::
+
+\specref{load-time-value} must appear outside of quoted structure in a
+``for \term{evaluation}'' position.  In situations which would appear to call
+for use of \specref{load-time-value} within a quoted structure, 
+the \term{backquote} \term{reader macro} is probably called for;
+\seesection\Backquote.
+
+Specifying \nil\ for \param{read-only-p} is not a way to force an object
+to become modifiable if it has already been made read-only.  It is only a way
+to say that, for an object that is modifiable, this operation is not intended
+to make that object read-only.
+
+\endissue{LOAD-TIME-EVAL:R**3-NEW-SPECIAL-FORM}
+                                                                        
+\endcom
+
+%%% ========== QUOTE
+\begincom{quote}\ftype{Special Operator}
+
+\label Syntax::
+
+\DefspecWithValues quote {object} {object}
+
+\label Arguments and Values:: 
+
+\param{object}---an \term{object}; \noeval.
+
+\label Description::
+
+%% 7.1.1 3
+\Thespecop{quote} just returns \param{object}.
+
+% added  --sjl 3 Mar 92
+The consequences are undefined if \term{literal objects} (including
+\term{quoted objects}) are destructively modified.
+
+\label Examples::
+
+\code
+ (setq a 1) \EV 1
+ (quote (setq a 3)) \EV (SETQ A 3)
+ a \EV 1
+ 'a \EV A
+ ''a \EV (QUOTE A) 
+ '''a \EV (QUOTE (QUOTE A))
+ (setq a 43) \EV 43
+ (list a (cons a 3)) \EV (43 (43 . 3))
+ (list (quote a) (quote (cons a 3))) \EV (A (CONS A 3)) 
+ 1 \EV 1
+ '1 \EV 1
+ "foo" \EV "foo"
+ '"foo" \EV "foo"
+ (car '(a b)) \EV A
+ '(car '(a b)) \EV (CAR (QUOTE (A B)))
+ #(car '(a b)) \EV #(CAR (QUOTE (A B)))
+ '#(car '(a b)) \EV #(CAR (QUOTE (A B)))
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+{\secref\Evaluation},
+{\secref\QuoteMacro},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification}
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+
+\label Notes::
+
+The textual notation \f{'\param{object}} is equivalent to \f{(quote \param{object})};
+\seesection\ConstantModification.
+
+%% 7.1.0 1
+Some \term{objects}, called \term{self-evaluating objects}, 
+do not require quotation by \specref{quote}.  
+However, \term{symbols} and \term{lists} are used to represent parts of programs,
+and so would not be useable as constant data in a program without \specref{quote}.
+Since \specref{quote} suppresses the \term{evaluation} of these \term{objects},
+they become data rather than program.
+
+\endcom
+
+%-------------------- Macros --------------------
+
+%%% ========== COMPILER-MACRO-FUNCTION
+\begincom{compiler-macro-function}\ftype{Accessor}
+
+\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+
+\label Syntax::
+
+\DefunWithValues compiler-macro-function {name {\opt} environment} {function}
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+\Defsetf         compiler-macro-function {name {\opt} environment} {new-function}
+\endissue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+
+\label Arguments and Values::
+
+\param{name}---a \term{function name}.
+
+\param{environment}---an \term{environment} \term{object}.
+
+\param{function}, \param{new-function}---a \term{compiler macro function}, or \nil.
+ 
+\label Description::
+
+\term{Accesses} the \term{compiler macro function} named \param{name}, if any,
+in the \param{environment}.
+
+A value of \nil\ denotes the absence of a \term{compiler macro function} named \param{name}.
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+ 
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+The consequences are undefined if \param{environment} is \term{non-nil}
+in a use of \SETFof{compiler-macro-function}.
+\endissue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+
+\label See Also::
+ 
+\macref{define-compiler-macro}, {\secref\CompilerMacros}
+
+\label Notes:\None.
+
+\endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+
+\endcom
+
+%%% ========== DEFINE-COMPILER-MACRO
+\begincom{define-compiler-macro}\ftype{Macro}
+ 
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\DefmacWithValuesNewline define-compiler-macro
+			 {name lambda-list {\DeclsAndDoc} \starparam{form}}
+			 {name}
+
+\label Arguments and Values::
+
+\param{name}---a \term{function name}.
+
+% tweaked.  --sjl 5 Mar 92 
+% \param{lambda-list}---a \term{lambda list}; 
+%  can contain the lambda list keywords
+%   \keyref{allow-other-keys},
+%   \keyref{aux},
+%   \keyref{body},
+%   \keyref{environment},
+%   \keyref{key},
+%   \keyref{optional}, 
+%   \keyref{rest},
+%  and 
+%  \keyref{whole}.
+\param{lambda-list}---a \term{macro lambda list}.
+ 
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+ 
+\param{documentation}---a \term{string}; \noeval.
+
+\param{form}---a \term{form}.
+
+\label Description::
+
+\editornote{KMP: This definition probably needs to be fully expanded to not
+	 	 refer through the definition of defmacro, but should suffice for now.}
+% If this rewriting happens, be sure to copy the compile-time side-effects
+% info from DEFMACRO too.  -- sjl 5 Mar 92
+
+This is the normal mechanism for defining a \term{compiler macro function}.
+Its manner of definition is the same as for \macref{defmacro}; the only
+differences are:
+
+\beginlist
+\itemitem{\bull} The \param{name} can be a \term{function name} naming
+ any \term{function} or \term{macro}.
+
+\itemitem{\bull} The expander function is installed as a \term{compiler macro function}
+ for the \param{name}, rather than as a \term{macro function}.
+
+\itemitem{\bull} The \keyref{whole} argument is bound to the form argument that 
+ is passed to the \term{compiler macro function}.  The remaining lambda-list 
+ parameters are specified as if this form contained the function name in the
+ \term{car} and the actual arguments in the \term{cdr}, but if the \term{car} 
+ of the actual form is the symbol \funref{funcall}, then the destructuring of 
+ the arguments is actually performed using its \term{cddr} instead.
+
+\itemitem{\bull}\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}%
+ \param{Documentation} is attached as a \term{documentation string} 
+    to \param{name} (as kind \specref{compiler-macro})
+and to the \term{compiler macro function}.
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+
+\itemitem{\bull} Unlike an ordinary \term{macro}, a \term{compiler macro}
+ can decline to provide an expansion merely by returning a form that is
+ the \term{same} as the original (which can be obtained by using
+ \keyref{whole}).
+\endlist 
+
+\label Examples::
+
+\code
+ (defun square (x) (expt x 2)) \EV SQUARE
+ (define-compiler-macro square (&whole form arg)
+   (if (atom arg)
+       `(expt ,arg 2)
+       (case (car arg)
+         (square (if (= (length arg) 2)
+                     `(expt ,(nth 1 arg) 4)
+                     form))
+         (expt   (if (= (length arg) 3)
+                     (if (numberp (nth 2 arg))
+                         `(expt ,(nth 1 arg) ,(* 2 (nth 2 arg)))
+                         `(expt ,(nth 1 arg) (* 2 ,(nth 2 arg))))
+                     form))
+         (otherwise `(expt ,arg 2))))) \EV SQUARE
+ (square (square 3)) \EV 81
+ (macroexpand '(square x)) \EV (SQUARE X), \term{false}
+ (funcall (compiler-macro-function 'square) '(square x) nil)
+\EV (EXPT X 2)
+ (funcall (compiler-macro-function 'square) '(square (square x)) nil)
+\EV (EXPT X 4)
+ (funcall (compiler-macro-function 'square) '(funcall #'square x) nil)
+\EV (EXPT X 2)
+
+ (defun distance-positional (x1 y1 x2 y2)
+   (sqrt (+ (expt (- x2 x1) 2) (expt (- y2 y1) 2))))
+\EV DISTANCE-POSITIONAL
+ (defun distance (&key (x1 0) (y1 0) (x2 x1) (y2 y1))
+   (distance-positional x1 y1 x2 y2))
+\EV DISTANCE
+ (define-compiler-macro distance (&whole form
+                                  &rest key-value-pairs
+                                  &key (x1 0  x1-p)
+                                       (y1 0  y1-p)
+                                       (x2 x1 x2-p)
+                                       (y2 y1 y2-p)
+                                  &allow-other-keys
+                                  &environment env)
+   (flet ((key (n) (nth (* n 2) key-value-pairs))
+          (arg (n) (nth (1+ (* n 2)) key-value-pairs))
+          (simplep (x)
+            (let ((expanded-x (macroexpand x env)))
+              (or (constantp expanded-x env)
+                  (symbolp expanded-x)))))
+     (let ((n (/ (length key-value-pairs) 2)))
+       (multiple-value-bind (x1s y1s x2s y2s others)
+           (loop for (key) on key-value-pairs by #'cddr
+                 count (eq key ':x1) into x1s
+                 count (eq key ':y1) into y1s
+                 count (eq key ':x2) into x2s
+                 count (eq key ':y1) into y2s
+                 count (not (member key '(:x1 :x2 :y1 :y2)))
+                   into others
+                 finally (return (values x1s y1s x2s y2s others)))
+         (cond ((and (= n 4)
+                     (eq (key 0) :x1)
+                     (eq (key 1) :y1)
+                     (eq (key 2) :x2)
+                     (eq (key 3) :y2))
+                `(distance-positional ,x1 ,y1 ,x2 ,y2))
+               ((and (if x1-p (and (= x1s 1) (simplep x1)) t)
+                     (if y1-p (and (= y1s 1) (simplep y1)) t)
+                     (if x2-p (and (= x2s 1) (simplep x2)) t)
+                     (if y2-p (and (= y2s 1) (simplep y2)) t)
+                     (zerop others))
+                `(distance-positional ,x1 ,y1 ,x2 ,y2))
+               ((and (< x1s 2) (< y1s 2) (< x2s 2) (< y2s 2)
+                     (zerop others))
+                (let ((temps (loop repeat n collect (gensym))))
+                  `(let ,(loop for i below n
+                               collect (list (nth i temps) (arg i)))
+                     (distance
+                       ,@(loop for i below n
+                               append (list (key i) (nth i temps)))))))
+               (t form))))))
+\EV DISTANCE
+ (dolist (form
+           '((distance :x1 (setq x 7) :x2 (decf x) :y1 (decf x) :y2 (decf x))
+             (distance :x1 (setq x 7) :y1 (decf x) :x2 (decf x) :y2 (decf x))
+             (distance :x1 (setq x 7) :y1 (incf x))
+             (distance :x1 (setq x 7) :y1 (incf x) :x1 (incf x))
+             (distance :x1 a1 :y1 b1 :x2 a2 :y2 b2)
+             (distance :x1 a1 :x2 a2 :y1 b1 :y2 b2)
+             (distance :x1 a1 :y1 b1 :z1 c1 :x2 a2 :y2 b2 :z2 c2)))
+   (print (funcall (compiler-macro-function 'distance) form nil)))
+\OUT (LET ((#:G6558 (SETQ X 7))
+\OUT       (#:G6559 (DECF X))
+\OUT       (#:G6560 (DECF X))
+\OUT       (#:G6561 (DECF X)))
+\OUT   (DISTANCE :X1 #:G6558 :X2 #:G6559 :Y1 #:G6560 :Y2 #:G6561)) 
+\OUT (DISTANCE-POSITIONAL (SETQ X 7) (DECF X) (DECF X) (DECF X)) 
+\OUT (LET ((#:G6567 (SETQ X 7))
+\OUT       (#:G6568 (INCF X)))
+\OUT   (DISTANCE :X1 #:G6567 :Y1 #:G6568)) 
+\OUT (DISTANCE :X1 (SETQ X 7) :Y1 (INCF X) :X1 (INCF X)) 
+\OUT (DISTANCE-POSITIONAL A1 B1 A2 B2) 
+\OUT (DISTANCE-POSITIONAL A1 B1 A2 B2) 
+\OUT (DISTANCE :X1 A1 :Y1 B1 :Z1 C1 :X2 A2 :Y2 B2 :Z2 C2) 
+\EV NIL
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None. 
+
+\label See Also::
+
+\funref{compiler-macro-function},
+\macref{defmacro},
+\funref{documentation},
+{\secref\DocVsDecls}
+
+\label Notes::
+
+The consequences of writing a \term{compiler macro} definition for a function
+in \thepackage{common-lisp} are undefined; it is quite possible that in some
+\term{implementations} such an attempt would override an equivalent or equally
+important definition.  In general, it is recommended that a programmer only
+write \term{compiler macro} definitions for \term{functions} he or she personally 
+maintains--writing a \term{compiler macro} definition for a function maintained
+elsewhere is normally considered a violation of traditional rules of modularity
+and data abstraction.
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== DEFMACRO
+\begincom{defmacro}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\DefmacWithValuesNewline defmacro {name lambda-list {\DeclsAndDoc} \starparam{form}} {name}
+ 
+\label Arguments and Values::
+
+\param{name}---a \term{symbol}. %!!! maybe call it a "user symbol" ?? -kmp 2-Aug-91
+ 
+%% 8.1.0 9
+%% 8.1.0 10
+%% 8.1.0 11
+%% 8.1.0 12
+\param{lambda-list}---a \term{macro lambda list}.
+ 
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+ 
+\param{documentation}---a \term{string}; \noeval.
+ 
+\param{form}---a \term{form}.
+ 
+\label Description::
+
+%% 8.1.0 6
+Defines \param{name} as a \term{macro} 
+by associating a \term{macro function} with that \param{name}
+in the global environment.
+\issue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW}
+% Reworded garbled text.  --sjl 7 Mar 92
+%When the \term{macro function} is called,
+%the \param{forms} are evaluated in
+%the \term{lexical environment} in which the \macref{defmacro} form was evaluated.
+The \term{macro function} is defined in the same \term{lexical environment}
+in which the \macref{defmacro} \term{form} appears.
+\endissue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW}
+
+ 
+%% 8.1.0 7
+The parameter variables in \param{lambda-list} are bound to
+destructured portions of the macro call.
+ 
+The expansion function
+accepts two arguments, a \term{form} and an 
+\term{environment}.  The expansion function returns a \term{form}.  
+The body of the expansion function is specified by \param{forms}.
+\param{Forms} are executed in order.  The value of the
+last \param{form} executed is returned as the expansion of the
+\term{macro}.
+\issue{FLET-IMPLICIT-BLOCK:YES}
+\issue{DEFMACRO-BLOCK-SCOPE:EXCLUDES-BINDINGS}
+The body \param{forms} of the expansion function (but not the \param{lambda-list})
+\endissue{DEFMACRO-BLOCK-SCOPE:EXCLUDES-BINDINGS}
+are implicitly enclosed in a \term{block} whose name is \param{name}.
+\endissue{FLET-IMPLICIT-BLOCK:YES}
+ 
+The \param{lambda-list} conforms to the requirements described in \secref\MacroLambdaLists.
+ 
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+\param{Documentation} is attached as a \term{documentation string} 
+    to \param{name} (as kind \specref{function})
+and to the \term{macro function}.
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+ 
+%% 8.1.0 17
+\macref{defmacro} can be used to redefine a \term{macro} or to replace
+a \term{function} definition with a \term{macro} definition.
+ 
+%% sandra says this is redundant
+%The consequences are undefined if a \term{special form} is redefined
+%using \macref{defmacro}.
+ 
+\issue{RECURSIVE-DEFTYPE:EXPLICITLY-VAGUE}
+Recursive expansion of the \term{form} returned must terminate,
+including the expansion of other \term{macros} which are \term{subforms}
+of other \term{forms} returned.
+
+%% Per Moon#13 (first public review) -kmp 5-May-93
+The consequences are undefined if the result of fully macroexpanding
+%a form contains any non-constant circular list structure.
+a \term{form}
+contains any \term{circular} \term{list structure} except in \term{literal objects}.
+\endissue{RECURSIVE-DEFTYPE:EXPLICITLY-VAGUE}
+ 
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+% added qualification about top-level-ness  --sjl 5 Mar 92
+If a \macref{defmacro} \term{form} appears as a \term{top level form},
+the \term{compiler} must store the \term{macro} definition at compile time,
+so that occurrences of the macro later on in the file can be expanded correctly.
+Users must ensure that the body of the \term{macro} can be evaluated at 
+compile time if it is referenced within the \term{file} being \term{compiled}.
+\endissue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+
+\label Examples::
+
+\code
+ (defmacro mac1 (a b) "Mac1 multiplies and adds" 
+            `(+ ,a (* ,b 3))) \EV MAC1 
+ (mac1 4 5) \EV 19 
+ (documentation 'mac1 'function) \EV "Mac1 multiplies and adds" 
+ (defmacro mac2 (&optional (a 2 b) (c 3 d) &rest x) `'(,a ,b ,c ,d ,x)) \EV MAC2 
+ (mac2 6) \EV (6 T 3 NIL NIL) 
+ (mac2 6 3 8) \EV (6 T 3 T (8)) 
+ (defmacro mac3 (&whole r a &optional (b 3) &rest x &key c (d a))
+    `'(,r ,a ,b ,c ,d ,x)) \EV MAC3 
+ (mac3 1 6 :d 8 :c 9 :d 10) \EV ((MAC3 1 6 :D 8 :C 9 :D 10) 1 6 9 8 (:D 8 :C 9 :D 10)) 
+\endcode
+% (defmacro mac4
+%      (&whole (su &rest (p &rest q)) a 
+%              &optional (b 3) &rest x &key c (d a))
+%    `'(,su ,p ,a ,b ,c ,d ,x)) \EV MAC4 
+% (mac4 1 6 :d 8 :c 9 :d 10) \EV (MAC4 1 1 6 9 8 (:D 8 :C 9 :D 10)) 
+ 
+%An example of destructuring follows:
+% 
+%\code
+% (defmacro halibut ((mouth eye1 eye2)
+%                    ((fin1 length1) (fin2 length2))
+%                    tail)
+% ...)
+%\endcode
+%Now consider this macro call:
+% 
+%\code
+% (halibut (m (car eyes) (cdr eyes))
+%          ((f1 (count-scales f1)) (f2 (count-scales f2)))
+%          my-favorite-tail) \EV NIL
+%\endcode
+%This would cause the expansion function to receive the 
+%values in \thenextfigure\ for its parameters:
+% 
+%\boxfig
+%{\dimen0=.75pc
+%\tabskip \dimen0 plus .5 fil
+%\halign to \hsize {#\hfil\tabskip \dimen0 plus 1fil&#\hfil\cr 
+%\noalign{\vskip -9pt}
+%\hfil{{\sl Parameter\/}} & {{\sl Value\/}} \cr
+%\noalign{\vskip 2pt\hrule\vskip 2pt}
+%mouth & m \cr
+%eye1 & (car eyes) \cr
+%eye2 & (cdr eyes) \cr
+%fin1 & f1 \cr
+%length1 & (count-scales f1) \cr
+%fin2 & f2 \cr
+%length2 & (count-scales f2) \cr
+%tail & my-favorite-tail \cr
+%\noalign{\vskip -9pt}                              
+%}}
+%\caption{Destructuring example expansion function values}
+%\endfig
+%The following macro call would be in error because there would be no
+%argument form to match the parameter \f{length1}:
+% 
+%\code
+% (halibut (m (car eyes) (cdr eyes))
+%          ((f1) (f2 (count-scales f2)))
+%          my-favorite-tail)
+%\endcode
+%The following macro call would be in error because a \term{symbol} appears
+%in the call where the structure of the \term{lambda list} requires a 
+%\term{list}:
+% 
+%\code
+% (halibut my-favorite-head
+%          ((f1 (count-scales f1)) (f2 (count-scales f2)))
+%          my-favorite-tail)
+%\endcode
+%The fact that the value of the variable \f{my-favorite-head}
+%might happen to be a \term{list} is irrelevant here.  It is the macro call
+%itself whose structure must match that of the \macref{defmacro} 
+%\term{lambda list}.
+% 
+%%% 8.1.0 25
+%The use of \term{lambda list keywords} is illustrated as follows.
+%Suppose it is convenient within the expansion
+%function for \f{halibut} to be able to refer to the \term{list}
+%whose components are called \f{mouth}, \f{eye1}, and \f{eye2} 
+%as \f{head}.
+%This may be written as follows:
+% 
+%\code
+% (defmacro halibut ((&whole head mouth eye1 eye2)
+%                    ((fin1 length1) (fin2 length2))
+%                    tail)
+% ...)
+%\endcode
+%Now consider the same valid macro call as before:
+% 
+%\code
+% (halibut (m (car eyes) (cdr eyes))
+%          ((f1 (count-scales f1)) (f2 (count-scales f2)))
+%          my-favorite-tail) \EV NIL
+%\endcode
+%This would cause the expansion function to receive the same
+%values for its parameters and also a value for the parameter \f{head}
+%as in \thenextfigure.
+% 
+%\boxfig
+%{\dimen0=.75pc
+%\tabskip \dimen0 plus .5 fil
+%\halign to \hsize {#\hfil\tabskip \dimen0 plus 1fil&#\hfil\cr 
+%\noalign{\vskip -9pt}
+%\hfil{{\sl Parameter\/}} & {{\sl Value\/}} \cr
+%\noalign{\vskip 2pt\hrule\vskip 2pt}
+%head & (m (car eyes) (cdr eyes)) \cr
+%\noalign{\vskip -9pt}
+%}}
+%\caption{Lambda list keywords expansion function values example}
+%\endfig
+% 
+%%% 8.1.0 19
+%The following implements a conditional \term{form} analogous to the
+%\fortran\ arithmetic IF statement.  
+%The \term{form} should accept four argument forms: a \f{test-value},
+%a \f{neg-form}, a \f{zero-form}, and a \f{pos-form}.
+%One of the last three forms is chosen to be executed according
+%to whether the value of the \f{test-form} is positive, negative,
+%or zero.
+%Using \macref{defmacro}, a definition for such a \term{form}
+%might look like this:
+% 
+%\code
+% (defmacro arithmetic-if (test neg-form zero-form pos-form)
+%   (let ((var (gensym)))
+%     `(let ((,var ,test))
+%        (cond ((< ,var 0) ,neg-form)
+%            ((= ,var 0) ,zero-form)
+%            (t ,pos-form))))) \EV ARITHMETIC-IF
+%\endcode
+%Note the use of the backquote facility in this definition,
+%and also the use of \funref{gensym} to generate a new variable name.
+%This is necessary to avoid conflict with any variables that might
+%be referred to in \f{neg-form}, \f{zero-form}, or \f{pos-form}.
+% 
+%%% 8.1.0 20
+%If the form is executed by the interpreter, it will cause the
+%function definition of the symbol \f{arithmetic-if}
+%to be a macro associated with which is
+%a two-argument expansion function roughly equivalent to:
+% 
+%\code
+% (lambda (calling-form environment)
+%   (declare (ignore environment))
+%   (let ((var (gensym)))
+%     (list 'let
+%           (list (list 'var (cadr calling-form)))
+%           (list 'cond
+%                 (list (list '< var '0) (caddr calling-form))
+%                 (list (list '= var '0) (cadddr calling-form))
+%                 (list 't (fifth calling-form))))))
+%\endcode
+ 
+ 
+% Barmar had noted that if we were going to show the above lambda, we should show
+% the defmacro that might have produced it.  But since we're not going to show it,
+% I guess the issue is moot. -kmp 28-Dec-90
+%
+%%% 8.1.0 21
+%The \term{lambda expression} 
+%could have been produced by the \macref{defmacro} macro.
+%The calls to \funref{list} are the (hypothetical) result 
+%of the backquote (\f{\bq})
+%macro character and its associated commas.
+%The precise macro expansion function might depend on the implementation.
+%For example, the implementation
+%might provide some degree of explicit error checking on the number
+%of argument forms in the macro call.
+% 
+%%% 8.1.0 22
+% 
+%%If \funref{eval} encounters
+%% 
+%%\code
+% (arithmetic-if (- x 4.0)
+%%                (- x)
+%%                (error "Strange zero")
+%%                x)
+%%\endcode
+%this will be expanded into something like
+% 
+%\code
+% (let ((g407 (- x 4.0)))
+%   (cond ((< g407 0) (- x))
+%         ((= g407 0) (error "Strange zero"))
+%         (t x)))
+%\endcode
+%and \funref{eval} tries again on this new form.
+% 
+%%% 8.1.0 23
+%To expand on this example
+%the \f{pos-form}
+%and \f{zero-form} could be omitted, allowing their values to default to \nil,
+%in the same way that the \f{else} form of \specref{if} 
+%may be omitted:
+% 
+%\code
+% (defmacro arithmetic-if (test neg-form &optional zero-form pos-form)
+%   (let ((var (gensym)))
+%     \bq(let ((,var ,test))
+%        (cond ((< ,var 0) ,neg-form)
+%              ((= ,var 0) ,zero-form)
+%              (t ,pos-form)))))
+%\endcode
+%Then 
+% 
+%\code
+% (arithmetic-if (- x 4.0) (print x))
+%\endcode
+%would be expanded into something like
+% 
+%\code
+% (let ((g408 (- x 4.0)))
+%   (cond ((< g408 0) (print x))
+%         ((= g408 0) nil)
+%         (t nil)))
+%\endcode
+ 
+%% 8.1.0 26
+The stipulation that
+an embedded \term{destructuring lambda list} is permitted only
+where \term{ordinary lambda list} syntax would permit a parameter name
+but not a \term{list} is made to prevent ambiguity.  For example,
+the following is not valid:
+ 
+\code
+ (defmacro loser (x &optional (a b &rest c) &rest z)
+   ...)
+\endcode
+because \term{ordinary lambda list} syntax does permit a 
+\term{list} following \optional;
+the list \f{(a b \&rest c)} would be interpreted as describing an
+optional parameter named \f{a} whose default value is that of the
+form \f{b}, with a supplied-p parameter named \keyref{rest} (not valid),
+and an extraneous symbol \f{c} in the list (also not valid).  An almost
+correct way to express this is
+ 
+\code
+ (defmacro loser (x &optional ((a b &rest c)) &rest z)
+   ...)
+\endcode
+The extra set of parentheses removes the ambiguity.  However, the
+definition is now incorrect because a macro call such as \f{(loser (car pool))}
+would not provide any argument form for the lambda list \f{(a b \&rest c)},
+and so the default value against which to match the \term{lambda list} would be
+\nil\ because no explicit default value was specified.  
+The consequences of this are  unspecified
+since the empty list, \nil, does not have \term{forms} to satisfy the
+parameters \f{a} and \f{b}.  The fully correct definition would be either
+ 
+\code
+ (defmacro loser (x &optional ((a b &rest c) '(nil nil)) &rest z)
+   ...)
+\endcode
+or
+ 
+\code
+ (defmacro loser (x &optional ((&optional a b &rest c)) &rest z)
+   ...)
+\endcode
+These differ slightly: the first requires that if the macro call
+specifies \f{a} explicitly then it must also specify \f{b} explicitly,
+whereas the second does not have this requirement.  For example,
+ 
+\code
+ (loser (car pool) ((+ x 1)))
+\endcode
+would be a valid call for the second definition but not for the first.
+ 
+\issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
+ 
+\code
+ (defmacro dm1a (&whole x) `',x)
+ (macroexpand '(dm1a))  \EV (QUOTE (DM1A))
+ (macroexpand '(dm1a a)) is an error.
+ 
+ (defmacro dm1b (&whole x a &optional b) `'(,x ,a ,b))
+ (macroexpand '(dm1b))  is an error.
+ (macroexpand '(dm1b q))  \EV (QUOTE ((DM1B Q) Q NIL))
+ (macroexpand '(dm1b q r)) \EV (QUOTE ((DM1B Q R) Q R))
+ (macroexpand '(dm1b q r s)) is an error.
+\endcode
+ 
+\code
+ (defmacro dm2a (&whole form a b) `'(form ,form a ,a b ,b))
+ (macroexpand '(dm2a x y)) \EV (QUOTE (FORM (DM2A X Y) A X B Y))
+ (dm2a x y) \EV (FORM (DM2A X Y) A X B Y)
+
+ (defmacro dm2b (&whole form a (&whole b (c . d) &optional (e 5)) 
+                 &body f &environment env)
+   ``(,',form ,,a ,',b ,',(macroexpand c env) ,',d ,',e ,',f))
+ ;Note that because backquote is involved, implementations may differ
+ ;slightly in the nature (though not the functionality) of the expansion.
+ (macroexpand '(dm2b x1 (((incf x2) x3 x4)) x5 x6))
+ \EV (LIST* '(DM2B X1 (((INCF X2) X3 X4))
+                   X5 X6)
+            X1
+            '((((INCF X2) X3 X4)) (SETQ X2 (+ X2 1)) (X3 X4) 5 (X5 X6))),
+     T
+ (let ((x1 5))
+   (macrolet ((segundo (x) `(cadr ,x)))
+     (dm2b x1 (((segundo x2) x3 x4)) x5 x6)))
+ \EV ((DM2B X1 (((SEGUNDO X2) X3 X4)) X5 X6)
+      5 (((SEGUNDO X2) X3 X4)) (CADR X2) (X3 X4) 5 (X5 X6))
+\endcode
+ 
+\endissue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
+ 
+\label Affected By:\None.
+
+\label Exceptional Situations:\none.
+% adequately covered in the packages chapter.  --sjl 5 Mar 92
+% \issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+% The consequences are undefined if \param{name} 
+% is a \term{symbol} in \thepackage{common-lisp}.
+% \endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+% Barmar writes:
+%     "Macros must not modify any of the structure they are given."
+%     We outlawed displacing at some point.
+% but I couldn't find anything to back up this claim.  Issue MACRO-CACHING
+% had this in mind, but didn't go far enough. So I've left this alone for now.
+% -kmp 2-Aug-91
+
+\label See Also::
+
+\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+\macref{define-compiler-macro},
+\endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+\macref{destructuring-bind}, 
+\funref{documentation},
+\funref{macroexpand},
+\varref{*macroexpand-hook*},
+\specref{macrolet}, 
+\funref{macro-function}, 
+{\secref\Evaluation},
+{\secref\Compilation},
+{\secref\DocVsDecls}
+
+\label Notes:\None.
+ 
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== MACRO-FUNCTION
+\begincom{macro-function}\ftype{Accessor}
+ 
+\label Syntax::
+
+\DefunWithValues macro-function {symbol {\opt} environment} {function}
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+% % If it's an error to supply the environment argument here, the syntax
+% % shouldn't show it.  Compare w/COMPILER-MACRO-FUNCTION.  --sjl 5 Mar 92
+% % \Defsetf         macro-function {symbol {\opt} environment} {new-function}
+% \Defsetf         macro-function {symbol} {new-function}
+%% Reinstated per X3J13.
+\Defsetf         macro-function {symbol {\opt} environment} {new-function}
+\endissue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+
+\label Arguments and Values::
+
+\param{symbol}---a \term{symbol}.
+ 
+\issue{MACRO-FUNCTION-ENVIRONMENT}
+\param{environment}---an \term{environment} \term{object}.
+\endissue{MACRO-FUNCTION-ENVIRONMENT}
+
+\param{function}---a \term{macro function} or \nil.
+ 
+\param{new-function}---a \term{macro function}.
+
+\label Description::
+
+%% 8.1.0 2
+Determines whether \param{symbol} has a function definition 
+as a macro in the specified \param{environment}.
+ 
+If so, the macro expansion function, a function of two arguments,
+is returned.  If \param{symbol} has no function definition
+in the lexical environment \param{environment}, or its definition
+is not a \term{macro}, \funref{macro-function} returns \nil.
+ 
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+\issue{MACRO-FUNCTION-ENVIRONMENT}
+% The consequences are undefined if \param{environment} is supplied 
+% in a use of \funref{macro-function} as a \macref{setf} location specifier.
+\endissue{MACRO-FUNCTION-ENVIRONMENT}
+\endissue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+
+%This doesn't belong here. -kmp 09-Apr-91
+% \issue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC}
+% The \term{environment} \term{object} has 
+% \term{dynamic extent}; the consequences are undefined if 
+% the \keyref{environment} argument is 
+% referred to outside the \term{dynamic extent} 
+% of the macro expansion function.
+% \endissue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC}
+ 
+\issue{MACRO-FUNCTION-ENVIRONMENT}
+% The following will be deleted:
+%  
+% %% 8.1.0 4
+% \funref{macro-function} 
+% cannot be used to determine whether \param{symbol} names
+% a locally defined macro established by \specref{macrolet};
+% %% or \specref{symbol-macrolet}
+% \funref{macro-function} can
+% examine only global definitions.
+\endissue{MACRO-FUNCTION-ENVIRONMENT}
+ 
+%% 8.1.0 3
+It is possible for both \funref{macro-function} and 
+\issue{SPECIAL-FORM-P-MISNOMER:RENAME}
+\funref{special-operator-p}
+\endissue{SPECIAL-FORM-P-MISNOMER:RENAME}
+to return \term{true} of \param{symbol}.  The \term{macro} definition must
+be available for use by programs that understand only the standard 
+\clisp\ \term{special forms}.
+ 
+\label Examples::
+\code
+ (defmacro macfun (x) '(macro-function 'macfun)) \EV MACFUN 
+ (not (macro-function 'macfun)) \EV \term{false} 
+\endcode
+%;;--- The next four lines are not valid Common Lisp, as equal
+%;;--- is not defined for functions --Moon
+% (and (setf (macro-function 'macfun) #'equal)
+%         (equal (macro-function 'macfun) #'equal)) \EV \term{true}
+% (macrolet ((macfun (x) "local"))
+%    (equal (macro-function 'macfun) #'equal)) \EV \term{true}
+\issue{MACRO-FUNCTION-ENVIRONMENT}
+\code
+ (macrolet ((foo (&environment env)
+               (if (macro-function 'bar env)
+                  ''yes
+                  ''no)))
+    (list (foo)
+          (macrolet ((bar () :beep))
+             (foo))))
+ 
+\EV (NO YES)
+\endcode
+\endissue{MACRO-FUNCTION-ENVIRONMENT}
+ 
+\label Affected By::
+\f{(setf macro-function)}, \macref{defmacro}, and \specref{macrolet}.
+
+\label Exceptional Situations::
+
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+The consequences are undefined if \param{environment} is \term{non-nil}
+in a use of \SETFof{macro-function}.
+\endissue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+ 
+\label See Also::
+
+\macref{defmacro}, {\secref\Evaluation}
+ 
+\label Notes::
+ 
+%% 8.1.0 5
+\macref{setf} can be used with \funref{macro-function} to install
+a \term{macro} as a symbol's global function definition:
+ 
+\code
+ (setf (macro-function symbol) fn)
+\endcode
+The value installed must be a \term{function} that accepts two arguments,
+the entire macro call and an \term{environment}, 
+and computes the expansion for that call.
+Performing this operation causes \param{symbol} to have only that
+macro definition as its global function definition; any previous
+definition, whether as a \term{macro} or as a 
+\term{function}, is lost.
+ 
+\endcom                          
+
+%%% ========== MACROEXPAND
+%%% ========== MACROEXPAND-1
+\begincom{macroexpand, macroexpand-1}\ftype{Function}
+ 
+\label Syntax::
+
+\DefunWithValues macroexpand   {form {\opt} env} {expansion, expanded-p}
+\DefunWithValues macroexpand-1 {form {\opt} env} {expansion, expanded-p}
+ 
+\label Arguments and Values::
+
+\param{form}---a \term{form}.
+ 
+\param{env}---an \term{environment} \term{object}.
+  \Default{\nil}
+ 
+\param{expansion}---a \term{form}.
+ 
+\issue{MACROEXPAND-RETURN-VALUE:TRUE}
+\param{expanded-p}---a \term{generalized boolean}.
+\endissue{MACROEXPAND-RETURN-VALUE:TRUE}
+ 
+\label Description::
+
+\funref{macroexpand} and \funref{macroexpand-1} expand \term{macros}.
+ 
+%% 8.2.0 2
+%% 8.2.0 3
+If \param{form} is a \term{macro form},
+then \funref{macroexpand-1} expands the \term{macro form} call once.
+ 
+%% 8.2.0 7
+\funref{macroexpand} 
+repeatedly expands \param{form} until it is no longer a \term{macro form}.
+In effect, \funref{macroexpand} calls \funref{macroexpand-1} repeatedly
+until the \term{secondary value} it returns is \nil.
+
+%% 8.2.0 2
+If \param{form} is a \term{macro form},
+then the \param{expansion} is a \term{macro expansion}
+ and \param{expanded-p} is \term{true}.
+Otherwise,
+ the \param{expansion} is the given \param{form}
+ and \param{expanded-p} is \term{false}.
+ 
+%% 8.2.0 4
+Macro expansion is carried out as follows.  
+Once \funref{macroexpand-1} has
+determined that the \param{form} is a \term{macro form},
+it obtains an appropriate expansion \term{function} for the
+\term{macro} or \term{symbol macro}.
+The value of 
+\varref{*macroexpand-hook*} is 
+\issue{FUNCTION-TYPE:X3J13-MARCH-88}
+coerced to a \term{function} and
+\endissue{FUNCTION-TYPE:X3J13-MARCH-88}
+then called as a \term{function} of three arguments:
+      the expansion \term{function},
+      the \param{form},
+  and the \param{env}.
+The \term{value} returned from this call is taken to be the expansion
+of the \param{form}.
+
+%% Augmented this first sentence to mention global environment 
+%% and local symbol-macrolet definitions. -kmp 12-May-93
+In addition to \term{macro} definitions in the global environment,
+any local macro definitions established within \param{env} by \specref{macrolet} 
+or \specref{symbol-macrolet} are considered.
+If only \param{form} is supplied as an argument,
+then the environment is effectively null, and only global macro definitions
+as established by \macref{defmacro} are considered.
+%% Sandra addition
+\term{Macro} definitions are shadowed by local \term{function} definitions.
+%% end Sandra addition
+
+\label Examples::
+
+\code
+ (defmacro alpha (x y) `(beta ,x ,y)) \EV ALPHA
+ (defmacro beta (x y) `(gamma ,x ,y)) \EV BETA
+ (defmacro delta (x y) `(gamma ,x ,y)) \EV EPSILON
+ (defmacro expand (form &environment env)
+   (multiple-value-bind (expansion expanded-p)
+       (macroexpand form env)
+     `(values ',expansion ',expanded-p))) \EV EXPAND
+ (defmacro expand-1 (form &environment env)
+   (multiple-value-bind (expansion expanded-p)
+       (macroexpand-1 form env)
+     `(values ',expansion ',expanded-p))) \EV EXPAND-1
+\medbreak
+;; Simple examples involving just the global environment
+ (macroexpand-1 '(alpha a b)) \EV (BETA A B), \term{true}
+ (expand-1 (alpha a b)) \EV (BETA A B), \term{true}
+ (macroexpand '(alpha a b)) \EV (GAMMA A B), \term{true}
+ (expand (alpha a b)) \EV (GAMMA A B), \term{true}
+ (macroexpand-1 'not-a-macro) \EV NOT-A-MACRO, \term{false}
+ (expand-1 not-a-macro) \EV NOT-A-MACRO, \term{false}
+ (macroexpand '(not-a-macro a b)) \EV (NOT-A-MACRO A B), \term{false}
+ (expand (not-a-macro a b)) \EV (NOT-A-MACRO A B), \term{false}
+\medbreak
+;; Examples involving lexical environments
+ (macrolet ((alpha (x y) `(delta ,x ,y)))
+   (macroexpand-1 '(alpha a b))) \EV (BETA A B), \term{true}
+ (macrolet ((alpha (x y) `(delta ,x ,y)))
+   (expand-1 (alpha a b))) \EV (DELTA A B), \term{true}
+ (macrolet ((alpha (x y) `(delta ,x ,y)))
+   (macroexpand '(alpha a b))) \EV (GAMMA A B), \term{true}
+ (macrolet ((alpha (x y) `(delta ,x ,y)))
+   (expand (alpha a b))) \EV (GAMMA A B), \term{true}
+ (macrolet ((beta (x y) `(epsilon ,x ,y)))
+   (expand (alpha a b))) \EV (EPSILON A B), \term{true}
+ (let ((x (list 1 2 3)))
+   (symbol-macrolet ((a (first x)))
+     (expand a))) \EV (FIRST X), \term{true}
+ (let ((x (list 1 2 3)))
+   (symbol-macrolet ((a (first x)))
+     (macroexpand 'a))) \EV A, \term{false}
+ (symbol-macrolet ((b (alpha x y)))
+   (expand-1 b)) \EV (ALPHA X Y), \term{true}
+ (symbol-macrolet ((b (alpha x y)))
+   (expand b)) \EV (GAMMA X Y), \term{true}
+ (symbol-macrolet ((b (alpha x y))
+                   (a b))
+   (expand-1 a)) \EV B, \term{true}
+ (symbol-macrolet ((b (alpha x y))
+                   (a b))
+   (expand a)) \EV (GAMMA X Y), \term{true}
+\medbreak
+;; Examples of shadowing behavior
+ (flet ((beta (x y) (+ x y)))
+   (expand (alpha a b))) \EV (BETA A B), \term{true}
+ (macrolet ((alpha (x y) `(delta ,x ,y)))
+   (flet ((alpha (x y) (+ x y)))
+     (expand (alpha a b)))) \EV (ALPHA A B), \term{false}
+ (let ((x (list 1 2 3)))
+   (symbol-macrolet ((a (first x)))
+     (let ((a x))
+       (expand a)))) \EV A, \term{false}
+\endcode
+ 
+\label Affected By::
+
+\macref{defmacro},
+\macref{setf} of \macref{macro-function},
+\specref{macrolet},
+\specref{symbol-macrolet}
+
+\label Exceptional Situations:\None.
+ 
+\label See Also::     
+
+\varref{*macroexpand-hook*},
+\macref{defmacro},
+\macref{setf} of \macref{macro-function},
+\specref{macrolet},
+\specref{symbol-macrolet},
+{\secref\Evaluation}
+ 
+\label Notes::
+ 
+Neither \funref{macroexpand} nor \funref{macroexpand-1} 
+makes any explicit attempt to expand \term{macro forms} that are
+either \term{subforms} of the \param{form} 
+    or \term{subforms} of the \param{expansion}.
+Such expansion might occur implicitly, however,
+due to the semantics or implementation of the \term{macro function}.
+
+\endcom
+
+\issue{ISO-COMPATIBILITY:ADD-SUBSTRATE}
+%%% ========== DEFINE-SYMBOL-MACRO
+\begincom{define-symbol-macro}\ftype{Macro}
+
+\label Syntax::
+ 
+\DefmacWithValuesNewline define-symbol-macro {symbol expansion} {symbol}
+ 
+\label Arguments and Values::
+ 
+\param{symbol}---a \term{symbol}.
+ 
+\param{expansion}---a \term{form}.
+ 
+\label Description::
+
+Provides a mechanism for globally affecting the \term{macro expansion}
+of the indicated \param{symbol}.
+
+Globally establishes an expansion function for the \term{symbol macro} 
+named by \param{symbol}.
+%% Patterned after wording from SYMBOL-MACROLET (per issue SYMBOL-MACROLET-SEMANTICS).
+The only guaranteed property of an expansion \term{function} for a \term{symbol macro}
+is that when it is applied to the \term{form} and the \term{environment} it returns
+the correct expansion.  (In particular, it is \term{implementation-dependent} 
+whether the expansion is conceptually stored in the expansion function,
+the \term{environment}, or both.)
+
+Each global reference to \param{symbol} (\ie not \term{shadowed}\meaning{2} by a 
+\term{binding} for a \term{variable} or \term{symbol macro} named by
+the same \term{symbol}) is expanded by the normal macro expansion process;
+\seesection\SymbolsAsForms.
+The expansion of a \term{symbol macro} is subject to further \term{macro expansion}
+in the same \term{lexical environment} as the \term{symbol macro} reference,
+exactly analogous to normal \term{macros}.
+ 
+%% Patterned after wording from SYMBOL-MACROLET (per issue SYMBOL-MACROLET-DECLARE).
+The consequences are unspecified if a \declref{special} declaration is made for
+\param{symbol} while in the scope of this definition (\ie when it is not 
+\term{shadowed}\meaning{2} by a \term{binding} for a \term{variable}
+or \term{symbol macro} named by the same \term{symbol}).
+
+Any use of \specref{setq} to set the value of 
+%% Per X3J13. -kmp 5-Oct-93
+%one of
+the \param{symbol}
+ while in the scope of this definition
+ is treated as if it were a \macref{setf}.
+\macref{psetq} of \param{symbol}
+ is treated as if it were a \macref{psetf}, and
+\macref{multiple-value-setq} 
+ is treated as if it were a \specref{setf} of \funref{values}.
+
+A \term{binding} for a \term{symbol macro} can be \term{shadowed}\meaning{2}
+by \specref{let} or \specref{symbol-macrolet}.
+
+\label Examples::
+ 
+\code
+(defvar *things* (list 'alpha 'beta 'gamma)) \EV *THINGS*
+
+(define-symbol-macro thing1 (first *things*)) \EV THING1
+(define-symbol-macro thing2 (second *things*)) \EV THING2
+(define-symbol-macro thing3 (third *things*)) \EV THING3
+
+thing1 \EV ALPHA
+(setq thing1 'ONE) \EV ONE
+*things* \EV (ONE BETA GAMMA)
+(multiple-value-setq (thing2 thing3) (values 'two 'three)) \EV TWO
+thing3 \EV THREE
+*things* \EV (ONE TWO THREE)
+
+(list thing2 (let ((thing2 2)) thing2)) \EV (TWO 2)
+\endcode
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+
+%% See issues LISP-SYMBOL-REDEFINITION and SYMBOL-MACROS-AND-PROCLAIMED-SPECIALS.
+If \param{symbol} is already defined as a \term{global variable},
+an error \oftype{program-error} is signaled.
+
+\label See Also::
+ 
+\specref{symbol-macrolet},
+\funref{macroexpand}
+ 
+\label Notes:\None.
+
+\endcom%{define-symbol-macro}
+\endissue{ISO-COMPATIBILITY:ADD-SUBSTRATE}
+
+%%% ========== SYMBOL-MACROLET
+\begincom{symbol-macrolet}\ftype{Special Operator}
+
+\issue{DECLS-AND-DOC}
+\issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM} 
+
+\label Syntax::
+ 
+\DefspecWithValuesNewline symbol-macrolet
+			  {\paren{\starparen{symbol expansion}}
+			   \starparam{declaration} 
+			   \starparam{form}}
+			  {\starparam{result}}
+ 
+\label Arguments and Values::
+ 
+\param{symbol}---a \term{symbol}.
+ 
+\param{expansion}---a \term{form}.
+
+\issue{SYMBOL-MACROLET-DECLARE:ALLOW}
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+\endissue{SYMBOL-MACROLET-DECLARE:ALLOW}
+                           
+\param{forms}---an \term{implicit progn}.
+                   
+\param{results}---the \term{values} returned by the \param{forms}.
+ 
+\label Description::
+ 
+%A number of changes in here due to Moore #1 (first public review).
+
+\specref{symbol-macrolet} provides a mechanism for 
+affecting the \term{macro expansion} environment for \term{symbols}.
+
+\specref{symbol-macrolet} lexically establishes expansion functions
+for each of the \term{symbol macros} named by \param{symbols}.
+\issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM}
+The only guaranteed property of an expansion \term{function} for a \term{symbol macro}
+is that when it is applied to the \term{form} and the \term{environment} it returns
+the correct expansion.  (In particular, it is \term{implementation-dependent} 
+whether the expansion is conceptually stored in the expansion function,
+the \term{environment}, or both.)
+\endissue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM}
+
+Each reference to \param{symbol} as a variable within the lexical \term{scope}
+of \specref{symbol-macrolet} is expanded by the normal macro expansion process;
+\seesection\SymbolsAsForms.
+The expansion of a symbol macro is subject to further macro expansion
+in the same lexical environment as the symbol macro invocation, exactly 
+analogous to normal \term{macros}.
+
+\issue{SYMBOL-MACROLET-DECLARE:ALLOW}
+Exactly the same \param{declarations} are allowed as for \specref{let}
+with one exception: \specref{symbol-macrolet} signals an error
+if a \declref{special} declaration names one of the \term{symbols} 
+being defined by \specref{symbol-macrolet}.  
+% Discussion of declarations moved to TYPE dictionary entry. --sjl 5 Mar 92
+\endissue{SYMBOL-MACROLET-DECLARE:ALLOW}
+ 
+When the \param{forms} of the \specref{symbol-macrolet} form are expanded, 
+any use of \specref{setq} to set the value of one of the specified variables 
+ is treated as if it were a \macref{setf}.
+\macref{psetq} of a \term{symbol} defined as a symbol macro 
+ is treated as if it were a \macref{psetf}, and
+\macref{multiple-value-setq} 
+ is treated as if it were a \specref{setf} of \funref{values}.
+
+The use of \specref{symbol-macrolet} can be shadowed by \specref{let}.
+In other words, \specref{symbol-macrolet} only substitutes for occurrences
+of \param{symbol} that would be in the \term{scope} of a lexical binding of
+\param{symbol} surrounding the \param{forms}.
+
+\label Examples::
+ 
+\code
+;;; The following is equivalent to
+;;;   (list 'foo (let ((x 'bar)) x)),
+;;; not
+;;;   (list 'foo (let (('foo 'bar)) 'foo))
+ (symbol-macrolet ((x 'foo))
+   (list x (let ((x 'bar)) x))) 
+\EV (foo bar)
+\NV (foo foo) 
+ 
+ (symbol-macrolet ((x '(foo x)))
+   (list x))
+\EV ((FOO X))
+\endcode
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+\issue{SYMBOL-MACROS-AND-PROCLAIMED-SPECIALS:SIGNALS-AN-ERROR}
+\issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+If an attempt is made to bind a \term{symbol} that is defined as a \term{global variable},
+an error \oftype{program-error} is signaled.
+\endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+\endissue{SYMBOL-MACROS-AND-PROCLAIMED-SPECIALS:SIGNALS-AN-ERROR} 
+
+If \param{declaration} contains a \declref{special} declaration 
+that names one of the \term{symbols} being bound by \specref{symbol-macrolet},
+an error \oftype{program-error} is signaled.
+
+\label See Also::
+ 
+\macref{with-slots}, \funref{macroexpand}
+ 
+\label Notes::
+ 
+The special form \specref{symbol-macrolet} is the basic mechanism that is used to
+implement \macref{with-slots}.
+
+If a \specref{symbol-macrolet} \term{form} is a \term{top level form},
+the \param{forms} are also processed as \term{top level forms}.
+\Seesection\FileCompilation.
+
+\endissue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM} 
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== *MACROEXPAND-HOOK*
+\begincom{*macroexpand-hook*}\ftype{Variable}
+
+\issue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+\label Value Type::
+
+a \term{designator} for a \term{function} of three \term{arguments}:
+  a \term{macro function},
+  a \term{macro form},
+  and an \term{environment} \term{object}.
+
+\label Initial Value::
+
+\issue{MACROEXPAND-HOOK-DEFAULT:EXPLICITLY-VAGUE}
+\issue{MACROEXPAND-HOOK-INITIAL-VALUE:IMPLEMENTATION-DEPENDENT}
+a \term{designator} for a function that is equivalent to \thefunction{funcall},
+but that might have additional \term{implementation-dependent} side-effects.
+\endissue{MACROEXPAND-HOOK-INITIAL-VALUE:IMPLEMENTATION-DEPENDENT}
+\endissue{MACROEXPAND-HOOK-DEFAULT:EXPLICITLY-VAGUE}
+
+\label Description::
+
+%% 8.2.0 7
+Used as the expansion interface hook by \funref{macroexpand-1} to 
+control the \term{macro expansion} process.
+When a \term{macro form} is to be expanded,
+this \term{function} is called with three arguments:
+  the \term{macro function},
+  the \term{macro form},
+  and the \term{environment} in which the \term{macro form} is to be expanded.
+\issue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC}
+The \term{environment} \term{object} has \term{dynamic extent};
+the consequences are undefined if the \term{environment} \term{object} is 
+referred to outside the \term{dynamic extent} of the macro expansion function.
+\endissue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC}
+ 
+\label Examples::
+
+\code
+ (defun hook (expander form env)
+    (format t "Now expanding: ~S~%" form)
+    (funcall expander form env)) \EV HOOK 
+ (defmacro machook (x y) `(/ (+ ,x ,y) 2)) \EV MACHOOK 
+ (macroexpand '(machook 1 2)) \EV (/ (+ 1 2) 2), \term{true} 
+ (let ((*macroexpand-hook* #'hook)) (macroexpand '(machook 1 2)))
+\OUT Now expanding (MACHOOK 1 2) 
+\EV (/ (+ 1 2) 2), \term{true}
+\endcode
+ 
+\label Affected By:\None.
+
+\label See Also::
+
+\funref{macroexpand}, \funref{macroexpand-1}, \funref{funcall}, {\secref\Evaluation}
+ 
+\label Notes::
+
+The net effect of the chosen initial value is to just invoke the
+\term{macro function}, giving it the \term{macro form} and
+\term{environment} as its two arguments.
+
+Users or user programs can \term{assign} this \term{variable} to
+customize or trace the \term{macro expansion} mechanism.  Note, however,
+that this \term{variable} is a global resource, potentially shared by
+multiple \term{programs}; as such, if any two \term{programs} depend for
+their correctness on the setting of this \term{variable}, those
+\term{programs} may not be able to run in the same \term{Lisp image}.
+For this reason, it is frequently best to confine its uses to debugging
+situations.
+
+\issue{MACROEXPAND-HOOK-INITIAL-VALUE:IMPLEMENTATION-DEPENDENT}
+Users who put their own function into \varref{*macroexpand-hook*}
+should consider saving the previous value of the hook, and calling that
+value from their own.
+\endissue{MACROEXPAND-HOOK-INITIAL-VALUE:IMPLEMENTATION-DEPENDENT}
+
+\endissue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+\endcom
+
+%-------------------- Declarations --------------------
+
+%%% ========== PROCLAIM
+\begincom{proclaim}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues proclaim {declaration-specifier} {\term{implementation-dependent}}
+
+\label Arguments and Values::
+
+\param{declaration-specifier}---a \term{declaration specifier}.
+
+\label Description::
+
+%% 9.1.0 11
+\term{Establishes} the \term{declaration} specified by \param{declaration-specifier}
+in the \term{global environment}.
+
+%% 9.1.0 13
+Such a \term{declaration}, sometimes called a \term{global declaration} 
+or a \term{proclamation}, is always in force unless locally \term{shadowed}.
+
+%% 9.1.0 12
+\term{Names} of \term{variables} and \term{functions} within 
+\param{declaration-specifier} refer to \term{dynamic variables} 
+and global \term{function} definitions, respectively.
+
+\Thenextfigure\ shows a list of \param{declaration identifiers} 
+that can be used with \funref{proclaim}.
+
+% IGNORE, IGNORABLE, and DYNAMIC-EXTENT removed as consequence of vote
+% taken at 5-Oct-93 X3J13 meeting.
+\issue{DYNAMIC-EXTENT:NEW-DECLARATION}
+\issue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}
+\displayfour{Global Declaration Specifiers}{
+declaration&inline&optimize&type\cr
+ftype&notinline&special&\cr
+}
+%function removed.
+\endissue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}
+\endissue{DYNAMIC-EXTENT:NEW-DECLARATION}
+
+%% 9.2.0 20
+An implementation is free to support other (\term{implementation-defined})
+\term{declaration identifiers} as well.
+
+\label Examples::
+
+\code
+ (defun declare-variable-types-globally (type vars)
+   (proclaim `(type ,type ,@vars))
+   type)
+
+ ;; Once this form is executed, the dynamic variable *TOLERANCE*
+ ;; must always contain a float.
+ (declare-variable-types-globally 'float '(*tolerance*))
+\EV FLOAT
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\specref{declaim},
+\misc{declare},
+{\secref\Compilation}
+
+\label Notes::
+
+Although the \term{execution} of a \funref{proclaim} \term{form} 
+has effects that might affect compilation, the compiler does not make
+any attempt to recognize and specially process \funref{proclaim} \term{forms}.
+A \term{proclamation} such as the following, even if a \term{top level form},
+does not have any effect until it is executed:
+
+\code
+(proclaim '(special *x*))
+\endcode
+
+If compile time side effects are desired, \specref{eval-when} may be useful.
+For example:
+
+\code
+ (eval-when (:execute :compile-toplevel :load-toplevel)
+   (proclaim '(special *x*)))
+\endcode
+
+In most such cases, however, it is preferrable to use \macref{declaim} for
+this purpose.
+
+\issue{DECLARE-MACROS:FLUSH}
+Since \funref{proclaim} \term{forms} are ordinary \term{function forms},
+\term{macro forms} can expand into them.
+%Barrett: So what?
+%Sandra: DUMB!
+%KMP: Tough. I think this is a commonly asked question, and perfectly 
+%     appropriate for a Note even though it's not a revelation.  Technically,
+%     anything in the Notes should be describable as "so what?" or "dumb"
+%     or we should ask why it's in the Notes and not the Description.
+\endissue{DECLARE-MACROS:FLUSH}
+
+\endcom
+
+%%% ========== DECLAIM
+\begincom{declaim}\ftype{Macro}
+
+\issue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO}
+
+\label Syntax:: 
+
+\DefmacWithValues declaim 
+		  {\starparam{declaration-specifier}}
+		  {\term{implementation-dependent}}
+
+\label Arguments and Values::
+
+\param{declaration-specifier}---a \term{declaration specifier}; \noeval.
+
+\label Description::
+
+Establishes the \term{declarations} specified by the \param{declaration-specifiers}.
+
+If a use of this macro appears as a \term{top level form} in a \term{file} 
+being processed by the \term{file compiler}, the proclamations are also made
+at compile-time.  As with other defining macros, it is unspecified whether or
+not the compile-time side-effects of a \macref{declaim} persist after the
+\term{file} has been \term{compiled}.
+
+\label Examples::
+
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\misc{declare},
+\funref{proclaim}
+
+\label Notes:\None.
+
+%!!! How does proclaim relate to declaim.
+%    Not quite as simple as
+%    (declaim <x>) == (eval-when (:compile-toplevel :load-toplevel :execute) (proclaim '<x>))
+%    but close...
+
+% Clarify that calls to PROCLAIM should be treated the same as any
+%   other function call.  Users should wrap an explicit EVAL-WHEN around
+%   top-level calls to PROCLAIM if they want them to affect compilation,
+%   or use the macro DECLAIM.
+
+\endissue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO}
+
+\endcom
+
+%%% ========== DECLARE
+\begincom{declare}\ftype{Symbol}
+
+%!!! Barmar: This entry needs A LOT of work.  It is highly redundant and perhaps inconsistent.
+
+\label Syntax::
+
+\Defspec declare {\starparam{declaration-specifier}}
+
+\label Arguments:: 
+
+%% 9.1.0 6
+\param{declaration-specifier}---a \term{declaration specifier}; \noeval.
+
+\label Description::
+
+%% 9.1.0 2
+A \misc{declare} \term{expression}, sometimes called a \term{declaration},
+can occur only at the beginning of the bodies of certain \term{forms};
+that is, it may be preceded only by other \misc{declare} \term{expressions},
+or by a \term{documentation string} if the context permits.
+
+A \misc{declare} \term{expression} can occur in a \term{lambda expression}
+or in any of the \term{forms} listed in \thenextfigure.
+
+\issue{DECLS-AND-DOC}
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\issue{SYMBOL-MACROLET-DECLARE:ALLOW}
+\issue{WITH-ADDED-METHODS:DELETE}
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\displaythree{Standardized Forms In Which Declarations Can Occur}{
+defgeneric&do-external-symbols&prog\cr
+define-compiler-macro&do-symbols&prog*\cr
+define-method-combination&dolist&restart-case\cr
+define-setf-expander&dotimes&symbol-macrolet\cr
+defmacro&flet&with-accessors\cr
+defmethod&handler-case&with-hash-table-iterator\cr
+defsetf&labels&with-input-from-string\cr
+deftype&let&with-open-file\cr
+defun&let*&with-open-stream\cr
+destructuring-bind&locally&with-output-to-string\cr
+do&macrolet&with-package-iterator\cr
+do*&multiple-value-bind&with-slots\cr
+do-all-symbols&pprint-logical-block&\cr
+}
+%Deleted GENERIC-FLET, GENERIC-LABELS, GENERIC-FUNCTION -kmp 7-Feb-92
+%Deleted WITH-ADDED-METHODS. -kmp 7-Jan-91
+%Added DEFINE-COMPILER-MACRO, DESTRUCTURING-BIND, HANDLER-CASE,
+% PPRINT-LOGICAL-BLOCK, RESTART-CASE, WITH-HASH-TABLE-ITERATOR,
+% and WITH-PACKAGE-ITERATOR. -kmp 15-Feb-92
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\endissue{WITH-ADDED-METHODS:DELETE}
+\endissue{SYMBOL-MACROLET-DECLARE:ALLOW}
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\endissue{DECLS-AND-DOC}
+
+A \misc{declare} \term{expression} can only occur 
+where specified by the syntax of these \term{forms}.
+%% 9.1.0 3
+The consequences of attempting to evaluate a \misc{declare} \term{expression} 
+are undefined.  In situations where such \term{expressions} can appear, 
+explicit checks are made for their presence and they are never actually evaluated;
+it is for this reason that they
+are called  ``\misc{declare} \term{expressions}''
+rather than ``\misc{declare} \term{forms}.''
+
+% This doesn't belong here.  I think it is adequately covered by the
+% discussion of lambda lists and scoping of lambda variables.  --sjl 5 mar 92
+% When evaluating a \term{lambda form},
+% none of the \term{bound declarations} made by \misc{declare} \term{expressions} 
+% appearing at the beginning of the body
+% of the \term{lambda expression} apply to the \term{argument} \term{evaluations}.
+% However, such \term{declarations} apply to the \term{initialization form} code (if any) 
+% for \keyref{optional}, \keyref{key}, and \keyref{aux} \term{bindings}
+% % Added to please KMP (and hopefully Moon, too).
+% subsequent to the \term{name} to which the \term{bound declaration} refers;
+% \seesection\DeclScope.
+
+\issue{DECLARE-MACROS:FLUSH}
+%\term{macro} 
+%calls may expand into declarations as long as this syntax is observed.
+\term{Macro forms} cannot expand into declarations;
+\misc{declare} \term{expressions} must appear as actual \term{subexpressions} of
+the \term{form} to which they refer.
+% the only valid declarations are \term{lists} whose \term{car} is the symbol \misc{declare}.
+%% Removed because this is already said in PROCLAIM.
+% \term{Macro forms} can expand into \funref{proclaim} forms, however.
+\endissue{DECLARE-MACROS:FLUSH}
+
+\Thenextfigure\ shows a list of \term{declaration identifiers} 
+that can be used with \misc{declare}.
+
+\issue{DYNAMIC-EXTENT:NEW-DECLARATION}
+\issue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}
+\displaythree{Local Declaration Specifiers}{
+dynamic-extent&ignore&optimize\cr
+ftype&inline&special\cr
+ignorable&notinline&type\cr
+}
+%function removed.
+\endissue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}
+\endissue{DYNAMIC-EXTENT:NEW-DECLARATION}
+
+%% 9.2.0 20
+An implementation is free to support other (\term{implementation-defined})
+\term{declaration identifiers} as well.
+
+\label Examples::     
+
+\code
+ (defun nonsense (k x z)
+   (foo z x)                     ;First call to foo
+   (let ((j (foo k x))           ;Second call to foo
+         (x (* k k)))
+     (declare (inline foo) (special x z))
+     (foo x j z)))               ;Third call to foo
+\endcode
+
+In this example,
+the \declref{inline} declaration applies
+only to the third call to \f{foo}, but not to the first or second ones.
+The \declref{special} declaration of \f{x} causes \specref{let} 
+to make a dynamic \term{binding} for \f{x}, and causes the reference to 
+\f{x}
+in the body of \specref{let} to be a dynamic reference.
+The reference to \f{x} in the second call to \f{foo} is a local reference
+to the second parameter of {\tt nonsense}.
+The reference to \f{x} in the first call to \f{foo} is a local
+reference, not a \declref{special} one.  The \declref{special} declaration of \f{z}
+causes the reference to \f{z} in the 
+%Added for Moon:
+third
+call
+to \f{foo} to be a dynamic reference; it does not
+refer to the parameter to \f{nonsense} named \f{z}, because that
+parameter \term{binding} has not been declared to be \declref{special}.
+(The \declref{special} declaration of \f{z} does not appear in the body
+of \macref{defun},  but in an inner \term{form}, and therefore does not
+affect the \term{binding} of the \term{parameter}.)
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+The consequences  of trying to use a \misc{declare} \term{expression} as 
+a \term{form} to be \term{evaluated} are undefined.
+
+\editornote{KMP: Probably we need to say something here about ill-formed 
+declare expressions.}
+
+\label See Also::
+
+\funref{proclaim},
+\secref\TypeSpecifiers,
+\declref{declaration},
+\declref{dynamic-extent},
+\declref{ftype},
+\declref{ignorable},
+\declref{ignore},
+\declref{inline},
+\declref{notinline},
+\declref{optimize},
+\declref{type}
+
+\label Notes:\None.
+
+%In all cases such additional code is within the scope of any \term{pervasive}
+%declarations appearing before the body of the \term{form}.
+%Declarations that affect \term{bindings} 
+%have no effect on such code, except (of course)
+%in those situations where the code is defined to be within the scope
+%of the variables affected by such non-\term{pervasive} declarations.
+
+%%% 9.1.0 3
+%Those \term{forms} that permit declarations to appear                      
+%perform explicit checks for their presence.
+
+\endcom
+
+%%% ========== IGNORE
+%%% ========== IGNORABLE
+
+\begincom{ignore, ignorable}\ftype{Declaration}
+
+\issue{DOTIMES-IGNORE:X3J13-MAR91}
+
+\label Syntax::
+
+\f{\paren{ignore \star{\curly{\param{var} | \paren{\misc{function} \param{fn}}}}}}
+
+\f{\paren{ignorable \star{\curly{\param{var} | \paren{\misc{function} \param{fn}}}}}}
+
+\label Arguments::
+
+\param{var}---a \term{variable} \term{name}.
+
+\param{fn}---a \term{function} \term{name}.
+
+\label Valid Context::
+
+\term{declaration}
+%% Removed per X3J13 -kmp 4-Oct-93 
+%or \term{proclamation}
+
+\label Binding Types Affected::
+
+\term{variable}, \term{function}
+
+\label Description::
+
+\issue{IGNORE-USE-TERMINOLOGY:VALUE-ONLY}
+The \declref{ignore} and \declref{ignorable} declarations
+refer to \term{for-value} \term{references} 
+    to \term{variable} \term{bindings} for the \param{vars}
+and to \term{function} \term{bindings} for the \param{fns}.
+
+An \declref{ignore} \term{declaration} specifies that
+\term{for-value} \term{references} to the indicated \term{bindings}
+will not
+occur within the scope of the \term{declaration}.
+Within the \term{scope} of such a \term{declaration},
+it is desirable
+for a compiler to issue a warning about 
+the presence of
+either a \term{for-value} \term{reference} to any \param{var} or \param{fn},
+    or a \declref{special} \term{declaration} for any \param{var}.
+
+An \declref{ignorable} \term{declaration} specifies that 
+\term{for-value} \term{references} to the indicated \term{bindings}
+might or might not
+occur within the scope of the \term{declaration}.
+Within the \term{scope} of such a \term{declaration},
+it is not desirable
+for a compiler to issue a warning about
+the presence or absence of
+either a \term{for-value} \term{reference} to any \param{var} or \param{fn},
+    or a \declref{special} \term{declaration} for any \param{var}.
+
+When not within the \term{scope} 
+of a \declref{ignore} or \declref{ignorable} \term{declaration},
+it is desirable
+for a compiler to issue a warning about
+any \param{var} for which there is 
+neither a \term{for-value} \term{reference} 
+    nor a \declref{special} \term{declaration},
+or about
+any \param{fn} for which there is 
+     no \term{for-value} \term{reference}.
+
+Any warning about a ``used'' or ``unused'' \term{binding} must be \oftype{style-warning},
+and may not affect program semantics.
+
+\endissue{IGNORE-USE-TERMINOLOGY:VALUE-ONLY}
+
+%!!! Maybe separate out to a concept section?
+%!!! Once these functions are described as using stream vars, 
+%    we can maybe remove this enumeration.
+%    Alternatively, we could make a table and put it in the chapter of "general rules".
+The \term{stream variables} established by 
+     \macref{with-open-file},
+     \macref{with-open-stream},
+     \macref{with-input-from-string},
+ and \macref{with-output-to-string},
+and all \term{iteration variables} are, by definition, always ``used''.
+Using \f{(declare (ignore \param{v}))}, 
+for such a \term{variable} \param{v} has unspecified consequences.
+
+\endissue{DOTIMES-IGNORE:X3J13-MAR91}
+
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+% % added.  I interpolated the bit about ignorable, since this was
+% % not covered in the original proposal.  --sjl 4 Mar 92
+% \issue{MACRO-DECLARATIONS:MAKE-EXPLICIT}
+% \declref{ignore} and \declref{ignorable} declarations may apply to
+% \term{symbol macros}.  Such a declaration specifies that the named
+% \term{symbol macro} must not (in the case of \declref{ignore}) or
+% may not (in the case of \declref{ignorable}) be referenced within
+% the scope of the declaration.
+% \endissue{MACRO-DECLARATIONS:MAKE-EXPLICIT}
+\endissue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+
+\label See Also::
+
+\misc{declare}
+%% Removed per X3J13.  -kmp 4-Oct-93
+% , \macref{declaim},
+% \funref{proclaim}
+
+\endcom
+
+%%% ========== DYNAMIC-EXTENT
+
+\begincom{dynamic-extent}\ftype{Declaration}
+
+\label Syntax::
+
+\f{(dynamic-extent \interleave{\starparam{var} |
+		               \star{\paren{\misc{function} \param{fn}}}})}
+
+\label Arguments::
+
+\param{var}---a \term{variable} \term{name}.
+
+\param{fn}---a \term{function} \term{name}.
+
+\label Valid Context::
+
+\term{declaration}
+%% Removed per X3J13 -kmp 4-Oct-93 
+%or \term{proclamation}
+
+\label Binding Types Affected::
+
+\term{variable}, \term{function}
+
+\label Description::
+
+\issue{DYNAMIC-EXTENT:NEW-DECLARATION}
+
+%!!! This needs work. -kmp 23-Aug-91
+%   Suppose that form <f> contains a DYNAMIC-EXTENT declaration for
+%   variable <v> (which need not be bound by <f>).  Consider the values
+%   <w1>, ..., <wN> taken on by <v> during the course of some execution of
+%   <f>.  The declaration asserts that if object <x> is an OIP of <wI>
+%   when <wI> ever becomes the value of <v>, then just after execution of
+%   <f> terminates <x> will be either inaccessible or still an OIP of <v>.
+In some containing \term{form}, \param{F}, this declaration
+asserts for each \param{var$\sub{i}$} (which need not be bound by \param{F}),
+and for each \term{value} \param{v$\sub{ij}$} that \param{var$\sub{i}$} takes on,
+and for each \term{object} \param{x$\sub{ijk}$} that 
+%% Removed per Moon
+%\param{v$\sub{ij}$}
+is
+an \term{otherwise inaccessible part} of \param{v$\sub{ij}$} at any time when
+%% "it" => V[ij] per Moon
+%it
+\param{v$\sub{ij}$}
+becomes the value of \param{var$\sub{i}$},
+that just after the execution of \param{F} terminates, 
+\param{x$\sub{ijk}$} is either \term{inaccessible}
+(if \param{F} established a \term{binding} for \param{var$\sub{i}$})
+or still an \term{otherwise inaccessible part} of the current value of 
+\param{var$\sub{i}$} (if \param{F} did not establish a \term{binding} 
+for \param{var$\sub{i}$}).
+\issue{DYNAMIC-EXTENT-FUNCTION:EXTEND}
+% The \param{var} may either be a symbol naming a variable, 
+% or a list of the form {\tt (function \i{name})} which names a function.
+The same relation holds for each \param{fn$\sub{i}$}, 
+except that the \term{bindings} are in the \term{function} \term{namespace}.
+\endissue{DYNAMIC-EXTENT-FUNCTION:EXTEND}
+
+The compiler is permitted to use
+%make whatever optimizations are appropriate given 
+%% For RPG:
+this information in any way that is appropriate to the \term{implementation}
+and that does not conflict with the semantics of \clisp.
+
+\declref{dynamic-extent} declarations can be \term{free declarations}
+or \term{bound declarations}.
+
+% added.  --sjl 4 Mar 92
+\issue{MACRO-DECLARATIONS:MAKE-EXPLICIT}
+The \param{vars} and \param{fns} named in a \declref{dynamic-extent} 
+declaration must not refer to \term{symbol macro} or \term{macro} bindings.
+\endissue{MACRO-DECLARATIONS:MAKE-EXPLICIT}
+
+
+\label Examples::
+
+
+Since stack allocation of the initial value entails knowing at the
+\term{object}'s creation time that the \term{object} can be 
+\term{stack-allocated},  it is not generally useful to make a 
+\declref{dynamic-extent} \term{declaration} for \term{variables}
+which have no lexically apparent initial value. 
+For example, it is probably useful to write:
+ 
+\code
+ (defun f ()
+   (let ((x (list 1 2 3)))
+     (declare (dynamic-extent x))
+         ...))
+\endcode
+ 
+This would permit those compilers that wish to do so to \term{stack allocate}
+the list held by the local variable {\tt x}.  It is permissible,
+but in practice probably not as useful, to write:
+ 
+\code
+ (defun g (x) (declare (dynamic-extent x)) ...)
+ (defun f () (g (list 1 2 3)))
+\endcode
+ 
+Most compilers would probably not \term{stack allocate} the \term{argument}
+to {\tt g} in {\tt f} because it would be a modularity violation for the compiler
+to assume facts about {\tt g} from within {\tt f}.   Only an implementation that 
+was willing to be responsible for recompiling {\tt f} if the definition of {\tt g} 
+changed incompatibly could legitimately \term{stack allocate} the \term{list} 
+argument to {\tt g} in {\tt f}.
+ 
+Here is another example:
+
+\code
+ (declaim (inline g))
+ (defun g (x) (declare (dynamic-extent x)) ...)
+ (defun f () (g (list 1 2 3)))
+ 
+ (defun f ()
+   (flet ((g (x) (declare (dynamic-extent x)) ...))
+     (g (list 1 2 3))))
+ 
+\endcode
+In the previous example, some compilers might determine that optimization was 
+possible and others might not.
+ 
+A variant of this is the so-called ``stack allocated rest list''
+that can be achieved (in implementations supporting the optimization) by:
+ 
+\code
+ (defun f (&rest x)
+   (declare (dynamic-extent x))
+   ...)
+\endcode
+ 
+Note that although the initial value of {\tt x} is not explicit, the {\tt f}
+function is responsible for assembling the list {\tt x} from the passed arguments,
+so the {\tt f} function can be optimized by the compiler to construct a 
+\term{stack-allocated} list instead of a heap-allocated list in implementations
+that support such.
+ 
+In the following example,
+
+\code
+ (let ((x (list 'a1 'b1 'c1))
+       (y (cons 'a2 (cons 'b2 (cons 'c2 nil)))))
+   (declare (dynamic-extent x y))
+   ...)
+\endcode
+The \term{otherwise inaccessible parts} of {\tt x} are three 
+\term{conses},  and the \term{otherwise inaccessible parts}
+of {\tt y} are three other \term{conses}.  
+None of the symbols {\tt a1},  {\tt b1},  {\tt c1},  {\tt a2},
+{\tt b2},  {\tt c2},  or \nil\ is an
+\term{otherwise inaccessible part} of {\tt x} or {\tt y} because each
+is \term{interned} and hence \term{accessible} by the \term{package}
+(or \term{packages}) in which it is \term{interned}.
+However, if a freshly allocated \term{uninterned} \term{symbol} had
+been used, it would have been an \term{otherwise inaccessible part} of
+the \term{list} which contained it.
+
+\code
+;; In this example, the implementation is permitted to \term{stack allocate}
+;; the list that is bound to X.
+ (let ((x (list 1 2 3)))
+   (declare (dynamic-extent x))
+   (print x)
+   :done)
+\OUT (1 2 3)
+\EV :DONE
+ 
+;; In this example, the list to be bound to L can be \term{stack-allocated}.
+ (defun zap (x y z)
+   (do ((l (list x y z) (cdr l)))
+       ((null l))
+     (declare (dynamic-extent l))
+     (prin1 (car l)))) \EV ZAP
+ (zap 1 2 3)
+\OUT 123
+\EV NIL
+
+;; Some implementations might open-code LIST-ALL-PACKAGES in a way
+;; that permits using \term{stack allocation} of the list to be bound to L.
+ (do ((l (list-all-packages) (cdr l)))
+     ((null l))
+   (declare (dynamic-extent l))
+   (let ((name (package-name (car l))))
+     (when (string-search "COMMON-LISP" name) (print name))))
+\OUT "COMMON-LISP"
+\OUT "COMMON-LISP-USER"
+\EV NIL
+
+;; Some implementations might have the ability to \term{stack allocate} 
+;; rest lists.  A declaration such as the following should be a cue
+;; to such implementations that stack-allocation of the rest list
+;; would be desirable.
+ (defun add (&rest x)
+   (declare (dynamic-extent x))
+   (apply #'+ x)) \EV ADD
+ (add 1 2 3) \EV 6
+
+ (defun zap (n m)
+   ;; Computes (RANDOM (+ M 1)) at relative speed of roughly O(N).
+   ;; It may be slow, but with a good compiler at least it
+   ;; doesn't waste much heap storage.  :-\}
+   (let ((a (make-array n)))
+     (declare (dynamic-extent a))
+     (dotimes (i n) 
+       (declare (dynamic-extent i))
+       (setf (aref a i) (random (+ i 1))))
+     (aref a m))) \EV ZAP
+ (< (zap 5 3) 3) \EV \term{true}
+\endcode
+ 
+The following are in error, since the value of {\tt x} is used outside of its
+\term{extent}:
+ 
+\code
+ (length (list (let ((x (list 1 2 3)))  ; Invalid
+                (declare (dynamic-extent x))
+                x)))
+
+ (progn (let ((x (list 1 2 3)))  ; Invalid
+          (declare (dynamic-extent x))
+          x)
+        nil)
+\endcode
+\endissue{DYNAMIC-EXTENT:NEW-DECLARATION}
+
+\label See Also::
+
+\misc{declare}
+%% Removed per X3J13.  -kmp 4-Oct-93
+% , \macref{declaim},
+% \funref{proclaim}
+
+\label Notes::
+
+The most common optimization is to \term{stack allocate} the 
+initial value of the \term{objects} named by the \param{vars}. 
+
+It is permissible for an implementation to simply ignore this declaration.
+
+\endcom
+
+%%% ========== TYPE
+
+\begincom{type}\ftype{Declaration}
+
+\label Syntax::
+
+\f{(type \param{typespec} \starparam{var})}
+
+\f{(\param{typespec} \starparam{var})}
+
+\label Arguments::
+
+\param{typespec}---a \term{type specifier}.
+
+\param{var}---a \term{variable} \term{name}.
+
+\label Valid Context::
+
+\term{declaration} or \term{proclamation}
+
+\label Binding Types Affected::
+
+\term{variable}
+
+\label Description::
+
+Affects
+only variable \term{bindings} and specifies that the
+\param{vars} take on 
+values only of the specified \param{typespec}.
+In particular, values assigned to the variables by \specref{setq},
+as well as the initial values of the \param{vars} must be of
+the specified \param{typespec}.
+\declref{type} declarations never apply to function \term{bindings} (see \declref{ftype}).
+
+%% This is already said in the stuff on COMMON-LISP package.
+%% !!! Maybe add a cross-reference? -kmp 9-Feb-92
+% \issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+% Except where explicitly allowed, the consequences are undefined if a
+% \term{symbol} in \thepackage{common-lisp} is used as a
+% \param{var} argument.
+% If such a \term{symbol} is not globally
+% defined 
+% %"by this standard" added per barmar: -kmp 28-Dec-90
+% by this standard
+% as a variable or a constant, it is allowed to lexically bind it
+% and to declare the {\tt type} of that \term{binding}.  For example,
+% the lexical variable names {\tt list} and {\tt car} are permitted.
+% \editornote{KMP: This is unintelligible to me and needs to be rewritten to clarify 
+%     that binding CL special variables is ok, but that their type decls are lexical.}
+% \endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+\issue{SYMBOL-MACROLET-DECLARE:ALLOW}
+A type declaration of a \term{symbol} 
+defined by \specref{symbol-macrolet} is equivalent
+to wrapping a \specref{the} 
+expression around the expansion of that \term{symbol},
+\endissue{SYMBOL-MACROLET-DECLARE:ALLOW}
+% moved here from symbol-macrolet dictionary entry  --sjl 5 mar 92
+\issue{SYMBOL-MACROLET-TYPE-DECLARATION:NO}
+although the \term{symbol}'s \term{macro expansion} is not actually affected.
+\endissue{SYMBOL-MACROLET-TYPE-DECLARATION:NO}
+
+\issue{DECLARE-TYPE-FREE:LEXICAL}
+
+The meaning of a type declaration
+  is equivalent to changing each reference to 
+a variable (\param{var}) within the scope of the
+  declaration to {\tt (the \param{typespec} \param{var})},
+changing each expression assigned to the
+  variable (\param{new-value}) within the scope of the declaration to 
+{\tt (the \param{typespec} \param{new-value})},
+  and executing 
+{\tt (the \param{typespec} \param{var})} at the moment the scope of the declaration
+  is entered.
+ 
+A \term{type} declaration is valid in all declarations. The interpretation
+  of a type declaration is as follows:
+\beginlist
+\itemitem{1.} During the execution of any reference to the
+  declared variable within the scope of the declaration, the consequences
+are 
+%"unspecified" -> "undefined" per barmar. i concur. -kmp
+%unspecified
+undefined
+if
+  the value of the declared variable is not of the declared \term{type}.
+
+\itemitem{2.} During the execution of any 
+\specref{setq} of the declared variable within the scope
+  of the declaration, the consequences are 
+%"unspecified" -> "undefined" per barmar. i concur. -kmp
+%unspecified
+undefined
+if the newly assigned value of the
+  declared variable is not of the declared \term{type}. 
+
+\itemitem{3.} At the moment the
+  scope of the declaration is entered, the consequences are 
+%"unspecified" -> "undefined" per barmar. i concur. -kmp
+%unspecified
+undefined
+if the value of the
+  declared variable is not of the declared \term{type}.
+\endlist
+
+A \term{type} declaration affects only variable references within
+its scope.
+% and the meaning of free and "variable-binding-associated" type
+%  declarations can be described identically.
+
+If nested \term{type} declarations refer to the same variable,
+  then the value of the variable must be a member of the intersection of
+  the declared \term{types}.
+\endissue{DECLARE-TYPE-FREE:LEXICAL}
+
+\issue{SPECIAL-TYPE-SHADOWING:CLARIFY}
+  If there is a local {\tt type} declaration for a dynamic
+  variable, and there is also a global {\tt type} proclamation for that same
+  variable, then the value of the variable within the scope of the local
+  declaration must be a member of the intersection of the two declared
+  \term{types}.
+\endissue{SPECIAL-TYPE-SHADOWING:CLARIFY}
+ 
+\declref{type} declarations can  be \term{free declarations}
+or \term{bound declarations}.
+
+\issue{TYPE-DECLARATION-ABBREVIATION:ALLOW-ALL}
+%!!! This paragraph might be better off elsewhere, but can live here for now.
+A \term{symbol} cannot be both the name of a \term{type} and the name of a
+declaration.  Defining a \term{symbol} as the \term{name} of a \term{class},
+\term{structure}, \term{condition}, or \term{type}, when the \term{symbol}
+has been \term{declared} as a declaration name, or vice versa, signals an error.
+\endissue{TYPE-DECLARATION-ABBREVIATION:ALLOW-ALL}
+
+%% The following was inserted after GLS checked this out.
+
+\issue{DECLARE-ARRAY-TYPE-ELEMENT-REFERENCES:RESTRICTIVE} 
+Within the \term{lexical scope} of an \typeref{array} type declaration, 
+all references to \term{array} \term{elements} are assumed to satisfy the
+\term{expressed array element type} (as opposed to the \term{upgraded array element type}).
+%The consequences are undefined if this is ever violated. 
+A compiler can treat
+the code within the scope of the \typeref{array} type declaration as if each
+\term{access} of an \term{array} \term{element} were surrounded by an appropriate 
+\specref{the} form.
+\endissue{DECLARE-ARRAY-TYPE-ELEMENT-REFERENCES:RESTRICTIVE} 
+
+\label Examples::
+
+\code
+ (defun f (x y)
+   (declare (type fixnum x y))
+   (let ((z (+ x y)))
+     (declare (type fixnum z))
+     z)) \EV F
+ (f 1 2) \EV 3
+ ;; The previous definition of F is equivalent to
+ (defun f (x y)
+   ;; This declaration is a shorthand form of the TYPE declaration
+   (declare (fixnum x y))
+   ;; To declare the type of a return value, it's not necessary to
+   ;; create a named variable.  A THE special form can be used instead.
+   (the fixnum (+ x y))) \EV F
+ (f 1 2) \EV 3
+\endcode
+
+\issue{DECLARE-ARRAY-TYPE-ELEMENT-REFERENCES:RESTRICTIVE} 
+
+% There were some comments on this code (from the Cleanup issue, probably)
+% that no one liked, so I removed them.  This example might do better with
+% some explanation, but better no explanation than a broken one. -kmp 14-Feb-92
+
+\code
+ (defvar *one-array* (make-array 10 :element-type '(signed-byte 5)))
+ (defvar *another-array* (make-array 10 :element-type '(signed-byte 8)))
+  
+ (defun frob (an-array)
+   (declare (type (array (signed-byte 5) 1) an-array))
+   (setf (aref an-array 1) 31)
+   (setf (aref an-array 2) 127)
+   (setf (aref an-array 3) (* 2 (aref an-array 3)))
+   (let ((foo 0))
+     (declare (type (signed-byte 5) foo))
+     (setf foo (aref an-array 0))))
+  
+ (frob *one-array*)
+ (frob *another-array*)
+\endcode
+
+\medbreak
+
+The above definition of \f{frob} is equivalent to:
+
+\code
+ (defun frob (an-array)
+   (setf (the (signed-byte 5) (aref an-array 1)) 31)
+   (setf (the (signed-byte 5) (aref an-array 2)) 127)
+   (setf (the (signed-byte 5) (aref an-array 3))
+         (* 2 (the (signed-byte 5) (aref an-array 3))))
+   (let ((foo 0))
+     (declare (type (signed-byte 5) foo))
+     (setf foo (the (signed-byte 5) (aref an-array 0)))))
+\endcode
+
+%!!! Barmar: What does upgrading matter?
+Given an implementation in which 
+\term{fixnums} are 29 bits but \typeref{fixnum} \term{arrays} 
+are upgraded to signed 32-bit \term{arrays},
+the following 
+%% "should->could" per barmar. i concur. -kmp 27-Dec-90
+%should
+could be compiled with all \term{fixnum} arithmetic:
+ 
+\code
+ (defun bump-counters (counters)
+   (declare (type (array fixnum *) bump-counters))
+   (dotimes (i (length counters))
+     (incf (aref counters i))))
+\endcode
+\endissue{DECLARE-ARRAY-TYPE-ELEMENT-REFERENCES:RESTRICTIVE} 
+
+\label See Also::
+
+\misc{declare},
+\macref{declaim},
+\funref{proclaim}
+
+\label Notes::
+
+\f{(\param{typespec} \starparam{var})} 
+is an abbreviation for \f{(type \param{typespec} \starparam{var})}.
+\issue{TYPE-DECLARATION-ABBREVIATION:ALLOW-ALL}
+%provided that \param{typespec} is one of the standard \term{type specifier} 
+%\term{symbols} in \figref\StandardizedAtomicTypeSpecs.
+\endissue{TYPE-DECLARATION-ABBREVIATION:ALLOW-ALL}
+
+A \declref{type} declaration for the arguments to a function does not
+necessarily imply anything about the type of the result.  The following
+function is not permitted to be compiled using \term{implementation-dependent}
+\term{fixnum}-only arithmetic:
+
+\code
+ (defun f (x y) (declare (fixnum x y)) (+ x y))
+\endcode
+
+To see why, consider \f{(f most-positive-fixnum 1)}.
+Common Lisp defines that \f{F} must return a \term{bignum} here, rather
+than signal an error or produce a mathematically incorrect result.
+If you have special knowledge such ``\term{fixnum} overflow'' cases will
+not come up, you can declare the result value to be in the \term{fixnum}
+range, enabling some compilers to use more efficient arithmetic:
+
+\code
+ (defun f (x y)
+   (declare (fixnum x y))
+   (the fixnum (+ x y)))
+\endcode
+
+Note, however, that in the three-argument case, because of the possibility
+of an implicit intermediate value growing too large, the following will not
+cause \term{implementation-dependent} \term{fixnum}-only arithmetic to be used:
+
+\code
+ (defun f (x y)
+   (declare (fixnum x y z))
+   (the fixnum (+ x y z)))
+\endcode
+
+To see why, consider \f{(f most-positive-fixnum 1 -1).}
+Although the arguments and the result are all \term{fixnums}, an intermediate
+value is not a \term{fixnum}.  If it is important that 
+\term{implementation-dependent} \term{fixnum}-only arithmetic be selected
+in \term{implementations} that provide it, 
+consider writing something like this instead:
+
+\code
+ (defun f (x y)
+   (declare (fixnum x y z))
+   (the fixnum (+ (the fixnum (+ x y)) z)))
+\endcode
+
+\endcom
+
+%%% ========== INLINE
+%%% ========== NOTINLINE
+
+\begincom{inline, notinline}\ftype{Declaration}
+
+\label Syntax::
+
+{\tt (inline \starparam{function-name})}
+
+{\tt (notinline \starparam{function-name})}
+
+\label Arguments::
+
+\param{function-name}---a \term{function name}.
+
+\label Valid Context::
+
+\term{declaration} or \term{proclamation}
+
+\label Binding Types Affected::
+
+\term{function}
+
+\label Description::
+
+\issue{FUNCTION-NAME:LARGE}
+\declref{inline} specifies that
+it is desirable for the compiler to produce inline calls
+to the \term{functions} named by \param{function-names}; 
+that is, the code for a specified \param{function-name}
+\endissue{FUNCTION-NAME:LARGE}
+should be integrated into the calling routine, appearing ``in line''
+in place of a procedure call.  
+%This declaration is \term{pervasive}.
+A compiler is free to ignore this declaration.
+\declref{inline} declarations never apply to variable \term{bindings}. 
+
+%% 9.2.0 14
+If one of the \term{functions} mentioned has a lexically apparent local definition
+(as made by \specref{flet} or \specref{labels}), then the declaration
+applies to that local definition and not to the global function definition.
+
+\issue{ALLOW-LOCAL-INLINE:INLINE-NOTINLINE}
+While no \term{conforming implementation} is required to perform inline expansion
+of user-defined functions, those \term{implementations} that do attempt
+to recognize the following paradigm:
+
+To define a \term{function} \f{f} that is not \declref{inline} by default
+but for which \f{(declare (inline f))} will make \param{f} be locally inlined,
+the proper definition sequence is:
+    
+\code
+ (declaim (inline f))
+ (defun f ...)
+ (declaim (notinline f))
+\endcode
+
+The \declref{inline} proclamation preceding the \macref{defun} \term{form}
+ensures that the \term{compiler} has the opportunity save the information
+necessary for inline expansion, and the \declref{notinline} proclamation 
+following the \macref{defun} \term{form} prevents \f{f} from being expanded
+inline everywhere.  
+\endissue{ALLOW-LOCAL-INLINE:INLINE-NOTINLINE}
+
+\issue{FUNCTION-NAME:LARGE}
+\declref{notinline} specifies that it is
+\endissue{FUNCTION-NAME:LARGE}
+undesirable to compile the \term{functions}
+named by \param{function-names} in-line.
+%This declaration is \term{pervasive}.
+A compiler is not free to ignore this declaration;
+%clarifying clause added per barmar. -kmp 28-Dec-90
+calls to the specified functions must be implemented as out-of-line subroutine calls.
+
+%% 9.2.0 16
+If one of the \term{functions}
+mentioned has a lexically apparent local definition
+(as made by \specref{flet} or \specref{labels}), then the declaration
+applies to that local definition and not to the global function definition.
+
+% added.  --sjl 4 Mar 92
+\issue{MACRO-DECLARATIONS:MAKE-EXPLICIT}
+In the presence of a \term{compiler macro} definition for 
+\param{function-name}, a \declref{notinline} declaration prevents that
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+\term{compiler macro} from being used.
+% in preference to the normal definition 
+% of \param{function-name} as a \term{function} or \term{macro}.
+\endissue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+An \declref{inline} declaration may be used to encourage use of 
+\term{compiler macro} definitions.  \declref{inline} and \declref{notinline}
+declarations otherwise have no effect when the lexically visible definition
+of \param{function-name} is a \term{macro} definition.
+\endissue{MACRO-DECLARATIONS:MAKE-EXPLICIT}
+
+
+\declref{inline} and \declref{notinline} declarations can be \term{free declarations} or
+\term{bound declarations}.                  
+\declref{inline} and \declref{notinline} declarations of functions that
+appear before the body of a 
+      \specref{flet}
+ or  \specref{labels}
+\issue{WITH-ADDED-METHODS:DELETE}
+% \specref{with-added-methods},
+\endissue{WITH-ADDED-METHODS:DELETE}
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+%   \specref{generic-flet}, 
+% and
+%   \specref{generic-labels} 
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\term{form} that defines that function are \term{bound declarations}.  
+Such declarations in other contexts are \term{free declarations}.
+
+\label Examples::
+
+\code
+ ;; The globally defined function DISPATCH should be open-coded,
+ ;; if the implementation supports inlining, unless a NOTINLINE 
+ ;; declaration overrides this effect.
+ (declaim (inline dispatch))
+ (defun dispatch (x) (funcall (get (car x) 'dispatch) x))
+ ;; Here is an example where inlining would be encouraged.
+ (defun top-level-1 () (dispatch (read-command)))
+ ;; Here is an example where inlining would be prohibited.
+ (defun top-level-2 ()
+   (declare (notinline dispatch))
+   (dispatch (read-command)))
+ ;; Here is an example where inlining would be prohibited.
+ (declaim (notinline dispatch))
+ (defun top-level-3 () (dispatch (read-command)))
+ ;; Here is an example where inlining would be encouraged.
+ (defun top-level-4 () 
+   (declare (inline dispatch))
+   (dispatch (read-command)))
+\endcode
+
+\label See Also::
+
+\misc{declare},
+\macref{declaim},
+\funref{proclaim}
+
+\endcom
+
+%%% ========== FTYPE
+
+\begincom{ftype}\ftype{Declaration}
+
+\label Syntax::
+
+\issue{FUNCTION-NAME:LARGE}
+\f{(ftype \param{type} \starparam{function-name})}
+\endissue{FUNCTION-NAME:LARGE}
+
+\label Arguments::
+
+\param{function-name}---a \term{function name}.
+
+% added --sjl 7 Mar 92
+\param{type}---a \term{type specifier}.
+
+\label Valid Context::
+
+\term{declaration} or \term{proclamation}
+
+\label Binding Types Affected::
+
+\term{function}
+
+\label Description::
+
+Specifies that the \term{functions} named by \param{function-names} are of
+the functional type \param{type}.
+For example:
+
+\code
+ (declare (ftype (function (integer list) t) ith)
+          (ftype (function (number) float) sine cosine))
+\endcode
+If one of the \term{functions} mentioned has a lexically apparent local definition
+(as made by \specref{flet} or \specref{labels}), then the declaration
+applies to that local definition and not to the global function definition.
+\declref{ftype} declarations never apply to variable \term{bindings} (see {\tt type}). 
+
+% added.  --sjl 4 Mar 92
+\issue{MACRO-DECLARATIONS:MAKE-EXPLICIT}
+The lexically apparent bindings of \param{function-names} must not be
+\term{macro} definitions.  (This is because \declref{ftype} declares the
+functional definition of each \term{function name} to be of a particular
+subtype of \typeref{function}, and \term{macros} do not denote 
+\term{functions}.)
+\endissue{MACRO-DECLARATIONS:MAKE-EXPLICIT}
+
+% This is adequately covered in the packages chapter.  --sjl 5 Mar 92
+% \issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+% Except where explicitly allowed, the consequences are undefined if
+% a \term{symbol} in \thepackage{common-lisp}
+% is used as a \param{function-name} argument.
+% If such a \term{symbol} is not defined
+% %"by this standard" added per barmar: -kmp 28-Dec-90
+% by this standard
+% as a \term{function},  \term{macro},  or \term{special form},
+% it is allowed to declare the
+% \declref{ftype} of that \term{binding}.  
+% \endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+\declref{ftype} 
+\issue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}
+%and \declref{function} 
+\endissue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}
+declarations
+can be \term{free declarations} or \term{bound declarations}.
+\declref{ftype} declarations of functions that appear before the body of a 
+   \specref{flet}
+or \specref{labels}
+\issue{WITH-ADDED-METHODS:DELETE}
+% \specref{with-added-methods},
+\endissue{WITH-ADDED-METHODS:DELETE}
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+%   \specref{generic-flet}, 
+% and
+%   \specref{generic-labels} 
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\term{form} that defines that function are \term{bound declarations}.  
+Such declarations in other contexts are \term{free declarations}.
+
+\issue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}
+% 
+% {\tt (function \param{var1} \param{var2}...)}
+% is equivalent to
+% {\tt  (type function \param{var1} \param{var2}...)}
+% 
+%
+%%% 9.2.0 12
+%If one of the \term{functions}
+%mentioned has a lexically apparent local definition
+%(as made by \specref{flet} or \specref{labels}), then the declaration
+%applies to that local definition and not to the global function definition.
+% 
+% 
+% See \declref{type} and \declref{ftype}.
+% 
+\endissue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}
+
+\label See Also::
+
+\misc{declare},
+\macref{declaim},
+\funref{proclaim}
+
+\endcom
+
+%%% ========== DECLARATION
+\begincom{declaration}\ftype{Declaration}
+
+\label Syntax::
+
+\f{(declaration \starparam{name})}
+
+\label Arguments::
+
+\param{name}---a \term{symbol}.
+
+\label Binding Types Affected:\None.
+
+\label Valid Context::
+
+\term{proclamation} only
+
+\label Description::
+
+%% 9.2.0 19
+Advises the compiler that each \param{name} is a valid but potentially
+non-standard declaration name.  The purpose of this is to tell one
+compiler not to issue warnings for declarations meant for another 
+compiler or other program processor.
+% Already said in the packages chapter.  --sjl 5 Mar 92
+% \issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+% The consequences are undefined if a \term{symbol} in \thepackage{common-lisp}
+% is used as a \i{name} argument.
+% \endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+%!!! Couldn't figure this out.  It's obviously better to omit it than include it but...
+% \reviewer{Barmar: What does this mean??}%!!!
+% \f{(\i{declaration} x)} never applies to a \term{binding} of {\tt y}.
+
+\label Examples::
+
+\code
+ (declaim (declaration author target-language target-machine))
+ (declaim (target-language ada))
+ (declaim (target-machine IBM-650))
+ (defun strangep (x)
+   (declare (author "Harry Tweeker"))
+   (member x '(strange weird odd peculiar)))
+\endcode
+
+\label See Also::
+
+\macref{declaim},
+\funref{proclaim}
+
+\endcom
+
+%%% ========== OPTIMIZE
+%%% ========== COMPILATION-SPEED
+%%% ========== DEBUG
+%%% ========== SAFETY
+%%% ========== SPACE
+%%% ========== SPEED
+
+\begincom{optimize}\ftype{Declaration}
+
+\label Syntax::
+
+\f{(optimize \star{\curly{\param{quality} | (\param{quality} \param{value})}})}
+\idxref{compilation-speed}%
+\idxref{debug}%
+\idxref{safety}%
+\idxref{space}%
+\idxref{speed}
+
+\label Arguments::
+
+\param{quality}---an \term{optimize quality}.
+
+\param{value}---one of the \term{integers} \f{0}, \f{1}, \f{2}, or \f{3}.
+
+\label Valid Context::
+
+\term{declaration} or \term{proclamation}
+
+\label Binding Types Affected:\None.
+
+\label Description::
+
+Advises the compiler that each \param{quality} should be given attention
+according to the specified corresponding \param{value}.
+Each \param{quality} must be a \term{symbol} naming an \term{optimize quality}; 
+the names and meanings of the standard \param{optimize qualities} are shown in 
+\thenextfigure.
+
+\issue{OPTIMIZE-DEBUG-INFO:NEW-QUALITY}
+\tablefigtwo{Optimize qualities}{Name}{Meaning}{
+\declref{compilation-speed} & speed of the compilation process  \cr
+\declref{debug}             & ease of debugging                 \cr
+\declref{safety}	    & run-time error checking           \cr
+\declref{space}             & both code size and run-time space \cr
+\declref{speed}             & speed of the object code		\cr
+}
+\endissue{OPTIMIZE-DEBUG-INFO:NEW-QUALITY}
+
+There may be other, \term{implementation-defined} \term{optimize qualities}.
+
+A \param{value} \f{0} means that the corresponding \param{quality} is totally
+unimportant, and \f{3} that the \param{quality} is extremely important;
+\f{1} and \f{2} are intermediate values, with \f{1} the 
+%% "average" -> "neutral" since KAB balked and I think this will be less weird. -kmp 3-Oct-91
+%average
+neutral value.
+\f{(\param{quality} 3)} can be abbreviated to \param{quality}.
+%This declaration is \term{pervasive}.
+
+Note that \term{code} which has the optimization \f{(safety 3)},
+or just \typeref{safety},
+is called \term{safe} \term{code}.
+
+% Added per Sandra in response to Barrett query ...
+The consequences are unspecified if a \param{quality} appears more than once
+with \term{different} \param{values}.
+
+\label Examples::
+
+\code
+ (defun often-used-subroutine (x y)
+   (declare (optimize (safety 2)))
+   (error-check x y)
+   (hairy-setup x)
+   (do ((i 0 (+ i 1))
+        (z x (cdr z)))
+       ((null z))
+     ;; This inner loop really needs to burn.
+     (declare (optimize speed))
+     (declare (fixnum i))
+     ))
+\endcode
+
+\label See Also::
+
+\misc{declare},
+\macref{declaim},
+\funref{proclaim},
+{\secref\DeclScope}
+
+\label Notes::
+
+An \declref{optimize} declaration never applies to either a \term{variable} or
+a \term{function} \term{binding}.  An \declref{optimize} declaration can only
+be a \term{free declaration}.  For more information, \seesection\DeclScope.
+
+\endcom
+
+% I moved the dictionary entry for the special declaration here.
+% It used to be in chapter 5, but it seemed more logical to put it with
+% all the other declaration specifiers.   -- sjl 5 Mar 92
+
+%%% ========== SPECIAL
+
+\begincom{special}\ftype{Declaration}
+
+\label Syntax::
+
+\f{(special \starparam{var})}
+
+\label Arguments::
+
+\param{var}---a \term{symbol}.
+
+\label Valid Context::
+
+\term{declaration} or \term{proclamation}
+
+\label Binding Types Affected::
+
+\term{variable}
+
+\label Description::
+ 
+Specifies that all of
+the \param{vars} named are dynamic.
+This specifier affects variable \term{bindings} and 
+affects references.
+All variable \term{bindings} affected are made to be dynamic \term{bindings},
+and affected variable references refer to the current dynamic 
+\term{binding}.
+%rather than the current lexical \term{binding}.
+For example:
+
+\code
+ (defun hack (thing *mod*)    ;The binding of the parameter
+   (declare (special *mod*))  ; *mod* is visible to hack1,
+   (hack1 (car thing)))       ; but not that of thing.
+ (defun hack1 (arg)
+   (declare (special *mod*))  ;Declare references to *mod*
+                              ;within hack1 to be special.
+   (if (atom arg) *mod*
+       (cons (hack1 (car arg)) (hack1 (cdr arg)))))
+\endcode
+
+%% 9.2.0 4
+A \declref{special} declaration does not affect inner \term{bindings} 
+of a \param{var}; the inner \term{bindings} implicitly shadow
+a \declref{special} declaration and must be explicitly re-declared to
+be \declref{special}.
+\declref{special} declarations never apply to function \term{bindings}.
+
+% adequately covered in the packages chapter.  --sjl 5 Mar 92
+% \issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+% Except where explicitly allowed, the consequences are undefined if
+% a \term{symbol} in \thepackage{common-lisp}
+% is used as a \param{var} argument.
+% \endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+\declref{special} declarations can be either \term{bound declarations},
+affecting both a binding and references, or \term{free declarations},
+affecting only references, depending on whether the declaration is 
+attached to a variable binding.
+
+%% 9.1.0 14
+When used in a \term{proclamation}, a \declref{special} 
+\term{declaration specifier}
+applies to all \term{bindings} as well as to all references of the
+mentioned variables.  For example, after
+
+\code
+ (declaim (special x))
+\endcode
+
+then in a function definition such as
+
+\code
+ (defun example (x) ...)
+\endcode
+
+the parameter \f{x} is bound as a dynamic variable
+rather than as a lexical variable.  
+
+\label Examples::
+
+\code
+(defun declare-eg (y)                 ;this y is special
+ (declare (special y))
+ (let ((y t))                         ;this y is lexical
+      (list y
+            (locally (declare (special y)) y)))) ;this y refers to the
+                                                 ;special binding of y
+\EV DECLARE-EG 
+ (declare-eg nil) \EV (T NIL) 
+\endcode
+
+
+\code
+(setf (symbol-value 'x) 6)
+(defun foo (x)                         ;a lexical binding of x
+  (print x)
+  (let ((x (1+ x)))                    ;a special binding of x
+    (declare (special x))              ;and a lexical reference
+    (bar))
+  (1+ x))
+(defun bar () 
+  (print (locally (declare (special x))
+           x)))
+(foo 10) 
+\OUT 10
+\OUT 11
+\EV 11
+\endcode
+
+\code
+(setf (symbol-value 'x) 6)
+(defun bar (x y)            ;[1] 1st occurrence of x
+  (let ((old-x x)           ;[2] 2nd occurrence of x -- same as 1st occurrence
+        (x y))              ;[3] 3rd occurrence of x
+    (declare (special x))
+    (list old-x x)))
+(bar 'first 'second) \EV (FIRST SECOND)
+\endcode
+
+\code
+ (defun few (x &optional (y *foo*))
+   (declare (special *foo*))
+   ...)
+\endcode
+The reference to \f{*foo*}
+in the first line of this example is not \declref{special}
+even though there is a \declref{special} declaration in the second line.
+
+\code
+ (declaim (special prosp)) \EV \term{implementation-dependent}
+ (setq prosp 1 reg 1) \EV 1
+ (let ((prosp 2) (reg 2))         ;the binding of prosp is special
+    (set 'prosp 3) (set 'reg 3)   ;due to the preceding proclamation,
+    (list prosp reg))             ;whereas the variable reg is lexical
+\EV (3 2)
+ (list prosp reg) \EV (1 3)
+
+ (declaim (special x))          ;x is always special.
+ (defun example (x y)                                 
+   (declare (special y))
+   (let ((y 3) (x (* x 2)))
+     (print (+ y (locally (declare (special y)) y)))
+     (let ((y 4)) (declare (special y)) (foo x)))) \EV EXAMPLE
+\endcode
+In the contorted code above, the outermost and innermost \term{bindings} of
+\f{y} are dynamic,
+but the middle
+binding is lexical. The two arguments to \f{+} are different,
+one being the value, which is \f{3}, of the lexical variable
+\f{y}, and the other being the value of the dynamic variable named \f{y}
+(a \term{binding} 
+of which happens, coincidentally, to lexically surround it at
+an outer level).  All the \term{bindings} 
+of \f{x} and references to \f{x}
+are dynamic, however, because of the proclamation that \f{x} is
+always \declref{special}.
+
+\label See Also::
+
+\macref{defparameter},
+\macref{defvar}
+
+\endcom
+
+%%% ========== LOCALLY
+\begincom{locally}\ftype{Special Operator}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\issue{LOCALLY-TOP-LEVEL:SPECIAL-FORM}
+\DefspecWithValues locally 
+		   {\starparam{declaration} \starparam{form}}
+		   {\starparam{result}}
+\endissue{LOCALLY-TOP-LEVEL:SPECIAL-FORM}
+
+\label Arguments and Values::
+
+\param{Declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{forms}---an \term{implicit progn}.
+
+\issue{RETURN-VALUES-UNSPECIFIED:SPECIFY}
+\param{results}---the \term{values} of the \param{forms}.
+\endissue{RETURN-VALUES-UNSPECIFIED:SPECIFY}
+
+\label Description::
+
+%% 9.1.0 10
+Sequentially evaluates a body of \param{forms}
+in a \term{lexical environment} where the given \param{declarations} have effect.
+
+\label Examples::
+
+\code
+ (defun sample-function (y)  ;this y is regarded as special
+   (declare (special y))                                
+   (let ((y t))              ;this y is regarded as lexical
+     (list y
+           (locally (declare (special y))
+             ;; this next y is regarded as special
+             y))))
+\EV SAMPLE-FUNCTION
+ (sample-function nil) \EV (T NIL) 
+ (setq x '(1 2 3) y '(4 . 5)) \EV (4 . 5)
+
+;;; The following declarations are not notably useful in specific.
+;;; They just offer a sample of valid declaration syntax using LOCALLY.
+ (locally (declare (inline floor) (notinline car cdr))
+          (declare (optimize space))
+    (floor (car x) (cdr y))) \EV 0, 1
+\endcode
+
+\issue{LOCALLY-TOP-LEVEL:SPECIAL-FORM}
+%Barmar: Say what the example does.
+%KMP: I added some comments. OK?
+\code
+;;; This example shows a definition of a function that has a particular set
+;;; of OPTIMIZE settings made locally to that definition.
+ (locally (declare (optimize (safety 3) (space 3) (speed 0)))
+   (defun frob (w x y &optional (z (foo x y)))
+     (mumble x y z w)))
+\EV FROB
+
+;;; This is like the previous example, except that the optimize settings
+;;; remain in effect for subsequent definitions in the same compilation unit.
+ (declaim (optimize (safety 3) (space 3) (speed 0)))
+ (defun frob (w x y &optional (z (foo x y)))
+   (mumble x y z w))
+\EV FROB
+\endcode
+\endissue{LOCALLY-TOP-LEVEL:SPECIAL-FORM}
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\misc{declare}
+
+\label Notes::
+
+The \declref{special} declaration may be used with \specref{locally}
+to affect references to, rather than \term{bindings} of, \term{variables}.
+%Barrett: So what?
+
+\issue{LOCALLY-TOP-LEVEL:SPECIAL-FORM}
+If a \specref{locally} \term{form} is a \term{top level form}, the body \param{forms}
+are also processed as \term{top level forms}.  \Seesection\FileCompilation.
+\endissue{LOCALLY-TOP-LEVEL:SPECIAL-FORM}
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== THE
+\begincom{the}\ftype{Special Operator}
+
+\label Syntax::
+
+\DefspecWithValues the {value-type form} {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{value-type}---a \term{type specifier}; \noeval.
+
+\param{form}---a \term{form}; \eval.
+
+\issue{THE-VALUES:RETURN-NUMBER-RECEIVED}
+%% 7.9.2 19                      
+\param{results}---the \term{values} resulting from the \term{evaluation} of \param{form}.
+  These \term{values} must conform to the \term{type} supplied by \param{value-type};
+  see below.
+\endissue{THE-VALUES:RETURN-NUMBER-RECEIVED}
+
+\label Description::
+
+%% 9.3.0 2
+\specref{the} specifies that the \term{values}\meaning{1a} returned by \param{form}
+are of the \term{types} specified by \param{value-type}.
+The consequences are undefined if any \param{result}
+is not of the declared type.
+
+\issue{THE-AMBIGUITY:FOR-DECLARATION}
+%% This text has been removed per Moon #19 (first public review). -kmp 8-May-93
+% %!!! Barmar: If this is true, the THE form is equivalent to the form argument.
+% \param{Value-type} can be any valid \term{type specifier}.
+% In the case that \param{form} returns one
+%   value and \param{value-type} is not a 
+% \declref{values} \term{type specifier}, 
+% 
+% \code
+%  (the type exp) 
+% \EQ 
+%  (let ((#:g0001 exp))
+%    (declare (type type #:g0001))
+%    #:g0001)
+% \endcode
+\endissue{THE-AMBIGUITY:FOR-DECLARATION}
+
+\issue{JUN90-TRIVIAL-ISSUES:27}
+\issue{THE-VALUES:RETURN-NUMBER-RECEIVED}
+It is permissible for \param{form} to \term{yield} a different number of \term{values} 
+than are specified by \param{value-type}, provided that the values
+for which \param{types} are declared are indeed of those \term{types}.
+Missing values are treated as \nil\ for the purposes of checking their \term{types}.
+
+Regardless of number of \term{values} declared by \param{value-type},
+the number of \term{values} returned by \thespecform{the} is the same as
+the number of \term{values} returned by \param{form}. 
+\endissue{THE-VALUES:RETURN-NUMBER-RECEIVED}
+\endissue{JUN90-TRIVIAL-ISSUES:27}
+
+\label Examples::
+
+\issue{THE-VALUES:RETURN-NUMBER-RECEIVED}
+\code
+ (the symbol (car (list (gensym)))) \EV #:G9876
+ (the fixnum (+ 5 7)) \EV 12
+ (the (values) (truncate 3.2 2)) \EV 1, 1.2
+ (the integer (truncate 3.2 2)) \EV 1, 1.2
+ (the (values integer) (truncate 3.2 2)) \EV 1, 1.2
+ (the (values integer float) (truncate 3.2 2))   \EV 1, 1.2
+ (the (values integer float symbol) (truncate 3.2 2)) \EV 1, 1.2
+ (the (values integer float symbol t null list) 
+      (truncate 3.2 2)) \EV 1, 1.2
+ (let ((i 100))
+    (declare (fixnum i))
+    (the fixnum (1+ i))) \EV 101
+ (let* ((x (list 'a 'b 'c))
+        (y 5))
+    (setf (the fixnum (car x)) y)
+    x) \EV (5 B C)
+\endcode
+\endissue{THE-VALUES:RETURN-NUMBER-RECEIVED}
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+The consequences are undefined if
+the \term{values} \term{yielded} by the \param{form} 
+are not of the \term{type} specified by \param{value-type}.
+
+\label See Also::
+
+\declref{values}
+
+\label Notes::
+
+The \declref{values} \term{type specifier} can be used to indicate the types
+of \term{multiple values}:
+
+\code
+ (the (values integer integer) (floor x y))
+ (the (values string t)
+      (gethash the-key the-string-table))
+\endcode
+
+\macref{setf} can be used with \specref{the} type declarations.
+In this case the declaration is transferred to the form that
+specifies  the new value.  The resulting \macref{setf} \term{form}
+is then analyzed.
+
+\endcom
+
+%-------------------- Introspection --------------------
+
+%%% ========== SPECIAL-OPERATOR-P
+\begincom{special-operator-p}\ftype{Function}
+
+\issue{SPECIAL-FORM-P-MISNOMER:RENAME}
+
+\label Syntax::
+
+\DefunWithValues special-operator-p {symbol} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{symbol}---a \term{symbol}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 7.1.1 22
+\Predicate{symbol}{a \term{special operator}}
+
+\label Examples::
+
+\code
+ (special-operator-p 'if) \EV \term{true}
+ (special-operator-p 'car) \EV \term{false}
+ (special-operator-p 'one) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Should signal \typeref{type-error} if its argument is not a \term{symbol}.
+
+\label See Also:\None.
+
+\label Notes::
+
+Historically, this function was called \f{special-form-p}.  The name was
+finally declared a misnomer and changed, since it returned true for
+\term{special operators}, not \term{special forms}.
+
+%This is beyond the scope of the language. -kmp 26-Dec-90
+% A returned \term{non-nil} value is typically a \term{function}
+% of \term{implementation-dependent} nature that can be used to
+% interpret (evaluate) the \term{special form}.
+
+\endissue{SPECIAL-FORM-P-MISNOMER:RENAME}
+
+\endcom
+
+%%% ========== CONSTANTP
+\begincom{constantp}\ftype{Function}
+
+\issue{CONSTANTP-DEFINITION:INTENTIONAL}
+\issue{CONSTANTP-ENVIRONMENT:ADD-ARG}
+
+\label Syntax::
+
+\DefunWithValues constantp {form {\opt} environment} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{form}---a \term{form}.
+
+\param{environment}---an \term{environment} \term{object}.
+ \Default{\nil}
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 20.1.0 14
+%% 20.1.0 15
+Returns \term{true} if \param{form} can be determined
+by the \term{implementation} to be a \term{constant form} 
+in the indicated \param{environment}; 
+otherwise, it returns \term{false} indicating either 
+    that the \term{form} is not a \term{constant form}
+ or that it cannot be determined whether or not \term{form} is a \term{constant form}.
+
+The following kinds of \term{forms} are considered \term{constant forms}:
+\beginlist
+\itemitem{\bull}
+% This is the wrong term.  --sjl 5 Mar 92
+%  \term{Constant objects}
+  \term{Self-evaluating objects} 
+  (such as \term{numbers}, 
+           \term{characters},
+       and the various kinds of \term{arrays})
+  are always considered \term{constant forms} 
+  and must be recognized as such by \funref{constantp}.
+
+\itemitem{\bull}
+  \term{Constant variables}, such as \term{keywords},
+  symbols defined by \clisp\ as constant (such as \nil, \t, and \conref{pi}),
+  and symbols declared as constant by the user in the indicated \param{environment}
+   using \macref{defconstant}
+  are always considered \term{constant forms}
+  and must be recognized as such by \funref{constantp}.
+
+\itemitem{\bull}
+  \specref{quote} \term{forms} are always considered \term{constant forms}
+  and must be recognized as such by \funref{constantp}.
+
+\itemitem{\bull} 
+  An \term{implementation} is permitted, but not required, to detect
+  additional \term{constant forms}.  If it does, it is also permitted,
+  but not required, to make use of information in the \param{environment}.
+  Examples of \term{constant forms} for which \funref{constantp} might
+  or might not return \term{true} are:
+    \f{(sqrt pi)},
+    \f{(+ 3 2)},
+    \f{(length '(a b c))},
+  and
+    \f{(let ((x 7)) (zerop x))}.
+\endlist
+
+If an \term{implementation} chooses to make use of the \param{environment}
+information, such actions as expanding \term{macros} or performing function
+inlining are permitted to be used, but not required; 
+however, expanding \term{compiler macros} is not permitted.
+
+\label Examples::
+
+\code
+ (constantp 1) \EV \term{true}
+ (constantp 'temp) \EV \term{false}
+ (constantp ''temp)) \EV \term{true}
+ (defconstant this-is-a-constant 'never-changing) \EV THIS-IS-A-CONSTANT 
+ (constantp 'this-is-a-constant) \EV \term{true}
+ (constantp "temp") \EV \term{true}
+ (setq a 6) \EV 6 
+ (constantp a) \EV \term{true}
+ (constantp '(sin pi)) \EV \term{implementation-dependent}
+ (constantp '(car '(x))) \EV \term{implementation-dependent}
+ (constantp '(eql x x)) \EV \term{implementation-dependent}
+ (constantp '(typep x 'nil)) \EV \term{implementation-dependent}
+ (constantp '(typep x 't)) \EV \term{implementation-dependent}
+ (constantp '(values this-is-a-constant)) \EV \term{implementation-dependent}
+ (constantp '(values 'x 'y)) \EV \term{implementation-dependent}
+ (constantp '(let ((a '(a b c))) (+ (length a) 6))) \EV \term{implementation-dependent}
+\endcode
+
+\label Side Effects:\None!
+
+\label Affected By::
+
+The state of the global environment (\eg which \term{symbols} have been
+declared to be the \term{names} of \term{constant variables}).
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\macref{defconstant}
+
+\label Notes:\None.
+
+\endissue{CONSTANTP-ENVIRONMENT:ADD-ARG}
+\endissue{CONSTANTP-DEFINITION:INTENTIONAL}
+
+\endcom
+
+\issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
+% The following functions were removed due to the retraction of
+% issue SYNTACTIC-ENVIRONMENT-ACCESS by X3J13 at the Mar 91 meeting.
+%  AUGMENT-ENVIRONMENT
+%  DECLARATION-INFORMATION
+%  DEFINE-DECLARATION
+%  ENCLOSE
+%  FUNCTION-INFORMATION
+%  PARSE-MACRO
+%  VARIABLE-INFORMATION
+\endissue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}

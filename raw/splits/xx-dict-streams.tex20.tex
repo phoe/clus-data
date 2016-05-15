@@ -1,0 +1,46 @@
+====== Function UNREAD-CHAR ======
+
+====Syntax====
+
+**{unread-char} {character** //\opt} input-stream// → //**[[CL:Constant Variables:nil]]**//
+
+====Arguments and Values====
+
+//character// - a //[[CL:Glossary:character]]//; must be the last //[[CL:Glossary:character]]// that was read from //input-stream//.
+
+//input-stream// - an //[[CL:Glossary:input]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard input]]//.
+
+====Description====
+
+**[[CL:Functions:unread-char]]** places //character// back onto the front of //input-stream// so that it will again be the next character in //input-stream//.
+
+When //input-stream// is an //[[CL:Glossary:echo stream]]//, no attempt is made to undo any echoing of the character that might already have been done on //input-stream//. However, characters placed on //input-stream// by **[[CL:Functions:unread-char]]** are marked in such a way as to inhibit later re-echo by **[[CL:Functions:read-char]]**.
+
+It is an error to invoke **[[CL:Functions:unread-char]]** twice consecutively on the same //[[CL:Glossary:stream]]// without an intervening call to **[[CL:Functions:read-char]]** (or some other input operation which implicitly reads characters) on that //[[CL:Glossary:stream]]//.
+
+Invoking **[[CL:Functions:peek-char]]** or **[[CL:Functions:read-char]]** commits all previous characters. The consequences of invoking **[[CL:Functions:unread-char]]** on any character preceding that which is returned by **[[CL:Functions:peek-char]]** (including those passed over by **[[CL:Functions:peek-char]]** that has a //[[CL:Glossary:non-nil]]// //peek-type//) are unspecified. In particular, the consequences of invoking **[[CL:Functions:unread-char]]** after **[[CL:Functions:peek-char]]** are unspecified.
+
+====Examples====
+
+<blockquote> (with-input-from-string (is "0123") (dotimes (i 6) (let ((c (read-char is))) (if (evenp i) (format t "~&~S ~S~
+▷ 0 #\\0
+▷ 2 #\\1
+▷ 4 #\\2 → NIL </blockquote>
+
+====Affected By====
+
+**[[CL:Variables:*standard-input*]]**, **[[CL:Variables:*terminal-io*]]**.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:peek-char]]**, **[[CL:Functions:read-char]]**, {\secref\StreamConcepts}
+
+====Notes====
+
+**[[CL:Functions:unread-char]]** is intended to be an efficient mechanism for allowing the //[[CL:Glossary:Lisp reader]]// and other parsers to perform one-character lookahead in //input-stream//.
+
+\issue{PEEK-CHAR-READ-CHAR-ECHO:FIRST-READ-CHAR} \issue{UNREAD-CHAR-AFTER-PEEK-CHAR:DONT-ALLOW}

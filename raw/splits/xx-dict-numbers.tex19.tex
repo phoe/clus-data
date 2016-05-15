@@ -1,0 +1,92 @@
+\begincom{floor, ffloor, ceiling, fceiling, truncate, ftruncate, round, fround}\ftype{Function}
+
+====Syntax====
+
+\DefunMultiWithValues {number ''&optional'' divisor} {quotient, remainder} {floor ffloor ceiling fceiling truncate ftruncate round fround}
+
+====Arguments and Values====
+
+//number// - a //[[CL:Glossary:real]]//.
+
+//divisor// - a non-zero //[[CL:Glossary:real]]//. The default is the //[[CL:Glossary:integer]]// ''1''.
+
+//quotient// - for **[[CL:Functions:floor]]**, **[[CL:Functions:ceiling]]**, **[[CL:Functions:truncate]]**, and **[[CL:Functions:round]]**: an //[[CL:Glossary:integer]]//; for **[[CL:Functions:ffloor]]**, **[[CL:Functions:fceiling]]**, **[[CL:Functions:ftruncate]]**, and **[[CL:Functions:fround]]**: a //[[CL:Glossary:float]]//.
+
+//remainder// - a //[[CL:Glossary:real]]//.
+
+====Description====
+
+These functions divide //number// by //divisor//, returning a //quotient// and //remainder//, such that
+
+\quad//quotient//\centerdot //divisor//+//remainder//=//number//
+
+The //quotient// always represents a mathematical integer.
+
+When more than one mathematical integer might be possible (i.e. when the remainder is not zero), the kind of rounding or truncation depends on the //[[CL:Glossary:operator]]//:
+
+\beginlist
+
+\itemitem{**[[CL:Functions:floor]]**, **[[CL:Functions:ffloor]]**}
+
+**[[CL:Functions:floor]]** and **[[CL:Functions:ffloor]]** produce a //quotient// that has been truncated toward negative infinity; that is, the //quotient// represents the largest mathematical integer that is not larger than the mathematical quotient.
+
+\itemitem{**[[CL:Functions:ceiling]]**, **[[CL:Functions:fceiling]]**}
+
+**[[CL:Functions:ceiling]]** and **[[CL:Functions:fceiling]]** produce a //quotient// that has been truncated toward positive infinity; that is, the //quotient// represents the smallest mathematical integer that is not smaller than the mathematical result.
+
+\itemitem{**[[CL:Functions:truncate]]**, **[[CL:Functions:ftruncate]]**}
+
+**[[CL:Functions:truncate]]** and **[[CL:Functions:ftruncate]]** produce a //quotient// that has been truncated towards zero; that is, the //quotient// represents the mathematical integer of the same sign as the mathematical quotient, and that has the greatest integral magnitude not greater than that of the mathematical quotient.
+
+\itemitem{**[[CL:Functions:round]]**, **[[CL:Functions:fround]]**}
+
+**[[CL:Functions:round]]** and **[[CL:Functions:fround]]** produce a //quotient// that has been rounded to the nearest mathematical integer; if the mathematical quotient is exactly halfway between two integers, (that is, it has the form ''integer''+''1\over2''), then the //quotient// has been rounded to the even (divisible by two) integer.
+
+\endlist
+
+All of these functions perform type conversion operations on //numbers//.
+
+The //remainder// is an //[[CL:Glossary:integer]]// if both ''x'' and ''y'' are //[[CL:Glossary:integers]]//, is a //[[CL:Glossary:rational]]// if both ''x'' and ''y'' are //[[CL:Glossary:rationals]]//, and is a //[[CL:Glossary:float]]// if either ''x'' or ''y'' is a //[[CL:Glossary:float]]//.
+
+**[[CL:Functions:ffloor]]**, **[[CL:Functions:fceiling]]**, **[[CL:Functions:ftruncate]]**, and **[[CL:Functions:fround]]** handle arguments of different //[[CL:Glossary:types]]// in the following way: If //number// is a //[[CL:Glossary:float]]//, and //divisor// is not a //[[CL:Glossary:float]]// of longer format, then the first result is a //[[CL:Glossary:float]]// of the same //[[CL:Glossary:type]]// as //number//. Otherwise, the first result is of the //[[CL:Glossary:type]]// determined by //[[CL:Glossary:contagion]]// rules; see section {\secref\NumericContagionRules}.
+
+====Examples====
+
+<blockquote> (floor 3/2) → 1, 1/2 (ceiling 3 2) → 2, -1 (ffloor 3 2) → 1.0, 1 (ffloor -4.7) → -5.0, 0.3 (ffloor 3.5d0) → 3.0d0, 0.5d0 (fceiling 3/2) → 2.0, -1/2 (truncate 1) → 1, 0 (truncate .5) → 0, 0.5 (round .5) → 0, 0.5 (ftruncate -7 2) → -3.0, -1 (fround -7 2) → -4.0, 1 (dolist (n '(2.6 2.5 2.4 0.7 0.3 -0.3 -0.7 -2.4 -2.5 -2.6)) (format t "~&~4,1@F ~2,' D ~2,' D ~2,' D ~2,' D" n (floor n) (ceiling n) (truncate n) (round n)))
+▷ +2.6 2 3 2 3
+▷ +2.5 2 3 2 2
+▷ +2.4 2 3 2 2
+▷ +0.7 0 1 0 1
+▷ +0.3 0 1 0 0
+▷ -0.3 -1 0 0 0
+▷ -0.7 -1 0 0 -1
+▷ -2.4 -3 -2 -2 -2
+▷ -2.5 -3 -2 -2 -2
+▷ -2.6 -3 -2 -2 -3 → NIL </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+None.
+
+====Notes====
+
+When only //number// is given, the two results are exact; the mathematical sum of the two results is always equal to the mathematical value of //number//.
+
+''(''function'' //number// //divisor//)'' and ''(''function'' (/ //number// //divisor//))'' (where ''function'' is any of one of **[[CL:Functions:floor]]**, **[[CL:Functions:ceiling]]**, **[[CL:Functions:ffloor]]**, **[[CL:Functions:fceiling]]**, **[[CL:Functions:truncate]]**, **[[CL:Functions:round]]**, **[[CL:Functions:ftruncate]]**, and **[[CL:Functions:fround]]**) return the same first value, but they return different remainders as the second value. For example:
+
+<blockquote> (floor 5 2) → 2, 1 (floor (/ 5 2)) → 2, 1/2 </blockquote>
+
+If an effect is desired that is similar to **[[CL:Functions:round]]**, but that always rounds up or down (rather than toward the nearest even integer) if the mathematical quotient is exactly halfway between two integers, the programmer should consider a construction such as ''(floor (+ x 1/2))'' or ''(ceiling (- x 1/2))''.
+

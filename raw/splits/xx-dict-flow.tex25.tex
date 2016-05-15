@@ -1,0 +1,53 @@
+====== Special Operator RETURN-FROM ======
+
+====Syntax====
+
+\DefspecNoReturn return-from {//name// [//result//]}
+
+====Arguments and Values====
+
+//name// - a //[[CL:Glossary:block tag]]//; \noeval.
+
+//result// - a //[[CL:Glossary:form]]//; \eval. The default is **[[CL:Constant Variables:nil]]**.
+
+====Description====
+
+Returns control and //[[CL:Glossary:multiple values]]// from a lexically enclosing //[[CL:Glossary:block]]//.
+
+A \specref{block} //[[CL:Glossary:form]]// named //name// must lexically enclose the occurrence of \specref{return-from}; any //[[CL:Glossary:values]]// //[[CL:Glossary:yielded]]// by the //[[CL:Glossary:evaluation]]// of //result// are immediately returned from the innermost such lexically enclosing //[[CL:Glossary:block]]//.
+
+The transfer of control initiated by \specref{return-from} is performed as described in \secref\TransferOfControl.
+
+====Examples====
+
+<blockquote> (block alpha (return-from alpha) 1) → NIL (block alpha (return-from alpha 1) 2) → 1 (block alpha (return-from alpha (values 1 2)) 3) → 1, 2 (let ((a 0)) (dotimes (i 10) (incf a) (when (oddp i) (return))) a) → 2 (defun temp (x) (if x (return-from temp 'dummy)) 44) → TEMP (temp nil) → 44 (temp t) → DUMMY (block out (flet ((exit (n) (return-from out n))) (block out (exit 1))) 2) → 1 (block nil (unwind-protect (return-from nil 1) (return-from nil 2))) → 2 (dolist (flag '(nil t)) (block nil (let ((x 5)) (declare (special x)) (unwind-protect (return-from nil) (print x)))) (print 'here))
+▷ 5
+▷ HERE
+▷ 5
+▷ HERE → NIL (dolist (flag '(nil t)) (block nil (let ((x 5)) (declare (special x)) (unwind-protect (if flag (return-from nil)) (print x)))) (print 'here))
+▷ 5
+▷ HERE
+▷ 5
+▷ HERE → NIL </blockquote>
+
+The following has undefined consequences because the \specref{block} //[[CL:Glossary:form]]// exits normally before the **[[CL:Macros:return-from]]** //[[CL:Glossary:form]]// is attempted.
+
+<blockquote> (funcall (block nil #'(lambda () (return-from nil)))) is an error. </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+\specref{block}, **[[CL:Macros:return]]**, {\secref\Evaluation}
+
+====Notes====
+
+None.
+
+\issue{EXIT-EXTENT:MINIMAL}

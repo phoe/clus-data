@@ -1,0 +1,41 @@
+====== Declaration IGNORE, IGNORABLE ======
+
+====Syntax====
+
+\f{\paren{ignore \star{\curly{//var// | \paren{\misc{function} //fn//}}}}}
+
+\f{\paren{ignorable \star{\curly{//var// | \paren{\misc{function} //fn//}}}}}
+
+====Arguments====
+
+//var// - a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
+
+//fn// - a //[[CL:Glossary:function]]// //[[CL:Glossary:name]]//.
+
+====Valid Context====
+
+//[[CL:Glossary:declaration]]//
+
+====Binding Types Affected====
+
+//[[CL:Glossary:variable]]//, //[[CL:Glossary:function]]//
+
+====Description====
+
+The \declref{ignore} and \declref{ignorable} declarations refer to //[[CL:Glossary:for-value]]// //[[CL:Glossary:references]]// to //[[CL:Glossary:variable]]// //[[CL:Glossary:bindings]]// for the //vars// and to //[[CL:Glossary:function]]// //[[CL:Glossary:bindings]]// for the //fns//.
+
+An \declref{ignore} //[[CL:Glossary:declaration]]// specifies that //[[CL:Glossary:for-value]]// //[[CL:Glossary:references]]// to the indicated //[[CL:Glossary:bindings]]// will not occur within the scope of the //[[CL:Glossary:declaration]]//. Within the //[[CL:Glossary:scope]]// of such a //[[CL:Glossary:declaration]]//, it is desirable for a compiler to issue a warning about the presence of either a //[[CL:Glossary:for-value]]// //[[CL:Glossary:reference]]// to any //var// or //fn//, or a \declref{special} //[[CL:Glossary:declaration]]// for any //var//.
+
+An \declref{ignorable} //[[CL:Glossary:declaration]]// specifies that //[[CL:Glossary:for-value]]// //[[CL:Glossary:references]]// to the indicated //[[CL:Glossary:bindings]]// might or might not occur within the scope of the //[[CL:Glossary:declaration]]//. Within the //[[CL:Glossary:scope]]// of such a //[[CL:Glossary:declaration]]//, it is not desirable for a compiler to issue a warning about the presence or absence of either a //[[CL:Glossary:for-value]]// //[[CL:Glossary:reference]]// to any //var// or //fn//, or a \declref{special} //[[CL:Glossary:declaration]]// for any //var//.
+
+When not within the //[[CL:Glossary:scope]]// of a \declref{ignore} or \declref{ignorable} //[[CL:Glossary:declaration]]//, it is desirable for a compiler to issue a warning about any //var// for which there is neither a //[[CL:Glossary:for-value]]// //[[CL:Glossary:reference]]// nor a \declref{special} //[[CL:Glossary:declaration]]//, or about any //fn// for which there is no //[[CL:Glossary:for-value]]// //[[CL:Glossary:reference]]//.
+
+Any warning about a "used" or "unused" //[[CL:Glossary:binding]]// must be of type **[[CL:Types:style-warning]]**, and may not affect program semantics.
+
+The //[[CL:Glossary:stream variables]]// established by **[[CL:Macros:with-open-file]]**, **[[CL:Macros:with-open-stream]]**, **[[CL:Macros:with-input-from-string]]**, and **[[CL:Macros:with-output-to-string]]**, and all //[[CL:Glossary:iteration variables]]// are, by definition, always "used". Using ''(declare (ignore //v//))'', for such a //[[CL:Glossary:variable]]// //v// has unspecified consequences.
+
+====See Also====
+
+\misc{declare}
+
+\issue{DOTIMES-IGNORE:X3J13-MAR91} \issue{IGNORE-USE-TERMINOLOGY:VALUE-ONLY} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}

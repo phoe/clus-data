@@ -1,0 +1,42 @@
+====== Function HASH-TABLE-COUNT ======
+
+====Syntax====
+
+**hash-table-count** //hash-table// → //count//
+
+====Arguments and Values====
+
+//hash-table// - a //[[CL:Glossary:hash table]]//.
+
+//count// - a non-negative //[[CL:Glossary:integer]]//.
+
+====Description====
+
+Returns the number of entries in the //hash-table//. If //hash-table// has just been created or newly cleared (see **[[CL:Functions:clrhash]]**) the entry count is ''0''.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] table (make-hash-table)) → #<HASH-TABLE EQL 0/120 32115135> (hash-table-count table) → 0 ([[CL:Macros:setf]] (gethash 57 table) "fifty-seven") → "fifty-seven" (hash-table-count table) → 1 (dotimes (i 100) ([[CL:Macros:setf]] (gethash i table) i)) → NIL (hash-table-count table) → 100 </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+**[[CL:Functions:clrhash]]**, **[[CL:Functions:remhash]]**, \SETFof{gethash}
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:hash-table-size]]**
+
+====Notes====
+
+The following relationships are functionally correct, although in practice using **[[CL:Functions:hash-table-count]]** is probably much faster:
+
+<blockquote> (hash-table-count //table//) ≡ (loop for value being the hash-values of //table// count t) ≡ (let ((total 0)) (maphash #'(lambda (key value) (declare (ignore key value)) (incf total)) //table//) total) </blockquote>
+

@@ -1,0 +1,50 @@
+====== Macro IGNORE-ERRORS ======
+
+====Syntax====
+
+\DefmacWithValues ignore-errors {\starparam{form}} {\starparam{result}}
+
+====Arguments and Values====
+
+//forms// - an //[[CL:Glossary:implicit progn]]//.
+
+//results// - In the normal situation, the //[[CL:Glossary:values]]// of the //[[CL:Glossary:forms]]// are returned; in the exceptional situation, two values are returned: **[[CL:Constant Variables:nil]]** and the //[[CL:Glossary:condition]]//.
+
+====Description====
+
+**[[CL:Macros:ignore-errors]]** is used to prevent //[[CL:Glossary:conditions]]// of type **[[CL:Types:error]]** from causing entry into the debugger.
+
+Specifically, **[[CL:Macros:ignore-errors]]** //[[CL:Glossary:executes]]// //[[CL:Glossary:forms]]// in a //[[CL:Glossary:dynamic environment]]// where a //[[CL:Glossary:handler]]// for //[[CL:Glossary:conditions]]// of type **[[CL:Types:error]]** has been established; if invoked, it //[[CL:Glossary:handles]]// such //[[CL:Glossary:conditions]]// by returning two //[[CL:Glossary:values]]//, **[[CL:Constant Variables:nil]]** and the //[[CL:Glossary:condition]]// that was //[[CL:Glossary:signaled]]//, from the **[[CL:Macros:ignore-errors]]** //[[CL:Glossary:form]]//.
+
+If a //[[CL:Glossary:normal return]]// from the //[[CL:Glossary:forms]]// occurs, any //[[CL:Glossary:values]]// returned are returned by **[[CL:Macros:ignore-errors]]**.
+
+====Examples====
+
+<blockquote> (defun load-init-file (program) (let ((win nil)) (ignore-errors ;if this fails, don't enter debugger (load (merge-pathnames (make-pathname :name program :type :lisp) (user-homedir-pathname))) ([[CL:Macros:defparameter]] win t)) (unless win (format t "~&Init file failed to load.~ win))
+
+(load-init-file "no-such-program")
+▷ Init file failed to load. NIL </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Macros:handler-case]]**, {\secref\ConditionSystemConcepts}
+
+====Notes====
+
+<blockquote> (ignore-errors . ''forms'') </blockquote>
+
+is equivalent to:
+
+<blockquote> (handler-case (progn . ''forms'') (error (condition) (values nil condition))) </blockquote>
+
+Because the second return value is a //[[CL:Glossary:condition]]// in the exceptional case, it is common (but not required) to arrange for the second return value in the normal case to be missing or **[[CL:Constant Variables:nil]]** so that the two situations can be distinguished.
+
+

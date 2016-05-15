@@ -1,0 +1,94 @@
+====== Function LOAD ======
+
+====Syntax====
+
+\DefunWithValuesNewline load {filespec ''&key'' verbose print if-does-not-exist external-format} {generalized-boolean}
+
+====Arguments and Values====
+
+//filespec// - a //[[CL:Glossary:stream]]//, or a //[[CL:Glossary:pathname designator]]//.
+
+The default is taken from **[[CL:Variables:*default-pathname-defaults*]]**.
+
+//verbose// - a //[[CL:Glossary:generalized boolean]]//. \Default{\thevalueof{*load-verbose*}}
+
+//print// - a //[[CL:Glossary:generalized boolean]]//. \Default{\thevalueof{*load-print*}}
+
+//if-does-not-exist// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:true]]//.
+
+//external-format// - an //[[CL:Glossary:external file format designator]]//. The default is **'':default''**.
+
+//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+**[[CL:Functions:load]]** //[[CL:Glossary:loads]]// the //[[CL:Glossary:file]]// named by //filespec// into the Lisp environment.
+
+The manner in which a //[[CL:Glossary:source file]]// is distinguished from a //[[CL:Glossary:compiled file]]// is //[[CL:Glossary:implementation-dependent]]//.
+
+If the file specification is not complete and both a //[[CL:Glossary:source file]]// and a //[[CL:Glossary:compiled file]]// exist which might match, then which of those files **[[CL:Functions:load]]** selects is //[[CL:Glossary:implementation-dependent]]//.
+
+If //filespec// is a //[[CL:Glossary:stream]]//, **[[CL:Functions:load]]** determines what kind of //[[CL:Glossary:stream]]// it is and loads directly from the //[[CL:Glossary:stream]]//.
+
+If //filespec// is a //[[CL:Glossary:logical pathname]]//, it is translated into a //[[CL:Glossary:physical pathname]]// as if by calling **[[CL:Functions:translate-logical-pathname]]**.
+
+**[[CL:Functions:load]]** sequentially executes each //[[CL:Glossary:form]]// it encounters in the //[[CL:Glossary:file]]// named by //filespec//. If the //[[CL:Glossary:file]]// is a //[[CL:Glossary:source file]]// and the //[[CL:Glossary:implementation]]// chooses to perform //[[CL:Glossary:implicit compilation]]//, **[[CL:Functions:load]]** must recognize //[[CL:Glossary:top level forms]]// as described in {\secref\TopLevelForms} and arrange for each //[[CL:Glossary:top level form]]// to be executed before beginning //[[CL:Glossary:implicit compilation]]// of the next. (Note, however, that processing of \specref{eval-when} //[[CL:Glossary:forms]]// by **[[CL:Functions:load]]** is controlled by the **'':execute''** situation.)
+
+If //verbose// is //[[CL:Glossary:true]]//, **[[CL:Functions:load]]** prints a message in the form of a comment (i.e. with a leading //[[CL:Glossary:semicolon]]//) to //[[CL:Glossary:standard output]]// indicating what //[[CL:Glossary:file]]// is being //[[CL:Glossary:loaded]]// and other useful information.
+
+If //verbose// is //[[CL:Glossary:false]]//, **[[CL:Functions:load]]** does not print this information.
+
+If //print// is //[[CL:Glossary:true]]//, **[[CL:Functions:load]]** incrementally prints information to //[[CL:Glossary:standard output]]// showing the progress of the //[[CL:Glossary:loading]]// process. For a //[[CL:Glossary:source file]]//, this information might mean printing the //[[CL:Glossary:values]]// //[[CL:Glossary:yielded]]// by each //[[CL:Glossary:form]]// in the //[[CL:Glossary:file]]// as soon as those //[[CL:Glossary:values]]// are returned. For a //[[CL:Glossary:compiled file]]//, what is printed might not reflect precisely the contents of the //[[CL:Glossary:source file]]//, but some information is generally printed. If //print// is //[[CL:Glossary:false]]//, **[[CL:Functions:load]]** does not print this information.
+
+If the file named by //filespec// is successfully loaded, **[[CL:Functions:load]]** returns //[[CL:Glossary:true]]//.
+
+\reviewer{Loosemore: What happens if the file cannot be loaded for some reason other than that it doesn't exist?} \editornote{KMP: i.e., can it return NIL? must it?}
+
+If the file does not exist, the specific action taken depends on //if-does-not-exist//: if it is **[[CL:Constant Variables:nil]]**, **[[CL:Functions:load]]** returns **[[CL:Constant Variables:nil]]**; otherwise, **[[CL:Functions:load]]** signals an error.
+
+The //external-format// specifies the //[[CL:Glossary:external file format]]// to be used when opening the //[[CL:Glossary:file]]// (see the //[[CL:Glossary:function]]// **[[CL:Functions:open]]**), except that when the //[[CL:Glossary:file]]// named by //filespec// is a //[[CL:Glossary:compiled file]]//, the //external-format// is ignored. **[[CL:Functions:compile-file]]** and **[[CL:Functions:load]]** cooperate in an //[[CL:Glossary:implementation-dependent]]// way to assure the preservation of the //[[CL:Glossary:similarity]]// of //[[CL:Glossary:characters]]// referred to in the //[[CL:Glossary:source file]]// at the time the //[[CL:Glossary:source file]]// was processed by the //[[CL:Glossary:file compiler]]// under a given //[[CL:Glossary:external file format]]//, regardless of the value of //external-format// at the time the //[[CL:Glossary:compiled file]]// is //[[CL:Glossary:loaded]]//.
+
+**[[CL:Functions:load]]** binds **[[CL:Variables:*readtable*]]** and **[[CL:Variables:*package*]]** to the values they held before //[[CL:Glossary:loading]]// the file.
+
+
+**[[CL:Variables:*load-truename*]]** is //[[CL:Glossary:bound]]// by **[[CL:Functions:load]]** to hold the //[[CL:Glossary:truename]]// of the //[[CL:Glossary:pathname]]// of the file being //[[CL:Glossary:loaded]]//.
+
+**[[CL:Variables:*load-pathname*]]** is //[[CL:Glossary:bound]]// by **[[CL:Functions:load]]** to hold a //[[CL:Glossary:pathname]]// that represents //filespec// merged against the defaults. That is, **[[CL:Functions:(pathname (merge-pathnames //filespec//))]]**.
+
+
+====Examples====
+
+<blockquote> ;Establish a data file... (with-open-file (str "data.in" :direction :output :if-exists :error) (print 1 str) (print '([[CL:Macros:defparameter]] a 888) str) t) → T (load "data.in") → //[[CL:Glossary:true]]// a → 888 (load ([[CL:Macros:defparameter]] p (merge-pathnames "data.in")) :verbose t) ; Loading contents of file /fred/data.in ; Finished loading /fred/data.in → //[[CL:Glossary:true]]// (load p :print t) ; Loading contents of file /fred/data.in ; 1 ; 888 ; Finished loading /fred/data.in → //[[CL:Glossary:true]]// </blockquote>
+
+\medbreak
+
+<blockquote> ;----[Begin file SETUP]---- (in-package "MY-STUFF") (defmacro compile-truename () `',*compile-file-truename*) (defvar *my-compile-truename* (compile-truename) "Just for debugging.") (defvar *my-load-pathname* *load-pathname*) (defun load-my-system () (dolist (module-name '("FOO" "BAR" "BAZ")) (load (merge-pathnames module-name *my-load-pathname*)))) ;----[End of file SETUP]----
+
+
+(load "SETUP") (load-my-system) </blockquote>
+
+====Affected By====
+
+The implementation, and the host computer's file system.
+
+====Exceptional Situations====
+
+If **'':if-does-not-exist''** is supplied and is //[[CL:Glossary:true]]//, or is not supplied, **[[CL:Functions:load]]** signals an error of type **[[CL:Types:file-error]]** if the file named by //filespec// does not exist,
+
+or if the //[[CL:Glossary:file system]]// cannot perform the requested operation.
+
+An error of type **[[CL:Types:file-error]]** might be signaled if ''(wild-pathname-p //filespec//)'' returns //[[CL:Glossary:true]]//.
+
+====See Also====
+
+**[[CL:Functions:error]]**, **[[CL:Functions:merge-pathnames]]**, **[[CL:Variables:*load-verbose*]]**, **[[CL:Variables:*default-pathname-defaults*]]**, **[[CL:Types:pathname]]**, **[[CL:Types:logical-pathname]]**,{\secref\FileSystemConcepts},
+
+{\secref\PathnamesAsFilenames}
+
+====Notes====
+
+None.
+
+
+
+\issue{PATHNAME-WILD:NEW-FUNCTIONS} \issue{PATHNAME-LOGICAL:ADD} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES} \issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM} \issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM} \issue{PATHNAME-LOGICAL:ADD} \issue{EVAL-TOP-LEVEL:LOAD-LIKE-COMPILE-FILE} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92} \issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM} \issue{IN-SYNTAX:MINIMAL} \issue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES} \issue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}

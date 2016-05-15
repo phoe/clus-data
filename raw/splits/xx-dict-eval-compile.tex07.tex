@@ -1,0 +1,74 @@
+====== Special Operator LOAD-TIME-VALUE ======
+
+====Syntax====
+
+\DefspecWithValues load-time-value {form ''&optional'' read-only-p} {object}
+
+====Arguments and Values====
+
+//form// - a //[[CL:Glossary:form]]//; \evalspecial.
+
+//read-only-p// - a //[[CL:Glossary:boolean]]//; \noeval.
+
+//object// - the //[[CL:Glossary:primary value]]// resulting from evaluating //form//.
+
+====Description====
+
+\specref{load-time-value} provides a mechanism for delaying evaluation of //form// until the expression is in the run-time environment; see section {\secref\Compilation}.
+
+//Read-only-p// designates whether the result can be considered a //[[CL:Glossary:constant object]]//. If \t, the result is a read-only quantity that can, if appropriate to the //[[CL:Glossary:implementation]]//, be copied into read-only space and/or //[[CL:Glossary:coalesced]]// with //[[CL:Glossary:similar]]// //[[CL:Glossary:constant objects]]// from other //[[CL:Glossary:programs]]//. If **[[CL:Constant Variables:nil]]** (the default), the result must be neither copied nor coalesced; it must be considered to be potentially modifiable data.
+
+If a \specref{load-time-value} expression is processed by **[[CL:Functions:compile-file]]**, the compiler performs its normal semantic processing (such as macro expansion and translation into machine code) on //form//, but arranges for the execution of //form// to occur at load time in a //[[CL:Glossary:null lexical environment]]//, with the result of this //[[CL:Glossary:evaluation]]// then being treated as
+
+a //[[CL:Glossary:literal object]]// at run time. It is guaranteed that the evaluation of //form// will take place only once when the //[[CL:Glossary:file]]// is //[[CL:Glossary:loaded]]//, but the order of evaluation with respect to the evaluation of //[[CL:Glossary:top level forms]]// in the file is //[[CL:Glossary:implementation-dependent]]//. \idxtext{order of evaluation}\idxtext{evaluation order}
+
+If a \specref{load-time-value} expression appears within a function compiled with **[[CL:Functions:compile]]**, the //form// is evaluated at compile time in a //[[CL:Glossary:null lexical environment]]//. The result of this compile-time evaluation is treated as
+
+a //[[CL:Glossary:literal object]]// in the compiled code.
+
+If a \specref{load-time-value} expression is processed by **[[CL:Functions:eval]]**, //form// is evaluated in a //[[CL:Glossary:null lexical environment]]//, and one value is returned. Implementations that implicitly compile (or partially compile) expressions processed by **[[CL:Functions:eval]]**
+
+might evaluate //form// only once, at the time this compilation is performed.
+
+
+If the //[[CL:Glossary:same]]// //[[CL:Glossary:list]]// ''(load-time-value //form//)'' is evaluated or compiled more than once, it is //[[CL:Glossary:implementation-dependent]]// whether //form// is evaluated only once or is evaluated more than once. This can happen both when an expression being evaluated or compiled shares substructure, and when the //[[CL:Glossary:same]]// //[[CL:Glossary:form]]// is processed by **[[CL:Functions:eval]]** or **[[CL:Functions:compile]]** multiple times. Since a \specref{load-time-value} expression can be referenced in more than one place and can be evaluated multiple times by **[[CL:Functions:eval]]**, it is //[[CL:Glossary:implementation-dependent]]// whether each execution returns a fresh //[[CL:Glossary:object]]// or returns the same //[[CL:Glossary:object]]// as some other execution. Users must use caution when destructively modifying the resulting //[[CL:Glossary:object]]//.
+
+If two lists ''(load-time-value //form//)'' that are the //[[CL:Glossary:same]]// under **[[CL:Functions:equal]]** but are not //[[CL:Glossary:identical]]// are evaluated or compiled, their values always come from distinct evaluations of //form//.
+
+Their //[[CL:Glossary:values]]// may not be coalesced
+
+unless //read-only-p// is \t.
+
+====Examples====
+
+<blockquote> ;;; The function INCR1 always returns the same value, even in different images. ;;; The function INCR2 always returns the same value in a given image, ;;; but the value it returns might vary from image to image. (defun incr1 (x) (+ x #.(random 17))) (defun incr2 (x) (+ x (load-time-value (random 17))))
+
+;;; The function FOO1-REF references the nth element of the first of ;;; the *FOO-ARRAYS* that is available at load time. It is permissible for ;;; that array to be modified (e.g., by SET-FOO1-REF); FOO1-REF will see the ;;; updated values. (defvar *foo-arrays* (list (make-array 7) (make-array 8))) (defun foo1-ref (n) (aref (load-time-value (first *my-arrays*) nil) n)) (defun set-foo1-ref (n val) ([[CL:Macros:setf]] (aref (load-time-value (first *my-arrays*) nil) n) val))
+
+;;; The function BAR1-REF references the nth element of the first of ;;; the *BAR-ARRAYS* that is available at load time. The programmer has ;;; promised that the array will be treated as read-only, so the system ;;; can copy or coalesce the array. (defvar *bar-arrays* (list (make-array 7) (make-array 8))) (defun bar1-ref (n) (aref (load-time-value (first *my-arrays*) t) n))
+
+;;; This use of LOAD-TIME-VALUE permits the indicated vector to be coalesced ;;; even though NIL was specified, because the object was already read-only ;;; when it was written as a literal vector rather than created by a constructor. ;;; User programs must treat the vector v as read-only. (defun baz-ref (n) (let ((v (load-time-value #(A B C) nil))) (values (svref v n) v)))
+
+;;; This use of LOAD-TIME-VALUE permits the indicated vector to be coalesced ;;; even though NIL was specified in the outer situation because T was specified ;;; in the inner situation. User programs must treat the vector v as read-only. (defun baz-ref (n) (let ((v (load-time-value (load-time-value (vector 1 2 3) t) nil))) (values (svref v n) v))) </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:compile-file]]**, **[[CL:Functions:compile]]**, **[[CL:Functions:eval]]**, {\secref\MinimalCompilation}, {\secref\Compilation}
+
+====Notes====
+
+\specref{load-time-value} must appear outside of quoted structure in a "for //[[CL:Glossary:evaluation]]//" position. In situations which would appear to call for use of \specref{load-time-value} within a quoted structure, the //[[CL:Glossary:backquote]]// //[[CL:Glossary:reader macro]]// is probably called for; see section {\secref\Backquote}.
+
+Specifying **[[CL:Constant Variables:nil]]** for //read-only-p// is not a way to force an object to become modifiable if it has already been made read-only. It is only a way to say that, for an object that is modifiable, this operation is not intended to make that object read-only.
+
+
+
+\issue{LOAD-TIME-EVAL:R**3-NEW-SPECIAL-FORM}

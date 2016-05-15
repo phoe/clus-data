@@ -1,0 +1,46 @@
+====== Standard Generic Function FUNCTION-KEYWORDS ======
+
+
+====Syntax====
+
+\DefgenWithValues {function-keywords} {method} {keys, allow-other-keys-p}
+
+====Method Signatures====
+
+\Defmeth {function-keywords} {\specparam{method}{standard-method}}
+
+====Arguments and Values====
+
+//method// - a //[[CL:Glossary:method]]//.
+
+//keys// - a //[[CL:Glossary:list]]//.
+
+//allow-other-keys-p// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+Returns the keyword parameter specifiers for a //method//.
+
+Two values are returned: a //[[CL:Glossary:list]]// of the explicitly named keywords and a //[[CL:Glossary:generalized boolean]]// that states whether \keyref{allow-other-keys} had been specified in the //method// definition.
+
+====Examples====
+
+<blockquote> (defmethod gf1 ((a integer) &optional (b 2) &key (c 3) ((:dee d) 4) e ((eff f))) (list a b c d e f)) → #<STANDARD-METHOD GF1 (INTEGER) 36324653> (find-method #'gf1 '() (list (find-class 'integer))) → #<STANDARD-METHOD GF1 (INTEGER) 36324653> (function-keywords *) → (:C :DEE :E EFF), //[[CL:Glossary:false]]// (defmethod gf2 ((a integer)) (list a b c d e f)) → #<STANDARD-METHOD GF2 (INTEGER) 42701775> (function-keywords (find-method #'gf1 '() (list (find-class 'integer)))) → (), //[[CL:Glossary:false]]// (defmethod gf3 ((a integer) &key b c d &allow-other-keys) (list a b c d e f)) (function-keywords *) → (:B :C :D), //[[CL:Glossary:true]]// </blockquote>
+
+====Affected By====
+
+**[[CL:Macros:defmethod]]**
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Macros:defmethod]]**
+
+====Notes====
+
+None.
+
+

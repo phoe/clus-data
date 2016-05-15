@@ -1,0 +1,46 @@
+====== Function BYTE, BYTE-SIZE, BYTE-POSITION ======
+
+====Syntax====
+
+**byte** //size position// → //bytespec//
+
+**byte-size ** //bytespec// → //size// **byte-position** //bytespec// → //position//
+
+====Arguments and Values====
+
+//size//, //position// - a non-negative //[[CL:Glossary:integer]]//.
+
+//bytespec// - a //[[CL:Glossary:byte specifier]]//.
+
+====Description====
+
+**[[CL:Functions:byte]]** returns a //[[CL:Glossary:byte specifier]]// that indicates a //[[CL:Glossary:byte]]// of width //size// and whose bits have weights ''2^{//position// + //size// - 1\/}'' through ''2^//position//'', and whose representation is //[[CL:Glossary:implementation-dependent]]//.
+
+**[[CL:Functions:byte-size]]** returns the number of bits specified by //bytespec//.
+
+**[[CL:Functions:byte-position]]** returns the position specified by //bytespec//.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] b (byte 100 200)) → #<BYTE-SPECIFIER size 100 position 200> (byte-size b) → 100 (byte-position b) → 200 </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:ldb]]**, **[[CL:Functions:dpb]]**
+
+====Notes====
+
+<blockquote> (byte-size (byte //j// //k//)) ≡ //j// (byte-position (byte //j// //k//)) ≡ //k// </blockquote>
+
+A //[[CL:Glossary:byte]]// of //[[CL:Glossary:size]]// of ''0'' is permissible; it refers to a //[[CL:Glossary:byte]]// of width zero. For example,
+
+<blockquote> (ldb (byte 0 3) #o7777) → 0 (dpb #o7777 (byte 0 3) 0) → 0 </blockquote>
+

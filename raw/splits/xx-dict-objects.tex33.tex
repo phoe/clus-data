@@ -1,0 +1,71 @@
+====== Local Function CALL-NEXT-METHOD ======
+
+====Syntax====
+
+\DefunWithValues call-next-method {''&rest'' args} {\starparam{result}}
+
+====Arguments and Values====
+
+//arg// - an //[[CL:Glossary:object]]//.
+
+
+//results// - the //[[CL:Glossary:values]]// returned by the //[[CL:Glossary:method]]// it calls.
+
+====Description====
+
+The //[[CL:Glossary:function]]// **[[CL:Functions:call-next-method]]** can be used
+
+within the body //[[CL:Glossary:forms]]// (but not the //[[CL:Glossary:lambda list]]//)
+
+of a //[[CL:Glossary:method]]// defined by a //[[CL:Glossary:method-defining form]]// to call the //[[CL:Glossary:next method]]//.
+
+If there is no next //[[CL:Glossary:method]]//, the generic function **[[CL:Functions:no-next-method]]** is called.
+
+The type of method combination used determines which //[[CL:Glossary:methods]]// can invoke **[[CL:Functions:call-next-method]]**. The standard //[[CL:Glossary:method combination]]// type allows **[[CL:Functions:call-next-method]]** to be used within primary //[[CL:Glossary:methods]]// and //[[CL:Glossary:around methods]]//.
+
+For generic functions using a type of method combination defined by the short form of **[[CL:Macros:define-method-combination]]**, **[[CL:Functions:call-next-method]]** can be used in //[[CL:Glossary:around methods]]// only.
+
+When **[[CL:Functions:call-next-method]]** is called with no arguments, it passes the current //[[CL:Glossary:method]]//'s original arguments to the next //[[CL:Glossary:method]]//. Neither argument defaulting, nor using \specref{setq}, nor rebinding variables with the same //[[CL:Glossary:names]]// as parameters of the //[[CL:Glossary:method]]// affects the values **[[CL:Functions:call-next-method]]** passes to the //[[CL:Glossary:method]]// it calls.
+
+
+
+When **[[CL:Functions:call-next-method]]** is called with arguments, the //[[CL:Glossary:next method]]// is called with those arguments.
+
+If **[[CL:Functions:call-next-method]]** is called with arguments but omits optional arguments, the //[[CL:Glossary:next method]]// called defaults those arguments.
+
+
+The //[[CL:Glossary:function]]// **[[CL:Functions:call-next-method]]** returns any //[[CL:Glossary:values]]// that are returned by the //[[CL:Glossary:next method]]//.
+
+The //[[CL:Glossary:function]]// **[[CL:Functions:call-next-method]]** has //[[CL:Glossary:lexical scope]]// and //[[CL:Glossary:indefinite extent]]// and can only be used within the body of a //[[CL:Glossary:method]]// defined by a //[[CL:Glossary:method-defining form]]//.
+
+
+Whether or not **[[CL:Functions:call-next-method]]** is //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]// is //[[CL:Glossary:implementation-dependent]]//; however, the restrictions on redefinition and //[[CL:Glossary:shadowing]]// of **[[CL:Functions:call-next-method]]** are the same as for //[[CL:Glossary:symbols]]// in \thepackage{common-lisp} which are //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]//. The consequences of attempting to use **[[CL:Functions:call-next-method]]** outside of a //[[CL:Glossary:method-defining form]]// are undefined.
+
+====Examples====
+
+None.
+
+====Affected By====
+
+**[[CL:Macros:defmethod]]**, **[[CL:Macros:call-method]]**, **[[CL:Functions:define-method-combination]]**.
+
+====Exceptional Situations====
+
+
+
+
+
+When providing arguments to **[[CL:Functions:call-next-method]]**, the following rule must be satisfied or an error of type **[[CL:Types:error]]**
+
+should be signaled: the ordered set of //[[CL:Glossary:applicable methods]]// for a changed set of arguments for **[[CL:Functions:call-next-method]]** must be the same as the ordered set of //[[CL:Glossary:applicable methods]]// for the original arguments to the //[[CL:Glossary:generic function]]//. Optimizations of the error checking are possible, but they must not change the semantics of **[[CL:Functions:call-next-method]]**.
+
+====See Also====
+
+**[[CL:Macros:define-method-combination]]**, **[[CL:Macros:defmethod]]**, **[[CL:Functions:next-method-p]]**, **[[CL:Functions:no-next-method]]**, **[[CL:Macros:call-method]]**, {\secref\MethodSelectionAndCombination}, {\secref\StdMethComb}, {\secref\BuiltInMethCombTypes}
+
+====Notes====
+
+None.
+
+
+\issue{METHOD-INITFORM:FORBID-CALL-NEXT-METHOD} \issue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}

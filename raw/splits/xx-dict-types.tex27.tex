@@ -1,0 +1,73 @@
+====== Function TYPE-OF ======
+
+====Syntax====
+
+**type-of** //object// → //typespec//
+
+====Arguments and Values====
+
+//object// - an //[[CL:Glossary:object]]//.
+
+//typespec// - a //[[CL:Glossary:type specifier]]//.
+
+====Description====
+
+
+Returns a //[[CL:Glossary:type specifier]]//, //typespec//, for a //[[CL:Glossary:type]]// that has the //object// as an //[[CL:Glossary:element]]//. The //typespec// satisfies the following:
+
+\beginlist
+
+\itemitem{1.} For any //object// that is an //[[CL:Glossary:element]]// of some //[[CL:Glossary:built-in type]]//:
+
+\beginlist \itemitem{a.} the //[[CL:Glossary:type]]// returned is a //[[CL:Glossary:recognizable subtype]]// of that //[[CL:Glossary:built-in type]]//.
+
+\itemitem{b.}
+
+the //[[CL:Glossary:type]]// returned does not involve ''and'', ''eql'', ''member'', ''not'', ''or'', ''satisfies'', or ''values''. \endlist
+
+\itemitem{2.} For all //objects//, ''(typep //object// (type-of //object//))'' returns //[[CL:Glossary:true]]//.
+
+Implicit in this is that //[[CL:Glossary:type specifiers]]// which are not valid for use with **[[CL:Functions:typep]]**, such as the //[[CL:Glossary:list]]// form of the **[[CL:Functions:function]]** //[[CL:Glossary:type specifier]]//, are never returned by **[[CL:Functions:type-of]]**.
+
+\itemitem{3.} The //[[CL:Glossary:type]]// returned by **[[CL:Functions:type-of]]** is always a //[[CL:Glossary:recognizable subtype]]// of the //[[CL:Glossary:class]]// returned by **[[CL:Functions:class-of]]**. That is,
+
+<blockquote> (subtypep (type-of //object//) (class-of //object//)) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// </blockquote>
+
+\itemitem{4.} For //objects// of metaclass **[[CL:Types:structure-class]]** or **[[CL:Types:standard-class]]**, and for //[[CL:Glossary:conditions]]//,
+
+**[[CL:Functions:type-of]]** returns the //[[CL:Glossary:proper name]]// of the //[[CL:Glossary:class]]// returned by **[[CL:Functions:class-of]]** if it has a //[[CL:Glossary:proper name]]//, and otherwise returns the //[[CL:Glossary:class]]// itself. In particular, for //objects// created by the constructor function of a structure defined with **[[CL:Macros:defstruct]]** without a **'':type''** option, **[[CL:Functions:type-of]]** returns the structure name; and for //objects// created by **[[CL:Functions:make-condition]]**, the //typespec// is the //[[CL:Glossary:name]]// of the //[[CL:Glossary:condition]]// //[[CL:Glossary:type]]//.
+
+
+\itemitem{5.} For each of the //[[CL:Glossary:types]]// **[[CL:Types:short-float]]**, **[[CL:Types:single-float]]**, **[[CL:Types:double-float]]**, or **[[CL:Types:long-float]]** of which the //object// is an //[[CL:Glossary:element]]//, the //typespec// is a //[[CL:Glossary:recognizable subtype]]// of that //[[CL:Glossary:type]]//.
+
+\endlist
+
+
+
+====Examples====
+
+<blockquote> </blockquote>
+
+<blockquote> (type-of 'a) → SYMBOL (type-of '(1 . 2)) → CONS //or// → (CONS FIXNUM FIXNUM) (type-of #c(0 1)) → COMPLEX //or// → (COMPLEX INTEGER) (defstruct temp-struct x y z) → TEMP-STRUCT (type-of (make-temp-struct)) → TEMP-STRUCT (type-of "abc") → STRING //or// → (STRING 3) (subtypep (type-of "abc") 'string) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// (type-of (expt 2 40)) → BIGNUM //or// → INTEGER //or// → (INTEGER 1099511627776 1099511627776) //or// → SYSTEM::TWO-WORD-BIGNUM //or// → FIXNUM (subtypep (type-of 112312) 'integer) → //[[CL:Glossary:true]]//, //[[CL:Glossary:true]]// (defvar *foo* (make-array 5 :element-type t)) → *FOO* (class-name (class-of *foo*)) → VECTOR (type-of *foo*) → VECTOR //or// → (VECTOR T 5) </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:array-element-type]]**, **[[CL:Functions:class-of]]**, **[[CL:Macros:defstruct]]**, **[[CL:Macros:typecase]]**, **[[CL:Functions:typep]]**, {\secref\Types}
+
+====Notes====
+
+Implementors are encouraged to arrange for **[[CL:Functions:type-of]]** to return
+
+a portable value.
+
+
+
+\issue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS} \issue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS} \issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND} \issue{TYPE-OF-AND-PREDEFINED-CLASSES:TYPE-OF-HANDLES-FLOATS} \issue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS}

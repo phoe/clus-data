@@ -1,0 +1,76 @@
+====== Function READ, READ-PRESERVING-WHITESPACE ======
+
+====Syntax====
+
+\DefunWithValues read {''&optional'' input-stream eof-error-p eof-value recursive-p} {object}
+
+\DefunWithValuesNewline read-preserving-whitespace {''&optional'' input-stream eof-error-p eof-value recursive-p} {object}
+
+====Arguments and Values====
+
+//input-stream// - an //[[CL:Glossary:input]]// //[[CL:Glossary:stream designator]]//.
+
+//eof-error-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:true]]//.
+
+//eof-value// - an //[[CL:Glossary:object]]//.
+
+The default is **[[CL:Constant Variables:nil]]**.
+
+//recursive-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+
+//object// - an //[[CL:Glossary:object]]// (parsed by the //[[CL:Glossary:Lisp reader]]//) or the //eof-value//.
+
+====Description====
+
+**[[CL:Functions:read]]** parses the printed representation of an //[[CL:Glossary:object]]// from //input-stream// and builds such an //[[CL:Glossary:object]]//.
+
+**[[CL:Functions:read-preserving-whitespace]]** is like **[[CL:Functions:read]]** but preserves any //[[CL:Glossary:whitespace]]// //[[CL:Glossary:character]]// that delimits the printed representation of the //[[CL:Glossary:object]]//.
+
+**[[CL:Functions:read-preserving-whitespace]]** is exactly like **[[CL:Functions:read]]** when the //recursive-p// //[[CL:Glossary:argument]]// to **[[CL:Functions:read-preserving-whitespace]]** is //[[CL:Glossary:true]]//.
+
+When **[[CL:Variables:*read-suppress*]]** is //[[CL:Glossary:false]]//, **[[CL:Functions:read]]** throws away the delimiting //[[CL:Glossary:character]]// required by certain printed representations if it is a //[[CL:Glossary:whitespace]]// //[[CL:Glossary:character]]//; but **[[CL:Functions:read]]** preserves the character (using **[[CL:Functions:unread-char]]**) if it is syntactically meaningful, because it could be the start of the next expression.
+
+If a file ends in a //[[CL:Glossary:symbol]]// or a //[[CL:Glossary:number]]// immediately followed by an //[[CL:Glossary:end of file]]//, **[[CL:Functions:read]]** reads the //[[CL:Glossary:symbol]]// or //[[CL:Glossary:number]]// successfully; when called again, it sees the //[[CL:Glossary:end of file]]// and only then acts according to //eof-error-p//. If a file contains ignorable text at the end, such as blank lines and comments, **[[CL:Functions:read]]** does not consider it to end in the middle of an //[[CL:Glossary:object]]//.
+
+If //recursive-p// is //[[CL:Glossary:true]]//, the call to **[[CL:Functions:read]]** is expected to be made from within some function that itself has been called from **[[CL:Functions:read]]** or from a similar input function, rather than from the top level.
+
+
+
+Both functions return the //[[CL:Glossary:object]]// read from //input-stream//. //Eof-value// is returned if //eof-error-p// is //[[CL:Glossary:false]]// and end of file is reached before the beginning of an //[[CL:Glossary:object]]//.
+
+====Examples====
+
+<blockquote> (read)
+▷ \IN{'a} → (QUOTE A) (with-input-from-string (is " ") (read is nil 'the-end)) → THE-END (defun skip-then-read-char (s c n) (if (char= c #\\{) (read s t nil t) (read-preserving-whitespace s)) (read-char-no-hang s)) → SKIP-THEN-READ-CHAR (let ((*readtable* (copy-readtable nil))) (set-dispatch-macro-character #\# #\\{ #'skip-then-read-char) (set-dispatch-macro-character #\# #\\} #'skip-then-read-char) (with-input-from-string (is "#{123 x #}123 y") (format t "~S ~S" (read is) (read is)))) → #\\x, #\\Space, NIL </blockquote>
+
+As an example, consider this //[[CL:Glossary:reader macro]]// definition:
+
+<blockquote> (defun slash-reader (stream char) (declare (ignore char)) `(path . ,(loop for dir = (read-preserving-whitespace stream t nil t) then (progn (read-char stream t nil t) (read-preserving-whitespace stream t nil t)) collect dir while (eql (peek-char nil stream nil nil t) #\\/)))) (set-macro-character #\\/ #'slash-reader) </blockquote>
+
+Consider now calling **[[CL:Functions:read]]** on this expression:
+
+<blockquote> (zyedh /usr/games/zork /usr/games/boggle) </blockquote> The ''/'' macro reads objects separated by more ''/'' characters; thus ''/usr/games/zork'' is intended to read as ''(path usr games zork)''. The entire example expression should therefore be read as
+
+<blockquote> (zyedh (path usr games zork) (path usr games boggle)) </blockquote> However, if **[[CL:Functions:read]]** had been used instead of **[[CL:Functions:read-preserving-whitespace]]**, then after the reading of the symbol ''zork'', the following space would be discarded; the next call to **[[CL:Functions:peek-char]]** would see the following ''/'', and the loop would continue, producing this interpretation:
+
+<blockquote> (zyedh (path usr games zork usr games boggle)) </blockquote> There are times when //[[CL:Glossary:whitespace]]// should be discarded. If a command interpreter takes single-character commands, but occasionally reads an //[[CL:Glossary:object]]// then if the //[[CL:Glossary:whitespace]]// after a //[[CL:Glossary:symbol]]// is not discarded it might be interpreted as a command some time later after the //[[CL:Glossary:symbol]]// had been read.
+
+====Affected By====
+
+**[[CL:Variables:*standard-input*]]**, **[[CL:Variables:*terminal-io*]]**, **[[CL:Variables:*readtable*]]**, **[[CL:Variables:*read-default-float-format*]]**, **[[CL:Variables:*read-base*]]**, **[[CL:Variables:*read-suppress*]]**, **[[CL:Variables:*package*]]**, **[[CL:Variables:*read-eval*]]**.
+
+====Exceptional Situations====
+
+**[[CL:Functions:read]]** signals an error of type **[[CL:Types:end-of-file]]**, regardless of //eof-error-p//, if the file ends in the middle of an //[[CL:Glossary:object]]// representation. For example, if a file does not contain enough right parentheses to balance the left parentheses in it, **[[CL:Functions:read]]** signals an error. This is detected when **[[CL:Functions:read]]** or **[[CL:Functions:read-preserving-whitespace]]** is called with //recursive-p// and //eof-error-p// //[[CL:Glossary:non-nil]]//, and end-of-file is reached before the beginning of an //[[CL:Glossary:object]]//.
+
+If //eof-error-p// is //[[CL:Glossary:true]]//, an error of type **[[CL:Types:end-of-file]]** is signaled at the end of file.
+
+====See Also====
+
+**[[CL:Functions:peek-char]]**, **[[CL:Functions:read-char]]**, **[[CL:Functions:unread-char]]**, **[[CL:Functions:read-from-string]]**, **[[CL:Functions:read-delimited-list]]**, **[[CL:Functions:parse-integer]]**, {\chapref\Syntax}, {\chapref\ReaderConcepts}
+
+====Notes====
+
+None.
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}

@@ -1,0 +1,71 @@
+====== Function PROVIDE, REQUIRE ======
+
+====Syntax====
+
+\DefunWithValues provide {module-name} {//[[CL:Glossary:implementation-dependent]]//}
+
+**require {module-name** //\opt} pathname-list// → ////[[CL:Glossary:implementation-dependent]]////
+
+====Arguments and Values====
+
+//module-name// - a //[[CL:Glossary:\symbolnamedesignator]]//.
+
+//pathname-list// - **[[CL:Constant Variables:nil]]**, or a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:non-empty]]// //[[CL:Glossary:list]]// of //[[CL:Glossary:pathname designators]]//. The default is **[[CL:Constant Variables:nil]]**.
+
+====Description====
+
+**[[CL:Functions:provide]]** adds the //module-name// to the //[[CL:Glossary:list]]// held by **[[CL:Variables:*modules*]]**, if such a name is not already present.
+
+**[[CL:Functions:require]]** tests for the presence of the //module-name// in the //[[CL:Glossary:list]]// held by **[[CL:Variables:*modules*]]**. If it is present, **[[CL:Functions:require]]** immediately returns.
+
+Otherwise, an attempt is made to load an appropriate set of //[[CL:Glossary:files]]// as follows: The //pathname-list// argument, if //[[CL:Glossary:non-nil]]//, specifies a list of //[[CL:Glossary:pathnames]]// to be loaded in order, from left to right. If the //pathname-list// is **[[CL:Constant Variables:nil]]**, an //[[CL:Glossary:implementation-dependent]]// mechanism will be invoked in an attempt to load the module named //module-name//; if no such module can be loaded, an error of type **[[CL:Types:error]]** is signaled.
+
+Both functions use **[[CL:Functions:string=]]** to test for the presence of a //module-name//.
+
+====Examples====
+
+<blockquote> ;;; This illustrates a nonportable use of REQUIRE, because it ;;; depends on the implementation-dependent file-loading mechanism.
+
+(require "CALCULUS")
+
+;;; This use of REQUIRE is nonportable because of the literal ;;; physical pathname.
+
+(require "CALCULUS" "/usr/lib/lisp/calculus")
+
+;;; One form of portable usage involves supplying a logical pathname, ;;; with appropriate translations defined elsewhere.
+
+(require "CALCULUS" "lib:calculus")
+
+;;; Another form of portable usage involves using a variable or ;;; table lookup function to determine the pathname, which again ;;; must be initialized elsewhere.
+
+(require "CALCULUS" *calculus-module-pathname*) </blockquote>
+
+====Side Effects====
+
+**[[CL:Functions:provide]]** modifies **[[CL:Variables:*modules*]]**.
+
+====Affected By====
+
+The specific action taken by **[[CL:Functions:require]]** is affected by calls to **[[CL:Functions:provide]]** (or, in general, any changes to \thevalueof{*modules*}).
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //module-name// is not a //[[CL:Glossary:\symbolnamedesignator]]//.
+
+If **[[CL:Functions:require]]** fails to perform the requested operation due to a problem while interacting with the //[[CL:Glossary:file system]]//, an error of type **[[CL:Types:file-error]]** is signaled.
+
+An error of type **[[CL:Types:file-error]]** might be signaled if any //[[CL:Glossary:pathname]]// in //pathname-list// is a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:wild]]// //[[CL:Glossary:pathname]]//.
+
+====See Also====
+
+**[[CL:Variables:*modules*]]**,
+
+{\secref\PathnamesAsFilenames}
+
+====Notes====
+
+The functions **[[CL:Functions:provide]]** and **[[CL:Functions:require]]** are deprecated.
+
+If a module consists of a single //[[CL:Glossary:package]]//, it is customary for the package and module names to be the same.
+
+\issue{REQUIRE-PATHNAME-DEFAULTS-AGAIN:X3J13-DEC-91} \issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT} \issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT} \issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT} \issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}

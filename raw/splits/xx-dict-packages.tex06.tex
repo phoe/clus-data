@@ -1,0 +1,53 @@
+====== Function IMPORT ======
+
+====Syntax====
+
+**import {symbols** //\opt} package// → //\t//
+
+====Arguments and Values====
+
+//symbols// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:list]]// of //[[CL:Glossary:symbols]]//.
+
+//package// - a //[[CL:Glossary:package designator]]//.
+
+The default is the //[[CL:Glossary:current package]]//.
+
+====Description====
+
+**[[CL:Functions:import]]** adds //symbol// or //symbols// to the internals of //package//, checking for name conflicts with existing //[[CL:Glossary:symbols]]// either //[[CL:Glossary:present]]// in //package// or //[[CL:Glossary:accessible]]// to it. Once the //symbols// have been //[[CL:Glossary:imported]]//, they may be referenced in the //[[CL:Glossary:importing]]// //package// without the use of a //[[CL:Glossary:package prefix]]// when using the //[[CL:Glossary:Lisp reader]]//.
+
+A name conflict in **[[CL:Functions:import]]** between the //symbol// being imported and a symbol inherited from some other //[[CL:Glossary:package]]// can be resolved in favor of the //symbol// being //[[CL:Glossary:imported]]// by making it a shadowing symbol, or in favor of the //[[CL:Glossary:symbol]]// already //[[CL:Glossary:accessible]]// by not doing the **[[CL:Functions:import]]**. A name conflict in **[[CL:Functions:import]]** with a //[[CL:Glossary:symbol]]// already //[[CL:Glossary:present]]// in the //package// may be resolved by uninterning that //[[CL:Glossary:symbol]]//, or by not doing the **[[CL:Functions:import]]**.
+
+The imported //[[CL:Glossary:symbol]]// is not automatically exported from the //[[CL:Glossary:current package]]//, but if it is already //[[CL:Glossary:present]]// and external, then the fact that it is external is not changed.
+
+If any //[[CL:Glossary:symbol]]// to be //[[CL:Glossary:imported]]// has no home package (i.e. **[[CL:Functions:(symbol-package //symbol//) →\ nil]]**), **[[CL:Functions:import]]** sets the //[[CL:Glossary:home package]]// of the //symbol// to //package//.
+
+If the //symbol// is already //[[CL:Glossary:present]]// in the importing //package//, **[[CL:Functions:import]]** has no effect.
+
+====Examples====
+
+<blockquote> (import 'common-lisp::car (make-package 'temp :use nil)) → T (find-symbol "CAR" 'temp) → CAR, :INTERNAL (find-symbol "CDR" 'temp) → NIL, NIL </blockquote>
+
+The form ''(import 'editor:buffer)'' takes the external symbol named ''buffer'' in \thepackage{editor} (this symbol was located when the form was read by the //[[CL:Glossary:Lisp reader]]//) and adds it to the //[[CL:Glossary:current package]]// as an //[[CL:Glossary:internal symbol]]//. The symbol ''buffer'' is then //[[CL:Glossary:present]]// in the //[[CL:Glossary:current package]]//.
+
+====Side Effects====
+
+The package system is modified.
+
+====Affected By====
+
+Current state of the package system.
+
+====Exceptional Situations====
+
+**[[CL:Functions:import]]** signals a //[[CL:Glossary:correctable]]// error of type **[[CL:Types:package-error]]** if any of the //symbols// to be //[[CL:Glossary:imported]]// has the //[[CL:Glossary:same]]// //[[CL:Glossary:name]]// (under **[[CL:Functions:string=]]**) as some distinct //[[CL:Glossary:symbol]]// (under **[[CL:Functions:eql]]**) already //[[CL:Glossary:accessible]]// in the //package//, even if the conflict is with a //[[CL:Glossary:shadowing symbol]]// of the //package//.
+
+====See Also====
+
+**[[CL:Functions:shadow]]**, **[[CL:Functions:export]]**
+
+====Notes====
+
+None.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE} \issue{IMPORT-SETF-SYMBOL-PACKAGE}

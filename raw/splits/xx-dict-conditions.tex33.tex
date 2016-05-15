@@ -1,0 +1,54 @@
+====== Function FIND-RESTART ======
+
+====Syntax====
+
+\Defun find-restart {identifier ''&optional'' condition} {restart}
+
+====Arguments and Values====
+
+//identifier// - a //[[CL:Glossary:non-nil]]// //[[CL:Glossary:symbol]]//, or a //[[CL:Glossary:restart]]//.
+
+//condition// - a //[[CL:Glossary:condition]]// //[[CL:Glossary:object]]//, or **[[CL:Constant Variables:nil]]**.
+
+//restart// - a //[[CL:Glossary:restart]]// or **[[CL:Constant Variables:nil]]**.
+
+====Description====
+
+**[[CL:Functions:find-restart]]** searches for a particular //[[CL:Glossary:restart]]// in the current //[[CL:Glossary:dynamic environment]]//.
+
+When //condition// is //[[CL:Glossary:non-nil]]//, only those //[[CL:Glossary:restarts]]// are considered that are either explicitly associated with that //condition//, or not associated with any //[[CL:Glossary:condition]]//; that is, the excluded //[[CL:Glossary:restarts]]// are those that are associated with a non-empty set of //[[CL:Glossary:conditions]]// of which the given //condition// is not an //[[CL:Glossary:element]]//. If //condition// is **[[CL:Constant Variables:nil]]**, all //[[CL:Glossary:restarts]]// are considered.
+
+If //identifier// is a //[[CL:Glossary:symbol]]//, then the innermost (most recently established) //[[CL:Glossary:applicable restart]]// with that //[[CL:Glossary:name]]// is returned. **[[CL:Constant Variables:nil]]** is returned if no such restart is found.
+
+If //identifier// is a currently active restart, then it is returned. Otherwise, **[[CL:Constant Variables:nil]]** is returned.
+
+====Examples====
+
+<blockquote> (restart-case (let ((r (find-restart 'my-restart))) (format t "~S is named ~S" r (restart-name r))) (my-restart () nil))
+▷ #<RESTART 32307325> is named MY-RESTART → NIL (find-restart 'my-restart) → NIL </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+Existing restarts.
+
+**[[CL:Macros:restart-case]]**, **[[CL:Macros:restart-bind]]**, **[[CL:Macros:with-condition-restarts]]**.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:compute-restarts]]**
+
+====Notes====
+
+<blockquote> (find-restart //identifier//) ≡ (find //identifier// (compute-restarts) :key :restart-name) </blockquote>
+
+Although anonymous restarts have a name of **[[CL:Constant Variables:nil]]**, the consequences are unspecified if **[[CL:Constant Variables:nil]]** is given as an //identifier//. Occasionally, programmers lament that **[[CL:Constant Variables:nil]]** is not permissible as an //identifier// argument. In most such cases, **[[CL:Functions:compute-restarts]]** can probably be used to simulate the desired effect.
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION} \issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION} \issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}

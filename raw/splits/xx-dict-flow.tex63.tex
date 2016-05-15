@@ -1,0 +1,53 @@
+====== Function GET-SETF-EXPANSION ======
+
+====Syntax====
+
+\DefunWithValuesNewline get-setf-expansion {place ''&optional'' environment} {vars, vals, store-vars, writer-form, reader-form}
+
+====Arguments and Values====
+
+//place// - a //[[CL:Glossary:place]]//.
+
+//environment// - an //[[CL:Glossary:environment]]// //[[CL:Glossary:object]]//.
+
+//vars, vals, store-vars, writer-form, reader-form// - a //[[CL:Glossary:setf expansion]]//.
+
+====Description====
+
+Determines five values constituting the //[[CL:Glossary:setf expansion]]// for //place// in //environment//; see section {\secref\SetfExpansions}.
+
+
+
+If //environment// is not supplied or **[[CL:Constant Variables:nil]]**, the environment is the //[[CL:Glossary:null lexical environment]]//.
+
+====Examples====
+
+<blockquote> (get-setf-expansion 'x) → NIL, NIL, (#:G0001), (SETQ X #:G0001), X </blockquote>
+
+<blockquote> ;;; This macro is like POP
+
+(defmacro xpop (place &environment env) (multiple-value-bind (dummies vals new setter getter) (get-setf-expansion place env) `(let* (,@(mapcar #'list dummies vals) (,(car new) ,getter)) (if (cdr new) (error "Can't expand this.")) (prog1 (car ,(car new)) ([[CL:Macros:defparameter]] ,(car new) (cdr ,(car new))) ,setter))))
+
+(defsetf frob (x) (value) `([[CL:Macros:setf]] (car ,x) ,value)) → FROB ;;; The following is an error; an error might be signaled at macro expansion time (flet ((frob (x) (cdr x))) ;Invalid (xpop (frob z)))
+
+</blockquote>
+
+
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Macros:defsetf]]**, **[[CL:Macros:define-setf-expander]]**, **[[CL:Macros:setf]]**
+
+====Notes====
+
+Any //[[CL:Glossary:compound form]]// is a valid //[[CL:Glossary:place]]//, since any //[[CL:Glossary:compound form]]// whose //[[CL:Glossary:operator]]// //f// has no //[[CL:Glossary:setf expander]]// are expanded into a call to ''(setf //f//)''.
+
+\issue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG} \issue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG} \issue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG}

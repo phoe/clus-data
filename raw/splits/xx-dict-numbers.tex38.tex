@@ -1,0 +1,57 @@
+====== Function SQRT, ISQRT ======
+
+====Syntax====
+
+\DefunWithValues sqrt {number} {root} **isqrt** //natural// → //natural-root//
+
+====Arguments and Values====
+
+//number//, //root// - a //[[CL:Glossary:number]]//.
+
+//natural//, //natural-root// - a non-negative //[[CL:Glossary:integer]]//.
+
+====Description====
+
+**[[CL:Functions:sqrt]]** and **[[CL:Functions:isqrt]]** compute square roots.
+
+**[[CL:Functions:sqrt]]** returns the //[[CL:Glossary:principal]]// square root of //number//. If the //number// is not a //[[CL:Glossary:complex]]// but is negative, then the result is a //[[CL:Glossary:complex]]//.
+
+**[[CL:Functions:isqrt]]** returns the greatest //[[CL:Glossary:integer]]// less than or equal to the exact positive square root of //natural//.
+
+If //number// is a positive //[[CL:Glossary:rational]]//, it is //[[CL:Glossary:implementation-dependent]]// whether //root// is a //[[CL:Glossary:rational]]// or a //[[CL:Glossary:float]]//. If //number// is a negative //[[CL:Glossary:rational]]//, it is //[[CL:Glossary:implementation-dependent]]// whether //root// is a //[[CL:Glossary:complex rational]]// or a //[[CL:Glossary:complex float]]//.
+
+The mathematical definition of complex square root (whether or not minus zero is supported) follows:
+
+''(sqrt ''x'') = (exp (/ (log ''x'') 2))''
+
+The branch cut for square root lies along the negative real axis, continuous with quadrant II. The range consists of the right half-plane, including the non-negative imaginary axis and excluding the negative imaginary axis.
+
+====Examples====
+
+<blockquote> (sqrt 9.0) → 3.0 (sqrt -9.0) → #C(0.0 3.0) (isqrt 9) → 3 (sqrt 12) → 3.4641016 (isqrt 12) → 3 (isqrt 300) → 17 (isqrt 325) → 18 (sqrt 25) → 5 //or// → 5.0 (isqrt 25) → 5 (sqrt -1) → #C(0.0 1.0) (sqrt #c(0 2)) → #C(1.0 1.0) </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+The //[[CL:Glossary:function]]// **[[CL:Functions:sqrt]]** should signal **[[CL:Types:type-error]]** if its argument is not a //[[CL:Glossary:number]]//.
+
+The //[[CL:Glossary:function]]// **[[CL:Functions:isqrt]]** should signal **[[CL:Types:type-error]]** if its argument is not a non-negative //[[CL:Glossary:integer]]//.
+
+The functions **[[CL:Functions:sqrt]]** and **[[CL:Functions:isqrt]]** might signal **[[CL:Types:arithmetic-error]]**.
+
+====See Also====
+
+**[[CL:Functions:exp]]**, **[[CL:Functions:log]]**, {\secref\FloatSubstitutability}
+
+====Notes====
+
+<blockquote> (isqrt x) ≡ (values (floor (sqrt x))) </blockquote> but it is potentially more efficient.
+
+\issue{IEEE-ATAN-BRANCH-CUT:SPLIT}

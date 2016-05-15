@@ -1,0 +1,113 @@
+====== Function MAKE-ARRAY ======
+
+====Syntax====
+
+**make-array** //dimensions ''&key'' element-type initial-element initial-contents adjustable fill-pointer displaced-to displaced-index-offset// → //new-array//
+
+====Arguments and Values====
+
+//dimensions// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:list]]// of //[[CL:Glossary:valid array dimensions]]//.
+
+//element-type// - a //[[CL:Glossary:type specifier]]//. The default is **[[CL:Types:t]]**.
+
+//initial-element// - an //[[CL:Glossary:object]]//.
+
+//initial-contents// - an //[[CL:Glossary:object]]//.
+
+//adjustable// - a //[[CL:Glossary:generalized boolean]]//. The default is **[[CL:Constant Variables:nil]]**.
+
+//fill-pointer// - a //[[CL:Glossary:valid fill pointer]]// for the //[[CL:Glossary:array]]// to be created, or **[[CL:Constant Variables:t]]** or **[[CL:Constant Variables:nil]]**. The default is **[[CL:Constant Variables:nil]]**.
+
+//displaced-to// - an //[[CL:Glossary:array]]// or **[[CL:Constant Variables:nil]]**. The default is **[[CL:Constant Variables:nil]]**. This option must not be supplied if either //initial-element// or //initial-contents// is supplied.
+
+//displaced-index-offset// - a //[[CL:Glossary:valid array row-major index]]// for //displaced-to//. The default is ''0''. This option must not be supplied unless a //[[CL:Glossary:non-nil]]// //displaced-to// is supplied.
+
+//new-array// - an //[[CL:Glossary:array]]//.
+
+====Description====
+
+Creates and returns an //[[CL:Glossary:array]]// constructed of the most //[[CL:Glossary:specialized]]// //[[CL:Glossary:type]]// that can accommodate elements of //[[CL:Glossary:type]]// given by //element-type//. If //dimensions// is **[[CL:Constant Variables:nil]]** then a zero-dimensional //[[CL:Glossary:array]]// is created.
+
+//Dimensions// represents the dimensionality of the new //[[CL:Glossary:array]]//.
+
+//element-type// indicates the //[[CL:Glossary:type]]// of the elements intended to be stored in the //new-array//. The //new-array// can actually store any //[[CL:Glossary:object|objects]]// of the //[[CL:Glossary:type]]// which results from //[[CL:Glossary:upgrade|upgrading]]// //element-type//; see section {\secref\ArrayUpgrading}.
+
+
+If //initial-element// is supplied, it is used to initialize each //[[CL:Glossary:element]]// of //new-array//. If //initial-element// is supplied, it must be of the //[[CL:Glossary:type]]// given by //element-type//. //initial-element// cannot be supplied if either the **'':initial-contents''** option is supplied or //displaced-to// is //[[CL:Glossary:non-nil]]//. If //initial-element// is not supplied,
+
+the consequences of later reading an uninitialized //[[CL:Glossary:element]]// of //new-array// are undefined
+
+unless either //initial-contents// is supplied or //displaced-to// is //[[CL:Glossary:non-nil]]//.
+
+//initial-contents// is used to initialize the contents of //[[CL:Glossary:array]]//. For example:
+
+<blockquote> (make-array '(4 2 3) :initial-contents '(((a b c) (1 2 3)) ((d e f) (3 1 2)) ((g h i) (2 3 1)) ((j k l) (0 0 0)))) </blockquote>
+
+//initial-contents// is composed of a nested structure of //[[CL:Glossary:sequences]]//. The numbers of levels in the structure must equal the rank of //[[CL:Glossary:array]]//. Each leaf of the nested structure must be of the //[[CL:Glossary:type]]// given by //element-type//. If //[[CL:Glossary:array]]// is zero-dimensional, then //initial-contents// specifies the single //[[CL:Glossary:element]]//. Otherwise, //initial-contents// must be a //[[CL:Glossary:sequence]]// whose length is equal to the first dimension; each element must be a nested structure for an //[[CL:Glossary:array]]// whose dimensions are the remaining dimensions, and so on. //Initial-contents// cannot be supplied if either //initial-element// is supplied or //displaced-to// is //[[CL:Glossary:non-nil]]//. If //initial-contents// is not supplied,
+
+the consequences of later reading an uninitialized //[[CL:Glossary:element]]// of //new-array// are undefined
+
+unless either //initial-element// is supplied or //displaced-to// is //[[CL:Glossary:non-nil]]//.
+
+If //adjustable// is //[[CL:Glossary:non-nil]]//, the array is //[[CL:Glossary:expressly adjustable]]// (and so //[[CL:Glossary:actually adjustable]]//); otherwise, the array is not //[[CL:Glossary:expressly adjustable]]// (and it is //[[CL:Glossary:implementation-dependent]]// whether the array is //[[CL:Glossary:actually adjustable]]//).
+
+If //fill-pointer// is //[[CL:Glossary:non-nil]]//, the //[[CL:Glossary:array]]// must be one-dimensional; that is, the //[[CL:Glossary:array]]// must be a //[[CL:Glossary:vector]]//. If //fill-pointer// is **[[CL:Constant Variables:t]]**, the length of the //[[CL:Glossary:vector]]// is used to initialize the //[[CL:Glossary:fill pointer]]//. If //fill-pointer// is an //[[CL:Glossary:integer]]//, it becomes the initial //[[CL:Glossary:fill pointer]]// for the //[[CL:Glossary:vector]]//.
+
+If //displaced-to// is //[[CL:Glossary:non-nil]]//, **[[CL:Functions:make-array]]** will create a //[[CL:Glossary:displaced array]]// and //displaced-to// is the //[[CL:Glossary:target]]// of that //[[CL:Glossary:displaced array]]//. In that case, the consequences are undefined if the //[[CL:Glossary:actual array element type]]// of //displaced-to// is not //[[CL:Glossary:type equivalent]]// to the //[[CL:Glossary:actual array element type]]// of the //[[CL:Glossary:array]]// being created. If //displaced-to// is **[[CL:Constant Variables:nil]]**, the //[[CL:Glossary:array]]// is not a //[[CL:Glossary:displaced array]]//.
+
+The //displaced-index-offset// is made to be the index offset of the //[[CL:Glossary:array]]//.
+
+When an array A is given as the '':displaced-to'' argument to **[[CL:Functions:make-array]]** when creating array B, then array B is said to be displaced to array A. The total number of elements in an //[[CL:Glossary:array]]//, called the total size of the //[[CL:Glossary:array]]//, is calculated as the product of all the dimensions. It is required that the total size of A be no smaller than the sum of the total size of B plus the offset ''n'' supplied by the //displaced-index-offset//. The effect of displacing is that array B does not have any elements of its own, but instead maps //[[CL:Glossary:accesses]]// to itself into //[[CL:Glossary:accesses]]// to array A. The mapping treats both //[[CL:Glossary:array|arrays]]// as if they were one-dimensional by taking the elements in row-major order, and then maps an //[[CL:Glossary:access]]// to element ''k'' of array B to an //[[CL:Glossary:access]]// to element ''k''+''n'' of array A.
+
+If **[[CL:Functions:make-array]]** is called with //adjustable//, //fill-pointer//, and //displaced-to// each **[[CL:Constant Variables:nil]]**, then the result is a //[[CL:Glossary:simple array]]//.
+
+If **[[CL:Functions:make-array]]** is called with one or more of //adjustable//, //fill-pointer//, or //displaced-to// being //[[CL:Glossary:true]]//, whether the resulting //[[CL:Glossary:array]]// is a //[[CL:Glossary:simple array]]// is //[[CL:Glossary:implementation-dependent]]//.
+
+When an array A is given as the '':displaced-to'' argument to **[[CL:Functions:make-array]]** when creating array B, then array B is said to be displaced to array A. The total number of elements in an //[[CL:Glossary:array]]//, called the total size of the //[[CL:Glossary:array]]//, is calculated as the product of all the dimensions. The consequences are unspecified if the total size of A is smaller than the sum of the total size of B plus the offset ''n'' supplied by the //displaced-index-offset//. The effect of displacing is that array B does not have any elements of its own, but instead maps //[[CL:Glossary:accesses]]// to itself into //[[CL:Glossary:accesses]]// to array A. The mapping treats both //[[CL:Glossary:array|arrays]]// as if they were one-dimensional by taking the elements in row-major order, and then maps an //[[CL:Glossary:access]]// to element ''k'' of array B to an //[[CL:Glossary:access]]// to //[[CL:Glossary:element]]// ''k''+''n'' of array A.
+
+====Examples====
+
+<blockquote>
+
+(make-array 5) ;; Creates a one-dimensional array of five elements. (make-array '(3 4) :element-type '(mod 16)) ;; Creates a ;;two-dimensional array, 3 by 4, with four-bit elements. (make-array 5 :element-type 'single-float) ;; Creates an array of single-floats. </blockquote>
+
+<blockquote> (make-array nil :initial-element nil) → #0ANIL (make-array 4 :initial-element nil) → #(NIL NIL NIL NIL) (make-array '(2 4) :element-type '(unsigned-byte 2) :initial-contents '((0 1 2 3) (3 2 1 0))) → #2A((0 1 2 3) (3 2 1 0)) (make-array 6 :element-type 'character :initial-element #\a :fill-pointer 3) → "aaa" </blockquote>
+
+The following is an example of making a //[[CL:Glossary:displaced array]]//.
+
+<blockquote> ([[CL:Macros:defparameter]] a (make-array '(4 3))) → #<ARRAY 4x3 simple 32546632> (dotimes (i 4) (dotimes (j 3) ([[CL:Macros:setf]] (aref a i j) (list i 'x j '= (* i j))))) → NIL ([[CL:Macros:defparameter]] b (make-array 8 :displaced-to a :displaced-index-offset 2)) → #<ARRAY 8 indirect 32550757> (dotimes (i 8) (print (list i (aref b i))))
+▷ (0 (0 X 2 = 0))
+▷ (1 (1 X 0 = 0))
+▷ (2 (1 X 1 = 1))
+▷ (3 (1 X 2 = 2))
+▷ (4 (2 X 0 = 0))
+▷ (5 (2 X 1 = 2))
+▷ (6 (2 X 2 = 4))
+▷ (7 (3 X 0 = 0)) → NIL </blockquote> The last example depends on the fact that //[[CL:Glossary:array|arrays]]// are, in effect, stored in row-major order.
+
+<blockquote> ([[CL:Macros:defparameter]] a1 (make-array 50)) → #<ARRAY 50 simple 32562043> ([[CL:Macros:defparameter]] b1 (make-array 20 :displaced-to a1 :displaced-index-offset 10)) → #<ARRAY 20 indirect 32563346> (length b1) → 20
+
+([[CL:Macros:defparameter]] a2 (make-array 50 :fill-pointer 10)) → #<ARRAY 50 fill-pointer 10 46100216> ([[CL:Macros:defparameter]] b2 (make-array 20 :displaced-to a2 :displaced-index-offset 10)) → #<ARRAY 20 indirect 46104010> (length a2) → 10 (length b2) → 20
+
+([[CL:Macros:defparameter]] a3 (make-array 50 :fill-pointer 10)) → #<ARRAY 50 fill-pointer 10 46105663> ([[CL:Macros:defparameter]] b3 (make-array 20 :displaced-to a3 :displaced-index-offset 10 :fill-pointer 5)) → #<ARRAY 20 indirect, fill-pointer 5 46107432> (length a3) → 10 (length b3) → 5 </blockquote>
+
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:adjustable-array-p]]**, **[[CL:Functions:aref]]**, **[[CL:Functions:arrayp]]**, **[[CL:Functions:array-element-type]]**, **[[CL:Constant Variables:array-rank-limit]]**, **[[CL:Constant Variables:array-dimension-limit]]**, **[[CL:Functions:fill-pointer]]**, **[[CL:Functions:upgraded-array-element-type]]**
+
+====Notes====
+
+There is no specified way to create an //[[CL:Glossary:array]]// for which **[[CL:Functions:adjustable-array-p]]** definitely returns //[[CL:Glossary:false]]//. There is no specified way to create an //[[CL:Glossary:array]]// that is not a //[[CL:Glossary:simple array]]//.
+
+
+
+\issue{UNINITIALIZED-ELEMENTS:CONSEQUENCES-UNDEFINED} \issue{UNINITIALIZED-ELEMENTS:CONSEQUENCES-UNDEFINED} \issue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY} \issue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}

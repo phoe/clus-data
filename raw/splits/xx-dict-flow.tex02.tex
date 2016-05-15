@@ -1,0 +1,71 @@
+====== Macro DEFUN ======
+
+====Syntax====
+
+\DefmacWithValuesNewline defun {function-name lambda-list {\DeclsAndDoc} \starparam{form}} {function-name}
+
+====Arguments and Values====
+
+//function-name// - a //[[CL:Glossary:function name]]//.
+
+//lambda-list// - an //[[CL:Glossary:ordinary lambda list]]//.
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//documentation// - a //[[CL:Glossary:string]]//; \noeval.
+
+//forms// - an //[[CL:Glossary:implicit progn]]//.
+
+//block-name// - the //[[CL:Glossary:function block name]]// of the //function-name//.
+
+====Description====
+
+Defines a new //[[CL:Glossary:function]]// named //function-name// in the //[[CL:Glossary:global environment]]//. The body of the //[[CL:Glossary:function]]// defined by **[[CL:Macros:defun]]** consists of //forms//; they are executed as an //[[CL:Glossary:implicit progn]]// when the //[[CL:Glossary:function]]// is called.
+
+**[[CL:Macros:defun]]** can be used to define a new //[[CL:Glossary:function]]//, to install a corrected version of an incorrect definition, to redefine an already-defined //[[CL:Glossary:function]]//, or to redefine a //[[CL:Glossary:macro]]// as a //[[CL:Glossary:function]]//.
+
+**[[CL:Macros:defun]]** implicitly puts a \specref{block} named //block-name// around the body //forms//
+
+(but not the //[[CL:Glossary:forms]]// in the //lambda-list//)
+
+of the //[[CL:Glossary:function]]// defined.
+
+//Documentation// is attached as a //[[CL:Glossary:documentation string]]// to //name// (as kind \specref{function}) and to the //[[CL:Glossary:function]]// //[[CL:Glossary:object]]//.
+
+Evaluating **[[CL:Macros:defun]]** causes //function-name// to be a global name for the //[[CL:Glossary:function]]// specified by the //[[CL:Glossary:lambda expression]]//
+
+<blockquote> (lambda //lambda-list// {\DeclsAndDoc} (block //block-name// \starparam{form})) </blockquote>
+
+processed in the //[[CL:Glossary:lexical environment]]// in which **[[CL:Macros:defun]]** was executed.
+
+(None of the arguments are evaluated at macro expansion time.)
+
+**[[CL:Macros:defun]]** is not required to perform any compile-time side effects. In particular, **[[CL:Macros:defun]]** does not make the //[[CL:Glossary:function]]// definition available at compile time. An //[[CL:Glossary:implementation]]// may choose to store information about the //[[CL:Glossary:function]]// for the purposes of compile-time error-checking (such as checking the number of arguments on calls), or to enable the //[[CL:Glossary:function]]// to be expanded inline.
+
+====Examples====
+
+<blockquote> (defun recur (x) (when (> x 0) (recur (1- x)))) → RECUR (defun ex (a b &optional c (d 66) &rest keys &key test (start 0)) (list a b c d keys test start)) → EX (ex 1 2) → (1 2 NIL 66 NIL NIL 0) (ex 1 2 3 4 :test 'equal :start 50) → (1 2 3 4 (:TEST EQUAL :START 50) EQUAL 50) (ex :test 1 :start 2) → (:TEST 1 :START 2 NIL NIL 0)
+
+;; This function assumes its callers have checked the types of the ;; arguments, and authorizes the compiler to build in that assumption. (defun discriminant (a b c) (declare (number a b c)) "Compute the discriminant for a quadratic equation." (- (* b b) (* 4 a c))) → DISCRIMINANT (discriminant 1 2/3 -2) → 76/9
+
+;; This function assumes its callers have not checked the types of the ;; arguments, and performs explicit type checks before making any assumptions. (defun careful-discriminant (a b c) "Compute the discriminant for a quadratic equation." (check-type a number) (check-type b number) (check-type c number) (locally (declare (number a b c)) (- (* b b) (* 4 a c)))) → CAREFUL-DISCRIMINANT (careful-discriminant 1 2/3 -2) → 76/9 </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+\specref{flet}, \specref{labels}, \specref{block}, \specref{return-from}, \misc{declare}, **[[CL:Functions:documentation]]**, {\secref\Evaluation}, {\secref\OrdinaryLambdaLists}, {\secref\DocVsDecls}
+
+====Notes====
+
+\specref{return-from} can be used to return prematurely from a //[[CL:Glossary:function]]// defined by **[[CL:Macros:defun]]**.
+
+Additional side effects might take place when additional information (typically debugging information) about the function definition is recorded.
+
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY} \issue{DECLS-AND-DOC} \issue{FUNCTION-NAME:LARGE} \issue{DEFMACRO-BLOCK-SCOPE:EXCLUDES-BINDINGS} \issue{DOCUMENTATION-FUNCTION-BUGS:FIX}

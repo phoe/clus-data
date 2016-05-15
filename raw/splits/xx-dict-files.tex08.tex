@@ -1,0 +1,48 @@
+====== Function DELETE-FILE ======
+
+====Syntax====
+
+**delete-file** //filespec// → //\t//
+
+====Arguments and Values====
+
+//filespec// - a //[[CL:Glossary:pathname designator]]//.
+
+====Description====
+
+Deletes the //[[CL:Glossary:file]]// specified by //filespec//.
+
+If the //filespec// //[[CL:Glossary:designator]]// is an open //[[CL:Glossary:stream]]//, then //filespec// and the file associated with it are affected (if the file system permits), in which case //filespec// might be closed immediately, and the deletion might be immediate or delayed until //filespec// is explicitly closed, depending on the requirements of the file system.
+
+It is //[[CL:Glossary:implementation-dependent]]// whether an attempt to delete a nonexistent file is considered to be successful.
+
+**[[CL:Functions:delete-file]]** returns //[[CL:Glossary:true]]// if it succeeds, or signals an error of type **[[CL:Types:file-error]]** if it does not.
+
+The consequences are undefined if //filespec// has a //[[CL:Glossary:wild]]// component, or if //filespec// has a **[[CL:Constant Variables:nil]]** component and the file system does not permit a **[[CL:Constant Variables:nil]]** component.
+
+====Examples====
+
+<blockquote> (with-open-file (s "delete-me.text" :direction :output :if-exists :error)) → NIL ([[CL:Macros:defparameter]] p (probe-file "delete-me.text")) → #P"R:>fred>delete-me.text.1" (delete-file p) → T (probe-file "delete-me.text") → //[[CL:Glossary:false]]// (with-open-file (s "delete-me.text" :direction :output :if-exists :error) (delete-file s)) → T (probe-file "delete-me.text") → //[[CL:Glossary:false]]// </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+If the deletion operation is not successful, an error of type **[[CL:Types:file-error]]** is signaled.
+
+An error of type **[[CL:Types:file-error]]** might be signaled if //filespec// is //[[CL:Glossary:wild]]//.
+
+====See Also====
+
+**[[CL:Types:pathname]]**, **[[CL:Types:logical-pathname]]**,{\secref\FileSystemConcepts},
+
+{\secref\PathnamesAsFilenames}
+
+====Notes====
+
+None.
+
+
+\issue{PATHNAME-LOGICAL:ADD} \issue{PATHNAME-WILD:NEW-FUNCTIONS} \issue{PATHNAME-LOGICAL:ADD} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}

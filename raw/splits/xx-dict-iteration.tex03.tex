@@ -1,0 +1,72 @@
+====== Macro DOLIST ======
+
+====Syntax====
+
+\DefmacWithValuesNewline dolist {\paren{var list-form [result-form]} \starparam{declaration} \star{{tag | statement}}} {\starparam{result}}
+
+====Arguments and Values====
+
+//var// - a //[[CL:Glossary:symbol]]//.
+
+//list-form// - a //[[CL:Glossary:form]]//.
+
+//result-form// - a //[[CL:Glossary:form]]//.
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//tag// - a //[[CL:Glossary:go tag]]//; \noeval.
+
+//statement// - a //[[CL:Glossary:compound form]]//; \evalspecial.
+
+//results// - if a **[[CL:Macros:return]]** or **[[CL:Macros:return-from]]** form is executed, the //[[CL:Glossary:values]]// passed from that //[[CL:Glossary:form]]//; otherwise, the //[[CL:Glossary:values]]// returned by the //result-form// or **[[CL:Constant Variables:nil]]** if there is no //result-form//.
+
+====Description====
+
+**[[CL:Macros:dolist]]** iterates over the elements of a //[[CL:Glossary:list]]//. The body of **[[CL:Macros:dolist]]** is like a \specref{tagbody}. It consists of a series of //tags// and //statements//.
+
+**[[CL:Macros:dolist]]** evaluates //list-form//, which should produce a //[[CL:Glossary:list]]//. It then executes the body once for each element in the //[[CL:Glossary:list]]//, in the order in which the //tags// and //statements// occur, with //var// bound to the element. Then //result-form// is evaluated. //tags// label //statements//.
+
+At the time //result-form// is processed, //var// is bound to **[[CL:Constant Variables:nil]]**.
+
+An //[[CL:Glossary:implicit block]]//
+
+named **[[CL:Constant Variables:nil]]** surrounds **[[CL:Macros:dolist]]**.
+
+**[[CL:Macros:return]]** may be used to terminate the loop immediately without performing any further iterations, returning zero or more //[[CL:Glossary:values]]//.
+
+The //[[CL:Glossary:scope]]// of the binding of //var// does not include the //list-form//, but the //result-form// is included.
+
+It is //[[CL:Glossary:implementation-dependent]]// whether **[[CL:Macros:dolist]]** //[[CL:Glossary:establishes]]// a new //[[CL:Glossary:binding]]// of //var// on each iteration or whether it //[[CL:Glossary:establishes]]// a binding for //var// once at the beginning and then //assigns// it on any subsequent iterations.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] temp-two '()) → NIL (dolist (temp-one '(1 2 3 4) temp-two) (push temp-one temp-two)) → (4 3 2 1)
+
+([[CL:Macros:defparameter]] temp-two 0) → 0 (dolist (temp-one '(1 2 3 4)) (incf temp-two)) → NIL temp-two → 4
+
+(dolist (x '(a b c d)) (prin1 x) (princ " "))
+▷ A B C D → NIL </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Macros:do]]**, **[[CL:Macros:dotimes]]**, \specref{tagbody},
+
+{\secref\TraversalRules}
+
+====Notes====
+
+\specref{go} may be used within the body of **[[CL:Macros:dolist]]** to transfer control to a statement labeled by a //tag//.
+
+\issue{DECLS-AND-DOC} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}

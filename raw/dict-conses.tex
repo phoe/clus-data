@@ -1,0 +1,4662 @@
+% -*- Mode: TeX -*-
+
+\def\SatisfyTest#1#2{The \param{test}, \param{test-not}, and \param{key} 
+affect how it is determined whether \param{#1} is the same as #2.
+For details, \seesection\SatisfyingTheTwoArgTest.\par}
+
+% Cons
+%  Trees
+%  Lists
+%   List Elements
+%   List Tails
+%   List Mapping
+%   Alists
+%   Plists
+%   Sets
+
+%-------------------- Conses, lists, atoms, ... --------------------
+
+\begincom{list}\ftype{System Class}
+
+\label Class Precedence List::
+
+\typeref{list},
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+A \newterm{list} is a chain of \term{conses} in which the \term{car} of each
+\term{cons} is an \term{element} of the \term{list}, and the \term{cdr} of
+each \term{cons} is either the next link in the chain or a terminating
+\term{atom}.
+
+A \newterm{proper list} is a chain of \term{conses} terminated by 
+the \newterm{empty list}, \empty, which is  itself a \term{proper list}.
+A \newterm{dotted list} is a \term{list} which has a terminating \term{atom} 
+that is not the \term{empty list}.
+A \newterm{circular list} is a chain of \term{conses} that has no termination
+because some \term{cons} in the chain is the \term{cdr} of a later \term{cons}.
+
+\term{Dotted lists} and \term{circular lists} are also \term{lists}, but usually
+the unqualified term ``list'' within this specification means \term{proper list}.
+Nevertheless, \thetype{list} unambiguously includes \term{dotted lists} 
+and \term{circular lists}.
+
+For each \term{element} of a \term{list} there is a \term{cons}.
+The \term{empty list} has no \term{elements} and is not a \term{cons}.
+
+%% 2.15.0 14
+\Thetypes{cons} and \typeref{null} form an \term{exhaustive partition} 
+of the \term{type} \typeref{list}.
+
+\label See Also::
+
+{\secref\LeftParen},
+{\secref\PrintingListsAndConses}
+
+\endcom%{list}\ftype{System Class}
+
+\begincom{null}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{null},
+\typeref{symbol},
+\typeref{list},
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+%% 2.15.0 13
+The only \term{object} \oftype{null} is \nil, 
+which represents the \term{empty list} and can also be notated \empty.
+
+\label See Also::
+
+{\secref\SymbolTokens},
+{\secref\LeftParen},
+{\secref\PrintingSymbols}
+
+\endcom%{null}\ftype{System Class}
+\begincom{cons}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{cons},
+\typeref{list},
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+A \term{cons} is a compound \term{object} having two components,
+called the \term{car} and \term{cdr}. These form a \term{dotted pair}.
+Each component can be any \term{object}.
+
+\issue{CONS-TYPE-SPECIFIER:ADD}
+
+\label Compound Type Specifier Kind::
+
+Specializing.
+
+\label Compound Type Specifier Syntax::
+
+\Deftype{cons}{\ttbrac{car-typespec \brac{cdr-typespec}}}
+
+\label Compound Type Specifier Arguments::
+
+\param{car-typespec}---a \term{type specifier},
+		    or the \term{symbol} \misc{*}.
+  \Default{the \term{symbol} \misc{*}}
+
+\param{cdr-typespec}---a \term{type specifier},
+		    or the \term{symbol} \misc{*}.
+  \Default{the \term{symbol} \misc{*}}
+
+\label Compound Type Specifier Description::
+
+This denotes the set of \term{conses} 
+whose \term{car} is constrained to be of \term{type} \param{car-typespec} and
+whose \term{cdr} is constrained to be of \term{type} \param{cdr-typespec}.
+(If either \param{car-typespec} or \param{cdr-typespec} is \misc{*},
+ it is as if \thetype{t} had been denoted.)
+
+\endissue{CONS-TYPE-SPECIFIER:ADD}
+
+\label See Also::
+
+{\secref\LeftParen},
+{\secref\PrintingListsAndConses}
+
+\endcom%{cons}\ftype{System Class}
+\begincom{atom}\ftype{Type}
+
+%Added per Barrett's suggestion. -kmp 23-Oct-90
+
+\label Supertypes:: 
+
+\typeref{atom},
+\typeref{t}
+
+\label Description::
+
+It is equivalent to {\tt (not cons)}.  
+
+\endcom%{atom}\ftype{Type}
+
+
+%-------------------- Cons --------------------
+
+%%% ========== CONS
+\begincom{cons}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues cons {object-1 object-2} {cons}
+
+\label Arguments and Values::
+
+\param{object-1}---an \term{object}.
+
+\param{object-2}---an \term{object}.
+
+\param{cons}---a \term{cons}.
+
+\label Description::
+
+%% 15.1.0 8
+Creates a \term{fresh} \term{cons}, the \term{car} of which is \param{object-1}
+and the \term{cdr} of which is \param{object-2}.
+
+\label Examples::
+
+\code
+ (cons 1 2) \EV (1 . 2)
+ (cons 1 nil) \EV (1)
+ (cons nil 2) \EV (NIL . 2)
+ (cons nil nil) \EV (NIL)
+ (cons 1 (cons 2 (cons 3 (cons 4 nil)))) \EV (1 2 3 4)
+ (cons 'a 'b) \EV (A . B)
+ (cons 'a (cons 'b (cons 'c '\empty))) \EV (A B C)
+ (cons 'a '(b c d)) \EV (A B C D)
+\endcode
+
+\label Side Effects:\None.
+
+%% Sandra thinks this is excessive.
+%Creates an \term{object}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+%% Sandra thinks this is excessive.
+%Might signal \typeref{storage-condition}.
+
+\label See Also::
+
+\funref{list}
+
+\label Notes::
+If \param{object-2} is a \term{list}, \funref{cons} can be thought of as
+producing a new \term{list} which is like it but has \param{object-1} prepended.
+\endcom
+
+
+%%% ========== CONSP
+\begincom{consp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues consp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 8
+\TypePredicate{object}{cons}
+
+\label Examples::
+\code
+ (consp nil) \EV \term{false}
+ (consp (cons 1 2)) \EV \term{true}
+\endcode
+
+The \term{empty list} is not a \term{cons}, so
+
+\code
+ (consp '()) \EQ (consp 'nil) \EV \term{false}
+\endcode
+
+\label Side Effects:\None!
+
+\label Affected By:\None!
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{listp}
+
+\label Notes::
+
+\code
+ (consp \param{object}) \EQ (typep \param{object} 'cons) \EQ (not (typep \param{object} 'atom)) \EQ (typep \param{object} '(not atom))
+\endcode
+
+\endcom
+
+%%% ========== ATOM
+\begincom{atom}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues atom {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 6
+\TypePredicate{object}{atom}
+
+\label Examples::
+\code
+ (atom 'sss) \EV \term{true}
+ (atom (cons 1 2)) \EV \term{false}
+ (atom nil) \EV \term{true}
+ (atom '()) \EV \term{true}
+ (atom 3) \EV \term{true}
+\endcode
+
+\label Affected By:\None!
+
+\label Exceptional Situations:\None!
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (atom \param{object}) \EQ (typep \param{object} 'atom) \EQ (not (consp \param{object}))
+ \EQ (not (typep \param{object} 'cons)) \EQ (typep \param{object} '(not cons))
+\endcode
+
+\endcom
+
+%%% ========== RPLACA
+%%% ========== RPLACD
+\begincom{rplaca, rplacd}\ftype{Function}
+
+\label Syntax::
+
+\DefunMultiWithValues {cons object} {cons}
+ {\entry{rplaca}
+  \entry{rplacd}}
+
+\label Pronunciation::
+
+\funref{rplaca}: \pronounced{\stress{r\harde}\Stress{plak}\schwa}
+	      or \pronounced{\stress{r\schwa}\Stress{plak}\schwa}
+
+\funref{rplacd}: \pronounced{\stress{r\harde}\Stress{plak}d\schwa}
+	      or \pronounced{\stress{r\schwa}\Stress{plak}d\schwa}
+	      or \pronounced{\stress{r\harde}\Stress{plak}d\harde}
+	      or \pronounced{\stress{r\schwa}\Stress{plak}d\harde}
+
+\label Arguments and Values::
+
+\param{cons}---a \term{cons}.
+
+\param{object}---an \term{object}.
+
+\label Description::
+
+%% 15.3.0 4
+\funref{rplaca} replaces the \term{car} of the \param{cons} with \param{object}.
+%and then returns the modified \param{cons}.
+
+\funref{rplacd} replaces the \term{cdr} of the \param{cons} with \param{object}.
+%and then returns the modified \param{cons}.
+
+\label Examples::
+%% 15.3.0 3
+\code
+ (defparameter *some-list* (list* 'one 'two 'three 'four)) \EV *some-list*
+ *some-list* \EV (ONE TWO THREE . FOUR)
+ (rplaca *some-list* 'uno) \EV (UNO TWO THREE . FOUR)
+ *some-list* \EV (UNO TWO THREE . FOUR)
+ (rplacd (last *some-list*) (list 'IV)) \EV (THREE IV)
+ *some-list* \EV (UNO TWO THREE IV)
+\endcode
+
+\label Side Effects::
+%% 15.3.0 1
+%% 15.3.0 2
+                   
+The \param{cons} is modified. 
+
+\label Affected By:\None!
+
+\label Exceptional Situations:\None.
+
+%!!! Issue: read-only structure might be enforced. -kmp
+
+\Shouldchecktype{cons}{a \term{cons}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+%%What else would they be used for? -kmp 15-Feb-91
+% \funref{rplaca} and \funref{rplacd} may be used to make alterations 
+% in an already existing list structure, that is, 
+% to change the \term{car} or \term{cdr} of an existing \term{cons}.
+
+\endcom
+
+%%% ========== CAR
+%%% ========== CDR
+%%% ========== CAAR
+%%% ========== CADR
+%%% ========== CDAR
+%%% ========== CDDR
+%%% ========== CAAAR
+%%% ========== CAADR
+%%% ========== CADAR
+%%% ========== CADDR
+%%% ========== CDAAR
+%%% ========== CDADR
+%%% ========== CDDAR
+%%% ========== CDDDR
+%%% ========== CAAAAR
+%%% ========== CAAADR
+%%% ========== CAADAR
+%%% ========== CAADDR
+%%% ========== CADAAR
+%%% ========== CADADR
+%%% ========== CADDAR
+%%% ========== CADDDR
+%%% ========== CDAAAR
+%%% ========== CDAADR
+%%% ========== CDADAR
+%%% ========== CDADDR
+%%% ========== CDDAAR
+%%% ========== CDDADR
+%%% ========== CDDDAR 
+%%% ========== CDDDDR 
+\begincom{car,    cdr,
+          caar,   cadr,   cdar,   cddr,
+	  caaar,  caadr,  cadar,  caddr,  cdaar,  cdadr,  cddar,  cdddr,
+          caaaar, caaadr, caadar, caaddr, cadaar, cadadr, caddar, cadddr,
+          cdaaar, cdaadr, cdadar, cdaddr, cddaar, cddadr, cdddar, cddddr}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunMultiAccessorWithValues {x} {object} {new-object}
+ {\entry{car}
+  \entry{cdr}
+  \blankline
+  \entry{caar}
+  \entry{cadr}
+  \entry{cdar}
+  \entry{cddr}
+  \blankline
+  \entry{caaar}
+  \entry{caadr}
+  \entry{cadar}
+  \entry{caddr}
+  \entry{cdaar}
+  \entry{cdadr}
+  \entry{cddar}
+  \entry{cdddr}
+  \blankline
+  \entry{caaaar}
+  \entry{caaadr}
+  \entry{caadar}
+  \entry{caaddr}
+  \entry{cadaar}
+  \entry{cadadr}
+  \entry{caddar}
+  \entry{cadddr}
+  \entry{cdaaar}
+  \entry{cdaadr}
+  \entry{cdadar}
+  \entry{cdaddr}
+  \entry{cddaar}
+  \entry{cddadr}
+  \entry{cdddar}
+  \entry{cddddr}}
+
+\label Pronunciation::
+
+\funref{cadr}: \pronounced{\Stress{ka}\stress{d\schwa r}}
+
+\funref{caddr}: \pronounced{\Stress{kad}\schwa \stress{d\schwa r}}
+  	     or \pronounced{\Stress{ka}\stress{d\.ud\schwa r}}
+
+\funref{cdr}: \pronounced{\Stress{k\.u}\stress{d\schwa r}}
+
+\funref{cddr}: \pronounced{\Stress{k\.ud}\schwa \stress{d\schwa r}}
+  	    or \pronounced{\Stress{k\schwa}\stress{d\.ud\schwa r}}
+
+\label Arguments and Values::
+
+\param{x}---a \term{list}.
+
+\param{object}---an \term{object}.
+
+\param{new-object}---an \term{object}.
+
+\label Description::
+
+%% 15.1.0 3
+If \param{x} is a \term{cons}, \funref{car} returns the \term{car} 
+of that \term{cons}.  If \param{x} is \nil, \funref{car} returns \nil.
+
+%% 15.1.0 4
+If \param{x} is a \term{cons}, \funref{cdr} returns the \term{cdr} 
+of that \term{cons}.  If \param{x} is \nil, \funref{cdr} returns \nil.
+
+\term{Functions} are provided which perform compositions of up to four
+\funref{car} and \funref{cdr} operations.  Their \term{names} consist of 
+a \f{C}, followed by two, three, or four occurrences of \f{A} or \f{D}, 
+and finally an \f{R}.  The series of \f{A}'s and \f{D}'s in each
+\term{function}'s \term{name} is chosen to identify the series of 
+\funref{car} and \funref{cdr} operations that is performed by the function.
+The order in which the \f{A}'s and \f{D}'s appear is the inverse of the
+order in which the corresponding operations are performed.  \Thenextfigure\ 
+defines the relationships precisely.
+
+\tablefigtwo{CAR and CDR variants}{This \term{place} $\ldots$}{Is equivalent to this \term{place} $\ldots$}{
+\f{(caar \param{x})}&\f{(car (car \param{x}))}\cr
+\f{(cadr \param{x})}&\f{(car (cdr \param{x}))}\cr
+\f{(cdar \param{x})}&\f{(cdr (car \param{x}))}\cr
+\f{(cddr \param{x})}&\f{(cdr (cdr \param{x}))}\cr
+\f{(caaar \param{x})}&\f{(car (car (car \param{x})))}\cr
+\f{(caadr \param{x})}&\f{(car (car (cdr \param{x})))}\cr
+\f{(cadar \param{x})}&\f{(car (cdr (car \param{x})))}\cr
+\f{(caddr \param{x})}&\f{(car (cdr (cdr \param{x})))}\cr
+\f{(cdaar \param{x})}&\f{(cdr (car (car \param{x})))}\cr
+\f{(cdadr \param{x})}&\f{(cdr (car (cdr \param{x})))}\cr
+\f{(cddar \param{x})}&\f{(cdr (cdr (car \param{x})))}\cr
+\f{(cdddr \param{x})}&\f{(cdr (cdr (cdr \param{x})))}\cr
+\f{(caaaar \param{x})}&\f{(car (car (car (car \param{x}))))}\cr
+\f{(caaadr \param{x})}&\f{(car (car (car (cdr \param{x}))))}\cr
+\f{(caadar \param{x})}&\f{(car (car (cdr (car \param{x}))))}\cr
+\f{(caaddr \param{x})}&\f{(car (car (cdr (cdr \param{x}))))}\cr
+\f{(cadaar \param{x})}&\f{(car (cdr (car (car \param{x}))))}\cr
+\f{(cadadr \param{x})}&\f{(car (cdr (car (cdr \param{x}))))}\cr
+\f{(caddar \param{x})}&\f{(car (cdr (cdr (car \param{x}))))}\cr
+\f{(cadddr \param{x})}&\f{(car (cdr (cdr (cdr \param{x}))))}\cr
+\f{(cdaaar \param{x})}&\f{(cdr (car (car (car \param{x}))))}\cr
+\f{(cdaadr \param{x})}&\f{(cdr (car (car (cdr \param{x}))))}\cr
+\f{(cdadar \param{x})}&\f{(cdr (car (cdr (car \param{x}))))}\cr
+\f{(cdaddr \param{x})}&\f{(cdr (car (cdr (cdr \param{x}))))}\cr
+\f{(cddaar \param{x})}&\f{(cdr (cdr (car (car \param{x}))))}\cr
+\f{(cddadr \param{x})}&\f{(cdr (cdr (car (cdr \param{x}))))}\cr
+\f{(cdddar \param{x})}&\f{(cdr (cdr (cdr (car \param{x}))))}\cr
+\f{(cddddr \param{x})}&\f{(cdr (cdr (cdr (cdr \param{x}))))}\cr
+}
+
+\macref{setf} can also be used with any of these functions to change an
+existing component of \param{x}, but \macref{setf} will not make new
+components.  So, for example, the \term{car} of a \term{cons} 
+can be assigned with \macref{setf} of \funref{car},
+but the \term{car} of \nil\ cannot be assigned with \macref{setf} of \funref{car}.
+Similarly, the \term{car} of the \term{car} of a \term{cons} whose \term{car}
+is a \term{cons} can be assigned with \macref{setf} of \funref{caar},
+but neither \nil nor a \term{cons} whose car is \nil\ can be assigned
+with \macref{setf} of \funref{caar}.
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+The argument \param{x} is permitted to be a \term{dotted list} 
+or a \term{circular list}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\label Examples::
+
+\code
+ (car nil) \EV NIL  
+ (cdr '(1 . 2)) \EV 2
+ (cdr '(1 2)) \EV (2)
+ (cadr '(1 2)) \EV 2 
+ (car '(a b c)) \EV A
+ (cdr '(a b c)) \EV (B C)
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+The functions \funref{car} and \funref{cdr} 
+should signal \typeref{type-error} if they receive an argument which is not a
+\term{list}.  The other functions (\funref{caar}, \funref{cadr},
+$\ldots$ \funref{cddddr}) should behave for the purpose of
+error checking as if defined by appropriate calls to \funref{car} and
+\funref{cdr}.
+
+\label See Also::
+
+\funref{rplaca}, \funref{first}, \funref{rest}
+
+\label Notes::
+
+%% 15.1.0 7
+The \term{car} of a \term{cons} can also be altered by using \funref{rplaca},
+and the \term{cdr} of a \term{cons} can be altered by using \funref{rplacd}.
+
+\code
+(car \i{x})    \EQ (first \i{x})
+(cadr \i{x})   \EQ (second \i{x}) \EQ (car (cdr \i{x}))
+(caddr \i{x})  \EQ (third \i{x})  \EQ (car (cdr (cdr \i{x})))
+(cadddr \i{x}) \EQ (fourth \i{x}) \EQ (car (cdr (cdr (cdr \i{x}))))
+\endcode
+
+\endcom
+
+%-------------------- Trees --------------------
+
+%%% ========== COPY-TREE
+\begincom{copy-tree}\ftype{Function}
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\label Syntax::
+
+\DefunWithValues copy-tree {tree} {new-tree}
+
+\label Arguments and Values::
+
+\param{tree}---a \term{tree}.
+
+\param{new-tree}---a \term{tree}.
+
+\label Description::
+
+%% 15.2.0 25
+Creates a \term{copy} of a \term{tree} of \term{conses}.
+
+If \param{tree} is not a \term{cons}, it is returned; 
+otherwise, the result is a new \term{cons} of the results of calling \funref{copy-tree} 
+on the \term{car} and \term{cdr} of \param{tree}.
+In other words, all \term{conses} in the \term{tree} represented by \param{tree}
+are copied recursively, stopping only when non-\term{conses} are encountered.
+
+\funref{copy-tree} does not preserve circularities and the sharing of substructure.
+%!!! And consequently might fail to return in the case of circularity? -kmp 09-Apr-91
+
+\label Examples::
+
+\code
+ (setq object (list (cons 1 "one")
+                    (cons 2 (list 'a 'b 'c))))
+\EV ((1 . "one") (2 A B C))
+ (setq object-too object) \EV ((1 . "one") (2 A B C))
+ (setq copy-as-list (copy-list object))
+ (setq copy-as-alist (copy-alist object))
+ (setq copy-as-tree (copy-tree object))
+ (eq object object-too) \EV \term{true}
+ (eq copy-as-tree object) \EV \term{false}
+ (eql copy-as-tree object) \EV \term{false}
+ (equal copy-as-tree object) \EV \term{true}
+ (setf (first (cdr (second object))) "a"
+       (car (second object)) "two"
+       (car object) '(one . 1)) \EV (ONE . 1)
+ object \EV ((ONE . 1) ("two" "a" B C))
+ object-too \EV ((ONE . 1) ("two" "a" B C))
+ copy-as-list \EV ((1 . "one") ("two" "a" B C))
+ copy-as-alist \EV ((1 . "one") (2 "a" B C))
+ copy-as-tree \EV ((1 . "one") (2 A B C)) 
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{tree-equal}
+
+\label Notes:\None.
+
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\endcom
+
+%%% ========== NSUBLIS
+%%% ========== SUBLIS
+\begincom{sublis, nsublis}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues sublis  {alist tree {\key} key test test-not} {new-tree}
+\DefunWithValues nsublis {alist tree {\key} key test test-not} {new-tree}
+
+\label Arguments and Values::
+
+\param{alist}---an \term{association list}.
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\param{tree}---a \term{tree}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\param{new-tree}---a \term{tree}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\label Description::
+
+%% 15.4.0 9
+\funref{sublis} makes substitutions for \term{objects} in \param{tree}
+(a structure of \term{conses}).
+%% 15.4.0 10
+\funref{nsublis} is like \funref{sublis} 
+but destructively modifies the relevant
+parts of the \param{tree}.
+
+\funref{sublis} looks at all subtrees and leaves of \param{tree};
+if a subtree or leaf appears as a key in \param{alist}
+(that is, the key and the subtree or leaf \term{satisfy the test}),
+it is replaced by the \term{object} with which that key is associated.
+This operation is non-destructive.  In effect, \funref{sublis} can
+perform several \funref{subst} operations simultaneously.
+
+%% Implied by "satisfy the test." -kmp 15-Feb-92
+% The first argument to the \kwd{test} or \kwd{test-not}
+% function is a key appearing in \param{alist};
+% the second argument is
+% the part of an element of \param{tree} extracted by the
+% \kwd{key} function (if supplied).
+% 
+% The argument to the \kwd{key} 
+% function is a \param{tree} element; the return value is part of
+% the supplied \param{tree} element.
+% If \kwd{key} is not supplied or \nil, 
+% the \param{tree} element itself is 
+% supplied to the \kwd{test} or \kwd{test-not}
+% function.
+
+If \funref{sublis} succeeds, a new copy of \param{tree} is returned in
+which each occurrence of such a subtree or leaf is replaced by the
+\term{object} with which it is associated.   If no changes are made, the
+original tree is returned.  The original \param{tree} is left unchanged,
+but the result tree may share cells with it.
+
+\funref{nsublis} is permitted to modify \param{tree} 
+but otherwise returns the same values as \funref{sublis}.
+
+\label Examples::
+
+\code
+ (sublis '((x . 100) (z . zprime))
+         '(plus x (minus g z x p) 4 . x))
+\EV (PLUS 100 (MINUS G ZPRIME 100 P) 4 . 100)
+ (sublis '(((+ x y) . (- x y)) ((- x y) . (+ x y)))
+         '(* (/ (+ x y) (+ x p)) (- x y))
+         :test #'equal)
+\EV (* (/ (- X Y) (+ X P)) (+ X Y))
+ (setq tree1 '(1 (1 2) ((1 2 3)) (((1 2 3 4)))))
+\EV (1 (1 2) ((1 2 3)) (((1 2 3 4))))
+ (sublis '((3 . "three")) tree1) 
+\EV (1 (1 2) ((1 2 "three")) (((1 2 "three" 4))))
+ (sublis '((t . "string"))
+          (sublis '((1 . "") (4 . 44)) tree1)
+          :key #'stringp)
+\EV ("string" ("string" 2) (("string" 2 3)) ((("string" 2 3 44))))
+ tree1 \EV (1 (1 2) ((1 2 3)) (((1 2 3 4))))
+ (setq tree2 '("one" ("one" "two") (("one" "Two" "three"))))
+\EV ("one" ("one" "two") (("one" "Two" "three"))) 
+ (sublis '(("two" . 2)) tree2) 
+\EV ("one" ("one" "two") (("one" "Two" "three"))) 
+ tree2 \EV ("one" ("one" "two") (("one" "Two" "three"))) 
+ (sublis '(("two" . 2)) tree2 :test 'equal) 
+\EV ("one" ("one" 2) (("one" "Two" "three"))) 
+
+ (nsublis '((t . 'temp))
+           tree1
+           :key #'(lambda (x) (or (atom x) (< (list-length x) 3))))
+\EV ((QUOTE TEMP) (QUOTE TEMP) QUOTE TEMP) 
+\endcode
+
+\label Side Effects::
+
+\funref{nsublis} modifies \param{tree}.
+ 
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{subst},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification},
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+Because the side-effecting variants (\eg \funref{nsublis}) potentially
+change the path that is being traversed, their effects in the presence
+of shared or circular structure structure may vary in surprising ways
+when compared to their non-side-effecting alternatives.  To see this,
+consider the following side-effect behavior, which might be exhibited by
+some implementations:
+
+\code
+ (defun test-it (fn)
+   (let* ((shared-piece (list 'a 'b))
+          (data (list shared-piece shared-piece)))
+     (funcall fn '((a . b) (b . a)) data)))
+ (test-it #'sublis) \EV ((B A) (B A))
+ (test-it #'nsublis) \EV ((A B) (A B))
+\endcode
+
+
+\endcom
+
+%%% ========== NSUBST
+%%% ========== NSUBST-IF
+%%% ========== NSUBST-IF-NOT
+%%% ========== SUBST
+%%% ========== SUBST-IF
+%%% ========== SUBST-IF-NOT
+\begincom{subst, subst-if, subst-if-not, nsubst, nsubst-if, nsubst-if-not}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues subst         {new old  tree {\key} key test test-not} {new-tree}
+\DefunWithValues subst-if      {new predicate tree {\key} key} {new-tree}
+\DefunWithValues subst-if-not  {new predicate tree {\key} key} {new-tree}
+
+\DefunWithValues nsubst        {new old  tree {\key} key test test-not} {new-tree}
+\DefunWithValues nsubst-if     {new predicate tree {\key} key} {new-tree}
+\DefunWithValues nsubst-if-not {new predicate tree {\key} key} {new-tree}
+
+\label Arguments and Values:: 
+
+\param{new}---an \term{object}.
+
+\param{old}---an \term{object}.
+
+\param{predicate}---a \term{symbol} that names a \term{function},
+   or a \term{function} of one argument 
+      that returns a \term{generalized boolean} value.
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\param{tree}---a \term{tree}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\param{new-tree}---a \term{tree}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\label Description::
+
+\funref{subst}, \funref{subst-if}, and \funref{subst-if-not} perform
+substitution operations on \param{tree}.  
+Each function searches \param{tree} for occurrences of a 
+particular \param{old} item of an element or subexpression that 
+\term{satisfies the test}.
+
+\funref{nsubst}, \funref{nsubst-if}, and \funref{nsubst-if-not} are 
+like \funref{subst},
+\funref{subst-if}, and \funref{subst-if-not} respectively, except that the 
+original \param{tree} is  modified.
+
+%% 15.4.0 4
+\funref{subst} makes a copy of \param{tree},
+substituting \param{new} for every subtree or leaf of \param{tree}
+(whether the subtree or leaf is a \term{car} or a \term{cdr} of its parent)
+such that \param{old} and the subtree or leaf \term{satisfy the test}.  
+
+%% 15.4.0 7
+\funref{nsubst} is a destructive version of \funref{subst}.  
+The list structure of
+\param{tree} is altered by destructively replacing with \param{new}
+each leaf of the \param{tree} such that \param{old} and the leaf
+\term{satisfy the test}.
+
+%% Implied by "satisfy the test".
+% Either \kwd{test} or \kwd{test-not} can
+% be used to supply a test function other than the default.
+% The first argument to the \kwd{test} or \kwd{test-not} function
+% is \param{old};
+% the second argument is 
+% the part of an element of \param{tree} 
+% extracted by the \kwd{key} function (if supplied).
+% The argument to the \kwd{key} function is an
+% element of \param{tree}; the return value is part of the supplied
+% argument.
+% If \kwd{key} is not supplied, the element from
+% \param{tree} is supplied to the \kwd{test} or \kwd{test-not} function.
+
+For \funref{subst}, \funref{subst-if}, 
+and \funref{subst-if-not},
+if the functions succeed, a new
+copy of the tree is returned in which each  occurrence of such an
+element is replaced by the
+\param{new} element or subexpression.  If no changes are made, the original 
+\param{tree} may be returned.
+The original \param{tree} is left unchanged, but the result tree 
+may share storage with it.           
+
+For \funref{nsubst}, \funref{nsubst-if}, 
+and \funref{nsubst-if-not}
+the original \param{tree} is  modified and returned as the function result,
+but the result may not be \funref{eq} to \param{tree}.
+%!!! Barmar: Huh??? ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+\label Examples::
+
+%% 15.4.0 6
+\code
+ (setq tree1 '(1 (1 2) (1 2 3) (1 2 3 4))) \EV (1 (1 2) (1 2 3) (1 2 3 4))
+ (subst "two" 2 tree1) \EV (1 (1 "two") (1 "two" 3) (1 "two" 3 4))
+ (subst "five" 5 tree1) \EV (1 (1 2) (1 2 3) (1 2 3 4))
+ (eq tree1 (subst "five" 5 tree1)) \EV \term{implementation-dependent}
+ (subst 'tempest 'hurricane
+        '(shakespeare wrote (the hurricane)))
+\EV (SHAKESPEARE WROTE (THE TEMPEST))
+ (subst 'foo 'nil '(shakespeare wrote (twelfth night)))
+\EV (SHAKESPEARE WROTE (TWELFTH NIGHT . FOO) . FOO)
+ (subst '(a . cons) '(old . pair)
+        '((old . spice) ((old . shoes) old . pair) (old . pair))
+        :test #'equal)
+\EV ((OLD . SPICE) ((OLD . SHOES) A . CONS) (A . CONS))
+
+ (subst-if 5 #'listp tree1) \EV 5
+ (subst-if-not '(x) #'consp tree1) 
+\EV (1 X)
+
+ tree1 \EV (1 (1 2) (1 2 3) (1 2 3 4))
+ (nsubst 'x 3 tree1 :key #'(lambda (y) (and (listp y) (third y)))) 
+\EV (1 (1 2) X X)
+ tree1 \EV (1 (1 2) X X)
+\endcode
+
+\label Side Effects::
+
+%% 15.4.0 7
+\funref{nsubst}, \funref{nsubst-if}, and \funref{nsubst-if-not} 
+might alter the \term{tree structure} of \param{tree}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{substitute},
+\funref{nsubstitute},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification},
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The functions \funref{subst-if-not} and \funref{nsubst-if-not} are deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+One possible definition of \funref{subst}:
+
+%% Indentation fixed per Boyer/Kaufmann/Moore #13 (by X3J13 vote at May 4-5, 1994 meeting)
+%% -kmp 9-May-94
+\code
+ (defun subst (old new tree &rest x &key test test-not key)
+   (cond ((satisfies-the-test old tree :test test
+                              :test-not test-not :key key)
+          new)
+         ((atom tree) tree)
+         (t (let ((a (apply #'subst old new (car tree) x))
+                  (d (apply #'subst old new (cdr tree) x)))
+              (if (and (eql a (car tree))
+                       (eql d (cdr tree)))
+                  tree
+                  (cons a d))))))
+\endcode
+\endcom
+
+%%% ========== TREE-EQUAL
+\begincom{tree-equal}\ftype{Function}
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\label Syntax::
+
+\DefunWithValues tree-equal {tree-1 tree-2 {\key} test test-not} {generalized-boolean}
+
+\label Arguments and Values:: 
+
+\param{tree-1}---a \term{tree}.
+
+\param{tree-2}---a \term{tree}.
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 15.1.0 8
+\funref{tree-equal} tests whether two trees are of the same shape
+and have the same leaves.  
+\funref{tree-equal} returns \term{true} if \param{tree-1} and \param{tree-2}  are 
+both \term{atoms} and \term{satisfy the test},
+or if they are both \term{conses} and
+the \term{car} of \param{tree-1} is \funref{tree-equal} to
+the \term{car} of \param{tree-2} and
+the \term{cdr} of \param{tree-1} is \funref{tree-equal} to
+the \term{cdr} of \param{tree-2}.  
+Otherwise, \funref{tree-equal} returns \term{false}.
+
+\funref{tree-equal} recursively compares \term{conses} but not any 
+other \term{objects} that have components.  
+
+The first argument to the \kwd{test} or \kwd{test-not} 
+function is \param{tree-1} or a \term{car} or \term{cdr} of \param{tree-1};
+the second argument is \param{tree-2} or a \term{car} 
+or \term{cdr} of \param{tree-2}.
+
+\label Examples::
+
+\code
+ (setq tree1 '(1 (1 2))
+       tree2 '(1 (1 2))) \EV (1 (1 2))
+ (tree-equal tree1 tree2) \EV \term{true}
+ (eql tree1 tree2) \EV \term{false}
+ (setq tree1 '('a ('b 'c))
+       tree2 '('a ('b 'c))) \EV ('a ('b 'c)) 
+\EV ((QUOTE A) ((QUOTE B) (QUOTE C)))
+ (tree-equal tree1 tree2 :test 'eq) \EV \term{true}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+The consequences are undefined 
+if both \param{tree-1} and \param{tree-2} are circular.
+
+\label See Also::
+
+\funref{equal},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\endcom
+
+%-------------------- List --------------------
+
+%%% ========== COPY-LIST
+\begincom{copy-list}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues copy-list {list} {copy}
+
+\label Arguments and Values::
+
+\param{list}---a \term{proper list} or a \term{dotted list}.
+
+\param{copy}---a \term{list}.
+
+\label Description::
+
+%% 15.2.0 23
+
+Returns a \term{copy} of \param{list}.
+If \param{list} is a \term{dotted list},
+the resulting \term{list} will also be a \term{dotted list}.
+
+Only the \term{list structure} of \param{list} is copied; 
+the \term{elements} of the resulting list are 
+the \term{same} as the corresponding \term{elements} of the given \param{list}.
+
+\label Examples::    
+
+\code
+ (setq lst (list 1 (list 2 3))) \EV (1 (2 3))
+ (setq slst lst) \EV (1 (2 3))
+ (setq clst (copy-list lst)) \EV (1 (2 3))
+ (eq slst lst) \EV \term{true}
+ (eq clst lst) \EV \term{false}
+ (equal clst lst) \EV \term{true}
+ (rplaca lst "one") \EV ("one" (2 3))
+ slst \EV ("one" (2 3))
+ clst \EV (1 (2 3))
+ (setf (caadr lst) "two") \EV "two"
+ lst \EV ("one" ("two" 3))
+ slst \EV ("one" ("two" 3))
+ clst \EV (1 ("two" 3))
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+The consequences are undefined if \param{list} is a \term{circular list}.
+
+\label See Also::
+
+\funref{copy-alist},
+\funref{copy-seq},
+\funref{copy-tree}
+
+\label Notes::
+
+The copy created is \funref{equal} to \param{list}, but not \funref{eq}.
+
+\endcom
+
+%%% ========== LIST
+%%% ========== LIST*
+\begincom{list, list*}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {list}  {{\rest} objects} {list}
+\DefunWithValues {list*} {{\rest} \plus{objects}} {result}
+
+\label Arguments and Values:: 
+
+\param{object}---an \term{object}.
+
+\param{list}---a \term{list}.
+
+\param{result}---an \term{object}.
+%A (possibly dotted) list, if at least 2 args are given.
+
+\label Description::
+
+%% 15.2.0 17
+
+\funref{list} returns a \term{list} containing the supplied \param{objects}.  
+
+%% 15.2.0 18
+
+\funref{list*} is like \funref{list} except that 
+the last \term{argument} to \funref{list} becomes 
+the \term{car} of the last \term{cons} constructed, while
+the last \term{argument} to \funref{list*} becomes 
+the \term{cdr} of the last \term{cons} constructed.
+Hence, any given call to \funref{list*} always produces one fewer \term{conses}
+than a call to \funref{list} with the same number of arguments.
+
+If the last \term{argument} to \funref{list*} is a \term{list}, 
+the effect is to construct a new \term{list} which is similar, but
+which has additional elements added to the front corresponding to
+the preceding \term{arguments} of \funref{list*}.
+
+If \funref{list*} receives only one \param{object},
+that \param{object} is returned, regardless of whether or not it is a \term{list}.
+
+\label Examples::
+
+\code
+ (list 1) \EV (1)
+ (list* 1) \EV 1
+ (setq a 1) \EV 1
+ (list a 2) \EV (1 2)
+ '(a 2) \EV (A 2)
+ (list 'a 2) \EV (A 2)
+ (list* a 2) \EV (1 . 2)
+ (list) \EV NIL ;\ie ()
+ (setq a '(1 2)) \EV (1 2)
+ (eq a (list* a)) \EV \term{true}
+ (list 3 4 'a (car '(b . c)) (+ 6 -2)) \EV (3 4 A B 4)
+ (list* 'a 'b 'c 'd) \EQ (cons 'a (cons 'b (cons 'c 'd))) \EV (A B C . D)
+ (list* 'a 'b 'c '(d e f)) \EV (A B C D E F)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{cons}
+
+\label Notes::
+
+\code
+ (list* \param{x}) \EQ \param{x}
+\endcode
+
+\endcom
+
+%%% ========== LIST-LENGTH
+\begincom{list-length}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues list-length {list} {length}
+
+\label Arguments and Values::
+
+\param{list}---a \term{proper list} or a \term{circular list}.
+
+\param{length}---a non-negative \term{integer}, or \nil.
+
+\label Description::
+
+%% 15.2.0 5
+Returns the \term{length} of \param{list} if \param{list} is a \term{proper list}.
+Returns \nil\ if \param{list} is a \term{circular list}.
+
+\label Examples::
+
+\code
+ (list-length '(a b c d)) \EV 4
+ (list-length '(a (b c) d)) \EV 3
+ (list-length '()) \EV 0
+ (list-length nil) \EV 0
+ (defun circular-list (&rest elements)
+   (let ((cycle (copy-list elements))) 
+     (nconc cycle cycle)))
+ (list-length (circular-list 'a 'b)) \EV NIL
+ (list-length (circular-list 'a)) \EV NIL
+ (list-length (circular-list)) \EV 0
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{list}{a \term{proper list} or a \term{circular list}}
+
+\label See Also::
+
+\funref{length}
+
+\label Notes::
+
+\funref{list-length} could be implemented as follows:
+
+\code
+ (defun list-length (x)  
+   (do ((n 0 (+ n 2))           ;Counter.
+        (fast x (cddr fast))    ;Fast pointer: leaps by 2.
+        (slow x (cdr slow)))    ;Slow pointer: leaps by 1.
+       (nil)
+     ;; If fast pointer hits the end, return the count.
+     (when (endp fast) (return n))
+     (when (endp (cdr fast)) (return (+ n 1)))
+     ;; If fast pointer eventually equals slow pointer,
+     ;;  then we must be stuck in a circular list.
+     ;; (A deeper property is the converse: if we are
+     ;;  stuck in a circular list, then eventually the
+     ;;  fast pointer will equal the slow pointer.
+     ;;  That fact justifies this implementation.)
+     (when (and (eq fast slow) (> n 0)) (return nil))))
+ 
+\endcode
+
+\endcom
+
+%%% ========== LISTP
+\begincom{listp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues listp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 10
+\TypePredicate{object}{list}
+
+\label Examples::
+\code
+ (listp nil) \EV \term{true}
+ (listp (cons 1 2)) \EV \term{true}
+ (listp (make-array 6)) \EV \term{false}
+ (listp t) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{consp}
+
+\label Notes::
+
+%This is implied by type list, but still worth saying. -kmp
+
+If \param{object} is a \term{cons},
+\funref{listp} does not check whether \param{object} is a \term{proper list};
+it returns \term{true} for any kind of \term{list}.
+
+\code
+ (listp \param{object}) \EQ (typep \param{object} 'list) \EQ (typep \param{object} '(or cons null))
+\endcode
+
+\endcom
+
+%%% ========== MAKE-LIST
+\begincom{make-list}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-list {size {\key} initial-element} {list}
+                                   
+\label Arguments and Values::
+
+\param{size}---a non-negative \term{integer}.
+
+\param{initial-element}---an \term{object}.
+  \Default{\nil}
+
+\param{list}---a \term{list}.
+
+\label Description::
+
+%% 15.2.0 19
+Returns a \term{list} of \param{length} given by \term{size},
+each of the \term{elements} of which is \param{initial-element}.
+
+\label Examples::
+\code
+ (make-list 5) \EV (NIL NIL NIL NIL NIL)
+ (make-list 3 :initial-element 'rah) \EV (RAH RAH RAH)
+ (make-list 2 :initial-element '(1 2 3)) \EV ((1 2 3) (1 2 3))
+ (make-list 0) \EV NIL ;\ie ()
+ (make-list 0 :initial-element 'new-element) \EV NIL 
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{size}{a non-negative \term{integer}}
+
+\label See Also::
+
+\funref{cons},
+\funref{list}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- List Elements --------------------
+
+%%% ========== PUSH
+\begincom{push}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValues push {item place} {new-place-value}
+
+\label Arguments and Values::
+
+\param{item}---an \term{object}. 
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\param{place}---a \term{place}, the \term{value} of which may be any \term{object}.  
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{new-place-value}---a \term{list} (the new \term{value} of \param{place}).
+
+\label Description::
+
+\macref{push} prepends \param{item} to the \term{list} that is stored
+in \param{place}, stores the resulting \term{list} in \param{place}, 
+and returns the \term{list}.
+
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+For information about the \term{evaluation} of \term{subforms} of \param{place},
+\seesection\GenRefSubFormEval.
+\endissue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+
+\label Examples::
+%% 15.2.0 31
+\code
+ (setq llst '(nil)) \EV (NIL)
+ (push 1 (car llst)) \EV (1)
+ llst \EV ((1))
+ (push 1 (car llst)) \EV (1 1)
+ llst \EV ((1 1))
+ (setq x '(a (b c) d)) \EV (A (B C) D)
+ (push 5 (cadr x)) \EV (5 B C)  
+ x \EV (A (5 B C) D)
+\endcode
+
+\label Side Effects::
+
+The contents of \param{place} are modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{pop},
+\macref{pushnew},
+{\secref\GeneralizedReference}
+
+\label Notes::
+The effect of \f{(push \i{item} \i{place})}
+is equivalent to
+
+\code
+ (setf place (cons \i{item} \i{place}))
+\endcode
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+except that the \term{subforms} of \param{place} 
+are evaluated only once, and \param{item} is evaluated
+before \param{place}.
+\endissue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+
+\endcom
+
+%%% ========== POP
+\begincom{pop}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValues pop {place} {element}
+
+\label Arguments and Values:: 
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\param{place}---a \term{place}, the \term{value} of which is a \term{list}
+   (possibly, but necessarily, a \term{dotted list} or \term{circular list}).
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{element}---an \term{object} (the \term{car} of the contents of \param{place}).
+
+\label Description::
+
+%% 15.2.0 35
+\macref{pop} \term{reads} the \term{value} of \param{place},
+remembers the \term{car} of the \term{list} which was retrieved,
+\term{writes} the \term{cdr} of the \term{list} back into the \param{place},
+and finally \term{yields} the \term{car} of the originally retrieved \term{list}.
+
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+For information about the \term{evaluation} of \term{subforms} of \param{place},
+\seesection\GenRefSubFormEval.
+\endissue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+
+\label Examples::
+
+\code
+ (setq stack '(a b c)) \EV (A B C)
+ (pop stack) \EV A  
+ stack \EV (B C)
+ (setq llst '((1 2 3 4))) \EV ((1 2 3 4))
+ (pop (car llst)) \EV 1
+ llst \EV ((2 3 4))
+\endcode
+
+\label Side Effects::
+
+The contents of \param{place} are modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{push},
+\macref{pushnew},
+{\secref\GeneralizedReference}
+
+\label Notes::
+
+The effect of \f{(pop \param{place})} is roughly equivalent to
+
+\code
+ (prog1 (car \param{place}) (setf \param{place} (cdr \param{place})))
+\endcode
+except that the latter would evaluate any \term{subforms} of \param{place}
+three times, while \macref{pop} evaluates them only once.
+
+
+\endcom
+
+
+%%% ========== FIRST
+%%% ========== SECOND
+%%% ========== THIRD
+%%% ========== FOURTH
+%%% ========== FIFTH
+%%% ========== SIXTH
+%%% ========== SEVENTH
+%%% ========== EIGHTH
+%%% ========== NINTH
+%%% ========== TENTH
+\begincom{first, second, third, fourth, fifth, 
+	  sixth, seventh, eighth, ninth, tenth}\ftype{Accessor}
+         
+\label Syntax::
+
+\DefunMultiAccessorWithValues {list} {object} {new-object}
+ {\entry{first}
+  \entry{second}
+  \entry{third}
+  \entry{fourth}
+  \entry{fifth}
+  \entry{sixth}
+  \entry{seventh}
+  \entry{eighth}
+  \entry{ninth}
+  \entry{tenth}}
+
+\label Arguments and Values::
+
+\param{list}---a \term{list}, 
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+	       which might be a \term{dotted list} or a \term{circular list}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{object}, \param{new-object}---an \param{object}.
+
+\label Description::
+
+The functions
+%% 15.2.0 11
+\funref{first},
+\funref{second},
+\funref{third}, 
+\funref{fourth}, 
+\funref{fifth},
+\funref{sixth},
+\funref{seventh},
+\funref{eighth}, 
+\funref{ninth},
+and
+\funref{tenth}
+%% 15.2.0 12
+\param{access} the first, second, third, fourth, fifth, sixth, seventh, eighth,
+ninth, and tenth \term{elements} of \param{list}, respectively.
+%% I changed this to be in terms of car/cdr because I felt this made 
+%% the error checking requirements more apparent. -kmp 27-Aug-93
+% If there is no such \term{element} during a \term{read}, \nil\ is returned.
+% The consequences are undefined if there is no such \term{element} during a \term{write}.
+Specifically,
+
+\code
+ (first \param{list})    \EQ  (car \param{list})
+ (second \param{list})   \EQ  (car (cdr \param{list}))
+ (third \param{list})    \EQ  (car (cddr \param{list}))
+ (fourth \param{list})   \EQ  (car (cdddr \param{list}))
+ (fifth \param{list})    \EQ  (car (cddddr \param{list}))
+ (sixth \param{list})    \EQ  (car (cdr (cddddr \param{list})))
+ (seventh \param{list})  \EQ  (car (cddr (cddddr \param{list})))
+ (eighth \param{list})   \EQ  (car (cdddr (cddddr \param{list})))
+ (ninth \param{list})    \EQ  (car (cddddr (cddddr \param{list})))
+ (tenth \param{list})    \EQ  (car (cdr (cddddr (cddddr \param{list}))))
+\endcode
+
+\macref{setf} can also be used with any of these functions to change an
+existing component.  The same equivalences apply.  For example:
+
+\code
+ (setf (fifth \param{list}) \param{new-object}) \EQ (setf (car (cddddr \param{list})) \param{new-object})
+\endcode
+
+\label Examples::
+
+\code
+ (setq lst '(1 2 3 (4 5 6) ((V)) vi 7 8 9 10)) 
+\EV (1 2 3 (4 5 6) ((V)) VI 7 8 9 10)
+ (first lst) \EV 1
+ (tenth lst) \EV 10
+ (fifth lst) \EV ((V))
+ (second (fourth lst)) \EV 5
+ (sixth '(1 2 3)) \EV NIL
+ (setf (fourth lst) "four") \EV "four"
+ lst \EV (1 2 3 "four" ((V)) VI 7 8 9 10)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{car}, \funref{nth}
+
+\label Notes::
+
+\funref{first}  is functionally equivalent to \funref{car},
+\funref{second} is functionally equivalent to \funref{cadr},
+\funref{third}  is functionally equivalent to \funref{caddr}, and 
+\funref{fourth} is functionally equivalent to \funref{cadddr}.
+
+The ordinal numbering used here is one-origin,
+as opposed to the zero-origin numbering used by \funref{nth}:
+
+\code
+ (fifth x) \EQ (nth 4 x)
+\endcode
+
+\endcom
+
+%%% ========== NTH
+\begincom{nth}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues nth {n list} {object}
+\Defsetf         nth {n list} {new-object}
+
+\label Arguments and Values::
+
+\param{n}---a non-negative \term{integer}.
+
+\param{list}---a \term{list},
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+	       which might be a \term{dotted list} or a \term{circular list}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{object}---an \term{object}.
+
+\param{new-object}---an \term{object}.
+
+\label Description::
+
+\funref{nth} locates the \param{n}th element of \param{list},
+where the \term{car} of the \param{list} is the ``zeroth'' element.
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% If the length of \param{list} is not greater than \param{n}, 
+% then the result is \nil.
+Specifically,
+
+\code
+ (nth \param{n} \param{list}) \EQ (car (nthcdr \param{n} \param{list}))
+\endcode
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+%% 15.2.0 8
+
+\funref{nth} may be used to specify a \param{place} to \macref{setf}.
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+Specifically,
+% when \funref{nth} is used in this way, \param{n} must be less
+% than the length of the \param{list}.
+
+\code
+ (setf (nth \param{n} \param{list}) \param{new-object}) \EQ (setf (car (nthcdr \param{n} \param{list})) \param{new-object})
+\endcode
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\label Examples::
+
+%% 15.2.0 6
+\code
+ (nth 0 '(foo bar baz)) \EV FOO
+ (nth 1 '(foo bar baz)) \EV BAR
+ (nth 3 '(foo bar baz)) \EV NIL
+ (setq 0-to-3 (list 0 1 2 3)) \EV (0 1 2 3)
+ (setf (nth 2 0-to-3) "two") \EV "two"
+ 0-to-3 \EV (0 1 "two" 3)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{elt},
+\funref{first},
+\funref{nthcdr}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- List Tails --------------------
+
+%%% ========== ENDP
+\begincom{endp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues endp {list} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{list}---a \term{list},
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+	       which might be a \term{dotted list} or a \term{circular list}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 15.2.0 3
+Returns \term{true}  if \param{list} is the \term{empty list}.
+Returns \term{false} if \param{list} is a \term{cons}.
+
+\label Examples::
+
+\code
+ (endp nil) \EV \term{true}
+ (endp '(1 2)) \EV \term{false}
+ (endp (cddr '(1 2))) \EV \term{true}
+\endcode
+                              
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{list}{a \term{list}}
+
+\label See Also:\None.
+
+\label Notes::
+
+The purpose of \funref{endp} is to test for the end of \param{proper list}.
+Since \funref{endp} does not descend into a \term{cons}, 
+it is well-defined to pass it a \term{dotted list}.
+However, if shorter ``lists'' are iteratively produced 
+by calling \funref{cdr} on such a \term{dotted list} 
+and those ``lists'' are tested with \funref{endp},
+a situation that has undefined consequences will eventually result 
+when the \term{non-nil} \term{atom} (which is not in fact a \term{list})
+finally becomes the argument to \funref{endp}.
+Since this is the usual way in which \funref{endp} is used,
+it is conservative programming style 
+and consistent with the intent of \funref{endp}
+to treat \funref{endp} as simply a function on \term{proper lists} 
+which happens not to enforce an argument type of \term{proper list} except
+when the argument is \term{atomic}.
+
+\endcom
+
+%%% ========== NULL
+\begincom{null}\ftype{Function}
+
+\issue{NOT-AND-NULL-RETURN-VALUE:X3J13-MAR-93}
+
+\label Syntax::
+
+\DefunWithValues null {object} {boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{boolean}---a \term{boolean}.
+
+\label Description::
+
+%% 6.2.2 3
+\StrictPredicate{object}{the \term{empty list}}
+
+\label Examples::   
+
+\code
+ (null '()) \EV T
+ (null nil) \EV T
+ (null t) \EV NIL
+ (null 1) \EV NIL
+\endcode
+
+\endissue{NOT-AND-NULL-RETURN-VALUE:X3J13-MAR-93}
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{not}
+
+\label Notes::
+
+%% 6.4.0 4
+\funref{null} is intended to be used to test for the \term{empty list}
+whereas \funref{not} is intended to be used to invert a \term{boolean}
+(or \term{generalized boolean}).
+Operationally, \funref{null} and \funref{not} compute the same result;
+which to use is a matter of style.
+
+\code
+ (null \param{object}) \EQ (typep \param{object} 'null) \EQ (eq \param{object} '\empty)
+\endcode
+
+\endcom
+
+%%% ========== NCONC
+\begincom{nconc}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues nconc {{\rest} lists} {concatenated-list}
+
+\label Arguments and Values::
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\param{list}---each but the last must be a \term{list} 
+	(which might be a \param{dotted list} but must not be a \term{circular list});
+        the last \param{list} may be any \term{object}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{concatenated-list}---a \term{list}.
+
+\label Description::
+
+% Note: Issue APPEND-DOTTED was repealed.
+
+%% 15.2.0 28
+Returns a \term{list} that is the concatenation of \param{lists}.
+If no \param{lists} are supplied, \f{(nconc)} returns \nil.
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\funref{nconc} is defined using the following recursive relationship:
+ 
+\code
+ (nconc) \EV ()
+ (nconc nil . \param{lists}) \EQ (nconc . \param{lists})
+ (nconc \param{list}) \EV \param{list}
+ (nconc \param{list-1} \param{list-2}) \EQ (progn (rplacd (last \param{list-1}) \param{list-2}) \param{list-1})
+ (nconc \param{list-1} \param{list-2} . \param{lists}) \EQ (nconc (nconc \param{list-1} \param{list-2}) . \param{lists})
+\endcode
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+
+\label Examples::
+
+\code
+ (nconc) \EV NIL
+ (setq x '(a b c)) \EV (A B C)
+ (setq y '(d e f)) \EV (D E F)
+ (nconc x y) \EV (A B C D E F)
+ x \EV (A B C D E F)
+\endcode
+Note, in the example, that the value of \f{x} is now different,
+since its last \term{cons} 
+has been \funref{rplacd}'d to the value of \f{y}.
+If \f{(nconc x y)} were evaluated again,
+it would yield a piece of a \term{circular list},
+whose printed representation would be
+\f{(A B C D E F D E F D E F ...)}, repeating forever;
+if the \varref{*print-circle*} switch were \term{non-nil},
+it would be printed as \f{(A B C . \#1=(D E F . \#1\#))}.
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\code
+ (setq foo (list 'a 'b 'c 'd 'e)
+       bar (list 'f 'g 'h 'i 'j)
+       baz (list 'k 'l 'm)) \EV (K L M)
+ (setq foo (nconc foo bar baz)) \EV (A B C D E F G H I J K L M)
+ foo \EV (A B C D E F G H I J K L M)
+ bar \EV (F G H I J K L M)
+ baz \EV (K L M)
+
+ (setq foo (list 'a 'b 'c 'd 'e)
+       bar (list 'f 'g 'h 'i 'j)
+       baz (list 'k 'l 'm)) \EV (K L M)
+ (setq foo (nconc nil foo bar nil baz)) \EV (A B C D E F G H I J K L M) 
+ foo \EV (A B C D E F G H I J K L M)
+ bar \EV (F G H I J K L M)
+ baz \EV (K L M)
+\endcode
+
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\label Side Effects::
+
+The \param{lists} are modified rather than copied.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None?
+
+\label See Also::
+
+\funref{append}, \funref{concatenate}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== APPEND
+\begincom{append}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues append {{\rest} lists} {result}
+
+\label Arguments and Values:: 
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\param{list}---each must be a \term{proper list} except the last,
+	       which may be any \term{object}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{result}---an \term{object}.  This will be a \term{list}
+		 unless the last \param{list} was not a \term{list}
+%Sandra noted a but in the preceding.
+        	    and all preceding \param{lists} were \term{null}.
+
+
+\label Description::
+
+%% Issue APPEND-DOTTED had an effect here, but was later rescinded.
+
+%% 15.2.0 20
+\funref{append} returns a new \param{list} that is the concatenation of
+the copies.  \param{lists} are left unchanged; the \term{list structure} 
+of each of \param{lists} except the last is copied.
+%% 15.2.0 21
+The last argument is not copied; it becomes the \term{cdr} of the 
+final \term{dotted pair} of the concatenation of the preceding \param{lists},
+or is returned directly if there are no preceding
+% "non-empty" added with encouragement of Sandra and KAB. -kmp 28-Jan-92
+\term{non-empty} 
+\param{lists}.
+
+\label Examples::
+
+\code
+ (append '(a b c) '(d e f) '() '(g)) \EV (A B C D E F G)
+ (append '(a b c) 'd) \EV (A B C . D)
+ (setq lst '(a b c)) \EV (A B C)
+ (append lst '(d)) \EV (A B C D)
+ lst \EV (A B C)
+ (append) \EV NIL
+ (append 'a) \EV A
+\endcode
+ 
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{nconc}, \funref{concatenate}
+
+\label Notes:\None.
+
+\endcom
+
+%% Entries for REVAPPEND and NCONC consolidated. -kmp 29-Aug-93
+
+%%% ========== REVAPPEND
+%%% ========== NRECONC
+
+\begincom{revappend, nreconc}\ftype{Function}
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\label Syntax::
+
+\DefunWithValues revappend {list tail} {result-list}
+\DefunWithValues nreconc   {list tail} {result-list}
+
+\label Arguments and Values::
+
+\param{list}---a \term{proper list}.
+
+\param{tail}---an \term{object}. 
+
+\param{result-list}---an \term{object}.
+
+\label Description::
+
+\funref{revappend} constructs a \term{copy}\meaning{2} of \param{list},
+but with the \term{elements} in reverse order.  It then appends (as if
+by \funref{nconc}) the \param{tail} to that reversed list and returns the result.
+
+\funref{nreconc} reverses the order of \term{elements} in \param{list}
+(as if by \funref{nreverse}).  It then appends (as if by \funref{nconc})
+the \param{tail} to that reversed list and returns the result.
+
+The resulting \term{list} shares \term{list structure} with \param{tail}.
+
+\label Examples::
+
+\code
+ (let ((list-1 (list 1 2 3))
+       (list-2 (list 'a 'b 'c)))
+   (print (revappend list-1 list-2))
+   (print (equal list-1 '(1 2 3)))
+   (print (equal list-2 '(a b c))))
+\OUT (3 2 1 A B C) 
+\OUT T
+\OUT T
+\EV T
+
+ (revappend '(1 2 3) '()) \EV (3 2 1)
+ (revappend '(1 2 3) '(a . b)) \EV (3 2 1 A . B)
+ (revappend '() '(a b c)) \EV (A B C)
+ (revappend '(1 2 3) 'a) \EV (3 2 1 . A)
+ (revappend '() 'a) \EV A   ;degenerate case
+
+ (let ((list-1 '(1 2 3))
+       (list-2 '(a b c)))
+   (print (nreconc list-1 list-2))
+   (print (equal list-1 '(1 2 3)))
+   (print (equal list-2 '(a b c))))
+\OUT (3 2 1 A B C) 
+\OUT NIL
+\OUT T
+\EV T
+
+\endcode
+
+\label Side Effects::
+
+\funref{revappend} does not modify either of its \term{arguments}.
+\funref{nreconc} is permitted to modify \param{list} but not \param{tail}.
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+Although it might be implemented differently,
+\funref{nreconc} is constrained to have side-effect behavior equivalent to:
+
+\code
+ (nconc (nreverse \param{list}) \param{tail})
+\endcode
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{reverse},
+\funref{nreverse},
+\funref{nconc}
+
+\label Notes::
+
+%% 15.2.0 27
+%% 15.2.0 30
+
+The following functional equivalences are true, 
+although good \term{implementations} will typically use a faster algorithm for
+achieving the same effect:
+
+\code
+ (revappend \param{list} \param{tail}) \EQ (nconc (reverse \param{list}) \param{tail})
+ (nreconc \param{list} \param{tail}) \EQ (nconc (nreverse \param{list}) \param{tail})
+\endcode
+
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\endcom
+
+
+
+%% Entries for REVAPPEND and NCONC consolidated. -kmp 29-Aug-93
+% %%% ========== NRECONC
+% \begincom{nreconc}\ftype{Function}
+% 
+% \label Syntax::
+% 
+% \DefunWithValues nreconc {list-1 list-2} {result-list}
+% 
+% \label Arguments and Values:: 
+% 
+% \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% 
+% \param{list-1}---a \term{proper list}.
+% 
+% \param{list-2}---an \term{object}.
+% 
+% \endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% 
+% \param{result-list}---an \term{object}. 
+% 
+% \label Description::
+% 
+% \funref{nreconc} reverses the order of the elements in 
+% \param{list-1} and appends \param{list-2} to \param{list-1} 
+% \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% (as if by \funref{nconc}).
+% \endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% The new \param{list-1} is returned.
+% 
+% \label Examples::
+% 
+% \code
+%  (defparameter *list-1* (list 1 2 3))
+%  (defparameter *list-2* (list 'a 'b 'c))
+%  (nreconc *list-1* *list-2*) \EV (3 2 1 A B C)
+%  *list-1* \EV \term{implementation-dependent}
+%  *list-2* \EV (A B C)
+% 
+%  (nreconc (list) 'a) \EV A  ;degenerate situation
+% \endcode
+% 
+% \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% % \code
+% %  (nreconc (cons 1 2) nil) \EV (1)
+% % \endcode
+% \endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% 
+% \label Side Effects::
+% 
+% \param{list-1} is modified.
+% 
+% \issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+% \funref{nreconc} is constrained to have side-effect behavior equivalent to:
+% 
+% \f{(nconc (nreverse \param{list-1}) \param{list-2})}.
+% \endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+% 
+% \label Affected By:\None.
+% 
+% \label Exceptional Situations:\None?
+% 
+% \label See Also::
+% 
+% \funref{revappend}
+% 
+% \label Notes::
+% %% 15.2.0 30
+% \f{(nreconc x y)} is exactly the same as 
+% \f{(nconc (nreverse x) y)} except that it is potentially more efficient.
+% 
+% \endcom
+
+%% Entries for REVAPPEND and NCONC consolidated. -kmp 29-Aug-93
+% %%% ========== REVAPPEND
+% \begincom{revappend}\ftype{Function}
+% 
+% \label Syntax::
+% 
+% \DefunWithValues revappend {list-1 list-2} {result-list}
+% 
+% \label Arguments and Values::
+% 
+% \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% \param{list-1}---a \term{proper list}.
+% 
+% \param{list-2}---an \term{object}. 
+% 
+% \param{result-list}---an \term{object}.
+% \endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% 
+% \label Description::
+% 
+% \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% Constructs a \term{fresh} \term{list} that is a \term{copy} of \param{list-1}
+% but with the \term{elements} in reverse order,
+% and then appends \param{list-2} to that \term{list}
+% (as if by \funref{nconc}).
+% %(as if by \funref{append}).
+% \endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% 
+% The resulting \term{list} shares \term{list structure} with \param{list-2}.
+% 
+% \label Examples::
+% 
+% \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% \code
+%  (setq lst1 '(1 2 3)
+%         lst2 '(a b c))  \EV (A B C)
+%  (revappend lst1 lst2) \EV (3 2 1 A B C)
+%  lst1 \EV (1 2 3)
+%  lst2 \EV (A B C)
+%  (revappend '(1 2 3) '(a . b)) \EV (3 2 1 A . B)
+%  (revappend nil '(a b c)) \EV (A B C)
+%  (revappend '() 'a) \EV A ;degenerate case
+% \endcode
+% 
+% % \code
+% %  (revappend '(1 . 2) '(a b c)) \EV (1 A B C)
+% % \endcode
+% \endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% 
+% \label Side Effects:\None.
+% 
+% \label Affected By:\None.
+% 
+% \label Exceptional Situations:\None.
+% 
+% \label See Also::
+% 
+% \funref{nreconc}
+% 
+% \label Notes::
+% %% 15.2.0 27
+% 
+% %"reverse" => "nconc" per Barrett
+% \code
+%  (revappend x y) \EQ (nconc (reverse x) y)
+% \endcode
+% 
+% \endcom
+
+%%% ========== NBUTLAST
+%%% ========== BUTLAST
+\begincom{butlast, nbutlast}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues butlast  {list {\opt} n} {result-list}
+\DefunWithValues nbutlast {list {\opt} n} {result-list}
+
+\label Arguments and Values::
+
+\param{list}---a \term{list}, 
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+	       which might be a \term{dotted list} but must not be a \term{circular list}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\issue{BUTLAST-NEGATIVE:SHOULD-SIGNAL}
+\param{n}---a non-negative \term{integer}.
+\endissue{BUTLAST-NEGATIVE:SHOULD-SIGNAL}
+
+\param{result-list}---a \term{list}.
+
+\label Description::
+
+%% 15.2.0 36
+\funref{butlast} returns a copy of \param{list} from which the last
+\param{n}
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+%elements
+conses
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+have been omitted.
+If \param{n} is not supplied, its value is 1.  
+If there are fewer than \param{n} 
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+%elements
+conses
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+in \param{list},
+\nil\ is returned and, in the case of \funref{nbutlast},
+\param{list} is not modified.  
+%Barmar notes that if there are n elements, NIL is returned, too.
+%He suggests says "fewer than n+1".
+%But KMP thinks the definition already covers that, and the reason for the
+%exception about NIL is to clarify the behavior in the cases not covered.
+
+%% 15.2.0 37
+\funref{nbutlast} is like \funref{butlast}, but \funref{nbutlast} 
+may modify \param{list}.
+It changes the \term{cdr} of
+the \term{cons} \param{n}+1 from the end of the \param{list} to \nil.  
+
+\label Examples::
+\code
+ (setq lst '(1 2 3 4 5 6 7 8 9)) \EV (1 2 3 4 5 6 7 8 9)
+ (butlast lst) \EV (1 2 3 4 5 6 7 8)
+ (butlast lst 5) \EV (1 2 3 4)
+ (butlast lst (+ 5 5)) \EV NIL
+ lst \EV (1 2 3 4 5 6 7 8 9)
+ (nbutlast lst 3) \EV (1 2 3 4 5 6)
+ lst \EV (1 2 3 4 5 6)
+ (nbutlast lst 99) \EV NIL
+ lst \EV (1 2 3 4 5 6)
+ (butlast '(a b c d)) \EV (A B C)
+ (butlast '((a b) (c d))) \EV ((A B))
+ (butlast '(a)) \EV NIL
+ (butlast nil) \EV NIL
+ (setq foo (list 'a 'b 'c 'd)) \EV (A B C D)
+ (nbutlast foo) \EV (A B C)
+ foo \EV (A B C)
+ (nbutlast (list 'a)) \EV NIL
+ (nbutlast '()) \EV NIL
+\endcode
+
+% The following example was present but no one could figure out what
+% made anyone think this would reliably work, so I removed it. -kmp 14-Feb-92
+%
+% (butlast '(1 2 . 3)) \EV (1)
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\Shouldchecktype{list}{a \term{proper list} or a \term{dotted list}}
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\issue{BUTLAST-NEGATIVE:SHOULD-SIGNAL}
+\Shouldchecktype{n}{a non-negative \term{integer}}
+\endissue{BUTLAST-NEGATIVE:SHOULD-SIGNAL}
+
+\label See Also:\None.
+
+\label Notes::
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\code
+ (butlast \param{list} \param{n}) \EQ (ldiff \param{list} (last \param{list} \param{n}))
+\endcode
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\endcom      
+
+%%% ========== LAST
+\begincom{last}\ftype{Function}      
+
+\label Syntax::
+
+\DefunWithValues last {list {\opt} n} {tail}
+
+\label Arguments and Values::
+
+\param{list}---a \term{list},
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+               which might be a \term{dotted list} but must not be a \term{circular list}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\issue{LAST-N}
+\param{n}---a non-negative \term{integer}.
+ \Default{\f{1}}
+\endissue{LAST-N}
+
+\param{tail}---an \term{object}.
+
+\label Description::
+
+\issue{LAST-N}
+%% 15.2.0 16
+\funref{last} returns the last \param{n} \term{conses} 
+ (not the last \param{n} elements) of \param{list}).
+If \param{list} is \empty, \funref{last} returns \empty.
+
+If \param{n} is zero,
+  the atom that terminates \param{list} is returned.
+If \param{n} is greater than or equal to the number of \term{cons} cells in \param{list},
+  the result is \param{list}.
+\endissue{LAST-N}
+
+\label Examples::
+
+\issue{LAST-N}
+\code
+ (last nil) \EV NIL
+ (last '(1 2 3)) \EV (3)
+ (last '(1 2 . 3)) \EV (2 . 3)
+ (setq x (list 'a 'b 'c 'd)) \EV (A B C D)
+ (last x) \EV (D)
+ (rplacd (last x) (list 'e 'f)) x \EV (A B C D E F)
+ (last x) \EV (F)
+
+ (last '(a b c))   \EV (C)
+
+ (last '(a b c) 0) \EV ()
+ (last '(a b c) 1) \EV (C)
+ (last '(a b c) 2) \EV (B C)
+ (last '(a b c) 3) \EV (A B C)
+ (last '(a b c) 4) \EV (A B C)
+
+ (last '(a . b) 0) \EV B
+ (last '(a . b) 1) \EV (A . B)
+ (last '(a . b) 2) \EV (A . B)
+\endcode
+\endissue{LAST-N}
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\issue{LAST-N}
+The consequences are undefined if \param{list} is a \term{circular list}.
+\endissue{LAST-N}
+\Shouldchecktype{n}{a non-negative \term{integer}}
+
+\label See Also::
+
+\funref{butlast},
+\funref{nth}
+
+\label Notes::                                             
+
+\issue{LAST-N}
+The following code could be used to define \funref{last}.
+
+\code
+ (defun last (list &optional (n 1))
+   (check-type n (integer 0))
+   (do ((l list (cdr l))
+        (r list)
+        (i 0 (+ i 1)))
+       ((atom l) r)
+     (if (>= i n) (pop r))))
+\endcode
+\endissue{LAST-N}
+\endcom
+
+%% Tentatively merged entries for LDIFF and TAILP. -kmp 29-Aug-93
+
+%%% ========== LDIFF
+%%% ========== TAILP
+\begincom{ldiff, tailp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues ldiff {list object} {result-list}
+\DefunWithValues tailp {object list} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{list}---a \term{list},
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+                   which might be a \term{dotted list}.
+
+\param{object}---an \term{object}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{result-list}---a \term{list}.
+
+%% Per X3J13. -kmp 05-Oct-93
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+\issue{TAILP-NIL:T}
+%% 15.5.0 7
+%% (CLtL definition superseded by later cleanup issue clarifying behavior.)
+If \param{object} is the \term{same} as some \term{tail} of \param{list},
+\funref{tailp} returns \term{true};
+otherwise, it returns \term{false}.
+\endissue{TAILP-NIL:T}
+
+%% 15.2.0 38
+If \param{object} is the \term{same} as some \term{tail} of \param{list},
+\funref{ldiff} returns a \term{fresh} \term{list} 
+of the \term{elements} of \term{list} 
+that precede \funref{object} in the \term{list structure} of \param{list};
+otherwise, it returns a \term{copy}\meaning{2} of \param{list}.
+
+\label Examples::
+
+\issue{TAILP-NIL:T}
+\code
+ (let ((lists '#((a b c) (a b c . d))))
+   (dotimes (i (length lists)) ()
+     (let ((list (aref lists i)))
+       (format t "~2&list=~S ~21T(tailp object list)~
+                  ~44T(ldiff list object)~%" list)
+         (let ((objects (vector list (cddr list) (copy-list (cddr list))
+                                '(f g h) '() 'd 'x)))
+           (dotimes (j (length objects)) ()
+             (let ((object (aref objects j)))
+               (format t "~& object=~S ~21T~S ~44T~S"
+                       object (tailp object list) (ldiff list object))))))))
+\OUT 
+\OUT list=(A B C)         (tailp object list)    (ldiff list object)
+\OUT  object=(A B C)      T                      NIL
+\OUT  object=(C)          T                      (A B)
+\OUT  object=(C)          NIL                    (A B C)
+\OUT  object=(F G H)      NIL                    (A B C)
+\OUT  object=NIL          T                      (A B C)
+\OUT  object=D            NIL                    (A B C)
+\OUT  object=X            NIL                    (A B C)
+\OUT 
+\OUT list=(A B C . D)     (tailp object list)    (ldiff list object)
+\OUT  object=(A B C . D)  T                      NIL
+\OUT  object=(C . D)      T                      (A B)
+\OUT  object=(C . D)      NIL                    (A B C . D)
+\OUT  object=(F G H)      NIL                    (A B C . D)
+\OUT  object=NIL          NIL                    (A B C . D)
+\OUT  object=D            T                      (A B C)
+\OUT  object=X            NIL                    (A B C . D)
+\EV NIL
+\endcode
+\endissue{TAILP-NIL:T}
+
+\label Side Effects::
+
+Neither \funref{ldiff} nor \funref{tailp} modifies either of its \term{arguments}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\Lazychecktype{list}{a \term{proper list} or a \term{dotted list}}
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\label See Also::
+
+\funref{set-difference}
+
+\label Notes::
+
+If the \param{list} is a \term{circular list},
+\funref{tailp} will reliably \term{yield} a \term{value} 
+only if the given \param{object} is in fact a \term{tail} of \param{list}.
+Otherwise, the consequences are unspecified:
+a given \term{implementation} which detects the circularity must return \term{false},
+but since an \term{implementation} is not obliged to detect such a \term{situation},
+\funref{tailp} might just loop indefinitely without returning in that case.
+
+\issue{TAILP-NIL:T}
+
+\funref{tailp} could be defined as follows:
+
+\code
+ (defun tailp (object list)
+   (do ((list list (cdr list)))
+       ((atom list) (eql list object))
+      (if (eql object list)
+          (return t))))
+\endcode
+
+and \funref{ldiff} could be defined by:
+
+%% !!! I just up the following based on the Description.
+%%     Does everyone agree it's right? -kmp 29-Aug-93
+\code
+(defun ldiff (list object)
+  (do ((list list (cdr list))
+       (r '() (cons (car list) r)))
+      ((atom list)
+       (if (eql list object) (nreverse r) (nreconc r list)))
+    (when (eql object list)
+      (return (nreverse r)))))
+\endcode
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% This stuff probably isn't needed. -kmp 7-Jan-91
+%
+% Since the \param{list} can be a \term{dotted list},
+% the end test must be \funref{atom}, not \funref{endp}.
+% For example, if \f{(tailp \i{x} l)} returns \term{true},
+% it means that there is an \i{n} such that \f{(nthcdr \i{n} \param{list})} returns \i{x}.
+%
+% Note that it doesn't follow that if \term{tailp} returns \nil,
+% it is safe to go \funref{nthcdr}'s into the \param{list} looking
+% for \i{x}, since the \param{list} might be a \term{dotted list}
+% and \funref{nthcdr} might hit bad data.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\endissue{TAILP-NIL:T}
+
+\endcom
+
+% %%% ========== LDIFF
+% \begincom{ldiff}\ftype{Function}
+% 
+% \label Syntax::
+% 
+% \DefunWithValues ldiff {list object} {result-list}
+% 
+% \label Arguments and Values::
+% 
+% \param{list}---a \term{list},
+% \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+%                    which might be a \term{dotted list}.
+% 
+% \param{object}---an \term{object}.
+% \endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% 
+% \param{result-list}---a \term{list}.
+% 
+% \label Description::
+% 
+% %!!! Rewrite in terms of glossary term "sublist" if we can get the issue
+% %    of dottedness resolved. -kmp 27-May-91
+% 
+% %% 15.2.0 38
+% Returns a \term{fresh} \term{list} whose \term{elements} are 
+% those \term{elements} of \param{list} that appear before \param{object}.
+% If \param{object} is not a tail of \param{list} or
+% if \param{object} is \nil,
+% then a copy of the entire \param{list} is returned.
+% \param{list} is not destroyed.
+% 
+% % KMP: Can the list be dotted?
+% %      What is the status of (LDIFF '(A B C . 3) 3)?
+% % Barrett: The description seems to imply that it cannot be dotted.
+% 
+% \label Examples::
+% 
+% \code
+%  (setq x '(a b c d e)) \EV (A B C D E)
+%  (setq y (cdddr x)) \EV (D E)
+%  (ldiff x y) \EV (A B C)
+%  (ldiff x (copy-list y)) \EV (A B C D E)
+% \endcode
+% 
+% \label Side Effects:\None.
+% 
+% \label Affected By:\None.
+% 
+% \label Exceptional Situations::
+% 
+% \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% \Lazychecktype{list}{a \term{proper list} or a \term{dotted list}}
+% \endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% 
+% \label See Also::
+% 
+% \funref{tailp},
+% \funref{set-difference}
+% 
+% \label Notes:\None.
+% 
+% \endcom
+% 
+% %%% ========== TAILP
+% \begincom{tailp}\ftype{Function}
+% 
+% \label Syntax::
+% 
+% \DefunWithValues tailp {object list} {generalized-boolean}
+% 
+% \label Arguments and Values:: 
+% 
+% \param{object}---an \term{object}.
+% 
+% \param{list}---a \term{list},
+% \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+%                    which might be a \term{dotted list}.
+% \endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% 
+% \param{generalized-boolean}---a \term{generalized boolean}.
+% 
+% \label Description::
+% 
+% \issue{TAILP-NIL:T}
+% %% 15.5.0 7
+% %% (CLtL definition superseded by later cleanup issue clarifying behavior.)
+% 
+% Returns \term{true} if and only if \param{object} is a \term{tail} of \param{list};
+% otherwise returns \term{false}.  The predicate used for comparison is \funref{eql}.
+% 
+% Since the \param{list} can be a \term{dotted list},
+% the end test used by \funref{tailp} must be \funref{atom}, not \funref{endp}.
+% That is, if \f{(tailp \i{x} l)} returns \term{true},
+% it means that there is an \i{n} such that \f{(nthcdr \i{n} \param{list})} returns \i{x}.
+%  
+% \label Examples::
+% 
+% \code
+%  (let ((x '(b c))) (tailp x (cons 'a x))) \EV \term{true}
+%  (tailp '(x y) '(a b c)) \EV \term{false}
+%  (tailp '() '(a b c)) \EV \term{true}
+%  (tailp 3 '(a b c)) \EV \term{false}
+%  (tailp 3 '(a b c . 3)) \EV \term{true}
+%  (tailp '(x y) '(a b c . 3)) \EV \term{false}
+% \endcode
+% 
+% \endissue{TAILP-NIL:T}
+% 
+% \label Side Effects:\None.
+% 
+% \label Affected By:\None.
+% 
+% \label Exceptional Situations::
+% 
+% \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% \Lazychecktype{list}{a \term{proper list} or a \term{dotted list}}
+% \endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+% 
+% \label See Also::
+% 
+% \funref{ldiff}
+% 
+% \label Notes::
+% 
+% If the \param{list} is a \term{circular list},
+% \funref{tailp} will reliably \term{yield} a \term{value} 
+% only if the given \param{object} is in fact a \term{subtail}.
+% Otherwise, the consequences are unspecified:
+% a given \term{implementation} which detects the circularity must return \term{false},
+% but since an \term{implementation} is not obliged to detect such a \term{situation},
+% \funref{tailp} might just loop indefinitely without returning in that case.
+% 
+% \issue{TAILP-NIL:T}
+% 
+% \funref{tailp} could be defined as follows:
+% 
+% \code
+%  (defun tailp (sublist list)
+%    (do ((list list (cdr list)))
+%        ((atom list) (eql list sublist))
+%       (if (eql sublist list)
+%           (return t))))
+% \endcode
+% 
+% % This probably isn't needed. -kmp 7-Jan-91
+% %
+% % Note that it doesn't follow that if \term{tailp} returns \nil,
+% % it is safe to go \funref{nthcdr}'s into the \param{list} looking
+% % for \i{x}, since the \param{list} might be a \term{dotted list}
+% % and \funref{nthcdr} might hit bad data.
+% 
+% \endissue{TAILP-NIL:T}
+% 
+% \endcom
+
+%%% ========== NTHCDR
+\begincom{nthcdr}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues nthcdr {n list} {tail}
+
+\label Arguments and Values::
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{n}---a non-negative \term{integer}.
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\param{list}---a \term{list},
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+	       which might be a \term{dotted list} or a \term{circular list}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{tail}---an \term{object}.
+%\term{tail} of the \param{list}.
+
+\label Description::
+
+%% 15.2.0 14
+%% Described using more descriptive terminology, 
+%% in a way that doesn't get confused about whether n is 0-based or 1-based. -kmp 29-Aug-93
+%Returns the \param{n}th successive \term{cdr} of \param{list}.
+Returns the \term{tail} of \param{list} that would be obtained by calling \funref{cdr}
+\param{n} times in succession.
+
+\label Examples::
+
+% I added an example of high-safety error, to demonstrate relation of NTHCDR and CDR.
+% -kmp 26-Aug-93
+\code
+ (nthcdr 0 '()) \EV NIL
+ (nthcdr 3 '()) \EV NIL
+ (nthcdr 0 '(a b c)) \EV (A B C)
+ (nthcdr 2 '(a b c)) \EV (C)
+ (nthcdr 4 '(a b c)) \EV ()
+ (nthcdr 1 '(0 . 1)) \EV 1
+
+ (locally (declare (optimize (safety 3)))
+   (nthcdr 3 '(0 . 1)))
+ Error: Attempted to take CDR of 1.
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+%% I added this stuff because it seemed consistent with the other entries. -kmp 26-Aug-93
+
+\Shouldchecktype{n}{a non-negative \term{integer}}
+
+For \param{n} being an integer greater than \f{1},
+the error checking done by \f{(nthcdr \param{n} \param{list})}
+is the same as for \f{(nthcdr (- \param{n} 1) (cdr \param{list}))};
+\seefun{cdr}.
+
+\label See Also::
+
+\funref{cdr},
+\funref{nth},
+\funref{rest}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== REST
+\begincom{rest}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues rest {list} {tail}
+\Defsetf         rest {list} {new-tail}
+
+\label Arguments and Values::
+
+\param{list}---a \term{list},
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+	       which might be a \term{dotted list} or a \term{circular list}.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{tail}---an \term{object}.
+
+\label Description::
+
+%% 15.2.0 13
+\funref{rest} performs the same operation as \funref{cdr},
+but mnemonically complements \funref{first}.
+Specifically,
+
+\code
+ (rest \param{list}) \EQ (cdr \param{list})
+ (setf (rest \param{list}) \param{new-tail}) \EQ (setf (cdr \param{list}) \param{new-tail})
+\endcode
+
+% If \param{list} is a \term{cons},
+% \funref{rest} returns the portion that follows the first \term{element}.
+% If \param{list} is the \term{empty list},
+% \funref{rest} returns the \term{empty list}.
+% 
+% \macref{setf} may be used with \funref{rest} to change 
+% the \term{cdr} of a \term{non-empty} \term{list} (\ie a \term{cons}).
+
+\label Examples::
+
+\code
+ (rest '(1 2)) \EV (2)
+ (rest '(1 . 2)) \EV 2
+ (rest '(1)) \EV NIL
+ (setq *cons* '(1 . 2)) \EV (1 . 2)
+ (setf (rest *cons*) "two") \EV "two"
+ *cons* \EV (1 . "two")
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{cdr},
+\funref{nthcdr}
+
+\label Notes::
+
+\funref{rest} is often preferred stylistically over \funref{cdr}
+when the argument is to being subjectively viewed as a \term{list} 
+rather than as a \term{cons}.
+
+\endcom
+
+%%% ========== MEMBER
+%%% ========== MEMBER-IF
+%%% ========== MEMBER-IF-NOT
+\begincom{member, member-if, member-if-not}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues member        {item      list {\key} key test test-not} {tail}
+\DefunWithValues member-if     {predicate list {\key} key} {tail}
+\DefunWithValues member-if-not {predicate list {\key} key} {tail}
+
+\label Arguments and Values:: 
+
+\param{item}---an \term{object}.
+
+\param{list}---a \term{proper list}.
+
+\param{predicate}---a \term{designator} for 
+		    a \term{function} of one \term{argument}
+		    that returns a \term{generalized boolean}.
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{tail}---a \term{list}.
+
+\label Description::
+
+%% 15.5.0 4
+\funref{member}, \funref{member-if}, and \funref{member-if-not} each
+search \param{list} for \param{item} or for a top-level element that 
+\term{satisfies the test}.  The argument to the \param{predicate} function 
+is an element of \param{list}.
+
+%% Implied by "satifies the test". -kmp 15-Feb-92
+% If \kwd{test} or \kwd{test-not} is not supplied, 
+% \funref{eql} is used.
+% The first argument to the \kwd{test} 
+% or \kwd{test-not} function is \param{item}, and the second argument
+% is an element of \param{list} as returned by the \kwd{key} function.
+% It is an error to supply both \kwd{test} and 
+% \kwd{test-not} 
+% in the same function call.
+% 
+% If \kwd{key} is supplied, it is used to
+% extract the part to be tested from the \param{list} element.
+% The argument to the \kwd{key} function 
+% is an element of \param{list}; typically, the  \kwd{key} function 
+% returns part of the element of
+% \param{list} it was given.
+% If \kwd{key} is not supplied or \nil, the \param{list} 
+% element is used.
+
+If some element \term{satisfies the test},
+the tail of \param{list} beginning
+with this element is returned; otherwise \nil\ is returned.
+
+\param{list} is searched on the top level only. 
+
+\label Examples::
+
+\code
+ (member 2 '(1 2 3)) \EV (2 3)                                 
+ (member 2 '((1 . 2) (3 . 4)) :test-not #'= :key #'cdr) \EV ((3 . 4))
+ (member 'e '(a b c d)) \EV NIL
+\endcode
+
+
+%!!! I'm suspicious of this dotted list.
+\code
+ (member-if #'listp '(a b nil c d)) \EV (NIL C D)
+ (member-if #'numberp '(a #\\Space 5/3 foo)) \EV (5/3 FOO)
+ (member-if-not #'zerop 
+                 '(3 6 9 11 . 12)
+                 :key #'(lambda (x) (mod x 3))) \EV (11 . 12)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{list}{a \term{proper list}}
+
+\label See Also::
+
+\funref{find},
+\funref{position},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+\Thefunction{member-if-not} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+In the following
+
+\code
+ (member 'a '(g (a y) c a d e a f)) \EV (A D E A F)
+\endcode
+
+the value returned by \funref{member} is \term{identical} to the portion
+of the \term{list} beginning with \f{a}.  Thus \funref{rplaca} on the
+result of \funref{member} can be used to alter the part of the \term{list}
+where \f{a} was found (assuming a check has been made that \funref{member}
+did not return \nil).
+
+\endcom
+
+%-------------------- List Mapping --------------------
+
+
+%%% ========== MAPCAR
+%%% ========== MAPLIST
+%%% ========== MAPC
+%%% ========== MAPL
+%%% ========== MAPCAN
+%%% ========== MAPCON
+\begincom{mapc, mapcar, mapcan, mapl, maplist, mapcon}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues mapc    {function {\rest} \plus{lists}} {list-1}
+\DefunWithValues mapcar  {function {\rest} \plus{lists}} {result-list}
+\DefunWithValues mapcan  {function {\rest} \plus{lists}} {concatenated-results}
+\DefunWithValues mapl    {function {\rest} \plus{lists}} {list-1}
+\DefunWithValues maplist {function {\rest} \plus{lists}} {result-list}
+\DefunWithValues mapcon  {function {\rest} \plus{lists}} {concatenated-results}
+
+\label Arguments and Values:: 
+
+\param{function}---a \term{designator} for a \term{function} 
+  that must take as many \term{arguments} as there are \param{lists}.
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\param{list}---a \term{proper list}.
+
+\param{list-1}---the first \param{list} (which must be a \term{proper list}).
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\param{result-list}---a \term{list}.
+                   
+\param{concatenated-results}---a \term{list}.
+
+\label Description::
+
+The mapping operation involves applying \param{function} to
+successive sets of arguments in which
+one argument is obtained from each \term{sequence}.
+Except for \funref{mapc} and \funref{mapl},
+the result contains the results returned by \param{function}.
+In the cases of \funref{mapc} and \funref{mapl},
+the resulting \term{sequence} is \param{list}.
+
+%% 14.2.0 6
+\param{function} is called
+first on all the elements with index \f{0}, then on all those
+with index \f{1}, and so on.
+\param{result-type} specifies the \term{type} of
+the 
+resulting \term{sequence}.
+\issue{FUNCTION-TYPE:X3J13-MARCH-88}
+If \param{function} is a \term{symbol}, it is \funref{coerce}d
+to a \term{function} as if by \funref{symbol-function}.
+\endissue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+%% 7.8.4 4
+\funref{mapcar} operates on successive \term{elements} of the \param{lists}.
+\param{function} is applied to the first \term{element} of each \param{list},
+then to the second \term{element} of each \param{list}, and so on.
+The iteration terminates when the shortest \param{list} runs out,
+and excess elements in other lists are ignored.
+The value returned by \funref{mapcar} is a \term{list}
+of the results of successive calls to \param{function}.
+
+%% 7.8.4 6             
+\funref{mapc} is like \funref{mapcar} except that the results of 
+applying \param{function} are not accumulated.
+The \param{list} argument is returned.
+
+%% 7.8.4 5
+\funref{maplist} is like \funref{mapcar} except that
+\param{function} is applied to successive sublists of the \param{lists}.
+\param{function} 
+is first applied to the \param{lists} themselves, 
+and then to the \term{cdr} of each
+\param{list}, and then to the \term{cdr} of the \term{cdr}
+of each \param{list}, and so on.  
+
+\funref{mapl} is like \funref{maplist} except that the results of 
+applying \param{function} are not accumulated;
+\param{list-1} is returned.
+  
+%% 7.8.4 8
+\funref{mapcan} and \funref{mapcon} are like \funref{mapcar} and
+\funref{maplist} respectively, except that the results of
+applying \param{function} are combined 
+into a \term{list} by the use of \funref{nconc}
+rather than \funref{list}.
+That is,
+
+\code
+ (mapcon f x1 ... xn)
+   \EQ (apply #'nconc (maplist f x1 ... xn))
+\endcode
+and similarly for the relationship between \funref{mapcan} 
+and \funref{mapcar}.
+
+\label Examples::
+
+\code
+ (mapcar #'car '((1 a) (2 b) (3 c))) \EV (1 2 3) 
+ (mapcar #'abs '(3 -4 2 -5 -6)) \EV (3 4 2 5 6)
+ (mapcar #'cons '(a b c) '(1 2 3)) \EV ((A . 1) (B . 2) (C . 3))
+
+ (maplist #'append '(1 2 3 4) '(1 2) '(1 2 3)) 
+\EV ((1 2 3 4 1 2 1 2 3) (2 3 4 2 2 3)) 
+ (maplist #'(lambda (x) (cons 'foo x)) '(a b c d))
+\EV ((FOO A B C D) (FOO B C D) (FOO C D) (FOO D))
+ (maplist #'(lambda (x) (if (member (car x) (cdr x)) 0 1)) '(a b a c d b c))
+\EV (0 0 1 0 1 1 1)
+;An entry is 1 if the corresponding element of the input
+;  list was the last instance of that element in the input list.
+
+ (setq dummy nil) \EV NIL 
+ (mapc #'(lambda (&rest x) (setq dummy (append dummy x)))
+        '(1 2 3 4)
+        '(a b c d e)
+        '(x y z)) \EV (1 2 3 4) 
+ dummy \EV (1 A X 2 B Y 3 C Z)                   
+
+ (setq dummy nil) \EV NIL 
+ (mapl #'(lambda (x) (push x dummy)) '(1 2 3 4)) \EV (1 2 3 4) 
+ dummy \EV ((4) (3 4) (2 3 4) (1 2 3 4)) 
+
+ (mapcan #'(lambda (x y) (if (null x) nil (list x y)))
+          '(nil nil nil d e)
+          '(1 2 3 4 5 6)) \EV (D 4 E 5) 
+ (mapcan #'(lambda (x) (and (numberp x) (list x)))
+          '(a 1 b c 3 4 d 5))
+\EV (1 3 4 5)
+\endcode
+In this case the function serves as a filter; 
+this is a standard \Lisp\ idiom using \funref{mapcan}.
+
+\code
+ (mapcon #'list '(1 2 3 4)) \EV ((1 2 3 4) (2 3 4) (3 4) (4)) 
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazycheckanytype{list}{a \term{proper list}}
+
+\label See Also::
+
+\macref{dolist},
+\funref{map},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Alists --------------------
+
+%%% ========== ACONS
+\begincom{acons}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues acons {key datum alist} {new-alist}
+
+\label Arguments and Values:: 
+
+\param{key}---an \term{object}.
+
+\param{datum}---an \term{object}.
+
+\param{alist}---an \term{association list}.
+
+\param{new-alist}---an \term{association list}.
+
+\label Description::
+
+%% 15.6.0 5
+Creates a \term{fresh} \term{cons},
+the \term{cdr} of which is \param{alist} and
+the \term{car} of which is another \term{fresh} \term{cons},
+ the \term{car} of which is \param{key} and
+ the \term{cdr} of which is \param{datum}.
+
+\label Examples::
+
+\code
+ (setq alist '()) \EV NIL
+ (acons 1 "one" alist) \EV ((1 . "one"))
+ alist \EV NIL
+ (setq alist (acons 1 "one" (acons 2 "two" alist))) \EV ((1 . "one") (2 . "two"))
+ (assoc 1 alist) \EV (1 . "one")
+ (setq alist (acons 1 "uno" alist)) \EV ((1 . "uno") (1 . "one") (2 . "two"))
+ (assoc 1 alist) \EV (1 . "uno")
+\endcode
+
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+
+\funref{assoc}, \funref{pairlis}
+
+\label Notes::
+
+\code
+(acons \param{key} \param{datum} \param{alist}) \EQ (cons (cons \param{key} \param{datum}) \param{alist})
+\endcode
+
+\endcom
+
+%%% ========== ASSOC
+%%% ========== ASSOC-IF
+%%% ========== ASSOC-IF-NOT
+\begincom{assoc, assoc-if, assoc-if-not}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues assoc        {item      alist {\key} key test test-not} {entry}
+
+\issue{ASSOC-RASSOC-IF-KEY:YES}
+
+\DefunWithValues assoc-if     {predicate alist {\key} key} {entry}
+\DefunWithValues assoc-if-not {predicate alist {\key} key} {entry}
+
+\endissue{ASSOC-RASSOC-IF-KEY:YES}
+
+\label Arguments and Values::
+
+\param{item}---an \term{object}.
+
+\param{alist}---an \term{association list}.
+
+\param{predicate}---a \term{designator} for 
+		    a \term{function} of one \term{argument}
+		    that returns a \term{generalized boolean}.
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{entry}---a \term{cons} that is an \term{element} of \param{alist},
+	        or \nil.
+
+\label Description::
+
+\issue{ASSOC-RASSOC-IF-KEY}
+%% Replaced per X3J13. -kmp 05-Oct-93
+% %% 15.6.0 8
+% \funref{assoc} returns the first \term{cons} in \param{alist} whose 
+% \term{car} \term{satisfies the test}, or \nil\ if no such \term{cons} is found.
+% 
+% The arguments to \param{test} and \param{test-not} and are the key of the
+% \param{item} and the key of the \term{car} of an element of \param{alist}, 
+% in that order.
+% 
+% \funref{assoc-if} and \funref{assoc-if-not} return the first \term{cons} 
+% in \param{alist} whose \term{car} \term{satisfies the predicate}, or \nil\ if 
+% no such \term{cons} is found.
+% 
+% The argument to \param{predicate} is the key of an element of \param{alist}.
+\funref{assoc}, \funref{assoc-if}, and \funref{assoc-if-not}
+return the first \term{cons} in \param{alist} whose \term{car} \term{satisfies the test},
+or \nil\ if no such \term{cons} is found.
+\endissue{ASSOC-RASSOC-IF-KEY}
+                    
+For \funref{assoc}, \funref{assoc-if}, and \funref{assoc-if-not}, if \nil\ appears
+in \param{alist} in place of a pair, it is ignored.
+
+\label Examples::
+%% 15.6.0 9
+
+\issue{ASSOC-RASSOC-IF-KEY}
+\code
+ (setq values '((x . 100) (y . 200) (z . 50))) \EV ((X . 100) (Y . 200) (Z . 50))
+ (assoc 'y values) \EV (Y . 200)
+ (rplacd (assoc 'y values) 201) \EV (Y . 201)
+ (assoc 'y values) \EV (Y . 201)
+ (setq alist '((1 . "one")(2 . "two")(3 . "three"))) 
+\EV ((1 . "one") (2 . "two") (3 . "three"))
+ (assoc 2 alist) \EV (2 . "two")
+ (assoc-if #'evenp alist) \EV (2 . "two")
+ (assoc-if-not #'(lambda(x) (< x 3)) alist) \EV (3 . "three")
+ (setq alist '(("one" . 1)("two" . 2))) \EV (("one" . 1) ("two" . 2))
+ (assoc "one" alist) \EV NIL
+ (assoc "one" alist :test #'equalp) \EV ("one" . 1)
+ (assoc "two" alist :key #'(lambda(x) (char x 2))) \EV NIL 
+ (assoc #\\o alist :key #'(lambda(x) (char x 2))) \EV ("two" . 2)
+ (assoc 'r '((a . b) (c . d) (r . x) (s . y) (r . z))) \EV  (R . X)
+ (assoc 'goo '((foo . bar) (zoo . goo))) \EV NIL
+ (assoc '2 '((1 a b c) (2 b c d) (-7 x y z))) \EV (2 B C D)
+ (setq alist '(("one" . 1) ("2" . 2) ("three" . 3)))
+\EV (("one" . 1) ("2" . 2) ("three" . 3))
+ (assoc-if-not #'alpha-char-p alist
+               :key #'(lambda (x) (char x 0))) \EV ("2" . 2)
+\endcode
+\endissue{ASSOC-RASSOC-IF-KEY}
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{alist}{an \term{association list}}
+
+\label See Also::
+
+\funref{rassoc},
+\funref{find},
+\funref{member},
+\funref{position},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+\Thefunction{assoc-if-not} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+It is possible to \funref{rplacd} the result of \funref{assoc}, provided
+that it is not \nil,
+in order to ``update'' \param{alist}. 
+
+%% 15.6.0 10
+The two expressions
+
+\code
+ (assoc item list :test fn)
+\endcode
+and
+
+\code
+ (find item list :test fn :key #'car)
+\endcode
+are equivalent in meaning with one exception:
+if \nil\ appears in \param{alist} in place of a pair,
+and \param{item} is \nil,
+\funref{find} will compute the \term{car} of the \nil\ in \param{alist},
+find that it is equal to \param{item}, and return \nil,
+whereas \funref{assoc} will ignore the \nil\ in \param{alist} and continue
+to search for an actual \term{cons} whose \term{car} is \nil.
+
+\endcom
+
+
+%%% ========== COPY-ALIST
+\begincom{copy-alist}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues copy-alist {alist} {new-alist}
+
+\label Arguments and Values::
+
+\param{alist}---an \term{association list}.
+
+\param{new-alist}---an \term{association list}.
+
+\label Description::
+
+%% 15.2.0 24
+\funref{copy-alist} returns a \term{copy} of \param{alist}.
+
+The \term{list structure} of \param{alist} is copied,
+and the \term{elements} of \param{alist} which are \term{conses} are
+also copied (as \term{conses} only). 
+Any other \term{objects} which are referred to, 
+whether directly or indirectly,
+by the \param{alist} continue to be shared.
+
+\label Examples::
+
+\code
+(defparameter *alist* (acons 1 "one" (acons 2 "two" '())))
+*alist* \EV ((1 . "one") (2 . "two"))
+(defparameter *list-copy* (copy-list *alist*))
+*list-copy* \EV ((1 . "one") (2 . "two"))
+(defparameter *alist-copy* (copy-alist *alist*))
+*alist-copy* \EV ((1 . "one") (2 . "two"))
+(setf (cdr (assoc 2 *alist-copy*)) "deux") \EV "deux"
+*alist-copy* \EV ((1 . "one") (2 . "deux"))
+*alist* \EV ((1 . "one") (2 . "two"))
+(setf (cdr (assoc 1 *list-copy*)) "uno") \EV "uno"
+*list-copy* \EV ((1 . "uno") (2 . "two"))
+*alist* \EV ((1 . "uno") (2 . "two"))
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{copy-list}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== PAIRLIS
+\begincom{pairlis}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues pairlis {keys data {\opt} alist} {new-alist}
+
+\label Arguments and Values::
+
+\param{keys}---a \term{proper list}.
+
+\param{data}---a \term{proper list}.
+
+\param{alist}---an \term{association list}.
+  \Default{the \term{empty list}}
+
+\param{new-alist}---an \term{association list}.
+
+\label Description::
+
+%% 15.6.0 6
+Returns an \term{association list} that associates
+elements of \param{keys} to corresponding elements of \param{data}.
+The consequences are undefined if \param{keys} and \param{data} are 
+not of the same \term{length}.  
+
+If \param{alist} is supplied, \funref{pairlis} returns
+a modified \param{alist} with the
+new pairs prepended to it.
+%% 15.6.0 7
+The new pairs may appear in the resulting \term{association list} in 
+either forward or backward order.
+The result of 
+
+\code
+ (pairlis '(one two) '(1 2) '((three . 3) (four . 19)))
+\endcode
+might be
+
+\code
+ ((one . 1) (two . 2) (three . 3) (four . 19))
+\endcode
+or
+
+\code
+ ((two . 2) (one . 1) (three . 3) (four . 19))
+\endcode
+
+
+\label Examples::
+\code
+ (setq keys '(1 2 3)
+        data '("one" "two" "three")
+        alist '((4 . "four"))) \EV ((4 . "four"))
+ (pairlis keys data) \EV ((3 . "three") (2 . "two") (1 . "one"))
+ (pairlis keys data alist)
+\EV ((3 . "three") (2 . "two") (1 . "one") (4 . "four"))
+ alist \EV ((4 . "four"))
+\endcode
+
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktypes{\param{keys} and \param{data}}{\term{proper lists}}
+
+\label See Also::
+
+\funref{acons}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== RASSOC
+%%% ========== RASSOC-IF
+%%% ========== RASSOC-IF-NOT
+\begincom{rassoc, rassoc-if, rassoc-if-not}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues rassoc        {item      alist  {\key} key test test-not} {entry}
+
+\issue{ASSOC-RASSOC-IF-KEY:YES}
+
+\DefunWithValues rassoc-if     {predicate alist {\key} key} {entry}
+\DefunWithValues rassoc-if-not {predicate alist {\key} key} {entry}
+
+\endissue{ASSOC-RASSOC-IF-KEY:YES}
+
+\label Arguments and Values:: 
+
+\param{item}---an \term{object}.
+
+\param{alist}---an \term{association list}.
+
+\param{predicate}---a \term{designator} for
+		    a \term{function} of one \term{argument}
+		    that returns a \term{generalized boolean}.
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{entry}---a \term{cons} that is an \term{element} of the \param{alist},
+		or \nil.
+
+\label Description::
+
+%% 15.6.0 13
+\funref{rassoc}, \funref{rassoc-if}, and \funref{rassoc-if-not}
+return the first \term{cons} whose \term{cdr} 
+\term{satisfies the test}.
+If no such \term{cons} is found, \nil\
+is returned.
+
+\issue{ASSOC-RASSOC-IF-KEY}
+%% Removed per X3J13. -kmp 05-Oct-93
+% The argument to \param{predicate} is an element of \param{alist}
+% as returned by the \kwd{key} function (if supplied).
+% The arguments to \kwd{test} and \kwd{test-not}
+% are \param{item} and an element of \param{alist}
+% as returned by the \kwd{key} function (if supplied), in that
+% order.
+% 
+% If \kwd{key} is supplied, it is applied to the \term{cdr}
+% of the \param{alist} entries and the result is passed to the
+% \param{predicate}, \kwd{test}, or \kwd{test-not} function.
+% The \term{cdr} of the \param{alist} entry contains the
+% key of the association, and if \kwd{key} is
+% not supplied or \nil, the \term{cdr} is the key of the association.
+\endissue{ASSOC-RASSOC-IF-KEY}
+
+If \nil\ appears in \param{alist} in place of a pair, it is  ignored.
+
+\label Examples::
+
+\code
+ (setq alist '((1 . "one") (2 . "two") (3 . 3))) 
+\EV ((1 . "one") (2 . "two") (3 . 3))
+ (rassoc 3 alist) \EV (3 . 3)
+ (rassoc "two" alist) \EV NIL
+ (rassoc "two" alist :test 'equal) \EV (2 . "two")
+ (rassoc 1 alist :key #'(lambda (x) (if (numberp x) (/ x 3)))) \EV (3 . 3)
+ (rassoc 'a '((a . b) (b . c) (c . a) (z . a))) \EV (C . A)
+ (rassoc-if #'stringp alist) \EV (1 . "one")
+ (rassoc-if-not #'vectorp alist) \EV (3 . 3)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{assoc},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+\Thefunction{rassoc-if-not} is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+It is possible to \funref{rplaca} the result of \funref{rassoc}, 
+provided that it is not \nil, in order to ``update'' \param{alist}. 
+
+%% 15.6.0 13
+
+The expressions
+
+\code
+ (rassoc item list :test fn)
+\endcode
+and
+
+\code
+ (find item list :test fn :key #'cdr)
+\endcode
+are equivalent in meaning, except when the \f{item} is \nil\
+and \nil\ appears in place of a pair in the \param{alist}.
+\Seefun{assoc}. 
+
+\endcom
+
+
+
+%-------------------- Plists --------------------
+
+%%% ========== GET-PROPERTIES
+\begincom{get-properties}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues get-properties {plist indicator-list} {indicator, value, tail}
+
+\label Arguments and Values:: 
+
+\issue{PLIST-DUPLICATES:ALLOW}
+\param{plist}---a \term{property list}.
+\endissue{PLIST-DUPLICATES:ALLOW}
+
+\param{indicator-list}---a \term{proper list} (of \term{indicators}).
+
+\param{indicator}---an \term{object} that is an \term{element} of \param{indicator-list}.
+
+\param{value}---an \term{object}.
+
+\param{tail}---a \term{list}.
+
+\label Description::
+
+%% 10.1.0 19
+\funref{get-properties} is used to look up any of several
+\term{property list} entries all at once.
+
+%% 10.1.0 23        
+It searches the \param{plist} for the first entry whose \term{indicator} 
+is \term{identical} to one of the \term{objects} in \param{indicator-list}.
+If such an entry is found, the \param{indicator} and \param{value} returned
+are the \term{property indicator} and its associated \term{property value},
+and the \param{tail} returned is the \term{tail} of the \param{plist}
+that begins with the found entry (\ie whose \term{car} is the \param{indicator}).
+If no such entry is found, the \param{indicator}, \param{value}, and \param{tail} 
+are all \nil.
+                                              
+\label Examples::
+
+\code
+ (setq x '()) \EV NIL
+ (setq *indicator-list* '(prop1 prop2)) \EV (PROP1 PROP2)
+ (getf x 'prop1) \EV NIL
+ (setf (getf x 'prop1) 'val1) \EV VAL1
+ (eq (getf x 'prop1) 'val1) \EV \term{true}
+ (get-properties x *indicator-list*) \EV PROP1, VAL1, (PROP1 VAL1)
+ x \EV (PROP1 VAL1)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{get}, \funref{getf}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== GETF
+\begincom{getf}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues getf {plist indicator {\opt} default} {value}
+\Defsetf         getf {place indicator {\opt} default} {new-value}
+
+\label Arguments and Values::
+
+\param{plist}---a \term{property list}.
+
+\param{place}---a \term{place}, the \term{value} of which is a \term{property list}.
+
+\param{indicator}---an \term{object}.
+
+\param{default}---an \term{object}.
+ \Default{\nil}
+
+%% 10.1.0 24
+\param{value}---an \term{object}.
+
+\param{new-value}---an \term{object}.
+
+\label Description::
+
+%% 10.1.0 19
+% \funref{getf} is used to \term{access} entries in a \term{property list}.
+% \funref{getf} searches \param{plist} for an indicator 
+% \term{identical} to \param{indicator} and returns the associated value.
+\funref{getf} finds a \term{property} on the \param{plist}
+whose \term{property indicator} is \term{identical} to \param{indicator},
+and returns its corresponding \term{property value}.
+\issue{PLIST-DUPLICATES:ALLOW}
+If there are multiple \term{properties}\meaning{1} with that \term{property indicator},
+\funref{getf} uses the first such \term{property}.
+\endissue{PLIST-DUPLICATES:ALLOW}
+% If \param{indicator} is not found, then \param{default} is returned.
+If there is no \term{property} with that \term{property indicator},
+\param{default} is returned.
+
+% %% 10.1.0 20
+% For \macref{setf} of \funref{getf}, the effect is 
+%    to add a new property-value pair,
+% or to update an existing pair,
+% in the \term{property list} that is the \term{value} of \param{place}.
+\macref{setf} of \funref{getf} may be used to associate a new \term{object}
+with an existing indicator in the \term{property list} held by \param{place},
+or to create a new assocation if none exists.
+\issue{PLIST-DUPLICATES:ALLOW}
+If there are multiple \term{properties}\meaning{1} with that \term{property indicator},
+\macref{setf} of \funref{getf} associates the \param{new-value} 
+with the first such \term{property}.
+\endissue{PLIST-DUPLICATES:ALLOW}
+\issue{SETF-GET-DEFAULT:EVALUATED-BUT-IGNORED}
+When a \funref{getf} \term{form} is used as a \macref{setf} \param{place},
+any \param{default} which is supplied is evaluated according to normal
+left-to-right evaluation rules, but its \term{value} is ignored.
+\endissue{SETF-GET-DEFAULT:EVALUATED-BUT-IGNORED}
+
+%% 10.1.0 20
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\macref{setf} of \funref{getf} is permitted to either
+    \term{write} the \term{value} of \param{place} itself,
+ or modify of any part, \term{car} or \term{cdr}, 
+     of the \term{list structure} held by \param{place}.
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}%
+
+\label Examples::
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\code
+ (setq x '()) \EV NIL
+ (getf x 'prop1) \EV NIL
+ (getf x 'prop1 7) \EV 7
+ (getf x 'prop1) \EV NIL
+ (setf (getf x 'prop1) 'val1) \EV VAL1
+ (eq (getf x 'prop1) 'val1) \EV \term{true}
+ (getf x 'prop1) \EV VAL1
+ (getf x 'prop1 7) \EV VAL1
+ x \EV (PROP1 VAL1)
+
+;; Examples of implementation variation permitted.
+ (setq foo (list 'a 'b 'c 'd 'e 'f)) \EV (A B C D E F)
+ (setq bar (cddr foo)) \EV (C D E F)
+ (remf foo 'c) \EV \term{true}
+ foo \EV (A B E F)
+ bar
+\EV (C D E F)
+\OV (C)
+\OV (NIL)
+\OV (C NIL)
+\OV (C D)
+\endcode
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+ 
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{get},
+\funref{get-properties},
+\macref{setf},
+{\secref\FnFormsAsGenRefs}
+
+\label Notes::
+
+There is no way (using \funref{getf}) to distinguish an absent property
+from one whose value is \param{default}; but see \funref{get-properties}.
+
+Note that while supplying a \term{default} argument to \macref{getf}
+in a \macref{setf} situation is sometimes not very interesting,
+it is still important because some macros, such as \macref{push} and
+\macref{incf}, require a \param{place} argument which data is both \term{read}
+from and \term{written} to.  In such a context, if a \term{default} 
+argument is to be supplied for the \term{read} situation, it must be
+syntactically valid for the \term{write} situation as well. For example,
+
+\code
+ (let ((plist '()))
+   (incf (getf plist 'count 0))
+   plist) \EV (COUNT 1)
+\endcode
+
+\endcom
+
+%%% ========== REMF
+\begincom{remf}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValues remf {place indicator} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{place}---a \term{place}.
+
+\param{indicator}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 10.1.0 22
+\macref{remf} removes from the \term{property list} stored in \param{place}
+a \term{property}\meaning{1} with a \term{property indicator}
+% EQ => identical -kmp 14-Jul-93
+\term{identical} to \param{indicator}.
+\issue{PLIST-DUPLICATES:ALLOW}
+If there are multiple \term{properties}\meaning{1} with the \term{identical} key,
+\macref{remf} only removes the first such \term{property}.
+\endissue{PLIST-DUPLICATES:ALLOW}
+\macref{remf} returns \term{false} if no such \term{property} was found,
+or \term{true} if a property was found.
+
+The \term{property indicator} 
+and the corresponding \term{property value} 
+are removed in an undefined order
+by destructively splicing the property list.  
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\macref{remf} is permitted to either \macref{setf} \param{place} or to 
+\macref{setf} any part, \funref{car} or \funref{cdr}, 
+of the \term{list structure} held by that \param{place}.
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+For information about the \term{evaluation} of \term{subforms} of \param{place},
+\seesection\GenRefSubFormEval.
+\endissue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+
+\label Examples::
+
+\code
+ (setq x (cons () ())) \EV (NIL)
+ (setf (getf (car x) 'prop1) 'val1) \EV VAL1
+ (remf (car x) 'prop1) \EV \term{true}
+ (remf (car x) 'prop1) \EV \term{false}
+\endcode
+
+\label Side Effects::
+
+The property list stored in \param{place} is modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{remprop}, \funref{getf}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Sets --------------------
+
+%%% ========== INTERSECTION
+%%% ========== NINTERSECTION
+\begincom{intersection, nintersection}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues intersection  {list-1 list-2 {\key} key test test-not} {result-list}
+\DefunWithValues nintersection {list-1 list-2 {\key} key test test-not} {result-list}
+
+\label Arguments and Values:: 
+
+\param{list-1}---a \term{proper list}.
+
+\param{list-2}---a \term{proper list}.
+
+%% 15.5.0 15
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{result-list}---a \term{list}.
+     
+\label Description::
+
+%% 15.5.0 14
+\funref{intersection} and \funref{nintersection} return a \term{list}
+that contains every element that occurs in both \param{list-1} and \param{list-2}.
+
+%% 15.5.0 16
+\funref{nintersection} is the destructive version of \funref{intersection}.
+It performs the same operation,
+but may destroy \param{list-1} using its cells to construct the result.
+\issue{NINTERSECTION-DESTRUCTION:REVERT}
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+%% This has gone back and forth, but my opinion is that the current state of this
+%% is that the second arg is again protected. -kmp 7-Feb-92
+%%
+%% This opinion finally validated by clarifying vote in letter ballot (X3J13/93-302).
+%% Option REVERT affirms the status quo from both CLtL1 and draft 12.24,
+%% overriding the possible effect of REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89.
+%
+% %%Barmar noted that this next sentence was in conflict with the changes
+% %%made by REMF-DESTRUCTION-UNSPECIFIED, so I've removed it for now.  Mail sent
+% %%to find out if X3J13 really intended for NINTERSECTION's contract to be changed,
+% %%or if making this untrue this was a `typo':
+% %\param{list-2} is not destroyed.
+% 
+% \funref{nintersection} is permitted to modify any part of the \term{list structure} 
+% of \param{list-1} or \param{list-2}.
+%
+\param{list-2} is not destroyed.
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\endissue{NINTERSECTION-DESTRUCTION:REVERT}
+
+The intersection operation is described as follows.
+For all possible ordered pairs consisting of 
+    one \term{element} from \param{list-1} 
+and one \term{element} from \param{list-2},
+\kwd{test} or \kwd{test-not} are used 
+to determine whether they \term{satisfy the test}.  
+The first argument to the \kwd{test} or \kwd{test-not}
+function is an element of \param{list-1}; the second argument is an
+element of \param{list-2}.
+If \kwd{test} or \kwd{test-not} is not supplied, \funref{eql}
+is used.
+It is an error if \kwd{test} and \kwd{test-not} are supplied in
+the same function call.
+
+If \kwd{key} is supplied (and not \nil), it is used to
+extract the part to be tested from the \param{list} element. 
+The argument to the \kwd{key} function
+is an element of either \param{list-1} or \param{list-2};
+the \kwd{key} function typically returns part of the supplied element.
+If \kwd{key} is not supplied or \nil, the \param{list-1} and
+\param{list-2} elements are used.
+
+For every pair that \term{satifies the test},
+exactly one of the two elements of the pair will be put in the result.
+No element from either \term{list} appears in the result that does not 
+\term{satisfy the test} for
+an element from the other \term{list}.
+If one of the \term{lists} contains duplicate
+elements, there may be duplication in the result.
+
+There is no guarantee that the order of elements in the result will
+reflect the ordering of the arguments in any particular way.
+The result \term{list} may share cells with, 
+or be \funref{eq} to, either \param{list-1} or \param{list-2}
+if appropriate.
+
+\label Examples::
+
+\code
+ (setq list1 (list 1 1 2 3 4 a b c "A" "B" "C" "d")
+       list2 (list 1 4 5 b c d "a" "B" "c" "D")) 
+  \EV (1 4 5 B C D "a" "B" "c" "D")
+ (intersection list1 list2) \EV (C B 4 1 1)
+ (intersection list1 list2 :test 'equal) \EV ("B" C B 4 1 1)
+ (intersection list1 list2 :test #'equalp) \EV ("d" "C" "B" "A" C B 4 1 1) 
+ (nintersection list1 list2) \EV (1 1 4 B C)
+ list1 \EV \term{implementation-dependent} ;\eg (1 1 4 B C)
+ list2 \EV \term{implementation-dependent} ;\eg (1 4 5 B C D "a" "B" "c" "D")
+ (setq list1 (copy-list '((1 . 2) (2 . 3) (3 . 4) (4 . 5))))
+\EV ((1 . 2) (2 . 3) (3 . 4) (4 . 5)) 
+ (setq list2 (copy-list '((1 . 3) (2 . 4) (3 . 6) (4 . 8))))
+\EV ((1 . 3) (2 . 4) (3 . 6) (4 . 8)) 
+ (nintersection list1 list2 :key #'cdr) \EV ((2 . 3) (3 . 4)) 
+ list1 \EV \term{implementation-dependent} ;\eg ((1 . 2) (2 . 3) (3 . 4)) 
+ list2 \EV \term{implementation-dependent} ;\eg ((1 . 3) (2 . 4) (3 . 6) (4 . 8)) 
+\endcode
+
+\label Side Effects::
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\funref{nintersection} can modify \param{list-1}, 
+\issue{NINTERSECTION-DESTRUCTION}
+%or \param{list-2}.
+but not \param{list-2}.
+\endissue{NINTERSECTION-DESTRUCTION}
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktypes{\param{list-1} and \param{list-2}}{\term{proper lists}}
+
+\label See Also::
+
+\funref{union},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification},
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+Since the \funref{nintersection} side effect is not required,
+it should not be used in for-effect-only
+  positions in portable code.
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\endcom
+
+%%% ========== ADJOIN
+\begincom{adjoin}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues adjoin {item list {\key} key test test-not} {new-list}
+
+\label Arguments and Values:: 
+
+\param{item}---an \term{object}.
+
+\param{list}---a \term{proper list}.
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+%% 15.5.0 8   
+\param{new-list}---a \term{list}.
+
+\label Description::
+
+Tests whether \param{item} is the same as an existing element of \param{list}.
+If the \param{item} is not an existing element,
+\funref{adjoin} adds it to \param{list} (as if by \funref{cons})
+and returns the resulting \term{list}; 
+otherwise, nothing is added and the original \param{list} is returned.
+
+\SatisfyTest{item}{an \term{element} of \param{list}}
+
+\label Examples::
+
+\code
+ (setq slist '()) \EV NIL 
+ (adjoin 'a slist) \EV (A) 
+ slist \EV NIL 
+ (setq slist (adjoin '(test-item 1) slist)) \EV ((TEST-ITEM 1)) 
+ (adjoin '(test-item 1) slist) \EV ((TEST-ITEM 1) (TEST-ITEM 1)) 
+ (adjoin '(test-item 1) slist :test 'equal) \EV ((TEST-ITEM 1)) 
+ (adjoin '(new-test-item 1) slist :key #'cadr) \EV ((TEST-ITEM 1)) 
+ (adjoin '(new-test-item 1) slist) \EV ((NEW-TEST-ITEM 1) (TEST-ITEM 1)) 
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{list}{a \term{proper list}}
+
+\label See Also::
+
+\macref{pushnew},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\code
+ (adjoin item list :key fn)
+   \EQ (if (member (fn item) list :key fn) list (cons item list))
+\endcode
+      
+\endcom
+
+%%% ========== PUSHNEW
+\begincom{pushnew}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValuesNewline pushnew {item place {\key} key test test-not} {new-place-value}
+
+\label Arguments and Values:: 
+
+\param{item}---an \term{object}.  
+
+%!!! Need to separate discussion of place from its value. -kmp 1-Sep-91
+\param{place}---a \term{place}, the \term{value} of which is a \term{proper list}. 
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{new-place-value}---a \term{list} (the new \term{value} of \param{place}).
+
+\label Description::
+
+\macref{pushnew} tests whether  \param{item} is the same as any existing
+element of the \term{list} stored in \param{place}.  If \param{item} is not,
+it is prepended to the \term{list}, and the new \term{list} is stored in
+\param{place}.
+
+%% 15.2.0 34
+\macref{pushnew} returns the new \term{list} that is stored in \param{place}.
+
+%% 15.2.0 32
+Whether or not \param{item} is already a member of the \term{list} that is
+in \param{place} is determined by comparisons using \kwd{test} or \kwd{test-not}.
+The first argument to the \kwd{test} or \kwd{test-not}
+function is \param{item}; the second argument is
+an element of the \term{list} in \param{place} as returned by
+the \kwd{key} function (if supplied).
+
+If \kwd{key} is supplied, it is used to extract the part to be tested from
+both \param{item} and the \term{list} element,
+as for \funref{adjoin}.
+
+The argument to the \kwd{key} function 
+is an element of the \term{list} stored in 
+\param{place}. The \kwd{key} function typically returns part
+part of the element of the \term{list}.
+If \kwd{key} is not supplied or \nil, the \term{list} 
+element is used.
+
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+For information about the \term{evaluation} of \term{subforms} of \param{place},
+\seesection\GenRefSubFormEval.
+\endissue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+
+\issue{PUSHNEW-STORE-REQUIRED:UNSPECIFIED}
+It is \term{implementation-dependent} whether or not \macref{pushnew} 
+actually executes the storing form for its \param{place} in the
+situation where the \param{item} is already a member of the \term{list}
+held by \param{place}.
+\endissue{PUSHNEW-STORE-REQUIRED:UNSPECIFIED}
+
+\label Examples::
+\code
+ (setq x '(a (b c) d)) \EV (A (B C) D)
+ (pushnew 5 (cadr x)) \EV (5 B C)   
+ x \EV (A (5 B C) D)
+ (pushnew 'b (cadr x)) \EV (5 B C)  
+ x \EV (A (5 B C) D)
+ (setq lst '((1) (1 2) (1 2 3))) \EV ((1) (1 2) (1 2 3))
+ (pushnew '(2) lst) \EV ((2) (1) (1 2) (1 2 3))
+ (pushnew '(1) lst) \EV ((1) (2) (1) (1 2) (1 2 3))
+ (pushnew '(1) lst :test 'equal) \EV ((1) (2) (1) (1 2) (1 2 3))
+ (pushnew '(1) lst :key #'car) \EV ((1) (2) (1) (1 2) (1 2 3)) 
+\endcode
+
+\label Side Effects::
+
+The contents of \param{place} may be modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{push},
+\funref{adjoin},
+{\secref\GeneralizedReference}
+
+\label Notes::
+
+The effect of
+\code
+ (pushnew item place :test p)
+\endcode
+is roughly equivalent to
+\code
+ (setf place (adjoin item place :test p))
+\endcode
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+except that the \term{subforms} of \f{place} are evaluated only once, 
+and \f{item} is evaluated before \f{place}.
+\endissue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+
+\endcom
+
+%%% ========== NSET-DIFFERENCE
+%%% ========== SET-DIFFERENCE
+\begincom{set-difference, nset-difference}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues set-difference  {list-1 list-2 {\key} key test test-not} {result-list}
+\DefunWithValues nset-difference {list-1 list-2 {\key} key test test-not} {result-list}
+
+\label Arguments and Values:: 
+
+\param{list-1}---a \term{proper list}.
+
+\param{list-2}---a \term{proper list}.
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{result-list}---a \term{list}.
+                                   
+\label Description::
+%% 15.5.0 17
+\funref{set-difference} returns a \term{list} 
+of elements of \param{list-1}
+that do not appear in \param{list-2}.  
+
+%% 15.5.0 20
+\funref{nset-difference} is the destructive 
+version of \funref{set-difference}.
+It may destroy \param{list-1}.
+
+%% 15.5.0 19
+For all possible ordered pairs consisting of
+one element from \param{list-1} and one element from \param{list-2}, the 
+\kwd{test} or \kwd{test-not} function is
+used to determine whether they \term{satisfy the test}.  
+The first argument to the \kwd{test} or \kwd{test-not} function 
+is the part of an element of \param{list-1} that is returned by 
+the \kwd{key} function (if supplied); the second argument is the part of 
+an element of \param{list-2} that is 
+returned by the \kwd{key} function (if supplied).
+
+If \kwd{key} is supplied, its argument is a \param{list-1} or
+\param{list-2} element. The \kwd{key} function 
+typically returns part of 
+the supplied element.
+If \kwd{key} is not supplied, the \param{list-1} or \param{list-2}
+element is used.
+
+An element of \param{list-1}
+appears in the result if and only if it does not match any element
+of \param{list-2}.  
+
+
+%% 15.5.0 18
+There is no guarantee that the order of elements in the result will
+reflect the ordering of the arguments in any particular way.
+The result \term{list} 
+may share cells with, or be \funref{eq} to, either of \param{list-1}
+or \param{list-2},
+if appropriate.
+
+\label Examples::
+
+\code
+ (setq lst1 (list "A" "b" "C" "d")
+       lst2 (list "a" "B" "C" "d")) \EV ("a" "B" "C" "d")
+ (set-difference lst1 lst2) \EV ("d" "C" "b" "A")
+ (set-difference lst1 lst2 :test 'equal) \EV ("b" "A")
+ (set-difference lst1 lst2 :test #'equalp) \EV NIL 
+ (nset-difference lst1 lst2 :test #'string=) \EV ("A" "b")
+ (setq lst1 '(("a" . "b") ("c" . "d") ("e" . "f")))
+\EV (("a" . "b") ("c" . "d") ("e" . "f")) 
+ (setq lst2 '(("c" . "a") ("e" . "b") ("d" . "a")))
+\EV (("c" . "a") ("e" . "b") ("d" . "a")) 
+ (nset-difference lst1 lst2 :test #'string= :key #'cdr)
+\EV (("c" . "d") ("e" . "f")) 
+ lst1 \EV (("a" . "b") ("c" . "d") ("e" . "f")) 
+ lst2 \EV (("c" . "a") ("e" . "b") ("d" . "a")) 
+\endcode
+\code
+;; Remove all flavor names that contain "c" or "w".
+ (set-difference '("strawberry" "chocolate" "banana"
+                  "lemon" "pistachio" "rhubarb")
+          '(#\\c #\\w)
+          :test #'(lambda (s c) (find c s)))
+\EV ("banana" "rhubarb" "lemon")    ;One possible ordering.
+\endcode
+
+\label Side Effects::
+
+\funref{nset-difference} may destroy \param{list-1}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktypes{\param{list-1} and \param{list-2}}{\term{proper lists}}
+
+\label See Also::
+
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification},
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\endcom
+
+%%% ========== NSET-EXCLUSIVE-OR
+%%% ========== SET-EXCLUSIVE-OR
+\begincom{set-exclusive-or, nset-exclusive-or}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues set-exclusive-or  {list-1 list-2 {\key} key test test-not} {result-list}
+\DefunWithValues nset-exclusive-or {list-1 list-2 {\key} key test test-not} {result-list}
+
+\label Arguments and Values:: 
+
+\param{list-1}---a \term{proper list}.
+
+\param{list-2}---a \term{proper list}.
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{result-list}---a \term{list}.
+
+\label Description::
+%% 15.5.0 22
+\funref{set-exclusive-or} returns a \term{list} of elements that appear
+in exactly one of \param{list-1} and \param{list-2}.
+
+%% 15.5.0 25
+\funref{nset-exclusive-or} 
+is the \term{destructive} version of \funref{set-exclusive-or}.
+
+%% 15.5.0 24
+For all possible ordered pairs consisting of
+one element from \param{list-1} and one element from \param{list-2}, the 
+\kwd{test} or \kwd{test-not} function is
+used to determine whether they \term{satisfy the test}.  
+
+If \kwd{key} is supplied, it is used to
+extract the part to be tested from the \param{list-1} or \param{list-2} element. 
+The first argument to the \kwd{test} or \kwd{test-not} function 
+is the part of an element of \param{list-1} extracted by the \kwd{key}
+function (if supplied); the second argument  is the part of an 
+element of \param{list-2} extracted by the \kwd{key} function (if supplied).
+If \kwd{key} is not supplied or \nil, the \param{list-1} or
+\param{list-2} element is used.
+
+The result contains precisely
+those elements of \param{list-1} and \param{list-2} 
+that appear in no matching pair.
+
+The result \term{list} of \funref{set-exclusive-or} 
+might share storage with one of \param{list-1} or \param{list-2}.
+
+\label Examples::
+
+\code
+ (setq lst1 (list 1 "a" "b")
+       lst2 (list 1 "A" "b")) \EV (1 "A" "b")
+ (set-exclusive-or lst1 lst2) \EV ("b" "A" "b" "a")
+ (set-exclusive-or lst1 lst2 :test #'equal) \EV ("A" "a")
+ (set-exclusive-or lst1 lst2 :test 'equalp) \EV NIL 
+ (nset-exclusive-or lst1 lst2) \EV ("a" "b" "A" "b") 
+ (setq lst1 (list (("a" . "b") ("c" . "d") ("e" . "f"))))
+\EV (("a" . "b") ("c" . "d") ("e" . "f"))
+ (setq lst2 (list (("c" . "a") ("e" . "b") ("d" . "a"))))
+\EV (("c" . "a") ("e" . "b") ("d" . "a")) 
+ (nset-exclusive-or lst1 lst2 :test #'string= :key #'cdr)
+\EV (("c" . "d") ("e" . "f") ("c" . "a") ("d" . "a")) 
+ lst1 \EV (("a" . "b") ("c" . "d") ("e" . "f"))
+ lst2 \EV (("c" . "a") ("d" . "a")) 
+\endcode
+
+\label Side Effects::
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\funref{nset-exclusive-or} is permitted to modify any part,
+\term{car} or \term{cdr}, of the \term{list structure} of \param{list-1} or \param{list-2}.
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktypes{\param{list-1} and \param{list-2}}{\term{proper lists}}
+
+\label See Also::
+
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification},
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+Since the \funref{nset-exclusive-or} side effect is not required,
+it should not be used in for-effect-only
+  positions in portable code.
+ 
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\endcom
+
+%%% ========== SUBSETP
+\begincom{subsetp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues subsetp {list-1 list-2 {\key} key test test-not} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{list-1}---a \term{proper list}.
+
+\param{list-2}---a \term{proper list}.
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 15.5.0 26
+\funref{subsetp} returns \term{true} if every element of \param{list-1}
+\bogusterm{matches} some element of \param{list-2},
+and \term{false} otherwise.
+
+Whether a list element is the same as another list element is
+determined by the functions specified by the keyword arguments.  
+The first argument to the \kwd{test} or \kwd{test-not} 
+function is 
+%!!! Sandra: typically?
+typically
+part of an element of \param{list-1} extracted by
+the \kwd{key} function; the second argument is  typically part of 
+an element of \param{list-2} extracted by
+the \kwd{key} function.
+
+The argument to the \kwd{key} function is an element of either
+\param{list-1} or \param{list-2}; the return value is part of the element
+of the supplied list element.
+If \kwd{key} is not supplied or \nil, 
+the \param{list-1} or \param{list-2}
+element itself is supplied to the \kwd{test} or \kwd{test-not} 
+function.
+
+\label Examples::
+
+\code
+ (setq cosmos '(1 "a" (1 2))) \EV (1 "a" (1 2))
+ (subsetp '(1) cosmos) \EV \term{true}
+ (subsetp '((1 2)) cosmos) \EV \term{false}
+ (subsetp '((1 2)) cosmos :test 'equal) \EV \term{true}
+ (subsetp '(1 "A") cosmos :test #'equalp) \EV \term{true}
+ (subsetp '((1) (2)) '((1) (2))) \EV \term{false}
+ (subsetp '((1) (2)) '((1) (2)) :key #'car) \EV \term{true}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktypes{\param{list-1} and \param{list-2}}{\term{proper lists}}
+
+\label See Also::
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+\endcom
+
+%%% ========== NUNION
+%%% ========== UNION
+\begincom{union, nunion}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues union  {list-1 list-2 {\key} key test test-not} {result-list}
+\DefunWithValues nunion {list-1 list-2 {\key} key test test-not} {result-list}
+
+\label Arguments and Values:: 
+
+\param{list-1}---a \term{proper list}.
+
+\param{list-2}---a \term{proper list}.
+
+\param{test}---a \term{designator} for a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{test-not}---a \term{designator} for 
+  a \term{function} of two \term{arguments}
+  that returns a \term{generalized boolean}.
+
+\param{key}---a \term{designator} for a \term{function} of one argument,
+  or \nil.
+
+\param{result-list}---a \term{list}.
+
+\label Description::
+
+\funref{union} and \funref{nunion} return a \term{list}
+that contains every element that occurs in either \param{list-1} 
+or \param{list-2}.                                 
+
+%% 15.5.0 11
+For all possible ordered pairs consisting of one
+element from \param{list-1} 
+and one element from \param{list-2}, \kwd{test} or  \kwd{test-not} is used
+to determine whether they \term{satisfy the test}. 
+The first argument to the \kwd{test} or \kwd{test-not} 
+function is the part of the element of \param{list-1} extracted by the
+\kwd{key} function (if supplied); the second argument  
+is the part of the element of \param{list-2} extracted by the
+\kwd{key} function (if supplied).
+
+The argument to the \kwd{key} function is an element of
+\param{list-1} or \param{list-2}; the return value is part of the supplied
+element.  
+If \kwd{key} is not supplied or \nil, 
+the element of \param{list-1} or \param{list-2}
+itself is supplied to the \kwd{test} or \kwd{test-not} function. 
+
+For every matching pair, 
+%Removed per barmar -kmp 29-Jul-91
+%at least
+one of the two elements of the pair will be in the result.  Any
+element from either \param{list-1} or \param{list-2}
+that matches no element of the other will appear
+in the result.  
+
+%% 15.5.0 9
+If there is a duplication between \param{list-1} 
+and \param{list-2},
+only one of the duplicate instances will be in the result.
+If either \param{list-1} 
+or \param{list-2} has duplicate entries within it,
+the redundant entries
+might or might not appear in the result.
+
+%% 15.5.0 10
+The order of elements in the result do not have to
+reflect the ordering of \param{list-1} or \param{list-2} in any way.
+The result \term{list} may be \funref{eq} to either
+\param{list-1} or \param{list-2} if appropriate.
+
+\label Examples::
+
+\code
+ (union '(a b c) '(f a d))
+\EV (A B C F D)
+\OV (B C F A D)
+\OV (D F A B C)
+ (union '((x 5) (y 6)) '((z 2) (x 4)) :key #'car)
+\EV ((X 5) (Y 6) (Z 2))
+\OV ((X 4) (Y 6) (Z 2))
+
+ (setq lst1 (list 1 2 '(1 2) "a" "b")
+       lst2 (list 2 3 '(2 3) "B" "C"))
+\EV (2 3 (2 3) "B" "C")
+ (nunion lst1 lst2)
+\EV (1 (1 2) "a" "b" 2 3 (2 3) "B" "C") 
+\OV (1 2 (1 2) "a" "b" "C" "B" (2 3) 3)
+\endcode
+
+\label Side Effects::
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\funref{nunion} is permitted to modify any part, \term{car} or \term{cdr}, 
+of the \term{list structure} of \param{list-1} or \param{list-2}.
+\endissue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktypes{\param{list-1} and \param{list-2}}{\term{proper lists}}
+
+\label See Also::
+
+\funref{intersection},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification},
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+The \kwd{test-not} parameter is deprecated.
+\endissue{TEST-NOT-IF-NOT:FLUSH-ALL}
+
+Since the \funref{nunion} side effect is not required,
+it should not be used in for-effect-only positions in portable code.
+
+\endcom
+

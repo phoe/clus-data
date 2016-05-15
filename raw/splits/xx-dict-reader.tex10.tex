@@ -1,0 +1,63 @@
+====== Function SET-MACRO-CHARACTER, GET-MACRO-CHARACTER ======
+
+====Syntax====
+
+\DefunWithValues get-macro-character {char ''&optional'' readtable} {function, non-terminating-p}
+
+\DefunWithValues set-macro-character {char new-function ''&optional'' non-terminating-p readtable} {\t}
+
+====Arguments and Values====
+
+//char// - a //[[CL:Glossary:character]]//.
+
+//non-terminating-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+
+//readtable// - a //[[CL:Glossary:readtable designator]]//.
+
+The default is the //[[CL:Glossary:current readtable]]//.
+
+//function// - **[[CL:Constant Variables:nil]]**, or a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]//.
+
+//new-function// - a //[[CL:Glossary:function designator]]//.
+
+====Description====
+
+**[[CL:Functions:get-macro-character]]** returns as its //[[CL:Glossary:primary value]]//, //function//, the //[[CL:Glossary:reader macro function]]// associated with //char// in //readtable// (if any), or else **[[CL:Constant Variables:nil]]** if //char// is not a //[[CL:Glossary:macro character]]// in //readtable//. The //[[CL:Glossary:secondary value]]//, //non-terminating-p//, is //[[CL:Glossary:true]]// if //char// is a //[[CL:Glossary:non-terminating]]// //[[CL:Glossary:macro character]]//; otherwise, it is //[[CL:Glossary:false]]//.
+
+**[[CL:Functions:set-macro-character]]** causes //char// to be a //[[CL:Glossary:macro character]]// associated with the //[[CL:Glossary:reader macro function]]// //new-function// (or the //[[CL:Glossary:designator]]// for //new-function//) in //readtable//. If //non-terminating-p// is //[[CL:Glossary:true]]//, //char// becomes a //[[CL:Glossary:non-terminating]]// //[[CL:Glossary:macro character]]//; otherwise it becomes a //[[CL:Glossary:terminating]]// //[[CL:Glossary:macro character]]//.
+
+====Examples====
+
+<blockquote> (get-macro-character #\\\lbr) → NIL, //[[CL:Glossary:false]]// (not (get-macro-character #\\;)) → //[[CL:Glossary:false]]// </blockquote>
+
+The following is a possible definition for the //[[CL:Glossary:single-quote]]// //[[CL:Glossary:reader macro]]// in //[[CL:Glossary:standard syntax]]//:
+
+<blockquote> (defun single-quote-reader (stream char) (declare (ignore char)) (list 'quote (read stream t nil t))) → SINGLE-QUOTE-READER (set-macro-character #\\' #'single-quote-reader) → T </blockquote>
+
+Here ''single-quote-reader'' reads an //[[CL:Glossary:object]]// following the //[[CL:Glossary:single-quote]]// and returns a //[[CL:Glossary:list]]// of \specref{quote} and that //[[CL:Glossary:object]]//. The //char// argument is ignored.
+
+The following is a possible definition for the //[[CL:Glossary:semicolon]]// //[[CL:Glossary:reader macro]]// in //[[CL:Glossary:standard syntax]]//:
+
+<blockquote> (defun semicolon-reader (stream char) (declare (ignore char)) ;; First swallow the rest of the current input line. ;; End-of-file is acceptable for terminating the comment. (do () ((char= (read-char stream nil #\\Newline t) #\\Newline))) ;; Return zero values. (values)) → SEMICOLON-READER (set-macro-character #\\; #'semicolon-reader) → T </blockquote>
+
+====Side Effects====
+
+The //readtable// is modified.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Variables:*readtable*]]**
+
+====Notes====
+
+None.
+
+\issue{GET-MACRO-CHARACTER-READTABLE:NIL-STANDARD}

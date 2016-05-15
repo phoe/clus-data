@@ -1,0 +1,79 @@
+====== Function SUBST, SUBST-IF, SUBST-IF-NOT, NSUBST, NSUBST-IF, NSUBST-IF-NOT ======
+
+====Syntax====
+
+**subst {new old tree** //\key} key test test-not// → //new-tree// **subst-if {new predicate tree** //\key} key// → //new-tree// **subst-if-not {new predicate tree** //\key} key// → //new-tree//
+
+**nsubst {new old tree** //\key} key test test-not// → //new-tree// **nsubst-if {new predicate tree** //\key} key// → //new-tree// **nsubst-if-not {new predicate tree** //\key} key// → //new-tree//
+
+====Arguments and Values====
+
+//new// - an //[[CL:Glossary:object]]//.
+
+//old// - an //[[CL:Glossary:object]]//.
+
+//predicate// - a //[[CL:Glossary:symbol]]// that names a //[[CL:Glossary:function]]//, or a //[[CL:Glossary:function]]// of one argument that returns a //[[CL:Glossary:generalized boolean]]// value.
+
+//tree// - a //[[CL:Glossary:tree]]//.
+
+//test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument, or **[[CL:Constant Variables:nil]]**.
+
+//new-tree// - a //[[CL:Glossary:tree]]//.
+
+====Description====
+
+**[[CL:Functions:subst]]**, **[[CL:Functions:subst-if]]**, and **[[CL:Functions:subst-if-not]]** perform substitution operations on //tree//. Each function searches //tree// for occurrences of a particular //old// item of an element or subexpression that //[[CL:Glossary:satisfies the test]]//.
+
+**[[CL:Functions:nsubst]]**, **[[CL:Functions:nsubst-if]]**, and **[[CL:Functions:nsubst-if-not]]** are like **[[CL:Functions:subst]]**, **[[CL:Functions:subst-if]]**, and **[[CL:Functions:subst-if-not]]** respectively, except that the original //tree// is modified.
+
+**[[CL:Functions:subst]]** makes a copy of //tree//, substituting //new// for every subtree or leaf of //tree// (whether the subtree or leaf is a //[[CL:Glossary:car]]// or a //[[CL:Glossary:cdr]]// of its parent) such that //old// and the subtree or leaf //[[CL:Glossary:satisfy the test]]//.
+
+**[[CL:Functions:nsubst]]** is a destructive version of **[[CL:Functions:subst]]**. The list structure of //tree// is altered by destructively replacing with //new// each leaf of the //tree// such that //old// and the leaf //[[CL:Glossary:satisfy the test]]//.
+
+For **[[CL:Functions:subst]]**, **[[CL:Functions:subst-if]]**, and **[[CL:Functions:subst-if-not]]**, if the functions succeed, a new copy of the tree is returned in which each occurrence of such an element is replaced by the //new// element or subexpression. If no changes are made, the original //tree// may be returned. The original //tree// is left unchanged, but the result tree may share storage with it.
+
+For **[[CL:Functions:nsubst]]**, **[[CL:Functions:nsubst-if]]**, and **[[CL:Functions:nsubst-if-not]]** the original //tree// is modified and returned as the function result, but the result may not be **[[CL:Functions:eq]]** to //tree//.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] tree1 '(1 (1 2) (1 2 3) (1 2 3 4))) → (1 (1 2) (1 2 3) (1 2 3 4)) (subst "two" 2 tree1) → (1 (1 "two") (1 "two" 3) (1 "two" 3 4)) (subst "five" 5 tree1) → (1 (1 2) (1 2 3) (1 2 3 4)) (eq tree1 (subst "five" 5 tree1)) → //[[CL:Glossary:implementation-dependent]]// (subst 'tempest 'hurricane '(shakespeare wrote (the hurricane))) → (SHAKESPEARE WROTE (THE TEMPEST)) (subst 'foo 'nil '(shakespeare wrote (twelfth night))) → (SHAKESPEARE WROTE (TWELFTH NIGHT . FOO) . FOO) (subst '(a . cons) '(old . pair) '((old . spice) ((old . shoes) old . pair) (old . pair)) :test #'equal) → ((OLD . SPICE) ((OLD . SHOES) A . CONS) (A . CONS))
+
+(subst-if 5 #'listp tree1) → 5 (subst-if-not '(x) #'consp tree1) → (1 X)
+
+tree1 → (1 (1 2) (1 2 3) (1 2 3 4)) (nsubst 'x 3 tree1 :key #'(lambda (y) (and (listp y) (third y)))) → (1 (1 2) X X) tree1 → (1 (1 2) X X) </blockquote>
+
+====Side Effects====
+
+**[[CL:Functions:nsubst]]**, **[[CL:Functions:nsubst-if]]**, and **[[CL:Functions:nsubst-if-not]]** might alter the //[[CL:Glossary:tree structure]]// of //tree//.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:substitute]]**, **[[CL:Functions:nsubstitute]]**,
+
+{\secref\ConstantModification},
+
+{\secref\TraversalRules}
+
+====Notes====
+
+The **'':test-not''** parameter is deprecated.
+
+The functions **[[CL:Functions:subst-if-not]]** and **[[CL:Functions:nsubst-if-not]]** are deprecated.
+
+One possible definition of **[[CL:Functions:subst]]**:
+
+<blockquote> (defun subst (old new tree &rest x &key test test-not key) (cond ((satisfies-the-test old tree :test test :test-not test-not :key key) new) ((atom tree) tree) (t (let ((a (apply #'subst old new (car tree) x)) (d (apply #'subst old new (cdr tree) x))) (if (and (eql a (car tree)) (eql d (cdr tree))) tree (cons a d)))))) </blockquote>
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY} \issue{DOTTED-LIST-ARGUMENTS:CLARIFY} \issue{CONSTANT-MODIFICATION:DISALLOW} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{TEST-NOT-IF-NOT:FLUSH-ALL} \issue{TEST-NOT-IF-NOT:FLUSH-ALL}

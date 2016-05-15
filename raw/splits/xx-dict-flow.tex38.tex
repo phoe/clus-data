@@ -1,0 +1,53 @@
+====== Function COMPLEMENT ======
+
+====Syntax====
+
+**complement** //function// → //complement-function//
+
+====Arguments and Values====
+
+//function// - a //[[CL:Glossary:function]]//.
+
+//complement-function// - a //[[CL:Glossary:function]]//.
+
+====Description====
+
+Returns a //[[CL:Glossary:function]]// that takes the same //[[CL:Glossary:arguments]]// as //function//, and has the same side-effect behavior as //function//, but returns only a single value: a //[[CL:Glossary:generalized boolean]]// with the opposite truth value of that which would be returned as the //[[CL:Glossary:primary value]]// of //function//. That is, when the //function// would have returned //[[CL:Glossary:true]]// as its //[[CL:Glossary:primary value]]// the //complement-function// returns //[[CL:Glossary:false]]//, and when the //function// would have returned //[[CL:Glossary:false]]// as its //[[CL:Glossary:primary value]]// the //complement-function// returns //[[CL:Glossary:true]]//.
+
+====Examples====
+
+<blockquote> (funcall (complement #'zerop) 1) → //[[CL:Glossary:true]]// (funcall (complement #'characterp) #\\A) → //[[CL:Glossary:false]]// (funcall (complement #'member) 'a '(a b c)) → //[[CL:Glossary:false]]// (funcall (complement #'member) 'd '(a b c)) → //[[CL:Glossary:true]]// </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:not]]**
+
+====Notes====
+
+<blockquote> (complement ''x'') ≡ #'(lambda (&rest arguments) (not (apply ''x'' arguments))) </blockquote>
+
+In \clisp, functions with names like "''"xxx''-if-not'''' are related to functions with names like "\f{{\it xxx}-if}" in that
+
+<blockquote> (''xxx''-if-not ''f'' . ''arguments'') ≡ (''xxx''-if (complement ''f'') . ''arguments'') </blockquote>
+
+For example,
+
+<blockquote> (find-if-not #'zerop '(0 0 3)) ≡ (find-if (complement #'zerop) '(0 0 3)) → 3 </blockquote>
+
+Note that since the "''"xxx''-if-not'''' //[[CL:Glossary:functions]]// and the **'':test-not''** arguments have been deprecated, uses of "''"xxx''-if'''' //[[CL:Glossary:functions]]// or **'':test''** arguments with **[[CL:Functions:complement]]** are preferred.
+
+
+
+\issue{FUNCTION-COMPOSITION:JAN89-X3J13}

@@ -1,0 +1,49 @@
+====== Function APPLY ======
+
+====Syntax====
+
+\DefunWithValues apply {function ''&rest'' args''+''} {\starparam{result}}
+
+====Arguments and Values====
+
+//function// - a //[[CL:Glossary:function designator]]//.
+
+//args// - a //[[CL:Glossary:spreadable argument list designator]]//.
+
+//results// - the //[[CL:Glossary:values]]// returned by //function//.
+
+====Description====
+
+//[[CL:Glossary:Applies]]// the //function// to the //args//.
+
+When the //function// receives its arguments via \keyref{rest}, it is permissible (but not required) for the //[[CL:Glossary:implementation]]// to //[[CL:Glossary:bind]]// the //[[CL:Glossary:rest parameter]]// to an //[[CL:Glossary:object]]// that shares structure with the last argument to **[[CL:Functions:apply]]**. Because a //[[CL:Glossary:function]]// can neither detect whether it was called via **[[CL:Functions:apply]]** nor whether (if so) the last argument to **[[CL:Functions:apply]]** was a //[[CL:Glossary:constant]]//, //[[CL:Glossary:conforming programs]]// must neither rely on the //[[CL:Glossary:list]]// structure of a //[[CL:Glossary:rest list]]// to be freshly consed, nor modify that //[[CL:Glossary:list]]// structure.
+
+**[[CL:Macros:setf]]** can be used with **[[CL:Functions:apply]]** in certain circumstances; see section {\secref\SETFofAPPLY}.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] f '+) → + (apply f '(1 2)) → 3 ([[CL:Macros:defparameter]] f #'-) → #<FUNCTION -> (apply f '(1 2)) → -1 (apply #'max 3 5 '(2 7 3)) → 7 (apply 'cons '((+ 2 3) 4)) → ((+ 2 3) . 4) (apply #'+ '()) → 0
+
+(defparameter *some-list* '(a b c)) (defun strange-test (&rest x) (eq x *some-list*)) (apply #'strange-test *some-list*) → //[[CL:Glossary:implementation-dependent]]//
+
+(defun bad-boy (&rest x) (rplacd x 'y)) (bad-boy 'a 'b 'c) has undefined consequences. (apply #'bad-boy *some-list*) has undefined consequences. </blockquote>
+
+<blockquote> (defun foo (size &rest keys &key double &allow-other-keys) (let ((v (apply #'make-array size :allow-other-keys t keys))) (if double (concatenate (type-of v) v v) v))) (foo 4 :initial-contents '(a b c d) :double t) → #(A B C D A B C D) </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:funcall]]**, **[[CL:Functions:fdefinition]]**, \specref{function}, {\secref\Evaluation}, {\secref\SETFofAPPLY}
+
+====Notes====
+
+None.
+
+\issue{FUNCTION-TYPE:X3J13-MARCH-88} \issue{REST-LIST-ALLOCATION:MAY-SHARE} \issue{REST-LIST-ALLOCATION:MAY-SHARE}

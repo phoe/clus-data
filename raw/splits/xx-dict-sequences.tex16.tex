@@ -1,0 +1,59 @@
+====== Function SEARCH ======
+
+====Syntax====
+
+\DefunWithValuesNewline search {sequence-1 sequence-2 ''&key'' from-end test test-not key start1 start2 end1 end2} {position}
+
+====Arguments and Values====
+
+//Sequence-1// - a //[[CL:Glossary:sequence]]//.
+
+//Sequence-2// - a //[[CL:Glossary:sequence]]//.
+
+//from-end// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+
+//test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument, or **[[CL:Constant Variables:nil]]**.
+
+//start1//, //end1// - //[[CL:Glossary:bounding index designators]]// of //sequence-1//. \Defaults{//start1// and //end1//}{''0'' and **[[CL:Constant Variables:nil]]**}
+
+//start2//, //end2// - //[[CL:Glossary:bounding index designators]]// of //sequence-2//. \Defaults{//start2// and //end2//}{''0'' and **[[CL:Constant Variables:nil]]**}
+
+//position// - a //[[CL:Glossary:bounding index]]// of //sequence-2//, or **[[CL:Constant Variables:nil]]**.
+
+====Description====
+
+Searches //sequence-2// for a subsequence that matches //sequence-1//.
+
+The implementation may choose to search //sequence-2// in any order; there is no guarantee on the number of times the test is made. For example, when //start-end// is //[[CL:Glossary:true]]//, the //sequence// might actually be searched from left to right instead of from right to left (but in either case would return the rightmost matching subsequence). If the search succeeds, **[[CL:Functions:search]]** returns the offset into //sequence-2// of the first element of the leftmost or rightmost matching subsequence, depending on //from-end//; otherwise **[[CL:Functions:search]]** returns **[[CL:Constant Variables:nil]]**.
+
+If //from-end// is //[[CL:Glossary:true]]//, the index of the leftmost element of the rightmost matching subsequence is returned.
+
+====Examples==== <blockquote> (search "dog" "it's a dog's life") → 7 (search '(0 1) '(2 4 6 1 3 5) :key #'oddp) → 2 </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+{\secref\TraversalRules}
+
+====Notes====
+
+The **'':test-not''** //[[CL:Glossary:argument]]// is deprecated.
+
+
+
+\issue{SUBSEQ-OUT-OF-BOUNDS} \issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{TEST-NOT-IF-NOT:FLUSH-ALL}

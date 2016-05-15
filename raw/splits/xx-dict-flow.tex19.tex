@@ -1,0 +1,44 @@
+====== Special Operator PROGV ======
+
+====Syntax====
+
+\DefspecWithValues progv {//symbols// //values// \starparam{form}} {\starparam{result}}
+
+====Arguments and Values====
+
+//symbols// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:symbols]]//; \eval.
+
+//values// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:object|objects]]//; \eval.
+
+//forms// - an //[[CL:Glossary:implicit progn]]//.
+
+//results// - the //[[CL:Glossary:values]]// returned by the //[[CL:Glossary:forms]]//.
+
+====Description====
+
+\specref{progv} creates new dynamic variable //[[CL:Glossary:bindings]]// and executes each //form// using those //[[CL:Glossary:bindings]]//. Each //form// is evaluated in order.
+
+\specref{progv} allows //[[CL:Glossary:binding]]// one or more dynamic variables whose names may be determined at run time. Each //form// is evaluated in order with the dynamic variables whose names are in //symbols// bound to corresponding //values//. If too few //values// are supplied, the remaining //[[CL:Glossary:symbols]]// are bound and then made to have no value. If too many //values// are supplied, the excess values are ignored. The //[[CL:Glossary:bindings]]// of the dynamic variables are undone on exit from \specref{progv}.
+
+====Examples==== <blockquote> ([[CL:Macros:defparameter]] *x* 1) → 1 (progv '(*x*) '(2) *x*) → 2 *x* → 1
+
+Assuming *x* is not globally special,
+
+(let ((*x* 3)) (progv '(*x*) '(4) (list *x* (symbol-value '*x*)))) → (3 4) </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+\specref{let}, {\secref\Evaluation}
+
+====Notes====
+
+Among other things, \specref{progv} is useful when writing interpreters for languages embedded in Lisp; it provides a handle on the mechanism for //[[CL:Glossary:binding]]// //[[CL:Glossary:dynamic variables]]//.
+

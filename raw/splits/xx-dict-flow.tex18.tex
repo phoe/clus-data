@@ -1,0 +1,69 @@
+====== Special Operator LET, LET* ======
+
+====Syntax====
+
+\DefspecWithValues let {\paren{\star{\VarValue}} \starparam{declaration} \starparam{form}} {\starparam{result}}
+
+\DefspecWithValues let* {\paren{\star{\VarValue}} \starparam{declaration} \starparam{form}} {\starparam{result}}
+
+====Arguments and Values====
+
+//var// - a //[[CL:Glossary:symbol]]//.
+
+//init-form// - a //[[CL:Glossary:form]]//.
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//form// - a //[[CL:Glossary:form]]//.
+
+//results// - the //[[CL:Glossary:values]]// returned by the //[[CL:Glossary:forms]]//.
+
+====Description====
+
+\specref{let} and \specref{let*} create new variable //[[CL:Glossary:bindings]]// and execute a series of //forms// that use these //[[CL:Glossary:bindings]]//. \specref{let} performs the //[[CL:Glossary:bindings]]// in parallel and \specref{let*} does them sequentially.
+
+
+The form
+
+<blockquote> (let ((//var1// //init-form-1//) (//var2// //init-form-2//) ... (//varm// //init-form-m//)) //declaration1// //declaration2// ... //declarationp// //form1// //form2// ... //formn//) </blockquote> first evaluates the expressions //init-form-1//, //init-form-2//, and so on,
+
+in that order, saving the resulting values. Then all of the variables //varj// are bound to the corresponding values; each //[[CL:Glossary:binding]]// is lexical unless there is a \declref{special} declaration to the contrary. The expressions //formk// are then evaluated in order; the values of all but the last are discarded (that is, the body of a \specref{let} is an //[[CL:Glossary:implicit progn]]//).
+
+\specref{let*} is similar to \specref{let}, but the //[[CL:Glossary:bindings]]// of variables are performed sequentially rather than in parallel. The expression for the //init-form// of a //var// can refer to //vars// previously bound in the \specref{let*}.
+
+
+The form
+
+<blockquote> (let* ((//var1// //init-form-1//) (//var2// //init-form-2//) ... (//varm// //init-form-m//)) //declaration1// //declaration2// ... //declarationp// //form1// //form2// ... //formn//) </blockquote> first evaluates the expression //init-form-1//, then binds the variable //var1// to that value; then it evaluates //init-form-2// and binds
+
+//var2//, and so on. The expressions //formj// are then evaluated in order; the values of all but the last are discarded (that is, the body of \specref{let*} is an implicit \specref{progn}).
+
+For both \specref{let} and \specref{let*}, if there is not an //init-form// associated with a //var//, //var// is initialized to **[[CL:Constant Variables:nil]]**.
+
+The special form \specref{let} has the property that the //[[CL:Glossary:scope]]// of the name binding does not include any initial value form. For \specref{let*}, a variable's //[[CL:Glossary:scope]]// also includes the remaining initial value forms for subsequent variable bindings.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] a 'top) → TOP (defun dummy-function () a) → DUMMY-FUNCTION (let ((a 'inside) (b a)) (format nil "~S ~S ~S" a b (dummy-function))) → "INSIDE TOP TOP" (let* ((a 'inside) (b a)) (format nil "~S ~S ~S" a b (dummy-function))) → "INSIDE INSIDE TOP" (let ((a 'inside) (b a)) (declare (special a)) (format nil "~S ~S ~S" a b (dummy-function))) → "INSIDE TOP INSIDE" </blockquote>
+
+\medbreak The code
+
+<blockquote> (let (x) (declare (integer x)) ([[CL:Macros:defparameter]] x (gcd y z)) ...) </blockquote> is incorrect; although ''x'' is indeed set before it is used, and is set to a value of the declared type //[[CL:Glossary:integer]]//, nevertheless ''x'' initially takes on the value **[[CL:Constant Variables:nil]]** in violation of the type declaration.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+\specref{progv}
+
+====Notes====
+
+None.
+
+\issue{DECLS-AND-DOC} \issue{VARIABLE-LIST-ASYMMETRY:SYMMETRIZE} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}

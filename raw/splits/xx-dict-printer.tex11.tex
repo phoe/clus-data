@@ -1,0 +1,111 @@
+====== Standard Generic Function PRINT-OBJECT ======
+
+====Syntax====
+
+\DefgenWithValues print-object {object stream} {object}
+
+====Method Signatures====
+
+\Defmeth {print-object} {\paren{//object// standard-object} //stream//}
+
+\Defmeth {print-object} {\paren{//object// structure-object} //stream//}
+
+====Arguments and Values====
+
+//object// - an //[[CL:Glossary:object]]//.
+
+//stream// - a //[[CL:Glossary:stream]]//.
+
+
+====Description====
+
+\TheGF{print-object} writes the printed representation of //object// to //stream//. The //[[CL:Glossary:function]]// **[[CL:Functions:print-object]]** is called by the //[[CL:Glossary:Lisp printer]]//; it should not be called by the user.
+
+Each implementation is required to provide a //[[CL:Glossary:method]]// on \theclass{standard-object} and on \theclass{structure-object}. In addition, each //[[CL:Glossary:implementation]]// must provide //[[CL:Glossary:methods]]// on enough other //[[CL:Glossary:classes]]// so as to ensure that there is always an applicable //[[CL:Glossary:method]]//. Implementations are free to add //[[CL:Glossary:methods]]// for other //[[CL:Glossary:classes]]//. Users may write //[[CL:Glossary:methods]]// for **[[CL:Functions:print-object]]** for their own //[[CL:Glossary:classes]]// if they do not wish to inherit an //[[CL:Glossary:implementation-dependent]]// //[[CL:Glossary:method]]//.
+
+The //[[CL:Glossary:method]]// on \theclass{structure-object} prints the object in the default ''#S'' notation; see section {\secref\PrintingStructures}.
+
+//[[CL:Glossary:Methods]]// on **[[CL:Functions:print-object]]** are responsible for implementing their part of the semantics of the //[[CL:Glossary:printer control variables]]//, as follows:
+
+\beginlist
+
+
+\item{**[[CL:Variables:*print-readably*]]**}
+
+All methods for **[[CL:Functions:print-object]]** must obey **[[CL:Variables:*print-readably*]]**. This includes both user-defined methods and //[[CL:Glossary:implementation-defined]]// methods. Readable printing of //[[CL:Glossary:structures]]// and //[[CL:Glossary:standard objects]]// is controlled by their **[[CL:Functions:print-object]]** method, not by their **[[CL:Functions:make-load-form]]** //[[CL:Glossary:method]]//. //[[CL:Glossary:Similarity]]// for these //[[CL:Glossary:object|objects]]// is application dependent and hence is defined to be whatever these //[[CL:Glossary:methods]]// do; see section {\secref\Similarity}.
+
+
+\item{**[[CL:Variables:*print-escape*]]**}
+
+Each //[[CL:Glossary:method]]// must implement **[[CL:Variables:*print-escape*]]**.
+
+\item{**[[CL:Variables:*print-pretty*]]**}
+
+The //[[CL:Glossary:method]]// may wish to perform specialized line breaking or other output conditional on \thevalueof{*print-pretty*}. For further information, see (for example) the //[[CL:Glossary:macro]]// **[[CL:Macros:pprint-fill]]**. See also \secref\PPrintDispatchTables\ and \secref\PrettyPrinterExamples.
+
+
+\item{**[[CL:Variables:*print-length*]]**}
+
+//[[CL:Glossary:Methods]]// that produce output of indefinite length must obey **[[CL:Variables:*print-length*]]**.
+
+For further information, see (for example) the //[[CL:Glossary:macros]]// **[[CL:Macros:pprint-logical-block]]** and **[[CL:Macros:pprint-pop]]**. See also \secref\PPrintDispatchTables\ and \secref\PrettyPrinterExamples.
+
+
+\item{**[[CL:Variables:*print-level*]]**}
+
+The printer takes care of **[[CL:Variables:*print-level*]]** automatically, provided that each //[[CL:Glossary:method]]// handles exactly one level of structure and calls **[[CL:Functions:write]]** (or an equivalent //[[CL:Glossary:function]]//) recursively if there are more structural levels. The printer's decision of whether an //[[CL:Glossary:object]]// has components (and therefore should not be printed when the printing depth is not less than **[[CL:Variables:*print-level*]]**) is //[[CL:Glossary:implementation-dependent]]//. In some implementations its **[[CL:Functions:print-object]]** //[[CL:Glossary:method]]// is not called; in others the //[[CL:Glossary:method]]// is called, and the determination that the //[[CL:Glossary:object]]// has components is based on what it tries to write to the //stream//.
+
+\item{**[[CL:Variables:*print-circle*]]**}
+
+When \thevalueof{*print-circle*} is //[[CL:Glossary:true]]//, a user-defined
+
+**[[CL:Functions:print-object]]** //[[CL:Glossary:method]]//
+
+can print //[[CL:Glossary:object|objects]]// to the supplied //[[CL:Glossary:stream]]// using **[[CL:Functions:write]]**, **[[CL:Functions:prin1]]**, **[[CL:Functions:princ]]**, or **[[CL:Functions:format]]** and expect circularities to be detected and printed using the ''#''n''#'' syntax. If a user-defined
+
+**[[CL:Functions:print-object]]** //[[CL:Glossary:method]]//
+
+prints to a //[[CL:Glossary:stream]]// other than the one that was supplied, then circularity detection starts over for that //[[CL:Glossary:stream]]//. See **[[CL:Variables:*print-circle*]]**.
+
+\item{**[[CL:Variables:*print-base*]]**, **[[CL:Variables:*print-radix*]]**, **[[CL:Variables:*print-case*]]**, **[[CL:Variables:*print-gensym*]]**, and **[[CL:Variables:*print-array*]]**}
+
+These //[[CL:Glossary:printer control variables]]// apply to specific types of //[[CL:Glossary:object|objects]]// and are handled by the //[[CL:Glossary:methods]]// for those //[[CL:Glossary:object|objects]]//.
+
+\endlist
+
+If these rules are not obeyed, the results are undefined.
+
+
+In general, the printer and the **[[CL:Functions:print-object]]** methods should not rebind the print control variables as they operate recursively through the structure, but this is //[[CL:Glossary:implementation-dependent]]//.
+
+In some implementations the //stream// argument passed to a **[[CL:Functions:print-object]]** //[[CL:Glossary:method]]// is not the original //[[CL:Glossary:stream]]//, but is an intermediate //[[CL:Glossary:stream]]// that implements part of the printer. //[[CL:Glossary:methods]]// should therefore not depend on the identity of this //[[CL:Glossary:stream]]//.
+
+
+
+
+====Examples====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:pprint-fill]]**, **[[CL:Macros:pprint-logical-block]]**, **[[CL:Macros:pprint-pop]]**, **[[CL:Functions:write]]**, **[[CL:Variables:*print-readably*]]**, **[[CL:Variables:*print-escape*]]**, **[[CL:Variables:*print-pretty*]]**, **[[CL:Variables:*print-length*]]**, {\secref\DefaultPrintObjMeths},
+
+{\secref\PrintingStructures},
+
+{\secref\PPrintDispatchTables}, {\secref\PrettyPrinterExamples}
+
+====Notes====
+
+None.
+
+
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93} \issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93} \issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93} \issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93} \issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93} \issue{DATA-IO:ADD-SUPPORT} \issue{GENERALIZE-PRETTY-PRINTER:UNIFY} \issue{GENERALIZE-PRETTY-PRINTER:UNIFY} \issue{PRINT-CIRCLE-STRUCTURE:USER-FUNCTIONS-WORK}

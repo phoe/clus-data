@@ -1,0 +1,60 @@
+====== Function PEEK-CHAR ======
+
+====Syntax====
+
+\DefunWithValues {peek-char} {''&optional'' peek-type input-stream eof-error-p eof-value recursive-p} {char}
+
+====Arguments and Values====
+
+//peek-type// - a //[[CL:Glossary:character]]// or \t\ or **[[CL:Constant Variables:nil]]**.
+
+//input-stream// - //[[CL:Glossary:input]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard input]]//.
+
+//eof-error-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:true]]//.
+
+//eof-value// - an //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**.
+
+//recursive-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+
+//char// - a //[[CL:Glossary:character]]// or the //eof-value//.
+
+====Description====
+
+**[[CL:Functions:peek-char]]** obtains the next character in //input-stream// without actually reading it, thus leaving the character to be read at a later time. It can also be used to skip over and discard intervening characters in the //input-stream// until a particular character is found.
+
+If //peek-type// is not supplied or **[[CL:Constant Variables:nil]]**, **[[CL:Functions:peek-char]]** returns the next character to be read from //input-stream//, without actually removing it from //input-stream//. The next time input is done from //input-stream//, the character will still be there.
+
+If //peek-type// is \t, then **[[CL:Functions:peek-char]]** skips over //[[CL:Glossary:whitespace]]// //[[CL:Glossary:characters]]//, but not comments, and then performs the peeking operation on the next character. The last character examined, the one that starts an //[[CL:Glossary:object]]//, is not removed from //input-stream//.
+
+If //peek-type// is a //[[CL:Glossary:character]]//, then **[[CL:Functions:peek-char]]** skips over input characters until a character that is **[[CL:Functions:char=]]** to that //[[CL:Glossary:character]]// is found; that character is left in //input-stream//.
+
+If an //[[CL:Glossary:end of file]]// occurs and //eof-error-p// is //[[CL:Glossary:false]]//, //eof-value// is returned.
+
+{'' ''}{\ExplainRecursiveP}
+
+When //input-stream// is an //[[CL:Glossary:echo stream]]//, characters that are only peeked at are not echoed. In the case that //peek-type// is not **[[CL:Constant Variables:nil]]**, the characters that are passed by **[[CL:Functions:peek-char]]** are treated as if by **[[CL:Functions:read-char]]**, and so are echoed unless they have been marked otherwise by **[[CL:Functions:unread-char]]**.
+
+====Examples==== <blockquote> (with-input-from-string (input-stream " 1 2 3 4 5") (format t "~S ~S ~S" (peek-char t input-stream) (peek-char #\\4 input-stream) (peek-char nil input-stream)))
+▷ #\\1 #\\4 #\\4 → NIL </blockquote>
+
+====Affected By====
+
+**[[CL:Variables:*readtable*]]**, **[[CL:Variables:*standard-input*]]**, **[[CL:Variables:*terminal-io*]]**.
+
+====Exceptional Situations====
+
+If //eof-error-p// is //[[CL:Glossary:true]]// and an //[[CL:Glossary:end of file]]// occurs an error of type **[[CL:Types:end-of-file]]** is signaled.
+
+If //peek-type// is a //[[CL:Glossary:character]]//, an //[[CL:Glossary:end of file]]// occurs, and //eof-error-p// is //[[CL:Glossary:true]]//, an error of type **[[CL:Types:end-of-file]]** is signaled.
+
+If //recursive-p// is //[[CL:Glossary:true]]// and an //[[CL:Glossary:end of file]]// occurs, an error of type **[[CL:Types:end-of-file]]** is signaled.
+
+====See Also====
+
+None.
+
+====Notes====
+
+None.
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY} \issue{PEEK-CHAR-READ-CHAR-ECHO:FIRST-READ-CHAR}

@@ -1,0 +1,44 @@
+====== Accessor SYMBOL-VALUE ======
+
+====Syntax====
+
+**symbol-value** //symbol// → //value// (**setf** (**symbol-value** //symbol//) //new-value//)
+
+====Arguments and Values====
+
+//symbol// - a //[[CL:Glossary:symbol]]// that must have a //[[CL:Glossary:value]]//.
+
+//value//, //new-value// - an //[[CL:Glossary:object]]//.
+
+====Description====
+
+//[[CL:Glossary:Accesses]]// the //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:value cell]]//.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:setf]] (symbol-value 'a) 1) → 1 (symbol-value 'a) → 1 ;; SYMBOL-VALUE cannot see lexical variables. (let ((a 2)) (symbol-value 'a)) → 1 (let ((a 2)) ([[CL:Macros:defparameter]] a 3) (symbol-value 'a)) → 1 ;; SYMBOL-VALUE can see dynamic variables. (let ((a 2)) (declare (special a)) (symbol-value 'a)) → 2 (let ((a 2)) (declare (special a)) ([[CL:Macros:defparameter]] a 3) (symbol-value 'a)) → 3 (let ((a 2)) ([[CL:Macros:setf]] (symbol-value 'a) 3) a) → 2 a → 3 (symbol-value 'a) → 3 (let ((a 4)) (declare (special a)) (let ((b (symbol-value 'a))) ([[CL:Macros:setf]] (symbol-value 'a) 5) (values a b))) → 5, 4 a → 3 (symbol-value :any-keyword) → :ANY-KEYWORD (symbol-value 'nil) → NIL (symbol-value '()) → NIL ;; The precision of this next one is //[[CL:Glossary:implementation-dependent]]//. (symbol-value 'pi) → 3.141592653589793d0 </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+**[[CL:Functions:makunbound]]**, **[[CL:Functions:set]]**, \specref{setq}
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //symbol// is not a //[[CL:Glossary:symbol]]//.
+
+Should signal **[[CL:Types:unbound-variable]]** if //symbol// is //[[CL:Glossary:unbound]]// and an attempt is made to //[[CL:Glossary:read]]// its //[[CL:Glossary:value]]//. (No such error is signaled on an attempt to //[[CL:Glossary:write]]// its //[[CL:Glossary:value]]//.)
+
+====See Also====
+
+**[[CL:Functions:boundp]]**, **[[CL:Functions:makunbound]]**, **[[CL:Functions:set]]**, \specref{setq}
+
+====Notes====
+
+**[[CL:Functions:symbol-value]]** can be used to get the value of a //[[CL:Glossary:constant variable]]//.
+
+**[[CL:Functions:symbol-value]]** cannot //[[CL:Glossary:access]]// the value of a //[[CL:Glossary:lexical variable]]//.
+

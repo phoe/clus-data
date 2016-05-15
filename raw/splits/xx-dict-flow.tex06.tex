@@ -1,0 +1,113 @@
+====== Special Operator FLET, LABELS, MACROLET ======
+
+====Syntax====
+
+\DefspecWithValuesNewline flet {\vtop{\hbox{\paren{\starparen{//function-name// //lambda-list// {\LocalDeclsAndDoc} \starparam{local-form}}}} \hbox{\starparam{declaration} \starparam{form}}}} {\starparam{result}}
+
+\DefspecWithValuesNewline labels {\vtop{\hbox{\paren{\starparen{//function-name// //lambda-list// {\LocalDeclsAndDoc} \starparam{local-form}}}} \hbox{\starparam{declaration} \starparam{form}}}} {\starparam{result}}
+
+\DefspecWithValuesNewline macrolet {\vtop{\hbox{\paren{\starparen{//name// //lambda-list// {\LocalDeclsAndDoc} \starparam{local-form}}}} \hbox{\starparam{declaration} \starparam{form}}}} {\starparam{result}}
+
+====Arguments and Values====
+
+//function-name// - a //[[CL:Glossary:function name]]//.
+
+//name// - a //[[CL:Glossary:symbol]]//.
+
+//lambda-list// - a //[[CL:Glossary:lambda list]]//; for \specref{flet} and \specref{labels}, it is an //[[CL:Glossary:ordinary lambda list]]//; for \specref{macrolet}, it is a //[[CL:Glossary:macro lambda list]]//.
+
+//local-declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//local-documentation// - a //[[CL:Glossary:string]]//; \noeval.
+
+//local-forms//, //forms// - an //[[CL:Glossary:implicit progn]]//.
+
+//results// - the //[[CL:Glossary:values]]// of the //forms//.
+
+====Description====
+
+\specref{flet}, \specref{labels}, and \specref{macrolet} define local //[[CL:Glossary:functions]]// and //[[CL:Glossary:macros]]//, and execute //forms// using the local definitions. //Forms// are executed in order of occurrence.
+
+The body forms (but not the //[[CL:Glossary:lambda list]]//)
+
+of each //[[CL:Glossary:function]]// created by \specref{flet} and \specref{labels} and each //[[CL:Glossary:macro]]// created by \specref{macrolet} are enclosed in an //[[CL:Glossary:implicit block]]// whose name is the //[[CL:Glossary:function block name]]// of the //function-name// or //name//, as appropriate.
+
+The scope of the //declarations// between the list of local function/macro definitions and the body //forms// in \specref{flet} and \specref{labels} does not include the bodies of the locally defined //[[CL:Glossary:functions]]//, except that for \specref{labels}, any \declref{inline}, \declref{notinline}, or \declref{ftype} declarations that refer to the locally defined functions do apply to the local function bodies. That is, their //[[CL:Glossary:scope]]// is the same as the function name that they affect.
+
+The scope of these //declarations// does not include the bodies of the macro expander functions defined by \specref{macrolet}.
+
+\beginlist \itemitem{\bf flet}
+
+\specref{flet} defines locally named //[[CL:Glossary:functions]]// and executes a series of //forms// with these definition //[[CL:Glossary:bindings]]//. Any number of such local //[[CL:Glossary:functions]]// can be defined.
+
+The //[[CL:Glossary:scope]]// of the name //[[CL:Glossary:binding]]// encompasses only the body. Within the body of \specref{flet}, //function-names// matching those defined by \specref{flet} refer to the locally defined //[[CL:Glossary:functions]]// rather than to the global function definitions of the same name.
+
+Also, within the scope of \specref{flet}, global //[[CL:Glossary:setf expander]]// definitions of the //function-name// defined by \specref{flet} do not apply.
+
+Note that this applies to **[[CL:Functions:(defsetf ''f'' ...)]]**, not **[[CL:Functions:(defmethod (setf ''f'') ...)]]**.
+
+The names of //[[CL:Glossary:functions]]// defined by \specref{flet} are in the //[[CL:Glossary:lexical environment]]//; they retain their local definitions only within the body of \specref{flet}. The function definition bindings are visible only in the body of \specref{flet}, not the definitions themselves. Within the function definitions, local function names that match those being defined refer to //[[CL:Glossary:functions]]// or //[[CL:Glossary:macros]]// defined outside the \specref{flet}. \specref{flet} can locally //[[CL:Glossary:shadow]]// a global function name, and the new definition can refer to the global definition.
+
+Any //local-documentation// is attached to the corresponding local //function// (if one is actually created) as a //[[CL:Glossary:documentation string]]//.
+
+\itemitem{\bf labels}
+
+\specref{labels} is equivalent to \specref{flet} except that the scope of the defined function names for \specref{labels} encompasses the function definitions themselves as well as the body.
+
+\itemitem{\bf macrolet}
+
+\specref{macrolet} establishes local //[[CL:Glossary:macro]]// definitions, using the same format used by **[[CL:Macros:defmacro]]**.
+
+Within the body of \specref{macrolet}, global //[[CL:Glossary:setf expander]]// definitions of the //names// defined by the \specref{macrolet} do not apply; rather, **[[CL:Macros:setf]]** expands the //[[CL:Glossary:macro form]]// and recursively process the resulting //[[CL:Glossary:form]]//.
+
+The macro-expansion functions defined by \specref{macrolet} are defined in the
+
+//[[CL:Glossary:lexical environment]]// in which the \specref{macrolet} form appears.
+
+Declarations and \specref{macrolet} and \specref{symbol-macrolet} definitions affect the local macro definitions in a \specref{macrolet}, but the consequences are undefined if the local macro definitions reference any local //[[CL:Glossary:variable]]// or //[[CL:Glossary:function]]// //[[CL:Glossary:bindings]]// that are visible in that //[[CL:Glossary:lexical environment]]//.
+
+Any //local-documentation// is attached to the corresponding local //macro function// as a //[[CL:Glossary:documentation string]]//.
+
+\endlist
+
+====Examples====
+
+<blockquote> (defun foo (x flag) (macrolet ((fudge (z) ;The parameters x and flag are not accessible ; at this point; a reference to flag would be to ; the global variable of that name. \bq\ (if flag (* ,z ,z) ,z))) ;The parameters x and flag are accessible here. (+ x (fudge x) (fudge (+ x 1))))) ≡ (defun foo (x flag) (+ x (if flag (* x x) x) (if flag (* (+ x 1) (+ x 1)) (+ x 1)))) </blockquote> after macro expansion. The occurrences of ''x'' and ''flag'' legitimately refer to the parameters of the function ''foo'' because those parameters are visible at the site of the macro call which produced the expansion.
+
+<blockquote> (flet ((flet1 (n) (+ n n))) (flet ((flet1 (n) (+ 2 (flet1 n)))) (flet1 2))) → 6
+
+(defun dummy-function () 'top-level) → DUMMY-FUNCTION (funcall #'dummy-function) → TOP-LEVEL (flet ((dummy-function () 'shadow)) (funcall #'dummy-function)) → SHADOW (eq (funcall #'dummy-function) (funcall 'dummy-function)) → //[[CL:Glossary:true]]// (flet ((dummy-function () 'shadow)) (eq (funcall #'dummy-function) (funcall 'dummy-function))) → //[[CL:Glossary:false]]//
+
+(defun recursive-times (k n) (labels ((temp (n) (if (zerop n) 0 (+ k (temp (1- n)))))) (temp n))) → RECURSIVE-TIMES (recursive-times 2 3) → 6
+
+(defmacro mlets (x &environment env) (let ((form `(babbit ,x))) (macroexpand form env))) → MLETS (macrolet ((babbit (z) `(+ ,z ,z))) (mlets 5)) → 10 </blockquote>
+
+<blockquote> (flet ((safesqrt (x) (sqrt (abs x)))) ;; The safesqrt function is used in two places. (safesqrt (apply #'+ (map 'list #'safesqrt '(1 2 3 4 5 6))))) → 3.291173 </blockquote>
+
+<blockquote> (defun integer-power (n k) (declare (integer n)) (declare (type (integer 0 *) k)) (labels ((expt0 (x k a) (declare (integer x a) (type (integer 0 *) k)) (cond ((zerop k) a) ((evenp k) (expt1 (* x x) (floor k 2) a)) (t (expt0 (* x x) (floor k 2) (* x a))))) (expt1 (x k a) (declare (integer x a) (type (integer 0 *) k)) (cond ((evenp k) (expt1 (* x x) (floor k 2) a)) (t (expt0 (* x x) (floor k 2) (* x a)))))) (expt0 n k 1))) → INTEGER-POWER </blockquote>
+
+<blockquote> (defun example (y l) (flet ((attach (x) ([[CL:Macros:defparameter]] l (append l (list x))))) (declare (inline attach)) (dolist (x y) (unless (null (cdr x)) (attach x))) l))
+
+(example '((a apple apricot) (b banana) (c cherry) (d) (e)) '((1) (2) (3) (4 2) (5) (6 3 2))) → ((1) (2) (3) (4 2) (5) (6 3 2) (A APPLE APRICOT) (B BANANA) (C CHERRY)) </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+\misc{declare}, **[[CL:Macros:defmacro]]**, **[[CL:Macros:defun]]**, **[[CL:Functions:documentation]]**, **[[CL:Macros:let]]**, {\secref\Evaluation}, {\secref\DocVsDecls}
+
+====Notes====
+
+It is not possible to define recursive //[[CL:Glossary:functions]]// with \specref{flet}. \specref{labels} can be used to define mutually recursive //[[CL:Glossary:functions]]//.
+
+If a \specref{macrolet} //[[CL:Glossary:form]]// is a //[[CL:Glossary:top level form]]//, the body //forms// are also processed as //[[CL:Glossary:top level forms]]//. see section {\secref\FileCompilation}.
+
+\issue{DECLARATION-SCOPE:NO-HOISTING} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG} \issue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW} \issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13} \issue{FLET-DECLARATIONS} \issue{DECLS-AND-DOC} \issue{FLET-DECLARATIONS:ALLOW} \issue{FUNCTION-NAME:LARGE} \issue{FLET-IMPLICIT-BLOCK:YES} \issue{FUNCTION-NAME:LARGE} \issue{DEFMACRO-BLOCK-SCOPE:EXCLUDES-BINDINGS} \issue{FLET-DECLARATIONS}

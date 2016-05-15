@@ -1,0 +1,43 @@
+====== Function PATHNAME ======
+
+====Syntax====
+
+**pathname** //pathspec// → //pathname//
+
+====Arguments and Values====
+
+//pathspec// - a //[[CL:Glossary:pathname designator]]//.
+
+//pathname// - a //[[CL:Glossary:pathname]]//.
+
+====Description====
+
+Returns the //[[CL:Glossary:pathname]]// denoted by //pathspec//.
+
+If the //pathspec// //[[CL:Glossary:designator]]// is a //[[CL:Glossary:stream]]//, the //[[CL:Glossary:stream]]// can be either open or closed; in both cases, the **[[CL:Functions:pathname]]** returned corresponds to the //[[CL:Glossary:filename]]// used to open the //[[CL:Glossary:file]]//. **[[CL:Functions:pathname]]** returns the same //[[CL:Glossary:pathname]]// for a //[[CL:Glossary:file stream]]// after it is closed as it did when it was open.
+
+If the //pathspec// //[[CL:Glossary:designator]]// is a //[[CL:Glossary:file stream]]// created by opening a //[[CL:Glossary:logical pathname]]//, a //[[CL:Glossary:logical pathname]]// is returned.
+
+====Examples====
+
+<blockquote> ;; There is a great degree of variability permitted here. The next ;; several examples are intended to illustrate just a few of the many ;; possibilities. Whether the name is canonicalized to a particular ;; case (either upper or lower) depends on both the file system and the ;; implementation since two different implementations using the same ;; file system might differ on many issues. How information is stored ;; internally (and possibly presented in #S notation) might vary, ;; possibly requiring `accessors' such as PATHNAME-NAME to perform case ;; conversion upon access. The format of a namestring is dependent both ;; on the file system and the implementation since, for example, one ;; implementation might include the host name in a namestring, and ;; another might not. #S notation would generally only be used in a ;; situation where no appropriate namestring could be constructed for use ;; with #P. ([[CL:Macros:defparameter]] p1 (pathname "test")) → #P"CHOCOLATE:TEST" ; with case canonicalization (e.g., VMS) //or// → #P"VANILLA:test" ; without case canonicalization (e.g., Unix) //or// → #P"test" //or// → #S(PATHNAME :HOST "STRAWBERRY" :NAME "TEST") //or// → #S(PATHNAME :HOST "BELGIAN-CHOCOLATE" :NAME "test") ([[CL:Macros:defparameter]] p2 (pathname "test")) → #P"CHOCOLATE:TEST" //or// → #P"VANILLA:test" //or// → #P"test" //or// → #S(PATHNAME :HOST "STRAWBERRY" :NAME "TEST") //or// → #S(PATHNAME :HOST "BELGIAN-CHOCOLATE" :NAME "test") (pathnamep p1) → //[[CL:Glossary:true]]// (eq p1 (pathname p1)) → //[[CL:Glossary:true]]// (eq p1 p2) → //[[CL:Glossary:true]]// //or// → //[[CL:Glossary:false]]// (with-open-file (stream "test" :direction :output) (pathname stream)) → #P"ORANGE-CHOCOLATE:>Gus>test.lisp.newest" </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Types:pathname]]**, **[[CL:Types:logical-pathname]]**,{\secref\FileSystemConcepts},
+
+{\secref\PathnamesAsFilenames}
+
+====Notes====
+
+None.
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-STREAM} \issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY} \issue{PATHNAME-LOGICAL:ADD} \issue{PATHNAME-LOGICAL:ADD}

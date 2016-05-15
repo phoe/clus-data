@@ -1,0 +1,55 @@
+====== Function REMPROP ======
+
+====Syntax====
+
+**remprop** //symbol indicator// → //generalized-boolean//
+
+====Arguments and Values====
+
+//symbol// - a //[[CL:Glossary:symbol]]//.
+
+//indicator// - an //[[CL:Glossary:object]]//.
+
+//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+**[[CL:Functions:remprop]]** removes from the //[[CL:Glossary:property list]]// of //symbol// a //[[CL:Glossary:property]]// with a //[[CL:Glossary:property indicator]]//
+
+//[[CL:Glossary:identical]]// to //indicator//.
+
+If there are multiple //[[CL:Glossary:properties]]// with the //[[CL:Glossary:identical]]// key, **[[CL:Macros:remprop]]** only removes the first such //[[CL:Glossary:property]]//.
+
+**[[CL:Macros:remprop]]** returns //[[CL:Glossary:false]]// if no such //[[CL:Glossary:property]]// was found, or //[[CL:Glossary:true]]// if a property was found.
+
+The //[[CL:Glossary:property indicator]]// and the corresponding //[[CL:Glossary:property value]]// are removed in an undefined order by destructively splicing the property list.
+
+The permissible side-effects correspond to those permitted for **[[CL:Macros:remf]]**, such that:
+
+<blockquote> (remprop ''x'' ''y'') ≡ (remf (symbol-plist ''x'') ''y'') </blockquote>
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] test (make-symbol "PSEUDO-PI")) → #:PSEUDO-PI (symbol-plist test) → () ([[CL:Macros:setf]] (get test 'constant) t) → T ([[CL:Macros:setf]] (get test 'approximation) 3.14) → 3.14 ([[CL:Macros:setf]] (get test 'error-range) 'noticeable) → NOTICEABLE (symbol-plist test) → (ERROR-RANGE NOTICEABLE APPROXIMATION 3.14 CONSTANT T) ([[CL:Macros:setf]] (get test 'approximation) nil) → NIL (symbol-plist test) → (ERROR-RANGE NOTICEABLE APPROXIMATION NIL CONSTANT T) (get test 'approximation) → NIL (remprop test 'approximation) → //[[CL:Glossary:true]]// (get test 'approximation) → NIL (symbol-plist test) → (ERROR-RANGE NOTICEABLE CONSTANT T) (remprop test 'approximation) → NIL (symbol-plist test) → (ERROR-RANGE NOTICEABLE CONSTANT T) (remprop test 'error-range) → //[[CL:Glossary:true]]// ([[CL:Macros:setf]] (get test 'approximation) 3) → 3 (symbol-plist test) → (APPROXIMATION 3 CONSTANT T) </blockquote>
+
+====Side Effects====
+
+The //[[CL:Glossary:property list]]// of //symbol// is modified.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //symbol// is not a //[[CL:Glossary:symbol]]//.
+
+====See Also====
+
+**[[CL:Macros:remf]]**, **[[CL:Functions:symbol-plist]]**
+
+====Notes====
+
+//[[CL:Glossary:Numbers]]// and //[[CL:Glossary:characters]]// are not recommended for use as //indicators// in portable code since **[[CL:Functions:remprop]]** tests with **[[CL:Functions:eq]]** rather than **[[CL:Functions:eql]]**, and consequently the effect of using such //indicators// is //[[CL:Glossary:implementation-dependent]]//. Of course, if you've gotten as far as needing to remove such a //[[CL:Glossary:property]]//, you don't have much choice---the time to have been thinking about this was when you used **[[CL:Macros:setf]]** of **[[CL:Macros:get]]** to establish the //[[CL:Glossary:property]]//.
+
+\issue{PLIST-DUPLICATES:ALLOW} \issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}

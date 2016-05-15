@@ -1,0 +1,57 @@
+====== Function PROCLAIM ======
+
+====Syntax====
+
+**proclaim** //declaration-specifier// → ////[[CL:Glossary:implementation-dependent]]////
+
+====Arguments and Values====
+
+//declaration-specifier// - a //[[CL:Glossary:declaration specifier]]//.
+
+====Description====
+
+//[[CL:Glossary:Establishes]]// the //[[CL:Glossary:declaration]]// specified by //declaration-specifier// in the //[[CL:Glossary:global environment]]//.
+
+Such a //[[CL:Glossary:declaration]]//, sometimes called a //[[CL:Glossary:global declaration]]// or a //[[CL:Glossary:proclamation]]//, is always in force unless locally //[[CL:Glossary:shadowed]]//.
+
+//[[CL:Glossary:Names]]// of //[[CL:Glossary:variables]]// and //[[CL:Glossary:functions]]// within //declaration-specifier// refer to //[[CL:Glossary:dynamic variables]]// and global //[[CL:Glossary:function]]// definitions, respectively.
+
+\Thenextfigure\ shows a list of //declaration identifiers// that can be used with **[[CL:Functions:proclaim]]**.
+
+\displayfour{Global Declaration Specifiers}{ declaration&inline&optimize&type\cr ftype&notinline&special&\cr }
+
+An implementation is free to support other (//[[CL:Glossary:implementation-defined]]//) //[[CL:Glossary:declaration identifiers]]// as well.
+
+====Examples====
+
+<blockquote> (defun declare-variable-types-globally (type vars) (proclaim `(type ,type ,@vars)) type)
+
+;; Once this form is executed, the dynamic variable *TOLERANCE* ;; must always contain a float. (declare-variable-types-globally 'float '(*tolerance*)) → FLOAT </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+\specref{declaim}, \misc{declare}, {\secref\Compilation}
+
+====Notes====
+
+Although the //[[CL:Glossary:execution]]// of a **[[CL:Functions:proclaim]]** //[[CL:Glossary:form]]// has effects that might affect compilation, the compiler does not make any attempt to recognize and specially process **[[CL:Functions:proclaim]]** //[[CL:Glossary:forms]]//. A //[[CL:Glossary:proclamation]]// such as the following, even if a //[[CL:Glossary:top level form]]//, does not have any effect until it is executed:
+
+<blockquote> (proclaim '(special *x*)) </blockquote>
+
+If compile time side effects are desired, \specref{eval-when} may be useful. For example:
+
+<blockquote> (eval-when (:execute :compile-toplevel :load-toplevel) (proclaim '(special *x*))) </blockquote>
+
+In most such cases, however, it is preferrable to use **[[CL:Macros:declaim]]** for this purpose.
+
+Since **[[CL:Functions:proclaim]]** //[[CL:Glossary:forms]]// are ordinary //[[CL:Glossary:function forms]]//, //[[CL:Glossary:macro forms]]// can expand into them.
+
+\issue{DYNAMIC-EXTENT:NEW-DECLARATION} \issue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION} \issue{DECLARE-MACROS:FLUSH}

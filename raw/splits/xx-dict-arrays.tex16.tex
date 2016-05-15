@@ -1,0 +1,34 @@
+====== Function ARRAY-IN-BOUNDS-P ======
+
+====Syntax====
+
+**array-in-bounds-p** //array ''&rest'' subscripts// → //generalized-boolean//
+
+====Arguments and Values====
+
+//array// - an //[[CL:Glossary:array]]//.
+
+//subscripts// - a list of //[[CL:Glossary:integers]]// of length equal to the //[[CL:Glossary:rank]]// of the //[[CL:Glossary:array]]//.
+
+//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+Returns //[[CL:Glossary:true]]// if the //subscripts// are all in bounds for //array//; otherwise returns //[[CL:Glossary:false]]//. (If //array// is a //[[CL:Glossary:vector]]// with a //[[CL:Glossary:fill pointer]]//, that //[[CL:Glossary:fill pointer]]// is ignored.)
+
+====Examples==== <blockquote> ([[CL:Macros:defparameter]] a (make-array '(7 11) :element-type 'string-char)) (array-in-bounds-p a 0 0) → //[[CL:Glossary:true]]// (array-in-bounds-p a 6 10) → //[[CL:Glossary:true]]// (array-in-bounds-p a 0 -1) → //[[CL:Glossary:false]]// (array-in-bounds-p a 0 11) → //[[CL:Glossary:false]]// (array-in-bounds-p a 7 0) → //[[CL:Glossary:false]]// </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:array-dimensions]]**
+
+====Notes==== <blockquote> (array-in-bounds-p array subscripts) ≡ (and (not (some #'minusp (list subscripts))) (every #'< (list subscripts) (array-dimensions array))) </blockquote>
+

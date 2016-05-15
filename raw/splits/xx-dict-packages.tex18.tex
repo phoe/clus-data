@@ -1,0 +1,51 @@
+====== Function USE-PACKAGE ======
+
+====Syntax====
+
+**use-package {packages-to-use** //\opt} package// → //\t//
+
+====Arguments and Values====
+
+//packages-to-use// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:list]]// of //[[CL:Glossary:package designators]]//. \Thepackage{keyword} may not be supplied.
+
+//package// - a //[[CL:Glossary:package designator]]//. The default is the //[[CL:Glossary:current package]]//.
+
+The //package// cannot be \thepackage{keyword}.
+
+====Description====
+
+**[[CL:Functions:use-package]]** causes //package// to inherit all the //[[CL:Glossary:external symbols]]// of //packages-to-use//. The inherited //[[CL:Glossary:symbols]]// become //[[CL:Glossary:accessible]]// as //[[CL:Glossary:internal symbols]]// of //package//.
+
+//Packages-to-use// are added to the //[[CL:Glossary:use list]]// of //package// if they are not there already. All //[[CL:Glossary:external symbols]]// in //packages-to-use// become //[[CL:Glossary:accessible]]// in //package// as //[[CL:Glossary:internal symbols]]//.
+
+**[[CL:Functions:use-package]]** does not cause any new //[[CL:Glossary:symbols]]// to be //[[CL:Glossary:present]]// in //package// but only makes them //[[CL:Glossary:accessible]]// by inheritance.
+
+**[[CL:Functions:use-package]]** checks for name conflicts between the newly imported symbols and those already //[[CL:Glossary:accessible]]// in //package//.
+
+A name conflict in **[[CL:Functions:use-package]]** between two external symbols inherited by //package// from //packages-to-use// may be resolved in favor of either //[[CL:Glossary:symbol]]// by //[[CL:Glossary:importing]]// one of them into //package// and making it a shadowing symbol.
+
+====Examples====
+
+<blockquote> (export (intern "LAND-FILL" (make-package 'trash)) 'trash) → T (find-symbol "LAND-FILL" (make-package 'temp)) → NIL, NIL (package-use-list 'temp) → (#<PACKAGE "TEMP">) (use-package 'trash 'temp) → T (package-use-list 'temp) → (#<PACKAGE "TEMP"> #<PACKAGE "TRASH">) (find-symbol "LAND-FILL" 'temp) → TRASH:LAND-FILL, :INHERITED </blockquote>
+
+====Side Effects====
+
+The //[[CL:Glossary:use list]]// of //package// may be modified.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:unuse-package]]**, **[[CL:Functions:package-use-list]]**, {\secref\PackageConcepts}
+
+====Notes====
+
+It is permissible for a //[[CL:Glossary:package]]// ''P\sub 1'' to //[[CL:Glossary:use]]// a //[[CL:Glossary:package]]// ''P\sub 2'' even if ''P\sub 2'' already uses ''P\sub 1''. The using of //[[CL:Glossary:packages]]// is not transitive, so no problem results from the apparent circularity.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}

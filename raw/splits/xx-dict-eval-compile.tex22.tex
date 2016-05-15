@@ -1,0 +1,111 @@
+====== Declaration TYPE ======
+
+====Syntax====
+
+\f{(type //typespec// \starparam{var})}
+
+\f{(//typespec// \starparam{var})}
+
+====Arguments====
+
+//typespec// - a //[[CL:Glossary:type specifier]]//.
+
+//var// - a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
+
+====Valid Context====
+
+//[[CL:Glossary:declaration]]// or //[[CL:Glossary:proclamation]]//
+
+====Binding Types Affected====
+
+//[[CL:Glossary:variable]]//
+
+====Description====
+
+Affects only variable //[[CL:Glossary:bindings]]// and specifies that the //vars// take on values only of the specified //typespec//. In particular, values assigned to the variables by \specref{setq}, as well as the initial values of the //vars// must be of the specified //typespec//. \declref{type} declarations never apply to function //[[CL:Glossary:bindings]]// (see \declref{ftype}).
+
+A type declaration of a //[[CL:Glossary:symbol]]// defined by \specref{symbol-macrolet} is equivalent to wrapping a \specref{the} expression around the expansion of that //[[CL:Glossary:symbol]]//,
+
+although the //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:macro expansion]]// is not actually affected.
+
+The meaning of a type declaration is equivalent to changing each reference to a variable (//var//) within the scope of the declaration to **[[CL:Functions:(the //typespec// //var//)]]**, changing each expression assigned to the variable (//new-value//) within the scope of the declaration to **[[CL:Functions:(the //typespec// //new-value//)]]**, and executing **[[CL:Functions:(the //typespec// //var//)]]** at the moment the scope of the declaration is entered.
+
+A //[[CL:Glossary:type]]// declaration is valid in all declarations. The interpretation of a type declaration is as follows: \beginlist \itemitem{1.} During the execution of any reference to the declared variable within the scope of the declaration, the consequences are
+
+undefined if the value of the declared variable is not of the declared //[[CL:Glossary:type]]//.
+
+\itemitem{2.} During the execution of any \specref{setq} of the declared variable within the scope of the declaration, the consequences are
+
+undefined if the newly assigned value of the declared variable is not of the declared //[[CL:Glossary:type]]//.
+
+\itemitem{3.} At the moment the scope of the declaration is entered, the consequences are
+
+undefined if the value of the declared variable is not of the declared //[[CL:Glossary:type]]//. \endlist
+
+A //[[CL:Glossary:type]]// declaration affects only variable references within its scope.
+
+If nested //[[CL:Glossary:type]]// declarations refer to the same variable, then the value of the variable must be a member of the intersection of the declared //[[CL:Glossary:types]]//.
+
+If there is a local **[[CL:Functions:type]]** declaration for a dynamic variable, and there is also a global **[[CL:Functions:type]]** proclamation for that same variable, then the value of the variable within the scope of the local declaration must be a member of the intersection of the two declared //[[CL:Glossary:types]]//.
+
+
+\declref{type} declarations can be //[[CL:Glossary:free declarations]]// or //[[CL:Glossary:bound declarations]]//.
+
+A //[[CL:Glossary:symbol]]// cannot be both the name of a //[[CL:Glossary:type]]// and the name of a declaration. Defining a //[[CL:Glossary:symbol]]// as the //[[CL:Glossary:name]]// of a //[[CL:Glossary:class]]//, //[[CL:Glossary:structure]]//, //[[CL:Glossary:condition]]//, or //[[CL:Glossary:type]]//, when the //[[CL:Glossary:symbol]]// has been //[[CL:Glossary:declared]]// as a declaration name, or vice versa, signals an error.
+
+
+Within the //[[CL:Glossary:lexical scope]]// of an **[[CL:Types:array]]** type declaration, all references to //[[CL:Glossary:array]]// //[[CL:Glossary:element|elements]]// are assumed to satisfy the //[[CL:Glossary:expressed array element type]]// (as opposed to the //[[CL:Glossary:upgraded array element type]]//).
+
+A compiler can treat the code within the scope of the **[[CL:Types:array]]** type declaration as if each //[[CL:Glossary:access]]// of an //[[CL:Glossary:array]]// //[[CL:Glossary:element]]// were surrounded by an appropriate \specref{the} form.
+
+
+====Examples====
+
+<blockquote> (defun f (x y) (declare (type fixnum x y)) (let ((z (+ x y))) (declare (type fixnum z)) z)) → F (f 1 2) → 3 ;; The previous definition of F is equivalent to (defun f (x y) ;; This declaration is a shorthand form of the TYPE declaration (declare (fixnum x y)) ;; To declare the type of a return value, it's not necessary to ;; create a named variable. A THE special form can be used instead. (the fixnum (+ x y))) → F (f 1 2) → 3 </blockquote>
+
+
+
+<blockquote> (defvar *one-array* (make-array 10 :element-type '(signed-byte 5))) (defvar *another-array* (make-array 10 :element-type '(signed-byte 8)))
+
+(defun frob (an-array) (declare (type (array (signed-byte 5) 1) an-array)) ([[CL:Macros:setf]] (aref an-array 1) 31) ([[CL:Macros:setf]] (aref an-array 2) 127) ([[CL:Macros:setf]] (aref an-array 3) (* 2 (aref an-array 3))) (let ((foo 0)) (declare (type (signed-byte 5) foo)) ([[CL:Macros:setf]] foo (aref an-array 0))))
+
+(frob *one-array*) (frob *another-array*) </blockquote>
+
+\medbreak
+
+The above definition of ''frob'' is equivalent to:
+
+<blockquote> (defun frob (an-array) ([[CL:Macros:setf]] (the (signed-byte 5) (aref an-array 1)) 31) ([[CL:Macros:setf]] (the (signed-byte 5) (aref an-array 2)) 127) ([[CL:Macros:setf]] (the (signed-byte 5) (aref an-array 3)) (* 2 (the (signed-byte 5) (aref an-array 3)))) (let ((foo 0)) (declare (type (signed-byte 5) foo)) ([[CL:Macros:setf]] foo (the (signed-byte 5) (aref an-array 0))))) </blockquote>
+
+Given an implementation in which //[[CL:Glossary:fixnum|fixnums]]// are 29 bits but **[[CL:Types:fixnum]]** //[[CL:Glossary:array|arrays]]// are upgraded to signed 32-bit //[[CL:Glossary:array|arrays]]//, the following
+
+could be compiled with all //[[CL:Glossary:fixnum]]// arithmetic:
+
+<blockquote> (defun bump-counters (counters) (declare (type (array fixnum *) bump-counters)) (dotimes (i (length counters)) (incf (aref counters i)))) </blockquote>
+
+
+====See Also====
+
+\misc{declare}, **[[CL:Macros:declaim]]**, **[[CL:Functions:proclaim]]**
+
+====Notes====
+
+\f{(//typespec// \starparam{var})} is an abbreviation for \f{(type //typespec// \starparam{var})}.
+
+A \declref{type} declaration for the arguments to a function does not necessarily imply anything about the type of the result. The following function is not permitted to be compiled using //[[CL:Glossary:implementation-dependent]]// //[[CL:Glossary:fixnum]]//-only arithmetic:
+
+<blockquote> (defun f (x y) (declare (fixnum x y)) (+ x y)) </blockquote>
+
+To see why, consider ''(f most-positive-fixnum 1)''. Common Lisp defines that ''F'' must return a //[[CL:Glossary:bignum]]// here, rather than signal an error or produce a mathematically incorrect result. If you have special knowledge such "//[[CL:Glossary:fixnum]]// overflow" cases will not come up, you can declare the result value to be in the //[[CL:Glossary:fixnum]]// range, enabling some compilers to use more efficient arithmetic:
+
+<blockquote> (defun f (x y) (declare (fixnum x y)) (the fixnum (+ x y))) </blockquote>
+
+Note, however, that in the three-argument case, because of the possibility of an implicit intermediate value growing too large, the following will not cause //[[CL:Glossary:implementation-dependent]]// //[[CL:Glossary:fixnum]]//-only arithmetic to be used:
+
+<blockquote> (defun f (x y) (declare (fixnum x y z)) (the fixnum (+ x y z))) </blockquote>
+
+To see why, consider ''(f most-positive-fixnum 1 -1).'' Although the arguments and the result are all //[[CL:Glossary:fixnum|fixnums]]//, an intermediate value is not a //[[CL:Glossary:fixnum]]//. If it is important that //[[CL:Glossary:implementation-dependent]]// //[[CL:Glossary:fixnum]]//-only arithmetic be selected in //[[CL:Glossary:implementations]]// that provide it, consider writing something like this instead:
+
+<blockquote> (defun f (x y) (declare (fixnum x y z)) (the fixnum (+ (the fixnum (+ x y)) z))) </blockquote>
+
+\issue{SYMBOL-MACROLET-DECLARE:ALLOW} \issue{SYMBOL-MACROLET-TYPE-DECLARATION:NO} \issue{DECLARE-TYPE-FREE:LEXICAL} \issue{SPECIAL-TYPE-SHADOWING:CLARIFY} \issue{TYPE-DECLARATION-ABBREVIATION:ALLOW-ALL} \issue{DECLARE-ARRAY-TYPE-ELEMENT-REFERENCES:RESTRICTIVE} \issue{DECLARE-ARRAY-TYPE-ELEMENT-REFERENCES:RESTRICTIVE} \issue{TYPE-DECLARATION-ABBREVIATION:ALLOW-ALL}

@@ -1,0 +1,40 @@
+====== Function PACKAGE-SHADOWING-SYMBOLS ======
+
+====Syntax====
+
+**package-shadowing-symbols** //package// → //symbols//
+
+====Arguments and Values====
+
+//package// - a //[[CL:Glossary:package designator]]//.
+
+//symbols// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:symbols]]//.
+
+====Description====
+
+Returns a //[[CL:Glossary:list]]// of //[[CL:Glossary:symbols]]// that have been declared as //[[CL:Glossary:shadowing symbols]]// in //package// by **[[CL:Functions:shadow]]** or **[[CL:Functions:shadowing-import]]** (or the equivalent **[[CL:Macros:defpackage]]** options). All //[[CL:Glossary:symbols]]// on this //[[CL:Glossary:list]]// are //[[CL:Glossary:present]]// in //package//.
+
+====Examples====
+
+<blockquote> (package-shadowing-symbols (make-package 'temp)) → () (shadow 'cdr 'temp) → T (package-shadowing-symbols 'temp) → (TEMP::CDR) (intern "PILL" 'temp) → TEMP::PILL, NIL (shadowing-import 'pill 'temp) → T (package-shadowing-symbols 'temp) → (PILL TEMP::CDR) </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //package// is not a //[[CL:Glossary:package designator]]//.
+
+====See Also====
+
+**[[CL:Functions:shadow]]**, **[[CL:Functions:shadowing-import]]**
+
+====Notes====
+
+Whether the list of //symbols// is //[[CL:Glossary:fresh]]// is //[[CL:Glossary:implementation-dependent]]//.
+

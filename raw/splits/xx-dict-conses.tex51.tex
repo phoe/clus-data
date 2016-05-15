@@ -1,0 +1,64 @@
+====== Function SET-EXCLUSIVE-OR, NSET-EXCLUSIVE-OR ======
+
+====Syntax====
+
+**set-exclusive-or {list-1 list-2** //\key} key test test-not// → //result-list// **nset-exclusive-or {list-1 list-2** //\key} key test test-not// → //result-list//
+
+====Arguments and Values====
+
+//list-1// - a //[[CL:Glossary:proper list]]//.
+
+//list-2// - a //[[CL:Glossary:proper list]]//.
+
+//test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument, or **[[CL:Constant Variables:nil]]**.
+
+//result-list// - a //[[CL:Glossary:list]]//.
+
+====Description====
+
+**[[CL:Functions:set-exclusive-or]]** returns a //[[CL:Glossary:list]]// of elements that appear in exactly one of //list-1// and //list-2//.
+
+**[[CL:Functions:nset-exclusive-or]]** is the //[[CL:Glossary:destructive]]// version of **[[CL:Functions:set-exclusive-or]]**.
+
+For all possible ordered pairs consisting of one element from //list-1// and one element from //list-2//, the **'':test''** or **'':test-not''** function is used to determine whether they //[[CL:Glossary:satisfy the test]]//.
+
+If **'':key''** is supplied, it is used to extract the part to be tested from the //list-1// or //list-2// element. The first argument to the **'':test''** or **'':test-not''** function is the part of an element of //list-1// extracted by the **'':key''** function (if supplied); the second argument is the part of an element of //list-2// extracted by the **'':key''** function (if supplied). If **'':key''** is not supplied or **[[CL:Constant Variables:nil]]**, the //list-1// or //list-2// element is used.
+
+The result contains precisely those elements of //list-1// and //list-2// that appear in no matching pair.
+
+The result //[[CL:Glossary:list]]// of **[[CL:Functions:set-exclusive-or]]** might share storage with one of //list-1// or //list-2//.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] lst1 (list 1 "a" "b") lst2 (list 1 "A" "b")) → (1 "A" "b") (set-exclusive-or lst1 lst2) → ("b" "A" "b" "a") (set-exclusive-or lst1 lst2 :test #'equal) → ("A" "a") (set-exclusive-or lst1 lst2 :test 'equalp) → NIL (nset-exclusive-or lst1 lst2) → ("a" "b" "A" "b") ([[CL:Macros:defparameter]] lst1 (list (("a" . "b") ("c" . "d") ("e" . "f")))) → (("a" . "b") ("c" . "d") ("e" . "f")) ([[CL:Macros:defparameter]] lst2 (list (("c" . "a") ("e" . "b") ("d" . "a")))) → (("c" . "a") ("e" . "b") ("d" . "a")) (nset-exclusive-or lst1 lst2 :test #'string= :key #'cdr) → (("c" . "d") ("e" . "f") ("c" . "a") ("d" . "a")) lst1 → (("a" . "b") ("c" . "d") ("e" . "f")) lst2 → (("c" . "a") ("d" . "a")) </blockquote>
+
+====Side Effects====
+
+**[[CL:Functions:nset-exclusive-or]]** is permitted to modify any part, //[[CL:Glossary:car]]// or //[[CL:Glossary:cdr]]//, of the //[[CL:Glossary:list structure]]// of //list-1// or //list-2//.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should be prepared to signal an error of type type-error if //list-1// and //list-2// are not //[[CL:Glossary:proper lists]]//.
+
+====See Also====
+
+{\secref\ConstantModification},
+
+{\secref\TraversalRules}
+
+====Notes====
+
+The **'':test-not''** parameter is deprecated.
+
+Since the **[[CL:Functions:nset-exclusive-or]]** side effect is not required, it should not be used in for-effect-only positions in portable code.
+
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89} \issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89} \issue{CONSTANT-MODIFICATION:DISALLOW} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{TEST-NOT-IF-NOT:FLUSH-ALL}

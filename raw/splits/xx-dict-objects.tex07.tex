@@ -1,0 +1,80 @@
+====== Standard Generic Function UPDATE-INSTANCE-FOR-REDEFINED-CLASS ======
+
+====Syntax====
+
+
+\DefgenWithValuesNewline update-instance-for-redefined-class {\vtop{instance added-slots discarded-slots property-list \hbox{''&rest'' initargs ''&key'' {\allowotherkeys}}}} {\starparam{result}}
+
+====Method Signatures====
+
+\Defmeth {update-instance-for-redefined-class} {\vtop{\hbox{\specparam{instance}{standard-object}} added-slots discarded-slots property-list ''&rest'' initargs}}
+
+====Arguments and Values====
+
+//instance// - an //[[CL:Glossary:object]]//.
+
+//added-slots// - a //[[CL:Glossary:list]]//.
+
+//discarded-slots// - a //[[CL:Glossary:list]]//.
+
+//property-list// - a //[[CL:Glossary:list]]//.
+
+//initargs// - an //[[CL:Glossary:initialization argument list]]//.
+
+//result// - an //[[CL:Glossary:object]]//.
+
+====Description====
+
+The //[[CL:Glossary:generic function]]// **[[CL:Functions:update-instance-for-redefined-class]]** is not intended to be called by programmers. Programmers may write //[[CL:Glossary:methods]]// for it. The //[[CL:Glossary:generic function]]// **[[CL:Functions:update-instance-for-redefined-class]]** is called by the mechanism activated by **[[CL:Functions:make-instances-obsolete]]**.
+
+The system-supplied primary //[[CL:Glossary:method]]// on **[[CL:Functions:update-instance-for-redefined-class]]** checks the validity of //initargs// and signals an error if an //initarg// is supplied that is not declared as valid. This //[[CL:Glossary:method]]// then initializes //[[CL:Glossary:slots]]// with values according to the //initargs//, and initializes the newly //added-slots// with values according to their **'':initform''** forms. It does this by calling the generic function **[[CL:Functions:shared-initialize]]** with the following arguments: the //instance//, a list of names of the newly //added-slots// to //instance//, and the //initargs// it received. Newly //added-slots// are those //[[CL:Glossary:local slots]]// for which no //[[CL:Glossary:slot]]// of the same name exists in the old version of the //[[CL:Glossary:class]]//.
+
+When **[[CL:Functions:make-instances-obsolete]]** is invoked or when a //[[CL:Glossary:class]]// has been redefined and an //[[CL:Glossary:instance]]// is being updated, a //property-list// is created that captures the slot names and values of all the //discarded-slots// with values in the original //instance//. The structure of the //instance// is transformed so that it conforms to the current class definition. The arguments to **[[CL:Functions:update-instance-for-redefined-class]]** are this transformed //instance//, a list of //added-slots// to the //instance//, a list //discarded-slots// from the //instance//, and the //property-list// containing the slot names and values for //[[CL:Glossary:slots]]// that were discarded and had values. Included in this list of discarded //[[CL:Glossary:slots]]// are //[[CL:Glossary:slots]]// that were local in the old //[[CL:Glossary:class]]// and are shared in the new //[[CL:Glossary:class]]//.
+
+
+The value returned by **[[CL:Functions:update-instance-for-redefined-class]]** is ignored.
+
+====Examples====
+
+<blockquote>
+
+(defclass position () ())
+
+(defclass x-y-position (position) ((x :initform 0 :accessor position-x) (y :initform 0 :accessor position-y)))
+
+;;; It turns out polar coordinates are used more than Cartesian ;;; coordinates, so the representation is altered and some new ;;; accessor methods are added.
+
+(defmethod update-instance-for-redefined-class :before ((pos x-y-position) added deleted plist &key) ;; Transform the x-y coordinates to polar coordinates ;; and store into the new slots. (let ((x (getf plist 'x)) (y (getf plist 'y))) ([[CL:Macros:setf]] (position-rho pos) (sqrt (+ (* x x) (* y y))) (position-theta pos) (atan y x))))
+
+(defclass x-y-position (position) ((rho :initform 0 :accessor position-rho) (theta :initform 0 :accessor position-theta)))
+
+;;; All instances of the old x-y-position class will be updated ;;; automatically.
+
+;;; The new representation is given the look and feel of the old one.
+
+(defmethod position-x ((pos x-y-position)) (with-slots (rho theta) pos (* rho (cos theta))))
+
+(defmethod ([[CL:Macros:setf]] position-x) (new-x (pos x-y-position)) (with-slots (rho theta) pos (let ((y (position-y pos))) ([[CL:Macros:defparameter]] rho (sqrt (+ (* new-x new-x) (* y y))) theta (atan y new-x)) new-x)))
+
+(defmethod position-y ((pos x-y-position)) (with-slots (rho theta) pos (* rho (sin theta))))
+
+(defmethod ([[CL:Macros:setf]] position-y) (new-y (pos x-y-position)) (with-slots (rho theta) pos (let ((x (position-x pos))) ([[CL:Macros:defparameter]] rho (sqrt (+ (* x x) (* new-y new-y))) theta (atan new-y x)) new-y)))
+
+</blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations==== The system-supplied primary //[[CL:Glossary:method]]// on **[[CL:Functions:update-instance-for-redefined-class]]** signals an error if an //initarg// is supplied that is not declared as valid.
+
+====See Also====
+
+**[[CL:Functions:make-instances-obsolete]]**, **[[CL:Functions:shared-initialize]]**, {\secref\ClassReDef}, {\secref\InitargRules}, {\secref\DeclaringInitargValidity}
+
+====Notes====
+
+//Initargs// are declared as valid by using the **'':initarg''** option to **[[CL:Macros:defclass]]**, or by defining //[[CL:Glossary:methods]]// for **[[CL:Functions:update-instance-for-redefined-class]]** or **[[CL:Functions:shared-initialize]]**. The keyword name of each keyword parameter specifier in the //[[CL:Glossary:lambda list]]// of any //[[CL:Glossary:method]]// defined on **[[CL:Functions:update-instance-for-redefined-class]]** or **[[CL:Functions:shared-initialize]]** is declared as a valid //initarg// name for all //[[CL:Glossary:classes]]// for which that //[[CL:Glossary:method]]// is applicable.
+
+
+\issue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}

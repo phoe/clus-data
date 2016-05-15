@@ -1,0 +1,53 @@
+====== Macro PSETQ ======
+
+====Syntax====
+
+\DefmacWithValues psetq {\stardown{pair}} {**[[CL:Constant Variables:nil]]**}
+
+\auxbnf{pair}{var form}
+
+====Arguments and Values====
+
+//var// - a //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:variable]]// other than a //[[CL:Glossary:constant variable]]//.
+
+//form// - a //[[CL:Glossary:form]]//.
+
+====Description====
+
+Assigns values to //[[CL:Glossary:variables]]//.
+
+This is just like \specref{setq}, except that the assignments happen "in parallel." That is, first all of the forms are evaluated, and only then are the variables set to the resulting values. In this way, the assignment to one variable does not affect the value computation of another in the way that would occur with \specref{setq}'s sequential assignment.
+
+If any //var// refers to a //[[CL:Glossary:binding]]// made by \specref{symbol-macrolet}, then that //var// is treated as if **[[CL:Macros:psetf]]** (not **[[CL:Macros:psetq]]**) had been used.
+
+====Examples====
+
+<blockquote> ;; A simple use of PSETQ to establish values for variables. ;; As a matter of style, many programmers would prefer SETQ ;; in a simple situation like this where parallel assignment ;; is not needed, but the two have equivalent effect. (p[[CL:Macros:defparameter]] a 1 b 2 c 3) → NIL a → 1 b → 2 c → 3
+
+;; Use of PSETQ to update values by parallel assignment. ;; The effect here is very different than if SETQ had been used. (p[[CL:Macros:defparameter]] a (1+ b) b (1+ a) c (+ a b)) → NIL a → 3 b → 2 c → 3
+
+;; Use of PSETQ on a symbol macro. (let ((x (list 10 20 30))) (symbol-macrolet ((y (car x)) (z (cadr x))) (p[[CL:Macros:defparameter]] y (1+ z) z (1+ y)) (list x y z))) → ((21 11 30) 21 11)
+
+;; Use of parallel assignment to swap values of A and B. (let ((a 1) (b 2)) (p[[CL:Macros:defparameter]] a b b a) (values a b)) → 2, 1 </blockquote>
+
+====Side Effects====
+
+The values of //forms// are assigned to //vars//.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Macros:psetf]]**, \specref{setq}
+
+====Notes====
+
+None.
+
+\issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM}

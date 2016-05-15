@@ -1,0 +1,42 @@
+====== Macro ROTATEF ======
+
+====Syntax====
+
+\DefmacWithValues rotatef {\starparam{place}} {**[[CL:Constant Variables:nil]]**}
+
+====Arguments and Values====
+
+//place// - a //[[CL:Glossary:place]]//.
+
+====Description====
+
+**[[CL:Macros:rotatef]]** modifies the values of each //place// by rotating values from one //place// into another.
+
+If a //place// produces more values than there are store variables, the extra values are ignored. If a //place// produces fewer values than there are store variables, the missing values are set to **[[CL:Constant Variables:nil]]**.
+
+In the form ''(rotatef ''place1'' ''place2'' ... ''placen'')'', the values in ''place1'' through ''placen'' are //[[CL:Glossary:read]]// and //[[CL:Glossary:written]]//. Values 2 through ''n'' and value 1 are then stored into ''place1'' through ''placen''. It is as if all the places form an end-around shift register that is rotated one place to the left, with the value of ''place1'' being shifted around the end to ''placen''.
+
+For information about the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subforms]]// of //places//, see section {\secref\GenRefSubFormEval}.
+
+
+====Examples==== <blockquote> (let ((n 0) (x (list 'a 'b 'c 'd 'e 'f 'g))) (rotatef (nth (incf n) x) (nth (incf n) x) (nth (incf n) x)) x) → (A C D B E F G) </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Macros:define-setf-expander]]**, **[[CL:Macros:defsetf]]**, **[[CL:Macros:setf]]**, **[[CL:Macros:shiftf]]**, **[[CL:Variables:*macroexpand-hook*]]**, {\secref\GeneralizedReference}
+
+====Notes====
+
+The effect of ''(rotatef //place1// //place2// ... //placen//)'' is roughly equivalent to
+
+<blockquote> (psetf //place1// //place2// //place2// //place3// ... //placen// //place1//) </blockquote> except that the latter would evaluate any //[[CL:Glossary:subforms]]// of each ''place'' twice, whereas **[[CL:Macros:rotatef]]** evaluates them once.
+
+\issue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW} \issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}

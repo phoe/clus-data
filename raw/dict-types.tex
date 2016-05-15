@@ -1,0 +1,1978 @@
+% -*- Mode: TeX -*-		   
+
+%%% ========== NIL
+\begincom{nil}\ftype{Type}
+
+\label Supertypes::
+all \term{types}
+
+\label Description::
+
+\Thetype{nil} contains no \term{objects} and so is also
+called the \term{empty type}.
+%% 2.15.0 5
+\Thetype{nil} is a \term{subtype} of every \term{type}.
+No \term{object} is \oftype{nil}.
+
+\label Notes::
+
+The \term{type} containing the \term{object} \nil\ is \thetype{null},
+not \thetype{nil}.
+
+\endcom%{nil}\ftype{Type}
+
+%%% ========== BOOLEAN
+\begincom{boolean}\ftype{Type}
+
+\label Supertypes::
+
+\typeref{boolean},
+\typeref{symbol},
+\typeref{t}
+
+\label Description::
+
+\Thetype{boolean} contains the \term{symbols} \misc{t} and \misc{nil},
+which represent true and false, respectively.
+
+\label See Also::
+
+\misc{t} (\term{constant variable}),
+\misc{nil} (\term{constant variable}),
+\specref{if},
+\funref{not},
+\funref{complement}
+
+\label Notes::
+
+Conditional operations, such as \specref{if},
+permit the use of \term{generalized booleans},
+not just \term{booleans};
+any \term{non-nil} value,
+not just \misc{t},
+counts as true for a \term{generalized boolean}.
+However, as a matter of convention, 
+the \term{symbol} \misc{t} is considered the canonical value to use
+even for a \term{generalized boolean} when no better choice presents itself.
+
+\endcom%{boolean}\ftype{Type}
+
+%Number and its subtypes moved to dict-numbers.
+%Character and its subtypes moved to dict-characters.
+%System Class SYMBOL moved to dict-symbols.
+%Type KEYWORD moved to dict-symbols.
+%Type SEQUENCE moved to dict-sequence.
+%Type LIST, NULL, CONS, ATOM, ... moved to dict-conses.
+%Types ARRAY, STRING, etc. to dict-strings.
+
+%% new definition here?
+%%% ========== FUNCTION
+\begincom{function}\ftype{System Class}
+
+\issue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+\label Class Precedence List::
+\typeref{function},
+\typeref{t}
+
+\label Description::
+
+A \term{function} is an \term{object} that represents code 
+to be executed when an appropriate number of arguments is supplied.
+%Removed per symbolics comments:
+% A \term{function} can be supplied as an
+%argument without error to \funref{funcall} or \funref{apply}.
+A \term{function} is produced by 
+ \thespecform{function},
+ \thefunction{coerce},
+\issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
+%the \thefunction{enclose},
+\endissue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
+or
+ \thefunction{compile}.
+A \term{function} can be directly invoked by using it as the first argument to
+\funref{funcall}, \funref{apply}, or \specref{multiple-value-call}.
+
+%!!! Barrett says this syntax is confused.
+% Issues: &allow-other-keys, &key in value-typespec, &key mis-formatted where it already is.
+\label Compound Type Specifier Kind::
+
+Specializing.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.5.0 12
+\Deftype{function}{\ttbrac{arg-typespec \brac{value-typespec}}}
+
+\auxbnf{arg-typespec}{\lparen\starparam{typespec}            \CR
+		      \ \ttbrac{{\opt} \starparam{typespec}} \CR
+                      \ \ttbrac{{\rest} \param{typespec}}    \CR
+                      \ \ttbrac{{\key} \starparen{keyword typespec}}\rparen}
+
+\label Compound Type Specifier Arguments::
+
+\param{typespec}---a \term{type specifier}.
+
+\param{value-typespec}---a \term{type specifier}.
+
+\label Compound Type Specifier Description::
+
+\editornote{KMP: Isn't there some context info about ftype declarations to be merged here?}
+
+\editornote{KMP: This could still use some cleaning up.}%!!!
+
+\editornote{Sandra: Still need clarification about what happens if the
+number of arguments doesn't match the FUNCTION type declaration.}
+
+The list form of the \typeref{function} \term{type-specifier}
+can be used only for declaration and not for discrimination.
+Every element of this \term{type} is
+% I think the ``at least'' is confusing.  --sjl 7 Mar 92
+% a \term{function} that accepts arguments at least of the
+a \term{function} that accepts arguments of the
+types   
+specified by the  \param{argj-types} and returns values that are
+members of the \term{types} specified by \param{value-type}. The
+\keyref{optional}, \keyref{rest}, \keyref{key}, 
+\issue{FUNCTION-TYPE-KEY-NAME:SPECIFY-KEYWORD}
+and \keyref{allow-other-keys} 
+\endissue{FUNCTION-TYPE-KEY-NAME:SPECIFY-KEYWORD}
+markers can appear in the list of argument types. 
+\issue{FUNCTION-TYPE-REST-LIST-ELEMENT:USE-ACTUAL-ARGUMENT-TYPE}
+The \term{type specifier} provided
+with \keyref{rest} is the \term{type} 
+of each actual argument, not the \term{type} of the
+corresponding variable.
+\endissue{FUNCTION-TYPE-REST-LIST-ELEMENT:USE-ACTUAL-ARGUMENT-TYPE}
+ 
+\issue{FUNCTION-TYPE-KEY-NAME:SPECIFY-KEYWORD}
+The \keyref{key} parameters 
+should be supplied as lists of the form {\tt (\param{keyword} \param{type})}.  
+The \param{keyword} must be a valid keyword-name symbol
+as must be supplied in the actual arguments of a
+call.
+\issue{KEYWORD-ARGUMENT-NAME-PACKAGE:ANY}
+This is usually a \term{symbol} in \thepackage{keyword} but can be any \term{symbol}.
+\endissue{KEYWORD-ARGUMENT-NAME-PACKAGE:ANY}
+% tweaked to be less wordy  --sjl 7 Mar 92
+%The \keyref{allow-other-keys} declarations are interpreted as follows:
+%when \keyref{key} is given in a
+%\declref{function} \term{type specifier} \term{lambda list}, 
+%it is safe to assume that the \term{keyword parameters} given
+When \keyref{key} is given in a
+\declref{function} \term{type specifier} \term{lambda list},
+the \term{keyword parameters} given
+are exhaustive unless \keyref{allow-other-keys} is also present. 
+\keyref{allow-other-keys} is an indication 
+that other keyword arguments might actually be
+supplied and, if supplied, can be used. 
+For example,
+the \term{type} of \thefunction{make-list} could be declared as follows:
+
+\code
+ (function ((integer 0) &key (:initial-element t)) list)
+\endcode
+\endissue{FUNCTION-TYPE-KEY-NAME:SPECIFY-KEYWORD}
+
+The \param{value-type} can be a \declref{values} 
+\term{type specifier} in order to indicate the
+\term{types} of \term{multiple values}.
+
+
+\issue{FUNCTION-TYPE-ARGUMENT-TYPE-SEMANTICS:RESTRICTIVE}
+%{The following will be deleted:}
+%
+%
+%%% 4.5.0 13
+%For example, \thefunction{cons} is of type \f{(function (t t) cons)},
+%because it can accept any two arguments and always returns a \term{cons}.
+%%%see FUNCTION-TYPE-ARGUMENT-TYPE-SEMANTICS; cons isn't of the following type.
+%\funref{cons} is also of type {\tt (function (float string) list)}, 
+%because it can
+%accept a \term{float}
+%and a \term{string} (among other things), and its
+%result is always \oftype{list}            
+%(in fact a \term{cons} is never \term{null},
+%but that does not matter for this type declaration).
+%\funref{truncate} is of type 
+%{\tt (function (number number) (values number number))}, 
+%as well as of type
+%{\tt (function (integer (mod 8)) integer)}.
+%
+%{End of deletion.}
+
+Consider a declaration of the following form:
+                                   
+\code
+ (ftype (function (arg0-type arg1-type ...) val-type) f))
+\endcode
+ 
+Any \term{form}
+{\tt (f arg0 arg1 ...)}
+within the scope of
+that declaration is equivalent to the following:
+ 
+\code
+ (the val-type (f (the arg0-type arg0) (the arg1-type arg1) ...))
+\endcode
+ 
+That is, the consequences are undefined if any of the arguments are
+not of the specified \term{types} or the result is not of the
+specified \term{type}. In particular, if any argument is not of the
+correct \term{type}, the result is not guaranteed to be of the
+specified \term{type}.
+ 
+Thus, an \declref{ftype} declaration for a \term{function}
+describes \term{calls} to the \term{function}, not the actual definition
+of the \term{function}.
+
+Consider a declaration of the following form:
+
+\code
+ (type (function (arg0-type arg1-type ...) val-type) fn-valued-variable)
+\endcode
+ 
+This declaration has the interpretation that, within the scope of the
+declaration, the consequences are unspecified if the value of {\tt
+fn-valued-variable} is called with arguments not of the specified
+\term{types}; the value resulting from a valid call will be of type
+{\tt val-type}.
+
+As with variable type declarations, nested declarations
+imply intersections of \term{types}, as follows:
+\beginlist
+\itemitem{\bull} 
+Consider the following two
+declarations of \declref{ftype}:
+
+\code
+ (ftype (function (arg0-type1 arg1-type1 ...) val-type1) f))
+\endcode
+and
+
+\code
+ (ftype (function (arg0-type2 arg1-type2 ...) val-type2) f))
+\endcode
+ 
+If both these declarations are in effect,
+then within the shared scope of the declarations, calls to {\tt f} can be
+treated as if {\tt f} were declared as follows:
+
+\code
+ (ftype (function ((and arg0-type1 arg0-type2) (and arg1-type1 arg1-type2 ...) ...)
+                  (and val-type1 val-type2)) 
+        f))
+\endcode
+ 
+%!!! Barmar: what does this mean?
+%    KMP: This is ill-worded and out of place. 
+It is permitted to ignore one or all of the \declref{ftype} declarations in force.
+ 
+\itemitem{\bull} 
+If two (or more) type declarations are in effect for a variable, and
+they are both {\tt function} declarations, the declarations combine similarly.
+\endlist
+ 
+\endissue{FUNCTION-TYPE-ARGUMENT-TYPE-SEMANTICS:RESTRICTIVE}
+
+\endissue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+\endcom%{function}\ftype{System Class}
+
+%%% ========== COMPILED-FUNCTION
+\begincom{compiled-function}\ftype{Type}
+
+\issue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+
+\label Supertypes::
+
+\typeref{compiled-function},
+\typeref{function},
+\typeref{t}
+
+\label Description::
+
+\issue{COMPILED-FUNCTION-REQUIREMENTS:TIGHTEN}
+Any \term{function} may be considered by an \term{implementation} to be a 
+a \term{compiled function} if it contains no references to \term{macros} that
+must be expanded at run time, and it contains no unresolved references 
+to \term{load time values}.  \Seesection\CompilationSemantics.
+\endissue{COMPILED-FUNCTION-REQUIREMENTS:TIGHTEN}
+
+%% 2.13.0 2
+\term{Functions} whose definitions appear lexically within a
+\term{file} that has been \term{compiled} with \funref{compile-file} and then
+\term{loaded} with \funref{load} are \oftype{compiled-function}.
+\issue{COMPILED-FUNCTION-REQUIREMENTS:TIGHTEN}
+\term{Functions} produced by the \funref{compile} function
+are \oftype{compiled-function}.
+\endissue{COMPILED-FUNCTION-REQUIREMENTS:TIGHTEN}
+Other \term{functions} might also be \oftype{compiled-function}.
+%but \funref{compile} does not necessarily produce a \term{compiled function}.
+
+\endissue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+\endcom%{compiled-function}\ftype{Type}
+
+%%% ========== GENERIC-FUNCTION
+\begincom{generic-function}\ftype{System Class}
+
+\issue{JUN90-TRIVIAL-ISSUES:9}
+\label Class Precedence List::
+
+\typeref{generic-function},
+\typeref{function},
+\typeref{t}
+\endissue{JUN90-TRIVIAL-ISSUES:9}
+
+\label Description::
+
+A \newterm{generic function} is a \term{function} whose behavior
+depends on the \term{classes} or identities of the \term{arguments}
+supplied to it.  A generic function object contains a set of
+\term{methods}, a \term{lambda list}, a \term{method combination} \term{type}, 
+and other information.  The \term{methods}
+define the class-specific behavior and operations of the \term{generic function};
+a \term{method} is said to \term{specialize} a \term{generic function}.
+When invoked, a \term{generic function} executes a subset of its
+\term{methods} based on the \term{classes} or identities of its \term{arguments}.
+
+A \term{generic function} can be used in the same ways that an
+ordinary \term{function} can be used; specifically, a \term{generic function} can
+be used as an argument to \funref{funcall} and \funref{apply},
+and can be given a global or a local name.
+
+\endcom%{generic-function}\ftype{System Class}
+
+%%% ========== STANDARD-GENERIC-FUNCTION
+\begincom{standard-generic-function}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{standard-generic-function},
+\typeref{generic-function},
+\typeref{function},
+\typeref{t}
+
+\label Description::
+
+\Theclass{standard-generic-function} is the default \term{class} of
+\term{generic functions} \term{established} by
+\macref{defmethod},
+\funref{ensure-generic-function},
+\macref{defgeneric},
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+% \macref{generic-function},
+% \specref{generic-flet},
+% \specref{generic-labels},
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\issue{WITH-ADDED-METHODS:DELETE}
+%\specref{with-added-methods},
+\endissue{WITH-ADDED-METHODS:DELETE}%
+and
+\macref{defclass} \term{forms}.
+
+\endcom%{standard-generic-function}\ftype{System Class}
+
+%random-state moved to dict-numbers 
+
+%conditions moved to dict-conditions, some perhaps to move again
+
+%%% ========== CLASS
+\begincom{class}\ftype{System Class}
+
+\issue{JUN90-TRIVIAL-ISSUES:9}
+\label Class Precedence List::
+\typeref{class},
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{standard-object},
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{t}
+\endissue{JUN90-TRIVIAL-ISSUES:9}
+
+\label Description::
+
+%!!! Barrett: Since none of this can be accessed portably,
+%    why specifically mention any of it?
+\Thetype{class} represents \term{objects} that determine the structure 
+and behavior of their \term{instances}. Associated with an \term{object}
+\oftype{class} is information describing its place in the 
+directed acyclic graph of \term{classes}, its \term{slots}, and its options.
+%% Barrett: No! This is a gross AMOPism.
+%and information about the \term{methods} that mention this \term{class} as a specializer.
+
+% I had a terrible time figuring out what these paragraphs were trying
+% to say until I realized what cleanup issue they were from.  I've moved
+% this text to the discussion of built-in types in the classes concepts
+% section, where there is more context for it.  --sjl 7 Mar 92
+%\issue{CONDITION-SLOTS:HIDDEN}
+%It is \term{implementation-dependent} whether \term{slots} are involved in the
+%operation of \term{functions} defined in this specification
+%on \term{instances} of \term{classes} defined in this specification,
+%except when \term{slots} are explicitly defined by this specification.
+%
+%If in a particular \term{implementation} a \term{class} defined in this specification
+%has \term{slots} that are not defined by this specfication, the names of these \term{slots}
+%must not be \term{external symbols} of \term{packages} defined in this specification nor
+%otherwise \term{accessible} in \thepackage{cl-user}.
+%\endissue{CONDITION-SLOTS:HIDDEN}
+
+\endcom%{class}\ftype{System Class}
+
+%%% ========== BUILT-IN-CLASS
+\begincom{built-in-class}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{built-in-class},
+\typeref{class},
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{standard-object},
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{t}
+
+\label Description::
+
+A \term{built-in class} is a \term{class} whose \term{instances} have 
+restricted capabilities or special representations.
+%!!! Barrett: The rest of this looks like a duplication of text a few pages back.
+Attempting to use
+\macref{defclass} to define \term{subclasses} of a \term{built-in class}
+signals an error \oftype{error}.
+Calling \funref{make-instance} to create an \term{instance} 
+of a \term{built-in class} signals an error \oftype{error}.
+Calling \funref{slot-value} on an \term{instance} of a \term{built-in class}
+signals an error \oftype{error}.  Redefining a \term{built-in class}
+or using \funref{change-class} to change the \term{class} of an \term{instance}
+to or from a \term{built-in class} signals an error \oftype{error}.
+However, \term{built-in classes} can be used as \term{parameter specializers}
+in \term{methods}.
+%!!! Barrett: Other ops also signal errors.
+%    See SLOT-VALUE-METACLASSES
+%Any \term{class} that corresponds to a standard
+%\clisp\ type specified in \CLtL\ 
+%might be an instance of \typeref{built-in-class}.
+%The predefined Common Lisp \term{type specifiers} that are required to have
+%corresponding classes are listed in \figref\ClassTypeCorrespondence.  It is implementation
+%dependent whether each of these classes is implemented as a built-in class.
+
+\endcom%{built-in-class}\ftype{System Class}
+
+%%% ========== STRUCTURE-CLASS
+\begincom{structure-class}\ftype{System Class}
+
+\label Class Precedence List::
+
+\typeref{structure-class},
+\typeref{class},
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{standard-object},
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{t}
+
+\label Description::
+
+All \term{classes} defined by means of \macref{defstruct} 
+are \instsofclass{structure-class}.
+
+\endcom%{structure-class}\ftype{System Class}
+
+%%% ========== STANDARD-CLASS
+\begincom{standard-class}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{standard-class},
+\typeref{class},
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{standard-object},
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{t}
+
+\label Description::
+
+\Theclass{standard-class} is the default \term{class} of \term{classes}
+defined by \macref{defclass}.
+
+\endcom%{standard-class}\ftype{System Class}
+
+%%% ========== METHOD
+\begincom{method}\ftype{System Class}
+
+\issue{JUN90-TRIVIAL-ISSUES:9}
+\label Class Precedence List::
+\typeref{method},
+\typeref{t}
+\endissue{JUN90-TRIVIAL-ISSUES:9}
+
+\label Description::
+
+A \term{method} is an \term{object} that represents a modular part of the behavior
+of a \term{generic function}.
+
+A \term{method} contains \term{code} to implement the \term{method}'s
+behavior, a sequence of \term{parameter specializers} that specify when the
+given \term{method} is applicable, and a sequence of \term{qualifiers}
+that is used by the method combination facility to distinguish among
+\term{methods}.  Each required parameter of each 
+\term{method} has an associated \term{parameter specializer}, and the 
+\term{method} will be invoked only on arguments that satisfy its 
+\term{parameter specializers}.
+
+The method combination facility controls the selection of 
+\term{methods}, the order in which they are run, and the values that are
+returned by the generic function.  The \CLOS\ offers a default method
+combination type and provides a facility for declaring new types of
+method combination.
+
+\label See Also::
+
+{\secref\GFsAndMethods}
+
+\endcom%{method}\ftype{System Class}
+
+%%% ========== STANDARD-METHOD
+\begincom{standard-method}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{standard-method},
+\typeref{method},
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{standard-object},
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{t}
+
+\label Description::
+
+\Theclass{standard-method} is the default \term{class} of 
+\term{methods} defined by the 
+ \macref{defmethod} and
+ \macref{defgeneric} \term{forms}.
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+% \macref{generic-function},
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\issue{WITH-ADDED-METHODS:DELETE}
+%\specref{with-added-methods},
+\endissue{WITH-ADDED-METHODS:DELETE}%
+%  \specref{generic-flet},
+% and
+%  \specref{generic-labels} \term{forms}.
+
+\endcom%{standard-method}\ftype{System Class}
+
+%%% ========== STRUCTURE-OBJECT
+\begincom{structure-object}\ftype{Class}
+
+\issue{JUN90-TRIVIAL-ISSUES:9}
+\label Class Precedence List::
+
+\typeref{structure-object},
+\typeref{t}
+\endissue{JUN90-TRIVIAL-ISSUES:9}
+
+\label Description::
+
+% \Theclass{structure-object} is a \term{superclass} of
+% every \term{class} that is defined by \macref{defstruct}.
+\Theclass{structure-object} is an \term{instance} of \typeref{structure-class}
+and is a \term{superclass} of every \term{class} 
+that is an \term{instance} of \typeref{structure-class}
+except itself, and is a \term{superclass} of every \term{class} 
+that is defined by \macref{defstruct}.
+
+\issue{DATA-TYPES-HIERARCHY-UNDERSPECIFIED}%
+%% Barrett: This is bogus.  I think there is enough other text in the draft
+%%    (the first bullet in ``Type Relationships'' plus the definition of
+%%    \term{system class}) to cover the requirements specified by 
+%%    DATA-TYPES-HIERARCHY-UNDERSPECIFIED that this could simply be removed.
+% The following \term{type specifier} \term{symbols} do not name
+% \term{structure} \term{types} in any \term{implementation}:
+% \typeref{cons}, \typeref{symbol}, \typeref{array}, 
+% \typeref{number},
+% \typeref{character}, \typeref{hash-table}, 
+% \typeref{readtable}, \typeref{package}, \typeref{pathname}, 
+% \typeref{stream}, or
+% \typeref{random-state}.
+% It is \term{implementation-dependent}
+% whether other \term{standardized} \term{type specifiers} name structure types. 
+\endissue{DATA-TYPES-HIERARCHY-UNDERSPECIFIED}
+
+\label See Also::
+
+\macref{defstruct},
+{\secref\SharpsignS},
+{\secref\PrintingStructures}
+
+\endcom%{structure-object}\ftype{Class}
+
+%%% ========== STANDARD-OBJECT
+\begincom{standard-object}\ftype{Class}
+
+\label Class Precedence List::
+\typeref{standard-object},
+\typeref{t}
+
+\label Description::
+
+\Theclass{standard-object} is an \term{instance} of \typeref{standard-class}
+and is a \term{superclass} of every \term{class} that is an \term{instance} of
+\typeref{standard-class} except itself.
+% and
+%\typeref{structure-class}.
+
+\endcom%{standard-object}\ftype{Class}
+
+%%% ========== METHOD-COMBINATION
+\begincom{method-combination}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{method-combination},
+\typeref{t}
+
+\label Description::
+
+Every \term{method combination} \term{object} is an 
+\term{indirect instance} of the \term{class} \typeref{method-combination}.
+A \term{method combination} \term{object} represents the information about
+the \term{method combination} being used by a \term{generic function}.
+A \term{method combination} \term{object} contains information about
+both the type of \term{method combination} and the arguments being used
+with that \term{type}.
+
+\endcom%{method-combination}\ftype{System Class}
+
+%%% ========== T
+%% 2.0.0 6
+\begincom{t}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{t}
+
+\label Description::
+The set of all \term{objects}.  
+%% 2.15.0 4
+\Thetype{t} is a \term{supertype} of every \term{type}, 
+including itself. Every \term{object} is \oftype{t}.
+
+\issue{COMMON-TYPE:REMOVE}
+% Reference to type COMMON removed, and moved to Appendix A.
+\endissue{COMMON-TYPE:REMOVE}
+
+\endcom%{t}\ftype{System Class}
+
+%%% ========== SATISFIES
+\begincom{satisfies}\ftype{Type Specifier}
+
+\label Compound Type Specifier Kind::
+
+Predicating.
+
+\label Compound Type Specifier Syntax::
+
+\Deftype{satisfies}{predicate-name}
+
+\label Compound Type Specifier Arguments::
+
+\param{predicate-name}---a \term{symbol}.
+
+\label Compound Type Specifier Description::
+%% 4.3.0 1
+%\itemitem
+%{\tt (satisfies \param{predicate-name})} 
+                                             
+This denotes the set of all \term{objects} that satisfy the
+\term{predicate} \param{predicate-name}, which must be a \term{symbol}
+whose global \term{function} definition is a one-argument
+predicate.  A name is required for \param{predicate-name}; 
+\term{lambda expressions} are not allowed.
+For example, the \term{type specifier} {\tt (and integer (satisfies evenp))}
+denotes the set of all even integers.
+The form {\tt (typep \param{x} '(satisfies \param{p}))} is equivalent to
+{\tt (if (\param{p} \param{x}) t nil)}.
+% The call {\tt (typep x '(satisfies p))} results in applying
+% \f{p} to \f{x} and returning \f{t} if the result is \term{true} and \nil\ if the
+% result is \term{false}.
+%% 4.3.0 2                                   
+%% I don't like the following example because it presupposes that standard-char-p is not
+%  defined in terms of typep. -kmp 24-Oct-90
+% For example, \thetype{standard-char} could be defined as follows:
+% 
+% \code
+%  (deftype standard-char () '(and character (satisfies standard-char-p)))
+% \endcode
+
+\issue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+The argument is required.
+The \term{symbol} \misc{*} can be the argument, but it
+denotes itself (the \term{symbol} \misc{*}),
+and does not represent an unspecified value.
+
+The symbol \typeref{satisfies} is not valid as a \term{type specifier}.
+\endissue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+
+
+\endcom%{satisfies}\ftype{Type Specifier}
+
+%%% ========== MEMBER
+\begincom{member}\ftype{Type Specifier}
+
+\label Compound Type Specifier Kind::
+
+Combining.
+
+\label Compound Type Specifier Syntax::
+
+\Deftype{member}{\starparam{object}}
+
+\label Compound Type Specifier Arguments::
+
+\param{object}---an \term{object}.
+
+\label Compound Type Specifier Description::
+%% 4.4.0 3
+%\itemitem
+%{\tt (member \starparam{object})}
+%{\tt (member \param{object1} \param{object2} ...)}
+
+This denotes the set containing the named \param{objects}. An
+\term{object} is of this \term{type} if and only if it is \funref{eql}
+to one of the specified \param{objects}.
+
+\issue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+The \term{type specifiers} \f{(member)} and \nil\ are equivalent.
+\misc{*} can be among the \param{objects},
+but if so it denotes itself (the symbol \misc{*}) 
+and does not represent an unspecified value.
+The symbol \misc{member} is not valid as a \term{type specifier};
+and, specifically, it is not an abbreviation for either \f{(member)} or \f{(member *)}.
+\endissue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+
+\label See Also::
+
+\thetype{eql}
+
+\endcom%{member}\ftype{Type Specifier}
+
+%%% ========== NOT
+\begincom{not}\ftype{Type Specifier}
+
+\label Compound Type Specifier Kind::
+
+Combining.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.4.0 4
+\Deftype{not}{typespec}
+
+\label Compound Type Specifier Arguments::
+
+\param{typespec}---a \term{type specifier}.
+
+\label Compound Type Specifier Description::
+
+This denotes the set of all \term{objects} that are not of the \term{type} \param{typespec}.
+
+\issue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+The argument is required, and cannot be \misc{*}.
+
+The symbol \typeref{not} is not valid as a \term{type specifier}.
+\endissue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+
+\endcom%{not}\ftype{Type Specifier}
+
+%%% ========== AND
+\begincom{and}\ftype{Type Specifier}
+
+\label Compound Type Specifier Kind::
+
+Combining.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.4.0 5
+\Deftype{and}{\starparam{typespec}}
+
+\label Compound Type Specifier Arguments::
+
+\param{typespec}---a \term{type specifier}.
+
+\label Compound Type Specifier Description::
+  
+This denotes the set of all \term{objects} of the \term{type} 
+determined by the intersection of the \param{typespecs}.
+
+\issue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+\misc{*} is not permitted as an argument.
+
+The \term{type specifiers} \f{(and)} and \t\ are equivalent.
+The symbol \misc{and} is not valid as a \term{type specifier},
+and, specifically, it is not an abbreviation for \f{(and)}.
+\endissue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+
+\endcom%{and}\ftype{Type Specifier}
+
+%%% ========== OR
+\begincom{or}\ftype{Type Specifier}
+
+\label Compound Type Specifier Kind::
+
+Combining.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.4.0 7 
+\Deftype{or}{\starparam{typespec}}
+
+\label Compound Type Specifier Arguments::
+
+\param{typespec}---a \term{type specifier}.
+
+\label Compound Type Specifier Description::
+                               
+This denotes the set of all \term{objects} of the
+\term{type} determined by the union of the \param{typespecs}.
+For example, \thetype{list} by definition is the same as \f{(or null cons)}.
+Also, the value returned by \funref{position} is an \objectoftype{(or null (integer 0 *))};
+\ie either \nil\ or a non-negative \term{integer}.
+
+\issue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+\misc{*} is not permitted as an argument.
+
+The \term{type specifiers} \f{(or)} and \nil\ are equivalent.
+The symbol \typeref{or} is not valid as a \term{type specifier};
+and, specifically, it is not an abbreviation for \f{(or)}.
+\endissue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+
+\endcom%{or}\ftype{Type Specifier}
+
+%%% ========== VALUES
+\begincom{values}\ftype{Type Specifier}
+
+\label Compound Type Specifier Kind::
+
+Specializing.
+
+\label Compound Type Specifier Syntax::
+
+\Deftype{values}{\down{value-typespec}}
+
+\reviewer{Barmar: Missing \keyref{key}}%!!!
+
+\auxbnf{value-typespec}{\starparam{typespec}
+			\ttbrac{{\opt} {\starparam{typespec}}}
+			\ttbrac{{\rest} typespec}
+			\ttbrac{\keyref{allow-other-keys}}}
+
+\label Compound Type Specifier Arguments::
+
+\param{typespec}---a \term{type specifier}.
+
+\label Compound Type Specifier Description::
+
+%% 4.5.0 14                                                    
+%\itemitem{\tt (values \starparam{value-type})}
+%\itemitem{\tt (values \param{value1-type} \param{value2-type} ...)}
+
+This \term{type specifier} can be used only as the \param{value-type} in a
+\typeref{function} \term{type specifier} or a \specref{the}
+\term{special form}.  It is used to specify individual \term{types} 
+when \term{multiple values} are involved.
+The \keyref{optional} and \keyref{rest} markers can appear in the \param{value-type} list;
+they indicate the parameter list of a \term{function} that, 
+when given to \specref{multiple-value-call} along with the values,
+%would be suitable for receiving those values.
+would correctly receive those values.
+
+\issue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+The symbol \misc{*} may not be among the \param{value-types}.
+
+The symbol \misc{values} is not valid as a \term{type specifier};
+and, specifically, it is not an abbreviation for \f{(values)}.
+\endissue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+
+\endcom%{values}\ftype{Type Specifier}
+
+%%% ========== EQL
+\begincom{eql}\ftype{Type Specifier}
+
+\label Compound Type Specifier Kind::
+
+Combining.
+
+\label Compound Type Specifier Syntax::
+
+\Deftype{eql}{object}
+
+\label Compound Type Specifier Arguments::
+
+\param{object}---an \term{object}.
+
+\label Compound Type Specifier Description::
+
+Represents the \term{type} 
+%% Replaced per Boyer/Kaufmann/Moore #6 (by X3J13 vote at May 4-5, 1994 meeting).
+%whose only \term{element} is \param{object}.
+of all \param{x} for which \f{(eql \param{object} \param{x})} is true.
+
+\issue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+The argument \param{object} is required.  The \param{object} can be \misc{*},
+but if so it denotes itself (the symbol \misc{*}) 
+and does not represent an unspecified value.
+The \term{symbol} \misc{eql} is not valid as an \term{atomic type specifier}.
+%% Laubsch thinks this second part is gratuitous (and I agree). -kmp 20-Jan-92
+%and, specifically, it is not an abbreviation for \f{(eql *)}.
+\endissue{TYPE-SPECIFIER-ABBREVIATION:X3J13-JUN90-GUESS}
+
+\endcom%{eql}\ftype{Type Specifier}
+
+%%% ========== COERCE
+\begincom{coerce}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues coerce {object result-type} {result}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{result-type}---a \term{type specifier}.
+
+\param{result}---an \term{object}, of \term{type} \param{result-type}
+  except in situations described in \secref\RuleOfCanonRepForComplexRationals.
+    
+\label Description::
+
+%% 4.8.0 3
+\term{Coerces} the \param{object} to \term{type} \param{result-type}.
+
+If \param{object} is already of \term{type} \param{result-type},
+the \param{object} itself is returned, regardless of whether it
+would have been possible in general to coerce an \term{object} of 
+some other \term{type} to \param{result-type}.
+
+%% 4.8.0 4
+Otherwise, the \param{object} is \term{coerced} to \term{type} \param{result-type}
+according to the following rules:
+
+\beginlist
+
+\itemitem{\typeref{sequence}}
+
+\issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+% If the \param{result-type} is a \term{subtype} of \typeref{list},
+% the result will be a \term{list}.
+% 
+% If the \param{result-type} is a \term{subtype} of \typeref{vector},
+% then if the implementation can determine the element type specified
+% for the \param{result-type}, the element type of the resulting array 
+% is the result of \term{upgrading} that element type; or, if the
+% implementation can determine that the element type is unspecified (or \f{*}),
+% the element type of the resulting array is \typeref{t};
+% otherwise, an error is signaled.
+
+If the \param{result-type} is a \term{recognizable subtype} of \typeref{list},
+and the \term{object} is a \term{sequence},
+then the \param{result} is a \term{list} 
+that has the \term{same} \term{elements} as \param{object}.
+
+If the \param{result-type} is a \term{recognizable subtype} of \typeref{vector},
+and the \term{object} is a \term{sequence},
+then the \param{result} is a \term{vector} 
+that has the \term{same} \term{elements} as \param{object}.
+If \param{result-type} is a specialized \term{type}, 
+the \param{result} has an \term{actual array element type} that is the result of
+\term{upgrading} the element type part of that \term{specialized} \term{type}.
+If no element type is specified, the element type defaults to \typeref{t}.
+If the \term{implementation} cannot determine the element type, an error is signaled.
+
+% I don't understand this and I can't figure out where it came from.
+% It's stated below that an error is signaled if the appropriate result
+% cannot be constructed.  --sjl 7 Mar 92
+%The consequences are undefined if the \param{result} is not of \term{type} 
+%\param{result-type}.
+\endissue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}
+
+\itemitem{\typeref{character}}
+
+If the \param{result-type} is \typeref{character}
+and the \term{object} is a \term{character designator},
+the \param{result} is the \term{character} it denotes.
+
+\issue{CHARACTER-LOOSE-ENDS:FIX}
+%Reference to INT-CHAR removed.
+\endissue{CHARACTER-LOOSE-ENDS:FIX}
+
+\itemitem{\typeref{complex}}
+
+%% 4.8.0 7
+If the \param{result-type} is \typeref{complex} 
+%% "number" => "real" per Boyer/Kaufmann/Moore #7 (by X3J13 vote at May 4-5, 1994 meeting)
+%% -kmp 9-May-94
+and the \term{object} is a \term{real},
+then the \param{result} is obtained by constructing a \term{complex}
+whose real part is the \term{object} and
+whose imaginary part is the result of \term{coercing} an \term{integer} zero
+to the \term{type} of the \term{object} (using \funref{coerce}).
+(If the real part is a \term{rational}, however, 
+then the result must be represented as a \term{rational} rather
+than a \term{complex}; \seesection\RuleOfCanonRepForComplexRationals.
+So, for example, \f{(coerce 3 'complex)} is permissible,
+but will return \f{3}, which is not a \term{complex}.)
+
+\itemitem{\typeref{float}}
+
+%% 4.8.0 6
+If the \param{result-type} is any of \typeref{float},
+ \typeref{short-float}, 
+ \typeref{single-float}, 
+ \typeref{double-float}, 
+ \typeref{long-float},
+and the \term{object} is a 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{real},
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+then the \param{result} is a \term{float} of \term{type} \param{result-type}
+which is equal in sign and magnitude to the \term{object} to whatever degree of
+representational precision is permitted by that \term{float} representation.
+(If the \param{result-type} is \typeref{float}
+and \param{object} is not already a \term{float}, 
+then the \param{result} is a \term{single float}.)
+
+\issue{FUNCTION-TYPE:X3J13-MARCH-88}
+\itemitem{\typeref{function}}
+
+If the \param{result-type} is \typeref{function},
+and \param{object} is any 
+\issue{COERCING-SETF-NAME-TO-FUNCTION:ALL-FUNCTION-NAMES}
+%% Barmar asked what about (COERCE '(SETF symbol) 'FUNCTION)
+%% Mail sent to Quinquevirate. -kmp 3-Jun-91
+%% This change was the result of that discussion. kmp 14-May-93
+%\term{symbol}
+\term{function name}
+\endissue{COERCING-SETF-NAME-TO-FUNCTION:ALL-FUNCTION-NAMES}
+that is \term{fbound} 
+but that is globally defined neither as a \term{macro name} nor as a \term{special operator},
+then the \param{result} is the \term{functional value} of \param{object}.
+
+If the \param{result-type} is \typeref{function},
+and \param{object} is a \term{lambda expression},
+then the \param{result} is a \term{closure} of \param{object}
+in the \term{null lexical environment}.
+\endissue{FUNCTION-TYPE:X3J13-MARCH-88}
+
+\itemitem{\typeref{t}}
+
+%% 4.8.0 8
+Any \param{object} can be \term{coerced} to an \term{object} \oftype{t}.
+In this case, the \param{object} is simply returned.
+
+\endlist
+
+\label Examples::
+
+\code
+ (coerce '(a b c) 'vector) \EV #(A B C)
+ (coerce 'a 'character) \EV #\\A
+ (coerce 4.56 'complex) \EV #C(4.56 0.0)
+ (coerce 4.5s0 'complex) \EV #C(4.5s0 0.0s0)
+ (coerce 7/2 'complex) \EV 7/2
+ (coerce 0 'short-float) \EV 0.0s0
+ (coerce 3.5L0 'float) \EV 3.5L0
+ (coerce 7/2 'float) \EV 3.5
+ (coerce (cons 1 2) t) \EV (1 . 2)
+\endcode
+
+\issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+All the following \term{forms} should signal an error:
+
+\code
+ (coerce '(a b c) '(vector * 4))
+ (coerce #(a b c) '(vector * 4))
+ (coerce '(a b c) '(vector * 2))
+ (coerce #(a b c) '(vector * 2))
+ (coerce "foo" '(string 2))
+ (coerce #(#\\a #\\b #\\c) '(string 2))
+ (coerce '(0 1) '(simple-bit-vector 3))
+\endcode
+\endissue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+If a coercion is not possible, an error \oftype{type-error} is signaled.
+
+\f{(coerce x 'nil)} always signals an error \oftype{type-error}.
+
+An error
+%KMP: I'm not sure UNDEFINED-FUNCTION is the right error type to signal here.
+%Barrett: Yeah. This isn't really right for `fbound but not function'. Make it ERROR.
+%KMP: Done
+\oftype{error} is signaled
+if the \param{result-type} is \typeref{function} but
+\param{object} is a \term{symbol} that is not \term{fbound} or
+if the \term{symbol} names a \term{macro} or a \term{special operator}.
+
+\issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+An error \oftype{type-error} should be signaled if \param{result-type}
+specifies the number of elements and \param{object} is of a different length.
+\endissue{SEQUENCE-TYPE-LENGTH:MUST-MATCH}
+
+\label See Also::
+
+\funref{rational}, \funref{floor}, \funref{char-code}, \funref{char-int}
+
+\label Notes::
+
+%% 4.8.0 9
+Coercions from \term{floats} to \term{rationals} 
+and from \term{ratios} to \term{integers} 
+are not provided because of rounding problems.  
+
+\code
+ (coerce x 't) \EQ (identity x) \EQ x
+\endcode
+
+\endcom
+
+%%% ========== DEFTYPE
+\begincom{deftype}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\DefmacWithValues deftype {name lambda-list {\DeclsAndDoc} \starparam{form}} {name}
+
+\label Arguments and Values::
+
+\param{name}---a \term{symbol}.
+
+\param{lambda-list}---a \term{deftype lambda list}.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+%% 4.7.0 4
+\param{documentation}---a \term{string}; \noeval.
+
+\param{form}---a \term{form}.
+
+\label Description::
+
+%% 4.7.0 2
+\funref{deftype} defines a \term{derived type specifier} named \param{name}.
+
+The meaning of the new \term{type specifier} is given in terms of
+%tweaked  --sjl 7 Mar 92
+%a body of code which expands the \term{type specifier} into another
+a function which expands the \term{type specifier} into another
+\term{type specifier}, which itself will be expanded if it contains
+references to another \term{derived type specifier}.
+
+The newly defined \term{type specifier} may be referenced as a list of
+the form {\tt (\param{name} \param{arg$\sub{1}$} \param{arg$\sub{2}$} ...)\/}.
+The number of arguments must be appropriate to the \param{lambda-list}.
+If the new \term{type specifier} takes no arguments, 
+or if all of its arguments are optional, 
+the \term{type specifier} may be used as an \term{atomic type specifier}.
+
+The \term{argument} \term{expressions} to the \term{type specifier},
+\param{arg$\sub{1}$} $\ldots$ \param{arg$\sub{n}$}, are not \term{evaluated}.
+Instead, these \term{literal objects} become the \term{objects} to which
+corresponding \term{parameters} become \term{bound}.
+
+The body of the \funref{deftype} \term{form} 
+\issue{DEFMACRO-BLOCK-SCOPE:EXCLUDES-BINDINGS}
+(but not the \param{lambda-list})
+\endissue{DEFMACRO-BLOCK-SCOPE:EXCLUDES-BINDINGS}
+is
+\issue{FLET-IMPLICIT-BLOCK:YES}
+implicitly enclosed in a \term{block} named \param{name},
+\endissue{FLET-IMPLICIT-BLOCK:YES}
+and is evaluated as an \term{implicit progn}, 
+returning a new \term{type specifier}.
+
+\issue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW}
+The \term{lexical environment} of the body is the one which was current
+at the time the \macref{deftype} form was evaluated, augmented by the 
+\term{variables} in the \param{lambda-list}.
+\endissue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW}
+
+\issue{RECURSIVE-DEFTYPE:EXPLICITLY-VAGUE}
+Recursive expansion of the \term{type specifier} returned as the expansion
+must terminate, including the expansion of \term{type specifiers} which
+are nested within the expansion.
+
+The consequences are undefined if the result of fully expanding a
+\term{type specifier} contains any circular structure, except within
+the \term{objects} referred to by \typeref{member} and \typeref{eql}
+\term{type specifiers}.
+\endissue{RECURSIVE-DEFTYPE:EXPLICITLY-VAGUE}
+
+%% 4.7.0 4
+\param{Documentation} is attached to \param{name} as a \term{documentation string}
+of kind \misc{type}.
+
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+% added qualification about top-level-ness  --sjl 5 Mar 92
+If a \macref{deftype} \term{form} appears as a \term{top level form},
+the \term{compiler} must ensure that the \param{name} is recognized
+in subsequent \term{type} declarations.  
+The \term{programmer} must ensure that the body of a \macref{deftype} form 
+can be \term{evaluated} at compile time if the \param{name} is
+referenced in subsequent \term{type} declarations.  
+If the expansion of a \term{type specifier} is not defined fully at compile time
+(perhaps because it expands into an unknown \term{type specifier} or a
+\declref{satisfies} of a named \term{function} that isn't defined in the
+compile-time environment), an \term{implementation} may ignore any references to
+this \term{type} in declarations and/or signal a warning.
+\endissue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+
+\label Examples::
+%% 4.7.0 5
+\code
+ (defun equidimensional (a)
+   (or (< (array-rank a) 2)
+       (apply #'= (array-dimensions a)))) \EV EQUIDIMENSIONAL
+ (deftype square-matrix (&optional type size)
+   `(and (array ,type (,size ,size))
+         (satisfies equidimensional))) \EV SQUARE-MATRIX
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+% addressed in the packages chapter.  --sjl 5 Mar 92
+%\issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+%The consequences are undefined if a \term{symbol} in \thepackage{common-lisp}
+%is used as the \param{name} argument.
+%\endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+\label See Also::
+
+\misc{declare},
+\macref{defmacro},
+\funref{documentation},
+{\secref\TypeSpecifiers},
+{\secref\DocVsDecls}
+
+\label Notes:\None.
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== SUBTYPEP
+\begincom{subtypep}\ftype{Function}
+
+\issue{SUBTYPEP-ENVIRONMENT:ADD-ARG}
+
+\label Syntax::
+
+\DefunWithValues subtypep 
+		 {type-1 type-2 {\opt} environment}
+		 {subtype-p, valid-p}
+
+\label Arguments and Values:: 
+
+\param{type-1}---a \term{type specifier}.
+% acceptable to \funref{typep}
+
+\param{type-2}---a \term{type specifier}.
+% acceptable to \funref{typep}.
+
+%!!! as opposed to what? need a glossary term -kmp 15-Feb-91
+
+\param{environment}---an \term{environment} \term{object}.
+  \Default{\nil, denoting the \term{null lexical environment}
+	   and the current \term{global environment}}
+%!!! Need to say what happens with the environment.
+
+\param{subtype-p}---a \term{generalized boolean}.
+
+\param{valid-p}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.1 3
+If \param{type-1} is a \term{recognizable subtype} of \param{type-2}, 
+the first \term{value} is \term{true}.
+Otherwise, the first \term{value} is \term{false},
+indicating that either
+ \param{type-1} is not a \term{subtype} of \param{type-2}, or else
+ \param{type-1} is a \term{subtype} of \param{type-2} 
+  but is not a \term{recognizable subtype}.
+
+A second \term{value} is also returned indicating the `certainty' of 
+the first \term{value}.  If this value is \term{true}, then the first
+value is an accurate indication of the \term{subtype} relationship.
+(The second \term{value} is always \term{true} when the first \term{value}
+ is \term{true}.)
+
+\Thenextfigure\ summarizes the possible combinations of \term{values}
+that might result.
+
+\tablefigthree{Result possibilities for subtypep}{Value 1}{Value 2}{Meaning}{
+\term{true}  & \term{true}  & \param{type-1} is definitely a \term{subtype} of
+			      \param{type-2}.\cr
+\term{false} & \term{true}  & \param{type-1} is definitely not a \term{subtype} of
+			      \param{type-2}.\cr
+\term{false} & \term{false} & \funref{subtypep} could not determine the relationship,\cr
+	     & 	            & so \param{type-1} might or might not be a \term{subtype} of
+			      \param{type-2}.\cr
+}
+
+\issue{SUBTYPEP-TOO-VAGUE:CLARIFY-MORE}
+
+\funref{subtypep} is permitted to return the 
+\term{values} \term{false} and \term{false} only when at least
+one argument involves one of these \term{type specifiers}:
+  \declref{and},
+% Added per Barrett:
+  \declref{eql},
+  the list form of \declref{function},
+  \declref{member},
+  \declref{not},
+  \declref{or},
+  \declref{satisfies},
+or
+  \declref{values}.
+(A \term{type specifier} `involves' such a \term{symbol} if, 
+ after being \term{type expanded},
+ it contains that \term{symbol} in a position that would call for
+ its meaning as a \term{type specifier} to be used.)
+One consequence of this is that if neither \param{type-1} nor \param{type-2}
+involves any of these \term{type specifiers}, then \funref{subtypep} is obliged
+to determine the relationship accurately.  In particular, \funref{subtypep} 
+returns the \term{values} \term{true} and \term{true}
+if the arguments are \funref{equal} and do not involve
+any of these \term{type specifiers}.
+
+\funref{subtypep} never returns a second value of \nil\ when both
+\param{type-1} and \param{type-2} involve only
+ the names in \figref\StandardizedAtomicTypeSpecs, or
+ names of \term{types} defined by \macref{defstruct},
+\macref{define-condition},
+ or \macref{defclass}, or
+ \term{derived types} that expand into only those names.
+While \term{type specifiers} listed in \figref\StandardizedAtomicTypeSpecs\ and 
+names of \macref{defclass} and \macref{defstruct} can in some cases be
+implemented as \term{derived types}, \funref{subtypep} regards them as primitive.
+
+The relationships between \term{types} reflected by \funref{subtypep}
+are those specific to the particular implementation.  For example, if
+an implementation supports only a single type of floating-point numbers,
+in that implementation \f{(subtypep 'float 'long-float)} 
+returns the \term{values} \term{true} and \term{true} 
+(since the two \term{types} are identical).
+\endissue{SUBTYPEP-TOO-VAGUE:CLARIFY-MORE}
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+For all \param{T1} and \param{T2} other than \f{*}, 
+\f{(array \param{T1})} and \f{(array \param{T2})} 
+are two different \term{type specifiers} that always refer to the same sets of
+things if and only if they refer to \term{arrays}
+of exactly the same specialized representation, \ie
+if \f{(upgraded-array-element-type '\param{T1})}  and
+   \f{(upgraded-array-element-type '\param{T2})} 
+return two different \term{type specifiers} that always refer to the same sets of
+\term{objects}.
+This is another way of saying that 
+\f{`(array \param{type-specifier})}
+and
+\f{`(array ,(upgraded-array-element-type '\param{type-specifier}))} 
+refer to the same
+set of specialized \term{array} representations.
+For all \param{T1} and \param{T2} other than \f{*}, 
+%tweaked --sjl 7 Mar 92
+%the specified intersection for 
+%    \f{(array \param{T1})}
+%and \f{(array \param{T2})} is \nil\
+the intersection of
+    \f{(array \param{T1})}
+and \f{(array \param{T2})} is the empty set
+if and only if they refer to \term{arrays} of different,
+distinct specialized representations.  
+
+Therefore,
+
+\code
+ (subtypep '(array T1) '(array T2)) \EV \term{true}
+\endcode
+if and only if
+
+\code
+ (upgraded-array-element-type 'T1)  and
+ (upgraded-array-element-type 'T2)  
+\endcode
+
+return two different \term{type specifiers} that always refer to the same sets of
+\term{objects}.
+ 
+For all type-specifiers \param{T1} and \param{T2} other than \f{*}, 
+
+\code
+ (subtypep '(complex T1) '(complex T2)) \EV \term{true}, \term{true}
+\endcode
+
+if:
+\beginlist
+\itemitem{1.} \f{T1} is a \term{subtype} of \f{T2}, or
+\itemitem{2.} \f{(upgraded-complex-part-type '\param{T1})} and
+	      \f{(upgraded-complex-part-type '\param{T2})} 
+   return two different \term{type specifiers} that always refer to the 
+   same sets of \term{objects}; in this case,
+    \f{(complex \param{T1})} and 
+    \f{(complex \param{T2})} both refer to the 
+   same specialized representation.
+\endlist 
+The \term{values} are \term{false} and \term{true} otherwise.
+
+The form
+
+\code
+ (subtypep '(complex single-float) '(complex float))
+\endcode
+ must return \term{true} in all implementations, but
+
+\code
+ (subtypep '(array single-float) '(array float))
+\endcode
+
+returns \term{true} only in implementations that do not have a specialized \term{array}
+representation for \term{single floats} distinct from that for other \term{floats}.
+
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+ 
+%% KAB: What??
+% When a type description is restricted by range or enumeration, and the
+% restricted type is empty.
+
+\label Examples::
+
+\code
+ (subtypep 'compiled-function 'function) \EV \term{true}, \term{true}
+ (subtypep 'null 'list) \EV \term{true}, \term{true}
+ (subtypep 'null 'symbol) \EV \term{true}, \term{true}
+ (subtypep 'integer 'string) \EV \term{false}, \term{true}
+ (subtypep '(satisfies dummy) nil) \EV \term{false}, \term{implementation-dependent}
+ (subtypep '(integer 1 3) '(integer 1 4)) \EV \term{true}, \term{true}
+ (subtypep '(integer (0) (0)) 'nil) \EV \term{true}, \term{true}
+ (subtypep 'nil '(integer (0) (0))) \EV \term{true}, \term{true}
+ (subtypep '(integer (0) (0)) '(member)) \EV \term{true}, \term{true} ;or \term{false}, \term{false}
+ (subtypep '(member) 'nil) \EV \term{true}, \term{true} ;or \term{false}, \term{false}
+ (subtypep 'nil '(member)) \EV \term{true}, \term{true} ;or \term{false}, \term{false}
+\endcode
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+ Let \f{<aet-x>} and \f{<aet-y>} be two distinct \term{type specifiers} that 
+do not always refer to the same sets of
+\term{objects}
+in a given implementation, but for which
+\funref{make-array}, will return an 
+\term{object} of the same \term{array} \term{type}.
+ 
+Thus, in each case, 
+ 
+\code
+  (subtypep (array-element-type (make-array 0 :element-type '<aet-x>))
+            (array-element-type (make-array 0 :element-type '<aet-y>)))
+\EV \term{true}, \term{true}
+ 
+  (subtypep (array-element-type (make-array 0 :element-type '<aet-y>))
+            (array-element-type (make-array 0 :element-type '<aet-x>)))
+\EV \term{true}, \term{true}
+\endcode
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+ 
+If  \f{(array <aet-x>)} 
+and \f{(array <aet-y>)} are different names for
+exactly the same set of \term{objects}, 
+these names should always refer to the same sets of
+\term{objects}.
+ That implies that the following set of tests are also true:
+ 
+\code
+ (subtypep '(array <aet-x>) '(array <aet-y>)) \EV \term{true}, \term{true}
+ (subtypep '(array <aet-y>) '(array <aet-x>)) \EV \term{true}, \term{true}
+\endcode
+ 
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+{\secref\Types}
+
+\label Notes::
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+The small differences between the \funref{subtypep} specification for
+the \typeref{array} and \typeref{complex} types are necessary because there 
+is no creation function for \term{complexes} which allows 
+the specification of the resultant part type independently of
+the actual types of the parts.  Thus in the case of \thetype{complex},
+the actual type of the parts is referred to, although a \term{number} 
+can be a member of more than one \term{type}.
+For example, \f{17} is of \term{type} \f{(mod 18)} 
+as well as \term{type} \f{(mod 256)} and \term{type} \typeref{integer};
+and \f{2.3f5} is \oftype{single-float} 
+as well as \term{type} \typeref{float}.
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+ 
+\endissue{SUBTYPEP-ENVIRONMENT:ADD-ARG}
+
+\endcom
+
+%%% ========== TYPE-OF
+\begincom{type-of}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues type-of {object} {typespec}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{typespec}---a \term{type specifier}.
+
+\label Description::
+
+\issue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS}
+ 
+Returns a \term{type specifier}, \param{typespec}, for a \term{type} 
+that has the \param{object} as an \term{element}.
+The \param{typespec} satisfies the following:
+
+\beginlist
+
+\itemitem{1.}
+For any \param{object} that is an \term{element} of some \term{built-in type}:
+
+\beginlist
+\itemitem{a.}
+the \term{type} returned is a \term{recognizable subtype} of that \term{built-in type}.
+
+\itemitem{b.}
+%KMP: I added MEMBER and EQL because they seemed to be missing only by accident.
+%     The discussion of TYPE-OF-UNDERCONSTRAINED seems to imply that MEMBER
+%     is missing due to editing error. And I think EQL was added later. -kmp 3-Jun-91
+the \term{type} returned does not involve 
+     \f{and},
+     \f{eql},
+     \f{member},
+     \f{not},
+     \f{or}, 
+     \f{satisfies},
+  or \f{values}.
+\endlist
+
+\itemitem{2.}
+For all \param{objects}, \f{(typep \param{object} (type-of \param{object}))} 
+returns \term{true}.
+%Per Barmar:
+Implicit in this is that \term{type specifiers} which are
+not valid for use with \funref{typep}, such as the \term{list} form of the
+\funref{function} \term{type specifier}, are never returned by \funref{type-of}.
+
+\itemitem{3.}
+The \term{type} returned by \funref{type-of} is always a \term{recognizable subtype}
+of the \term{class} returned by \funref{class-of}.  That is,
+
+\code
+ (subtypep (type-of \param{object}) (class-of \param{object})) \EV \term{true}, \term{true}
+\endcode
+
+\itemitem{4.}
+For \param{objects} of metaclass \typeref{structure-class} or \typeref{standard-class},
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+and for \term{conditions},
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\funref{type-of} returns the \term{proper name} of the \term{class} returned 
+by \funref{class-of} if it has a \term{proper name},
+and otherwise returns the \term{class} itself.
+In particular, for \param{objects} created by the constructor function
+of a structure defined with \macref{defstruct} without a \kwd{type} option,
+\funref{type-of} returns the structure name; and for \param{objects} created 
+by \funref{make-condition}, the \param{typespec} is the \term{name} of the
+\term{condition} \term{type}.
+ 
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:TYPE-OF-HANDLES-FLOATS}
+\itemitem{5.}
+For each of the \term{types}
+     \typeref{short-float}, 
+     \typeref{single-float},
+     \typeref{double-float},
+  or \typeref{long-float}
+of which the \param{object} is an \term{element},
+the \param{typespec} is a \term{recognizable subtype} of that \term{type}.
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:TYPE-OF-HANDLES-FLOATS}
+
+\endlist
+
+\endissue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS}
+ 
+%(The CLOS specification has already specified that class objects are
+%acceptable wherever \term{type specifiers} are, and in particular, as input to
+%SUBTYPEP and TYPEP.)
+% 
+%This proposal is intended to be consistent with 88-002R, 
+%and not to conflict with any of the definitions in that document.
+
+%If \param{object} is not a user-defined named
+%\term{structure} 
+%created by \macref{defstruct}, 
+%\funref{type-of} returns a \term{type} of which 
+%\param{object} 
+%is a member.
+%%% 4.9.0 3
+%The result in this case is \term{implementation-dependent}.
+%For example:
+%
+%\code
+% (type-of "abc") \EV SIMPLE-STRING
+% (type-of "abc") \EV STRING
+% (type-of "abc") \EV ARRAY
+%\endcode
+%If \param{object} is a user-defined named
+%\term{structure} 
+%created by \macref{defstruct}, then \funref{type-of} 
+%returns the type name
+%of that \term{structure}.
+
+\label Examples::
+
+\code
+\endcode
+
+\issue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS}
+\code
+ (type-of 'a) \EV SYMBOL          
+ (type-of '(1 . 2))
+\EV CONS
+\OV (CONS FIXNUM FIXNUM)
+ (type-of #c(0 1))
+\EV COMPLEX
+\OV (COMPLEX INTEGER)
+ (defstruct temp-struct x y z) \EV TEMP-STRUCT
+ (type-of (make-temp-struct)) \EV TEMP-STRUCT
+ (type-of "abc")
+\EV STRING
+\OV (STRING 3)
+ (subtypep (type-of "abc") 'string) \EV \term{true}, \term{true}
+ (type-of (expt 2 40))
+\EV BIGNUM
+\OV INTEGER
+\OV (INTEGER 1099511627776 1099511627776)
+\OV SYSTEM::TWO-WORD-BIGNUM
+\OV FIXNUM
+ (subtypep (type-of 112312) 'integer) \EV \term{true}, \term{true}
+ (defvar *foo* (make-array 5 :element-type t)) \EV *FOO*
+ (class-name (class-of *foo*)) \EV VECTOR
+ (type-of *foo*)
+\EV VECTOR
+\OV (VECTOR T 5)
+\endcode
+\endissue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS}
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{array-element-type},
+\funref{class-of},
+\macref{defstruct},
+\macref{typecase},
+\funref{typep},
+{\secref\Types}
+
+\label Notes::
+
+Implementors are encouraged to arrange for \funref{type-of} to return
+\issue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS}
+%the most specific \term{type} that can be conveniently computed and
+%is likely to be useful to the user.
+a portable value.
+%Barmar: "a type specifier defined in this standard"
+%KMP: This is a little messy. The problem is that user-defined types are
+%     not directly described here,...
+\endissue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS}
+ 
+\endcom
+
+%%% ========== TYPEP
+\begincom{typep}\ftype{Function}
+
+\issue{SUBTYPEP-ENVIRONMENT:ADD-ARG}
+
+\label Syntax::
+
+\DefunWithValues typep {object type-specifier {\opt} environment} {generalized-boolean}
+                                    
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{type-specifier}---any \term{type specifier} except 
+\issue{FUNCTION-TYPE}%
+% The following will be deleted from the standard:
+% 
+% \declref{function},
+\endissue{FUNCTION-TYPE}%
+\misc{values}, or a \term{type specifier} list
+whose first element is either \misc{function} or \misc{values}.
+
+\param{environment}---an \term{environment} \term{object}.
+  \Default{\nil, denoting the \term{null lexical environment}
+	   and the and current \term{global environment}}
+%!!! Need to say what happens with the environment.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.1 2
+\Predicate{object}{of the \term{type} specified by \param{type-specifier}}
+
+% already stated elsewhere, not crucial here.  --sjl 7 Mar 92
+%\param{Object} can be of more than one \term{type},
+%since one \term{type} can include another.  
+A \param{type-specifier} of the form \f{(satisfies fn)} 
+is handled by applying the function \f{fn} to \param{object}.
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+\f{(typep \param{object} '(array \param{type-specifier}))}, 
+where \param{type-specifier} is not \f{*},   
+returns \term{true} if and only if \param{object} is an \term{array} 
+that could be the result 
+of supplying \param{type-specifier} 
+as the \kwd{element-type} argument to \funref{make-array}.
+\f{(array *)} refers to all \term{arrays} 
+regardless of element type, while \f{(array \param{type-specifier})}
+refers only to those \term{arrays} 
+that can result from giving \param{type-specifier} as the
+\kwd{element-type} argument to \funref{make-array}.  
+A similar interpretation applies to \f{(simple-array \param{type-specifier})} 
+and \f{(vector \param{type-specifier})}.
+\Seesection\ArrayUpgrading.
+
+\f{(typep \param{object} '(complex \param{type-specifier}))}
+returns \term{true} for all \term{complex} numbers that can result from 
+giving \term{numbers} of type \param{type-specifier}
+to \thefunction{complex}, plus all other \term{complex} numbers 
+of the same specialized representation.      
+Both the real and the imaginary parts of any such 
+\term{complex} number must satisfy:
+
+\code
+ (typep realpart 'type-specifier)
+ (typep imagpart 'type-specifier)
+\endcode
+ 
+\Seefun{upgraded-complex-part-type}.
+
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+\label Examples::
+
+\code
+ (typep 12 'integer) \EV \term{true}
+ (typep (1+ most-positive-fixnum) 'fixnum) \EV \term{false}
+ (typep nil t) \EV \term{true}
+ (typep nil nil) \EV \term{false}
+ (typep 1 '(mod 2)) \EV \term{true}
+ (typep #c(1 1) '(complex (eql 1))) \EV \term{true}
+;; To understand this next example, you might need to refer to
+;; \secref\RuleOfCanonRepForComplexRationals.
+ (typep #c(0 0) '(complex (eql 0))) \EV \term{false}
+\endcode
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+Let \f{A\sssx} and \f{A\sssy} be two \term{type specifiers} that 
+denote different \term{types}, but for which
+
+\code
+ (upgraded-array-element-type 'A\sssx)
+\endcode
+and
+
+\code
+ (upgraded-array-element-type 'A\sssy)
+\endcode
+denote the same \term{type}.  Notice that
+ 
+\code
+ (typep (make-array 0 :element-type 'A\sssx) '(array A\sssx)) \EV \term{true}
+ (typep (make-array 0 :element-type 'A\sssy) '(array A\sssy)) \EV \term{true}
+ (typep (make-array 0 :element-type 'A\sssx) '(array A\sssy)) \EV \term{true}
+ (typep (make-array 0 :element-type 'A\sssy) '(array A\sssx)) \EV \term{true}
+\endcode
+
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+ 
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+%% 4.5.0.0 10
+An error \oftype{error} is signaled if \param{type-specifier} is \f{values}, 
+or a \term{type specifier} list whose first element is either
+\misc{function} or \misc{values}.
+
+The consequences are undefined if
+the \param{type-specifier} is not a \term{type specifier}.
+
+\label See Also::
+
+\funref{type-of},
+\funref{upgraded-array-element-type},
+\funref{upgraded-complex-part-type},
+{\secref\TypeSpecifiers}
+
+\label Notes::
+
+\term{Implementations} are encouraged to recognize and optimize the case of 
+\f{(typep \param{x} (the class \param{y}))},
+since it does not involve any need for expansion 
+of \macref{deftype} information at runtime.
+
+\code
+
+\endcode
+
+\endissue{SUBTYPEP-ENVIRONMENT:ADD-ARG}
+
+\endcom
+
+%-------------------- Type Errors --------------------
+
+\begincom{type-error}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{type-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{type-error} represents a situation in which an \term{object} is not
+of the expected type.  The ``offending datum'' and ``expected type'' are initialized 
+by \theinitkeyargs{datum} and \kwd{expected-type} to \funref{make-condition},
+and are \term{accessed} by the functions 
+\funref{type-error-datum} and \funref{type-error-expected-type}.
+
+\label See Also::
+
+\funref{type-error-datum}, \funref{type-error-expected-type}
+
+\endcom%{type-error}\ftype{Condition Type}
+
+%%% ========== TYPE-ERROR-DATUM
+\begincom{type-error-datum, type-error-expected-type}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues type-error-datum {condition} {datum}
+\DefunWithValues type-error-expected-type {condition} {expected-type}
+
+\label Arguments and Values:: 
+
+\param{condition}---a \term{condition} \oftype{type-error}.
+
+\param{datum}---an \term{object}.
+
+\param{expected-type}---a \term{type specifier}.
+
+\label Description::
+
+\funref{type-error-datum} returns the offending datum in the \term{situation}
+represented by the \param{condition}.
+
+\funref{type-error-expected-type} returns the expected type of the
+offending datum in the \term{situation} represented by the \param{condition}.
+
+\label Examples::
+
+\code
+ (defun fix-digits (condition)
+   (check-type condition type-error)
+   (let* ((digits '(zero one two three four
+                   five six seven eight nine))
+         (val (position (type-error-datum condition) digits)))
+     (if (and val (subtypep 'fixnum (type-error-expected-type condition)))
+         (store-value 7))))
+ 
+ (defun foo (x)
+   (handler-bind ((type-error #'fix-digits))
+     (check-type x number)
+     (+ x 3)))
+ 
+ (foo 'seven)
+\EV 10
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\typeref{type-error},
+{\secref\Conditions}
+
+\label Notes:\None.
+
+%% Shouldn't be needed. -kmp 1-Sep-91
+%It is an error to use \macref{setf} with \funref{type-error-datum}.
+%It is an error to use \macref{setf} with \funref{type-error-expected-type}.
+
+\endcom
+
+%%% ========== SIMPLE-TYPE-ERROR
+
+\begincom{simple-type-error}\ftype{Condition Type}
+
+\label Class Precedence List::
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\typeref{simple-type-error},
+\typeref{simple-condition},
+\typeref{type-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\label Description::
+
+\term{Conditions} \oftype{simple-type-error} 
+are like \term{conditions} \oftype{type-error}, 
+except that they provide an alternate mechanism for specifying
+how the \term{condition} is to be \term{reported};
+\seetype{simple-condition}.
+
+\label See Also::
+
+\typeref{simple-condition},
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\funref{simple-condition-format-control},
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\funref{simple-condition-format-arguments}, 
+\funref{type-error-datum},
+\funref{type-error-expected-type}
+
+\endcom%{simple-type-error}\ftype{Condition Type}

@@ -1,0 +1,61 @@
+====== Function SET-DIFFERENCE, NSET-DIFFERENCE ======
+
+====Syntax====
+
+**set-difference {list-1 list-2** //\key} key test test-not// → //result-list// **nset-difference {list-1 list-2** //\key} key test test-not// → //result-list//
+
+====Arguments and Values====
+
+//list-1// - a //[[CL:Glossary:proper list]]//.
+
+//list-2// - a //[[CL:Glossary:proper list]]//.
+
+//test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument, or **[[CL:Constant Variables:nil]]**.
+
+//result-list// - a //[[CL:Glossary:list]]//.
+
+====Description====
+
+**[[CL:Functions:set-difference]]** returns a //[[CL:Glossary:list]]// of elements of //list-1// that do not appear in //list-2//.
+
+**[[CL:Functions:nset-difference]]** is the destructive version of **[[CL:Functions:set-difference]]**. It may destroy //list-1//.
+
+For all possible ordered pairs consisting of one element from //list-1// and one element from //list-2//, the **'':test''** or **'':test-not''** function is used to determine whether they //[[CL:Glossary:satisfy the test]]//. The first argument to the **'':test''** or **'':test-not''** function is the part of an element of //list-1// that is returned by the **'':key''** function (if supplied); the second argument is the part of an element of //list-2// that is returned by the **'':key''** function (if supplied).
+
+If **'':key''** is supplied, its argument is a //list-1// or //list-2// element. The **'':key''** function typically returns part of the supplied element. If **'':key''** is not supplied, the //list-1// or //list-2// element is used.
+
+An element of //list-1// appears in the result if and only if it does not match any element of //list-2//.
+
+There is no guarantee that the order of elements in the result will reflect the ordering of the arguments in any particular way. The result //[[CL:Glossary:list]]// may share cells with, or be **[[CL:Functions:eq]]** to, either of //list-1// or //list-2//, if appropriate.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] lst1 (list "A" "b" "C" "d") lst2 (list "a" "B" "C" "d")) → ("a" "B" "C" "d") (set-difference lst1 lst2) → ("d" "C" "b" "A") (set-difference lst1 lst2 :test 'equal) → ("b" "A") (set-difference lst1 lst2 :test #'equalp) → NIL (nset-difference lst1 lst2 :test #'string=) → ("A" "b") ([[CL:Macros:defparameter]] lst1 '(("a" . "b") ("c" . "d") ("e" . "f"))) → (("a" . "b") ("c" . "d") ("e" . "f")) ([[CL:Macros:defparameter]] lst2 '(("c" . "a") ("e" . "b") ("d" . "a"))) → (("c" . "a") ("e" . "b") ("d" . "a")) (nset-difference lst1 lst2 :test #'string= :key #'cdr) → (("c" . "d") ("e" . "f")) lst1 → (("a" . "b") ("c" . "d") ("e" . "f")) lst2 → (("c" . "a") ("e" . "b") ("d" . "a")) </blockquote> <blockquote> ;; Remove all flavor names that contain "c" or "w". (set-difference '("strawberry" "chocolate" "banana" "lemon" "pistachio" "rhubarb") '(#\\c #\\w) :test #'(lambda (s c) (find c s))) → ("banana" "rhubarb" "lemon") ;One possible ordering. </blockquote>
+
+====Side Effects====
+
+**[[CL:Functions:nset-difference]]** may destroy //list-1//.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should be prepared to signal an error of type type-error if //list-1// and //list-2// are not //[[CL:Glossary:proper lists]]//.
+
+====See Also====
+
+{\secref\ConstantModification},
+
+{\secref\TraversalRules}
+
+====Notes====
+
+The **'':test-not''** parameter is deprecated.
+
+\issue{CONSTANT-MODIFICATION:DISALLOW} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{TEST-NOT-IF-NOT:FLUSH-ALL}

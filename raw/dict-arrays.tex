@@ -1,0 +1,2800 @@
+% -*- Mode: TeX -*-
+
+% Arrays
+%  Vectors
+%   Bit Vectors
+%   Strings
+
+%-------------------- Array types --------------------
+
+%% 2.5.0 1
+\begincom{array}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{array},
+\typeref{t}
+
+\label Description::
+
+An \term{array} contains \term{objects} arranged according to a
+Cartesian coordinate system.
+%% 2.5.1 4
+% {Symbolics rewrote the following}
+An \term{array} provides mappings from a set of
+\issue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+\term{fixnums}
+\endissue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+$\left\{i\sub{0},i\sub{1},\dots,i\sub{r-1}\right\}$ to corresponding \term{elements}
+of the \term{array}, 
+where $0 \le i\sub{j} < d\sub{j}$,
+$r$ is the rank of the array, and $d\sub{j}$ is the size of \term{dimension} $j$ of
+the array.
+
+When an \term{array} is created, the program requesting its creation may
+declare that all \term{elements} are of a particular \term{type}, 
+called the \term{expressed array element type}.
+The implementation is permitted to \term{upgrade} this type in order to 
+produce the \term{actual array element type},
+which is the \term{element type} for the \term{array} is actually \term{specialized}.
+\Seefun{upgraded-array-element-type}.
+
+\label Compound Type Specifier Kind::
+
+Specializing.
+
+\label Compound Type Specifier Syntax::
+
+\Deftype{array}{\ttbrac{\curly{element-type | \misc{*}} \brac{dimension-spec}}}
+
+\auxbnf{dimension-spec}{rank | \misc{*} | \paren{\star{\curly{dimension | \misc{*}}}}}
+
+\label Compound Type Specifier Arguments::
+
+\param{dimension}---a \term{valid array dimension}.
+
+\param{element-type}---a \term{type specifier}.
+
+\issue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+\param{rank}---a non-negative \term{fixnum}.
+\endissue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+
+\label Compound Type Specifier Description::
+
+%% 4.5.0 6
+%% 4.5.0 7
+
+This denotes the set of \term{arrays} whose
+  \term{element type},  \term{rank},  and \term{dimensions}
+match any given
+  \param{element-type}, \param{rank}, and \param{dimensions}.
+Specifically:
+
+If \param{element-type} is the \term{symbol} \misc{*},
+\term{arrays} are not excluded on the basis of their \term{element type}.
+Otherwise, only those \param{arrays} are included whose \term{actual array element type}
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+is the result of \term{upgrading} \param{element-type};
+\seesection\ArrayUpgrading.
+%The following will be left out:
+%\param{element-type}
+%% The following seems redundant. -kmp 20-Oct-91
+% {\tt (array \param{type-specifier})}
+% refers only to those \term{arrays} 
+% that can result from giving \param{type-specifier} as the
+% \kwd{element-type} argument to \funref{make-array}.  
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+If the \param{dimension-spec} is a \param{rank},
+the set includes only those \param{arrays} having that \term{rank}.
+If the \param{dimension-spec} is a \term{list} of \param{dimensions},
+the set includes only those \param{arrays} having a \term{rank}
+given by the \term{length} of the \param{dimensions},
+and having the indicated \param{dimensions}; 
+in this case, \misc{*} matches any value for the corresponding \term{dimension}.
+If the \param{dimension-spec} is the \term{symbol} \misc{*},
+the set is not restricted on the basis of \term{rank} or \term{dimension}.
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+%The following will be left out:
+%
+%For declaration purposes, this \term{type} encompasses those 
+%\term{arrays}
+%that can result by supplying \param{element-type} as the element type
+%to \thefunction{make-array}; this might be different
+%from what the \term{type} means for discrimination purposes.
+%For example:
+%
+%\code
+% (array integer 3)       ;Three-dimensional arrays of integers
+% (array integer (* * *)) ;Three-dimensional arrays of integers
+% (array * (4 5 6))       ;4-by-5-by-6 arrays
+% (array character (3 *)) ;Two-dimensional arrays of characters that have 
+%                         ;three rows
+% (array short-float \empty)   ;Zero-rank arrays of short-floats
+%\endcode
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+\label See Also::
+
+\varref{*print-array*},
+\funref{aref},
+\funref{make-array},
+\typeref{vector},
+{\secref\SharpsignA},
+{\secref\PrintingOtherArrays}
+
+\label Notes::
+
+Note that the type {\tt (array t)}     
+is a proper \term{subtype} of the type {\tt (array *)}.
+The reason is that the type {\tt (array t)} is the set of \term{arrays} 
+that can
+hold any \term{object} (the \term{elements} are \oftype{t},  which includes
+all \term{objects}).
+On the other hand, the type {\tt (array *)}
+is the set of all \term{arrays} whatsoever, including for example
+\term{arrays} that can hold only \term{characters}. 
+%% possible issue here that: ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS says that
+%%this example only works in implementations that have specialized arrays for
+%%elements of type character, not required in CL. But char committee may
+%%require them.
+The type {\tt (array character)} 
+is not a \term{subtype} of the type {\tt (array t)}; 
+the two sets                                              
+are \term{disjoint} because the type {\tt (array character)} is not the
+set of all \term{arrays} that can hold 
+\term{characters}, but rather the set of
+\term{arrays} 
+that are specialized to hold precisely \term{characters} and no
+other \term{objects}. 
+
+%The following expression cannot be used to determine if
+%array \f{foo} can hold a \term{character}:
+%
+%\code
+% (typep foo '(array character))
+%\endcode
+%The following expression can be used to determine if
+%array \f{foo} can hold a \term{character}:
+%
+%\code
+% (subtypep 'character (array-element-type foo))
+%\endcode
+
+
+\endcom%{array}\ftype{System Class}
+%% 2.5.0 9
+\begincom{simple-array}\ftype{Type}
+
+\label Supertypes:: 
+
+\typeref{simple-array},
+%% 2.15.0 20
+\typeref{array},
+\typeref{t}
+
+\label Description::
+
+%Per Symbolics comments, this is reworded to clarify that this only defines
+%things that might be simple, not what must be:
+%An \term{array}
+%that is not displaced to another \term{array}, has no \term{fill pointer},
+%and is not to have its size adjusted dynamically after
+%creation is a \term{simple array}.
+The \term{type} of an \term{array} that is not displaced 
+to another \term{array}, has no \term{fill pointer}, and is
+% \reviewer{Barrett: Reexamine in light of ADJUST-ARRAY-NOT-ADJUSTABLE--specifically,
+%  all arrays are now valid to adjust-array--they just don't all get changed by side-effect.}
+not
+\term{expressly adjustable} is a \subtypeof{simple-array}.
+The concept of a \term{simple array}
+exists to allow the implementation to use a specialized representation
+and to allow the user to declare that certain values will always be
+\term{simple arrays}. 
+
+%% 2.15.0 21
+The \term{types} \typeref{simple-vector},
+		 \typeref{simple-string},
+             and \typeref{simple-bit-vector}
+are \term{disjoint} \subtypesof{simple-array}, 
+for they respectively mean \f{(simple-array t (*))},
+		           the union of all \f{(simple-array \i{c} (*))} 
+ 			    for any \i{c} being a \subtypeof{character},
+			and \f{(simple-array bit (*))}.
+
+\label Compound Type Specifier Kind::
+
+Specializing.
+
+%% 4.5.0 8
+\label Compound Type Specifier Syntax::
+
+\Deftype{simple-array}{\ttbrac{\curly{element-type | \misc{*}} \brac{dimension-spec}}}
+
+\auxbnf{dimension-spec}{rank | \misc{*} | \paren{\star{\curly{dimension | \misc{*}}}}}
+
+\label Compound Type Specifier Arguments::
+
+\param{dimension}---a \term{valid array dimension}.
+
+\param{element-type}---a \term{type specifier}.
+
+\issue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+\param{rank}---a non-negative \term{fixnum}.
+\endissue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+
+\label Compound Type Specifier Description::
+                   
+This \term{compound type specifier} is treated exactly as the corresponding
+\term{compound type specifier} for \term{type} \typeref{array} would be treated,
+except that the set is further constrained to include only \term{simple arrays}.
+
+% This denotes the set of \term{simple arrays} whose elements are all of \term{type}
+% \issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+% {\penalty-50}\f{(upgraded-array-element-type \param{element-type})}
+% %The following will be left out:
+% %\param{element-type}
+% \endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+% and whose dimensions are \param{dimensions}.
+% \param{Element-type} must be a valid \term{type specifier} or \misc{*}.
+% \issue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+% \param{Dimensions} must be a non-negative \term{fixnum},
+% \endissue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+% which is the number
+% of dimensions, or a \term{list} of \term{valid array dimensions}
+% representing the length of each dimension (any dimension
+% can be \misc{*} instead), or it can be \misc{*}.
+
+\label Notes::
+
+It is \term{implementation-dependent} 
+whether \term{displaced arrays},
+        \term{vectors} with \term{fill pointers},
+     or arrays that are \term{actually adjustable}
+  are \term{simple arrays}.
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+{\tt (simple-array *)} refers to all \term{simple arrays} 
+regardless of element type, {\tt (simple-array \param{type-specifier})}
+refers only to those \term{simple arrays}
+that can result from giving \param{type-specifier} as the
+\kwd{element-type} argument to \funref{make-array}.  
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+\endcom%{simple-array}\ftype{Type}
+%% 2.5.1 1
+\begincom{vector}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{vector},
+\typeref{array},
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+Any one-dimensional \term{array} is a \term{vector}.
+
+%% 2.15.0 19
+\Thetype{vector} is a \subtypeof{array}; 
+for all \term{types} \f{x}, {\tt (vector x)} is the same as {\tt (array x (*))}.
+
+%% 2.15.0 18
+The \term{type} {\tt (vector t)}, \thetype{string}, and \thetype{bit-vector}
+are \term{disjoint} \subtypesof{vector}.
+
+\label Compound Type Specifier Kind::
+
+Specializing.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.5.0 9
+\Deftype{vector}{\ttbrac{\curly{element-type | \misc{*}} \brac{\curly{size | \misc{*}}}}}
+
+\label Compound Type Specifier Arguments::
+
+\issue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+\param{size}---a non-negative \term{fixnum}.
+\endissue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+
+\param{element-type}---a \term{type specifier}.
+
+\label Compound Type Specifier Description::
+
+This denotes the set of specialized \term{vectors}
+whose \term{element type} and \param{dimension} match the specified values.
+Specifically:
+
+If \param{element-type} is the \term{symbol} \misc{*},
+\term{vectors} are not excluded on the basis of their \term{element type}.
+Otherwise, only those \param{vectors} are included whose \term{actual array element type}
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+is the result of \term{upgrading} \param{element-type};
+\seesection\ArrayUpgrading.
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+If a \param{size} is specified,
+the set includes only those \param{vectors} whose only \term{dimension}
+is \param{size}.
+If the \term{symbol} \misc{*} is specified instead of a \param{size},
+the set is not restricted on the basis of \term{dimension}.
+
+\label See Also::
+
+{\secref\RequiredSpecializedArrays},
+{\secref\SharpsignLeftParen},
+{\secref\PrintingOtherVectors},
+{\secref\SharpsignA}
+
+\label Notes::
+
+The \term{type} \f{(vector \param{e} \param{s})} 
+is equivalent to the \term{type} \f{(array \param{e} (\param{s}))}.
+
+The type \f{(vector bit)} has the name \typeref{bit-vector}.
+
+The union of all \term{types} \f{(vector $C$)}, 
+where $C$ is any \term{subtype} of \typeref{character},
+has the name \typeref{string}.
+%Every implementation of \clisp\ must provide distinct representations for
+%these as distinct specialized \term{types}.
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+{\tt (vector *)} refers to all \term{vectors} 
+regardless of element type, {\tt (vector \param{type-specifier})}
+refers only to those \term{vectors} 
+that can result from giving \param{type-specifier} as the
+\kwd{element-type} argument to \funref{make-array}.  
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+\endcom%{vector}\ftype{System Class}
+\begincom{simple-vector}\ftype{Type}
+
+\label Supertypes::
+
+\typeref{simple-vector},
+\typeref{vector},
+\typeref{simple-array},
+\typeref{array},
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+% This sentence replaced per Symbolics comments:
+% A \term{vector} that is not displaced to another \term{array}, has no
+% \term{fill pointer}, is able to hold elements of any \term{type},
+% and is not to have its size adjusted dynamically after creation is a
+% \term{simple vector}.
+The \term{type} of a \term{vector} that is not displaced to another
+\term{array}, has no \term{fill pointer}, is not 
+%to have its size adjusted dynamically after creation, 
+\term{expressly adjustable}
+and is able to hold 
+elements of any \term{type} is a \subtypeof{simple-vector}.
+
+%% 2.15.0 22                       
+\Thetype{simple-vector} is a \subtypeof{vector},
+and is a \term{subtype} of \term{type} \f{(vector t)}.
+
+\label Compound Type Specifier Kind::
+
+Specializing.
+
+\label Compound Type Specifier Syntax::
+
+\Deftype{simple-vector}{\ttbrac{size}}
+
+\label Compound Type Specifier Arguments::
+
+\issue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+\param{size}---a non-negative \term{fixnum},
+	    or the \term{symbol} \misc{*}.
+  \Default{the \term{symbol} \misc{*}}
+\endissue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+
+\label Compound Type Specifier Description::
+
+%% 4.5.0 10                            
+%\itemitem{\tt (simple-vector \param{size})}
+
+This is the same as {\tt (simple-array t (\param{size}))}.
+%This is the same as {\tt (and (vector t \param{size}) simple-array)}.
+
+% This is the same                
+% as the type \f{(vector t \param{size})}
+% except that \typeref{simple-vector} also specifies
+% that its members are \term{simple arrays}.
+
+\endcom%{simple-vector}\ftype{Type}
+\begincom{bit-vector}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{bit-vector},
+\typeref{vector},
+\typeref{array},
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+A \term{bit vector} is a \term{vector} the \term{element type} of which is \term{bit}.
+
+%% 2.15.0 17
+\Thetype{bit-vector} is a \subtypeof{vector}, 
+for \typeref{bit-vector} means \f{(vector bit)}.
+
+\label Compound Type Specifier Kind::
+
+Abbreviating.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.6.0 12
+\Deftype{bit-vector}{\ttbrac{size}}
+
+\label Compound Type Specifier Arguments::
+
+\issue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+\param{size}---a non-negative \term{fixnum},
+	    or the \term{symbol} \misc{*}.
+\endissue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+
+\label Compound Type Specifier Description::
+                                                        
+This denotes the same \term{type} as the \term{type} {\tt (array bit (\param{size}))};
+that is, the set of \term{bit vectors} of size \param{size}.
+
+\label See Also::
+
+{\secref\SharpsignStar},
+{\secref\PrintingBitVectors},
+{\secref\RequiredSpecializedArrays}
+
+\endcom%{bit-vector}\ftype{System Class}
+\begincom{simple-bit-vector}\ftype{Type}
+
+\label Supertypes:: 
+
+\typeref{simple-bit-vector},
+%% 2.15.0 25
+\typeref{bit-vector},
+\typeref{vector},
+\typeref{simple-array},
+\typeref{array},
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+% Reworded per Symbolics comments:
+%   A \term{bit vector} that is not displaced to another
+% \term{array}, has no \term{fill pointer}, and is not to have its
+% size adjusted dynamically after creation is a \term{simple bit vector}.
+The \term{type} of a \term{bit vector} that is not displaced
+to another \term{array}, has no \term{fill pointer}, and is 
+not
+%to have its size adjusted dynamically after creation 
+\term{expressly adjustable}
+is a
+\subtypeof{simple-bit-vector}.
+
+\label Compound Type Specifier Kind::
+
+Abbreviating.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.6.0 13
+\Deftype{simple-bit-vector}{\ttbrac{size}}
+
+\label Compound Type Specifier Arguments::
+
+\issue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+\param{size}---a non-negative \term{fixnum},
+	    or the \term{symbol} \misc{*}.
+  \Default{the \term{symbol} \misc{*}}
+\endissue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+
+\label Compound Type Specifier Description::
+
+This denotes the same type as the \term{type}
+\f{(simple-array bit (\param{size}))}; 
+that is, the set of \term{simple bit vectors} of size \param{size}.
+
+\endcom%{simple-bit-vector}\ftype{Type}
+
+
+%-------------------- Arrays --------------------
+
+%%% ========== MAKE-ARRAY
+\begincom{make-array}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValuesNewline make-array
+			{dimensions {\key} \vtop{\hbox{element-type}
+                                                 \hbox{initial-element}
+                                                 \hbox{initial-contents}
+                                                 \hbox{adjustable}
+                                                 \hbox{fill-pointer}
+                                                 \hbox{displaced-to}
+                                                 \hbox{displaced-index-offset}}}
+		 	{new-array}
+
+\label Arguments and Values::
+
+%% 17.1.0 3
+\param{dimensions}---a \term{designator} for a \term{list} of \term{valid array dimensions}.
+
+%% 17.1.0 6
+\param{element-type}---a \term{type specifier}. 
+ \Default{\typeref{t}}
+
+\param{initial-element}---an \term{object}.
+
+\param{initial-contents}---an \term{object}.
+%Per Barmar, remove (or sequence vector) because 0-dimension case doesn't care. -kmp 24-Jul-91
+
+\param{adjustable}---a \term{generalized boolean}.
+ \Default{\nil}
+
+%!!! Is there a designator for this?
+\param{fill-pointer}---a \term{valid fill pointer} for the \term{array} to be created,
+		       or \t\ or \nil.
+ \Default{\nil}
+
+%% 17.1.0 11
+\param{displaced-to}---an \term{array} or \nil.
+ \Default{\nil}
+ This option must not be supplied if either \param{initial-element}
+ or \param{initial-contents} is supplied.
+
+%% 17.1.0 12
+\param{displaced-index-offset}---a \term{valid array row-major index} 
+ for \param{displaced-to}. \Default{\f{0}}
+ This option must not be supplied unless a \term{non-nil} \param{displaced-to} is supplied.
+
+\param{new-array}---an \term{array}.
+
+\label Description::
+
+Creates and returns an \term{array} constructed of the most \term{specialized}
+\term{type} that can accommodate elements of \term{type} given by \param{element-type}.
+If \param{dimensions} is \nil\ then a zero-dimensional \term{array} is created.
+
+\param{Dimensions} represents the dimensionality of the new \term{array}.
+
+\param{element-type} indicates the \term{type} of the elements intended to be stored
+in the \param{new-array}.  The \param{new-array} can actually store any \term{objects}
+of the \term{type} which results from \term{upgrading} \param{element-type};
+\seesection\ArrayUpgrading.
+                                                                       
+%% 17.1.0 7
+If \param{initial-element} is supplied, 
+it is used to initialize each \term{element} of \param{new-array}. 
+If \param{initial-element} is supplied,
+it must be of the \term{type} given by \param{element-type}.
+\param{initial-element} cannot be supplied if either the \kwd{initial-contents} option
+is supplied or \param{displaced-to} is \term{non-nil}.
+If \param{initial-element} is not supplied,
+\issue{UNINITIALIZED-ELEMENTS:CONSEQUENCES-UNDEFINED}
+%% This issue finally did pass at the March-93 meeting. -kmp 5-May-93
+% the initial values of the \term{array} \term{elements} are 
+% %%Rewritten to conform to the fact that issue UNINITIALIZED-ELEMENTS failed
+% %%to clarify this in the other direction because consensus was that this was well-defined
+% %%already. -kmp 15-Jan-92
+% %undefined 
+% \term{implementation-dependent} 
+the consequences of later reading an uninitialized \term{element} of \param{new-array}
+are undefined
+\endissue{UNINITIALIZED-ELEMENTS:CONSEQUENCES-UNDEFINED}
+unless either \param{initial-contents} is supplied 
+or \param{displaced-to} is \term{non-nil}.
+
+
+%% 17.1.0 8
+\param{initial-contents} is used to initialize the contents of \term{array}.
+For example:
+
+\code
+ (make-array '(4 2 3) :initial-contents
+             '(((a b c) (1 2 3))
+              ((d e f) (3 1 2))
+              ((g h i) (2 3 1))
+              ((j k l) (0 0 0))))
+\endcode
+
+%!!! Is ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY fully merged?
+
+\param{initial-contents} is composed of a nested structure of \term{sequences}. 
+The numbers of levels in the structure must equal the rank of \term{array}.
+Each leaf of the nested structure must be of the \term{type} given by \param{element-type}. 
+If \term{array} is zero-dimensional, then \param{initial-contents} specifies the single
+\term{element}.  Otherwise, \param{initial-contents} must be a \term{sequence}
+whose length is equal to the first dimension; each element must be a nested 
+structure for an \term{array} whose dimensions are the remaining dimensions, 
+and so on.
+\param{Initial-contents} cannot be supplied if either 
+\param{initial-element} is supplied
+or \param{displaced-to} is \term{non-nil}.
+If \param{initial-contents} is not supplied,
+\issue{UNINITIALIZED-ELEMENTS:CONSEQUENCES-UNDEFINED}
+%% This issue finally did pass at the March-93 meeting. -kmp 5-May-93
+% the initial values of the \term{array} \term{elements} are 
+% %%Rewritten to conform to the fact that issue UNINITIALIZED-ELEMENTS failed
+% %%to clarify this in the other direction because consensus was that this was well-defined
+% %%already. -kmp 15-Jan-92
+% %undefined
+% \term{implementation-dependent}
+the consequences of later reading an uninitialized \term{element} of \param{new-array}
+are undefined
+\endissue{UNINITIALIZED-ELEMENTS:CONSEQUENCES-UNDEFINED}
+unless either \param{initial-element} is supplied
+or \param{displaced-to} is \term{non-nil}.
+
+%% KMP's rewrite:
+% %% 17.1.0 9
+% If \param{adjustable} is \term{non-nil},
+% the array is both \term{expressly adjustable} 
+% 	      and \term{actually adjustable};
+% otherwise, the array is not \term{expressly adjustable} 
+%        and it is \term{implementation-dependent} whether 
+% 	    the array is \term{actually adjustable}.
+%% To which Barrett suggested:
+% If \param{adjustable} is \term{non-nil},
+% the array is \term{expressly adjustable};
+% otherwise, it is \term{implementation-dependent} whether 
+%   the array is \term{actually adjustable}.
+%% We have compromised on:
+%% 17.1.0 9
+If \param{adjustable} is \term{non-nil},
+the array is \term{expressly adjustable} 
+	      (and so \term{actually adjustable});
+otherwise, the array is not \term{expressly adjustable} 
+       (and it is \term{implementation-dependent} whether 
+	    the array is \term{actually adjustable}).
+% ...
+% it is possible to alter the \term{array}'s size dynamically after it is created.
+%\issue{ADJUST-ARRAY-NOT-ADJUSTABLE:DONKEY}
+%and \funref{adjustable-array-p} will be true.
+%If \param{adjustable} is not supplied or \nil, 
+%\term{array} is not required to be
+%adjustable, but a non-adjustable \term{array} is not guaranteed.
+%\endissue{ADJUST-ARRAY-NOT-ADJUSTABLE:DONKEY}
+
+%% 17.1.0 10
+If \param{fill-pointer} is \term{non-nil},
+the \term{array} must be one-dimensional;
+that is, the \term{array} must be a \term{vector}.
+If \param{fill-pointer} is \t,
+the length of the \term{vector} is used to initialize the \term{fill pointer}.
+If \param{fill-pointer} is an \term{integer},
+it becomes the initial \term{fill pointer} for the \term{vector}.
+
+If \param{displaced-to} is \term{non-nil},
+\funref{make-array} will create a \term{displaced array} 
+and \param{displaced-to} is the \term{target} of that \term{displaced array}. 
+In that case, the consequences are undefined if the \term{actual array element type} of 
+\param{displaced-to} is not \term{type equivalent} to the \term{actual array element type}
+of the \term{array} being created.
+If \param{displaced-to} is \nil, the \term{array} is not a \term{displaced array}.
+
+%!!! should "index offset" or "displaced index offset" be a formal term?
+The \param{displaced-index-offset} is made to be the index offset of the \term{array}.
+%% 17.1.0 13
+When an array A is given as
+\thekeyarg{displaced-to} to \funref{make-array} 
+when creating array B,
+then array B is said to be displaced to array A.  The
+total number of elements in an \term{array}, 
+called the total size of the \term{array},
+is calculated as the product of all the dimensions.
+It is required that the total size of A be no smaller than the sum
+of the total size of B plus the offset \f{n} supplied by
+the \param{displaced-index-offset}.
+The effect of displacing is that array B does not have any
+elements of its own, but instead maps \term{accesses} to itself into
+\term{accesses} to array A.  The mapping treats both \term{arrays} as if they
+were one-dimensional by taking the elements in row-major order,
+and then maps an \term{access} to element \f{k} of array B to an \term{access} to element
+\f{k}+\f{n} of array A.
+
+%% 17.1.0 14
+If \funref{make-array} is called with \param{adjustable}, \param{fill-pointer},
+and \param{displaced-to} each \nil, 
+then the result is a \term{simple array}.
+\issue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+If \funref{make-array} is called with one or more of \param{adjustable},
+\param{fill-pointer}, or \param{displaced-to} being \term{true}, whether the
+resulting \term{array} is a \term{simple array} is \term{implementation-dependent}.
+\endissue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+
+%% 17.1.0 13
+  When an array A is given as \thekeyarg{displaced-to} to
+  \funref{make-array} when creating array B, then array B is said to
+  be displaced to array A.  The total number of elements in an \term{array}, 
+  called the total size of the \term{array}, is calculated as the product
+  of all the dimensions.
+The consequences are unspecified if
+the total size of A is smaller than the sum
+of the total size of B plus the offset \f{n} supplied by
+the \param{displaced-index-offset}.
+The effect of displacing is that array B does not have any
+elements of its own, but instead maps \term{accesses} to itself into
+\term{accesses} to array A.  The mapping treats both \term{arrays} as if they
+were one-dimensional by taking the elements in row-major order,
+and then maps an \term{access} to element \f{k} of array B to an \term{access} 
+to \term{element} \f{k}+\f{n} of array A.
+
+%% Redundant with previous paragraph.
+% When \kwd{displaced-to} is supplied to \funref{make-array},
+% the \param{displaced-index-offset} is made to be the
+% index offset of the \term{array}.
+%% Redundant with Arguments and Values above.
+% If the \param{displaced-index-offset} is not supplied,
+% the index offset is zero.
+
+\label Examples::
+%% 17.1.0 15
+\code
+
+ (make-array 5) ;; Creates a one-dimensional array of five elements.
+ (make-array '(3 4) :element-type '(mod 16)) ;; Creates a 
+                ;;two-dimensional array, 3 by 4, with four-bit elements.
+ (make-array 5 :element-type 'single-float) ;; Creates an array of single-floats.
+\endcode
+
+\code
+ (make-array nil :initial-element nil) \EV #0ANIL
+ (make-array 4 :initial-element nil) \EV #(NIL NIL NIL NIL)
+ (make-array '(2 4) 
+              :element-type '(unsigned-byte 2) 
+              :initial-contents '((0 1 2 3) (3 2 1 0)))
+\EV #2A((0 1 2 3) (3 2 1 0))
+ (make-array 6
+              :element-type 'character 
+              :initial-element #\\a 
+              :fill-pointer 3) \EV "aaa"
+\endcode
+
+The following is an example of making a \term{displaced array}.
+
+\code
+ (setq a (make-array '(4 3))) 
+\EV #<ARRAY 4x3 simple 32546632>
+ (dotimes (i 4)
+   (dotimes (j 3)
+     (setf (aref a i j) (list i 'x j '= (* i j)))))
+\EV NIL
+ (setq b (make-array 8 :displaced-to a
+                       :displaced-index-offset 2))
+\EV #<ARRAY 8 indirect 32550757>
+ (dotimes (i 8)
+   (print (list i (aref b i))))
+\OUT (0 (0 X 2 = 0)) 
+\OUT (1 (1 X 0 = 0)) 
+\OUT (2 (1 X 1 = 1)) 
+\OUT (3 (1 X 2 = 2)) 
+\OUT (4 (2 X 0 = 0)) 
+\OUT (5 (2 X 1 = 2)) 
+\OUT (6 (2 X 2 = 4)) 
+\OUT (7 (3 X 0 = 0)) 
+\EV NIL
+\endcode
+The last example depends on the fact that \term{arrays} are, in effect,
+stored in row-major order. 
+
+\code
+ (setq a1 (make-array 50))
+\EV #<ARRAY 50 simple 32562043>
+ (setq b1 (make-array 20 :displaced-to a1 :displaced-index-offset 10))
+\EV #<ARRAY 20 indirect 32563346>
+ (length b1) \EV 20
+
+ (setq a2 (make-array 50 :fill-pointer 10))
+\EV #<ARRAY 50 fill-pointer 10 46100216>
+ (setq b2 (make-array 20 :displaced-to a2 :displaced-index-offset 10))
+\EV #<ARRAY 20 indirect 46104010>
+ (length a2) \EV 10
+ (length b2) \EV 20
+
+ (setq a3 (make-array 50 :fill-pointer 10))
+\EV #<ARRAY 50 fill-pointer 10 46105663>
+ (setq b3 (make-array 20 :displaced-to a3 :displaced-index-offset 10
+                         :fill-pointer 5))
+\EV #<ARRAY 20 indirect, fill-pointer 5 46107432>
+ (length a3) \EV 10
+ (length b3) \EV 5
+\endcode
+  
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{adjustable-array-p},
+\funref{aref},
+\funref{arrayp},
+\funref{array-element-type},
+\conref{array-rank-limit},
+\conref{array-dimension-limit},
+\funref{fill-pointer},
+\funref{upgraded-array-element-type}
+
+\label Notes::
+
+\issue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+There is no specified way to create an \term{array} 
+for which \funref{adjustable-array-p} definitely
+returns \term{false}.
+There is no specified way to create an \term{array} 
+that is not a \term{simple array}.
+\endissue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+ 
+\endcom
+
+
+%%% ========== ADJUST-ARRAY
+\begincom{adjust-array}\ftype{Function}
+
+%!!! Barmar's review comments of this were made on the basis of document that
+%    did not include various cleanups.  This should be re-reviewed carefully later.
+%    -kmp 17-Dec-90
+
+\label Syntax::
+
+\DefunWithValuesNewline adjust-array
+			{array new-dimensions {\key} \vtop{\hbox{element-type}
+                                                           \hbox{initial-element}
+                                                           \hbox{initial-contents}
+                                                           \hbox{fill-pointer}
+                                                           \hbox{displaced-to}
+                                                           \hbox{displaced-index-offset}}}
+			{adjusted-array}
+
+\label Arguments and Values:: 
+                                  
+\param{array}---an \term{array}.
+
+\param{new-dimensions}---a \term{valid array dimension} 
+   		      or a \term{list} of \term{valid array dimensions}.
+
+%% 17.6.0 6
+\param{element-type}---a \term{type specifier}.
+%!!! Not sure how to express the default.  Mail sent to Quinquevirate asking for thoughts.
+
+%% 17.6.0 7
+\param{initial-element}---an \term{object}.
+  \param{Initial-element} must not be supplied if either 
+  \param{initial-contents} or \param{displaced-to} is supplied.
+%!!! How to express this default??
+
+%!!! "array contents designator" ? -kmp 14-May-91
+\param{initial-contents}---an \term{object}.
+ If \term{array} has rank greater than zero, then \param{initial-contents}
+ is composed of nested \term{sequences}, the depth of which must equal
+ the rank of \param{array}.  Otherwise, \term{array} is zero-dimensional and
+ \param{initial-contents} supplies the single element.
+ \param{initial-contents} must not be supplied if either 
+ \param{initial-element} or \param{displaced-to} is given.
+
+%% 17.6.0 8
+\param{fill-pointer}---a \term{valid fill pointer} for the
+ \term{array} to be created, or \t, or \nil.
+ \Default{\nil}
+
+\param{displaced-to}---an \term{array} or \nil.
+ \param{initial-elements} and \param{initial-contents} must not be supplied
+ if \param{displaced-to} is supplied.
+%!!! Default?
+
+\issue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+\param{displaced-index-offset}---an \objectoftype{(fixnum 0 \i{n})} 
+ where \i{n} is {\tt (array-total-size \param{displaced-to})}.
+ \param{displaced-index-offset} may be supplied only if \param{displaced-to} is supplied.
+%!!! Default?
+\endissue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+
+\param{adjusted-array}---an \term{array}.
+
+\label Description::
+
+%% 17.6.0 3
+\funref{adjust-array} changes the dimensions or elements of \param{array}.
+The result is an \term{array} of the same \term{type} and rank as \param{array},
+%% 17.6.0 4
+%% 17.6.0 9
+that is either the modified \param{array},
+or a newly created \term{array} to which
+\param{array} can be displaced, and that has 
+the given \param{new-dimensions}.
+
+%% Sandra points out that this is implied by the definition of "valid array dimension".
+% The total number of elements that \param{array} 
+% can contain (as given by the
+% product of all \param{new-dimensions}) must be less than 
+% \conref{array-total-size-limit}.                         
+
+\param{New-dimensions} specify the size of each \term{dimension} of \param{array}. 
+
+\param{Element-type} specifies the \term{type} of the \term{elements}
+of the resulting \term{array}.  If \param{element-type} is supplied,
+% % the consequences are unspecified if it is not a \term{type}
+% % %What does "compatible" mean here?? -kmp 29-Apr-91
+% % %Sandra's curious, too. -kmp 14-Feb-92
+% % that is compatible with {\tt (array-element-type \param{array})}.
+% %% Sandra's suggested rewrite:
+% the consequences are unspecified if
+% \f{(upgraded-array-element-type \param{element-type})}
+% is not the same as {\tt (array-element-type \param{array})}.
+%% KMP's rewrite
+the consequences are unspecified if
+the \term{upgraded array element type} of \param{element-type}
+is not the same as the \term{actual array element type} of \param{array}.
+%% Sandra thinks this is redundant.
+% If the resulting \term{array} is a displaced \term{array},
+% the consequences are unspecified if \param{element-type}
+% is not compatible with the \term{element type} of the \term{array} 
+% that the resulting \term{array} shares elements with.
+%% Redundant with Arguments and Values.
+%If \kwd{element-type} is not supplied, the elements are of type \t.
+
+If \param{initial-contents} is supplied, it is treated as for
+\funref{make-array}.  In this case none of the original contents of
+\param{array} appears in the resulting \term{array}.
+
+\issue{ADJUST-ARRAY-FILL-POINTER}
+If \param{fill-pointer} is an \term{integer},
+it becomes the \term{fill pointer} for the resulting \term{array}.
+If \param{fill-pointer} is the symbol \t,
+it indicates that the size of the resulting \term{array} 
+should be used as the \term{fill pointer}.
+If \param{fill-pointer} is \nil,
+it indicates that the \term{fill pointer} should be left as it is.
+\endissue{ADJUST-ARRAY-FILL-POINTER}
+
+If \param{displaced-to}
+%is supplied and
+\term{non-nil}, a \term{displaced array}
+is created. The resulting \term{array} shares its contents with the \term{array} given by
+\param{displaced-to}.
+The resulting \term{array} cannot contain more elements than the \term{array}
+it is displaced to.  
+If \param{displaced-to} is not supplied or \nil,
+the resulting \term{array} is not a \term{displaced array}.
+If array $A$ is created displaced to array $B$ and subsequently
+array $B$ is given to \funref{adjust-array}, array $A$ will still be
+displaced to array $B$.
+Although \param{array} might be a \term{displaced array}, 
+the resulting \term{array} is not a \term{displaced array} unless
+\param{displaced-to} is supplied and not \nil.
+\issue{ADJUST-ARRAY-DISPLACEMENT}
+The interaction between \funref{adjust-array} and 
+displaced \term{arrays} 
+is as follows given three \term{arrays}, {\tt A}, {\tt B}, and~{\tt C}:
+
+\beginlist
+\itemitem{{\tt A} is not displaced before or after the call}
+
+\code
+ (adjust-array A ...)
+\endcode
+
+The dimensions of {\tt A} are altered, and the
+contents rearranged as appropriate.  
+Additional elements of {\tt A} are taken from
+\param{initial-element}.  
+The use of \param{initial-contents} causes all old contents to be
+discarded.
+
+\itemitem{{\tt A} is not displaced before, but is displaced to 
+{\tt C} after the call}  
+
+\code
+ (adjust-array A ... :displaced-to C)
+\endcode
+               
+None of the original contents of {\tt A} appears in 
+{\tt A} afterwards; {\tt A} now contains
+the contents of {\tt C}, without any rearrangement of {\tt C}.
+
+\itemitem{{\tt A} is displaced to {\tt B} 
+before the call, and is displaced to {\tt C} after 
+the call}
+
+\code
+ (adjust-array A ... :displaced-to B)
+ (adjust-array A ... :displaced-to C)
+\endcode
+
+{\tt B} and {\tt C} might be the same. The contents of {\tt B} do not appear in 
+{\tt A} afterward unless such contents also happen to be in {\tt C}  If
+\param{displaced-index-offset} 
+is not supplied in the \funref{adjust-array} call, it defaults
+to zero; the old offset into {\tt B} is not retained.
+                                  
+%% 17.6.0 11
+\itemitem{{\tt A} is displaced to {\tt B} before the call, but not displaced
+afterward.}  
+
+\code
+ (adjust-array A ... :displaced-to B)
+ (adjust-array A ... :displaced-to nil)
+\endcode
+{\tt A} gets a
+new ``data region,'' and contents of {\tt B} are copied into it as appropriate to
+maintain the existing old contents; additional elements of {\tt A} 
+are taken from
+\param{initial-element} if supplied.  However, 
+the use of \param{initial-contents} causes all old contents
+to be discarded.
+%If \param{array} is displaced
+%to another array \f{x} when \funref{adjust-array}
+%is applied to \param{array}, then afterwards neither 
+%\param{array} nor the returned
+%result is displaced to \f{x} unless such displacement is explicitly
+%re-specified in the call to \funref{adjust-array}.
+\endlist
+\endissue{ADJUST-ARRAY-DISPLACEMENT}
+                      
+If \param{displaced-index-offset} is supplied,
+it specifies the offset
+of the resulting \term{array} from the beginning of 
+the \term{array} that it is displaced to.           
+If \param{displaced-index-offset} is not supplied, the offset is~0.  
+The size of the resulting \term{array} plus the 
+offset value cannot exceed the size of
+the \term{array} that it is displaced to.
+
+%% 17.6.0 5
+If only \param{new-dimensions}
+and an \param{initial-element} argument are supplied,
+those elements of \param{array} that
+are still in bounds appear in the resulting \term{array}. The elements of
+the resulting \term{array} that are not in the bounds of 
+\term{array} are initialized
+to \param{initial-element}; if \param{initial-element} is not provided,
+\issue{UNINITIALIZED-ELEMENTS:CONSEQUENCES-UNDEFINED}
+%% This issue finally did pass at the March-93 meeting. -kmp 5-May-93
+% then the initial contents of any resulting \term{elements}
+% %%Rewritten to conform to the fact that issue UNINITIALIZED-ELEMENTS failed
+% %%to clarify this in the other direction because consensus was that this was well-defined
+% %%already. -kmp 15-Jan-92
+% %are undefined.
+% is \term{implementation-dependent}.
+the consequences of later reading any such new \term{element} of \param{new-array}
+before it has been initialized
+are undefined.
+\endissue{UNINITIALIZED-ELEMENTS:CONSEQUENCES-UNDEFINED}
+
+If \param{initial-contents} or \param{displaced-to} is supplied,
+then none of the original contents of \param{array} appears in the new \term{array}.
+
+%% 17.6.0 10
+
+\issue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+%The following will be deleted:
+%
+%The consequences are unspecified
+%if \funref{adjust-array} is invoked with an \param{array} argument
+%that is not adjustable.
+
+\endissue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+%If \param{fill-pointer} is \nil,
+%then the consequences are unspecified if
+%\param{array} has a \term{fill pointer}.
+The consequences are unspecified if \param{array} is adjusted 
+to a size smaller than its \term{fill pointer} without supplying
+the \param{fill-pointer} argument so that its \term{fill-pointer}
+is properly adjusted in the process.
+
+If {\tt A} is displaced to {\tt B}, the consequences are unspecified 
+if {\tt B} is adjusted in such a way that it no longer has enough elements
+to satisfy {\tt A}.  
+
+\issue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+
+If \funref{adjust-array} is applied to an \term{array} that is \term{actually adjustable},
+the \term{array} returned is \term{identical} to \param{array}.
+%% This was only needed when "\term{expressly adjustable}" was used in the previous sentence.
+% It is \term{implementation-dependent} whether \funref{adjust-array} 
+% returns an \term{array} that is \term{identical} to its first argument for any
+% other \term{arrays}.
+If the \term{array} returned by \funref{adjust-array} 
+is \term{distinct} from \param{array}, then the argument \param{array} is unchanged.
+\endissue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+ 
+Note that if an \term{array} $A$ is displaced to another \term{array} $B$,
+and $B$ is displaced to another \term{array} $C$, and $B$ is altered by
+\funref{adjust-array}, $A$ must now refer to the adjust contents of $B$.
+This means that an implementation cannot collapse the chain to make $A$
+refer to $C$ directly and forget that the chain of reference passes through
+$B$.  However, caching techniques are permitted as long as they preserve the 
+semantics specified here.
+
+\label Examples::
+
+\code
+ (adjustable-array-p
+  (setq ada (adjust-array
+              (make-array '(2 3)
+                          :adjustable t
+                          :initial-contents '((a b c) (1 2 3)))
+              '(4 6)))) \EV T 
+ (array-dimensions ada) \EV (4 6) 
+ (aref ada 1 1) \EV 2 
+ (setq beta (make-array '(2 3) :adjustable t))
+\EV #2A((NIL NIL NIL) (NIL NIL NIL)) 
+ (adjust-array beta '(4 6) :displaced-to ada)
+\EV #2A((A B C NIL NIL NIL)
+       (1 2 3 NIL NIL NIL)
+       (NIL NIL NIL NIL NIL NIL) 
+       (NIL NIL NIL NIL NIL NIL))
+ (array-dimensions beta) \EV (4 6)
+ (aref beta 1 1) \EV 2 
+\endcode
+
+%% 17.6.0 11
+Suppose that the 4-by-4 array in \f{m} looks like this:
+
+\code
+#2A(( alpha     beta      gamma     delta )
+    ( epsilon   zeta      eta       theta )
+    ( iota      kappa     lambda    mu    )
+    ( nu        xi        omicron   pi    ))
+\endcode
+Then the result of
+
+\code
+ (adjust-array m '(3 5) :initial-element 'baz)
+\endcode
+is a 3-by-5 array with contents       
+
+\code
+#2A(( alpha     beta      gamma     delta     baz )
+    ( epsilon   zeta      eta       theta     baz )
+    ( iota      kappa     lambda    mu        baz ))
+\endcode
+
+\label Affected By:\None!
+
+%%I don't think this sort of thing is worthwhile to note. -kmp 7-Jan-91
+%How \param{array} was created.
+
+\label Exceptional Situations::
+
+An error \oftype{error} is signaled if \param{fill-pointer} is supplied
+and \term{non-nil} but \param{array} has no \term{fill pointer}.
+
+%\issue{ADJUST-ARRAY-NOT-ADJUSTABLE:DONKEY}
+%An error \oftype{error} is signaled if an attempt
+%  is made to adjust an \param{array} that is not adjustable (that is, an
+%  \param{array} for which \funref{adjustable-array-p} returns \term{false}).
+% 
+%\endissue{ADJUST-ARRAY-NOT-ADJUSTABLE:DONKEY}
+\label See Also::
+
+\funref{adjustable-array-p},    \funref{make-array},
+\funref{array-dimension-limit}, \funref{array-total-size-limit},
+\typeref{array}
+
+\label Notes:\None.
+
+%\issue{ADJUST-ARRAY-NOT-ADJUSTABLE:DONKEY}
+%\funref{adjustable-array-p} is an appropriate
+%  predicate to determine whether \funref{adjust-array} will reliably succeed.
+%\endissue{ADJUST-ARRAY-NOT-ADJUSTABLE:DONKE Y}
+
+%% Sandra thinks this is redundant.
+% \issue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+% The value returned by \funref{adjust-array} might not be \term{identical} 
+% to the argument \param{array}.
+% \endissue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+
+\endcom                 
+
+%%% ========== ADJUSTABLE-ARRAY-P
+\begincom{adjustable-array-p}\ftype{Function}
+
+%!!! Barmar's review comments of this were made on the basis of document that
+%    did not include various cleanups.  This should be re-reviewed carefully later.
+%    -kmp 17-Dec-90
+
+\label Syntax::
+
+\DefunWithValues adjustable-array-p {array} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+\issue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+
+%% 17.3.0 13
+Returns true if and only if \funref{adjust-array} could return a \term{value}
+which is \term{identical} to \param{array} when given that \term{array} as its
+first \term{argument}.
+\endissue{ADJUST-ARRAY-NOT-ADJUSTABLE:IMPLICIT-COPY}
+
+\label Examples::
+
+\code
+ (adjustable-array-p 
+   (make-array 5
+               :element-type 'character 
+               :adjustable t 
+               :fill-pointer 3)) \EV \term{true}
+ (adjustable-array-p (make-array 4)) \EV \term{implementation-dependent}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Should signal an error \oftype{type-error} if its argument is not an \term{array}.
+
+\label See Also::
+
+\funref{adjust-array}, \funref{make-array}
+
+\label Notes:\None.
+%\issue{ADJUST-ARRAY-NOT-ADJUSTABLE:DONKEY}
+%
+%  
+%  An \term{array} ``is adjustable'' 
+%if {\tt (adjustable-array-p \term{array})} is \term{true}.
+%  The adjustability of an \term{array} has no necessary
+%  relation to any value that was given (or not given) by the \kwd{adjustable} 
+%  \term{argument}
+%  in the call to \funref{make-array} that created the \term{array}.
+%
+%  There is no portable way to create a non-adjustable
+%  \term{array} (that is, an \term{array} for which \funref{adjustable-array-p} is
+%  guaranteed to return \term{false}).
+%\endissue{ADJUST-ARRAY-NOT-ADJUSTABLE:DONKEY}
+\endcom
+
+%%% ========== AREF
+\begincom{aref}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues aref {array {\rest} subscripts} {element}
+\Defsetf         aref {array {\rest} subscripts} {new-element}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+\issue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+\param{subscripts}---a \term{list} of \term{valid array indices} for the \param{array}.
+\endissue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+
+\param{element}, \param{new-element}---an \term{object}.
+
+\label Description::
+
+%% 17.2.0 3
+\term{Accesses} the \param{array} \term{element} specified by the \param{subscripts}.
+If no \param{subscripts} are supplied and \param{array} is zero rank,
+\funref{aref} \term{accesses} the sole element of \param{array}.
+
+%% 17.2.0 4
+\funref{aref} ignores \term{fill pointers}.
+It is permissible to use \funref{aref} 
+to \term{access} any \param{array} \term{element},
+whether \term{active} or not.
+
+%% This is implied by the use of "access" above.
+% %% 17.2.0 5
+% \macref{setf} can be used with \funref{aref} to destructively replace
+% an \term{array} element with a new value.
+
+\label Examples::
+
+%% 2.5.0 6
+If the variable \f{foo} names a 3-by-5 array,
+then the first index could be 0, 1, or 2, and then second index
+could be 0, 1, 2, 3, or 4.  The array elements can be referred to by using
+\thefunction{aref}; for example, \f{(aref foo 2 1)}
+refers to element (2, 1) of the array.  
+
+\code
+ (aref (setq alpha (make-array 4)) 3) \EV \term{implementation-dependent}
+ (setf (aref alpha 3) 'sirens) \EV SIRENS
+ (aref alpha 3) \EV SIRENS
+ (aref (setq beta (make-array '(2 4) 
+                    :element-type '(unsigned-byte 2)
+                    :initial-contents '((0 1 2 3) (3 2 1 0))))
+        1 2) \EV 1
+ (setq gamma '(0 2))
+ (apply #'aref beta gamma) \EV 2
+ (setf (apply #'aref beta gamma) 3) \EV 3
+ (apply #'aref beta gamma) \EV 3
+ (aref beta 0 2) \EV 3
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{bit},
+\funref{char},
+\funref{elt},
+\funref{row-major-aref},
+\funref{svref},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification}
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== ARRAY-DIMENSION
+\begincom{array-dimension}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues array-dimension {array axis-number} {dimension}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+\param{axis-number}---an \term{integer} greater than or equal to zero
+		      and less than the \term{rank} of the \param{array}.
+
+% Barmar observes that nothing requires the implementation to enforce ARRAY-DIMENSION-LIMIT.
+% It's a requirement on the user to be prepared to lose if he exceeds it,
+% but it is not a requirement on the implementation to make him lose in that case.
+\param{dimension}---a non-negative \term{integer}.
+
+\label Description::
+
+%!!! (array-dimension (make-array nil) ??)
+
+%% 17.3.0 6
+\funref{array-dimension} returns the \param{axis-number} 
+\term{dimension}\meaning{1} of \param{array}.
+%This next is implied by the definition of dimension, but retained for now for safety. -kmp
+(Any \term{fill pointer} is ignored.)
+
+\label Examples::
+
+\code
+ (array-dimension (make-array 4) 0) \EV 4
+ (array-dimension (make-array '(2 3)) 1) \EV 3
+\endcode
+
+
+\label Affected By::    
+None.
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{array-dimensions}, \funref{length}
+
+\label Notes::
+\code
+ (array-dimension array n) \EQ (nth n (array-dimensions array))
+\endcode
+\endcom
+
+%%% ========== ARRAY-DIMENSIONS
+\begincom{array-dimensions}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues array-dimensions {array} {dimensions}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+% Barmar observes that nothing requires the implementation to enforce ARRAY-DIMENSION-LIMIT.
+% It's a requirement on the user to be prepared to lose if he exceeds it,
+% but it is not a requirement on the implementation to make him lose in that case.
+\param{dimensions}---a \term{list} of \term{integers}.
+
+\label Description::                    
+
+%% 17.3.0 8
+Returns a \term{list} of the \term{dimensions} of \param{array}.
+(If \param{array} is a \term{vector} with a \term{fill pointer}, 
+ that \term{fill pointer} is ignored.)
+
+\label Examples::
+
+\code
+ (array-dimensions (make-array 4)) \EV (4)
+ (array-dimensions (make-array '(2 3))) \EV (2 3)
+ (array-dimensions (make-array 4 :fill-pointer 2)) \EV (4)
+\endcode
+
+\label Affected By:\None!
+
+\label Exceptional Situations::
+
+Should signal an error \oftype{type-error} if its argument is not an \term{array}.
+
+\label See Also::
+
+\funref{array-dimension}
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.
+                                
+\endcom
+
+%%% ========== ARRAY-ELEMENT-TYPE
+\begincom{array-element-type}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues array-element-type {array} {typespec}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+\param{typespec}---a \term{type specifier}.
+
+\label Description::
+
+%% 17.3.0 3
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+Returns a \term{type specifier} which represents the \term{actual array element type}
+of the array, which is the set of \term{objects} that such an \param{array} can hold.
+%Barmar points out that this is redundant.
+% after upgrading.
+(Because of \term{array} \term{upgrading}, this \term{type specifier} can in
+some cases denote a \term{supertype} of the \term{expressed array element type}
+of the \param{array}.)
+%\term{type} requested by the user when \param{array} was created.
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+\label Examples::
+
+\code
+ (array-element-type (make-array 4)) \EV T
+ (array-element-type (make-array 12 :element-type '(unsigned-byte 8))) 
+\EV \term{implementation-dependent}
+ (array-element-type (make-array 12 :element-type '(unsigned-byte 5)))
+\EV \term{implementation-dependent}
+\endcode
+
+\code
+ (array-element-type (make-array 5 :element-type '(mod 5)))
+\endcode
+could be \f{(mod 5)}, \f{(mod 8)}, \f{fixnum}, \f{t}, or any other
+type of which \f{(mod 5)} is a \term{subtype}.
+
+\label Affected By::
+
+The \term{implementation}.
+
+\label Exceptional Situations::
+
+Should signal an error \oftype{type-error} if its argument is not an \term{array}.
+
+\label See Also::
+
+\typeref{array},
+\funref{make-array},
+\funref{subtypep},
+\funref{upgraded-array-element-type}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== ARRAY-HAS-FILL-POINTER-P
+\begincom{array-has-fill-pointer-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues array-has-fill-pointer-p {array} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 17.5.0 5
+Returns \term{true} if \param{array} has a \term{fill pointer};
+otherwise returns \term{false}.
+
+\label Examples::
+
+\code
+ (array-has-fill-pointer-p (make-array 4)) \EV \term{implementation-dependent}
+ (array-has-fill-pointer-p (make-array '(2 3))) \EV \term{false}
+ (array-has-fill-pointer-p
+   (make-array 8 
+               :fill-pointer 2 
+               :initial-element 'filler)) \EV \term{true}
+\endcode
+
+\label Affected By:\None!
+
+\label Exceptional Situations::
+
+Should signal an error \oftype{type-error} if its argument is not an \term{array}.
+
+\label See Also::
+
+\funref{make-array}, \funref{fill-pointer}
+
+\label Notes::
+
+Since \term{arrays} of \term{rank} other than one cannot have a \term{fill pointer},
+\funref{array-has-fill-pointer-p} always returns \nil\ when its argument
+is such an array.
+
+\endcom
+
+%--------------------
+
+\begincom{array-displacement}\ftype{Function}
+
+\issue{DISPLACED-ARRAY-PREDICATE:ADD}
+
+\label Syntax::
+
+\DefunWithValues array-displacement {array} {displaced-to, displaced-index-offset}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+\param{displaced-to}---an \param{array} or \nil.
+
+\param{displaced-index-offset}---a non-negative \term{fixnum}.
+
+\label Description::
+
+If the \param{array} is a \term{displaced array},
+returns the \term{values} of the \kwd{displaced-to} and \kwd{displaced-index-offset}
+options
+for the \term{array} (\seefuns{make-array} and \funref{adjust-array}).
+If the \param{array} is not a \term{displaced array},
+\nil\ and \f{0} are returned.
+
+If \funref{array-displacement} is called on an \param{array}
+for which a \term{non-nil} \term{object} was provided as the
+\kwd{displaced-to} \term{argument} to \funref{make-array} 
+or \funref{adjust-array}, it must return that \term{object}
+as its first value. It is \term{implementation-dependent}
+whether \funref{array-displacement} returns a \term{non-nil}
+\term{primary value} for any other \param{array}.
+
+\label Examples::
+
+\code
+ (setq a1 (make-array 5)) \EV #<ARRAY 5 simple 46115576>
+ (setq a2 (make-array 4 :displaced-to a1
+                        :displaced-index-offset 1))
+\EV #<ARRAY 4 indirect 46117134>
+ (array-displacement a2)
+\EV #<ARRAY 5 simple 46115576>, 1
+ (setq a3 (make-array 2 :displaced-to a2
+                        :displaced-index-offset 2))
+\EV #<ARRAY 2 indirect 46122527>
+ (array-displacement a3)
+\EV #<ARRAY 4 indirect 46117134>, 2
+\endcode
+
+\label Affected By:\None!
+
+\label Exceptional Situations::
+
+\Shouldchecktype{array}{an \term{array}}
+
+\label See Also::
+
+\funref{make-array}
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.
+\endissue{DISPLACED-ARRAY-PREDICATE:ADD}
+
+\endcom
+
+
+%%% ========== ARRAY-IN-BOUNDS-P
+\begincom{array-in-bounds-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues array-in-bounds-p {array {\rest} subscripts} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+% Note that they needn't be valid array indices, 
+% since that would make this function a lot less interesting!
+\param{subscripts}---a list of \term{integers} 
+		     of length equal to the \term{rank} of the \term{array}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 17.3.0 10
+Returns \term{true} if the \param{subscripts} are all in bounds for \param{array};
+otherwise returns \term{false}.
+(If \param{array} is a \term{vector} with a \term{fill pointer}, 
+ that \term{fill pointer} is ignored.)
+
+\label Examples::
+\code
+ (setq a (make-array '(7 11) :element-type 'string-char))
+ (array-in-bounds-p a 0  0) \EV \term{true}
+ (array-in-bounds-p a 6 10) \EV \term{true}
+ (array-in-bounds-p a 0 -1) \EV \term{false}
+ (array-in-bounds-p a 0 11) \EV \term{false}
+ (array-in-bounds-p a 7  0) \EV \term{false}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{array-dimensions}
+
+\label Notes::
+\code
+ (array-in-bounds-p array subscripts)   
+ \EQ (and (not (some #'minusp (list subscripts)))
+         (every #'< (list subscripts) (array-dimensions array)))
+\endcode
+\endcom
+
+%%% ========== ARRAY-RANK
+\begincom{array-rank}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues array-rank {array} {rank}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+% Barmar observes that nothing requires the implementation to enforce ARRAY-RANK-LIMIT.
+% It's a requirement on the user to be prepared to lose if he exceeds it,
+% but it is not a requirement on the implementation to make him lose in that case.
+\param{rank}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 17.3.0 4                                         
+Returns the number of \term{dimensions} of \param{array}.
+                                     
+\label Examples::
+
+\code
+ (array-rank (make-array '())) \EV 0
+ (array-rank (make-array 4)) \EV 1
+ (array-rank (make-array '(4))) \EV 1
+ (array-rank (make-array '(2 3))) \EV 2
+\endcode
+
+\label Affected By:\None.
+                          
+\label Exceptional Situations::
+
+Should signal an error \oftype{type-error} if its argument is not an \term{array}.
+
+\label See Also::
+
+\conref{array-rank-limit}, \funref{make-array}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== ARRAY-ROW-MAJOR-INDEX
+\begincom{array-row-major-index}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues array-row-major-index {array {\rest} subscripts} {index}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+\param{subscripts}---a \term{list} of \term{valid array indices} for the \param{array}.
+
+\param{index}---a \term{valid array row-major index} for the \param{array}.
+
+\label Description::
+
+%% 17.3.0 11
+Computes the position according to the row-major ordering of \param{array}
+for the element that is specified by \param{subscripts}, and returns the
+offset of the element in the computed position from the beginning of \param{array}.
+
+For a one-dimensional \param{array}, 
+the result of \funref{array-row-major-index}
+equals \param{subscript}.
+
+\funref{array-row-major-index} ignores \term{fill pointers}.
+
+\label Examples::
+
+\code
+ (setq a (make-array '(4 7) :element-type '(unsigned-byte 8)))
+ (array-row-major-index a 1 2) \EV 9
+ (array-row-major-index 
+    (make-array '(2 3 4) 
+                :element-type '(unsigned-byte 8)
+                :displaced-to a
+                :displaced-index-offset 4)
+    0 2 1) \EV 9
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes::
+
+%% 17.3.0 12
+A possible definition of \funref{array-row-major-index}, 
+with no error-checking, is
+
+\code
+ (defun array-row-major-index (a &rest subscripts)
+   (apply #'+ (maplist #'(lambda (x y)
+                            (* (car x) (apply #'* (cdr y))))
+                       subscripts
+                       (array-dimensions a))))
+\endcode
+
+\endcom
+
+%%% ========== ARRAY-TOTAL-SIZE
+\begincom{array-total-size}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues array-total-size {array} {size}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+% Barmar observes that nothing requires the implementation to enforce ARRAY-TOTAL-SIZE-LIMIT.
+% It's a requirement on the user to be prepared to lose if he exceeds it,
+% but it is not a requirement on the implementation to make him lose in that case.
+\param{size}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 17.3.0 9
+Returns the \term{array total size} of the \param{array}.
+
+\label Examples::
+
+\code
+ (array-total-size (make-array 4)) \EV 4
+ (array-total-size (make-array 4 :fill-pointer 2)) \EV 4
+ (array-total-size (make-array 0)) \EV 0
+ (array-total-size (make-array '(4 2))) \EV 8
+ (array-total-size (make-array '(4 0))) \EV 0
+ (array-total-size (make-array '())) \EV 1
+\endcode
+
+\label Affected By:\None!
+
+\label Exceptional Situations::
+
+Should signal an error \oftype{type-error} if its argument is not an \term{array}.
+
+\label See Also::
+
+\funref{make-array}, \funref{array-dimensions}
+
+\label Notes::
+
+If the \param{array} is a \term{vector} with a \term{fill pointer},
+the \term{fill pointer} is ignored when calculating the \term{array total size}.
+
+Since the product of no arguments is one, the \term{array total size} of a
+zero-dimensional \term{array} is one.
+
+\code
+ (array-total-size x)
+    \EQ (apply #'* (array-dimensions x))
+    \EQ (reduce #'* (array-dimensions x))
+\endcode
+
+\endcom
+
+%%% ========== ARRAYP
+\begincom{arrayp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues arrayp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 24
+\TypePredicate{object}{array}
+       
+\label Examples::
+
+\code
+ (arrayp (make-array '(2 3 4) :adjustable t)) \EV \term{true}
+ (arrayp (make-array 6)) \EV \term{true}
+ (arrayp #*1011) \EV \term{true}
+ (arrayp "hi") \EV \term{true}
+ (arrayp 'hi) \EV \term{false}
+ (arrayp 12) \EV \term{false}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{typep}
+
+\label Notes::
+
+\code
+ (arrayp \param{object}) \EQ (typep \param{object} 'array)
+\endcode
+
+\endcom
+
+%%% ========== FILL-POINTER
+\begincom{fill-pointer}\ftype{Accessor}
+
+\label Syntax::
+
+%% 17.5.0 7
+\DefunWithValues fill-pointer {vector} {fill-pointer}
+\Defsetf         fill-pointer {vector} {new-fill-pointer}
+
+\label Arguments and Values::
+
+\param{vector}---a \term{vector} with a \term{fill pointer}.
+
+\param{fill-pointer}, \param{new-fill-pointer}---a \term{valid fill pointer} 
+  for the \param{vector}.
+
+\label Description::
+
+%% 17.5.0 6
+\term{Accesses} the \term{fill pointer} of \param{vector}.
+
+\label Examples::
+
+\code
+ (setq a (make-array 8 :fill-pointer 4)) \EV #(NIL NIL NIL NIL)
+ (fill-pointer a) \EV 4
+ (dotimes (i (length a)) (setf (aref a i) (* i i))) \EV NIL
+ a \EV #(0 1 4 9)
+ (setf (fill-pointer a) 3) \EV 3
+ (fill-pointer a) \EV 3
+ a \EV #(0 1 4)
+ (setf (fill-pointer a) 8) \EV 8
+ a \EV #(0 1 4 9 NIL NIL NIL NIL)
+\endcode
+
+\label Side Effects:\None!
+
+\label Affected By:\None!
+
+\label Exceptional Situations::
+
+\Shouldchecktype{vector}{a \term{vector} with a \term{fill pointer}}
+
+\label See Also::
+
+\funref{make-array}, \funref{length}
+
+\label Notes::
+
+There is no \term{operator} that will remove a \term{vector}'s \term{fill pointer}.
+
+\endcom
+
+%%% ========== ROW-MAJOR-AREF
+\begincom{row-major-aref}\ftype{Accessor}
+\issue{AREF-1D}
+
+\label Syntax:: 
+
+\DefunWithValues row-major-aref {array index} {element}
+\Defsetf         row-major-aref {array index} {new-element}
+
+\label Arguments and Values::
+
+\param{array}---an \term{array}.
+
+\issue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+\param{index}---a \term{valid array row-major index} for the \param{array}.
+\endissue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+
+\param{element}, \param{new-element}---an \term{object}.
+
+\label Description::
+
+Considers \term{array} as a \term{vector} by viewing its \term{elements}
+in row-major order, and returns the \term{element} of that \term{vector} 
+which is referred to by the given \param{index}.
+
+\funref{row-major-aref} is valid for use with \macref{setf}.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{aref},
+\funref{array-row-major-index}
+
+\label Notes::
+
+\code
+ (row-major-aref array index) \EQ
+   (aref (make-array (array-total-size array)
+                     :displaced-to array
+                     :element-type (array-element-type array))
+         index)
+
+ (aref array i1 i2 ...) \EQ
+     (row-major-aref array (array-row-major-index array i1 i2))
+\endcode
+
+\endissue{AREF-1D}
+
+\endcom
+
+
+%%% ========== UPGRADED-ARRAY-ELEMENT-TYPE
+\begincom{upgraded-array-element-type}\ftype{Function}
+
+\issue{SUBTYPEP-ENVIRONMENT:ADD-ARG}
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+\label Syntax::
+
+\DefunWithValues upgraded-array-element-type {typespec {\opt} environment}
+		 {upgraded-typespec}
+
+\label Arguments and Values::
+
+\param{typespec}---a \term{type specifier}.
+
+\param{environment}---an \term{environment} \term{object}.
+  \Default{\nil, denoting the \term{null lexical environment}
+	   and the current \term{global environment}}
+%!!! Need to say what happens with the environment.
+
+\param{upgraded-typespec}---a \term{type specifier}.
+
+\label Description::
+
+Returns the \term{element type} of 
+the most \term{specialized} \term{array} representation capable of 
+holding items of the \term{type} denoted by \param{typespec}.
+
+%Added by KMP in response to a Barmar comment. -kmp 29-Jul-91
+The \param{typespec} is a \term{subtype} of 
+(and possibly \term{type equivalent} to)
+the \param{upgraded-typespec}.
+
+If \param{typespec} is \typeref{bit},
+ the result is \term{type equivalent} to \f{bit}.
+\issue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+If \param{typespec} is \typeref{base-char},
+ the result is \term{type equivalent} to \f{base-char}.
+\endissue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+If \param{typespec} is \typeref{character},
+ the result is \term{type equivalent} to \f{character}.
+
+The purpose of \funref{upgraded-array-element-type} is to reveal how
+an implementation does its \term{upgrading}.
+
+The \param{environment} is used to expand any \term{derived type specifiers}
+that are mentioned in the \param{typespec}.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{array-element-type},
+\funref{make-array}
+
+\label Notes::
+
+Except for storage allocation consequences and dealing correctly with the
+optional \param{environment} \term{argument},
+\funref{upgraded-array-element-type} could be defined as:
+
+\code
+ (defun upgraded-array-element-type (type &optional environment)
+   (array-element-type (make-array 0 :element-type type)))
+\endcode
+                                                     
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+\endissue{SUBTYPEP-ENVIRONMENT:ADD-ARG}
+
+\endcom
+
+%%% ========== ARRAY-DIMENSION-LIMIT
+\begincom{array-dimension-limit}\ftype{Constant Variable}
+
+\label Constant Value::
+
+A positive
+\issue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+\term{fixnum},
+\endissue{FIXNUM-NON-PORTABLE:TIGHTEN-DEFINITION}
+the exact magnitude of which is \term{implementation-dependent},
+but which is not less than \f{1024}.
+
+\label Description::
+
+%% 17.1.0 18
+The upper exclusive bound on each individual \term{dimension} of an \term{array}.
+
+\label Examples:\None.
+
+\label See Also::
+
+\funref{make-array}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== ARRAY-RANK-LIMIT
+\begincom{array-rank-limit}\ftype{Constant Variable}
+
+\label Constant Value::
+
+A positive
+\issue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+\term{fixnum},
+\endissue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+the exact magnitude of which is \term{implementation-dependent},
+but which is not less than \f{8}.
+
+\label Description::
+
+%% 17.1.0 17
+The upper exclusive bound on the \term{rank} of an \term{array}.
+
+\label Examples:\None.
+
+\label See Also::
+
+\funref{make-array}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== ARRAY-TOTAL-SIZE-LIMIT
+\begincom{array-total-size-limit}\ftype{Constant Variable}
+
+\label Constant Value::
+
+A positive
+\issue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+\term{fixnum},
+\endissue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+the exact magnitude of which is \term{implementation-dependent},
+but which is not less than \f{1024}.
+
+\label Description::
+
+%% 17.1.0 19
+The upper exclusive bound on the \term{array total size} of an \term{array}.
+
+%% 17.1.0 20
+The actual limit on the \term{array total size} 
+imposed by the \term{implementation}
+might vary according the \term{element type} of the \term{array};
+in this case, the value of \conref{array-total-size-limit} 
+will be the smallest of these possible limits.
+
+\label Examples:\None.
+
+\label See Also::
+
+\funref{make-array}, \funref{array-element-type}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Vectors --------------------
+
+%%% ========== SIMPLE-VECTOR-P
+\begincom{simple-vector-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues simple-vector-p {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 21
+\TypePredicate{object}{simple-vector}.
+
+\label Examples::        
+
+\code
+ (simple-vector-p (make-array 6)) \EV \term{true}
+ (simple-vector-p "aaaaaa") \EV \term{false}
+ (simple-vector-p (make-array 6 :fill-pointer t)) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:: 
+
+\typeref{simple-vector}
+
+\label Notes::
+
+\code
+ (simple-vector-p \param{object}) \EQ (typep \param{object} 'simple-vector)
+\endcode
+
+\endcom
+
+%%% ========== SVREF
+\begincom{svref}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunWithValues svref {simple-vector index} {element}
+\Defsetf         svref {simple-vector index} {new-element}
+                                                            
+\label Arguments and Values::
+
+\param{simple-vector}---a \term{simple vector}.
+
+\param{index}---a \term{valid array index} for the \param{simple-vector}.
+
+\param{element}, \param{new-element}---an \term{object}
+  (whose \term{type} is a \term{subtype} 
+   of the \term{array element type} of the \param{simple-vector}).
+
+\label Description::
+
+%% 17.2.0 7
+\term{Accesses} the \term{element} of \param{simple-vector} specified by \param{index}.
+
+%% Implied by use of "Access". -kmp 15-Jan-92
+% %% 17.2.0 7
+% \macref{setf} may be used with \funref{svref} to destructively replace
+% a \term{simple vector} element with a new value.
+
+\label Examples::
+
+\code
+ (simple-vector-p (setq v (vector 1 2 'sirens))) \EV \term{true}
+ (svref v 0) \EV 1
+ (svref v 2) \EV SIRENS
+ (setf (svref v 1) 'newcomer) \EV NEWCOMER               
+ v \EV #(1 NEWCOMER SIRENS)
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{aref},
+\funref{sbit},
+\funref{schar},
+\funref{vector},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification}
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+
+\label Notes::
+
+%% 17.2.0 8
+\funref{svref} is identical to \funref{aref} 
+except that it requires its first argument to be a \term{simple vector}.  
+
+\code
+ (svref \param{v} \param{i}) \EQ (aref (the simple-vector \param{v}) \param{i})
+\endcode
+
+\endcom
+
+%%% ========== VECTOR
+\begincom{vector}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues vector {{\rest} objects} {vector}
+
+\label Arguments and Values:: 
+
+\param{object}---an \term{object}.
+
+\param{vector}---a \term{vector} of \term{type} \f{(vector t {\tt *})}.
+
+\label Description::
+
+%% 17.1.0 21
+Creates a \term{fresh} \term{simple general vector} whose size
+corresponds to the number of \param{objects}. 
+
+The \term{vector} is initialized to contain the \param{objects}.
+
+\label Examples::
+
+\code
+ (arrayp (setq v (vector 1 2 'sirens))) \EV \term{true}
+ (vectorp v) \EV \term{true}
+ (simple-vector-p v) \EV \term{true}         
+ (length v) \EV 3
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{make-array}
+
+\label Notes::
+
+\funref{vector} is analogous to \funref{list}.
+
+\code
+ (vector a\ssso a\ssst ... a\sssn)
+  \EQ (make-array (list \i{n}) :element-type t
+                          :initial-contents 
+                            (list a\ssso a\ssst ... a\sssn))
+\endcode
+\endcom
+
+%%% ========== VECTOR-POP
+\begincom{vector-pop}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues vector-pop {vector} {element}
+
+\label Arguments and Values::
+
+\param{vector}---a \term{vector} with a \term{fill pointer}.
+
+\param{element}---an \term{object}.
+
+\label Description::
+
+%% 17.5.0 10
+Decreases the \term{fill pointer} of \param{vector} by one, 
+and retrieves the \term{element} of \param{vector} that is
+designated by the new \term{fill pointer}.
+
+\label Examples::
+
+\code
+ (vector-push (setq fable (list 'fable))
+              (setq fa (make-array 8
+                                   :fill-pointer 2
+                                   :initial-element 'sisyphus))) \EV 2 
+ (fill-pointer fa) \EV 3 
+ (eq (vector-pop fa) fable) \EV \term{true}
+ (vector-pop fa) \EV SISYPHUS 
+ (fill-pointer fa) \EV 1 
+\endcode
+
+\label Side Effects::
+
+The \term{fill pointer} is decreased by one.
+
+\label Affected By::
+
+The value of the \term{fill pointer}.
+
+\label Exceptional Situations::
+
+An error \oftype{type-error} is signaled if \param{vector} does not have a \term{fill pointer}.
+
+If the \term{fill pointer} is zero, \funref{vector-pop} signals an error \oftype{error}.
+
+\label See Also::
+
+\funref{vector-push}, \funref{vector-push-extend}, \funref{fill-pointer}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== VECTOR-PUSH
+%%% ========== VECTOR-PUSH-EXTEND
+\begincom{vector-push, vector-push-extend}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues vector-push {new-element vector} {new-index-p}
+
+\DefunWithValues vector-push-extend {new-element vector {\opt} extension} {new-index}
+
+\label Arguments and Values::
+
+\param{new-element}---an \term{object}.
+
+\param{vector}---a \term{vector} with a \term{fill pointer}.
+
+\param{extension}---a positive \term{integer}.
+ \Default{\term{implementation-dependent}}
+
+\param{new-index-p}---a \term{valid array index} for \param{vector}, or \nil.
+
+\param{new-index}---a \term{valid array index} for \param{vector}.
+
+\label Description::
+
+%% 17.5.0 8
+\funref{vector-push} and \funref{vector-push-extend} store 
+\param{new-element} in \param{vector}.
+\funref{vector-push} attempts to store
+\param{new-element} 
+in the element of \param{vector} designated by the \term{fill pointer},
+and to increase the \term{fill pointer} by one.  If the 
+\f{(>= (fill-pointer \param{vector}) (array-dimension \param{vector} 0))},
+neither \param{vector} nor its \term{fill pointer} are affected.
+Otherwise, the store and increment take
+place and \funref{vector-push} 
+returns the former value of the \term{fill pointer}
+which is one less than the one it leaves in \param{vector}.
+
+%% 17.5.0 9
+\funref{vector-push-extend} is just like \funref{vector-push} except
+that if the \term{fill pointer} gets too large, \param{vector} is extended using
+\funref{adjust-array} so that it can contain more elements.
+\param{Extension}
+is the minimum number of elements to be added to \param{vector} if it
+must be extended.
+
+\funref{vector-push} and 
+\funref{vector-push-extend} return the index of \param{new-element} in \param{vector}.
+If \f{(>= (fill-pointer \param{vector}) (array-dimension \param{vector} 0))},
+\funref{vector-push} returns \nil.
+
+\label Examples::
+
+\code
+ (vector-push (setq fable (list 'fable))
+              (setq fa (make-array 8 
+                                   :fill-pointer 2
+                                   :initial-element 'first-one))) \EV 2 
+ (fill-pointer fa) \EV 3 
+ (eq (aref fa 2) fable) \EV \term{true}
+ (vector-push-extend #\\X
+                    (setq aa 
+                          (make-array 5
+                                      :element-type 'character
+                                      :adjustable t
+                                      :fill-pointer 3))) \EV 3 
+ (fill-pointer aa) \EV 4 
+ (vector-push-extend #\\Y aa 4) \EV 4 
+ (array-total-size aa) \EV at least 5 
+ (vector-push-extend #\\Z aa 4) \EV 5 
+ (array-total-size aa) \EV 9 ;(or more)
+\endcode
+
+\label Affected By::
+The value of the \term{fill pointer}.
+
+How \param{vector} was created.
+
+\label Exceptional Situations::         
+
+An error \oftype{error} is signaled by \funref{vector-push-extend}
+if it tries to extend \param{vector} and \param{vector} is not \term{actually adjustable}.
+
+An error \oftype{error} is signaled if \param{vector} does not 
+have a \term{fill pointer}.
+
+\label See Also::
+
+\funref{adjustable-array-p}, \funref{fill-pointer}, \funref{vector-pop}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== VECTORP
+\begincom{vectorp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues vectorp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 20
+\TypePredicate{object}{vector}
+
+\label Examples::
+
+\code
+ (vectorp "aaaaaa") \EV \term{true}
+ (vectorp (make-array 6 :fill-pointer t)) \EV \term{true}
+ (vectorp (make-array '(2 3 4))) \EV \term{false}
+ (vectorp #*11) \EV \term{true}
+ (vectorp #b11) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:\None.
+
+\label Notes::
+\code
+ (vectorp \param{object}) \EQ (typep \param{object} 'vector)
+\endcode
+
+\endcom
+
+%-------------------- Bit Vectors --------------------
+
+%%% ========== BIT
+%%% ========== SBIT
+\begincom{bit, sbit}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunMultiWithValues {bit-array {\rest} subscripts} {bit}
+   {\entry{bit}
+    \entry{sbit}}
+\DefsetfMulti         {bit-array {\rest} subscripts} {new-bit}
+   {\entry{bit}
+    \entry{sbit}}
+
+\label Arguments and Values::
+
+\param{bit-array}---for \funref{bit},  a \term{bit array};
+		    for \funref{sbit}, a \term{simple bit array}.
+
+\param{subscripts}---a \term{list} of \term{valid array indices} 
+		     for the \param{bit-array}.
+
+\param{bit}---a \term{bit}.
+
+\label Description::
+
+%% 17.4.0 3
+%% 17.4.0 4
+\funref{bit} and \funref{sbit} \term{access} the \param{bit-array} 
+\term{element} specified by \param{subscripts}.
+
+%!!! Is this necessary to say? How is it said elsewhere?
+These \term{functions} ignore the \term{fill pointer} when \term{accessing} \term{elements}.
+
+%% This is implied by "access" above.
+% %% 17.4.0 6
+% \macref{setf} can be used with \funref{bit} or \funref{sbit} to destructively 
+% replace a \term{bit array} \term{element} with a new value.
+
+\label Examples::
+
+\code
+ (bit (setq ba (make-array 8 
+                            :element-type 'bit 
+                            :initial-element 1))
+       3) \EV 1
+ (setf (bit ba 3) 0) \EV 0
+ (bit ba 3) \EV 0
+ (sbit ba 5) \EV 1
+ (setf (sbit ba 5) 1) \EV 1
+ (sbit ba 5) \EV 1
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{aref},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification}
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+
+\label Notes::
+
+%% 17.4.0 7
+\funref{bit} and \funref{sbit} are like \funref{aref}
+except that they require \param{arrays} to be
+a \term{bit array} and a \term{simple bit array}, respectively.
+
+%% 17.4.0 5
+\funref{bit} and \funref{sbit}, unlike \funref{char} and \funref{schar},
+allow the first argument to be an \term{array} of any \term{rank}.
+
+\endcom
+
+%%% ========== BIT-AND
+%%% ========== BIT-ANDC1
+%%% ========== BIT-ANDC2
+%%% ========== BIT-EQV
+%%% ========== BIT-IOR
+%%% ========== BIT-NAND
+%%% ========== BIT-NOR
+%%% ========== BIT-NOT
+%%% ========== BIT-ORC1
+%%% ========== BIT-ORC2
+%%% ========== BIT-XOR
+\begincom{bit-and, bit-andc1, bit-andc2, bit-eqv,
+	  bit-ior, bit-nand, bit-nor, bit-not, bit-orc1, bit-orc2, bit-xor}\ftype{Function}
+
+\label Syntax::
+
+\DefunMultiWithValues {bit-array1 bit-array2 {\opt} opt-arg} {resulting-bit-array}
+  {\entry{bit-and}
+   \entry{bit-andc1}
+   \entry{bit-andc2}
+   \entry{bit-eqv}
+   \entry{bit-ior}
+   \entry{bit-nand}
+   \entry{bit-nor}
+   \entry{bit-orc1}
+   \entry{bit-orc2}
+   \entry{bit-xor}}
+
+\DefunWithValues bit-not {bit-array {\opt} opt-arg} {resulting-bit-array}
+
+\label Arguments and Values::
+
+\param{bit-array}, \param{bit-array1}, \param{bit-array2}---a \term{bit array}.
+
+\param{Opt-arg}---a \term{bit array}, or \t, or \nil.
+ \Default{\nil}
+
+%!!! This needs work. -kmp 24-May-91
+\param{Bit-array}, \param{bit-array1}, \param{bit-array2}, and \param{opt-arg}
+(if an \term{array}) must all be of the same \term{rank} and \term{dimensions}.  
+
+\param{resulting-bit-array}---a \term{bit array}.
+                 
+\label Description::
+
+%% 17.4.0 8
+These functions perform 
+bit-wise logical operations on \param{bit-array1} and \param{bit-array2}
+and return an \term{array} 
+of matching \term{rank} and \term{dimensions},
+such that any given bit of the result
+is produced by operating on corresponding bits from each of the arguments.
+
+%% 17.4.0 11
+In the case of \funref{bit-not}, an \term{array}
+of \term{rank} and \term{dimensions} matching \param{bit-array}
+is returned that contains a copy of \param{bit-array} 
+with all the bits inverted.
+
+%% 17.4.0 9
+%% 17.4.0 12
+If \param{opt-arg} is of type \f{(array bit)} the contents of the 
+result are destructively placed into \param{opt-arg}.
+If \param{opt-arg} is the symbol \t,
+\param{bit-array} or \param{bit-array1} is replaced with the result; 
+if \param{opt-arg} is \nil\ or omitted, a new \term{array} is created
+to contain the result.  
+
+%% 17.4.0 10
+\Thenextfigure\ indicates the logical operation
+performed by each of the \term{functions}.
+
+\boxfig 
+{\dimen0=2pc
+\tabskip 2\dimen0
+\halign to \hsize {#\hfil\tabskip \dimen0&#\hfil\tabskip 0pt plus 1fil\cr
+\noalign{\vskip -9pt}
+{\bf Function}&{\bf Operation}\cr
+\noalign{\vskip 2pt\hrule\vskip 2pt}
+\cr
+\funref{bit-and}&and\cr
+\funref{bit-eqv}&equivalence (exclusive nor)\cr
+\funref{bit-not}&complement\cr
+\funref{bit-ior}&inclusive or\cr
+\funref{bit-xor}&exclusive or\cr
+\funref{bit-nand}&complement of \param{bit-array1} and \param{bit-array2}\cr
+\funref{bit-nor}&complement of \param{bit-array1} or \param{bit-array2}\cr
+\funref{bit-andc1}&and complement of \param{bit-array1} with \param{bit-array2}\cr
+\funref{bit-andc2}&and \param{bit-array1} with complement of \param{bit-array2}\cr
+\funref{bit-orc1}&or complement of \param{bit-array1} with \param{bit-array2}\cr
+\funref{bit-orc2}&or \param{bit-array1} with complement of \param{bit-array2}\cr
+\noalign{\vskip -9pt}
+\caption{Bit-wise Logical Operations on Bit Arrays}\cr
+}}
+\endfig
+
+\label Examples::
+\code
+ (bit-and (setq ba #*11101010) #*01101011) \EV #*01101010
+ (bit-and #*1100 #*1010) \EV #*1000      
+ (bit-andc1 #*1100 #*1010) \EV #*0010
+ (setq rba (bit-andc2 ba #*00110011 t)) \EV #*11001000
+ (eq rba ba) \EV \term{true}
+ (bit-not (setq ba #*11101010)) \EV #*00010101
+ (setq rba (bit-not ba 
+                     (setq tba (make-array 8 
+                                           :element-type 'bit))))
+\EV #*00010101
+ (equal rba tba) \EV \term{true}
+ (bit-xor #*1100 #*1010) \EV #*0110
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{lognot}, \funref{logand}
+                
+\label Notes:\None.
+
+\endcom
+
+%%% ========== BIT-VECTOR-P
+\begincom{bit-vector-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues bit-vector-p {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 19
+\TypePredicate{object}{bit-vector}
+
+\label Examples::
+
+\code
+ (bit-vector-p (make-array 6 
+                           :element-type 'bit 
+                           :fill-pointer t)) \EV \term{true}
+ (bit-vector-p #*) \EV \term{true}
+ (bit-vector-p (make-array 6)) \EV \term{false}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::                  
+
+\funref{typep}
+
+\label Notes::
+
+\code
+ (bit-vector-p \param{object}) \EQ (typep \param{object} 'bit-vector)
+\endcode
+
+\endcom
+
+%%% ========== SIMPLE-BIT-VECTOR-P
+\begincom{simple-bit-vector-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues simple-bit-vector-p {object} {generalized-boolean}
+
+\label Arguments and Values::             
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 23
+\TypePredicate{object}{simple-bit-vector}
+
+\label Examples::           
+\code
+ (simple-bit-vector-p (make-array 6)) \EV \term{false}
+ (simple-bit-vector-p #*) \EV \term{true}
+\endcode
+
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:: 
+
+\funref{simple-vector-p}
+
+\label Notes::
+\code
+ (simple-bit-vector-p \param{object}) \EQ (typep \param{object} 'simple-bit-vector)
+\endcode
+
+\endcom
+

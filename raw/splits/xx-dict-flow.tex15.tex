@@ -1,0 +1,66 @@
+====== Macro DEFCONSTANT ======
+
+====Syntax====
+
+**defconstant** //name initial-value [documentation]// → //name//
+
+====Arguments and Values====
+
+//name// - a //[[CL:Glossary:symbol]]//; \noeval.
+
+//initial-value// - a //[[CL:Glossary:form]]//; \eval.
+
+//documentation// - a //[[CL:Glossary:string]]//; \noeval.
+
+====Description====
+
+**[[CL:Macros:defconstant]]**
+
+causes the global variable named by //name// to be given a value that is the result of evaluating //initial-value//.
+
+A constant defined by **[[CL:Macros:defconstant]]** can be redefined with **[[CL:Macros:defconstant]]**.
+
+However, the consequences are undefined if an attempt is made to assign a //[[CL:Glossary:value]]// to the //[[CL:Glossary:symbol]]// using another operator, or to assign it to a //[[CL:Glossary:different]]//
+
+//[[CL:Glossary:value]]// using a subsequent **[[CL:Macros:defconstant]]**.
+
+If //documentation// is supplied, it is attached to //name// as a //[[CL:Glossary:documentation string]]// of kind \misc{variable}.
+
+**[[CL:Macros:defconstant]]** normally appears as a //[[CL:Glossary:top level form]]//, but it is meaningful for it to appear as a //[[CL:Glossary:non-top-level form]]//. However, the compile-time side effects described below only take place when **[[CL:Macros:defconstant]]** appears as a //[[CL:Glossary:top level form]]//.
+
+
+
+The consequences are undefined if there are any //[[CL:Glossary:bindings]]// of the variable named by //name// at the time **[[CL:Macros:defconstant]]** is executed or if the value is not **[[CL:Functions:eql]]** to the value of //initial-value//.
+
+The consequences are undefined when constant //[[CL:Glossary:symbols]]// are rebound as either lexical or dynamic variables. In other words, a reference to a //[[CL:Glossary:symbol]]// declared with **[[CL:Macros:defconstant]]** always refers to its global value.
+
+
+The side effects of the execution of **[[CL:Macros:defconstant]]** must be equivalent to at least the side effects of the execution of the following code:
+
+<blockquote> ([[CL:Macros:setf]] (symbol-value '''name'') ''initial-value'') ([[CL:Macros:setf]] (documentation '''name'' 'variable) '''documentation'') </blockquote>
+
+If a **[[CL:Macros:defconstant]]** //[[CL:Glossary:form]]// appears as a //[[CL:Glossary:top level form]]//, the //[[CL:Glossary:compiler]]// must recognize that //name// names a //[[CL:Glossary:constant variable]]//. An implementation may choose to evaluate the value-form at compile time, load time, or both. Therefore, users must ensure that the //initial-value// can be //[[CL:Glossary:evaluated]]// at compile time (regardless of whether or not references to //name// appear in the file) and that it always //[[CL:Glossary:evaluates]]// to the same value.
+
+\editornote{KMP: Does "same value" here mean eql or similar?} \reviewer{Moon: Probably depends on whether load time is compared to compile time, or two compiles.}
+
+====Examples==== <blockquote> (defconstant this-is-a-constant 'never-changing "for a test") → THIS-IS-A-CONSTANT this-is-a-constant → NEVER-CHANGING (documentation 'this-is-a-constant 'variable) → "for a test" (constantp 'this-is-a-constant) → //[[CL:Glossary:true]]// </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:declaim]]**, **[[CL:Macros:defparameter]]**, **[[CL:Macros:defvar]]**, **[[CL:Functions:documentation]]**, **[[CL:Functions:proclaim]]**, {\secref\ConstantVars}, {\secref\Compilation}
+
+====Notes====
+
+None.
+
+
+
+\issue{DEFVAR-DOCUMENTATION:UNEVALUATED} \issue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW} \issue{DEFCONSTANT-SPECIAL:NO} \issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}

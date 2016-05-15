@@ -1,0 +1,57 @@
+====== Function READ-LINE ======
+
+====Syntax====
+
+\DefunWithValuesNewline read-line {''&optional'' input-stream eof-error-p eof-value recursive-p} {line, missing-newline-p}
+
+====Arguments and Values====
+
+//input-stream// - an //[[CL:Glossary:input]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard input]]//.
+
+//eof-error-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:true]]//.
+
+//eof-value// - an //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**.
+
+//recursive-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+
+//line// - a //[[CL:Glossary:string]]// or the //eof-value//.
+
+//missing-newline-p// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+Reads from //input-stream// a line of text that is terminated by a //[[CL:Glossary:newline]]// or //[[CL:Glossary:end of file]]//.
+
+{'' ''}{\ExplainRecursiveP}
+
+The //[[CL:Glossary:primary value]]//, //line//, is the line that is read, represented as a //[[CL:Glossary:string]]// (without the trailing //[[CL:Glossary:newline]]//, if any). If //eof-error-p// is //[[CL:Glossary:false]]// and the //[[CL:Glossary:end of file]]// for //input-stream// is reached before any //[[CL:Glossary:characters]]// are read, //eof-value// is returned as the //line//.
+
+The //[[CL:Glossary:secondary value]]//, //missing-newline-p//, is a //[[CL:Glossary:generalized boolean]]// that is //[[CL:Glossary:false]]// if the //line// was terminated by a //[[CL:Glossary:newline]]//, or //[[CL:Glossary:true]]// if the //line// was terminated by the //[[CL:Glossary:end of file]]// for //input-stream//
+
+(or if the //line// is the //eof-value//).
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] a "line 1 line2") → "line 1 line2" (read-line ([[CL:Macros:defparameter]] input-stream (make-string-input-stream a))) → "line 1", //[[CL:Glossary:false]]// (read-line input-stream) → "line2", //[[CL:Glossary:true]]// (read-line input-stream nil nil) → NIL, //[[CL:Glossary:true]]// </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+**[[CL:Variables:*standard-input*]]**, **[[CL:Variables:*terminal-io*]]**.
+
+====Exceptional Situations====
+
+If an //[[CL:Glossary:end of file]]// occurs before any characters are read in the line, an error is signaled if //eof-error-p// is //[[CL:Glossary:true]]//.
+
+====See Also====
+
+**[[CL:Functions:read]]**
+
+====Notes====
+
+The corresponding output function is **[[CL:Functions:write-line]]**.
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}

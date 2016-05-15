@@ -1,0 +1,46 @@
+====== Function TERPRI, FRESH-LINE ======
+
+====Syntax====
+
+**{terpri} ** //''&optional'' output-stream// → //**[[CL:Constant Variables:nil]]**// **{fresh-line}** //''&optional'' output-stream// → //generalized-boolean//
+
+====Arguments and Values====
+
+//output-stream// -- an //[[CL:Glossary:output]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard output]]//.
+
+//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+**[[CL:Functions:terpri]]** outputs a //[[CL:Glossary:newline]]// to //output-stream//.
+
+**[[CL:Functions:fresh-line]]** is similar to **[[CL:Functions:terpri]]** but outputs a //[[CL:Glossary:newline]]// only if the //output-stream// is not already at the start of a line. If for some reason this cannot be determined, then a //[[CL:Glossary:newline]]// is output anyway. **[[CL:Functions:fresh-line]]** returns //[[CL:Glossary:true]]// if it outputs a //[[CL:Glossary:newline]]//; otherwise it returns //[[CL:Glossary:false]]//.
+
+====Examples====
+
+<blockquote> (with-output-to-string (s) (write-string "some text" s) (terpri s) (terpri s) (write-string "more text" s)) → "some text
+
+more text" (with-output-to-string (s) (write-string "some text" s) (fresh-line s) (fresh-line s) (write-string "more text" s)) → "some text more text" </blockquote>
+
+====Side Effects====
+
+The //output-stream// is modified.
+
+====Affected By====
+
+**[[CL:Variables:*standard-output*]]**, **[[CL:Variables:*terminal-io*]]**.
+
+====Exceptional Situations====
+
+None. \reviewer{Barmar: What if stream is closed?}
+
+====See Also====
+
+None.
+
+====Notes====
+
+**[[CL:Functions:terpri]]** is identical in effect to
+
+<blockquote> (write-char #\\Newline output-stream) </blockquote>
+

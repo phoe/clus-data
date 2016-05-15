@@ -1,0 +1,44 @@
+====== Function LIST-LENGTH ======
+
+====Syntax====
+
+**list-length** //list// → //length//
+
+====Arguments and Values====
+
+//list// - a //[[CL:Glossary:proper list]]// or a //[[CL:Glossary:circular list]]//.
+
+//length// - a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**.
+
+====Description====
+
+Returns the //[[CL:Glossary:length]]// of //list// if //list// is a //[[CL:Glossary:proper list]]//. Returns **[[CL:Constant Variables:nil]]** if //list// is a //[[CL:Glossary:circular list]]//.
+
+====Examples====
+
+<blockquote> (list-length '(a b c d)) → 4 (list-length '(a (b c) d)) → 3 (list-length '()) → 0 (list-length nil) → 0 (defun circular-list (&rest elements) (let ((cycle (copy-list elements))) (nconc cycle cycle))) (list-length (circular-list 'a 'b)) → NIL (list-length (circular-list 'a)) → NIL (list-length (circular-list)) → 0 </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //list// is not a //[[CL:Glossary:proper list]]// or a //[[CL:Glossary:circular list]]//.
+
+====See Also====
+
+**[[CL:Functions:length]]**
+
+====Notes====
+
+**[[CL:Functions:list-length]]** could be implemented as follows:
+
+<blockquote> (defun list-length (x) (do ((n 0 (+ n 2)) ;Counter. (fast x (cddr fast)) ;Fast pointer: leaps by 2. (slow x (cdr slow))) ;Slow pointer: leaps by 1. (nil) ;; If fast pointer hits the end, return the count. (when (endp fast) (return n)) (when (endp (cdr fast)) (return (+ n 1))) ;; If fast pointer eventually equals slow pointer, ;; then we must be stuck in a circular list. ;; (A deeper property is the converse: if we are ;; stuck in a circular list, then eventually the ;; fast pointer will equal the slow pointer. ;; That fact justifies this implementation.) (when (and (eq fast slow) (> n 0)) (return nil))))
+
+</blockquote>
+

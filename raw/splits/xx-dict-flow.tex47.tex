@@ -1,0 +1,103 @@
+====== Macro TYPECASE, CTYPECASE, ETYPECASE ======
+
+====Syntax====
+
+\DefmacWithValues {typecase} {keyform \stardown{normal-clause} \brac{\down{otherwise-clause}}} {\starparam{result}} \DefmacWithValues {ctypecase} {keyplace \stardown{normal-clause}} {\starparam{result}} \DefmacWithValues {etypecase} {keyform \stardown{normal-clause}} {\starparam{result}}
+
+\auxbnf{normal-clause}{\paren{type \starparam{form}}} \auxbnf{otherwise-clause}{\paren{{otherwise | t} \starparam{form}}} \auxbnf{clause}{normal-clause | otherwise-clause} \idxref{otherwise}\idxref{t}
+
+====Arguments and Values====
+
+//keyform// - a //[[CL:Glossary:form]]//; evaluated to produce a //test-key//.
+
+//keyplace// - a //[[CL:Glossary:form]]//; evaluated initially to produce a //test-key//. Possibly also used later as a //[[CL:Glossary:place]]// if no //types// match.
+
+//test-key// - an object produced by evaluating //keyform// or //keyplace//.
+
+//type// - a //[[CL:Glossary:type specifier]]//.
+
+//forms// - an //[[CL:Glossary:implicit progn]]//.
+
+//results// - the //[[CL:Glossary:values]]// returned by the //forms// in the matching //clause//.
+
+====Description====
+
+These //[[CL:Glossary:macros]]// allow the conditional execution of a body of //forms// in a //clause// that is selected by matching the //test-key// on the basis of its //[[CL:Glossary:type]]//.
+
+The //keyform// or //keyplace// is //[[CL:Glossary:evaluated]]// to produce the //test-key//.
+
+Each of the //normal-clauses// is then considered in turn. If the //test-key// is of the //[[CL:Glossary:type]]// given by the //clauses//'s //type//, the //forms// in that //clause// are //evaluated// as an //[[CL:Glossary:implicit progn]]//, and the //[[CL:Glossary:values]]// it returns are returned as the value of the **[[CL:Macros:typecase]]**, **[[CL:Macros:ctypecase]]**, or **[[CL:Macros:etypecase]]** //[[CL:Glossary:form]]//.
+
+These //[[CL:Glossary:macros]]// differ only in their //[[CL:Glossary:behavior]]// when no //normal-clause// matches; specifically:
+
+\beginlist
+
+\itemitem{**[[CL:Macros:typecase]]**}
+
+If no //normal-clause// matches, and there is an //otherwise-clause//, then that //otherwise-clause// automatically matches; the //forms// in that //clause// are //evaluated// as an //[[CL:Glossary:implicit progn]]//, and the //[[CL:Glossary:values]]// it returns are returned as the value of the **[[CL:Macros:typecase]]**.
+
+If there is no //otherwise-clause//, **[[CL:Macros:typecase]]** returns **[[CL:Constant Variables:nil]]**.
+
+\itemitem{**[[CL:Macros:ctypecase]]**}
+
+If no //normal-clause// matches, a //[[CL:Glossary:correctable]]// //[[CL:Glossary:error]]// of type **[[CL:Types:type-error]]** is signaled. The offending datum is the //test-key// and the expected type is //[[CL:Glossary:type equivalent]]// to ''(or //type1// //type2// ...)''. \Therestart{store-value} can be used to correct the error.
+
+If \therestart{store-value} is invoked, its //[[CL:Glossary:argument]]// becomes the new //test-key//, and is stored in //keyplace// as if by ''(setf //keyplace// //test-key//)''. Then **[[CL:Macros:ctypecase]]** starts over, considering each //clause// anew.
+
+If \therestart{store-value} is invoked interactively, the user is prompted for a new //test-key// to use.
+
+The subforms of //keyplace// might be evaluated again if none of the cases holds.
+
+\itemitem{**[[CL:Macros:etypecase]]**}
+
+If no //normal-clause// matches, a //[[CL:Glossary:non-correctable]]// //[[CL:Glossary:error]]// of type **[[CL:Types:type-error]]** is signaled. The offending datum is the //test-key// and the expected type is //[[CL:Glossary:type equivalent]]// to ''(or //type1// //type2// ...)''.
+
+Note that in contrast with **[[CL:Macros:ctypecase]]**, the caller of **[[CL:Macros:etypecase]]** may rely on the fact that **[[CL:Macros:etypecase]]** does not return if a //normal-clause// does not match.
+
+\endlist
+
+In all three cases, is permissible for more than one //clause// to specify a matching //[[CL:Glossary:type]]//, particularly if one is a //[[CL:Glossary:subtype]]// of another; the earliest applicable //clause// is chosen.
+
+====Examples====
+
+<blockquote> ;;; (Note that the parts of this example which use TYPE-OF ;;; are implementation-dependent.) (defun what-is-it (x) (format t "~&~S is ~A.~ x (typecase x (float "a float") (null "a symbol, boolean false, or the empty list") (list "a list") (t (format nil "a(n) ~(~A~)" (type-of x)))))) → WHAT-IS-IT (map 'nil #'what-is-it '(nil (a b) 7.0 7 box))
+▷ NIL is a symbol, boolean false, or the empty list.
+▷ (A B) is a list.
+▷ 7.0 is a float.
+▷ 7 is a(n) integer.
+▷ BOX is a(n) symbol. → NIL ([[CL:Macros:defparameter]] x 1/3) → 1/3 (ctypecase x (integer (* x 4)) (symbol (symbol-value x)))
+▷ Error: The value of X, 1/3, is neither an integer nor a symbol.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Specify a value to use instead.
+▷ 2: Return to Lisp Toplevel.
+▷ Debug> \IN{:CONTINUE 1}
+▷ Use value: \IN{3.7}
+▷ Error: The value of X, 3.7, is neither an integer nor a symbol.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Specify a value to use instead.
+▷ 2: Return to Lisp Toplevel.
+▷ Debug> \IN{:CONTINUE 1}
+▷ Use value: \IN{12} → 48 x → 12 </blockquote>
+
+====Affected By====
+
+**[[CL:Macros:ctypecase]]** and **[[CL:Macros:etypecase]]**, since they might signal an error, are potentially affected by existing //handlers// and **[[CL:Variables:*debug-io*]]**.
+
+====Exceptional Situations====
+
+**[[CL:Macros:ctypecase]]** and **[[CL:Macros:etypecase]]** signal an error of type **[[CL:Types:type-error]]** if no //normal-clause// matches.
+
+The //[[CL:Glossary:compiler]]// may choose to issue a warning of type **[[CL:Types:style-warning]]** if a //clause// will never be selected because it is completely shadowed by earlier clauses.
+
+====See Also====
+
+**[[CL:Macros:case]]**, **[[CL:Macros:cond]]**, **[[CL:Macros:setf]]**, {\secref\GeneralizedReference}
+
+====Notes====
+
+<blockquote> (typecase //test-key// \star{\curly{(//type// \starparam{form})}}) ≡ (let ((#1=#:g0001 //test-key//)) (cond \star{\curly{((typep #1# '//type//) \starparam{form})}})) </blockquote>
+
+The specific error message used by **[[CL:Macros:etypecase]]** and **[[CL:Macros:ctypecase]]** can vary between implementations. In situations where control of the specific wording of the error message is important, it is better to use **[[CL:Macros:typecase]]** with an //otherwise-clause// that explicitly signals an error with an appropriate message.
+
+
+

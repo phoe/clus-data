@@ -1,0 +1,68 @@
+====== Standard Generic Function SHARED-INITIALIZE ======
+
+====Syntax====
+
+
+\DefgenWithValues shared-initialize {instance slot-names ''&rest'' initargs ''&key'' {\allowotherkeys}} {instance}
+
+
+====Method Signatures====
+
+\Defmeth shared-initialize {\specparam{instance}{standard-object} slot-names ''&rest'' initargs}
+
+====Arguments and Values====
+
+//instance// - an //[[CL:Glossary:object]]//.
+
+//slot-names// - a //[[CL:Glossary:list]]// or \t.
+
+//initargs// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:keyword/value pairs]]// (of initialization argument //[[CL:Glossary:names]]// and //[[CL:Glossary:values]]//).
+
+====Description====
+
+The generic function **[[CL:Functions:shared-initialize]]** is used to fill the //[[CL:Glossary:slots]]// of an //instance// using //initargs// and **'':initform''** forms. It is called when an instance is created, when an instance is re-initialized, when an instance is updated to conform to a redefined //[[CL:Glossary:class]]//, and when an instance is updated to conform to a different //[[CL:Glossary:class]]//. The generic function **[[CL:Functions:shared-initialize]]** is called by the system-supplied primary //[[CL:Glossary:method]]// for **[[CL:Functions:initialize-instance]]**, **[[CL:Functions:reinitialize-instance]]**, **[[CL:Functions:update-instance-for-redefined-class]]**, and **[[CL:Functions:update-instance-for-different-class]]**.
+
+The generic function **[[CL:Functions:shared-initialize]]** takes the following arguments: the //instance// to be initialized, a specification of a set of //slot-names// //[[CL:Glossary:accessible]]// in that //instance//, and any number of //initargs//. The arguments after the first two must form an //[[CL:Glossary:initialization argument list]]//. The system-supplied primary //[[CL:Glossary:method]]// on **[[CL:Functions:shared-initialize]]** initializes the //[[CL:Glossary:slots]]// with values according to the //initargs// and supplied **'':initform''** forms. //Slot-names// indicates which //[[CL:Glossary:slots]]// should be initialized according to their **'':initform''** forms if no //initargs// are provided for those //[[CL:Glossary:slots]]//.
+
+The system-supplied primary //[[CL:Glossary:method]]// behaves as follows, regardless of whether the //[[CL:Glossary:slots]]// are local or shared:
+
+\beginlist
+
+\itemitem{\bull} If an //initarg// in the //[[CL:Glossary:initialization argument list]]// specifies a value for that //[[CL:Glossary:slot]]//, that value is stored into the //[[CL:Glossary:slot]]//, even if a value has already been stored in the //[[CL:Glossary:slot]]// before the //[[CL:Glossary:method]]// is run.
+
+\itemitem{\bull} Any //[[CL:Glossary:slots]]// indicated by //slot-names// that are still unbound at this point are initialized according to their **'':initform''** forms. For any such //[[CL:Glossary:slot]]// that has an **'':initform''** form, that //[[CL:Glossary:form]]// is evaluated in the lexical environment of its defining **[[CL:Macros:defclass]]** //[[CL:Glossary:form]]// and the result is stored into the //[[CL:Glossary:slot]]//. For example, if a //[[CL:Glossary:before method]]// stores a value in the //[[CL:Glossary:slot]]//, the **'':initform''** form will not be used to supply a value for the //[[CL:Glossary:slot]]//.
+
+\itemitem{\bull} The rules mentioned in {\secref\InitargRules} are obeyed.
+
+\endlist
+
+The //slots-names// argument specifies the //[[CL:Glossary:slots]]// that are to be initialized according to their **'':initform''** forms if no initialization arguments apply. It can be a //[[CL:Glossary:list]]// of slot //[[CL:Glossary:names]]//, which specifies the set of those slot //[[CL:Glossary:names]]//; or it can be the //[[CL:Glossary:symbol]]// \t, which specifies the set of all of the //[[CL:Glossary:slots]]//.
+
+
+====Examples====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+
+====See Also====
+
+**[[CL:Functions:initialize-instance]]**, **[[CL:Functions:reinitialize-instance]]**, **[[CL:Functions:update-instance-for-redefined-class]]**, **[[CL:Functions:update-instance-for-different-class]]**, **[[CL:Functions:slot-boundp]]**, **[[CL:Functions:slot-makunbound]]**, {\secref\ObjectCreationAndInit}, {\secref\InitargRules}, {\secref\DeclaringInitargValidity}
+
+====Notes====
+
+//Initargs// are declared as valid by using the **'':initarg''** option to **[[CL:Macros:defclass]]**, or by defining //[[CL:Glossary:methods]]// for **[[CL:Functions:shared-initialize]]**. The keyword name of each keyword parameter specifier in the //[[CL:Glossary:lambda list]]// of any //[[CL:Glossary:method]]// defined on **[[CL:Functions:shared-initialize]]** is declared as a valid //initarg// name for all //[[CL:Glossary:classes]]// for which that //[[CL:Glossary:method]]// is applicable.
+
+Implementations are permitted to optimize **'':initform''** forms that neither produce nor depend on side effects, by evaluating these //[[CL:Glossary:forms]]// and storing them into slots before running any **[[CL:Functions:initialize-instance]]** methods, rather than by handling them in the primary **[[CL:Functions:initialize-instance]]** method. (This optimization might be implemented by having the **[[CL:Functions:allocate-instance]]** method copy a prototype instance.)
+
+Implementations are permitted to optimize default initial value forms for //initargs// associated with slots by not actually creating the complete initialization argument //[[CL:Glossary:list]]// when the only //[[CL:Glossary:method]]// that would receive the complete //[[CL:Glossary:list]]// is the //[[CL:Glossary:method]]// on **[[CL:Types:standard-object]]**. In this case default initial value forms can be treated like **'':initform''** forms. This optimization has no visible effects other than a performance improvement.
+
+
+\issue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}

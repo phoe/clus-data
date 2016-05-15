@@ -1,0 +1,56 @@
+====== Function GENTEMP ======
+
+====Syntax====
+
+**gentemp** //''&optional'' prefix package// → //new-symbol//
+
+====Arguments and Values====
+
+//prefix// - a //[[CL:Glossary:string]]//. The default is ''"T"''.
+
+//package// - a //[[CL:Glossary:package designator]]//. The default is the //[[CL:Glossary:current package]]//.
+
+//new-symbol// - a //[[CL:Glossary:fresh]]//, //[[CL:Glossary:interned]]// //[[CL:Glossary:symbol]]//.
+
+====Description====
+
+**[[CL:Functions:gentemp]]** creates and returns a //[[CL:Glossary:fresh]]// //[[CL:Glossary:symbol]]//, //[[CL:Glossary:interned]]// in the indicated //package//.
+
+The //[[CL:Glossary:symbol]]// is guaranteed to be one that was not previously //[[CL:Glossary:accessible]]// in //package//. It is neither //[[CL:Glossary:bound]]// nor //[[CL:Glossary:fbound]]//, and has a //[[CL:Glossary:null]]// //[[CL:Glossary:property list]]//.
+
+The //[[CL:Glossary:name]]// of the //new-symbol// is the concatenation of the //prefix// and a suffix, which is taken from an internal counter used only by **[[CL:Functions:gentemp]]**. (If a //[[CL:Glossary:symbol]]// by that name
+
+is already //[[CL:Glossary:accessible]]// in //package//, the counter is incremented as many times as is necessary to produce a //[[CL:Glossary:name]]// that is not already the //[[CL:Glossary:name]]// of a //[[CL:Glossary:symbol]]// //[[CL:Glossary:accessible]]// in //package//.)
+
+====Examples====
+
+<blockquote> (gentemp) → T1298 (gentemp "FOO") → FOO1299 (find-symbol "FOO1300") → NIL, NIL (gentemp "FOO") → FOO1300 (find-symbol "FOO1300") → FOO1300, :INTERNAL (intern "FOO1301") → FOO1301, :INTERNAL (gentemp "FOO") → FOO1302 (gentemp) → T1303 </blockquote>
+
+====Side Effects====
+
+Its internal counter is incremented one or more times.
+
+//[[CL:Glossary:Interns]]// the //new-symbol// in //package//.
+
+====Affected By====
+
+The current state of its internal counter, and the current state of the //package//.
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //prefix// is not a //[[CL:Glossary:string]]//. Should signal an error of type type-error if //package// is not a //[[CL:Glossary:package designator]]//.
+
+====See Also====
+
+**[[CL:Functions:gensym]]**
+
+====Notes====
+
+The function **[[CL:Functions:gentemp]]** is deprecated.
+
+If //package// is \thepackage{keyword}, the result is an //[[CL:Glossary:external symbol]]// of //package//. Otherwise, the result is an //[[CL:Glossary:internal symbol]]// of //package//.
+
+The **[[CL:Functions:gentemp]]** internal counter is independent of **[[CL:Variables:*gensym-counter*]]**, the counter used by **[[CL:Functions:gensym]]**. There is no provision for accessing the **[[CL:Functions:gentemp]]** internal counter.
+
+Just because **[[CL:Functions:gentemp]]** creates a //[[CL:Glossary:symbol]]// which did not previously exist does not mean that such a //[[CL:Glossary:symbol]]// might not be seen in the future (//e.g.// in a data file---perhaps even created by the same program in another session). As such, this symbol is not truly unique in the same sense as a //[[CL:Glossary:gensym]]// would be. In particular, programs which do automatic code generation should be careful not to attach global attributes to such generated //[[CL:Glossary:symbols]]// (//e.g.// \declref{special} //[[CL:Glossary:declarations]]//) and then write them into a file because such global attributes might, in a different session, end up applying to other //[[CL:Glossary:symbols]]// that were automatically generated on another day for some other purpose.
+

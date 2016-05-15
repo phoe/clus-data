@@ -1,0 +1,48 @@
+====== Special Operator GO ======
+
+====Syntax====
+
+\DefspecNoReturn go {tag}
+
+====Arguments and Values====
+
+//tag// - a //[[CL:Glossary:go tag]]//.
+
+====Description====
+
+\specref{go} transfers control to the point in the body of an enclosing \specref{tagbody} form labeled by a tag **[[CL:Functions:eql]]** to //tag//.
+
+If there is no such //tag// in the body, the bodies of lexically containing \specref{tagbody} //[[CL:Glossary:forms]]// (if any) are examined as well. If several tags are **[[CL:Functions:eql]]** to //tag//, control is transferred to whichever matching //tag// is contained in the innermost \specref{tagbody} form that contains the \specref{go}. The consequences are undefined if there is no matching //tag// lexically visible to the point of the \specref{go}.
+
+The transfer of control initiated by \specref{go} is performed as described in \secref\TransferOfControl.
+
+====Examples==== <blockquote> (tagbody ([[CL:Macros:defparameter]] val 2) (go lp) (incf val 3) lp (incf val 4)) → NIL val → 6 </blockquote>
+
+
+
+The following is in error because there is a normal exit of the \specref{tagbody} before the \specref{go} is executed.
+
+<blockquote> (let ((a nil)) (tagbody t ([[CL:Macros:defparameter]] a #'(lambda () (go t)))) (funcall a)) </blockquote>
+
+The following is in error because the \specref{tagbody} is passed over before the \specref{go} //[[CL:Glossary:form]]// is executed.
+
+<blockquote> (funcall (block nil (tagbody a (return #'(lambda () (go a)))))) </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+\specref{tagbody}
+
+====Notes====
+
+None.
+
+
+\issue{EXIT-EXTENT:MINIMAL}

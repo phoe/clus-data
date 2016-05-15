@@ -1,0 +1,53 @@
+====== Function COMPILE-FILE-PATHNAME ======
+
+====Syntax====
+
+\DefunWithValues compile-file-pathname {input-file ''&key'' output-file {\allowotherkeys}} {pathname}
+
+====Arguments and Values====
+
+//input-file// - a //[[CL:Glossary:pathname designator]]//. (Default fillers for unspecified components are taken from **[[CL:Variables:*default-pathname-defaults*]]**.)
+
+//output-file// - a //[[CL:Glossary:pathname designator]]//. The default is //[[CL:Glossary:implementation-defined]]//.
+
+//pathname// - a //[[CL:Glossary:pathname]]//.
+
+====Description====
+
+Returns the //[[CL:Glossary:pathname]]// that **[[CL:Functions:compile-file]]** would write into, if given the same arguments.
+
+The defaults for the //output-file// are taken from the //[[CL:Glossary:pathname]]// that results from merging the //input-file// with \thevalueof{*default-pathname-defaults*}, except that the type component should default to the appropriate //[[CL:Glossary:implementation-defined]]// default type for //[[CL:Glossary:compiled files]]//.
+
+If //input-file// is a //[[CL:Glossary:logical pathname]]// and //output-file// is unsupplied, the result is a //[[CL:Glossary:logical pathname]]//.
+
+If //input-file// is a //[[CL:Glossary:logical pathname]]//, it is translated into a physical pathname as if by calling **[[CL:Functions:translate-logical-pathname]]**.
+
+If //input-file// is a //[[CL:Glossary:stream]]//, the //[[CL:Glossary:stream]]// can be either open or closed. **[[CL:Functions:compile-file-pathname]]** returns the same //[[CL:Glossary:pathname]]// after a file is closed as it did when the file was open.
+
+It is an error if //input-file// is a //[[CL:Glossary:stream]]// that is created with **[[CL:Functions:make-two-way-stream]]**, **[[CL:Functions:make-echo-stream]]**, **[[CL:Functions:make-broadcast-stream]]**, **[[CL:Functions:make-concatenated-stream]]**, **[[CL:Functions:make-string-input-stream]]**, **[[CL:Functions:make-string-output-stream]]**.
+
+If an implementation supports additional keyword arguments to **[[CL:Functions:compile-file]]**, **[[CL:Functions:compile-file-pathname]]** must accept the same arguments.
+
+====Examples====
+
+See **[[CL:Functions:logical-pathname-translations]]**.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+An error of type **[[CL:Types:file-error]]** might be signaled if either //input-file// or //output-file// is //[[CL:Glossary:wild]]//.
+
+====See Also====
+
+**[[CL:Functions:compile-file]]**, **[[CL:Types:pathname]]**, **[[CL:Types:logical-pathname]]**,{\secref\FileSystemConcepts},
+
+{\secref\PathnamesAsFilenames}
+
+====Notes====
+
+None.
+
+\issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY} \issue{PATHNAME-STREAM} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-LOGICAL:ADD} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES} \issue{PATHNAME-LOGICAL:ADD} \issue{COMPILE-FILE-PATHNAME-ARGUMENTS:MAKE-CONSISTENT} \issue{COMPILE-FILE-OUTPUT-FILE-DEFAULTS:INPUT-FILE} \issue{PATHNAME-LOGICAL:ADD}

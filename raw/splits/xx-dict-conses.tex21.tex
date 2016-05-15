@@ -1,0 +1,59 @@
+\begincom{first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth}\ftype{Accessor}
+
+====Syntax====
+
+\DefunMultiAccessorWithValues {list} {object} {new-object} {first second third fourth fifth sixth seventh eighth ninth tenth}
+
+====Arguments and Values====
+
+//list// - a //[[CL:Glossary:list]]//,
+
+which might be a //[[CL:Glossary:dotted list]]// or a //[[CL:Glossary:circular list]]//.
+
+//object//, //new-object// - an //object//.
+
+====Description====
+
+The functions
+
+**[[CL:Functions:first]]**, **[[CL:Functions:second]]**, **[[CL:Functions:third]]**, **[[CL:Functions:fourth]]**, **[[CL:Functions:fifth]]**, **[[CL:Functions:sixth]]**, **[[CL:Functions:seventh]]**, **[[CL:Functions:eighth]]**, **[[CL:Functions:ninth]]**, and **[[CL:Functions:tenth]]**
+
+//access// the first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, and tenth //[[CL:Glossary:element|elements]]// of //list//, respectively.
+
+Specifically,
+
+<blockquote> (first //list//) ≡ (car //list//) (second //list//) ≡ (car (cdr //list//)) (third //list//) ≡ (car (cddr //list//)) (fourth //list//) ≡ (car (cdddr //list//)) (fifth //list//) ≡ (car (cddddr //list//)) (sixth //list//) ≡ (car (cdr (cddddr //list//))) (seventh //list//) ≡ (car (cddr (cddddr //list//))) (eighth //list//) ≡ (car (cdddr (cddddr //list//))) (ninth //list//) ≡ (car (cddddr (cddddr //list//))) (tenth //list//) ≡ (car (cdr (cddddr (cddddr //list//)))) </blockquote>
+
+**[[CL:Macros:setf]]** can also be used with any of these functions to change an existing component. The same equivalences apply. For example:
+
+<blockquote> ([[CL:Macros:setf]] (fifth //list//) //new-object//) ≡ ([[CL:Macros:setf]] (car (cddddr //list//)) //new-object//) </blockquote>
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] lst '(1 2 3 (4 5 6) ((V)) vi 7 8 9 10)) → (1 2 3 (4 5 6) ((V)) VI 7 8 9 10) (first lst) → 1 (tenth lst) → 10 (fifth lst) → ((V)) (second (fourth lst)) → 5 (sixth '(1 2 3)) → NIL ([[CL:Macros:setf]] (fourth lst) "four") → "four" lst → (1 2 3 "four" ((V)) VI 7 8 9 10) </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:car]]**, **[[CL:Functions:nth]]**
+
+====Notes====
+
+**[[CL:Functions:first]]** is functionally equivalent to **[[CL:Functions:car]]**, **[[CL:Functions:second]]** is functionally equivalent to **[[CL:Functions:cadr]]**, **[[CL:Functions:third]]** is functionally equivalent to **[[CL:Functions:caddr]]**, and **[[CL:Functions:fourth]]** is functionally equivalent to **[[CL:Functions:cadddr]]**.
+
+The ordinal numbering used here is one-origin, as opposed to the zero-origin numbering used by **[[CL:Functions:nth]]**:
+
+<blockquote> (fifth x) ≡ (nth 4 x) </blockquote>
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}

@@ -1,0 +1,113 @@
+\begincom{substitute, substitute-if, substitute-if-not, nsubstitute, nsubstitute-if, nsubstitute-if-not}\ftype{Function}
+
+====Syntax====
+
+\DefunWithValuesNewline substitute {newitem olditem sequence ''&key'' from-end test test-not start end count key} {result-sequence}
+
+\DefunWithValuesNewline substitute-if {newitem predicate sequence ''&key'' from-end start end count key} {result-sequence}
+
+\DefunWithValuesNewline substitute-if-not {newitem predicate sequence ''&key'' from-end start end count key} {result-sequence}
+
+\DefunWithValuesNewline nsubstitute {newitem olditem sequence ''&key'' from-end test test-not start end count key} {sequence}
+
+\DefunWithValuesNewline nsubstitute-if {newitem predicate sequence ''&key'' from-end start end count key} {sequence}
+
+\DefunWithValuesNewline nsubstitute-if-not {newitem predicate sequence ''&key'' from-end start end count key} {sequence}
+
+====Arguments and Values====
+
+//newitem// - an //[[CL:Glossary:object]]//.
+
+//olditem// - an //[[CL:Glossary:object]]//.
+
+//sequence// - a //[[CL:Glossary:proper sequence]]//.
+
+//predicate// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//from-end// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+
+//test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+
+//start//, //end// - //[[CL:Glossary:bounding index designators]]// of //sequence//. \Defaults{//start// and //end//}{''0'' and **[[CL:Constant Variables:nil]]**}
+
+//count// - an //[[CL:Glossary:integer]]// or **[[CL:Constant Variables:nil]]**.
+
+The default is **[[CL:Constant Variables:nil]]**.
+
+//key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument, or **[[CL:Constant Variables:nil]]**.
+
+//result-sequence// - a //[[CL:Glossary:sequence]]//.
+
+====Description====
+
+**[[CL:Functions:substitute]]**, **[[CL:Functions:substitute-if]]**, and **[[CL:Functions:substitute-if-not]]** return a
+
+copy of //sequence// in which each //[[CL:Glossary:element]]// that //[[CL:Glossary:satisfies the test]]// has been replaced with //newitem//.
+
+**[[CL:Functions:nsubstitute]]**, **[[CL:Functions:nsubstitute-if]]**, and **[[CL:Functions:nsubstitute-if-not]]** are like **[[CL:Functions:substitute]]**, **[[CL:Functions:substitute-if]]**, and **[[CL:Functions:substitute-if-not]]** respectively, but they may modify //sequence//.
+
+If //sequence// is a //[[CL:Glossary:vector]]//, the result is a //[[CL:Glossary:vector]]// that has the same //[[CL:Glossary:actual array element type]]// as //sequence//.
+
+If //sequence// is a //[[CL:Glossary:list]]//, the result is a //[[CL:Glossary:list]]//.
+
+//Count//, if supplied, limits the number of elements altered; if more than //count// //[[CL:Glossary:element|elements]]// //[[CL:Glossary:satisfy the test]]//, then of these //[[CL:Glossary:element|elements]]// only the leftmost or rightmost, depending on //from-end//, are replaced, as many as specified by //count//.
+
+If //count// is supplied and negative, the behavior is as if zero had been supplied instead.
+
+If //count// is **[[CL:Constant Variables:nil]]**, all matching items are affected.
+
+Supplying a //from-end// of //[[CL:Glossary:true]]// matters only when the //count// is provided (and //[[CL:Glossary:non-nil]]//); in that case, only the rightmost //count// //[[CL:Glossary:element|elements]]// //[[CL:Glossary:satisfying the test]]// are removed (instead of the leftmost).
+
+//predicate//, //test//, and //test-not// might be called more than once for each //[[CL:Glossary:sequence]]// //[[CL:Glossary:element]]//, and their side effects can happen in any order.
+
+The result of all these functions is a //[[CL:Glossary:sequence]]// of the same //[[CL:Glossary:type]]// as //sequence// that has the same elements except that those in the subsequence //[[CL:Glossary:bounded]]// by //start// and //end// and //[[CL:Glossary:satisfying the test]]// have been replaced by //newitem//.
+
+**[[CL:Functions:substitute]]**, **[[CL:Functions:substitute-if]]**, and **[[CL:Functions:substitute-if-not]]** return a //sequence// which can share with //sequence// or may be //[[CL:Glossary:identical]]// to the input //sequence// if no elements need to be changed.
+
+**[[CL:Functions:nsubstitute]]** and **[[CL:Functions:nsubstitute-if]]** are required to **[[CL:Macros:setf]]** any **[[CL:Functions:car]]** (if //sequence// is a //[[CL:Glossary:list]]//) or **[[CL:Functions:aref]]** (if //sequence// is a //[[CL:Glossary:vector]]//) of //sequence// that is required to be replaced with //newitem//. If //sequence// is a //[[CL:Glossary:list]]//, none of the //[[CL:Glossary:cdrs]]// of the top-level //[[CL:Glossary:list]]// can be modified.
+
+====Examples====
+
+<blockquote> (substitute #\\. #\\SPACE "0 2 4 6") → "0.2.4.6" (substitute 9 4 '(1 2 4 1 3 4 5)) → (1 2 9 1 3 9 5) (substitute 9 4 '(1 2 4 1 3 4 5) :count 1) → (1 2 9 1 3 4 5) (substitute 9 4 '(1 2 4 1 3 4 5) :count 1 :from-end t) → (1 2 4 1 3 9 5) (substitute 9 3 '(1 2 4 1 3 4 5) :test #'>) → (9 9 4 9 3 4 5)
+
+(substitute-if 0 #'evenp '((1) (2) (3) (4)) :start 2 :key #'car) → ((1) (2) (3) 0) (substitute-if 9 #'oddp '(1 2 4 1 3 4 5)) → (9 2 4 9 9 4 9) (substitute-if 9 #'evenp '(1 2 4 1 3 4 5) :count 1 :from-end t) → (1 2 4 1 3 9 5)
+
+([[CL:Macros:defparameter]] some-things (list 'a 'car 'b 'cdr 'c)) → (A CAR B CDR C) (nsubstitute-if "function was here" #'fboundp some-things :count 1 :from-end t) → (A CAR B "function was here" C) some-things → (A CAR B "function was here" C) ([[CL:Macros:defparameter]] alpha-tester (copy-seq "ab ")) → "ab " (nsubstitute-if-not #\\z #'alpha-char-p alpha-tester) → "abz" alpha-tester → "abz" </blockquote>
+
+====Side Effects====
+
+**[[CL:Functions:nsubstitute]]**, **[[CL:Functions:nsubstitute-if]]**, and **[[CL:Functions:nsubstitute-if-not]]** modify //sequence//.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should be prepared to signal an error of type type-error if //sequence// is not a //[[CL:Glossary:proper sequence]]//.
+
+====See Also====
+
+**[[CL:Functions:subst]]**, **[[CL:Functions:nsubst]]**,
+
+{\secref\ConstantModification},
+
+{\secref\TraversalRules}
+
+====Notes====
+
+If //sequence// is a //[[CL:Glossary:vector]]//, the result might or might not be simple, and might or might not be //[[CL:Glossary:identical]]// to //sequence//.
+
+The **'':test-not''** //[[CL:Glossary:argument]]// is deprecated.
+
+The functions **[[CL:Functions:substitute-if-not]]** and **[[CL:Functions:nsubstitute-if-not]]** are deprecated.
+
+**[[CL:Functions:nsubstitute]]** and **[[CL:Functions:nsubstitute-if]]** can be used in for-effect-only positions in code.
+
+Because the side-effecting variants (//e.g.// **[[CL:Functions:nsubstitute]]**) potentially change the path that is being traversed, their effects in the presence of shared or circular structure may vary in surprising ways when compared to their non-side-effecting alternatives. To see this, consider the following side-effect behavior, which might be exhibited by some implementations:
+
+<blockquote> (defun test-it (fn) (let ((x (cons 'b nil))) (rplacd x x) (funcall fn 'a 'b x :count 1))) (test-it #'substitute) → (A . #1=(B . #1#)) (test-it #'nsubstitute) → (A . #1#) </blockquote>
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{TEST-NOT-IF-NOT:FLUSH-ALL} \issue{TEST-NOT-IF-NOT:FLUSH-ALL} \issue{SUBSEQ-OUT-OF-BOUNDS} \issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL} \issue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER} \issue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER} \issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89} \issue{CONSTANT-MODIFICATION:DISALLOW}

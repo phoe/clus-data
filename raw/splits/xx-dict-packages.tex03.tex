@@ -1,0 +1,65 @@
+====== Function FIND-SYMBOL ======
+
+====Syntax====
+
+**find-symbol {string** //\opt} package// → //symbol, status//
+
+====Arguments and Values====
+
+//string// - a //[[CL:Glossary:string]]//.
+
+//package// - a //[[CL:Glossary:package designator]]//.
+
+The default is the //[[CL:Glossary:current package]]//.
+
+//symbol// - a //[[CL:Glossary:symbol]]// accessible in the //package//, or **[[CL:Constant Variables:nil]]**.
+
+//status// - one of **'':inherited''**, **'':external''**, **'':internal''**, or **[[CL:Constant Variables:nil]]**.
+
+====Description====
+
+**[[CL:Functions:find-symbol]]** locates a //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is //string// in a //[[CL:Glossary:package]]//. If a //[[CL:Glossary:symbol]]// named //string// is found in //package//, directly or by inheritance, the //[[CL:Glossary:symbol]]// found is returned as the first value; the second value is as follows:
+
+\beginlist \itemitem{**'':internal''**}
+
+If the //[[CL:Glossary:symbol]]// is //[[CL:Glossary:present]]// in //package// as an //[[CL:Glossary:internal symbol]]//.
+
+\itemitem{**'':external''**}
+
+If the //[[CL:Glossary:symbol]]// is //[[CL:Glossary:present]]// in //package// as an //[[CL:Glossary:external symbol]]//.
+
+\itemitem{**'':inherited''**}
+
+If the //[[CL:Glossary:symbol]]// is inherited by //package// through **[[CL:Functions:use-package]]**,
+
+but is not //[[CL:Glossary:present]]// in //package//.
+
+\endlist
+
+If no such //[[CL:Glossary:symbol]]// is //[[CL:Glossary:accessible]]// in //package//, both values are **[[CL:Constant Variables:nil]]**.
+
+====Examples====
+
+<blockquote> (find-symbol "NEVER-BEFORE-USED") → NIL, NIL (find-symbol "NEVER-BEFORE-USED") → NIL, NIL (intern "NEVER-BEFORE-USED") → NEVER-BEFORE-USED, NIL (intern "NEVER-BEFORE-USED") → NEVER-BEFORE-USED, :INTERNAL (find-symbol "NEVER-BEFORE-USED") → NEVER-BEFORE-USED, :INTERNAL (find-symbol "never-before-used") → NIL, NIL (find-symbol "CAR" 'common-lisp-user) → CAR, :INHERITED (find-symbol "CAR" 'common-lisp) → CAR, :EXTERNAL (find-symbol "NIL" 'common-lisp-user) → NIL, :INHERITED (find-symbol "NIL" 'common-lisp) → NIL, :EXTERNAL (find-symbol "NIL" (prog1 (make-package "JUST-TESTING" :use '()) (intern "NIL" "JUST-TESTING"))) → JUST-TESTING::NIL, :INTERNAL (export 'just-testing::nil 'just-testing) (find-symbol "NIL" 'just-testing) → JUST-TESTING:NIL, :EXTERNAL (find-symbol "NIL" "KEYWORD") → NIL, NIL //or// → :NIL, :EXTERNAL (find-symbol (symbol-name :nil) "KEYWORD") → :NIL, :EXTERNAL </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+**[[CL:Functions:intern]]**, **[[CL:Functions:import]]**, **[[CL:Functions:export]]**, **[[CL:Functions:use-package]]**, **[[CL:Functions:unintern]]**, **[[CL:Functions:unexport]]**, **[[CL:Functions:unuse-package]]**
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:intern]]**, **[[CL:Functions:find-all-symbols]]**
+
+====Notes====
+
+**[[CL:Functions:find-symbol]]** is operationally equivalent to **[[CL:Functions:intern]]**, except that it never creates a new //[[CL:Glossary:symbol]]//.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}

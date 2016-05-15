@@ -1,0 +1,80 @@
+====== Macro HANDLER-CASE ======
+
+====Syntax====
+
+
+\DefmacWithValues handler-case {//expression// \interleave{\stardown{error-clause} | \down{no-error-clause}}} {\starparam{result}}
+
+\auxbnf{clause}{\down{error-clause} | \down{no-error-clause}} \auxbnf{error-clause}{\paren{typespec \paren{//[var]//} \starparam{declaration} \starparam{form}}} \auxbnf{no-error-clause}{\paren{**'':no-error''** //lambda-list// \starparam{declaration} \starparam{form}}}
+
+====Arguments and Values====
+
+//expression// - a //[[CL:Glossary:form]]//.
+
+//typespec// - a //[[CL:Glossary:type specifier]]//.
+
+//var// - a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
+
+//lambda-list// - an //[[CL:Glossary:ordinary lambda list]]//.
+
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+
+//form// - a //[[CL:Glossary:form]]//.
+
+//results// - In the normal situation, the values returned are those that result from the evaluation of //expression//; in the exceptional situation when control is transferred to a //clause//, the value of the last //form// in that //clause// is returned.
+
+====Description====
+
+**[[CL:Macros:handler-case]]** executes //expression// in a //[[CL:Glossary:dynamic environment]]// where various handlers are active. Each ''error-clause'' specifies how to handle a //[[CL:Glossary:condition]]// matching the indicated //typespec//. A ''no-error-clause'' allows the specification of a particular action if control returns normally.
+
+
+If a //[[CL:Glossary:condition]]// is signaled for which there is an appropriate ''error-clause'' during the execution of //expression// (i.e. one for which ''(typep //[[CL:Glossary:condition]]// '//typespec//)'' returns //[[CL:Glossary:true]]//) and if there is no intervening handler for a //[[CL:Glossary:condition]]// of that //[[CL:Glossary:type]]//, then control is transferred to the body of the relevant ''error-clause''. In this case, the dynamic state is unwound appropriately (so that the handlers established around the //expression// are no longer active), and //var// is bound to the //[[CL:Glossary:condition]]// that had been signaled.
+
+If more than one case is provided, those cases are made accessible in parallel. That is, in
+
+<blockquote> (handler-case ''form'' (''typespec1'' (''var1'') ''form1'') (''typespec2'' (''var2'') ''form2'')) </blockquote>
+
+if the first ''clause'' (containing ''form1'') has been selected, the handler for the second is no longer visible (or vice versa).
+
+The ''clauses'' are searched sequentially from top to bottom. If there is //[[CL:Glossary:type]]// overlap between //typespecs//, the earlier of the ''clauses'' is selected.
+
+If //var// is not needed, it can be omitted. That is, a ''clause'' such as:
+
+<blockquote> (//typespec// (//var//) (declare (ignore //var//)) //form//) </blockquote>
+
+can be written ''(//typespec// () //form//)''.
+
+
+If there are no //forms// in a selected ''clause'', the case, and therefore **[[CL:Macros:handler-case]]**, returns **[[CL:Constant Variables:nil]]**. If execution of //expression// returns normally and no ''no-error-clause'' exists, the values returned by //expression// are returned by **[[CL:Macros:handler-case]]**. If execution of //expression// returns normally and a ''no-error-clause'' does exist, the values returned are used as arguments to the function described by constructing \f{(lambda //lambda-list// \starparam{form})} from the ''no-error-clause'', and the //[[CL:Glossary:values]]// of that function call are returned by **[[CL:Macros:handler-case]]**.
+
+The handlers which were established around the //expression// are no longer active at the time of this call.
+
+====Examples====
+
+<blockquote> (defun assess-condition (condition) (handler-case (signal condition) (warning () "Lots of smoke, but no fire.") ((or arithmetic-error control-error cell-error stream-error) (condition) (format nil "~S looks especially bad." condition)) (serious-condition (condition) (format nil "~S looks serious." condition)) (condition () "Hardly worth mentioning."))) → ASSESS-CONDITION (assess-condition (make-condition 'stream-error :stream *terminal-io*)) → "#<STREAM-ERROR 12352256> looks especially bad." (define-condition random-condition (condition) () (:report (lambda (condition stream) (declare (ignore condition)) (princ "Yow" stream)))) → RANDOM-CONDITION (assess-condition (make-condition 'random-condition)) → "Hardly worth mentioning." </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Macros:handler-bind]]**, **[[CL:Macros:ignore-errors]]**, {\secref\ConditionSystemConcepts}
+
+====Notes====
+
+<blockquote> (handler-case form (''type1'' (''var1'') . ''body1'') (''type2'' (''var2'') . ''body2'') ...) </blockquote> is approximately equivalent to:
+
+<blockquote> (block #1=#:g0001 (let ((#2=#:g0002 nil)) (tagbody (handler-bind ((''type1'' #'(lambda (temp) ([[CL:Macros:defparameter]] #1# temp) (go #3=#:g0003))) (''type2'' #'(lambda (temp) ([[CL:Macros:defparameter]] #2# temp) (go #4=#:g0004))) ...) (return-from #1# form)) #3# (return-from #1# (let ((''var1'' #2#)) . ''body1'')) #4# (return-from #1# (let ((''var2'' #2#)) . ''body2'')) ...))) </blockquote>
+
+<blockquote> (handler-case form (''type1'' ''(var1)'' . ''body1'') ... (:no-error (''varN-1'' ''varN-2'' ...) . ''bodyN'')) </blockquote> is approximately equivalent to:
+
+<blockquote>
+
+(block #1=#:error-return (multiple-value-call #'(lambda (''varN-1'' ''varN-2'' ...) . ''bodyN'') (block #2=#:normal-return (return-from #1# (handler-case (return-from #2# form) (''type1'' (''var1'') . ''body1'') ...))))) </blockquote>
+
+\issue{DECLS-AND-DOC}

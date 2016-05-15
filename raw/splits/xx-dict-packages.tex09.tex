@@ -1,0 +1,60 @@
+====== Function SHADOW ======
+
+====Syntax====
+
+**shadow {symbol-names** //\opt} package// → //\t//
+
+====Arguments and Values====
+
+//symbol-names// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:list]]// of //[[CL:Glossary:\symbolnamedesignators]]//.
+
+//package// - a //[[CL:Glossary:package designator]]//.
+
+The default is the //[[CL:Glossary:current package]]//.
+
+====Description====
+
+**[[CL:Functions:shadow]]** assures that //[[CL:Glossary:symbols]]// with names given by //symbol-names// are //[[CL:Glossary:present]]//
+
+in the //package//.
+
+Specifically, //package// is searched for //[[CL:Glossary:symbols]]// with the //[[CL:Glossary:names]]// supplied by //symbol-names//.
+
+For each such //[[CL:Glossary:name]]//, if a corresponding //[[CL:Glossary:symbol]]//
+
+is not //[[CL:Glossary:present]]// in //package// (directly, not by inheritance), then a corresponding //[[CL:Glossary:symbol]]// is created with that //[[CL:Glossary:name]]//, and inserted into //package// as an //[[CL:Glossary:internal symbol]]//. The corresponding //[[CL:Glossary:symbol]]//, whether pre-existing or newly created, is then added, if not already present, to the //[[CL:Glossary:shadowing symbols list]]// of //package//.
+
+
+====Examples====
+
+<blockquote> (package-shadowing-symbols (make-package 'temp)) → NIL (find-symbol 'car 'temp) → CAR, :INHERITED (shadow 'car 'temp) → T (find-symbol 'car 'temp) → TEMP::CAR, :INTERNAL (package-shadowing-symbols 'temp) → (TEMP::CAR) </blockquote>
+
+<blockquote> (make-package 'test-1) → #<PACKAGE "TEST-1"> (intern "TEST" (find-package 'test-1)) → TEST-1::TEST, NIL (shadow 'test-1::test (find-package 'test-1)) → T (shadow 'TEST (find-package 'test-1)) → T (assert (not (null (member 'test-1::test (package-shadowing-symbols (find-package 'test-1))))))
+
+(make-package 'test-2) → #<PACKAGE "TEST-2"> (intern "TEST" (find-package 'test-2)) → TEST-2::TEST, NIL (export 'test-2::test (find-package 'test-2)) → T (use-package 'test-2 (find-package 'test-1)) ;should not error
+
+</blockquote>
+
+====Side Effects====
+
+**[[CL:Functions:shadow]]** changes the state of the package system in such a way that the package consistency rules do not hold across the change.
+
+====Affected By====
+
+Current state of the package system.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:package-shadowing-symbols]]**,
+
+{\secref\PackageConcepts}
+
+====Notes====
+
+If a //[[CL:Glossary:symbol]]// with a name in //symbol-names// already exists in //package//, but by inheritance, the inherited symbol becomes //[[CL:Glossary:shadowed]]// by a newly created //[[CL:Glossary:internal symbol]]//.
+
+\issue{SHADOW-ALREADY-PRESENT:WORKS} \issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE} \issue{SHADOW-ALREADY-PRESENT:WORKS} \issue{SHADOW-ALREADY-PRESENT}

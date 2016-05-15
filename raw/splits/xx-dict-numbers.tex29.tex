@@ -1,0 +1,55 @@
+====== Function ABS ======
+
+====Syntax====
+
+**abs** //number// → //absolute-value//
+
+====Arguments and Values====
+
+//number// - a //[[CL:Glossary:number]]//.
+
+//absolute-value// - a non-negative //[[CL:Glossary:real]]//.
+
+====Description====
+
+**[[CL:Functions:abs]]** returns the absolute value of //number//.
+
+If //number// is
+
+a //[[CL:Glossary:real]]//,
+
+the result is of the same //[[CL:Glossary:type]]// as //number//.
+
+If //number// is a //[[CL:Glossary:complex]]//, the result is a positive
+
+//[[CL:Glossary:real]]//
+
+with the same magnitude as //number//. The result can be a //[[CL:Glossary:float]]// \reviewer{Barmar: Single-float.} even if //number//'s components are //[[CL:Glossary:rationals]]// and an exact rational result would have been possible.
+
+Thus the result of ''(abs #c(3 4))'' can be either ''5'' or ''5.0'', depending on the implementation.
+
+====Examples====
+
+<blockquote> (abs 0) → 0 (abs 12/13) → 12/13 (abs -1.09) → 1.09 (abs #c(5.0 -5.0)) → 7.071068 (abs #c(5 5)) → 7.071068 (abs #c(3/5 4/5)) → 1 or approximately 1.0 (eql (abs -0.0) -0.0) → //[[CL:Glossary:true]]// </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+{\secref\FloatSubstitutability}
+
+====Notes====
+
+If //number// is a //[[CL:Glossary:complex]]//, the result is equivalent to the following:
+
+''(sqrt (+ (expt (realpart //number//) 2) (expt (imagpart //number//) 2)))''
+
+An implementation should not use this formula directly for all //[[CL:Glossary:complexes]]// but should handle very large or very small components specially to avoid intermediate overflow or underflow.
+
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89} \issue{REAL-NUMBER-TYPE:X3J13-MAR-89} \issue{COMPLEX-RATIONAL-RESULT:EXTEND}

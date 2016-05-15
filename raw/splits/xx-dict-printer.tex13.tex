@@ -1,0 +1,61 @@
+====== Function SET-PPRINT-DISPATCH ======
+
+====Syntax====
+
+**set-pprint-dispatch {type-specifier function** //\opt} priority table// → //**[[CL:Constant Variables:nil]]**//
+
+====Arguments and Values====
+
+//type-specifier// - a //[[CL:Glossary:type specifier]]//.
+
+//function// - a //[[CL:Glossary:function]]//, a //[[CL:Glossary:function name]]//, or **[[CL:Constant Variables:nil]]**.
+
+//priority// - a //[[CL:Glossary:real]]//. The default is ''0''.
+
+//table// - a //[[CL:Glossary:pprint dispatch table]]//. \Default{\thevalueof{*print-pprint-dispatch*}}
+
+====Description====
+
+Installs an entry into the //[[CL:Glossary:pprint dispatch table]]// which is //table//.
+
+//Type-specifier//
+
+is the //[[CL:Glossary:key]]// of the entry. The first action of **[[CL:Functions:set-pprint-dispatch]]** is to remove any pre-existing entry associated with //type-specifier//. This guarantees that there will never be two entries associated with the same //[[CL:Glossary:type specifier]]// in a given //[[CL:Glossary:pprint dispatch table]]//. Equality of //[[CL:Glossary:type specifiers]]// is tested by **[[CL:Functions:equal]]**.
+
+Two values are associated with each //[[CL:Glossary:type specifier]]// in a //[[CL:Glossary:pprint dispatch table]]//: a //function// and a //priority//. The //function// must accept two arguments: the //[[CL:Glossary:stream]]// to which output is sent and the //[[CL:Glossary:object]]// to be printed. The //function// should //[[CL:Glossary:pretty print]]// the //[[CL:Glossary:object]]// to the //stream//. The //function// can assume that object satisfies the //[[CL:Glossary:type]]// given by //[[CL:Glossary:type-specifier]]//. The //function// must obey **[[CL:Variables:*print-readably*]]**.
+
+Any values returned by the //function// are ignored.
+
+//Priority// is a priority to resolve conflicts when an object matches more than one entry.
+
+It is permissible for //function// to be **[[CL:Constant Variables:nil]]**. In this situation, there will be no //type-specifier// entry in //table// after **[[CL:Functions:set-pprint-dispatch]]** returns.
+
+====Examples====
+
+None.
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+An error is signaled if //priority// is not a //[[CL:Glossary:real]]//.
+
+====See Also====
+
+None.
+
+====Notes====
+
+Since //[[CL:Glossary:pprint dispatch tables]]// are often used to control the pretty printing of Lisp code, it is common for the //type-specifier// to be an //[[CL:Glossary:expression]]// of the form
+
+<blockquote> (cons //car-type// //cdr-type//) </blockquote>
+
+This signifies that the corresponding object must be a cons cell whose //[[CL:Glossary:car]]// matches the //[[CL:Glossary:type specifier]]// //car-type// and whose //[[CL:Glossary:cdr]]// matches the //[[CL:Glossary:type specifier]]// //cdr-type//. The //cdr-type// can be omitted in which case it defaults to \misc{t}.
+
+\issue{PRETTY-PRINT-INTERFACE}

@@ -1,0 +1,41 @@
+====== Function ARRAY-DISPLACEMENT ======
+
+====Syntax====
+
+**array-displacement** //array// → //displaced-to, displaced-index-offset//
+
+====Arguments and Values====
+
+//array// - an //[[CL:Glossary:array]]//.
+
+//displaced-to// - an //array// or **[[CL:Constant Variables:nil]]**.
+
+//displaced-index-offset// - a non-negative //[[CL:Glossary:fixnum]]//.
+
+====Description====
+
+If the //array// is a //[[CL:Glossary:displaced array]]//, returns the //[[CL:Glossary:values]]// of the **'':displaced-to''** and **'':displaced-index-offset''** options for the //[[CL:Glossary:array]]// (see the //[[CL:Glossary:functions]]// **[[CL:Functions:make-array]]** and **[[CL:Functions:adjust-array]]**). If the //array// is not a //[[CL:Glossary:displaced array]]//, **[[CL:Constant Variables:nil]]** and ''0'' are returned.
+
+If **[[CL:Functions:array-displacement]]** is called on an //array// for which a //[[CL:Glossary:non-nil]]// //[[CL:Glossary:object]]// was provided as the **'':displaced-to''** //[[CL:Glossary:argument]]// to **[[CL:Functions:make-array]]** or **[[CL:Functions:adjust-array]]**, it must return that //[[CL:Glossary:object]]// as its first value. It is //[[CL:Glossary:implementation-dependent]]// whether **[[CL:Functions:array-displacement]]** returns a //[[CL:Glossary:non-nil]]// //[[CL:Glossary:primary value]]// for any other //array//.
+
+====Examples====
+
+<blockquote> ([[CL:Macros:defparameter]] a1 (make-array 5)) → #<ARRAY 5 simple 46115576> ([[CL:Macros:defparameter]] a2 (make-array 4 :displaced-to a1 :displaced-index-offset 1)) → #<ARRAY 4 indirect 46117134> (array-displacement a2) → #<ARRAY 5 simple 46115576>, 1 ([[CL:Macros:defparameter]] a3 (make-array 2 :displaced-to a2 :displaced-index-offset 2)) → #<ARRAY 2 indirect 46122527> (array-displacement a3) → #<ARRAY 4 indirect 46117134>, 2 </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //array// is not an //[[CL:Glossary:array]]//.
+
+====See Also====
+
+**[[CL:Functions:make-array]]**
+
+====Notes====
+
+None.
+
+\issue{DISPLACED-ARRAY-PREDICATE:ADD}

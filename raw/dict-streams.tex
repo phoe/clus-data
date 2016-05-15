@@ -1,0 +1,5147 @@
+% -*- Mode: TeX -*-
+
+\def\ExplainRecursiveP{If \param{recursive-p} is \term{true},
+this call is expected to be embedded in a higher-level call to \funref{read} 
+or a similar \term{function} used by the \term{Lisp reader}.}
+
+% Streams
+%  Stream I/O
+%   Binary I/O
+%    Byte I/O
+%   Text I/O
+%    Character I/O
+%    String I/O
+%   General I/O
+%    File Position
+%    File Opening
+%    Stream Closing
+%    Stream Buffering
+%    Query Functions
+%  File Streams
+%  Synonym Streams
+%  Broadcast Streams
+%  Two-Way-Streams
+%  Echo Streams
+%  Concatenated Streams
+%  String Streams
+%  Stream Variables
+
+%-------------------- Stream Types --------------------
+
+%% 2.10.0 1
+\begincom{stream}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{stream},
+\typeref{t}
+
+\label Description::
+ 
+A \term{stream} is an \term{object} that can be used with an input or output
+function to identify an appropriate source or sink of \term{characters} or 
+\term{bytes} for that operation.
+
+For more complete information, \seesection\StreamConcepts.
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+% \issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+% The types
+% \typeref{broadcast-stream},
+% \typeref{concatenated-stream},
+% \typeref{echo-stream},
+% \typeref{file-stream},
+% \typeref{string-stream},
+% \typeref{synonym-stream}, and
+% \typeref{two-way-stream} are \term{pairwise} \term{disjoint} \subtypesof{stream}.
+% \endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\label See Also::
+
+{\secref\StreamConcepts},
+{\secref\PrintingOtherObjects},
+{\chapref\Printer},
+{\chapref\Reader}
+
+\endcom%{stream}\ftype{System Class}
+\begincom{broadcast-stream}\ftype{System Class}
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Class Precedence List::
+
+\typeref{broadcast-stream},
+\typeref{stream},
+\typeref{t}
+
+\label Description::
+
+A \term{broadcast stream} is an \term{output} \term{stream} which 
+has associated with it a set of zero or more \term{output} \term{streams} 
+such that any output sent to the \term{broadcast stream} gets passed on
+as output to each of the associated \term{output} \term{streams}.
+(If a \term{broadcast stream} has no \term{component streams},
+then all output to the \term{broadcast stream} is discarded.)
+
+The set of operations that may be performed on a \term{broadcast stream} 
+is the intersection of those for its associated \term{output} \term{streams}.
+
+% Except as explicitly stated otherwise, 
+% the values returned by a stream operation are 
+% the values resulting from performing the operation 
+% on the last of its \term{component streams};
+% the values resulting from performing the operation
+% on all preceding \term{streams} are discarded.                    
+% %Barmar: What if no streams are supplied?
+% %Sandra: Actually, aren't the results of functions that operate on streams
+% % specified explicitly in the descriptions of those functions?
+% %KMP: I'm not sure this answers the question for objects of type BROADCAST-STREAM.
+% %Sandra: CLOSE is a stream operation and this statement is certainly not
+% %   true for CLOSE -- the component streams are not closed.
+%% Trying to untangle all the mail on this. -kmp 11-Feb-92
+Some output operations (\eg \funref{fresh-line}) return \term{values} based on the
+state of the \term{stream} at the time of the operation.
+\issue{BROADCAST-STREAM-RETURN-VALUES:CLARIFY-MINIMALLY}
+Since these \term{values} might differ for each of the \term{component streams},
+it is necessary to describe their return value specifically:
+
+\beginlist
+
+\itemitem{\bull}
+    \funref{stream-element-type} returns
+    the value from the last component stream, 
+    or \typeref{t} if there are no component streams.
+
+\itemitem{\bull}
+    \funref{fresh-line} returns
+     the value from the last component stream, 
+     or \nil\ if there are no component streams.
+
+\itemitem{\bull}
+   The functions
+          \funref{file-length},
+          \funref{file-position},
+          \funref{file-string-length},
+      and \funref{stream-external-format}
+   return the value from the last component stream;
+   if there are no component streams,
+       \funref{file-length} and \funref{file-position} return \f{0},
+       \funref{file-string-length} returns \f{1},
+   and \funref{stream-external-format} returns \kwd{default}.
+
+\itemitem{\bull}
+  The functions \funref{streamp} and \funref{output-stream-p} 
+  always return \term{true} for \term{broadcast streams}.
+
+\itemitem{\bull}
+  The functions \funref{open-stream-p} tests whether the \term{broadcast stream}
+  is \term{open}\meaning{2}, not whether its component streams are \term{open}.
+
+\itemitem{\bull}
+  The functions \funref{input-stream-p} and \term{interactive-stream-p} 
+  return an \term{implementation-defined}, \term{generalized boolean} value.
+
+\itemitem{\bull}
+  For the input operations
+        \funref{clear-input}
+        \funref{listen},
+        \funref{peek-char},
+        \funref{read-byte},
+        \funref{read-char-no-hang},
+        \funref{read-char},
+        \funref{read-line},
+    and \funref{unread-char},
+  the consequences are undefined if the indicated operation is performed.
+  However, an \term{implementation} is permitted 
+  to define such a behavior as an \term{implementation-dependent} extension.
+\endlist
+
+For any output operations not having their return values explicitly specified above
+or elsewhere in this document, it is defined that
+the \term{values} returned by such an operation are 
+the \term{values} resulting from performing the operation 
+on the last of its \term{component streams};
+the \term{values} resulting from performing the operation
+on all preceding \term{streams} are discarded.                    
+If there are no \term{component streams}, 
+the value is \term{implementation-dependent}.
+\endissue{BROADCAST-STREAM-RETURN-VALUES:CLARIFY-MINIMALLY}
+
+\label See Also::
+
+\funref{broadcast-stream-streams},
+\funref{make-broadcast-stream}
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\endcom%{broadcast-stream}\ftype{System Class}
+\begincom{concatenated-stream}\ftype{System Class}
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Class Precedence List::
+
+\typeref{concatenated-stream},
+\typeref{stream},
+\typeref{t}
+
+\label Description::
+
+A \term{concatenated stream} is an \term{input} \term{stream} which 
+is a \term{composite stream} of zero or more other \term{input} \term{streams}, 
+such that the sequence of data which can be read from the
+\term{concatenated stream} is the same as the concatenation of the 
+sequences of data which could be read from each of the 
+constituent \term{streams}.
+
+Input from a \term{concatenated stream} is taken from the first
+of the associated \term{input streams} until it reaches \term{end of file}\meaning{1}; 
+then that \term{stream} is discarded, and subsequent input is taken
+from the next \term{input stream}, and so on.
+%I added the following to round things out. -kmp 22-Apr-91
+An \term{end of file} on the associated \term{input streams} is always managed
+invisibly by the \term{concatenated stream}---the only time a client of
+a \term{concatenated stream} sees an \term{end of file} is when an attempt is
+made to obtain data from the \term{concatenated stream} but it has no
+remaining \term{input streams} from which to obtain such data.
+
+%!!!
+%Moon:
+%  I'm not sure about a concatenated stream with no streams.  Presumably the
+%  valid set of operations for a concatenated stream is the intersection of
+%  the valid set of operations for the component streams (this is never
+%  specified, though).  Maybe an empty concatenated stream accepts all
+%  operations, both character and binary, and always gives eof?  Or maybe
+%  it shouldn't be allowed?
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\label See Also::
+
+\funref{concatenated-stream-streams},
+\funref{make-concatenated-stream}
+
+\endcom%{concatenated-stream}\ftype{System Class}
+\begincom{echo-stream}\ftype{System Class}
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Class Precedence List::
+
+\typeref{echo-stream},
+\typeref{stream},
+\typeref{t}
+
+\label Description::
+
+An \term{echo stream} is a \term{bidirectional} \term{stream}
+that gets  its input  from an associated \term{input}  \term{stream}
+and  sends its output to   an associated \term{output} \term{stream}.
+
+All input taken from the \term{input} \term{stream} 
+is echoed to the \term{output} \term{stream}.
+Whether the input is echoed immediately after it is encountered,
+or after it has been read from the \term{input stream}
+is \term{implementation-dependent}.
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\label See Also::
+
+\funref{echo-stream-input-stream},
+\funref{echo-stream-output-stream},
+\funref{make-echo-stream}
+
+\endcom%{echo-stream}\ftype{System Class}
+\begincom{file-stream}\ftype{System Class}
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Class Precedence List::
+
+\typeref{file-stream},
+\typeref{stream},
+\typeref{t}
+
+\label Description::
+
+An \term{object} \oftype{file-stream} is a \term{stream} the direct
+source or sink of which is a \term{file}.  Such a \term{stream} is
+created explicitly by \funref{open} and \macref{with-open-file}, and
+implicitly by \term{functions} such as \funref{load} that process \term{files}.
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\label See Also::
+
+\funref{load},
+\funref{open},
+\macref{with-open-file}
+
+\endcom%{file-stream}\ftype{System Class}
+\begincom{string-stream}\ftype{System Class}
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Class Precedence List::
+
+\typeref{string-stream},
+\typeref{stream},
+\typeref{t}
+
+\label Description::
+
+A \term{string stream} is a \term{stream} 
+which reads input from or writes output to an associated \term{string}.
+
+The \term{stream element type} of a \term{string stream} is always
+a \subtypeof{character}.
+
+\label See Also::
+
+\funref{make-string-input-stream},
+\funref{make-string-output-stream},
+\macref{with-input-from-string},
+\macref{with-output-to-string}
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\endcom%{string-stream}\ftype{Type}
+\begincom{synonym-stream}\ftype{System Class}
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Class Precedence List::
+
+\typeref{synonym-stream},
+\typeref{stream},
+\typeref{t}
+
+\label Description::
+
+A \term{stream} that is an alias for another \term{stream},
+which is the \term{value} of a \term{dynamic variable}
+whose \term{name} is the \term{synonym stream symbol} of the \term{synonym stream}.
+
+Any operations on a \term{synonym stream} will be performed 
+on the \term{stream} that is then the \term{value} of the
+\term{dynamic variable} named by the \term{synonym stream symbol}.
+If the \term{value} of the \term{variable} should change,
+or if the \term{variable} should be \term{bound},
+then the \term{stream} will operate on the new \term{value} of the \term{variable}.
+
+\label See Also::
+
+\funref{make-synonym-stream},
+\funref{synonym-stream-symbol}
+
+%% This should go without saying.
+% \label Notes::
+% 
+% A \term{synonym stream} is created by \funref{make-synonym-stream}.
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\endcom%{synonym-stream}\ftype{System Class}
+\begincom{two-way-stream}\ftype{System Class}
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Class Precedence List::
+
+\typeref{two-way-stream},
+\typeref{stream},
+\typeref{t}
+
+\label Description::
+
+A \term{bidirectional} \term{composite stream} that 
+     receives its input  from an associated \term{input}  \term{stream} 
+ and sends    its output to   an associated \term{output} \term{stream}.
+
+\label See Also::
+
+\funref{make-two-way-stream},
+\funref{two-way-stream-input-stream},
+\funref{two-way-stream-output-stream}
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\endcom%{two-way-stream}\ftype{System Class}
+
+%-------------------- Streams --------------------
+
+%%% ========== INPUT-STREAM-P
+%%% ========== OUTPUT-STREAM-P
+\begincom{input-stream-p, output-stream-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues input-stream-p {stream} {generalized-boolean}
+\DefunWithValues output-stream-p {stream} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{stream}---a \term{stream}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 21.3.0 4
+\NamedPredicate{input-stream-p}{stream}{an \term{input} \term{stream}}
+
+%% 21.3.0 5
+\NamedPredicate{output-stream-p}{stream}{an \term{output} \term{stream}}
+
+\label Examples::
+
+\code
+ (input-stream-p *standard-input*) \EV \term{true}
+ (input-stream-p *terminal-io*) \EV \term{true}
+ (input-stream-p (make-string-output-stream)) \EV \term{false}
+
+ (output-stream-p *standard-output*) \EV \term{true}
+ (output-stream-p *terminal-io*) \EV \term{true}
+ (output-stream-p (make-string-input-stream "jr")) \EV \term{false}
+\endcode
+
+\label Side Effects:\None!
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{stream}{a \term{stream}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== INTERACTIVE-STREAM-P
+\begincom{interactive-stream-p}\ftype{Function}
+
+\issue{STREAM-CAPABILITIES:INTERACTIVE-STREAM-P}
+
+\label Syntax::
+
+\DefunWithValues interactive-stream-p {stream} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{stream}---a \term{stream}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+\Predicate{stream}{an \term{interactive stream}}
+ 
+\label Examples::
+
+\code
+ (when (> measured limit)
+   (let ((error (round (* (- measured limit) 100)
+                       limit)))
+     (unless (if (interactive-stream-p *query-io*)
+                 (yes-or-no-p "The frammis is out of tolerance by ~D%.~@
+                               Is it safe to proceed? " error)
+                 (< error 15))  ;15% is acceptable
+       (error "The frammis is out of tolerance by ~D%." error))))
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+% The cleanup said "signals", but that's stylistically inconsistent.
+% Barrett and I decided to just ignore the cleanup and fix things up. -kmp 22-Jan-92
+\Shouldchecktype{stream}{a \term{stream}}
+
+\label See Also::
+
+{\secref\StreamConcepts}
+
+\label Notes:\None.
+
+\endissue{STREAM-CAPABILITIES:INTERACTIVE-STREAM-P}
+
+\endcom
+
+%%% ========== OPEN-STREAM-P
+\begincom{open-stream-p}\ftype{Function}
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Syntax::
+
+\DefunWithValues open-stream-p {stream} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{stream}---a \term{stream}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+\Predicate{stream}{an \term{open} \term{stream}}
+ 
+\term{Streams} are open until they have been explicitly closed with \funref{close},
+or until they are implicitly closed due to exit from a
+  \macref{with-output-to-string}, 
+  \macref{with-open-file},
+  \macref{with-input-from-string},  or 
+  \macref{with-open-stream} \term{form}.
+
+\label Examples::
+
+\code
+ (open-stream-p *standard-input*) \EV \term{true}
+\endcode
+
+\label Side Effects:\None!
+
+\label Affected By::
+
+\funref{close}.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{stream}{a \term{stream}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\endcom
+
+%%% ========== STREAM-ELEMENT-TYPE
+\begincom{stream-element-type}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues stream-element-type {stream} {typespec}
+
+\label Arguments and Values::
+
+\param{stream}---a \term{stream}.
+
+\param{typespec}---a \term{type specifier}.
+
+\label Description::
+
+%% 21.3.0 6
+\funref{stream-element-type} returns a \term{type specifier} that
+indicates the \term{types} of \term{objects} that may be read from 
+or written to \param{stream}.
+
+\term{Streams} created by \funref{open} have an \term{element type}
+restricted to \typeref{integer} or a \subtypeof{character}.
+%%KMP (2-Jan-91): How?? What would it mean?  Does this have formal impact?
+% but in principle a \term{stream} may conduct transactions using any
+% \term{objects}.
+%% Removed on instruction of Barrett, who concurred, saying:
+%%  I'm not convinced this is even true, since OPEN just says "acceptable",
+%%  which I read as saying undefined consequences, which permits an implementation
+%%  to extend to allow other kinds of objects.  Even without that, the statement 
+%%  isn't all that interesting, since OPEN only defined to deal with filestreams,
+%%   and an implementation could provide other kinds of streams which pass aribitrary objects.
+
+\label Examples::
+
+\code
+;; Note that the stream must accomodate at least the specified type,
+;; but might accomodate other types.  Further note that even if it does
+;; accomodate exactly the specified type, the type might be specified in
+;; any of several ways.
+ (with-open-file (s "test" :element-type '(integer 0 1)
+                           :if-exists :error
+                           :direction :output)
+   (stream-element-type s))
+\EV INTEGER
+\OV (UNSIGNED-BYTE 16)
+\OV (UNSIGNED-BYTE 8)
+\OV BIT
+\OV (UNSIGNED-BYTE 1)
+\OV (INTEGER 0 1)
+\OV (INTEGER 0 (2))
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{stream}{a \term{stream}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== STREAMP
+\begincom{streamp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {streamp} {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 21.3.0 3
+\TypePredicate{object}{stream}
+
+\issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+\funref{streamp} is unaffected by whether \param{object},
+if it is a \term{stream}, is \term{open} or closed.
+\endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+
+\label Examples::
+
+\code
+ (streamp *terminal-io*) \EV \term{true}
+ (streamp 1) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (streamp \param{object}) \EQ (typep \param{object} 'stream)
+\endcode
+
+\endcom
+
+%-------------------- Byte Io --------------------
+
+%%% ========== READ-BYTE
+\begincom{read-byte}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {read-byte} {stream {\opt} eof-error-p eof-value} {byte}
+
+\label Arguments and Values::
+
+\param{stream}---a \term{binary} \term{input} \term{stream}.
+
+\param{eof-error-p}---a \term{generalized boolean}.
+ \Default{\term{true}}
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{eof-value}---an \term{object}.
+ \Default{\nil}
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\param{byte}---an \term{integer},
+%% Removed by KMP because in the presence of stream element type upgrading, 
+%% this won't necessarily work as expected if the file was written with an
+%% incompatible element type.
+%  of the \term{stream element type}
+% 		  of \term{stream}
+ or the \param{eof-value}.
+
+\label Description::
+
+%% 22.2.2 3
+\funref{read-byte} reads and returns one byte from \param{stream}.
+
+If an \term{end of file}\meaning{2} occurs and \param{eof-error-p} is \term{false}, 
+the \param{eof-value} is returned.  
+
+\label Examples::
+\code
+ (with-open-file (s "temp-bytes" 
+                     :direction :output
+                     :element-type 'unsigned-byte)
+    (write-byte 101 s)) \EV 101
+ (with-open-file (s "temp-bytes" :element-type 'unsigned-byte)
+    (format t "~S ~S" (read-byte s) (read-byte s nil 'eof)))
+\OUT 101 EOF
+\EV NIL
+\endcode
+
+\label Side Effects::
+
+Modifies \param{stream}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{stream}{a \term{stream}}
+
+Should signal an error \oftype{error} 
+if \param{stream} is not  a \term{binary} \term{input} \term{stream}.
+
+If there are no \term{bytes} remaining in the \param{stream} 
+and \param{eof-error-p} is \term{true}, an error \oftype{end-of-file} is signaled.
+
+\label See Also::
+
+\funref{read-char},
+\issue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}
+\funref{read-sequence},
+\endissue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}
+\funref{write-byte}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== WRITE-BYTE
+\begincom{write-byte}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {write-byte} {byte stream} {byte}
+
+\label Arguments and Values::
+
+\param{byte}---an \term{integer} of the \term{stream element type}
+		  of \term{stream}.
+
+\param{stream}---a \term{binary} \term{output} \term{stream}.
+
+\label Description::
+
+%% 22.3.2 4
+\funref{write-byte} writes one byte, \param{byte}, to \param{stream}.
+
+%The size of the byte written depends on the {\bf :element-type} argument
+%from \funref{open} or \macref{with-open-file}.  
+%Unless the byte size of that
+%element type is one, two, or four bits, each call to \funref{write-byte}
+%generates an integral number of 8-bit bytes, namely the minimum number
+%necessary to hold the number of bits indicated by the given element type.
+%If the byte size of the element type is one, two, or four bits, then as many
+%elements as possible (eight, four, or two respectively) are packed into
+%each 8-bit byte.
+
+\label Examples::
+
+\code
+ (with-open-file (s "temp-bytes" 
+                    :direction :output
+                    :element-type 'unsigned-byte)
+    (write-byte 101 s)) \EV 101
+\endcode
+
+\label Side Effects::
+
+\param{stream} is modified.
+
+\label Affected By::
+
+The \term{element type} of the \param{stream}.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{stream}{a \term{stream}}
+Should signal an error \oftype{error} 
+if \param{stream} is not  a \term{binary} \term{output} \term{stream}.
+
+Might signal an error \oftype{type-error} if \param{byte} is not
+an \term{integer} of the \term{stream element type} of \term{stream}.
+
+\label See Also::
+
+\funref{read-byte},
+\funref{write-char},
+\issue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}
+\funref{write-sequence}
+\endissue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Character Io --------------------
+
+%%% ========== PEEK-CHAR
+\begincom{peek-char}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {peek-char}
+		 {{\opt} \vtop{\hbox{peek-type input-stream eof-error-p}
+			       \hbox{eof-value recursive-p}}}
+		 {char}
+
+\label Arguments and Values::
+
+\param{peek-type}---a \term{character} or \t\ or \nil.
+
+\param{input-stream}---\term{input} \term{stream designator}.
+  \Default{\term{standard input}}
+
+\param{eof-error-p}---a \term{generalized boolean}.
+ \Default{\term{true}}
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{eof-value}---an \term{object}.
+ \Default{\nil}
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\param{recursive-p}---a \term{generalized boolean}.
+ \Default{\term{false}}
+
+\param{char}---a \term{character} or the \param{eof-value}.
+
+\label Description::
+
+\funref{peek-char} obtains the next character in \param{input-stream}
+without actually reading it, thus leaving the character
+to be read at a later time.  It can
+also be used to skip over and discard intervening
+characters in the \param{input-stream} 
+until a particular character is found.
+
+%% 22.2.1 33
+If \param{peek-type} is not supplied or \nil,
+\funref{peek-char} returns the next character to be read from 
+\param{input-stream}, without actually removing it from 
+\param{input-stream}.
+The next time input is done from \param{input-stream}, the character will still
+be there.  
+%% 22.2.1 34
+If \param{peek-type} is \t,
+then \funref{peek-char} skips over \term{whitespace}\meaning{2} \term{characters},
+but not comments,
+and then performs the peeking operation on the next
+character.
+The last character examined, the one that starts an \term{object},
+is not removed from \param{input-stream}.
+%% 22.2.1 35
+If \param{peek-type} is a \term{character},
+then \funref{peek-char} skips
+over input characters until a character that
+is \funref{char=} to that \term{character} is found;          
+that character is left in \param{input-stream}.
+
+If an \term{end of file}\meaning{2} occurs and \param{eof-error-p} is \term{false},
+\param{eof-value} is returned.  
+
+{$ $}{\ExplainRecursiveP}
+
+\issue{PEEK-CHAR-READ-CHAR-ECHO:FIRST-READ-CHAR}
+When \param{input-stream} is an \term{echo stream},
+characters that are only peeked at are not echoed. In the
+case that \param{peek-type} is not \nil,
+the characters that are passed by \funref{peek-char} 
+are treated as if by \funref{read-char},
+and so are echoed unless they have been marked otherwise by \funref{unread-char}.
+\endissue{PEEK-CHAR-READ-CHAR-ECHO:FIRST-READ-CHAR}
+
+
+\label Examples::
+\code
+ (with-input-from-string (input-stream "    1 2 3 4 5")
+    (format t "~S ~S ~S" 
+            (peek-char t input-stream)
+            (peek-char #\\4 input-stream)
+            (peek-char nil input-stream)))
+\OUT #\\1 #\\4 #\\4
+\EV NIL
+\endcode
+
+\label Affected By::
+
+\varref{*readtable*},
+\varref{*standard-input*},
+\varref{*terminal-io*}.
+
+\label Exceptional Situations::
+
+If \param{eof-error-p} is \term{true} and an \term{end of file}\meaning{2} occurs
+an error \oftype{end-of-file} is signaled.
+
+If     \param{peek-type} is a \term{character},
+       an \term{end of file}\meaning{2} occurs,
+   and \param{eof-error-p} is \term{true},
+an error \oftype{end-of-file} is signaled.
+
+%!!! Barrett is concerned about the case of eof-error-p here.
+If \param{recursive-p} is \term{true}
+and an \term{end of file}\meaning{2} occurs,
+an error \oftype{end-of-file} is signaled.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== READ-CHAR
+\begincom{read-char}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {read-char}
+		 {{\opt} input-stream eof-error-p eof-value recursive-p}
+		 {char}
+
+\label Arguments and Values::
+
+\param{input-stream}---an \term{input} \term{stream designator}.
+ \Default{\term{standard input}}
+
+\param{eof-error-p}---a \term{generalized boolean}.
+ \Default{\term{true}}
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{eof-value}---an \term{object}.
+ \Default{\nil}
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\param{recursive-p}---a \term{generalized boolean}.
+ \Default{\term{false}}
+
+\param{char}---a \term{character} or the \param{eof-value}.
+
+\label Description::
+
+%% 22.2.1 28
+\funref{read-char} returns the next \term{character} from \param{input-stream}.
+
+\issue{PEEK-CHAR-READ-CHAR-ECHO:FIRST-READ-CHAR}
+When \param{input-stream} is an \param{echo stream},
+the character is echoed on \param{input-stream} the first time the character is 
+%Sandra: "seen"? awfully vague.
+seen.
+  Characters that are not echoed by \funref{read-char} 
+are those that were
+  put there by \funref{unread-char} 
+and hence are assumed to have been echoed
+  already by a previous call to \funref{read-char}.
+\endissue{PEEK-CHAR-READ-CHAR-ECHO:FIRST-READ-CHAR}
+
+{$ $}{\ExplainRecursiveP}
+
+If an \term{end of file}\meaning{2} occurs and \param{eof-error-p} is \term{false}, 
+\param{eof-value} is returned.  
+
+\label Examples::
+\code
+ (with-input-from-string (is "0123")
+    (do ((c (read-char is) (read-char is nil 'the-end)))
+        ((not (characterp c)))
+     (format t "~S " c)))
+\OUT #\\0 #\\1 #\\2 #\\3
+\EV NIL
+\endcode
+
+
+\label Affected By::
+
+\varref{*standard-input*},
+\varref{*terminal-io*}.
+
+\label Exceptional Situations::
+
+If an \term{end of file}\meaning{2} occurs before a character can be read, and 
+\param{eof-error-p} is \term{true}, 
+an error \oftype{end-of-file} is signaled.
+
+\label See Also::
+
+\funref{read-byte},
+\issue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}
+\funref{read-sequence},
+\endissue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}
+\funref{write-char},
+\funref{read}
+
+\label Notes::
+%% 22.2.1 29
+The corresponding output function is \funref{write-char}.
+
+\endcom
+
+%%% ========== READ-CHAR-NO-HANG
+\begincom{read-char-no-hang}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues read-char-no-hang
+		 {{\opt} \vtop{\hbox{input-stream eof-error-p}
+			       \hbox{eof-value recursive-p}}}
+		 {char}
+
+\label Arguments and Values::
+
+\param{input-stream} -- an \term{input} \term{stream designator}.
+ \Default{\term{standard input}}
+
+\param{eof-error-p}---a \term{generalized boolean}.
+ \Default{\term{true}}
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{eof-value}---an \term{object}.
+ \Default{\nil}
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\param{recursive-p}---a \term{generalized boolean}.
+ \Default{\term{false}}
+
+\param{char}---a \term{character} or \nil\ or the \param{eof-value}.
+
+\label Description::
+
+\funref{read-char-no-hang} returns a character
+from \param{input-stream} if such a character is available.  If no character
+is available, \funref{read-char-no-hang} returns \nil.
+
+{$ $}{\ExplainRecursiveP}
+
+If an \term{end of file}\meaning{2} occurs and \param{eof-error-p} is \term{false}, 
+\param{eof-value} is returned.  
+
+\label Examples::
+
+%!!! This example suffers from the `newline problem' -kmp 8-May-91
+\code
+;; This code assumes an implementation in which a newline is not
+;; required to terminate input from the console.
+ (defun test-it ()
+   (unread-char (read-char))
+   (list (read-char-no-hang) 
+         (read-char-no-hang) 
+         (read-char-no-hang)))
+\EV TEST-IT
+;; Implementation A, where a Newline is not required to terminate
+;; interactive input on the console.
+ (test-it)
+\OUT \IN{a}
+\EV (#\\a NIL NIL)
+;; Implementation B, where a Newline is required to terminate
+;; interactive input on the console, and where that Newline remains
+;; on the input stream.
+ (test-it)
+\OUT \IN{a\CRLF}
+\EV (#\\a #\\Newline NIL)
+\endcode
+
+\label Affected By::
+
+\varref{*standard-input*},
+\varref{*terminal-io*}.
+
+\label Exceptional Situations::
+
+If an \term{end of file}\meaning{2} occurs
+when \param{eof-error-p} is \term{true},
+an error \oftype{end-of-file} is signaled .
+
+\label See Also::
+
+\funref{listen}
+
+\label Notes::
+
+%% 22.2.1 37
+\funref{read-char-no-hang} is exactly like \funref{read-char}, except
+that if it would be necessary to wait in order to get a character (as
+from a keyboard), \nil\ is immediately returned without waiting.  
+
+%!!! Symbolics doesn't echo the char from this. Should it? -kmp
+
+\endcom
+
+%%% ========== TERPRI
+%%% ========== FRESH-LINE
+\begincom{terpri, fresh-line}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {terpri}     {{\opt} output-stream} {\nil}
+\DefunWithValues {fresh-line} {{\opt} output-stream} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{output-stream} -- an \term{output} \term{stream designator}.
+ \Default{\term{standard output}}
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+\funref{terpri} outputs a \term{newline} to \param{output-stream}.
+
+%% 22.3.1 18
+
+\funref{fresh-line} is similar to \funref{terpri} but outputs a \term{newline}
+only if the \param{output-stream} is not already at the start of a line.
+If for some reason this cannot be determined, then a \term{newline} is output anyway.
+\funref{fresh-line} returns \term{true} if it outputs a \term{newline};
+otherwise it returns \term{false}.
+
+\label Examples::
+
+\code
+ (with-output-to-string (s)
+    (write-string "some text" s)
+    (terpri s)
+    (terpri s)
+    (write-string "more text" s))
+\EV "some text
+
+more text"
+ (with-output-to-string (s)
+    (write-string "some text" s)
+    (fresh-line s)
+    (fresh-line s)
+    (write-string "more text" s))
+\EV "some text
+more text"
+\endcode
+
+\label Side Effects::
+
+The \param{output-stream} is modified.
+
+\label Affected By::
+
+\varref{*standard-output*},
+\varref{*terminal-io*}.
+
+\label Exceptional Situations::
+
+None.
+\reviewer{Barmar: What if stream is closed?}%!!!
+
+\label See Also:\None.
+
+\label Notes::
+
+\funref{terpri} is identical in effect to
+
+\code
+ (write-char #\\Newline output-stream)
+\endcode
+
+\endcom
+
+%%% ========== UNREAD-CHAR
+\begincom{unread-char}\ftype{Function}
+
+\label Syntax::
+
+%% 22.2.1 30
+\DefunWithValues {unread-char} {character {\opt} input-stream} {\nil}
+
+\label Arguments and Values::
+
+%% 22.2.1 31
+\param{character}---a \term{character};
+  must be the last \term{character} that was read from \param{input-stream}.
+
+\param{input-stream}---an \term{input} \term{stream designator}.
+ \Default{\term{standard input}}
+
+\label Description::
+
+\funref{unread-char} places \param{character} back onto the front of
+\param{input-stream} so that it will again be the next character
+in \param{input-stream}.
+
+\issue{PEEK-CHAR-READ-CHAR-ECHO:FIRST-READ-CHAR}
+When \param{input-stream} is an \term{echo stream},
+no attempt is made to undo any echoing of the character that might already
+have been done on \param{input-stream}. However, characters placed on 
+\param{input-stream} by \funref{unread-char} are marked in such a way 
+as to inhibit later re-echo by \funref{read-char}.
+\endissue{PEEK-CHAR-READ-CHAR-ECHO:FIRST-READ-CHAR}
+
+It is an error to invoke \funref{unread-char} 
+twice consecutively on the same \term{stream}
+without an intervening call to \funref{read-char} 
+(or some other input operation which implicitly reads characters)
+on that \term{stream}.
+
+\issue{UNREAD-CHAR-AFTER-PEEK-CHAR:DONT-ALLOW}
+Invoking \funref{peek-char} or \funref{read-char} commits all previous characters.
+The consequences of invoking \funref{unread-char}
+on any character preceding that which is returned by 
+\funref{peek-char} (including those passed over by 
+\funref{peek-char} that has a \term{non-nil} \param{peek-type})
+are unspecified.
+In particular, the consequences of 
+invoking \funref{unread-char} after \funref{peek-char}
+are unspecified.
+\endissue{UNREAD-CHAR-AFTER-PEEK-CHAR:DONT-ALLOW}
+
+\label Examples::
+
+\code
+ (with-input-from-string (is "0123")
+    (dotimes (i 6)
+      (let ((c (read-char is)))
+        (if (evenp i) (format t "~&~S ~S~%" i c) (unread-char c is)))))
+\OUT 0 #\\0
+\OUT 2 #\\1
+\OUT 4 #\\2
+\EV NIL
+\endcode
+
+\label Affected By::
+
+\varref{*standard-input*},
+\varref{*terminal-io*}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{peek-char},
+\funref{read-char},
+{\secref\StreamConcepts}
+
+\label Notes::
+
+%% 22.2.1 32
+\funref{unread-char} is intended to be an efficient mechanism for allowing
+the \term{Lisp reader} and other parsers to perform one-character lookahead
+in \param{input-stream}.
+
+\endcom
+
+%%% ========== WRITE-CHAR
+\begincom{write-char}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {write-char} {character {\opt} output-stream} {character}
+
+\label Arguments and Values::
+
+\param{character}---a \term{character}.
+
+\param{output-stream} -- an \term{output} \term{stream designator}.
+ \Default{\term{standard output}}
+
+\label Description::
+
+%% 22.3.1 12
+\funref{write-char} outputs \param{character} to \param{output-stream}.
+
+\label Examples::
+\code
+ (write-char #\\a)
+\OUT a
+\EV #\\a
+ (with-output-to-string (s) 
+   (write-char #\\a s)
+   (write-char #\\Space s)
+   (write-char #\\b s))
+\EV "a b"
+\endcode
+
+\label Side Effects::
+
+The \param{output-stream} is modified.
+
+\label Affected By::
+
+\varref{*standard-output*},
+\varref{*terminal-io*}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{read-char},
+\funref{write-byte},
+\issue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}
+\funref{write-sequence}
+\endissue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- String I/O --------------------
+
+%%% ========== READ-LINE
+\begincom{read-line}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValuesNewline read-line
+       		 	{{\opt} input-stream eof-error-p eof-value recursive-p}
+		 	{line, missing-newline-p}
+%!!! Barrett wonders if the second return value should really be required
+%    when the first value is an eof-value...
+
+\label Arguments and Values::
+
+\param{input-stream}---an \term{input} \term{stream designator}.
+ \Default{\term{standard input}}
+
+\param{eof-error-p}---a \term{generalized boolean}.
+ \Default{\term{true}}
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{eof-value}---an \term{object}.
+ \Default{\nil}
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\param{recursive-p}---a \term{generalized boolean}.
+ \Default{\term{false}}
+
+\param{line}---a \term{string} or the \param{eof-value}.
+
+\param{missing-newline-p}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 22.2.1 26
+Reads from \param{input-stream} a line of text
+that is terminated by a \term{newline} or \term{end of file}.
+%% This should follow without saying. -kmp 11-Feb-92
+%Interactively, this \term{function} can be used to get a line of input from the \term{user}.
+
+{$ $}{\ExplainRecursiveP}
+
+The \term{primary value}, \param{line}, is the line that is read,
+represented as a \term{string} (without the trailing \term{newline}, if any).
+If  \param{eof-error-p} is \term{false} 
+and the \term{end of file} for \param{input-stream} is reached
+     before any \term{characters} are read,
+\param{eof-value} is returned as the \param{line}.
+
+The \term{secondary value}, \param{missing-newline-p}, 
+is a \term{generalized boolean} that is
+    \term{false} if the \param{line} was terminated by a \term{newline},
+ or \term{true}  if the \param{line} was terminated by 
+		   the \term{end of file} for \param{input-stream}
+%KMP: What's the right second value when the first return value is the eof flag?
+%Moon: Surely true, since there was no newline.
+%KMP: Added the following:
+		   (or if the \param{line} is the \param{eof-value}).
+
+\label Examples::
+
+\code
+ (setq a "line 1
+ line2")
+\EV "line 1
+ line2"
+ (read-line (setq input-stream (make-string-input-stream a)))
+\EV "line 1", \term{false}
+ (read-line input-stream)
+\EV "line2", \term{true}
+ (read-line input-stream nil nil)
+\EV NIL, \term{true}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\varref{*standard-input*},
+\varref{*terminal-io*}.
+
+\label Exceptional Situations::
+
+If an \term{end of file}\meaning{2} occurs before any characters are read in the line,
+an error is signaled if \param{eof-error-p} is \term{true}.  
+
+\label See Also::
+
+\funref{read}
+
+\label Notes::
+
+%% 22.2.1 27
+The corresponding output function is \funref{write-line}.
+
+\endcom
+
+%%% ========== WRITE-STRING
+%%% ========== WRITE-LINE
+\begincom{write-string, write-line}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {write-string} {string {\opt} output-stream {\key} start end} {string}
+\DefunWithValues {write-line}   {string {\opt} output-stream {\key} start end} {string}
+
+\label Arguments and Values::
+
+\param{string}---a \term{string}.
+
+\param{output-stream} -- an \term{output} \term{stream designator}.
+ \Default{\term{standard output}}
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{string}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\label Description::
+
+%% 22.3.1 13
+\funref{write-string} writes the \term{characters} of 
+the subsequence of \param{string} \term{bounded} by \param{start} and \param{end}
+to \param{output-stream}.
+\funref{write-line} does the same thing, 
+but then outputs a newline afterwards.  
+
+%% Redundant with "bounded by" above. -kmp 23-Jan-92
+% \param{start} specifies the offset into \param{string}.
+% \param{end} marks the the position following the last element of the substring.
+
+%% 22.3.1 16
+%% this paragraph was left out
+
+\label Examples::
+
+\code
+ (prog1 (write-string "books" nil :end 4) (write-string "worms"))
+\OUT bookworms
+\EV "books"
+ (progn (write-char #\\*)
+        (write-line "test12" *standard-output* :end 5) 
+        (write-line "*test2")
+        (write-char #\\*)
+        nil)
+\OUT *test1
+\OUT *test2
+\OUT *
+\EV NIL
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\varref{*standard-output*},
+\varref{*terminal-io*}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{read-line}, \funref{write-char}
+
+\label Notes::
+
+\funref{write-line} and \funref{write-string} return \param{string},
+not the substring \term{bounded} by \param{start} and \param{end}.
+
+\code
+ (write-string string)
+\EQ (dotimes (i (length string)
+      (write-char (char string i)))
+
+ (write-line string)
+\EQ (prog1 (write-string string) (terpri))
+\endcode
+%The WRITE-LINE equivalence supplied by Barmar.
+
+\endcom
+
+%-------------------- Block-Mode I/O --------------------
+
+\issue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}
+
+%%% ========== READ-SEQUENCE
+\begincom{read-sequence}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {read-sequence} {sequence stream {\key} start end} {position}
+
+\param{sequence}---a \term{sequence}.
+
+\param{stream}---an \term{input} \term{stream}.
+
+\param{start}, \param{end}---\term{bounding index designators} of
+ \param{sequence}.  \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+
+\param{position}---an \term{integer} greater than or equal to zero, and
+ less than or equal to the \term{length} of the \param{sequence}.
+
+\label Description::
+
+Destructively modifies \param{sequence} by replacing the \term{elements}
+of \param{sequence} \term{bounded} by \param{start} and \param{end} with
+\term{elements} read from \param{stream}.
+
+\param{Sequence} is destructively modified by copying successive
+\term{elements} into it from \param{stream}.  If the \term{end of file} for
+\param{stream} is reached before copying all \term{elements} of the
+subsequence, then the extra \term{elements} near the end of \param{sequence}
+are not updated.
+
+\param{Position} is the index of the first \term{element} of \param{sequence}
+that was not updated, which might be less than \param{end} because the
+\term{end of file} was reached.
+
+\label Examples::
+
+\code
+ (defvar *data* (make-array 15 :initial-element nil))
+ (values (read-sequence *data* (make-string-input-stream "test string")) *data*)
+ \EV 11, #(#\\t #\\e #\\s #\\t #\\Space #\\s #\\t #\\r #\\i #\\n #\\g NIL NIL NIL NIL)
+\endcode
+
+\label Side Effects::
+
+Modifies \param{stream} and \param{sequence}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+\Shouldchecktype{start}{a non-negative \term{integer}}
+\Shouldchecktype{end}{a non-negative \term{integer} or \nil}
+
+Might signal an error \oftype{type-error} if an \term{element} read from
+the \param{stream} is not a member of the \term{element type} of the
+\param{sequence}.
+
+\label See Also::
+
+{\secref\ConstantModification},
+\funref{write-sequence},
+\funref{read-line}
+
+\label Notes::
+
+\funref{read-sequence} is identical in effect to iterating over the indicated
+subsequence and reading one \term{element} at a time from \param{stream} and
+storing it into \param{sequence}, but may be more efficient than the
+equivalent loop.  An efficient implementation is more likely to exist
+for the case where the \param{sequence} is a \term{vector} with the same
+\term{element type} as the \param{stream}.
+
+\endcom
+
+%%% ========== WRITE-SEQUENCE
+\begincom{write-sequence}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {write-sequence} {sequence stream {\key} start end} {sequence}
+
+\param{sequence}---a \term{sequence}.
+
+\param{stream}---an \term{output} \term{stream}.
+
+\param{start}, \param{end}---\term{bounding index designators} of
+ \param{sequence}.  \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+
+\label Description::
+
+\funref{write-sequence} writes the \term{elements} of the subsequence
+of \param{sequence} \term{bounded} by \param{start} and \param{end} to
+\param{stream}.
+
+\label Examples::
+
+\code
+ (write-sequence "bookworms" *standard-output* :end 4)
+ \OUT book
+ \EV "bookworms"
+\endcode
+
+\label Side Effects::
+
+Modifies \param{stream}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Lazychecktype{sequence}{a \term{proper sequence}}
+\Shouldchecktype{start}{a non-negative \term{integer}}
+\Shouldchecktype{end}{a non-negative \term{integer} or \nil}
+
+Might signal an error \oftype{type-error} if an \term{element} of the
+\term{bounded} \term{sequence} is not a member of the
+\term{stream element type} of the \param{stream}.
+
+\label See Also::
+
+{\secref\ConstantModification},
+\funref{read-sequence},
+\funref{write-string},
+\funref{write-line}
+
+\label Notes::
+
+\funref{write-sequence} is identical in effect to iterating over the indicated
+subsequence and writing one \term{element} at a time to \param{stream}, but
+may be more efficient than the equivalent loop.  An efficient implementation
+is more likely to exist for the case where the \param{sequence} is a
+\term{vector} with the same \term{element type} as the \param{stream}.
+
+\endcom
+
+\endissue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}
+
+
+%-------------------- File Position --------------------
+
+%%% ========== FILE-LENGTH
+\begincom{file-length}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues file-length {stream} {length}
+
+\label Arguments and Values::
+
+\param{stream}---a \term{stream associated with a file}.
+
+\param{length}---a non-negative \term{integer} or \nil.
+
+\label Description::
+
+%% 23.3.0 21
+\funref{file-length} returns the length of \param{stream},  
+or \nil\ if the length cannot be determined.
+
+For a binary file, the length is measured in units of
+the \term{element type} of the \param{stream}.
+
+\label Examples::
+
+\code
+ (with-open-file (s "decimal-digits.text" 
+                    :direction :output :if-exists :error)
+   (princ "0123456789" s)
+   (truename s))
+\EV #P"A:>Joe>decimal-digits.text.1"
+ (with-open-file (s "decimal-digits.text")
+   (file-length s))
+\EV 10
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{stream}{a \term{stream associated with a file}}
+%!!! Is this going to run into trouble in cases like:
+%    (with-input-from-string (s "foo") (file-length s))
+%    which an implementation might want to support even thought it's not required?
+%    -kmp 26-Apr-91
+
+\label See Also::
+
+\funref{open}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== FILE-POSITION
+\begincom{file-position}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues file-position {stream} {position}
+\DefunWithValues file-position {stream position-spec} {success-p}
+
+\label Arguments and Values::
+
+\param{stream}---a \term{stream}.
+
+\param{position-spec}---a \term{file position designator}.
+
+\param{position}---a \term{file position} or \nil.
+
+\param{success-p}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 23.3.0 16
+Returns or changes the current position within a \param{stream}.
+
+%% 23.3.0 17
+When \param{position-spec} is not supplied,
+\funref{file-position} returns the current \term{file position} in the \param{stream},
+or \nil\ if this cannot be determined.
+
+%% 23.3.0 18
+When \param{position-spec} is supplied,
+the \term{file position} in \param{stream} is set to that \term{file position} (if possible).
+\funref{file-position} returns \term{true} 
+if the repositioning is performed successfully,
+or \term{false} if it is not.
+
+%%KMP: I could find no reference which supported this claim. It looks well-defined to me.
+%
+% The consequences are undefined if \param{file-stream} 
+% is not a \term{stream} that is open to a random-access file. 
+
+An \term{integer} returned by \funref{file-position} of one argument 
+should be acceptable as \param{position-spec} for use with the same file.
+
+For a character file,
+performing a single \funref{read-char} or \funref{write-char} operation
+may cause the file position to be increased by more than 1 because of
+character-set translations (such as translating between the \clisp\
+\f{\#\\Newline} character and an external ASCII
+carriage-return/line-feed sequence) and other aspects of the
+implementation.  For a binary file, every \funref{read-byte} 
+or \funref{write-byte}
+operation increases the file position by 1.
+
+\label Examples::
+
+\code
+ (defun tester ()
+   (let ((noticed '()) file-written)
+     (flet ((notice (x) (push x noticed) x))
+       (with-open-file (s "test.bin" 
+                          :element-type '(unsigned-byte 8)
+                          :direction :output
+                          :if-exists :error)
+          (notice (file-position s)) ;1
+          (write-byte 5 s) 
+          (write-byte 6 s)
+          (let ((p (file-position s)))
+            (notice p) ;2
+            (notice (when p (file-position s (1- p))))) ;3
+          (write-byte 7 s)
+          (notice (file-position s)) ;4
+          (setq file-written (truename s)))
+        (with-open-file (s file-written
+                           :element-type '(unsigned-byte 8)
+                           :direction :input)
+          (notice (file-position s)) ;5
+          (let ((length (file-length s)))
+            (notice length) ;6
+            (when length
+              (dotimes (i length)
+                (notice (read-byte s)))))) ;7,...
+        (nreverse noticed))))
+\EV tester
+ (tester)
+\EV (0 2 T 2 0 2 5 7)
+\OV (0 2 NIL 3 0 3 5 6 7)
+\OV (NIL NIL NIL NIL NIL NIL)
+\endcode
+
+\label Side Effects::
+
+When the \param{position-spec} argument is supplied,
+the \term{file position} in the \param{stream} might be moved.
+
+\label Affected By::
+
+The value returned by \funref{file-position} increases monotonically
+as input or output operations are performed.  
+          
+\label Exceptional Situations::
+
+%Note: KMP thinks there are implemetantions which might provide extensions to allow
+%   non-integer position specs and that we should use special error terminology here
+%   in order to give them some latitude.
+If \param{position-spec} is supplied, but is too large or otherwise inappropriate, 
+an error is signaled.
+
+\label See Also::
+
+\funref{file-length},
+\funref{file-string-length},
+\funref{open}
+
+\label Notes::
+
+%% 23.3.0 19
+Implementations that have character files represented
+as a sequence of records of bounded size might choose to encode the
+file position as, for example,
+\metavar{record-number}*\metavar{max-record-size}+\metavar{character-within-record}.
+This is a valid encoding because it increases monotonically as
+each character is read or written, though not necessarily by 1 at
+each step.  An \term{integer} might then be considered ``inappropriate''
+as \param{position-spec} to \funref{file-position} if, when decoded into
+record number and character number, it turned out that the
+supplied record was too short for the specified character number.
+
+\endcom
+
+%%% ========== FILE-STRING-LENGTH
+\begincom{file-string-length}\ftype{Function}
+
+\issue{CHARACTER-PROPOSAL:2-5-7}
+
+\label Syntax::
+
+\DefunWithValues file-string-length {stream object} {length}
+
+\label Arguments and Values::
+
+\param{stream}---an \term{output} \term{character} \term{file stream}.
+
+\param{object}---a \term{string} or a \term{character}.
+
+\param{length}---a non-negative \term{integer}, or \nil.
+
+\label Description::
+
+\funref{file-string-length} returns the difference between what 
+\f{(file-position \param{stream})} would be after writing 
+\param{object} and its current value, or \nil\ if this cannot be determined.  
+ 
+The returned value corresponds to the current state of \param{stream}
+at the time of the call and might not be 
+% valid if it is called twice;
+% two different values may occur.
+the same if it is called again
+when the state of the \term{stream} has changed.
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endissue{CHARACTER-PROPOSAL:2-5-7}
+
+\endcom
+
+
+%-------------------- File Opening --------------------
+
+% %%% ========== OPEN
+% \begincom{open}\ftype{Function}
+% 
+% \label Syntax::
+% 
+% \DefunWithValuesNewline open
+% 		 	{filespec {\key} \vtop{\hbox{direction element-type}
+% 				               \hbox{if-exists if-does-not-exist
+% 						     external-format}}}
+% 		        {stream}
+% 
+% \label Arguments and Values::
+% 
+% \param{filespec}---a \term{pathname designator}.
+% 
+% \param{direction}---one of \kwd{input}, \kwd{output}, \kwd{io}, or \kwd{probe}.
+%  \Default{\kwd{input}}
+% 
+% %% 23.2.0 9
+% %% 23.2.0 10
+% %% 23.2.0 11
+% %% 23.2.0 12
+% %% 23.2.0 13
+% %% 23.2.0 14
+% %% 23.2.0 15
+% %% 23.2.0 16
+% %% 23.2.0 17
+% %% 23.2.0 18
+% %% 23.2.0 19
+% \param{element-type}---a \term{type specifier} 
+% 		       for \term{recognizable subtype} of \typeref{character};
+% 		    or a \term{type specifier} 
+% 		       for a \term{finite} \term{recognizable subtype} of \term{integer};
+% 		    or one of the \term{symbols} 
+%                           \misc{signed-byte},
+%                           \misc{unsigned-byte},
+% 		       or \kwd{default}.
+% % \param{element-type}---\term{type specifier};
+% %   a \term{subtype} of \typeref{character} or \typeref{integer};
+% %   one of the following:
+% %      \typeref{character},
+% %      \f{(unsigned-byte \i{n})},
+% %      \typeref{unsigned-byte},
+% %      \f{(signed-byte \i{n})},
+% %      \typeref{signed-byte},
+% %      \typeref{bit},
+% %      \f{(mod \i{n})},
+% %   or \kwd{default},
+% % where \i{n} is an \term{integer}.
+%   \Default{\typeref{character}}
+% 
+% %% 23.2.0 21
+% %% 23.2.0 22
+% %% 23.2.0 23
+% %% 23.2.0 24
+% %% 23.2.0 25
+% %% 23.2.0 26
+% %% 23.2.0 27
+% %% 23.2.0 28
+% \param{if-exists}---one of \kwd{error}, \kwd{new-version}, \kwd{rename},
+% 		  \kwd{rename-and-delete}, \kwd{overwrite}, \kwd{append},
+% 		  \kwd{supersede}, or \nil.
+% 
+% %% 23.2.0 35
+% %% 23.2.0 36
+% \param{if-does-not-exist}---one of \kwd{error}, \kwd{create}, or \nil.
+% 
+% \issue{CHARACTER-PROPOSAL:2-5-2}
+% \param{external-format}---an \term{external file format designator}.
+%   \Default{\kwd{default}}
+% \endissue{CHARACTER-PROPOSAL:2-5-2}
+% 
+% \issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+% \param{stream}---a \term{file stream} or \nil.
+% \endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+% 
+% \label Description::
+% 
+% %% 23.2.0 2
+% %% 23.2.0 3
+% \funref{open} creates, opens, and returns a \term{file stream} 
+% that is connected to the file specified by \param{filespec}.
+% \param{Filespec} is the name of the file to be opened.  
+% %% Moon: Mostly redundant.
+% % \issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+% % If \param{filespec} is a \term{stream},
+% % \param{filespec} effectively
+% % becomes {\tt (pathname \param{filespec})}. \funref{open}
+% % can be used on either an open or a closed \term{stream},
+% % \endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+% % and the \term{stream} is not
+% % closed first or otherwise affected.
+% % \issue{PATHNAME-STREAM}
+% % Also, if \param{filespec} is a \term{stream}, 
+% % that \term{stream}
+% % can only have been originally opened by
+% % \funref{open} or \macref{with-open-file}, 
+% % or is a \term{synonym stream} whose \term{symbol} is bound
+% % to a \term{stream} originally opened by
+% % \funref{open} or \macref{with-open-file}.
+% % If \param{filespec} is a \term{pathname} (as returned by \funref{pathname})
+% % it represents the name used to open the file. This might be, but is
+% % not required to be, the actual name of the file. 
+% % \issue{PATHNAME-LOGICAL:ADD}
+% % If \param{filespec} is a \term{logical pathname}, it is translated
+% % into a physical pathname as if by calling \funref{translate-logical-pathname}.
+% % \endissue{PATHNAME-LOGICAL:ADD}
+% %% Salvaged from the above. -kmp 16-Feb-92
+% If the \param{filespec} \term{designator} is a \term{stream},
+% that \term{stream} is not closed first or otherwise affected.
+% 
+% %% Implied by pathname designator. -kmp 16-Feb-92
+% % It is an error if \param{filespec} is a \term{stream} that is 
+% % created with \funref{make-two-way-stream}, 
+% % \funref{make-echo-stream},
+% % \funref{make-broadcast-stream}, 
+% % \funref{make-concatenated-stream}, \funref{make-string-input-stream},
+% % \funref{make-string-output-stream}.
+% %\endissue{PATHNAME-STREAM}
+% 
+% The keyword arguments to \funref{open} specify the characteristics 
+% of the \term{file stream} that is returned, and how to handle errors.
+% 
+% %% 23.2.0 30
+% If \param{direction} is \kwd{input}
+% %% Barrett: defaults
+% %, not supplied, 
+% or \kwd{probe},
+% or if \param{if-exists} is not \kwd{new-version}
+% and the version component of the \param{filespec} is \kwd{newest},
+% then the file opened is that file already existing in the file system
+% that has a version greater than that of any other file in the file system
+% whose other pathname components are the same as those of \param{filespec}.
+% 
+% 
+% %% 23.2.0 31
+% %% 23.2.0 32
+% An implementation is required to recognize all of 
+% the \funref{open} keyword options 
+% and to do something reasonable in the context of the host operating
+% system.  
+% For example, if a file system does not support distinct file
+% versions and does not distinguish the notions of deletion and expunging,
+% \kwd{new-version} might be treated the same as
+% \kwd{rename} or \kwd{supersede}, and \kwd{rename-and-delete} might
+% be treated the same as \kwd{supersede}.
+% 
+% \beginlist
+% \itemitem{\bf :direction}
+% 
+% 
+% \Thenextfigure\ lists the possible values for \param{direction} options and their meanings.
+% %% 23.2.0 4
+% %% 23.2.0 5
+% %% 23.2.0 6
+% %% 23.2.0 7
+% %% 23.2.0 8
+% \boxfig
+% {\dimen0=.75pc
+% \tabskip \dimen0 plus .5 fil
+% \halign to \hsize {#\hfil\tabskip \dimen0 plus 1fil&#\hfil\cr 
+% \noalign{\vskip -9pt}
+% \hfil{\bf Direction} & {\bf Result with respect to the created \term{stream}} \cr
+% \noalign{\vskip 2pt\hrule\vskip 2pt}
+% \kwd{input}
+% % or not supplied
+% 			    & Creates an \term{input} \term{file stream}. \cr
+% 			    & \cr
+% \kwd{output} 	            & Creates an \term{output} \term{file stream}. \cr
+% 			    & \cr
+% \kwd{io} 		    & Creates a \term{bidirectional} \term{file stream}. \cr
+% 			    & \cr
+% \kwd{probe} 	            & Creates a no-directional \term{file stream};
+% 			      the \term{file stream}  \cr
+%              		    & is in effect created and then closed. \cr
+% \noalign{\vskip -9pt}
+% }}
+% \caption{Options for open---1}
+% \endfig
+% 
+% 
+% \itemitem{\bf :element-type}
+% 
+% \param{element-type} specifies the unit of transaction for the \term{file stream}.
+% %% This is the only salvaged info from the next block of commented out stuff. -kmp 14-Feb-92
+% If it is \kwd{default}, the unit is determined by \term{file system},
+% possibly based on the \term{file}.
+% % 
+% % \Thenextfigure\ gives the correspondence between the listed values for
+% % \param{element-type} and the unit of transaction.
+% % 
+% % \boxfig
+% % {\dimen0=.75pc
+% % \tabskip \dimen0 plus .5 fil
+% % \halign to \hsize {#\hfil\tabskip \dimen0 plus 1fil&#\hfil\cr 
+% % \noalign{\vskip -9pt}
+% % \hfil{\bf Element-type} & {\bf Unit of Transaction} \cr
+% % \noalign{\vskip 2pt\hrule\vskip 2pt}
+% % %{\tt string-char} or not supplied & a \term{string-char} \cr
+% % %& \cr
+% % {\tt character} & Any \term{character} \cr
+% % & \cr
+% % {\tt (unsigned-byte \i{n})} & A non-negative \term{integer} of size
+% % \i{n} \cr
+% % & \cr
+% % {\tt unsigned-byte} & A non-negative \term{integer} (size determined
+% % by file system) \cr
+% % & \cr
+% % {\tt (signed-byte \i{n})} & Signed byte of size \i{n} \cr
+% % & \cr
+% % {\tt signed-byte} & Signed byte (size determined by file system) \cr
+% % & \cr
+% % {\tt bit} & Values \f{0} and \f{1} \cr
+% % & \cr
+% % {\tt (mod \i{n})} & A non-negative \term{integer} less than \i{n}
+% % \cr
+% % & \cr
+% % \kwd{default} & Determined by file system based on the file \cr
+% % \noalign{\vskip -9pt}
+% % }}
+% % \caption{Options for open---2}
+% % \endfig
+% 
+% \itemitem{\bf :if-exists}
+% 
+% \param{if-exists} specifies the action to be taken if \param{direction} is
+% \kwd{output} or \kwd{io} and a file of the name \param{filespec} 
+% already exists.
+% If \param{direction} is \kwd{input}, not supplied, or \kwd{probe}, 
+% \param{if-exists} is ignored.
+% \Thenextfigure\ gives the result of \funref{open} as modified 
+% by \param{if-exists}.
+% %% 23.2.0 29
+% %% 23.2.0 20
+% 
+% \boxfig
+% {\dimen0=.75pc
+% \tabskip \dimen0 plus .5 fil
+% \halign to \hsize {#\hfil\tabskip \dimen0 plus 1fil&#\hfil\cr 
+% \noalign{\vskip -9pt}
+% \hfil{\bf If-exists} & {\bf Result with respect to file named \param{filespec}} \cr
+% \noalign{\vskip 2pt\hrule\vskip 2pt}
+% \kwd{error} or not supplied & An error \oftype{file-error} is signaled. \cr
+% when the version component of & \cr
+% \param{filespec} is not \kwd{newest} & \cr
+%  & \cr
+% \kwd{new-version} or not supplied & A new file is created \cr
+% when the version component of &	with a larger version number. \cr
+% \param{filespec} is \kwd{newest} & \cr
+%  & \cr
+% \kwd{rename} & The existing file is renamed \cr
+% 	& to some other name and then a new file is created. \cr
+% & \cr
+% \kwd{rename-and-delete} & The existing file is renamed \cr
+% 	& to some other name, then it is deleted \cr
+% 	& but not expunged, and then a new file is created. \cr
+% & \cr
+% \kwd{overwrite} & Output operations on the \term{stream} \cr
+% 	& destructively modify the existing file. \cr
+% 	& If \param{direction} is \kwd{io} the file is  \cr
+%       	& opened in a bidirectional mode that allows both \cr
+% 	& reading and writing.  The file pointer is initially \cr
+%    	& positioned at the beginning of the file; however, \cr
+%         & the file is not truncated back to length zero \cr
+%    	& when it is opened. \cr
+% & \cr
+% \kwd{append} & Output operations on the \term{stream} \cr
+% 	& destructively modify the existing file.  \cr
+% 	& The file pointer is initially positioned at \cr
+%         & the end of the file. \cr
+% 	& If \param{direction} is \kwd{io}, \cr
+%  	& the file is opened in a bidirectional mode that \cr
+% 	& allows both reading and writing. \cr
+% & \cr
+% \kwd{supersede} & The existing file is superseded,   \cr
+% 	& \ie a new file with the same name as the old \cr
+% 	& one is created. If possible, the implementation \cr
+% 	& should not destroy the old file until the new \cr
+%         &  \term{stream} is closed. \cr
+% & \cr
+% \nil\ & No file or \term{stream} is created. \cr
+% 	& \nil\ is returned to indicate failure. \cr
+% \noalign{\vskip -9pt}
+% }}
+% \caption{Options for open---3}
+% \endfig
+%                                      
+% \itemitem{\bf :if-does-not-exist}
+% 
+% %% 23.2.0 34
+% \param{if-does-not-exist}
+% specifies the action to be taken if
+% a file of name \param{filespec} does not already exist.
+% \Thenextfigure\  gives the result of \funref{open} as modified by 
+% \param{if-does-not-exist}.
+% 
+% 
+% %% 23.2.0 37
+% \boxfig                             
+% {\dimen0=.75pc
+% \tabskip \dimen0 plus .5 fil
+% \halign to \hsize {#\hfil\tabskip \dimen0 plus 1fil&#\hfil\cr 
+% \noalign{\vskip -9pt}
+% \hfil{\bf If-does-not-exist} & {\bf Result with respect to file named \param{filespec}} \cr
+% \noalign{\vskip 2pt\hrule\vskip 2pt}
+% \kwd{error} or not supplied & An error \oftype{file-error} is signaled. \cr
+% and \param{direction} is \kwd{input}, & \cr
+% or if \param{if-exists} is  & \cr
+% \kwd{overwrite} or \kwd{append}. & \cr
+%  & \cr
+% \kwd{create} or not supplied & An empty file is created. \cr
+% when \param{direction} is \kwd{output}& Processing continues  as if the file \cr
+% or \kwd{io}, and \param{if-exists} & had already existed but no processing as \cr
+% is anything but \kwd{overwrite} & directed by \param{if-exists} is performed. \cr
+% or \kwd{append}. & \cr
+%  & \cr
+% \nil\ or not supplied & No file or \term{stream} is created. \cr
+% when \param{direction} is \kwd{probe}.& \nil\ is returned to indicate failure. \cr
+% \noalign{\vskip -9pt}
+% }}
+% \caption{Options for open---4}
+% \endfig
+% 
+% \issue{CHARACTER-PROPOSAL:2-5-2}
+% \itemitem{\kwd{external-format}}
+% 
+% This option selects an \term{external file format} for the \term{file}:
+% % There are no conforming
+% % \term{values} for \param{external-format} other than the default \term{value},
+% % \kwd{default}, which selects a format that can accomodate at least the
+% % \term{base characters}.  \term{Implementations} are permitted to define
+% % additional external file formats.
+% The only \term{standardized} value for this option is \kwd{default},
+% although \term{implementations} are permitted to define additional 
+% \term{external file formats} and \term{implementation-dependent} values 
+% returned by \funref{stream-external-format} can also be used by \term{conforming programs}.
+%  
+% % The \param{external-format} is meaningful for 
+% %      \term{input},
+% %      \term{output},
+% %  and \term{bidirectional} \term{streams}.
+% %% Rewritten by KMP based on discussions with RWK:
+% The \param{external-format} is meaningful for
+% any kind of \term{file stream} whose \term{element type}
+% is a \term{subtype} of \term{character}.
+% This option is ignored for \term{streams} for which it is not meaningful;
+% however, \term{implementations} may define other \term{element types} 
+% for which it is meaningful.
+% %End of rewrite.
+% The consequences are unspecified if a \term{character} is written 
+% that cannot be represented by the given \term{external file format}.
+% \endissue{CHARACTER-PROPOSAL:2-5-2}
+% 
+% \endlist
+% 
+% %% 23.2.0 1 
+% When a file is opened, a \term{file stream} is constructed to serve
+% as the file system's ambassador to the \Lisp\ environment;
+% operations on the \term{file stream} are reflected by operations on the file
+% in the file system.  
+% 
+% A file can be deleted, renamed, or destructively modified by \funref{open}.
+% 
+% For information about opening relative pathnames,
+% \seesection\MergingPathnames.
+% 
+% \label Examples::
+% 
+% \code
+%  (open \i{filespec} :direction :probe)  \EV #<Closed Probe File Stream...>
+%  (setq q (merge-pathnames (user-homedir-pathname) "test"))
+% \EV #<PATHNAME :HOST NIL :DEVICE \i{device-name} :DIRECTORY \i{directory-name}
+%     :NAME "test" :TYPE NIL :VERSION :NEWEST>
+%  (open \i{filespec} :if-does-not-exist :create) \EV #<Input File Stream...>
+%  (setq s (open \i{filespec} :direction :probe)) \EV #<Closed Probe File Stream...>
+%  (truename s) \EV #<PATHNAME :HOST NIL :DEVICE \i{device-name} :DIRECTORY
+%     \i{directory-name} :NAME \i{filespec} :TYPE \i{extension} :VERSION 1>
+%  (open s :direction :output :if-exists nil) \EV NIL 
+% \endcode
+% 
+% \label Affected By::
+% 
+% The nature and state of the host computer's \term{file system}.
+% 
+% \label Exceptional Situations::                        
+% 
+% If \param{if-exists} is \kwd{error}, (subject to the
+% constraints on the meaning of \param{if-exists} listed above),
+% an error \oftype{file-error} is signaled.                        
+% 
+% If \param{if-does-not-exist} is \kwd{error} (subject to the
+% constraints on the meaning of \param{if-does-not-exist} listed above),
+% an error \oftype{file-error} is signaled.
+% 
+% %% 23.2.0 33
+% If it is impossible for an implementation to handle some option
+% in a manner close to what is specified here,
+% an error \oftype{error} might be signaled.
+% 
+% \issue{PATHNAME-WILD:NEW-FUNCTIONS}
+% % !!! Moon: I would have assumed type-error rather than file-error for this one.
+% %           I have no strong opinion, though.
+% An error \oftype{file-error} is signaled if
+% {\tt (wild-pathname-p \param{filespec})} returns true.
+% \endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+% 
+% \issue{CHARACTER-PROPOSAL:2-5-2}
+% An error \oftype{error} is signaled if the \param{external-format} 
+% is not understood by the \term{implementation}.
+% \endissue{CHARACTER-PROPOSAL:2-5-2}
+% 
+% % Refer to minutes of Dec-91 meeting (issue STREAM-ELEMENT-TYPE-UPGRADING) for
+% % an explanation of where this came from. -kmp 12-Feb-92
+% The various \term{file systems} in existence today have widely differing capabilities,
+% and some aspects of the \term{file system} are beyond the scope of this specification
+% to define.  A given \term{implementation} might not be able to support all of these options 
+% in exactly the manner stated.  An \term{implementation} is required to recognize all of 
+% these option keywords and to try to do something ``reasonable'' in the context of the 
+% host \term{file system}.  Where necessary to accomodate the \term{file system},
+% an \term{implementation} deviate slightly from the semantics specified here without 
+% being disqualified for consideration as a \term{conforming implementation}.
+% If it is utterly impossible for an \term{implementation} to handle some option
+% in a manner similar to what is specified here, it may simply signal an error.
+% 
+% With regard to the \kwd{element-type} option, if a \term{type} is
+% requested that is not supported by the \term{file system}, a substitution of types 
+% such as that which goes on in \term{upgrading} is permissible.  As a minimum 
+% requirement, it should be the case that opening an \term{output} \term{stream}
+% to a \term{file} in a given \term{element type} and later opening 
+% an \term{input} \term{stream} to the same \term{file} in the same \term{element type}
+% should work compatibly.
+% 
+% \label See Also::
+% 
+% \issue{PATHNAME-LOGICAL:ADD}
+% \funref{with-open-file},
+% \funref{close},
+% \typeref{pathname},
+% \typeref{logical-pathname},
+% \endissue{PATHNAME-LOGICAL:ADD}
+% {\secref\MergingPathnames}
+% 
+% \label Notes::
+% 
+% \issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+% % \issue{PATHNAME-LOGICAL:ADD}
+% % Whether or not \funref{open} recognizes \term{logical pathname} \term{namestrings}
+% % is \term{implementation-defined}.
+% % \endissue{PATHNAME-LOGICAL:ADD}
+% \endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+%  
+% %% 23.2.0 38
+% \funref{open} does not automatically close the file when an abnormal
+% exit occurs.
+% 
+% When \param{element-type} is a \term{subtype} of \typeref{character},
+% \funref{read-char} and/or \funref{write-char} can be
+% used on the resulting \term{file stream}. 
+% 
+% When \param{element-type} is a \term{subtype} of \term{integer},
+% \funref{read-byte} and/or \funref{write-byte} can be used on the resulting \term{file stream}.
+% 
+% % When \param{element-type} is 
+% %     \typeref{unsigned-byte},
+% %     {\tt (unsigned-byte \i{n})},
+% %     \typeref{signed-byte},
+% %     {\tt (signed-byte \i{n})},
+% %     \typeref{bit}, 
+% %  or {\tt (mod \i{n})},
+% % \funref{read-byte} and/or \funref{write-byte} can be
+% % used on the resulting \term{file stream}.
+% 
+% When \param{element-type} is \kwd{default},
+% the \term{type} can be determined by using \funref{stream-element-type}.
+% 
+% \endcom
+
+%%% ========== OPEN
+\begincom{open}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValuesNewline open
+		 	{filespec {\key} \vtop{\hbox{direction element-type}
+				               \hbox{if-exists if-does-not-exist
+						     external-format}}}
+		        {stream}
+
+\label Arguments and Values::
+
+\param{filespec}---a \term{pathname designator}.
+
+\param{direction}---one of \kwd{input}, \kwd{output}, \kwd{io}, or \kwd{probe}.
+ \Default{\kwd{input}}
+
+%% 23.2.0 9
+%% 23.2.0 10
+%% 23.2.0 11
+%% 23.2.0 12
+%% 23.2.0 13
+%% 23.2.0 14
+%% 23.2.0 15
+%% 23.2.0 16
+%% 23.2.0 17
+%% 23.2.0 18
+%% 23.2.0 19
+\param{element-type}---a \term{type specifier} 
+		       for \term{recognizable subtype} of \typeref{character};
+		    or a \term{type specifier} 
+		       for a \term{finite} \term{recognizable subtype} of \term{integer};
+		    or one of the \term{symbols} 
+                          \misc{signed-byte},
+                          \misc{unsigned-byte},
+		       or \kwd{default}.
+ \Default{\typeref{character}}
+
+%% 23.2.0 21
+%% 23.2.0 22
+%% 23.2.0 23
+%% 23.2.0 24
+%% 23.2.0 25
+%% 23.2.0 26
+%% 23.2.0 27
+%% 23.2.0 28
+\param{if-exists}---one of \kwd{error}, \kwd{new-version}, \kwd{rename},
+		  \kwd{rename-and-delete}, \kwd{overwrite}, \kwd{append},
+		  \kwd{supersede}, or \nil.
+ \Default{\kwd{new-version} if the version component of \param{filespec} is \kwd{newest},
+          or \kwd{error} otherwise}
+
+%% 23.2.0 35
+%% 23.2.0 36
+\param{if-does-not-exist}---one of \kwd{error}, \kwd{create}, or \nil.
+ \Default{\kwd{error} if \param{direction} is \kwd{input} 
+		      or \param{if-exists} is \kwd{overwrite} or \kwd{append};
+	  \kwd{create} if \param{direction} is \kwd{output} or \kwd{io},
+		      and \param{if-exists} is neither \kwd{overwrite} nor \kwd{append};
+       or \nil\ when \param{direction} is \kwd{probe}}
+
+\issue{CHARACTER-PROPOSAL:2-5-2}
+\param{external-format}---an \term{external file format designator}.
+  \Default{\kwd{default}}
+\endissue{CHARACTER-PROPOSAL:2-5-2}
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\param{stream}---a \term{file stream} or \nil.
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Description::
+
+%% 23.2.0 2
+%% 23.2.0 3
+\funref{open} creates, opens, and returns a \term{file stream} 
+that is connected to the file specified by \param{filespec}.
+\param{Filespec} is the name of the file to be opened.  
+%% Moon: Mostly redundant.
+% \issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+% If \param{filespec} is a \term{stream},
+% \param{filespec} effectively
+% becomes {\tt (pathname \param{filespec})}. \funref{open}
+% can be used on either an open or a closed \term{stream},
+% \endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+% and the \term{stream} is not
+% closed first or otherwise affected.
+% \issue{PATHNAME-STREAM}
+% Also, if \param{filespec} is a \term{stream}, 
+% that \term{stream}
+% can only have been originally opened by
+% \funref{open} or \macref{with-open-file}, 
+% or is a \term{synonym stream} whose \term{symbol} is bound
+% to a \term{stream} originally opened by
+% \funref{open} or \macref{with-open-file}.
+% If \param{filespec} is a \term{pathname} (as returned by \funref{pathname})
+% it represents the name used to open the file. This might be, but is
+% not required to be, the actual name of the file. 
+% \issue{PATHNAME-LOGICAL:ADD}
+% If \param{filespec} is a \term{logical pathname}, it is translated
+% into a physical pathname as if by calling \funref{translate-logical-pathname}.
+% \endissue{PATHNAME-LOGICAL:ADD}
+%% Salvaged from the above. -kmp 16-Feb-92
+If the \param{filespec} \term{designator} is a \term{stream},
+that \term{stream} is not closed first or otherwise affected.
+
+The keyword arguments to \funref{open} specify the characteristics 
+of the \term{file stream} that is returned, and how to handle errors.
+
+%% 23.2.0 30
+If \param{direction} is \kwd{input}
+%% Barrett: defaults
+%, not supplied, 
+or \kwd{probe},
+or if \param{if-exists} is not \kwd{new-version}
+and the version component of the \param{filespec} is \kwd{newest},
+then the file opened is that file already existing in the file system
+that has a version greater than that of any other file in the file system
+whose other pathname components are the same as those of \param{filespec}.
+
+%% 23.2.0 31
+%% 23.2.0 32
+An implementation is required to recognize all of 
+the \funref{open} keyword options 
+and to do something reasonable in the context of the host operating
+system.  
+For example, if a file system does not support distinct file
+versions and does not distinguish the notions of deletion and expunging,
+\kwd{new-version} might be treated the same as
+\kwd{rename} or \kwd{supersede}, and \kwd{rename-and-delete} might
+be treated the same as \kwd{supersede}.
+
+\beginlist
+
+\itemitem{\kwd{direction}}
+
+These are the possible values for \param{direction}, 
+and how they affect the nature of the \term{stream} that is created:
+
+\beginlist
+%% 23.2.0 4
+%% 23.2.0 5
+%% 23.2.0 6
+%% 23.2.0 7
+%% 23.2.0 8
+\itemitem{\kwd{input}}
+
+Causes the creation of an \term{input} \term{file stream}.
+
+\itemitem{\kwd{output}} 	            
+
+Causes the creation of an \term{output} \term{file stream}.
+
+\itemitem{\kwd{io}}
+
+Causes the creation of a \term{bidirectional} \term{file stream}.
+
+\itemitem{\kwd{probe}}
+
+Causes the creation of a ``no-directional'' \term{file stream}; 
+in effect, the \term{file stream} is created 
+and then closed prior to being returned by \funref{open}.
+
+\endlist
+
+\itemitem{\kwd{element-type}}
+
+The \param{element-type} specifies the unit of transaction for the \term{file stream}.
+%% This is the only salvaged info from the next block of commented out stuff. -kmp 14-Feb-92
+If it is \kwd{default},
+the unit is determined by \term{file system},
+possibly based on the \term{file}.
+
+\itemitem{\kwd{if-exists}}
+
+\param{if-exists} specifies the action to be taken if \param{direction} is
+\kwd{output} or \kwd{io} and a file of the name \param{filespec} 
+already exists.
+If \param{direction} is \kwd{input}, not supplied, or \kwd{probe}, 
+\param{if-exists} is ignored.
+These are the results of \funref{open} as modified by \param{if-exists}:
+%% 23.2.0 29
+%% 23.2.0 20
+
+\beginlist 
+
+\itemitem{\kwd{error}}
+
+An error \oftype{file-error} is signaled.
+
+\itemitem{\kwd{new-version}}
+
+A new file is created with a larger version number.
+
+\itemitem{\kwd{rename}} 
+
+The existing file is renamed to some other name and then a new file is created.
+
+\itemitem{\kwd{rename-and-delete}}
+
+The existing file is renamed to some other name,
+then it is deleted but not expunged, and then a new file is created.
+
+\itemitem{\kwd{overwrite}}
+
+Output operations on the \term{stream} destructively modify the existing file.
+If \param{direction} is \kwd{io} the file is opened in a bidirectional mode
+that allows both reading and writing.  The file pointer is initially 
+positioned at the beginning of the file; however, the file is not truncated
+back to length zero when it is opened.
+
+\itemitem{\kwd{append}}
+
+Output operations on the \term{stream} destructively modify the existing file.
+The file pointer is initially positioned at the end of the file.
+
+If \param{direction} is \kwd{io},
+the file is opened in a bidirectional mode that allows both reading and writing.
+
+\itemitem{\kwd{supersede}}
+
+The existing file is superseded;
+that is, a new file with the same name as the old one is created.
+If possible, the implementation should not destroy the old file until the new
+\term{stream} is closed.
+
+\itemitem{\nil}
+
+No file or \term{stream} is created;
+instead, \nil\ is returned to indicate failure.
+
+\endlist
+                                     
+\itemitem{\kwd{if-does-not-exist}}
+
+%% 23.2.0 34
+\param{if-does-not-exist}
+specifies the action to be taken if
+a file of name \param{filespec} does not already exist.
+These are the results of \funref{open} as modified by \param{if-does-not-exist}:
+
+%% 23.2.0 37
+\beginlist
+
+\itemitem{\kwd{error}}
+
+An error \oftype{file-error} is signaled.
+
+\itemitem{\kwd{create}}
+
+An empty file is created.
+Processing continues  as if the file 
+had already existed but no processing as 
+directed by \param{if-exists} is performed.
+
+\itemitem{\nil}
+
+No file or \term{stream} is created;
+instead, \nil\ is returned to indicate failure.
+
+\endlist
+
+\issue{CHARACTER-PROPOSAL:2-5-2}
+\itemitem{\kwd{external-format}}
+
+This option selects an \term{external file format} for the \term{file}:
+% There are no conforming
+% \term{values} for \param{external-format} other than the default \term{value},
+% \kwd{default}, which selects a format that can accomodate at least the
+% \term{base characters}.  \term{Implementations} are permitted to define
+% additional external file formats.
+The only \term{standardized} value for this option is \kwd{default},
+although \term{implementations} are permitted to define additional 
+\term{external file formats} and \term{implementation-dependent} values 
+returned by \funref{stream-external-format} can also be used by \term{conforming programs}.
+ 
+% The \param{external-format} is meaningful for 
+%      \term{input},
+%      \term{output},
+%  and \term{bidirectional} \term{streams}.
+%% Rewritten by KMP based on discussions with RWK:
+The \param{external-format} is meaningful for
+any kind of \term{file stream} whose \term{element type}
+is a \term{subtype} of \term{character}.
+This option is ignored for \term{streams} for which it is not meaningful;
+however, \term{implementations} may define other \term{element types} 
+for which it is meaningful.
+%End of rewrite.
+The consequences are unspecified if a \term{character} is written 
+that cannot be represented by the given \term{external file format}.
+\endissue{CHARACTER-PROPOSAL:2-5-2}
+
+\endlist
+
+%% 23.2.0 1 
+When a file is opened, a \term{file stream} is constructed to serve
+as the file system's ambassador to the \Lisp\ environment;
+operations on the \term{file stream} are reflected by operations on the file
+in the file system.  
+
+A file can be deleted, renamed, or destructively modified by \funref{open}.
+
+For information about opening relative pathnames,
+\seesection\MergingPathnames.
+
+\label Examples::
+
+\code
+ (open \i{filespec} :direction :probe)  \EV #<Closed Probe File Stream...>
+ (setq q (merge-pathnames (user-homedir-pathname) "test"))
+\EV #<PATHNAME :HOST NIL :DEVICE \i{device-name} :DIRECTORY \i{directory-name}
+    :NAME "test" :TYPE NIL :VERSION :NEWEST>
+ (open \i{filespec} :if-does-not-exist :create) \EV #<Input File Stream...>
+ (setq s (open \i{filespec} :direction :probe)) \EV #<Closed Probe File Stream...>
+ (truename s) \EV #<PATHNAME :HOST NIL :DEVICE \i{device-name} :DIRECTORY
+    \i{directory-name} :NAME \i{filespec} :TYPE \i{extension} :VERSION 1>
+ (open s :direction :output :if-exists nil) \EV NIL 
+\endcode
+
+\label Affected By::
+
+The nature and state of the host computer's \term{file system}.
+
+\label Exceptional Situations::                        
+
+If \param{if-exists} is \kwd{error}, (subject to the
+constraints on the meaning of \param{if-exists} listed above),
+an error \oftype{file-error} is signaled.                        
+
+If \param{if-does-not-exist} is \kwd{error} (subject to the
+constraints on the meaning of \param{if-does-not-exist} listed above),
+an error \oftype{file-error} is signaled.
+
+%% 23.2.0 33
+If it is impossible for an implementation to handle some option
+in a manner close to what is specified here,
+an error \oftype{error} might be signaled.
+
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+% !!! Moon: I would have assumed type-error rather than file-error for this one.
+%           I have no strong opinion, though.
+An error \oftype{file-error} is signaled if
+{\tt (wild-pathname-p \param{filespec})} returns true.
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+
+\issue{CHARACTER-PROPOSAL:2-5-2}
+An error \oftype{error} is signaled if the \param{external-format} 
+is not understood by the \term{implementation}.
+\endissue{CHARACTER-PROPOSAL:2-5-2}
+
+% Refer to minutes of Dec-91 meeting (issue STREAM-ELEMENT-TYPE-UPGRADING) for
+% an explanation of where this came from. -kmp 12-Feb-92
+The various \term{file systems} in existence today have widely differing capabilities,
+and some aspects of the \term{file system} are beyond the scope of this specification
+to define.  A given \term{implementation} might not be able to support all of these options 
+in exactly the manner stated.  An \term{implementation} is required to recognize all of 
+these option keywords and to try to do something ``reasonable'' in the context of the 
+host \term{file system}.  Where necessary to accomodate the \term{file system},
+an \term{implementation} deviate slightly from the semantics specified here without 
+being disqualified for consideration as a \term{conforming implementation}.
+If it is utterly impossible for an \term{implementation} to handle some option
+in a manner similar to what is specified here, it may simply signal an error.
+
+With regard to the \kwd{element-type} option, if a \term{type} is
+requested that is not supported by the \term{file system}, a substitution of types 
+such as that which goes on in \term{upgrading} is permissible.  As a minimum 
+requirement, it should be the case that opening an \term{output} \term{stream}
+to a \term{file} in a given \term{element type} and later opening 
+an \term{input} \term{stream} to the same \term{file} in the same \term{element type}
+should work compatibly.
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\funref{with-open-file},
+\funref{close},
+\typeref{pathname},
+\typeref{logical-pathname},
+\endissue{PATHNAME-LOGICAL:ADD}
+{\secref\MergingPathnames},
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes::
+
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+% \issue{PATHNAME-LOGICAL:ADD}
+% Whether or not \funref{open} recognizes \term{logical pathname} \term{namestrings}
+% is \term{implementation-defined}.
+% \endissue{PATHNAME-LOGICAL:ADD}
+\endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+ 
+%% 23.2.0 38
+\funref{open} does not automatically close the file when an abnormal
+exit occurs.
+
+When \param{element-type} is a \term{subtype} of \typeref{character},
+\funref{read-char} and/or \funref{write-char} can be
+used on the resulting \term{file stream}. 
+
+When \param{element-type} is a \term{subtype} of \term{integer},
+\funref{read-byte} and/or \funref{write-byte} can be used on the resulting \term{file stream}.
+
+% When \param{element-type} is 
+%     \typeref{unsigned-byte},
+%     {\tt (unsigned-byte \i{n})},
+%     \typeref{signed-byte},
+%     {\tt (signed-byte \i{n})},
+%     \typeref{bit}, 
+%  or {\tt (mod \i{n})},
+% \funref{read-byte} and/or \funref{write-byte} can be
+% used on the resulting \term{file stream}.
+
+When \param{element-type} is \kwd{default},
+the \term{type} can be determined by using \funref{stream-element-type}.
+
+\endcom
+
+
+%%% ========== STREAM-EXTERNAL-FORMAT
+\begincom{stream-external-format}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues stream-external-format {stream} {format}
+
+\label Arguments and Values::
+
+\param{stream}---a \term{file stream}.
+
+\param{format}---an \term{external file format}.
+
+\label Description::
+
+Returns an \term{external file format designator} for the \param{stream}.
+
+\label Examples::
+
+\code
+ (with-open-file (stream "test" :direction :output)
+   (stream-external-format stream))
+\EV :DEFAULT
+\OV :ISO8859/1-1987
+\OV (:ASCII :SAIL)
+\OV ACME::PROPRIETARY-FILE-FORMAT-17
+\OV #<FILE-FORMAT :ISO646-1983 2343673>
+\endcode
+
+\label Side Effects:\None!
+
+\label Affected By:\None!
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+the \kwd{external-format} \term{argument} to \thefunction{open} and
+\themacro{with-open-file}.
+
+\label Notes::
+
+The \param{format} returned is not necessarily meaningful 
+to other \term{implementations}.
+
+\endcom
+
+%%% ========== WITH-OPEN-FILE
+\begincom{with-open-file}\ftype{macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\DefmacWithValuesNewline with-open-file
+		  {\paren{stream filespec \starparam{options}}
+		   \starparam{declaration}
+		   \starparam{form}}
+		  {results}
+
+\label Arguments and Values::
+
+\param{stream} -- a variable.
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\param{filespec}---a \term{pathname designator}.
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+%!!! I doubt this can be right. -kmp 22-Apr-91
+\param{options} -- \term{forms}; \eval.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{forms}---an \term{implicit progn}.
+                                   
+\param{results}---the \term{values} returned by the \param{forms}.
+
+\label Description::
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\macref{with-open-file} uses \funref{open} to create a \term{file stream}
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+to \term{file} named by \param{filespec}. 
+%% 23.2.0 41
+\param{Filespec} is the name of the file to be opened.
+\param{Options} are used as keyword arguments to \funref{open}.
+%% Moon thought this was "drivel". -kmp 11-Feb-92
+% Then \macref{with-open-file} performs a 
+% specified series of actions on the open file.
+%% This is implied by "pathname designator". -kmp 16-Feb-92
+% \issue{PATHNAME-STREAM}
+% If \param{filespec} is a \term{file stream}, that \term{file stream}
+% can only have been originally opened by
+% \funref{open} or \macref{with-open-file}, 
+% or is a \term{synonym stream} whose \term{symbol} is bound
+% to a \term{file stream} originally opened by
+% \funref{open} or \macref{with-open-file}.
+% If \param{filespec} is a \term{pathname} (as returned by \funref{pathname}
+% it represents the name used to open the file. This may be, but is
+% not required to be, the actual name of the file. 
+% \endissue{PATHNAME-STREAM}
+% \issue{PATHNAME-LOGICAL:ADD}
+% If \param{filespec} is a \term{logical pathname}, it is translated
+% into a physical pathname as if by calling \funref{translate-logical-pathname}.
+% \endissue{PATHNAME-LOGICAL:ADD}
+
+\issue{WITH-OPEN-FILE-STREAM-EXTENT:DYNAMIC-EXTENT}
+The \term{stream} \term{object} to which the \param{stream} \term{variable} 
+is \term{bound} has \term{dynamic extent};
+its \term{extent} ends when the \term{form} is exited.
+\endissue{WITH-OPEN-FILE-STREAM-EXTENT:DYNAMIC-EXTENT}
+
+%% 23.2.0 39
+\macref{with-open-file} evaluates the \param{forms} as an \term{implicit progn} 
+with \param{stream} bound to 
+\issue{WITH-OPEN-FILE-DOES-NOT-EXIST:STREAM-IS-NIL}
+the value returned by \funref{open}.
+\endissue{WITH-OPEN-FILE-DOES-NOT-EXIST:STREAM-IS-NIL}
+
+%% 23.2.0 40
+When control leaves the body, either normally or abnormally (such as by
+use of \specref{throw}), the file is automatically closed.  If a new
+output file is being written, and control leaves abnormally, the file is
+aborted and the file system is left, so far as possible, as if the file
+had never been opened.  
+
+It is possible by the use of \f{:if-exists nil} 
+or \f{:if-does-not-exist nil} for
+\param{stream} to be bound to \nil.
+\issue{WITH-OPEN-FILE-DOES-NOT-EXIST:STREAM-IS-NIL}
+Users of \f{:if-does-not-exist nil} should check for a valid \term{stream}.
+\endissue{WITH-OPEN-FILE-DOES-NOT-EXIST:STREAM-IS-NIL}
+
+
+%% 23.2.0 42
+% %This looks suspect to me. -kmp 22-Apr-91
+% %Moon: Yes, this is drivel.
+%
+% \macref{with-open-file} opens, modifies, and 
+% tries to close the \param{file stream}.
+
+\issue{WITH-OPEN-FILE-SETQ:EXPLICITLY-VAGUE}
+The consequences are undefined if an attempt is made to \term{assign} the 
+\param{stream} \term{variable}.  The compiler may choose to issue a
+warning if such an attempt is detected.
+\endissue{WITH-OPEN-FILE-SETQ:EXPLICITLY-VAGUE}
+
+\label Examples::
+
+\code
+ (setq p (merge-pathnames "test"))
+\EV #<PATHNAME :HOST NIL :DEVICE \i{device-name} :DIRECTORY \i{directory-name}
+    :NAME "test" :TYPE NIL :VERSION :NEWEST>
+ (with-open-file (s p :direction :output :if-exists :supersede)
+    (format s "Here are a couple~%of test data lines~%")) \EV NIL
+ (with-open-file (s p)
+    (do ((l (read-line s) (read-line s nil 'eof)))
+        ((eq l 'eof) "Reached end of file.")
+     (format t "~&*** ~A~%" l)))
+\OUT *** Here are a couple
+\OUT *** of test data lines
+\EV "Reached end of file."
+\endcode
+
+%\code
+% (with-open-file (ifile name :direction :input)
+%   (with-open-file (ofile (merge-pathname-defaults ifile
+%                                                   nil
+%                                                   "out")
+%                          :direction :output
+%                          :if-exists :supersede)
+%     (transduce-file ifile ofile)))
+%\endcode
+
+\issue{WITH-OPEN-FILE-DOES-NOT-EXIST:STREAM-IS-NIL}
+%!!! This example is -way- too weird to be included without more commentary.
+\code
+;; Normally one would not do this intentionally because it is
+;; not perspicuous, but beware when using :IF-DOES-NOT-EXIST NIL
+;; that this doesn't happen to you accidentally...
+ (with-open-file (foo "no-such-file" :if-does-not-exist nil)
+   (read foo))
+\OUT \IN{hello?}
+\EV HELLO? ;This value was read from the terminal, not a file!
+
+;; Here's another bug to avoid...
+ (with-open-file (foo "no-such-file" :direction :output :if-does-not-exist nil)
+   (format foo "Hello"))
+\EV "Hello" ;FORMAT got an argument of NIL!
+\endcode
+\endissue{WITH-OPEN-FILE-DOES-NOT-EXIST:STREAM-IS-NIL}
+
+\label Side Effects::
+
+Creates a \term{stream} to the \term{file} named by \param{filename} (upon entry),
+and closes the \term{stream} (upon exit).
+In some \term{implementations},
+the \term{file} might be locked in some way while it is open.
+If the \term{stream} is an \term{output} \term{stream},
+a \term{file} might be created.
+
+\label Affected By::
+
+The host computer's file system.
+
+\label Exceptional Situations::
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+%% This restriction (and more) is already manifest in OPEN, so just omit it here.
+%
+% \issue{PATHNAME-WILD:NEW-FUNCTIONS}
+% % !!! Moon: I would have assumed type-error rather than file-error for this one.
+% %           I have no strong opinion, though.
+% An error \oftype{file-error} is signaled if
+% \f{(wild-pathname-p \param{filespec})} returns true.
+% \endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+\Seefun{open}.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\funref{open},
+\funref{close},
+\typeref{pathname},
+\typeref{logical-pathname},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+% \issue{PATHNAME-LOGICAL:ADD}
+% Whether or not \macref{with-open-file} recognizes \term{logical pathname} \term{namestrings}
+% is \term{implementation-defined}.
+% \endissue{PATHNAME-LOGICAL:ADD}
+\endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%-------------------- Stream Closing --------------------
+
+%%% ========== CLOSE
+\begincom{close}\ftype{Function}
+
+\label Syntax::
+
+\issue{RETURN-VALUES-UNSPECIFIED:SPECIFY}
+\DefunWithValues close {stream {\key} abort} {result}
+\endissue{RETURN-VALUES-UNSPECIFIED:SPECIFY}
+
+\label Arguments and Values::
+
+%% 21.3.0 7
+\param{stream}---a \term{stream} (either \term{open} or \term{closed}).
+
+\param{abort}---a \term{generalized boolean}.
+ \Default{\term{false}}
+
+\issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+\param{result}---\t\ if the \param{stream} was \term{open} at the time it was
+		     received as an \term{argument},
+		 or \term{implementation-dependent} otherwise.
+\endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+
+
+\label Description::
+
+%% 21.3.0 7
+%% 23.2.0 1
+\funref{close} closes \param{stream}. 
+Closing a \term{stream} means
+that it may no longer be used in input or output operations.
+The act of \term{closing} a \term{file stream}
+ends the association between the \term{stream} and its associated \term{file}; 
+the transaction with the \term{file system} is terminated,
+and input/output may no longer be performed on the \term{stream}. 
+
+If \param{abort} is \term{true}, an attempt is made to clean up any side
+effects of having created \param{stream}.
+If \param{stream} performs output to a file
+that was created when the \term{stream} was created, the
+file is deleted and any previously existing file is not superseded.
+
+It is permissible to close an already closed \term{stream},
+but in that case the \param{result} is \term{implementation-dependent}.
+ 
+After \param{stream} is closed, it is still possible to perform 
+the following query operations upon it:
+\issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+\funref{streamp}, \funref{pathname}, \funref{truename}, 
+\funref{merge-pathnames}, \funref{pathname-host}, \funref{pathname-device},
+\funref{pathname-directory},\funref{pathname-name}, 
+\funref{pathname-type}, \funref{pathname-version}, \funref{namestring}, 
+\funref{file-namestring}, \funref{directory-namestring}, 
+\funref{host-namestring}, \funref{enough-namestring}, \funref{open},
+\funref{probe-file}, and \funref{directory}. 
+\endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+
+\issue{CLOSE-CONSTRUCTED-STREAM:ARGUMENT-STREAM-ONLY}
+The effect of \funref{close} on a \term{constructed stream} is 
+ to close the argument \param{stream} only. 
+There is no effect on the \term{constituents} of \term{composite streams}.
+ 
+For a \term{stream} created with \funref{make-string-output-stream},
+the result of \funref{get-output-stream-string} is unspecified after \funref{close}.
+%% Sandra: Redundant.
+% For a \term{composite stream},
+% the call to \funref{close} has no effect on any of its \term{constituents}.
+\endissue{CLOSE-CONSTRUCTED-STREAM:ARGUMENT-STREAM-ONLY}
+ 
+\label Examples::
+
+%!!! Need to look at this!  -kmp 23-Apr-91
+\code
+ (setq s (make-broadcast-stream)) \EV #<BROADCAST-STREAM>
+ (close s) \EV T
+ (output-stream-p s) \EV \term{true}
+\endcode
+
+\label Side Effects::
+
+The \param{stream} is \term{closed} (if necessary).
+If \param{abort} is \term{true} and the \param{stream} is
+an \term{output} \term{file stream}, its associated \term{file}
+might be deleted.
+
+\label Affected By:\None!
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{open}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== WITH-OPEN-STREAM
+\begincom{with-open-stream}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\DefmacWithValuesNewline with-open-stream 
+		  {\paren{var stream}
+		   \starparam{declaration} 
+		   \starparam{form}}
+		  {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{var}---a \term{variable} \term{name}.
+
+\param{stream}---a \term{form}; evaluated to produce a \term{stream}.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{forms}---an \term{implicit progn}.
+
+\param{results}---the \term{values} returned by the \param{forms}.
+
+\label Description::
+
+\macref{with-open-stream} performs a series of operations on 
+\param{stream}, returns a value, and then closes the \param{stream}.
+
+%% 21.2.0 11
+\param{Var} is bound to the value of \param{stream},
+and then \param{forms} are executed
+as an \term{implicit progn}. 
+\param{stream}
+is automatically closed on exit from \macref{with-open-stream},
+no matter whether the exit is normal or abnormal.
+\issue{WITH-OPEN-FILE-STREAM-EXTENT:DYNAMIC-EXTENT}
+%!!!
+%Moon: I don't see how the following could possibly be true, 
+%      since WITH-OPEN-STREAM does not create the stream.  
+%      WITH-OPEN-FILE is different.  On the other hand,
+%      this accurately reflects the cleanup and CLtL.
+%KMP: I concur, but it will take a technical vote to fix it.
+The \param{stream} has \term{dynamic extent};
+its \term{extent} ends when the \term{form} is exited.
+\endissue{WITH-OPEN-FILE-STREAM-EXTENT:DYNAMIC-EXTENT}
+
+\issue{WITH-OPEN-FILE-SETQ:EXPLICITLY-VAGUE}
+The consequences are undefined if an attempt is made to \term{assign} the 
+the \term{variable} \param{var} with the \param{forms}.
+%The compiler may choose to issue a warning if such an attempt is detected.
+\endissue{WITH-OPEN-FILE-SETQ:EXPLICITLY-VAGUE}
+
+\label Examples::
+
+\code
+ (with-open-stream (s (make-string-input-stream "1 2 3 4"))
+    (+ (read s) (read s) (read s))) \EV 6
+\endcode
+
+\label Side Effects::
+
+The \param{stream} is closed (upon exit).
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{close}
+
+\label Notes:\None.
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%-------------------- Stream Buffering --------------------
+
+%%% ========== LISTEN
+\begincom{listen}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {listen} {{\opt} input-stream} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{input-stream}---an \term{input} \term{stream designator}.
+ \Default{\term{standard input}}
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 22.2.1 36
+Returns \term{true} if 
+there is a character immediately available from \param{input-stream};
+otherwise, returns \term{false}.
+On a non-interactive \param{input-stream},
+\funref{listen} returns \term{true} except when at \term{end of file}\meaning{1}.
+If an \term{end of file} is encountered, \funref{listen} returns \term{false}.
+\funref{listen} is intended to be used 
+when \param{input-stream} obtains characters
+from an interactive device such as a keyboard.  
+
+\label Examples::
+
+\code
+ (progn (unread-char (read-char)) (list (listen) (read-char)))
+\OUT \IN{1}
+\EV (T #\\1)
+ (progn (clear-input) (listen))
+\EV NIL ;Unless you're a very fast typist!
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\varref{*standard-input*}
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{interactive-stream-p},
+\funref{read-char-no-hang}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== CLEAR-INPUT
+\begincom{clear-input}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {clear-input} {{\opt} input-stream} {\nil}
+
+\label Arguments and Values::
+
+\param{input-stream}---an \term{input} \term{stream designator}.
+  \Default{\term{standard input}}
+
+\label Description::
+
+%% 22.2.1 38
+Clears any available input from \param{input-stream}.
+
+If \funref{clear-input} does not make sense for \param{input-stream}, 
+then \funref{clear-input} does nothing. 
+
+\label Examples::
+\code
+;; The exact I/O behavior of this example might vary from implementation
+;; to implementation depending on the kind of interactive buffering that
+;; occurs.  (The call to SLEEP here is intended to help even out the 
+;; differences in implementations which do not do line-at-a-time buffering.)
+
+(defun read-sleepily (&optional (clear-p nil) (zzz 0))
+  (list (progn (print '>) (read))
+        ;; Note that input typed within the first ZZZ seconds 
+        ;; will be discarded.
+        (progn (print '>) 
+               (if zzz (sleep zzz))
+               (print '>>)
+               (if clear-p (clear-input))
+               (read))))
+
+(read-sleepily)
+\OUT > \IN{10}
+\OUT >
+\OUT >> \IN{20}
+\EV (10 20)
+
+(read-sleepily t)
+\OUT > \IN{10}
+\OUT >
+\OUT >> \IN{20}
+\EV (10 20)
+
+(read-sleepily t 10)
+\OUT > \IN{10}
+\OUT > \IN{20}  ; Some implementations won't echo typeahead here.
+\OUT >> \IN{30}
+\EV (10 30)
+\endcode
+
+
+\label Side Effects::
+
+The \param{input-stream} is modified.
+
+\label Affected By::
+
+\varref{*standard-input*}
+
+\label Exceptional Situations::
+
+\Shouldchecktype{input-stream}{a \term{stream designator}}
+
+\label See Also::
+
+\funref{clear-output}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== FINISH-OUTPUT
+%%% ========== FORCE-OUTPUT
+%%% ========== CLEAR-OUTPUT
+\begincom{finish-output, force-output, clear-output}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {finish-output} {{\opt} output-stream} {\nil}
+\DefunWithValues {force-output}  {{\opt} output-stream} {\nil}
+\DefunWithValues {clear-output}  {{\opt} output-stream} {\nil}
+
+\label Arguments and Values::
+
+\param{output-stream}---an \term{output} \term{stream designator}.
+ \Default{\term{standard output}}
+
+\label Description::
+
+\funref{finish-output}, \funref{force-output}, and \funref{clear-output}
+exercise control over the internal handling of buffered stream output.  
+
+\funref{finish-output} attempts to ensure that any buffered output
+sent to \param{output-stream} has reached its destination, and then returns.
+
+\funref{force-output} initiates the emptying of any
+internal buffers but does not wait for completion
+or acknowledgment to return.
+
+%% 22.3.1 19
+\funref{clear-output} attempts to abort any
+outstanding output operation in progress in order
+to allow as little output as possible
+to continue to the destination.  
+
+% This next sentence was added per Moon, since it was present in CLtL for CLEAR-INPUT
+% and probably only accidentally omitted here. (I agree.) -kmp 11-Feb-92
+If any of these operations does not make sense for \param{output-stream}, 
+then it does nothing. 
+%% 22.3.1 20
+The precise actions of these \term{functions} are \term{implementation-dependent}.
+
+\label Examples::
+\code
+;; Implementation A
+ (progn (princ "am i seen?") (clear-output))
+\EV NIL
+
+;; Implementation B
+ (progn (princ "am i seen?") (clear-output))
+\OUT am i seen?
+\EV NIL
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\varref{*standard-output*}
+
+\label Exceptional Situations::
+
+\Shouldchecktype{output-stream}{a \term{stream designator}}
+
+%!!! Barmar: Are conditions signaled if stream is closed?
+
+\label See Also::
+
+\funref{clear-input}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Query Functions --------------------
+
+%%% ========== Y-OR-N-P
+%%% ========== YES-OR-NO-P
+\begincom{y-or-n-p, yes-or-no-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {y-or-n-p}    {{\opt} control {\rest} arguments} {generalized-boolean}
+\DefunWithValues {yes-or-no-p} {{\opt} control {\rest} arguments} {generalized-boolean}
+
+\label Arguments and Values::
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\param{control}---a \term{format control}.
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+\param{arguments}---\term{format arguments} for \param{control}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+These functions ask a question and parse a response from the user.
+They return \term{true} if the answer is affirmative,
+or \term{false} if the answer is negative.
+
+%% 22.4.0 2
+%% 22.4.0 9
+\funref{y-or-n-p} is for asking the user a question whose answer is either
+``yes'' or ``no.''  
+It is intended that the reply require
+the user to answer a yes-or-no question with a single
+character.
+%% 22.4.0 7
+\funref{yes-or-no-p} is also for asking the user a question
+whose answer is either ``Yes'' or ``No.''  
+It is intended that the reply require
+the user to take more action than just a single keystroke, such as typing
+the full word \f{yes} or \f{no} followed by a newline.
+
+
+%% 22.4.0 6
+%% this paragraph was left out
+
+
+\funref{y-or-n-p} types out a message (if supplied), reads an answer
+in some \term{implementation-dependent} manner (intended to be short and simple,
+such as reading a single character such as \f{Y} or \f{N}).
+\funref{yes-or-no-p} types out a message (if supplied), 
+attracts the user's attention (for example, by ringing
+the terminal's bell),
+and reads an answer
+in some \term{implementation-dependent} manner (intended to be multiple characters,
+such as \f{YES} or \f{NO}).
+
+%% 22.4.0 3
+%% 22.4.0 8
+If \param{format-control} is supplied and not \nil,
+then a \funref{fresh-line} operation is performed; then
+a message is printed as if \param{format-control} and \param{arguments}
+were given to \funref{format}.
+In any case, \funref{yes-or-no-p} and \funref{y-or-n-p} will provide 
+a prompt such as ``\f{(Y or N)}'' or ``\f{(Yes or No)}'' if appropriate.
+
+%% 22.4.0 4
+%% 22.4.0 9
+%% 22.4.0 1
+All input and output are performed using \term{query I/O}.
+
+\label Examples::
+%% 22.4.0 5
+\code
+ (y-or-n-p "(t or nil) given by")
+\OUT (t or nil) given by (Y or N) \IN{Y}
+\EV \term{true}
+ (yes-or-no-p "a ~S message" 'frightening) 
+\OUT a FRIGHTENING message (Yes or No) \IN{no}
+\EV \term{false}
+ (y-or-n-p "Produce listing file?") 
+\OUT Produce listing file?
+\OUT Please respond with Y or N. \IN{n}
+\EV \term{false}
+\endcode
+
+\label Side Effects::
+
+Output to and input from \term{query I/O} will occur.
+
+\label Affected By::
+
+\varref{*query-io*}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{format}
+
+\label Notes::
+
+\funref{yes-or-no-p} and \funref{yes-or-no-p} do not add question marks
+to the end of the prompt string, so any desired question mark or other
+punctuation should be explicitly included in the text query.
+
+\endcom
+
+%-------------------- File Streams --------------------
+
+
+
+%-------------------- Synonym Streams --------------------
+
+%%% ========== MAKE-SYNONYM-STREAM
+\begincom{make-synonym-stream}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-synonym-stream {symbol} {synonym-stream}
+
+\label Arguments and Values::
+
+\param{symbol}---a \term{symbol} that names a \term{dynamic variable}.
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\param{synonym-stream}---a \term{synonym stream}.
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Description::
+
+%% 21.2.0 3
+Returns a \term{synonym stream} whose \term{synonym stream symbol} is \param{symbol}.
+
+\label Examples::
+
+\code
+ (setq a-stream (make-string-input-stream "a-stream")
+        b-stream (make-string-input-stream "b-stream"))
+\EV #<String Input Stream> 
+ (setq s-stream (make-synonym-stream 'c-stream))
+\EV #<SYNONYM-STREAM for C-STREAM> 
+ (setq c-stream a-stream)
+\EV #<String Input Stream> 
+ (read s-stream) \EV A-STREAM
+ (setq c-stream b-stream)
+\EV #<String Input Stream> 
+ (read s-stream) \EV B-STREAM
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Should signal \typeref{type-error} if its argument is not a \term{symbol}.
+
+\label See Also::
+
+{\secref\StreamConcepts}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== SYNONYM-STREAM-SYMBOL
+\begincom{synonym-stream-symbol}\ftype{Function}
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Syntax::
+
+\DefunWithValues synonym-stream-symbol {synonym-stream} {symbol}
+
+\label Arguments and Values::
+
+\param{synonym-stream}---a \term{synonym stream}.
+
+\param{symbol}---a \term{symbol}.
+
+\label Description::
+
+Returns the \term{symbol} whose \funref{symbol-value} the \param{synonym-stream} is using.  
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{make-synonym-stream}
+
+\label Notes:\None.
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\endcom
+
+%-------------------- Broadcast Streams --------------------
+
+%%% ========== BROADCAST-STREAM-STREAMS
+\begincom{broadcast-stream-streams}\ftype{Function}
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Syntax::
+
+\DefunWithValues broadcast-stream-streams {broadcast-stream} {streams}
+
+\label Arguments and Values::
+
+\param{broadcast-stream}---a \term{broadcast stream}.
+
+\param{streams}---a \term{list} of \term{streams}.
+
+\label Description::
+
+Returns a \term{list} of output \term{streams} that constitute
+all the \term{streams} to which the \param{broadcast-stream} is broadcasting.  
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\endcom
+
+%%% ========== MAKE-BROADCAST-STREAM
+\begincom{make-broadcast-stream}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-broadcast-stream {{\rest} streams} {broadcast-stream}
+
+\label Arguments and Values::
+
+\param{stream}---an \term{output} \term{stream}.
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\param{broadcast-stream}---a \term{broadcast stream}.
+
+\label Description::
+
+%% 21.2.0 4
+Returns a \term{broadcast stream}.
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Examples::
+
+\code
+ (setq a-stream (make-string-output-stream)
+        b-stream (make-string-output-stream)) \EV #<String Output Stream>
+ (format (make-broadcast-stream a-stream b-stream)
+          "this will go to both streams") \EV NIL
+ (get-output-stream-string a-stream) \EV "this will go to both streams"
+ (get-output-stream-string b-stream) \EV "this will go to both streams"
+\endcode
+
+\label Side Effects:\None.
+
+%% Sandra thinks this is excessive.
+%A \term{broadcast stream} is created.
+ 
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldcheckanytype{stream}{an \term{output} \term{stream}}
+
+\label See Also::
+
+\funref{broadcast-stream-streams}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- two-Way Streams --------------------
+
+%%% ========== MAKE-TWO-WAY-STREAM
+\begincom{make-two-way-stream}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-two-way-stream {input-stream output-stream} {two-way-stream}
+
+\label Arguments and Values::
+
+\param{input-stream}---a \term{stream}.
+
+\param{output-stream}---a \term{stream}.
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\param{two-way-stream}---a \term{two-way stream}.
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Description::
+
+%% 21.2.0 6
+Returns a \term{two-way stream} 
+that gets  its input  from \param{input-stream}
+and  sends its output to   \param{output-stream}.
+
+\label Examples::
+
+\code
+ (with-output-to-string (out)
+    (with-input-from-string (in "input...")
+      (let ((two (make-two-way-stream in out)))
+        (format two "output...")
+        (setq what-is-read (read two))))) \EV "output..."
+ what-is-read \EV INPUT... 
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{input-stream}{an \term{input} \term{stream}}
+\Shouldchecktype{output-stream}{an \term{output} \term{stream}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== TWO-WAY-STREAM-INPUT-STREAM
+%%% ========== TWO-WAY-STREAM-OUTPUT-STREAM
+\begincom{two-way-stream-input-stream, two-way-stream-output-stream}\ftype{Function}
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Syntax::
+
+\DefunWithValues two-way-stream-input-stream  {two-way-stream} {input-stream}
+\DefunWithValues two-way-stream-output-stream {two-way-stream} {output-stream}
+
+\label Arguments and Values::
+
+\param{two-way-stream}---a \term{two-way stream}.
+
+\param{input-stream}---an \term{input} \term{stream}.
+
+\param{output-stream}---an \term{output} \term{stream}.
+
+\label Description::
+
+\funref{two-way-stream-input-stream} returns the \term{stream}
+from which \param{two-way-stream} receives input.
+
+\funref{two-way-stream-output-stream} returns the \term{stream} 
+to which \param{two-way-stream} sends output.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\endcom
+
+%-------------------- Echo Streams --------------------
+
+%%% ========== ECHO-STREAM-INPUT-STREAM
+%%% ========== ECHO-STREAM-OUTPUT-STREAM
+\begincom{echo-stream-input-stream, echo-stream-output-stream}\ftype{Function}
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Syntax::
+
+\DefunWithValues echo-stream-input-stream  {echo-stream} {input-stream}
+\DefunWithValues echo-stream-output-stream {echo-stream} {output-stream}
+
+\label Arguments and Values::
+
+\param{echo-stream}---an \term{echo stream}.
+
+\param{input-stream}---an \term{input} \term{stream}.
+
+\funref{output-stream}---an \term{output} \term{stream}.
+
+\label Description::
+
+\funref{echo-stream-input-stream} returns the \term{input} \term{stream} 
+from which \param{echo-stream} receives input.
+
+\funref{echo-stream-output-stream} returns the \term{output} \term{stream}
+to which \param{echo-stream} sends output.
+
+\label Examples:\None.
+
+\label Side Effects:\None!
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\endcom
+
+%%% ========== MAKE-ECHO-STREAM
+\begincom{make-echo-stream}\ftype{Function}
+
+\label Syntax::
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\DefunWithValues make-echo-stream {input-stream output-stream} {echo-stream}
+
+\label Arguments and Values::
+
+\param{input-stream}---an \term{input} \term{stream}.
+
+\param{output-stream}---an \term{output} \term{stream}.
+
+\param{echo-stream}---an \term{echo stream}.
+
+\label Description::
+
+%% 21.2.0 7
+Creates and returns an \term{echo stream} 
+that takes input  from \param{input-stream}
+and  sends output to   \param{output-stream}.
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Examples::
+\code
+ (let ((out (make-string-output-stream)))
+    (with-open-stream 
+        (s (make-echo-stream
+            (make-string-input-stream "this-is-read-and-echoed")
+            out))
+      (read s)
+      (format s " * this-is-direct-output")
+      (get-output-stream-string out)))
+\EV "this-is-read-and-echoed * this-is-direct-output"
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{echo-stream-input-stream},
+\funref{echo-stream-output-stream},
+\funref{make-two-way-stream}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Concatenated Streams --------------------
+
+%%% ========== CONCATENATED-STREAM-STREAMS
+\begincom{concatenated-stream-streams}\ftype{Function}
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Syntax::
+
+\DefunWithValues concatenated-stream-streams {concatenated-stream} {streams}
+
+\label Arguments and Values::
+
+\param{concatenated-stream} -- a \term{concatenated stream}.
+
+\param{streams}---a \term{list} of \term{input} \term{streams}.
+
+\label Description::
+
+Returns a \term{list} of \term{input} \term{streams} that constitute the
+ordered set of \term{streams} the \param{concatenated-stream} still 
+has to read from, starting with the current one it is reading from.
+The list may be \term{empty} if no more \term{streams} remain to be read.
+
+The consequences are undefined if the \term{list structure} of the \param{streams}
+is ever modified.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\endcom
+
+%%% ========== MAKE-CONCATENATED-STREAM
+\begincom{make-concatenated-stream}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-concatenated-stream {{\rest} input-streams} {concatenated-stream}
+
+\label Arguments and Values::
+
+\param{input-stream}---an \term{input} \term{stream}.
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\param{concatenated-stream}---a \term{concatenated stream}.
+
+\label Description::
+
+%% 21.2.0 5
+Returns a \term{concatenated stream} that has the indicated \param{input-streams}
+initially associated with it.
+
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Examples::
+%% POSSIBLE CLEAN-UP ISSUE Symbolics returns 1.
+\code
+ (read (make-concatenated-stream
+         (make-string-input-stream "1")
+         (make-string-input-stream "2"))) \EV 12
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Should signal \typeref{type-error} if any argument is not an \term{input} \term{stream}.
+
+\label See Also::
+
+\funref{concatenated-stream-streams}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- String Streams --------------------
+
+%%% ========== GET-OUTPUT-STREAM-STRING
+\begincom{get-output-stream-string}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues get-output-stream-string {string-output-stream} {string}
+
+\label Arguments and Values::
+
+\param{string-output-stream}---a \term{stream}.
+
+\param{string}---a \term{string}.
+
+\label Description::
+
+%% 21.2.0 10
+Returns a \term{string} containing, in order, all the \term{characters} 
+that have been output to \param{string-output-stream}.
+This operation clears any \term{characters} on \param{string-output-stream},
+so the \param{string} contains only those \term{characters} which have been output
+   since the last call to \funref{get-output-stream-string}
+or since the creation of the \param{string-output-stream},
+whichever occurred most recently.
+
+\label Examples::
+\code
+ (setq a-stream (make-string-output-stream)
+        a-string "abcdefghijklm") \EV "abcdefghijklm"
+ (write-string a-string a-stream) \EV "abcdefghijklm"
+ (get-output-stream-string a-stream) \EV "abcdefghijklm"
+ (get-output-stream-string a-stream) \EV ""
+\endcode
+
+
+\label Side Effects::
+
+The \param{string-output-stream} is cleared.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\issue{CLOSE-CONSTRUCTED-STREAM:ARGUMENT-STREAM-ONLY}
+%The result of calling \funref{get-output-stream-string} on 
+% the \param{string-stream} returned by \funref{make-string-output-stream} 
+% is unspecified after \funref{close}. 
+%% Rewritten for Sandra:
+The consequences are undefined if \param{stream-output-string} is \term{closed}.
+\endissue{CLOSE-CONSTRUCTED-STREAM:ARGUMENT-STREAM-ONLY}
+
+The consequences are undefined if \param{string-output-stream} is a \term{stream} that
+was not produced by \funref{make-string-output-stream}.
+\issue{STRING-OUTPUT-STREAM-BASHING:UNDEFINED}
+The consequences are undefined if \param{string-output-stream} was 
+created implicitly by \macref{with-output-to-string} or \funref{format}.
+
+%% Redundant -- Said already in WITH-OUTPUT-TO-STRING and FORMAT. -kmp 14-Feb-92
+% In the cases where a \term{string} argument with a \term{fill pointer} is supplied
+% as an \term{argument} to \macref{with-output-to-string} or \funref{format},
+% the consequences are undefined if destructive modifications are performed
+% directly on the \term{string} during the \term{dynamic extent} of the call.
+\endissue{STRING-OUTPUT-STREAM-BASHING:UNDEFINED}
+
+\label See Also::
+
+\funref{make-string-output-stream}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== MAKE-STRING-INPUT-STREAM
+\begincom{make-string-input-stream}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-string-input-stream {string {\opt} start end} {string-stream}
+
+\label Arguments and Values::
+
+\param{string}---a \term{string}.
+
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{string}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\param{string-stream}---an \term{input} \term{string stream}.
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Description::
+
+%% 21.2.0 8
+Returns an \term{input} \term{string stream}.  
+This \term{stream} will supply, in order, the \term{characters} in the substring
+of \param{string} \term{bounded} by \param{start} and \param{end}.
+After the last \term{character} has been supplied, 
+the \term{string stream} will then be at \term{end of file}.
+
+%% Implied by bounded. -kmp 14-Feb-92
+% \param{Start} marks the beginning position of the substring.
+% \param{End}   marks the position following the last element of the substring.
+
+\label Examples::
+
+\code
+ (let ((string-stream (make-string-input-stream "1 one ")))
+   (list (read string-stream nil nil)
+         (read string-stream nil nil)
+         (read string-stream nil nil)))
+\EV (1 ONE NIL)
+
+ (read (make-string-input-stream "prefixtargetsuffix" 6 12)) \EV TARGET
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{with-input-from-string}
+
+\label Notes:\None.
+
+\endcom
+
+
+%%% ========== MAKE-STRING-OUTPUT-STREAM
+\begincom{make-string-output-stream}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-string-output-stream {{\key} element-type} {string-stream}
+
+\label Arguments and Values::
+
+\issue{CHARACTER-PROPOSAL:2-5-6}
+\param{element-type}---a \term{type specifier}.
+  \Default{\typeref{character}}
+\endissue{CHARACTER-PROPOSAL:2-5-6}
+
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\param{string-stream}---an \term{output} \term{string stream}.
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\label Description::
+
+%% 21.2.0 9
+Returns
+\issue{CHARACTER-PROPOSAL:2-5-6}
+an \term{output} \term{string stream} that accepts \term{characters}
+and makes available (via \funref{get-output-stream-string})
+a \term{string} that contains the \term{characters} that were actually output.
+
+The \param{element-type} names the \term{type} of the \term{elements}
+of the \term{string}; a \term{string} is constructed of the most specialized
+\term{type} that can accommodate \term{elements} of that \term{element-type}.
+\endissue{CHARACTER-PROPOSAL:2-5-6}
+
+\label Examples::
+
+\code
+ (let ((s (make-string-output-stream)))
+   (write-string "testing... " s)
+   (prin1 1234 s)
+   (get-output-stream-string s))
+\EV "testing... 1234"
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\None.
+
+\label See Also::
+
+\funref{get-output-stream-string}, \macref{with-output-to-string}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== WITH-INPUT-FROM-STRING
+\begincom{with-input-from-string}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\DefmacWithValuesNewline with-input-from-string
+			 {\paren{var string {\key} index start end}
+			  \starparam{declaration}
+			  \starparam{form}}
+			 {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{var}---a \term{variable} \term{name}.
+
+\param{string}---a \term{form}; evaluated to produce a \term{string}.
+
+\param{index}---a \term{place}.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS:IS-AN-ERROR}
+\param{start}, \param{end}---\term{bounding index designators} of \param{string}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{SUBSEQ-OUT-OF-BOUNDS:IS-AN-ERROR}
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{forms}---an \term{implicit progn}.
+
+\param{result}---the \term{values} returned by the \param{forms}.
+
+\label Description::
+
+Creates an
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+\term{input} \term{string stream}, 
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+provides an opportunity to perform operations on the \term{stream} 
+ (returning zero or more \term{values}),
+and then closes the \term{string stream}.
+
+%% 21.2.0 12
+\param{String} is evaluated first, and \param{var} is bound to
+a character \term{input} \term{string stream} that supplies 
+\term{characters} from the subsequence of the resulting \term{string} \term{bounded} by
+\param{start} and \param{end}. 
+The body is executed as an \term{implicit progn}.
+
+%% 21.2.0 13
+The \term{input} \term{string stream} is automatically closed on exit from
+\macref{with-input-from-string}, no matter whether the exit is normal or abnormal.
+\issue{WITH-OPEN-FILE-STREAM-EXTENT:DYNAMIC-EXTENT}
+The \term{input} \term{string stream} to which the \term{variable} \param{var}
+is \term{bound} has \term{dynamic extent};
+its \term{extent} ends when the \term{form} is exited.
+\endissue{WITH-OPEN-FILE-STREAM-EXTENT:DYNAMIC-EXTENT}
+
+%% 21.2.0 14
+%% 21.2.0 15
+% \beginlist
+% \itemitem{\kwd{index}}
+
+The \param{index} is a pointer within the \param{string} to be advanced.
+If \macref{with-input-from-string}
+is exited normally, then \param{index} will have
+% stored into it 
+as its \term{value}
+the index into the \param{string} indicating the first character not read
+which is {\tt (length \param{string})} if all characters were used.
+The place specified by \param{index}
+is not updated as reading progresses, but only at the
+end of the operation. 
+
+%% This is redundant with "bounded".
+% %% 21.2.0 16
+% \itemitem{\kwd{start}}
+% 
+% \kwd{start} indicates the beginning of a substring of \param{string} to be used.
+% If \kwd{start} is not supplied or \nil, the beginning position is 0.
+% 
+% %% 21.2.0 17
+% \itemitem{\kwd{end}}
+% 
+% \kwd{end} indicates the end of a substring of \param{string} to be used.
+% If \kwd{end} is not supplied or \nil, the ending position is {\tt (length \param{string})}.
+% \endlist
+
+%% 21.2.0 19
+\param{start} and \param{index} may both specify the same variable, 
+which is a pointer within the \param{string} to be advanced,
+perhaps repeatedly by some containing loop.
+
+\issue{WITH-OPEN-FILE-SETQ:EXPLICITLY-VAGUE}
+The consequences are undefined if an attempt is made to \term{assign} 
+the \term{variable} \param{var}.
+%% Sandra thinks this isn't needed.
+% The compiler may choose to issue a
+% warning if such an attempt is detected.
+\endissue{WITH-OPEN-FILE-SETQ:EXPLICITLY-VAGUE}
+
+\label Examples::
+%% 21.2.0 18
+\code
+ (with-input-from-string (s "XXX1 2 3 4xxx"
+                             :index ind
+                             :start 3 :end 10)
+    (+ (read s) (read s) (read s))) \EV 6
+ ind \EV 9
+ (with-input-from-string (s "Animal Crackers" :index j :start 6)
+   (read s)) \EV CRACKERS
+\endcode
+The variable \f{j} is set to \f{15}.
+
+\label Side Effects::
+
+The \term{value} of the \term{place} named by \param{index}, if any, is modified.
+
+%% Sandra thinks this is excessive.
+%A \term{string stream} is created (upon entry) and closed (upon exit).
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{make-string-input-stream},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+
+\label Notes:\None.
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== WITH-OUTPUT-TO-STRING
+\begincom{with-output-to-string}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\DefmacWithValuesNewline with-output-to-string
+		  	 {\paren{var {\opt} string-form {\key} element-type}
+ 			  \starparam{declaration}
+ 			  \starparam{form}}
+			 {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{var}---a \term{variable} \term{name}.
+
+\param{string-form}---a \term{form} or \nil;
+		      if \term{non-nil}, evaluated to produce \param{string}.
+
+\param{string}---a \term{string} that has a \term{fill pointer}.
+
+\issue{CHARACTER-PROPOSAL:2-5-6}
+\param{element-type}---a \term{type specifier}; \eval.
+\issue{CHARACTER-PROPOSAL:2-3-6}
+  \Default{\typeref{character}}
+\endissue{CHARACTER-PROPOSAL:2-3-6}
+\endissue{CHARACTER-PROPOSAL:2-5-6}
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{forms}---an \term{implicit progn}.
+
+\param{results}---If a \param{string-form} is not supplied or \nil,
+		  a \term{string}; otherwise, 
+		  the \term{values} returned by the \param{forms}.
+
+\label Description::
+
+\macref{with-output-to-string} creates a
+\issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+character \term{output} \term{stream}, performs a series of operations
+that may send results to this \term{stream}, and then closes the \term{stream}. 
+\endissue{STREAM-ACCESS:ADD-TYPES-ACCESSORS}
+
+\issue{CHARACTER-PROPOSAL:2-3-6}
+The \param{element-type} names the \term{type} of the elements
+of the \term{stream}; a \term{stream} is constructed of the most specialized
+\term{type} that can accommodate elements of the given \term{type}.  
+\endissue{CHARACTER-PROPOSAL:2-3-6}
+
+%% 21.2.0 20
+The body is executed as an \term{implicit progn} with \param{var}
+bound to an \term{output} \term{string stream}.  
+All output to that \term{string stream} is saved in a \term{string}.  
+
+%% 21.2.0 22
+\issue{WITH-OUTPUT-TO-STRING-APPEND-STYLE:VECTOR-PUSH-EXTEND}
+If \param{string} is supplied, \param{element-type} is ignored, 
+and the output is incrementally appended to \param{string} as
+if by use of \funref{vector-push-extend}.
+\endissue{WITH-OUTPUT-TO-STRING-APPEND-STYLE:VECTOR-PUSH-EXTEND}
+
+%% 21.2.0 24
+%% Sandra: Huh?
+%In either case, 
+The \term{output} \term{stream} 
+is automatically closed on exit from \macref{with-output-from-string},
+no matter whether the exit is normal or abnormal.
+\issue{WITH-OPEN-FILE-STREAM-EXTENT:DYNAMIC-EXTENT}
+The \term{output} \term{string stream} to which the \term{variable} \param{var}
+is \term{bound} has \term{dynamic extent};
+its \term{extent} ends when the \term{form} is exited.
+\endissue{WITH-OPEN-FILE-STREAM-EXTENT:DYNAMIC-EXTENT}
+
+
+%% 21.2.0 21
+If no \param{string} is provided, then \macref{with-output-from-string} 
+\issue{CHARACTER-PROPOSAL:2-5-6}
+produces a \term{stream} that accepts characters and returns a \term{string} 
+of the indicated \param{element-type}.
+\endissue{CHARACTER-PROPOSAL:2-5-6}
+If \param{string} is provided,
+\macref{with-output-to-string} returns the results of evaluating the last \param{form}.
+
+\issue{WITH-OPEN-FILE-SETQ:EXPLICITLY-VAGUE}
+The consequences are undefined if an attempt is made to \term{assign}
+the \term{variable} \param{var}.
+%% Sandra: unnecessary.
+%The compiler may choose to issue a
+%warning if such an attempt is detected.
+\endissue{WITH-OPEN-FILE-SETQ:EXPLICITLY-VAGUE}
+
+\label Examples::
+\code
+ (setq fstr (make-array '(0) :element-type 'base-char
+                             :fill-pointer 0 :adjustable t)) \EV ""
+ (with-output-to-string (s fstr)
+    (format s "here's some output")
+    (input-stream-p s)) \EV \term{false}
+ fstr \EV "here's some output"
+\endcode
+
+\label Side Effects::
+
+The \param{string} is modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\issue{STRING-OUTPUT-STREAM-BASHING:UNDEFINED}
+The consequences are undefined if destructive modifications are performed
+directly on the \param{string} during the \term{dynamic extent} of the call.
+\endissue{STRING-OUTPUT-STREAM-BASHING:UNDEFINED}
+
+\label See Also::
+
+\funref{make-string-output-stream},
+\funref{vector-push-extend},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes:\None.
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%-------------------- Stream Variables --------------------
+
+% \def\iovarconstraint#1#2 #3{
+% \issue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS}
+% \term{implementation-dependent}, but it must be an \term{open},
+% \term{#1} \term{stream} which is not a 
+% \term{generalized synonym stream} to any of the \term{symbols} #3, but
+% which might be a \term{generalized synonym stream} to the 
+% \term{value} of one of those \term{symbols}.  #2
+% \endissue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS}
+% }
+% 
+% \def\TerminalIOsynOK{%
+% The initial value might also be a \term{generalized synonym stream} 
+% to either the \term{symbol} \varref{*terminal-io*} or to the \term{stream} 
+% which is its \term{value}.}
+% 
+% \def\iovarrationale#1{
+% \issue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS}
+% The intent of the constraints on the initial \term{value} 
+% is to ensure that it is always safe to bind \varref{*#1*} 
+% to one of the above-mentioned variables without
+% unduly restricting implementation flexibility.
+% \endissue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS}
+% }
+%
+% %%% ========== *DEBUG-IO*
+% \begincom{*debug-io*}\ftype{Variable}
+% 
+% \label Value Type::
+% 
+% a \term{bidirectional} \term{stream}.
+% 
+% \label Initial Value::
+% 
+% \iovarconstraint{bidirectional}{\TerminalIOsynOK}
+%  {\varref{*standard-input*},
+%   \varref{*standard-output*}, 
+%   \varref{*error-output*},
+%   \varref{*trace-output*}, or
+%   \varref{*query-io*}}
+% 
+% \label Description::
+% 
+% %% 21.1.0 7
+% A \term{stream} to be used for interactive debugging purposes.  
+% 
+% \label Examples:\None.
+% 
+% %% Moon: Not only is this example under *debug-io* disgusting, it is not correct Common
+% %%       Lisp because it violates dynamic extent:
+% %% KMP:  I concur! Commented out.
+% %
+% % \code
+% %  (with-output-to-string (out)
+% %    (with-input-from-string (in "enter > ")
+% %      (let ((two-way (make-two-way-stream in out)))
+% %        (setq *debug-io* two-way)))) \EV ""           
+% %  *debug-io* \EV #<TWO-WAY-STREAM>
+% % \endcode
+% 
+% \label Affected By:\None.
+% 
+% \label See Also::
+% 
+% \varref{*query-io*},
+% \funref{make-synonym-stream}
+% 
+% \label Notes::
+% 
+% \iovarrationale{debug-io}
+% 
+% Frequently \varref{*debug-io*} is bound to the same \term{stream} as \varref{*query-io*}.
+% 
+% \endcom
+% 
+% %%% ========== *ERROR-OUTPUT*
+% \begincom{*error-output*}\ftype{Variable}
+% 
+% \label Value Type::
+% 
+% an \term{output} \term{stream}.
+% 
+% \label Initial Value::
+% 
+% \iovarconstraint{output}{\TerminalIOsynOK}
+%  {\varref{*standard-input*},
+%   \varref{*standard-output*},
+%   \varref{*trace-output*},
+%   \varref{*query-io*}, or
+%   \varref{*debug-io*}}
+% 
+% \label Description::
+% 
+% %% 21.1.0 5
+% \Thevalueof{*error-output*} is a \term{stream} to which error messages should be sent.  
+% 
+% \label Examples::
+% 
+% \code
+%  (with-output-to-string (*error-output*)
+%    (warn "this string is sent to *error-output*"))
+%  \EV "Warning: this string is sent to *error-output*
+% " ;The exact format of this string is \term{implementation-dependent}.
+% \endcode
+% 
+% \label Affected By:\None.
+% 
+% %%Sandra: Gratuitous
+% %The \term{implementation}.
+% 
+% \label See Also::
+% 
+% \varref{*standard-output*},
+% \varref{*terminal-io*},
+% \funref{make-synonym-stream},
+% \funref{warn},
+% \funref{error},
+% \funref{cerror},
+% \funref{break},
+% \macref{check-type},
+% \macref{assert},
+% \macref{etypecase},
+% \macref{ctypecase},
+% \macref{ecase},
+% \macref{ccase}
+%      
+% \label Notes::
+% 
+% \iovarrationale{error-output}
+% 
+% Frequently \varref{*error-output*} is bound to the \term{same} \term{stream}
+% as \varref{*standard-output*}.
+% 
+% \endcom
+% 
+% %%% ========== *QUERY-IO*
+% \begincom{*query-io*}\ftype{Variable}
+% 
+% \label Value Type::
+% 
+% a \term{bidirectional} \term{stream}.
+% 
+% \label Initial Value::
+% 
+% \iovarconstraint{bidirectional}{\TerminalIOsynOK}
+%  {\varref{*standard-input*},
+%   \varref{*standard-output*},
+%   \varref{*error-output*},
+%   \varref{*trace-output*}, or
+%   \varref{*debug-io*}}
+% 
+% \label Description::
+% 
+% %% 21.1.0 6
+% \Thevalueof{*query-io*}, \term{query I/O}, is a \term{bidirectional} \term{stream} 
+% to be used when asking questions of the user.  The question should be output 
+% to this \term{stream}, and the answer read from it.
+% 
+% \label Examples:\None.
+% 
+% \label Affected By:\None.
+% 
+% %%Sandra: Gratuitous
+% %The \term{implementation}.
+% 
+% \label See Also::
+% 
+% \varref{*debug-io*},
+% \varref{*terminal-io*},
+% \funref{make-synonym-stream},
+% \funref{y-or-n-p},
+% \funref{yes-or-no-p}
+% 
+% \label Notes::
+% 
+% \iovarrationale{query-io}
+% 
+% %\varref{*query-io*} is normally a \term{synonym stream} to \varref{*terminal-io*}.
+% 
+% \varref{*query-io*} is used by such functions as \funref{y-or-n-p}
+% and \funref{yes-or-no-p}.
+% \endcom
+% 
+% %%% ========== *STANDARD-INPUT*
+% \begincom{*standard-input*}\ftype{Variable}
+% 
+% \label Value Type::
+% 
+% an \term{input} \term{stream}.
+% 
+% \label Initial Value::
+% 
+% \iovarconstraint{input}{\TerminalIOsynOK}
+%  {\varref{*standard-output*},
+%   \varref{*error-output*},
+%   \varref{*trace-output*},
+%   \varref{*query-io*}, or
+%   \varref{*debug-io*}}
+% 
+% \label Description::
+% 
+% \issue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS}
+% \Thevalueof{*standard-input*}, \term{standard input}, is a \term{stream}
+% that is used by many \term{operators} as a default source of input when 
+% no specific \term{input} \term{stream} is explicitly supplied.
+% \endissue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS} 
+% 
+% \label Examples::
+% 
+% \code
+%  (with-input-from-string (*standard-input* "1001")
+%     (+ 990 (read))) \EV 1991                       
+% \endcode
+% 
+% \label Affected By:\None.
+% 
+% %%Sandra: Gratuitous
+% %The \term{implementation}.
+% 
+% \label See Also::
+% 
+% \funref{make-synonym-stream}
+% 
+% \label Notes::
+% 
+% \iovarrationale{standard-input}
+% 
+% %% 21.1.0 3
+% %% 22.2.1 1
+% In the normal \term{Lisp read-eval-print loop}, input is read from
+% \term{standard input}.  Many input functions, including \funref{read} 
+% and \funref{read-char}, take a \term{stream} argument that defaults 
+% to \term{standard input}.
+% 
+% \endcom
+% 
+% 
+% %%% ========== *STANDARD-OUTPUT*
+% \begincom{*standard-output*}\ftype{Variable}
+% 
+% \label Value Type::
+% 
+% an \term{output} \term{stream}.
+% 
+% \label Initial Value::
+% 
+% \iovarconstraint{output}{\TerminalIOsynOK}
+%  {\varref{*standard-input*},
+%   \varref{*error-output*},
+%   \varref{*trace-output*},
+%   \varref{*query-io*}, or
+%   \varref{*debug-io*}}
+% 
+% \label Description::
+% 
+% \Thevalueof{*standard-output*}, \term{standard output}, is a \term{stream}
+% that is used by many \term{operators} as a default destination for output
+% when no specific \term{output} \term{stream} is explicitly supplied.
+% 
+% \label Examples::
+% \code
+%  (progn (setq out (with-output-to-string (*standard-output*)
+%                      (print "print and format t send things to")
+%                      (format t "*standard-output* now going to a string")))
+%         :done)
+% \EV :DONE
+%  out
+% \EV "
+% \\"print and format t send things to\\" *standard-output* now going to a string"
+% \endcode
+% 
+% \label Affected By:\None.
+% 
+% %%Sandra: Gratuitous
+% %The \term{implementation}.
+% 
+% \label See Also::
+% 
+% \funref{make-synonym-stream}
+% 
+% \label Notes::
+% 
+% %% 21.1.0 4
+% In the normal \term{Lisp read-eval-print loop}, output is sent to \term{standard output}.
+% Many output functions, including \funref{print} and \funref{write-char}, 
+% take a \term{stream} argument that defaults to \term{standard output}.
+% 
+% %!!! This needs to be cross-checked against the new descriptions of these streams.
+% %% 21.1.0 11
+% A program that wants, for example, to divert output to a file should do so by 
+% \term{binding} \varref{*standard-output*}; that way error messages sent to
+% \varref{*error-output*} can still get to the user by going through
+% \varref{*terminal-io*} (if \varref{*error-output*} is bound to \varref{*terminal-io*}),
+% which is usually what is desired.
+% 
+% \endcom
+% 
+% 
+% %%% ========== *TRACE-OUTPUT*
+% \begincom{*trace-output*}\ftype{Variable}
+% 
+% \label Value Type::
+% 
+% an \term{output} \term{stream}.
+% 
+% \label Initial Value::
+% 
+% \iovarconstraint{output}{\TerminalIOsynOK}
+%  {\varref{*standard-input*},
+%   \varref{*standard-output*},
+%   \varref{*error-output*},
+%   \varref{*query-io*}, or
+%   \varref{*debug-io*}}
+% 
+% \label Description::
+% 
+% %% 21.1.0 9
+% The \term{stream} on which traced functions (see \macref{trace})
+% and \themacro{time} print their output.
+% 
+% \label Examples::
+% 
+% \code
+%  (defun fact (n) (if (< n 2) 1 (* n (fact (- n 1)))))
+% \EV FACT
+%  (trace fact)
+% \EV (FACT)
+% ;; Of course, the format of traced output is implementation-dependent.
+%  (with-output-to-string (*trace-output*)
+%    (fact 3)) 
+% \EV "
+% 1 Enter FACT 3
+% | 2 Enter FACT 2
+% |   3 Enter FACT 1
+% |   3 Exit FACT 1
+% | 2 Exit FACT 2
+% 1 Exit FACT 6"
+% \endcode
+% 
+% \label Affected By:\None.
+% 
+% %%Sandra: Gratuitous
+% %The \term{implementation}.
+% 
+% \label See Also::
+% 
+% \funref{make-synonym-stream},
+% \macref{trace},
+% \macref{time}.
+%            
+% \label Notes::
+% 
+% \iovarrationale{trace-output}
+% 
+% \endcom
+%
+% %%% ========== *TERMINAL-IO*
+% \begincom{*terminal-io*}\ftype{Variable}
+% 
+% \label Value Type::
+% 
+% a \term{bidirectional} \term{stream}.
+% 
+% \label Initial Value::
+% 
+% \editornote{KMP: Doesn't debug-io belong in this list?}
+% 
+% \iovarconstraint{bidirectional}{}
+%  {\varref{*standard-input*},
+%   \varref{*standard-output*},
+%   \varref{*error-output*},
+%   \varref{*trace-output*}, or
+%   \varref{*query-io*}}
+% 
+% \label Description::
+% 
+% %% 21.1.0 8
+% \Thevalueof{*terminal-io*}, \term{terminal I/O}, is ordinarily 
+% a \term{bidirectional} \term{stream} that connects to the user's console.
+% Typically, writing to this \term{stream} 
+% would cause the output to appear
+% on a display screen, for example, and reading from the \term{stream} would
+% accept input from a keyboard.  It is intended
+% that standard input functions such as \funref{read} and \funref{read-char},
+% when used with this \term{stream}, cause echoing of the input
+% into the output side of the \term{stream}. The means by which this is
+% accomplished are \term{implementation-dependent}.
+% 
+% %% 21.1.0 11, clarified by KMP
+% The effect of changing \thevalueof{*terminal-io*},
+% either by \term{binding} or \term{assignment},
+% is \term{implementation-defined}.
+% 
+% \label Examples::
+% 
+% \code
+%  (progn (prin1 'foo) (prin1 'bar *terminal-io*))
+% \OUT FOOBAR
+% \EV BAR
+%  (with-output-to-string (*standard-output*)
+%    (prin1 'foo) 
+%    (prin1 'bar *terminal-io*))
+% \OUT BAR
+% \EV "FOO"
+% \endcode
+% 
+% \label Affected By:\None.
+% 
+% %%Sandra: Gratuitous
+% %The \term{implementation}.
+% 
+% \label See Also:\None.
+% 
+% \label Notes:\None.
+% 
+% \endcom
+
+%%% ========== *DEBUG-IO*
+%%% ========== *ERROR-OUTPUT*
+%%% ========== *QUERY-IO*
+%%% ========== *STANDARD-INPUT*
+%%% ========== *STANDARD-OUTPUT*
+%%% ========== *TRACE-OUTPUT*
+\begincom{*debug-io*, *error-output*, *query-io*,
+	  *standard-input*, *standard-output*,
+	  *trace-output*}\ftype{Variable}
+
+\label Value Type::
+
+For \varref{*standard-input*}:
+ an \term{input} \term{stream}
+
+For \varref{*error-output*}, \varref{*standard-output*}, and \varref{*trace-output*}:
+ an \term{output} \term{stream}.
+
+For \varref{*debug-io*}, \varref{*query-io*}:
+ a \term{bidirectional} \term{stream}.
+
+\label Initial Value::
+
+\term{implementation-dependent}, but
+it must be an \term{open} \term{stream} 
+that is not a  \term{generalized synonym stream}
+to an \term{I/O customization variables}
+but that might be a \term{generalized synonym stream} to 
+the value of some \term{I/O customization variable}.
+The initial value might also be a \term{generalized synonym stream} 
+to either the \term{symbol} \varref{*terminal-io*} or to the \term{stream} 
+that is its \term{value}.
+
+\label Description::
+
+These \term{variables} are collectively called the
+\term{standardized} \term{I/O customization variables}.
+They can be \term{bound} or \term{assigned} in order to 
+change the default destinations for input and/or output 
+used by various \term{standardized} \term{operators} and facilities.
+
+%% 21.1.0 7
+\Thevalueof{*debug-io*}, called \term{debug I/O},
+is a \term{stream} to be used for interactive debugging purposes.  
+
+%% 21.1.0 5
+\Thevalueof{*error-output*}, called \term{error output},
+is a \term{stream} to which warnings and non-interactive error messages should be sent.
+
+%% 21.1.0 6
+\Thevalueof{*query-io*}, called \term{query I/O},
+is a \term{bidirectional} \term{stream} 
+to be used when asking questions of the user.  The question should be output 
+to this \term{stream}, and the answer read from it.
+
+\issue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS}
+\Thevalueof{*standard-input*}, called \term{standard input},
+is a \term{stream} that is used by many \term{operators} 
+as a default source of input when no specific \term{input} \term{stream}
+is explicitly supplied.
+\endissue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS} 
+
+\Thevalueof{*standard-output*}, called \term{standard output},
+is a \term{stream} that is used by many \term{operators} 
+as a default destination for output when no specific \term{output} \term{stream}
+is explicitly supplied.
+
+%% 21.1.0 9
+\Thevalueof{*trace-output*}, called \term{trace output},
+is the \term{stream} on which traced functions (see \macref{trace})
+and \themacro{time} print their output.
+
+\label Examples::
+
+\code
+ (with-output-to-string (*error-output*)
+   (warn "this string is sent to *error-output*"))
+ \EV "Warning: this string is sent to *error-output*
+" ;The exact format of this string is \term{implementation-dependent}.
+\medbreak
+ (with-input-from-string (*standard-input* "1001")
+    (+ 990 (read))) \EV 1991                       
+\medbreak
+ (progn (setq out (with-output-to-string (*standard-output*)
+                     (print "print and format t send things to")
+                     (format t "*standard-output* now going to a string")))
+        :done)
+\EV :DONE
+ out
+\EV "
+\\"print and format t send things to\\" *standard-output* now going to a string"
+\medbreak
+ (defun fact (n) (if (< n 2) 1 (* n (fact (- n 1)))))
+\EV FACT
+ (trace fact)
+\EV (FACT)
+;; Of course, the format of traced output is implementation-dependent.
+ (with-output-to-string (*trace-output*)
+   (fact 3)) 
+\EV "
+1 Enter FACT 3
+| 2 Enter FACT 2
+|   3 Enter FACT 1
+|   3 Exit FACT 1
+| 2 Exit FACT 2
+1 Exit FACT 6"
+\endcode
+
+\label See Also::
+
+\varref{*terminal-io*},
+\typeref{synonym-stream},
+\macref{time},
+\macref{trace},
+{\chapref\Conditions},
+{\chapref\Reader},
+{\chapref\Printer}
+
+\label Notes::
+
+\issue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS}
+The intent of the constraints on the initial \term{value} 
+of the \term{I/O customization variables} is to ensure that it
+is always safe to \term{bind} or \term{assign} such a \term{variable} to 
+the \term{value} of another \term{I/O customization variable}, without
+unduly restricting \term{implementation} flexibility.
+\endissue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS}
+
+It is common for an \term{implementation} to make
+the initial \term{values} of \varref{*debug-io*} and \varref{*query-io*} 
+be the \term{same} \term{stream}, 
+and to make
+the initial \term{values} of \varref{*error-output*} and \varref{*standard-output*} 
+be the \term{same} \term{stream}.
+
+The functions \funref{y-or-n-p} and \funref{yes-or-no-p} use \term{query I/O}
+for their input and output.
+
+%% 21.1.0 3
+%% 22.2.1 1
+In the normal \term{Lisp read-eval-print loop},
+input is read from \term{standard input}.
+Many input functions, including \funref{read} and \funref{read-char},
+take a \term{stream} argument that defaults to \term{standard input}.
+
+%% 21.1.0 4
+In the normal \term{Lisp read-eval-print loop}, output is sent to \term{standard output}.
+Many output functions, including \funref{print} and \funref{write-char}, 
+take a \term{stream} argument that defaults to \term{standard output}.
+
+%% 21.1.0 11
+A program that wants, for example, to divert output to a file should do so by 
+\term{binding} \varref{*standard-output*}; that way error messages sent to
+\varref{*error-output*} can still get to the user by going through
+\varref{*terminal-io*} (if \varref{*error-output*} is bound to \varref{*terminal-io*}),
+which is usually what is desired.
+
+\endcom
+
+
+%%% ========== *TERMINAL-IO*
+\begincom{*terminal-io*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{bidirectional} \term{stream}.
+
+\label Initial Value::
+
+\term{implementation-dependent}, but
+it must be an \term{open} \term{stream} 
+that is not a  \term{generalized synonym stream}
+to an \term{I/O customization variables}
+but that might be a \term{generalized synonym stream} to 
+the \term{value} of some \term{I/O customization variable}.
+
+\label Description::
+
+%% 21.1.0 8
+\Thevalueof{*terminal-io*}, called  \term{terminal I/O}, is ordinarily 
+a \term{bidirectional} \term{stream} that connects to the user's console.
+Typically, writing to this \term{stream} 
+would cause the output to appear
+on a display screen, for example, and reading from the \term{stream} would
+accept input from a keyboard.  It is intended
+that standard input functions such as \funref{read} and \funref{read-char},
+when used with this \term{stream}, cause echoing of the input
+into the output side of the \term{stream}. The means by which this is
+accomplished are \term{implementation-dependent}.
+
+%% 21.1.0 11, clarified by KMP
+The effect of changing \thevalueof{*terminal-io*},
+either by \term{binding} or \term{assignment},
+is \term{implementation-defined}.
+
+\label Examples::
+
+\code
+ (progn (prin1 'foo) (prin1 'bar *terminal-io*))
+\OUT FOOBAR
+\EV BAR
+ (with-output-to-string (*standard-output*)
+   (prin1 'foo) 
+   (prin1 'bar *terminal-io*))
+\OUT BAR
+\EV "FOO"
+\endcode
+
+\label Affected By:\None.
+
+\label See Also::
+
+\varref{*debug-io*},
+\varref{*error-output*},
+\varref{*query-io*},
+\varref{*standard-input*},
+\varref{*standard-output*},
+\varref{*trace-output*}
+
+\label Notes:\None.
+
+\endcom
+
+
+%-------------------- Stream Errors --------------------
+
+\begincom{stream-error}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{stream-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{stream-error}
+consists of error conditions that are related to receiving input from
+or sending output to a \term{stream}.  
+The ``offending stream'' is initialized by
+\theinitkeyarg{stream} to \funref{make-condition}, 
+and is \term{accessed} by \thefunction{stream-error-stream}.
+
+\label See Also::
+
+\funref{stream-error-stream}
+
+\endcom%{stream-error}\ftype{Condition Type}
+
+%%% ========== STREAM-ERROR-STREAM
+\begincom{stream-error-stream}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues stream-error-stream {condition} {stream}
+
+\label Arguments and Values::
+
+\param{condition}---a \term{condition} \oftype{stream-error}.
+
+\param{stream}---a \term{stream}.
+
+\label Description::
+
+Returns the offending \term{stream} of a \term{condition} \oftype{stream-error}.
+
+\label Examples::
+\code
+ (with-input-from-string (s "(FOO")
+   (handler-case (read s)
+     (end-of-file (c)
+       (format nil "~&End of file on ~S." (stream-error-stream c)))))
+"End of file on #<String Stream>."
+\endcode
+% )
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\typeref{stream-error},
+{\secref\Conditions}
+
+\label Notes:\None.
+
+%% This shouldn't be needed.
+%It is an error to use \macref{setf} with \funref{stream-error-stream}.
+
+\endcom
+
+\begincom{end-of-file}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{end-of-file},
+\typeref{stream-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{end-of-file} consists of
+error conditions related to read operations that are done on
+\term{streams} that have no more data.
+
+\label See Also::
+
+\funref{stream-error-stream}
+
+\endcom%{end-of-file}\ftype{Condition Type}

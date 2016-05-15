@@ -1,0 +1,64 @@
+====== Standard Generic Function SLOT-MISSING ======
+
+====Syntax====
+
+\DefgenWithValues slot-missing {class object slot-name operation ''&optional'' new-value} {\starparam{result}}
+
+====Method Signatures====
+
+\Defmeth slot-missing {\vtop{\hbox{\specparam{class}{t} object slot-name} operation ''&optional'' new-value}}
+
+====Arguments and Values====
+
+//class// - the //[[CL:Glossary:class]]// of //object//.
+
+//object// - an //[[CL:Glossary:object]]//.
+
+//slot-name// - a //[[CL:Glossary:symbol]]// (the //[[CL:Glossary:name]]// of a would-be //[[CL:Glossary:slot]]//).
+
+//operation// - one of the //[[CL:Glossary:symbols]]// **[[CL:Functions:setf]]**, **[[CL:Functions:slot-boundp]]**, **[[CL:Functions:slot-makunbound]]**, or **[[CL:Functions:slot-value]]**.
+
+//new-value// - an //[[CL:Glossary:object]]//.
+
+//result// - an //[[CL:Glossary:object]]//.
+
+====Description====
+
+The generic function **[[CL:Functions:slot-missing]]** is invoked when an attempt is made to //[[CL:Glossary:access]]// a //[[CL:Glossary:slot]]// in an //object// whose //[[CL:Glossary:metaclass]]// is **[[CL:Types:standard-class]]** and the //[[CL:Glossary:slot]]// of the name //slot-name// is not a //[[CL:Glossary:name]]// of a //[[CL:Glossary:slot]]// in that //[[CL:Glossary:class]]//. The default //[[CL:Glossary:method]]// signals an error.
+
+The generic function **[[CL:Functions:slot-missing]]** is not intended to be called by programmers. Programmers may write //[[CL:Glossary:methods]]// for it.
+
+The generic function **[[CL:Functions:slot-missing]]** may be called during evaluation of **[[CL:Functions:slot-value]]**, ''(setf slot-value)'', **[[CL:Functions:slot-boundp]]**, and **[[CL:Functions:slot-makunbound]]**. For each of these operations the corresponding //[[CL:Glossary:symbol]]// for the //operation// argument is \misc{slot-value}, \misc{setf}, \misc{slot-boundp}, and \misc{slot-makunbound} respectively.
+
+The optional //new-value// argument to **[[CL:Functions:slot-missing]]** is used when the operation is attempting to set the value of the //[[CL:Glossary:slot]]//.
+
+
+If **[[CL:Functions:slot-missing]]** returns, its values will be treated as follows:
+
+\beginlist \item{\bull} If the //operation// is \misc{setf} or \misc{slot-makunbound}, any //[[CL:Glossary:values]]// will be ignored by the caller.
+
+\item{\bull} If the //operation// is \misc{slot-value}, only the //[[CL:Glossary:primary value]]// will be used by the caller, and all other values will be ignored.
+
+\item{\bull} If the //operation// is \misc{slot-boundp}, any //[[CL:Glossary:boolean equivalent]]// of the //[[CL:Glossary:primary value]]// of the //[[CL:Glossary:method]]// might be is used, and all other values will be ignored. \endlist
+
+====Examples====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+The default //[[CL:Glossary:method]]// on **[[CL:Functions:slot-missing]]** signals an error of type **[[CL:Types:error]]**.
+
+====See Also====
+
+**[[CL:Macros:defclass]]**, **[[CL:Functions:slot-exists-p]]**, **[[CL:Functions:slot-value]]**
+
+====Notes====
+
+The set of arguments (including the //[[CL:Glossary:class]]// of the instance) facilitates defining methods on the metaclass for **[[CL:Functions:slot-missing]]**.
+
+\issue{SLOT-MISSING-VALUES:SPECIFY}

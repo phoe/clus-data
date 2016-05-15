@@ -1,0 +1,84 @@
+====== Function EQUAL ======
+
+====Syntax====
+
+**equal** //x y// → //generalized-boolean//
+
+====Arguments and Values====
+
+//x// - an //[[CL:Glossary:object]]//.
+
+//y// - an //[[CL:Glossary:object]]//.
+
+//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+Returns //[[CL:Glossary:true]]// if //x// and //y// are structurally similar (isomorphic) //[[CL:Glossary:object|objects]]//. //[[CL:Glossary:object|objects]]// are treated as follows by **[[CL:Functions:equal]]**.
+
+\beginlist \itemitem{//[[CL:Glossary:Symbols]]//, //[[CL:Glossary:Numbers]]//, and //[[CL:Glossary:Characters]]//}
+
+**[[CL:Functions:equal]]** is //[[CL:Glossary:true]]// of two //[[CL:Glossary:object|objects]]// if they are //[[CL:Glossary:symbols]]// that are **[[CL:Functions:eq]]**, if they are //[[CL:Glossary:numbers]]// that are **[[CL:Functions:eql]]**, or if they are //[[CL:Glossary:characters]]// that are **[[CL:Functions:eql]]**.
+
+\itemitem{//[[CL:Glossary:Conses]]//}
+
+For //[[CL:Glossary:conses]]//, **[[CL:Functions:equal]]** is defined recursively as the two //[[CL:Glossary:cars]]// being **[[CL:Functions:equal]]** and the two //[[CL:Glossary:cdrs]]// being **[[CL:Functions:equal]]**.
+
+\itemitem{//[[CL:Glossary:array|arrays]]//}
+
+Two //[[CL:Glossary:array|arrays]]// are **[[CL:Functions:equal]]** only if they are **[[CL:Functions:eq]]**, with one exception: //[[CL:Glossary:strings]]// and //[[CL:Glossary:bit vectors]]// are compared element-by-element (using **[[CL:Functions:eql]]**). If either //x// or //y// has a //[[CL:Glossary:fill pointer]]//, the //[[CL:Glossary:fill pointer]]// limits the number of elements examined by **[[CL:Functions:equal]]**. Uppercase and lowercase letters in //[[CL:Glossary:strings]]// are considered by **[[CL:Functions:equal]]** to be different.
+
+\itemitem{//[[CL:Glossary:Pathnames]]//}
+
+Two //[[CL:Glossary:pathnames]]// are **[[CL:Functions:equal]]** if and only if all the corresponding components (host, device, and so on) are
+
+equivalent. Whether or not uppercase and lowercase letters are considered equivalent in //[[CL:Glossary:strings]]// appearing in components is //[[CL:Glossary:implementation-dependent]]//. //[[CL:Glossary:pathnames]]// that are **[[CL:Functions:equal]]** should be functionally equivalent.
+
+\itemitem{\bf Other (Structures, hash-tables, instances, ''\ldots'')}
+
+Two other //[[CL:Glossary:object|objects]]// are **[[CL:Functions:equal]]** only if they are **[[CL:Functions:eq]]**.
+
+\endlist
+
+**[[CL:Functions:equal]]** does not descend any //[[CL:Glossary:object|objects]]// other than the ones explicitly specified above. \Thenextfigure\ summarizes the information given in the previous list.
+
+In addition, the figure specifies the priority of the behavior of **[[CL:Functions:equal]]**, with upper entries taking priority over lower ones.
+
+\tablefigtwo{Summary and priorities of behavior of **[[CL:Functions:equal]]**}{Type}{Behavior}{ //[[CL:Glossary:number]]// & uses **[[CL:Functions:eql]]** \cr //[[CL:Glossary:character]]// & uses **[[CL:Functions:eql]]** \cr //[[CL:Glossary:cons]]// & descends \cr //[[CL:Glossary:bit vector]]// & descends \cr //[[CL:Glossary:string]]// & descends \cr //[[CL:Glossary:pathname]]// & "functionally equivalent" \cr //[[CL:Glossary:structure]]// & uses **[[CL:Functions:eq]]** \cr Other //[[CL:Glossary:array]]// & uses **[[CL:Functions:eq]]** \cr //[[CL:Glossary:hash table]]// & uses **[[CL:Functions:eq]]** \cr
+
+Other //[[CL:Glossary:object]]// & uses **[[CL:Functions:eq]]** \cr }
+
+Any two //[[CL:Glossary:object|objects]]// that are **[[CL:Functions:eql]]** are also **[[CL:Functions:equal]]**.
+
+**[[CL:Functions:equal]]** may fail to terminate if //x// or //y// is circular.
+
+====Examples====
+
+<blockquote> (equal 'a 'b) → //[[CL:Glossary:false]]// (equal 'a 'a) → //[[CL:Glossary:true]]// (equal 3 3) → //[[CL:Glossary:true]]// (equal 3 3.0) → //[[CL:Glossary:false]]// (equal 3.0 3.0) → //[[CL:Glossary:true]]// (equal #c(3 -4) #c(3 -4)) → //[[CL:Glossary:true]]// (equal #c(3 -4.0) #c(3 -4)) → //[[CL:Glossary:false]]// (equal (cons 'a 'b) (cons 'a 'c)) → //[[CL:Glossary:false]]// (equal (cons 'a 'b) (cons 'a 'b)) → //[[CL:Glossary:true]]// (equal #\\A #\\A) → //[[CL:Glossary:true]]// (equal #\\A #\\a) → //[[CL:Glossary:false]]// (equal "Foo" "Foo") → //[[CL:Glossary:true]]// (equal "Foo" (copy-seq "Foo")) → //[[CL:Glossary:true]]// (equal "FOO" "foo") → //[[CL:Glossary:false]]// (equal "This-string" "This-string") → //[[CL:Glossary:true]]// (equal "This-string" "this-string") → //[[CL:Glossary:false]]// </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:eq]]**, **[[CL:Functions:eql]]**, **[[CL:Functions:equalp]]**, **[[CL:Functions:=]]**, **[[CL:Functions:string=]]**, **[[CL:Functions:string-equal]]**, **[[CL:Functions:char=]]**, **[[CL:Functions:char-equal]]**, **[[CL:Functions:tree-equal]]**
+
+====Notes====
+
+//[[CL:Glossary:Object]]// equality is not a concept for which there is a uniquely determined correct algorithm. The appropriateness of an equality predicate can be judged only in the context of the needs of some particular program. Although these functions take any type of argument and their names sound very generic, **[[CL:Functions:equal]]** and **[[CL:Functions:equalp]]** are not appropriate for every application.
+
+
+A rough rule of thumb is that two //[[CL:Glossary:object|objects]]// are **[[CL:Functions:equal]]** if and only if their printed representations are the same.
+
+
+
+\issue{EQUAL-STRUCTURE:MAYBE-STATUS-QUO} \issue{EQUAL-STRUCTURE:MAYBE-STATUS-QUO} \issue{EQUAL-STRUCTURE:MAYBE-STATUS-QUO}

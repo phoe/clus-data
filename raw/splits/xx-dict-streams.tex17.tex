@@ -1,0 +1,54 @@
+====== Function READ-CHAR ======
+
+====Syntax====
+
+\DefunWithValues {read-char} {''&optional'' input-stream eof-error-p eof-value recursive-p} {char}
+
+====Arguments and Values====
+
+//input-stream// - an //[[CL:Glossary:input]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard input]]//.
+
+//eof-error-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:true]]//.
+
+//eof-value// - an //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**.
+
+//recursive-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+
+//char// - a //[[CL:Glossary:character]]// or the //eof-value//.
+
+====Description====
+
+**[[CL:Functions:read-char]]** returns the next //[[CL:Glossary:character]]// from //input-stream//.
+
+When //input-stream// is an //echo stream//, the character is echoed on //input-stream// the first time the character is
+
+seen. Characters that are not echoed by **[[CL:Functions:read-char]]** are those that were put there by **[[CL:Functions:unread-char]]** and hence are assumed to have been echoed already by a previous call to **[[CL:Functions:read-char]]**.
+
+{'' ''}{\ExplainRecursiveP}
+
+If an //[[CL:Glossary:end of file]]// occurs and //eof-error-p// is //[[CL:Glossary:false]]//, //eof-value// is returned.
+
+====Examples==== <blockquote> (with-input-from-string (is "0123") (do ((c (read-char is) (read-char is nil 'the-end))) ((not (characterp c))) (format t "~S " c)))
+▷ #\\0 #\\1 #\\2 #\\3 → NIL </blockquote>
+
+====Affected By====
+
+**[[CL:Variables:*standard-input*]]**, **[[CL:Variables:*terminal-io*]]**.
+
+====Exceptional Situations====
+
+If an //[[CL:Glossary:end of file]]// occurs before a character can be read, and //eof-error-p// is //[[CL:Glossary:true]]//, an error of type **[[CL:Types:end-of-file]]** is signaled.
+
+====See Also====
+
+**[[CL:Functions:read-byte]]**,
+
+**[[CL:Functions:read-sequence]]**,
+
+**[[CL:Functions:write-char]]**, **[[CL:Functions:read]]**
+
+====Notes====
+
+The corresponding output function is **[[CL:Functions:write-char]]**.
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY} \issue{PEEK-CHAR-READ-CHAR-ECHO:FIRST-READ-CHAR} \issue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}

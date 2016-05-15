@@ -1,0 +1,43 @@
+====== Function ENDP ======
+
+====Syntax====
+
+**endp** //list// → //generalized-boolean//
+
+====Arguments and Values====
+
+//list// - a //[[CL:Glossary:list]]//,
+
+which might be a //[[CL:Glossary:dotted list]]// or a //[[CL:Glossary:circular list]]//.
+
+//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+Returns //[[CL:Glossary:true]]// if //list// is the //[[CL:Glossary:empty list]]//. Returns //[[CL:Glossary:false]]// if //list// is a //[[CL:Glossary:cons]]//.
+
+====Examples====
+
+<blockquote> (endp nil) → //[[CL:Glossary:true]]// (endp '(1 2)) → //[[CL:Glossary:false]]// (endp (cddr '(1 2))) → //[[CL:Glossary:true]]// </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //list// is not a //[[CL:Glossary:list]]//.
+
+====See Also====
+
+None.
+
+====Notes====
+
+The purpose of **[[CL:Functions:endp]]** is to test for the end of //proper list//. Since **[[CL:Functions:endp]]** does not descend into a //[[CL:Glossary:cons]]//, it is well-defined to pass it a //[[CL:Glossary:dotted list]]//. However, if shorter "lists" are iteratively produced by calling **[[CL:Functions:cdr]]** on such a //[[CL:Glossary:dotted list]]// and those "lists" are tested with **[[CL:Functions:endp]]**, a situation that has undefined consequences will eventually result when the //[[CL:Glossary:non-nil]]// //[[CL:Glossary:atom]]// (which is not in fact a //[[CL:Glossary:list]]//) finally becomes the argument to **[[CL:Functions:endp]]**. Since this is the usual way in which **[[CL:Functions:endp]]** is used, it is conservative programming style and consistent with the intent of **[[CL:Functions:endp]]** to treat **[[CL:Functions:endp]]** as simply a function on //[[CL:Glossary:proper lists]]// which happens not to enforce an argument type of //[[CL:Glossary:proper list]]// except when the argument is //[[CL:Glossary:atomic]]//.
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}

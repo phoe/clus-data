@@ -1,0 +1,181 @@
+====== Macro DEFINE-CONDITION ======
+
+\editornote{KMP: This syntax stuff is still very confused and needs lots of work.}
+
+====Syntax====
+
+\DefmacWithValuesNewline define-condition {name \paren{\starparam{parent-type}} \paren{\stardown{slot-spec}} \starparam{option}} {name}
+
+\auxbnf{slot-spec}{slot-name | \paren{slot-name \down{slot-option}}} \auxbnf{slot-option}{\begininterleave \star{\curly{**'':reader''** //[[CL:Glossary:symbol]]//}} | \CR \star{\curly{**'':writer''** \down{function-name}}} | \CR \star{\curly{**'':accessor''** //[[CL:Glossary:symbol]]//}} | \CR \curly{**'':allocation''** \down{allocation-type}} | \CR \star{\curly{**'':initarg''** //[[CL:Glossary:symbol]]//}} | \CR \curly{**'':initform''** //[[CL:Glossary:form]]//} | \CR \curly{**'':type''** //type-specifier//} \endinterleave} \auxbnf{option}{\begininterleave \paren{**'':default-initargs''** ''.'' //initarg-list//} | \CR \paren{**'':documentation''** //[[CL:Glossary:string]]//} | \CR \paren{**'':report''** ''report-name''} \endinterleave} \auxbnf{function-name}{\curly{//[[CL:Glossary:symbol]]// | **[[CL:Functions:(setf //[[CL:Glossary:symbol]]**)]]//}} \auxbnf{allocation-type}{**'':instance''** | **'':class''**} \auxbnf{report-name}{//[[CL:Glossary:string]]// | //[[CL:Glossary:symbol]]// | //[[CL:Glossary:lambda expression]]//}
+
+====Arguments and Values====
+
+//name// - a //[[CL:Glossary:symbol]]//.
+
+//parent-type// - a //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:condition]]// //[[CL:Glossary:type]]//. If no //parent-types// are supplied, the //parent-types// default to ''(condition)''.
+
+//default-initargs// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:keyword/value pairs]]//.
+
+\editornote{KMP: This is all mixed up as to which is a slot option and which is a main option. I'll sort that out. Also, some of this is implied by the bnf and needn't be stated explicitly.}
+
+//Slot-spec// -- the //[[CL:Glossary:name]]// of a //[[CL:Glossary:slot]]// or a //[[CL:Glossary:list]]// consisting of the //slot-name// followed by zero or more //slot-options//.
+
+//Slot-name// -- a slot name (a //[[CL:Glossary:symbol]]//), the //[[CL:Glossary:list]]// of a slot name, or the //[[CL:Glossary:list]]// of slot name/slot form pairs.
+
+//Option// -- Any of the following:
+
+\beginlist
+
+\itemitem{**'':reader''**}
+
+**'':reader''** can be supplied more than once for a given //[[CL:Glossary:slot]]// and cannot be **[[CL:Constant Variables:nil]]**.
+
+\itemitem{**'':writer''**}
+
+**'':writer''** can be supplied more than once for a given //[[CL:Glossary:slot]]// and must name a //[[CL:Glossary:generic function]]//.
+
+\itemitem{**'':accessor''**}
+
+**'':accessor''** can be supplied more than once for a given //[[CL:Glossary:slot]]// and cannot be **[[CL:Constant Variables:nil]]**.
+
+\itemitem{**'':allocation''**}
+
+**'':allocation''** can be supplied once at most for a given //[[CL:Glossary:slot]]//. The default if **'':allocation''** is not supplied is **'':instance''**.
+
+\itemitem{**'':initarg''**}
+
+**'':initarg''** can be supplied more than once for a given //[[CL:Glossary:slot]]//.
+
+\itemitem{**'':initform''**}
+
+**'':initform''** can be supplied once at most for a given //[[CL:Glossary:slot]]//.
+
+\itemitem{**'':type''**}
+
+**'':type''** can be supplied once at most for a given //[[CL:Glossary:slot]]//.
+
+\itemitem{**'':documentation''**}
+
+**'':documentation''** can be supplied once at most for a given //[[CL:Glossary:slot]]//.
+
+\itemitem{**'':report''**}
+
+**'':report''** can be supplied once at most.
+
+\endlist
+
+====Description====
+
+**[[CL:Macros:define-condition]]** defines a new condition type called //name//, which is a //[[CL:Glossary:subtype]]// of
+
+the //[[CL:Glossary:type]]// or //[[CL:Glossary:types]]// named by //parent-type//. Each //parent-type// argument specifies a direct //[[CL:Glossary:supertype]]// of the new //[[CL:Glossary:condition]]//. The new //[[CL:Glossary:condition]]// inherits //[[CL:Glossary:slots]]// and //[[CL:Glossary:methods]]// from each of its direct //[[CL:Glossary:supertypes]]//, and so on.
+
+If a slot name/slot form pair is supplied, the slot form is a //[[CL:Glossary:form]]// that can be evaluated by **[[CL:Functions:make-condition]]** to produce a default value when an explicit value is not provided. If no slot form is supplied, the contents of the //slot// is initialized in an //[[CL:Glossary:implementation-dependent]]// way.
+
+If the //[[CL:Glossary:type]]// being defined and some other //[[CL:Glossary:type]]// from which it inherits have a slot by the same name, only one slot is allocated in the //[[CL:Glossary:condition]]//, but the supplied slot form overrides any slot form that might otherwise have been inherited from a //parent-type//. If no slot form is supplied, the inherited slot form (if any) is still visible.
+
+Accessors are created according to the same rules as used by
+
+**[[CL:Macros:defclass]]**.
+
+A description of //slot-options// follows:
+
+\beginlist
+
+\itemitem{**'':reader''**}
+
+The **'':reader''** slot option specifies that an //[[CL:Glossary:unqualified method]]// is to be defined on the //[[CL:Glossary:generic function]]// named by the argument to **'':reader''** to read the value of the given //[[CL:Glossary:slot]]//.
+
+
+\itemitem{\bull} The **'':initform''** slot option is used to provide a default initial value form to be used in the initialization of the //[[CL:Glossary:slot]]//. This //[[CL:Glossary:form]]// is evaluated every time it is used to initialize the //[[CL:Glossary:slot]]//. The //[[CL:Glossary:lexical environment]]// in which this //[[CL:Glossary:form]]// is evaluated is the lexical //[[CL:Glossary:environment]]// in which the **[[CL:Macros:define-condition]]** form was evaluated. Note that the //[[CL:Glossary:lexical environment]]// refers both to variables and to //[[CL:Glossary:functions]]//. For //[[CL:Glossary:local slots]]//, the //[[CL:Glossary:dynamic environment]]// is the dynamic //[[CL:Glossary:environment]]// in which **[[CL:Functions:make-condition]]** was called; for //[[CL:Glossary:shared slots]]//, the //[[CL:Glossary:dynamic environment]]// is the //[[CL:Glossary:dynamic environment]]// in which the **[[CL:Macros:define-condition]]** form was evaluated.
+
+
+\reviewer{Barmar: Issue CLOS-CONDITIONS doesn't say this.} No implementation is permitted to extend the syntax of **[[CL:Macros:define-condition]]** to allow ''(//slot-name// //form//)'' as an abbreviation for ''(//slot-name// :initform //form//)''.
+
+\itemitem{**'':initarg''**}
+
+The **'':initarg''** slot option declares an initialization argument named by its //[[CL:Glossary:symbol]]// argument and specifies that this initialization argument initializes the given //[[CL:Glossary:slot]]//. If the initialization argument has a value in the call to **[[CL:Functions:initialize-instance]]**, the value is stored into the given //[[CL:Glossary:slot]]//, and the slot's **'':initform''** slot option, if any, is not evaluated. If none of the initialization arguments specified for a given //[[CL:Glossary:slot]]// has a value, the //[[CL:Glossary:slot]]// is initialized according to the **'':initform''** slot option, if specified.
+
+\itemitem{**'':type''**}
+
+The **'':type''** slot option specifies that the contents of the //[[CL:Glossary:slot]]// is always of the specified //[[CL:Glossary:type]]//. It effectively declares the result type of the reader generic function when applied to an //[[CL:Glossary:object]]// of this //[[CL:Glossary:condition]]// type. The consequences of attempting to store in a //[[CL:Glossary:slot]]// a value that does not satisfy the type of the //[[CL:Glossary:slot]]// is undefined.
+
+
+\itemitem{**'':default-initargs''**}
+
+\editornote{KMP: This is an option, not a slot option.}
+
+This option is treated the same as it would be **[[CL:Macros:defclass]]**.
+
+\itemitem{**'':documentation''**}
+
+\editornote{KMP: This is both an option and a slot option.}
+
+The **'':documentation''** slot option provides a //[[CL:Glossary:documentation string]]// for the //[[CL:Glossary:slot]]//.
+
+\itemitem{**'':report''**}
+
+\editornote{KMP: This is an option, not a slot option.}
+
+//[[CL:Glossary:Condition]]// reporting is mediated through the **[[CL:Functions:print-object]]** method for the //[[CL:Glossary:condition]]// type in question, with **[[CL:Variables:*print-escape*]]** always being **[[CL:Constant Variables:nil]]**. Specifying ''(:report //report-name//)'' in the definition of a condition type ''C'' is equivalent to:
+
+<blockquote> (defmethod print-object ((x c) stream) (if *print-escape* (call-next-method) (//report-name// x stream))) </blockquote>
+
+If the value supplied by the argument to **'':report''** (//report-name//) is a //[[CL:Glossary:symbol]]// or a //[[CL:Glossary:lambda expression]]//, it must be acceptable to \specref{function}. ''(function //report-name//)'' is evaluated in the current //[[CL:Glossary:lexical environment]]//. It should return a //[[CL:Glossary:function]]// of two arguments, a //[[CL:Glossary:condition]]// and a //[[CL:Glossary:stream]]//, that prints on the //[[CL:Glossary:stream]]// a description of the //[[CL:Glossary:condition]]//. This //[[CL:Glossary:function]]// is called whenever the //[[CL:Glossary:condition]]// is printed while **[[CL:Variables:*print-escape*]]** is **[[CL:Constant Variables:nil]]**.
+
+If //report-name// is a //[[CL:Glossary:string]]//, it is a shorthand for
+
+<blockquote> (lambda (condition stream) (declare (ignore condition)) (write-string //report-name// stream)) </blockquote>
+
+This option is processed after the new //[[CL:Glossary:condition]]// type has been defined, so use of the //slot// accessors within the **'':report''** function is permitted. If this option is not supplied, information about how to report this type of //[[CL:Glossary:condition]]// is inherited from the //parent-type//.
+
+\endlist
+
+The consequences are unspecifed if an attempt is made to //[[CL:Glossary:read]]// a //slot// that has not been explicitly initialized and that has not been given a default value.
+
+The consequences are unspecified if an attempt is made to assign the //slots// by using **[[CL:Macros:setf]]**.
+
+If a **[[CL:Macros:define-condition]]** //[[CL:Glossary:form]]// appears as a //[[CL:Glossary:top level form]]//, the //[[CL:Glossary:compiler]]// must make //name// recognizable as a valid //[[CL:Glossary:type]]// name, and it must be possible to reference the //[[CL:Glossary:condition]]// //[[CL:Glossary:type]]// as the //parent-type// of another //[[CL:Glossary:condition]]// //[[CL:Glossary:type]]// in a subsequent **[[CL:Macros:define-condition]]** //[[CL:Glossary:form]]// in the //[[CL:Glossary:file]]// being compiled.
+
+====Examples====
+
+The following form defines a condition of //[[CL:Glossary:type]]// ''peg/hole-mismatch'' which inherits from a condition type called ''blocks-world-error'':
+
+<blockquote> (define-condition peg/hole-mismatch (blocks-world-error) ((peg-shape :initarg :peg-shape :reader peg/hole-mismatch-peg-shape) (hole-shape :initarg :hole-shape :reader peg/hole-mismatch-hole-shape)) (:report (lambda (condition stream) (format stream "A ~A peg cannot go in a ~A hole." (peg/hole-mismatch-peg-shape condition) (peg/hole-mismatch-hole-shape condition))))) </blockquote>
+
+The new type has slots ''peg-shape'' and ''hole-shape'', so **[[CL:Functions:make-condition]]** accepts '':peg-shape'' and '':hole-shape'' keywords. The //[[CL:Glossary:readers]]// ''peg/hole-mismatch-peg-shape'' and ''peg/hole-mismatch-hole-shape'' apply to objects of this type, as illustrated in the **'':report''** information.
+
+The following form defines a //[[CL:Glossary:condition]]// //[[CL:Glossary:type]]// named ''machine-error'' which inherits from **[[CL:Types:error]]**:
+
+<blockquote> (define-condition machine-error (error) ((machine-name :initarg :machine-name :reader machine-error-machine-name)) (:report (lambda (condition stream) (format stream "There is a problem with ~A." (machine-error-machine-name condition))))) </blockquote>
+
+Building on this definition, a new error condition can be defined which is a subtype of ''machine-error'' for use when machines are not available:
+
+<blockquote> (define-condition machine-not-available-error (machine-error) () (:report (lambda (condition stream) (format stream "The machine ~A is not available." (machine-error-machine-name condition))))) </blockquote>
+
+This defines a still more specific condition, built upon ''machine-not-available-error'', which provides a slot initialization form for ''machine-name'' but which does not provide any new slots or report information. It just gives the ''machine-name'' slot a default initialization:
+
+<blockquote> (define-condition my-favorite-machine-not-available-error (machine-not-available-error) ((machine-name :initform "mc.lcs.mit.edu"))) </blockquote>
+
+Note that since no **'':report''** clause was given, the information inherited from ''machine-not-available-error'' is used to report this type of condition.
+
+<blockquote> (define-condition ate-too-much (error) ((person :initarg :person :reader ate-too-much-person) (weight :initarg :weight :reader ate-too-much-weight) (kind-of-food :initarg :kind-of-food :reader :ate-too-much-kind-of-food))) → ATE-TOO-MUCH (define-condition ate-too-much-ice-cream (ate-too-much) ((kind-of-food :initform 'ice-cream) (flavor :initarg :flavor :reader ate-too-much-ice-cream-flavor :initform 'vanilla )) (:report (lambda (condition stream) (format stream "~A ate too much ~A ice-cream" (ate-too-much-person condition) (ate-too-much-ice-cream-flavor condition))))) → ATE-TOO-MUCH-ICE-CREAM (make-condition 'ate-too-much-ice-cream :person 'fred :weight 300 :flavor 'chocolate) → #<ATE-TOO-MUCH-ICE-CREAM 32236101> (format t "~A" *)
+▷ FRED ate too much CHOCOLATE ice-cream → NIL </blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+
+**[[CL:Functions:make-condition]]**, **[[CL:Macros:defclass]]**, {\secref\ConditionSystemConcepts}
+
+====Notes====
+
+None.
+
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY} \issue{DEFINE-CONDITION-SYNTAX:INCOMPATIBLY-MORE-LIKE-DEFCLASS+EMPHASIZE-READ-ONLY} \issue{CLOS-CONDITIONS:INTEGRATE} \issue{CLOS-CONDITIONS:INTEGRATE} \issue{CLOS-CONDITIONS:INTEGRATE}

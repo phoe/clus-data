@@ -1,0 +1,49 @@
+====== Function NTHCDR ======
+
+====Syntax====
+
+**nthcdr** //n list// → //tail//
+
+====Arguments and Values====
+
+//n// - a non-negative //[[CL:Glossary:integer]]//.
+
+//list// - a //[[CL:Glossary:list]]//,
+
+which might be a //[[CL:Glossary:dotted list]]// or a //[[CL:Glossary:circular list]]//.
+
+//tail// - an //[[CL:Glossary:object]]//.
+
+====Description====
+
+Returns the //[[CL:Glossary:tail]]// of //list// that would be obtained by calling **[[CL:Functions:cdr]]** //n// times in succession.
+
+====Examples====
+
+<blockquote> (nthcdr 0 '()) → NIL (nthcdr 3 '()) → NIL (nthcdr 0 '(a b c)) → (A B C) (nthcdr 2 '(a b c)) → (C) (nthcdr 4 '(a b c)) → () (nthcdr 1 '(0 . 1)) → 1
+
+(locally (declare (optimize (safety 3))) (nthcdr 3 '(0 . 1))) Error: Attempted to take CDR of 1. </blockquote>
+
+====Side Effects====
+
+None.
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+Should signal an error of type type-error if //n// is not a non-negative //[[CL:Glossary:integer]]//.
+
+For //n// being an integer greater than ''1'', the error checking done by ''(nthcdr //n// //list//)'' is the same as for ''(nthcdr (- //n// 1) (cdr //list//))''; see the //[[CL:Glossary:function]]// **[[CL:Functions:cdr]]**.
+
+====See Also====
+
+**[[CL:Functions:cdr]]**, **[[CL:Functions:nth]]**, **[[CL:Functions:rest]]**
+
+====Notes====
+
+None.
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY} \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
