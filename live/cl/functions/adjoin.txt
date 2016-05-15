@@ -1,0 +1,53 @@
+====== Function ADJOIN ======
+Tests whether //item// is the same as an existing element of //list//. If the //item// is not an existing element, **adjoin** adds it to //list// (as if by **[[CL:Functions:cons]]**) and returns the resulting //[[CL:Glossary:list]]//;  otherwise, nothing is added and the original //list// is returned.
+
+The //test//, //test-not//, and //key// affect how it is determined whether //item// is the same as an //[[CL:Glossary:element]]// of //list//. For details, see {\secref 17.2.1}.
+
+====Syntax====
+  * **adjoin** //item list// ''&key'' //key test test-not// → //new-list//
+
+====Arguments and Values==== 
+
+  * //item// - an //[[CL:Glossary:object]]//.
+  * //list// - a //[[CL:Glossary:proper list]]//.
+  * //test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one [[CL:Glossary:argument]], or **[[CL:Constant Variable:nil]]**.
+  * //new-list// - a //[[CL:Glossary:list]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] *slist* '()) → [[CL:Constant Variable:nil|NIL]] 
+(adjoin 'a *slist*) → (A) 
+*slist* → [[CL:Constant Variable:nil|NIL]] 
+([[CL:Macros:setf]] *slist* (adjoin '(test-item 1) *slist*)) → ((TEST-ITEM 1)) 
+(adjoin '(test-item 1) *slist*) → ((TEST-ITEM 1) (TEST-ITEM 1)) 
+(adjoin '(test-item 1) *slist* :test #'[[CL:Functions:equal]]) → ((TEST-ITEM 1)) 
+(adjoin '(new-test-item 1) *slist* :key #'[[CL:Functions:cadr]]) → ((TEST-ITEM 1)) 
+(adjoin '(new-test-item 1) *slist*) → ((NEW-TEST-ITEM 1) (TEST-ITEM 1)) 
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if //list// is not a //[[CL:Glossary:proper list]]//.
+
+====See Also====
+**[[CL:Macros:pushnew|Macro PUSHNEW]]**, {\secref\TraversalRules}
+
+====Example Implementation====
+<blockquote>
+(adjoin //item// //list// :key //fn//) ≡ (if (member (funcall //fn// //item//) //list// :key //fn//) list (cons //item// //list//))
+</blockquote>
+
+====Notes====
+The **'':test-not''** parameter is deprecated.
+
+
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}

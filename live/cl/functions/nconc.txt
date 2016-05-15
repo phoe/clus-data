@@ -1,0 +1,67 @@
+====== Function NCONC ======
+Returns a //[[CL:Glossary:list]]// that is the concatenation of //lists//. If no //lists// are supplied, ''(nconc)'' returns **[[CL:Constant Variable:nil]]**. **nconc** is defined using the following recursive relationship:
+
+<blockquote>
+(nconc) → ()
+([[CL:Functions:apply]] #'nconc [[CL:Constant Variables:nil]] //lists//) ≡ ([[CL:Functions:apply]] #'nconc //lists//)
+(nconc //list//) → //list//
+(nconc //list-1// //list-2//) ≡ ([[CL:Special Operators:progn]] ([[CL:Functions:rplacd]] ([[CL:Functions:last]] //list-1//) //list-2//) //list-1//)
+([[CL:Functions:apply]] #'nconc //list-1// //list-2// //lists//) ≡ ([[CL:Functions:apply]] #'[[CL:Functions:nconc]] ([[CL:Functions:nconc]] //list-1// //list-2//) //lists//)
+</blockquote>
+
+====Syntax====
+  * **nconc** //''&rest'' lists// → //concatenated-list//
+
+====Arguments and Values====
+  * //list// - each but the last must be a //[[CL:Glossary:list]]//  (which might be a //dotted list// but must not be a //[[CL:Glossary:circular list]]//); the last //list// may be any //[[CL:Glossary:object]]//.
+  * //concatenated-list// - a //[[CL:Glossary:list]]//.
+
+====Examples====
+<blockquote>
+(nconc) → [[CL:Constant Variable:nil|NIL]]
+([[CL:Macros:defparameter]] //*x*// '(a b c)) → (A B C)
+([[CL:Macros:defparameter]] //*y*// '(d e f)) → (D E F)
+(nconc //*x*// //*y*//) → (A B C D E F)
+//*x*// → (A B C D E F)
+</blockquote>
+
+Note, in the example, that the value of ''*x*'' is now different, since its last //[[CL:Glossary:cons]]// has been **[[CL:Functions:rplacd]]**'d to the value of ''*y*''. If ''(nconc *x* *y*)'' were evaluated again, it would yield a piece of a //[[CL:Glossary:circular list]]//, whose printed representation would be ''(A B C D E F D E F D E F ...)'', repeating forever; if the **[[CL:Variables:*print-circle*]]** switch were //[[CL:Glossary:non-nil]]//, it would be printed as ''(A B C . #1=(D E F . #1#))''.
+
+<blockquote>
+([[CL:Macros:defparameter]] //*foo*// ([[CL:Functions:list]] 'a 'b 'c 'd 'e))
+([[CL:Macros:defparameter]] //*bar*// ([[CL:Functions:list]] 'f 'g 'h 'i 'j))
+([[CL:Macros:defparameter]] //*baz*// ([[CL:Functions:list]] 'k 'l 'm))
+([[CL:Macros:setf]] //*foo*// (nconc //*foo*// //*bar*// //*baz*//)) → (A B C D E F G H I J K L M)
+//*foo*// → (A B C D E F G H I J K L M)
+//*bar*// → (F G H I J K L M)
+//*baz*// → (K L M)
+
+([[CL:Macros:setf]] //*foo*// ([[CL:Functions:list]] 'a 'b 'c 'd 'e)
+([[CL:Macros:setf]] //*bar*// ([[CL:Functions:list]] 'f 'g 'h 'i 'j))
+([[CL:Macros:setf]] //*baz*// ([[CL:Functions:list]] 'k 'l 'm))
+([[CL:Macros:setf]] //*foo*// (nconc [[CL:Constant Variables:nil]] //*foo*// //*bar*// [[CL:Constant Variables:nil]] //*baz*//)) → (A B C D E F G H I J K L M) 
+//*foo*// → (A B C D E F G H I J K L M)
+//*bar*// → (F G H I J K L M)
+//*baz*// → (K L M)
+</blockquote>
+
+====Side Effects====
+The //lists// are modified rather than copied.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Functions:append|Function APPEND]]**, **[[CL:Functions:concatenate|Function CONCATENATE]]**
+
+====Example Implementation====
+To be done.
+
+====Notes====
+None.
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}

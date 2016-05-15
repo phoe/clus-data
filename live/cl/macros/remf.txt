@@ -1,0 +1,48 @@
+====== Macro REMF ======
+**remf** removes from the //[[CL:Glossary:property list]]// stored in //place// a //[[CL:Glossary:property]]// with a //[[CL:Glossary:property indicator]]//
+
+//[[CL:Glossary:identical]]// to //indicator//. If there are multiple //[[CL:Glossary:properties]]// with the //[[CL:Glossary:identical]]// key, **remf** only removes the first such //[[CL:Glossary:property]]//.
+
+**remf** returns //[[CL:Glossary:false]]// if no such //[[CL:Glossary:property]]// was found, or //[[CL:Glossary:true]]// if a property was found.
+
+The //[[CL:Glossary:property indicator]]//  and the corresponding //[[CL:Glossary:property value]]//  are removed in an undefined order by destructively splicing the property list.   **remf** is permitted to either **[[CL:Macros:setf]]** //place// or to  **[[CL:Macros:setf]]** any part, **[[CL:Functions:car]]** or **[[CL:Functions:cdr]]**,  of the //[[CL:Glossary:list structure]]// held by that //place//.
+
+For information about the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subforms]]// of //place//, \seesection\GenRefSubFormEval.
+
+====Syntax====
+  * **remf** //place indicator// → //generalized-boolean//
+
+====Arguments and Values====
+  * //place//---a //[[CL:Glossary:place]]//.
+  * //indicator//---an //[[CL:Glossary:object]]//.
+  * //generalized-boolean//---a //[[CL:Glossary:generalized boolean]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] //*x*// ([[CL:Functions:cons]] () ())) → (NIL)
+([[CL:Macros:setf]] ([[CL:Functions:getf]] ([[CL:Functions:car]] //*x*//) 'prop1) 'val1) → VAL1
+(remf ([[CL:Functions:car]] //*x*//) 'prop1) → //[[CL:Glossary:true]]//
+(remf ([[CL:Functions:car]] //*x*//) 'prop1) → //[[CL:Glossary:false]]//
+</blockquote>
+
+====Side Effects====
+The property list stored in //place// is modified.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Functions:remprop]]**, **[[CL:Functions:getf]]**
+
+====Example Implementation====
+To be done.
+
+====Notes====
+None.
+
+\issue{PLIST-DUPLICATES:ALLOW}
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}

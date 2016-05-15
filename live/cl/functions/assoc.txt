@@ -1,0 +1,81 @@
+====== Function ASSOC, ASSOC-IF, ASSOC-IF-NOT ======
+**assoc**, **assoc-if**, and **assoc-if-not** return the first //[[CL:Glossary:cons]]// in //alist// whose //[[CL:Glossary:car]]// //[[CL:Glossary:satisfy the test|satisfies the test]]//, or **[[CL:Constant Variable:nil]]** if no such //[[CL:Glossary:cons]]// is found.
+                    
+For **assoc**, **assoc-if**, and **assoc-if-not**, if **[[CL:Constant Variable:nil]]** appears in //alist// in place of a pair, it is ignored.
+
+====Syntax====
+  * **assoc ** //item      alist ''&key'' key test test-not// → //entry//
+  * **assoc-if ** //predicate alist ''&key'' key// → //entry//
+  * **assoc-if-not** //predicate alist ''&key'' key// → //entry//
+
+====Arguments and Values====
+  * //item// - an //[[CL:Glossary:object]]//.
+  * //alist// - an //[[CL:Glossary:association list]]//.
+  * //predicate// - a //[[CL:Glossary:designator]]// for  a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //test-not// - a //[[CL:Glossary:designator]]// for  a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one [[CL:Glossary:argument]], or **[[CL:Constant Variable:nil]]**.
+  * //entry// - a //[[CL:Glossary:cons]]// that is an //[[CL:Glossary:element]]// of //alist//, or **[[CL:Constant Variable:nil]]**.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] //*values*// '((x . 100) (y . 200) (z . 50))) → ((X . 100) (Y . 200) (Z . 50))
+(assoc 'y //*values*//) → (Y . 200)
+([[CL:Functions:rplacd]] (assoc 'y //*values*//) 201) → (Y . 201)
+(assoc 'y //*values*//) → (Y . 201)
+([[CL:Macros:defparameter]] //*alist*// '((1 . "one")(2 . "two")(3 . "three"))) → ((1 . "one") (2 . "two") (3 . "three"))
+(assoc 2 //*alist*//) → (2 . "two")
+(assoc-if #'[[CL:Functions:evenp]] //*alist*//) → (2 . "two")
+(assoc-if-not #'([[CL:Macros:lambda]] (//x//) ([[CL:Functions:less|<]] //x// 3)) //*alist*//) → (3 . "three")
+([[CL:Macros:setf]] //*alist*// '(("one" . 1)("two" . 2))) → (("one" . 1) ("two" . 2))
+(assoc "one" //*alist*//) → [[CL:Constant Variable:nil|NIL]]
+(assoc "one" //*alist*// :test #'[[CL:Functions:equalp]]) → ("one" . 1)
+(assoc "two" //*alist*// :key #'([[CL:Macros:lambda]] (x) ([[CL:Functions:char]] x 2))) → [[CL:Constant Variable:nil|NIL]] 
+(assoc #\o //*alist*// :key #'([[CL:Macros:lambda]] (x) ([[CL:Functions:char]] x 2))) → ("two" . 2)
+(assoc 'r '((a . b) (c . d) (r . x) (s . y) (r . z))) →  (R . X)
+(assoc 'goo '((foo . bar) (zoo . goo))) → [[CL:Constant Variable:nil|NIL]]
+(assoc '2 '((1 a b c) (2 b c d) (-7 x y z))) → (2 B C D)
+([[CL:Macros:setf]] //*alist*// '(("one" . 1) ("2" . 2) ("three" . 3))) → (("one" . 1) ("2" . 2) ("three" . 3))
+(assoc-if-not #'[[CL:Functions:alpha-char-p]] //*alist*// :key #'([[CL:Macros:lambda]] (x) ([[CL:Functions:char]] x 0))) → ("2" . 2)
+</blockquote>
+
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if //alist// is not an //[[CL:Glossary:association list]]//.
+
+====See Also====
+**[[CL:Functions:rassoc|Function RASSOC]]**, **[[CL:Functions:find|Function FIND]]**, **[[CL:Functions:member|Function MEMBER]]**, **[[CL:Functions:position|Function POSITION]]**, {\secref\TraversalRules}
+
+====Example Implementation====
+To be done.
+
+The two expressions
+
+<blockquote>
+(assoc //item// //list// :test //fn//)
+</blockquote>
+
+and
+
+<blockquote>
+([[CL:Functions:find]] //item// //list// :test //fn// :key #'[[CL:Functions:car]])
+</blockquote>
+
+are equivalent in meaning with one exception: if **[[CL:Constant Variable:nil]]** appears in //alist// in place of a pair, and //item// is **[[CL:Constant Variable:nil]]**, **[[CL:Functions:find]]** will compute the //[[CL:Glossary:car]]// of the **[[CL:Constant Variable:nil]]** in //alist//, find that it is equal to //item//, and return **[[CL:Constant Variable:nil]]**, whereas **assoc** will ignore the **[[CL:Constant Variable:nil]]** in //alist// and continue to search for an actual //[[CL:Glossary:cons]]// whose //[[CL:Glossary:car]]// is **[[CL:Constant Variable:nil]]**.
+
+====Notes====
+The **'':test-not''** parameter is deprecated.
+
+The //[[CL:Glossary:function]]// **assoc-if-not** is deprecated.
+
+It is possible to **[[CL:Functions:rplacd]]** the result of **assoc**, provided that it is not **[[CL:Constant Variable:nil]]**, in order to "update" //alist//. 
+
+
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+\issue{ASSOC-RASSOC-IF-KEY}
+\issue{ASSOC-RASSOC-IF-KEY:YES}

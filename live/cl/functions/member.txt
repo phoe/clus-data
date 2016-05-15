@@ -1,0 +1,65 @@
+====== Function MEMBER, MEMBER-IF, MEMBER-IF-NOT ======
+**member**, **member-if**, and **member-if-not** each search //list// for //item// or for a top-level element that  //[[CL:Glossary:satisfy the test|satisfies the test]]//.  The argument to the //predicate// function  is an element of //list//.
+
+If some element //[[CL:Glossary:satisfy the test|satisfies the test]]//, the tail of //list// beginning with this element is returned; otherwise **[[CL:Constant Variable:nil]]** is returned.
+
+//list// is searched on the top level only. 
+
+====Syntax====
+  * **member       ** //item      list ''&key'' key test test-not// → //tail//
+  * **member-if    ** //predicate list ''&key'' key// → //tail//
+  * **member-if-not** //predicate list ''&key'' key// → //tail//
+
+====Arguments and Values==== 
+
+  * //item// - an //[[CL:Glossary:object]]//.
+  * //list// - a //[[CL:Glossary:proper list]]//.
+  * //predicate// - a //[[CL:Glossary:designator]]// for  a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //test-not// - a //[[CL:Glossary:designator]]// for  a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one [[CL:Glossary:argument]], or **[[CL:Constant Variable:nil]]**.
+  * //tail// - a //[[CL:Glossary:list]]//.
+
+====Examples====
+<blockquote>
+(member 2 '(1 2 3)) → (2 3)                                 
+(member 2 '((1 . 2) (3 . 4)) :test-not #'[[CL:Functions:numeric-equal|=]] :key #'[[CL:Functions:cdr]]) → ((3 . 4))
+(member 'e '(a b c d)) → [[CL:Constant Variable:nil|NIL]]
+</blockquote>
+
+<blockquote>
+(member-if #'[[CL:Functions:listp]] '(a b nil c d)) → ([[CL:Constant Variable:nil|NIL]] C D)
+(member-if #'[[CL:Functions:numberp]] '(a #\Space 5/3 foo)) → (5/3 FOO)
+(member-if-not #'[[CL:Functions:zerop]] '(3 6 9 11 . 12) :key #'([[CL:Macros:lambda]] (//x//) ([[CL:Functions:mod]] //x// 3))) → (11 . 12)
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if //list// is not a //[[CL:Glossary:proper list]]//.
+
+====See Also====
+**[[CL:Functions:find|Function FIND]]**, **[[CL:Functions:position|Function POSITION]]**, {\secref\TraversalRules}
+
+====Example Implementation====
+To be done.
+
+====Notes====
+The **'':test-not''** parameter is deprecated.
+
+The //[[CL:Glossary:function]]// **member-if-not** is deprecated.
+
+In the following
+
+<blockquote>
+(member 'a '(g (a y) c a d e a f)) → (A D E A F)
+</blockquote>
+
+the value returned by **member** is //[[CL:Glossary:identical]]// to the portion of the //[[CL:Glossary:list]]// beginning with ''a''.  Thus **[[CL:Functions:rplaca]]** on the result of **member** can be used to alter the part of the //[[CL:Glossary:list]]// where ''a'' was found (assuming a check has been made that **member** did not return **[[CL:Constant Variable:nil]]**).
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}

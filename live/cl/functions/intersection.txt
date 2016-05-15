@@ -1,0 +1,71 @@
+====== Function INTERSECTION, NINTERSECTION ======
+**intersection** and **nintersection** return a //[[CL:Glossary:list]]// that contains every element that occurs in both //list-1// and //list-2//.
+
+**nintersection** is the destructive version of **intersection**. It performs the same operation, but may destroy //list-1// using its cells to construct the result.
+
+//list-2// is not destroyed.
+
+The intersection operation is described as follows. For all possible ordered pairs consisting of one //[[CL:Glossary:element]]// from //list-1//  and one //[[CL:Glossary:element]]// from //list-2//, **'':test''** or **'':test-not''** are used  to determine whether they //[[CL:Glossary:satisfy the test]]//.   The first argument to the **'':test''** or **'':test-not''** function is an element of //list-1//; the second argument is an element of //list-2//. If **'':test''** or **'':test-not''** is not supplied, **[[CL:Functions:eql]]** is used. It is an error if **'':test''** and **'':test-not''** are supplied in the same function call.
+
+If **'':key''** is supplied (and not **[[CL:Constant Variable:nil]]**), it is used to extract the part to be tested from the //list// element.  The argument to the **'':key''** function is an element of either //list-1// or //list-2//; the **'':key''** function typically returns part of the supplied element. If **'':key''** is not supplied or **[[CL:Constant Variable:nil]]**, the //list-1// and //list-2// elements are used.
+
+For every pair that //[[CL:Glossary:satisfy the test|satifies the test]]//, exactly one of the two elements of the pair will be put in the result. No element from either //[[CL:Glossary:list]]// appears in the result that does not  //[[CL:Glossary:satisfy the test]]// for an element from the other //[[CL:Glossary:list]]//. If one of the //[[CL:Glossary:list|lists]]// contains duplicate elements, there may be duplication in the result.
+
+There is no guarantee that the order of elements in the result will reflect the ordering of the arguments in any particular way. The result //[[CL:Glossary:list]]// may share cells with,  or be **[[CL:Functions:eq]]** to, either //list-1// or //list-2// if appropriate.
+
+====Syntax====
+  * **intersection ** //list-1 list-2 ''&key'' key test test-not// → //result-list//
+  * **nintersection** //list-1 list-2 ''&key'' key test test-not// → //result-list//
+
+====Arguments and Values==== 
+
+  * //list-1// - a //[[CL:Glossary:proper list]]//.
+  * //list-2// - a //[[CL:Glossary:proper list]]//.
+  * //test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //test-not// - a //[[CL:Glossary:designator]]// for  a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one [[CL:Glossary:argument]], or **[[CL:Constant Variable:nil]]**.
+  * //result-list// - a //[[CL:Glossary:list]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] //**list-1**// (list 1 1 2 3 4 a b c "A" "B" "C" "d") 
+              //**list-2**// (list 1 4 5 b c d "a" "B" "c" "D"))
+(intersection //**list-1**// //**list-2**//) → (C B 4 1 1)
+(intersection //**list-1**// //**list-2**// :test #'[[CL:Functions:equal]]) → ("B" C B 4 1 1)
+(intersection //**list-1**// //**list-2**// :test #'[[CL:Functions:equalp]]) → ("d" "C" "B" "A" C B 4 1 1) 
+(nintersection //**list-1**// //**list-2**//) → (1 1 4 B C)
+//**list-1**// → //[[CL:Glossary:implementation-dependent]]// ;//e.g.// (1 1 4 B C)
+//**list-2**// → //[[CL:Glossary:implementation-dependent]]// ;//e.g.// (1 4 5 B C D "a" "B" "c" "D")
+([[CL:Macros:setf]] //**list-1**// (copy-list '((1 . 2) (2 . 3) (3 . 4) (4 . 5)))) → ((1 . 2) (2 . 3) (3 . 4) (4 . 5)) 
+([[CL:Macros:setf]] //**list-2**// (copy-list '((1 . 3) (2 . 4) (3 . 6) (4 . 8)))) → ((1 . 3) (2 . 4) (3 . 6) (4 . 8)) 
+(nintersection //**list-1**// //**list-2**// :key #'[[CL:Functions:cdr]]) → ((2 . 3) (3 . 4)) 
+//**list-1**// → //[[CL:Glossary:implementation-dependent]]// ;//e.g.// ((1 . 2) (2 . 3) (3 . 4)) 
+//**list-2**// → //[[CL:Glossary:implementation-dependent]]// ;//e.g.// ((1 . 3) (2 . 4) (3 . 6) (4 . 8)) 
+</blockquote>
+
+====Side Effects====
+**nintersection** can modify //list-1//, but not //list-2//.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if //list-1// and //list-2// are not //[[CL:Glossary:proper list|proper lists]]//.
+
+====See Also====
+**[[CL:Functions:union|Function UNION]]**, {\secref\ConstantModification}, {\secref\TraversalRules}
+
+====Example Implementation====
+To be done.
+
+====Notes====
+The **'':test-not''** parameter is deprecated.
+
+Since the **nintersection** side effect is not required, it should not be used in for-effect-only positions in portable code.
+
+\issue{NINTERSECTION-DESTRUCTION:REVERT}
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+\issue{NINTERSECTION-DESTRUCTION}
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}

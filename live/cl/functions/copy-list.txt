@@ -1,0 +1,47 @@
+====== Function COPY-LIST ======
+Returns a //[[CL:Glossary:copy]]// of //list//. If //list// is a //[[CL:Glossary:dotted list]]//, the resulting //[[CL:Glossary:list]]// will also be a //[[CL:Glossary:dotted list]]//. 
+
+Only the //[[CL:Glossary:list structure]]// of //list// is copied;  the //[[CL:Glossary:element|elements]]// of the resulting list are  the //[[CL:Glossary:same]]// as the corresponding //[[CL:Glossary:element|elements]]// of the given //list//.
+
+====Syntax====
+  * **copy-list** //list// → //copy//
+
+====Arguments and Values====
+  * //list// - a //[[CL:Glossary:proper list]]// or a //[[CL:Glossary:dotted list]]//.
+  * //copy// - a //[[CL:Glossary:list]]//.
+
+====Examples====    
+<blockquote>
+([[CL:Macros:defparameter]] //**list**// (list 1 (list 2 3))) → (1 (2 3))
+([[CL:Macros:defparameter]] //**uncopied-list**// //**list**//) → (1 (2 3))
+([[CL:Macros:defparameter]] //**copied-list**// (copy-list //**list**//)) → (1 (2 3))
+([[CL:Functions:eq]] //**uncopied-list**// //**list**//) → //[[CL:Glossary:true]]//
+([[CL:Functions:eq]] //**copied-list**// //**list**//) → //[[CL:Glossary:false]]//
+([[CL:Functions:equal]] //**copied-list**// //**list**//) → //[[CL:Glossary:true]]//
+([[CL:Functions:rplaca]] //**list**// "one") → ("one" (2 3))
+//**uncopied-list**// → ("one" (2 3))
+//**copied-list**// → (1 (2 3))
+([[CL:Macros:[[CL:Macros:setf]]]] ([[CL:Functions:caadr]] //**list**//) "two") → "two"
+//**list**// → ("one" ("two" 3))
+//**uncopied-list**// → ("one" ("two" 3))
+//**copied-list**// → (1 ("two" 3))
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+The consequences are undefined if //list// is a //[[CL:Glossary:circular list]]//.
+
+====See Also====
+**[[CL:Functions:copy-alist|Function COPY-ALIST]]**, **[[CL:Functions:copy-seq|Function COPY-SEQ]]**, **[[CL:Functions:copy-tree|Function COPY-TREE]]**
+
+====Example Implementation====
+To be done.
+
+====Notes====
+The copy created is **[[CL:Functions:equal]]** to //list//, but not **[[CL:Functions:eq]]**.
+

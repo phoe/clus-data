@@ -1,0 +1,68 @@
+====== Function LAST ======
+**last** returns the last //n// //[[CL:Glossary:cons|conses]]//   (not the last //n// elements) of //list//). If //list// is **[[CL:Constant Variables:nil]]**, **last** returns **[[CL:Constant Variables:nil]]**.
+
+If //n// is zero, the atom that terminates //list// is returned. If //n// is greater than or equal to the number of //[[CL:Glossary:cons]]// cells in //list//,   the result is //list//.
+
+====Syntax====
+  * **last** //list ''&optional'' n// → //tail//
+
+====Arguments and Values====
+  * //list// - a //[[CL:Glossary:list]]//, which might be a //[[CL:Glossary:dotted list]]// but must not be a //[[CL:Glossary:circular list]]//.
+  * //n// - a non-negative //[[CL:Glossary:integer]]//. The default is ''1.''
+  * //tail// - an //[[CL:Glossary:object]]//.
+
+====Examples====
+<blockquote>
+(last nil) → [[CL:Constant Variable:nil|NIL]]
+(last '(1 2 3)) → (3)
+(last '(1 2 . 3)) → (2 . 3)
+([[CL:Macros:defparameter]] //*x*// (list 'a 'b 'c 'd)) → (A B C D)
+(last //*x*//) → (D)
+([[CL:Functions:rplacd]] (last //*x*//) (list 'e 'f)) //*x*// → (A B C D E F)
+(last //*x*//) → (F)
+
+(last '(a b c))   → (C)
+
+(last '(a b c) 0) → [[CL:Constant Variable:nil|NIL]]
+(last '(a b c) 1) → (C)
+(last '(a b c) 2) → (B C)
+(last '(a b c) 3) → (A B C)
+(last '(a b c) 4) → (A B C)
+
+(last '(a . b) 0) → B
+(last '(a . b) 1) → (A . B)
+(last '(a . b) 2) → (A . B)
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+The consequences are undefined if //list// is a //[[CL:Glossary:circular list]]//.
+
+Should signal an error of type type-error if //n// is not a non-negative //[[CL:Glossary:integer]]//.
+
+====See Also====
+**[[CL:Functions:butlast|Function BUTLAST]]**, **[[CL:Functions:nth|Function NTH]]**
+
+====Example Implementation====
+The following code could be used to define **last**.
+
+<blockquote>
+([[CL:Macros:defun]] last (//list// &optional (//n// 1))
+  ([[CL:Macros:check-type]] //n// ([[CL:Types:integer]] 0))
+  ([[CL:Macros:do]] ((//l// //list// ([[CL:Functions:cdr]] //l//))
+       (//r// //list//)
+       (//i// 0 ([[CL:Functionc:1-plus|1+]] //i//)))
+      (([[CL:Functions:atom]] //l//) //r//)
+    ([[CL:Special Operators:if]] ([[CL:Functions:greater-equal|>=]] //i// //n//) ([[CL:Macros:pop]] //r//))))
+</blockquote>
+
+====Notes====                                             
+None.
+
+\issue{LAST-N}
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}

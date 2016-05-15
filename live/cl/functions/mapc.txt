@@ -1,0 +1,85 @@
+====== Function MAPC, MAPCAR, MAPCAN, MAPL, MAPLIST, MAPCON ======
+The mapping operation involves applying //function// to successive sets of arguments in which one argument is obtained from each //[[CL:Glossary:sequence]]//. Except for **mapc** and **mapl**, the result contains the results returned by //function//. In the cases of **mapc** and **mapl**, the resulting //[[CL:Glossary:sequence]]// is //list//.
+
+//function// is called first on all the elements with index ''0'', then on all those with index ''1'', and so on. //result-type// specifies the //[[CL:Glossary:type]]// of the  resulting //[[CL:Glossary:sequence]]//. If //function// is a //[[CL:Glossary:symbol]]//, it is **[[CL:Functions:coerce]]**d to a //[[CL:Glossary:function]]// as if by **[[CL:Functions:symbol-function]]**.
+
+**mapcar** operates on successive //[[CL:Glossary:element|elements]]// of the //lists//. //function// is applied to the first //[[CL:Glossary:element]]// of each //list//, then to the second //[[CL:Glossary:element]]// of each //list//, and so on. The iteration terminates when the shortest //list// runs out, and excess elements in other lists are ignored. The value returned by **mapcar** is a //[[CL:Glossary:list]]// of the results of successive calls to //function//.
+
+**mapc** is like **mapcar** except that the results of applying //function// are not accumulated. The //list// argument is returned.
+
+**maplist** is like **mapcar** except that //function// is applied to successive sublists of the //lists//. //function//  is first applied to the //lists// themselves,  and then to the //[[CL:Glossary:cdr]]// of each //list//, and then to the //[[CL:Glossary:cdr]]// of the //[[CL:Glossary:cdr]]// of each //list//, and so on.  
+
+**mapl** is like **maplist** except that the results of  applying //function// are not accumulated; //list-1// is returned.
+
+**mapcan** and **mapcon** are like **mapcar** and **maplist** respectively, except that the results of applying //function// are combined  into a //[[CL:Glossary:list]]// by the use of **[[CL:Functions:nconc]]** rather than **[[CL:Functions:list]]**. That is,
+
+<blockquote>
+(mapcon //f// //x1// ... //xn//) ≡ ([[CL:Functions:apply]] #'[[CL:Functions:nconc]] (maplist //f// //x1// ... //xn//))
+</blockquote>
+
+and similarly for the relationship between **mapcan**  and **mapcar**. 
+
+====Syntax====
+  * **mapc   ** //function ''&rest'' lists''+''// → //list-1//
+  * **mapcar ** //function ''&rest'' lists''+''// → //result-list//
+  * **mapcan ** //function ''&rest'' lists''+''// → //concatenated-results//
+  * **mapl   ** //function ''&rest'' lists''+''// → //list-1//
+  * **maplist** //function ''&rest'' lists''+''// → //result-list//
+  * **mapcon ** //function ''&rest'' lists''+''// → //concatenated-results//
+
+====Arguments and Values==== 
+  * //function// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// that must take as many //[[CL:Glossary:arguments]]// as there are //lists//.
+  * //list// - a //[[CL:Glossary:proper list]]//.
+  * //list-1// - the first //list// (which must be a //[[CL:Glossary:proper list]]//).
+  * //result-list// - a //[[CL:Glossary:list]]//.
+  * //concatenated-results// - a //[[CL:Glossary:list]]//.
+
+====Examples====
+<blockquote>
+(mapcar #'[[CL:Functions:car]] '((1 a) (2 b) (3 c))) → (1 2 3) 
+(mapcar #'[[CL:Functions:abs]] '(3 -4 2 -5 -6)) → (3 4 2 5 6)
+(mapcar #'[[CL:Functions:cons]] '(a b c) '(1 2 3)) → ((A . 1) (B . 2) (C . 3))
+
+(maplist #'[[CL:Functions:append]] '(1 2 3 4) '(1 2) '(1 2 3))  → ((1 2 3 4 1 2 1 2 3) (2 3 4 2 2 3)) 
+(maplist #'([[CL:Macros:lambda]] (//x//) ([[CL:Functions:cons]] 'foo //x//)) '(a b c d)) → ((FOO A B C D) (FOO B C D) (FOO C D) (FOO D))
+(maplist #'([[CL:Macros:lambda]] (//x//) ([[CL:Special Operators:if]] ([[CL:Functions:member]] ([[CL:Functions:car]] //x//) ([[CL:Functions:cdr]] //x//)) 0 1)) '(a b a c d b c)) → (0 0 1 0 1 1 1)
+;  An entry is 1 if the corresponding element of the input list was the last instance of that element in the input list.
+
+([[CL:Macros:defparameter]] //*dummy-mapc*// [[CL:Constant Variables:nil]]) → [[CL:Constant Variable:nil|NIL]] 
+(mapc #'([[CL:Macros:lambda]] (&rest //x//) ([[CL:Macros:setf]] //*dummy-mapc*// ([[CL:Functions:append]] //*dummy-mapc*// //x//))) '(1 2 3 4) '(a b c d e) '(x y z)) → (1 2 3 4) 
+//*dummy-mapc*// → (1 A X 2 B Y 3 C Z)                   
+
+([[CL:Macros:defparameter]] //*dummy-mapl*// [[CL:Constant Variables:nil]]) → [[CL:Constant Variable:nil|NIL]] 
+(mapl #'([[CL:Macros:lambda]] (//x//) (push //x// //*dummy-mapl*//)) '(1 2 3 4)) → (1 2 3 4) 
+//*dummy-mapl*// → ((4) (3 4) (2 3 4) (1 2 3 4)) 
+
+(mapcan #'([[CL:Macros:lambda]] (//x y//) ([[CL:Special Operators:if]] ([[CL:Functions:null]] //x//) [[Cl:Constant Variables:nil]] ([[CL:Functions:list]] //x y//))) '(nil nil nil d e) '(1 2 3 4 5 6)) → (D 4 E 5) 
+(mapcan #'([[CL:Macros:lambda]] (//x//) ([[CL:Macros:and]] ([[CL:Functions:numberp]] //x//) ([[CL:Functions:list]] //x//))) '(a 1 b c 3 4 d 5)) → (1 3 4 5)
+</blockquote>
+In this case the function serves as a filter; this is a standard Lisp idiom using **mapcan**.
+
+<blockquote>
+(mapcon #'[[CL:Functions:list]] '(1 2 3 4)) → ((1 2 3 4) (2 3 4) (3 4) (4)) 
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if any //list// is not a //[[CL:Glossary:proper list]]//.
+
+====See Also====
+**[[CL:Macros:dolist|Function DOLIST]]**, **[[CL:Functions:map|Function MAP]]**, {\secref\TraversalRules}
+
+====Example Implementation====
+To be done.
+
+====Notes====
+None.
+
+\issue{FUNCTION-TYPE:X3J13-MARCH-88}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}

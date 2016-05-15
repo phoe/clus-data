@@ -1,0 +1,51 @@
+====== Function TREE-EQUAL ======
+**tree-equal** tests whether two trees are of the same shape and have the same leaves.   **tree-equal** returns //[[CL:Glossary:true]]// if //tree-1// and //tree-2//  are  both //[[CL:Glossary:atom|atoms]]// and //[[CL:Glossary:satisfy the test]]//, or if they are both //[[CL:Glossary:cons|conses]]// and the //[[CL:Glossary:car]]// of //tree-1// is **tree-equal** to the //[[CL:Glossary:car]]// of //tree-2// and the //[[CL:Glossary:cdr]]// of //tree-1// is **tree-equal** to the //[[CL:Glossary:cdr]]// of //tree-2//.   Otherwise, **tree-equal** returns //[[CL:Glossary:false]]//.
+
+**tree-equal** recursively compares //[[CL:Glossary:cons|conses]]// but not any  other //[[CL:Glossary:object|objects]]// that have components.  
+
+The first argument to the **'':test''** or **'':test-not''**  function is //tree-1// or a //[[CL:Glossary:car]]// or //[[CL:Glossary:cdr]]// of //tree-1//; the second argument is //tree-2// or a //[[CL:Glossary:car]]//  or //[[CL:Glossary:cdr]]// of //tree-2//.
+
+====Syntax====
+  * **tree-equal** //tree-1 tree-2 ''&key'' test test-not// → //generalized-boolean//
+
+====Arguments and Values==== 
+
+  * //tree-1// - a //[[CL:Glossary:tree]]//.
+  * //tree-2// - a //[[CL:Glossary:tree]]//.
+  * //test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //test-not// - a //[[CL:Glossary:designator]]// for   a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] //*tree-1*// '(1 (1 2))) → (1 (1 2))
+([[CL:Macros:defparameter]] //*tree-2*// '(1 (1 2))) → (1 (1 2))
+(tree-equal //*tree-1*// //*tree-2*//) → //[[CL:Glossary:true]]//
+([[CL:Functions:eql]] //*tree-1*// //*tree-2*//) → //[[CL:Glossary:false]]//
+([[CL:Macros:setf]] //*tree-1*// '('a ('b 'c))) → ('a ('b 'c)) ≡ ((QUOTE A) ((QUOTE B) (QUOTE C)))
+([[CL:Macros:setf]] //*tree-2*// '('a ('b 'c))) → ('a ('b 'c)) ≡ ((QUOTE A) ((QUOTE B) (QUOTE C)))
+(tree-equal //*tree-1*// //*tree-2*// :test #'[[CL:Functions:eq]]) → //[[CL:Glossary:true]]//
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+The consequences are undefined if both //tree-1// and //tree-2// are circular.
+
+====See Also====
+**[[CL:Functions:equal|Function EQUAL]]**, {\secref\TraversalRules}
+
+====Example Implementation====
+To be done.
+
+====Notes====
+The **'':test-not''** parameter is deprecated.
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL}
+

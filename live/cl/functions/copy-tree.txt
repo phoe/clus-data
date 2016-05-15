@@ -1,0 +1,53 @@
+====== Function COPY-TREE ======
+Creates a //[[CL:Glossary:copy]]// of a //[[CL:Glossary:tree]]// of //[[CL:Glossary:cons|conses]]//.
+
+If //tree// is not a //[[CL:Glossary:cons]]//, it is returned; otherwise, the result is a new //[[CL:Glossary:cons]]// of the results of calling **copy-tree** on the //[[CL:Glossary:car]]// and //[[CL:Glossary:cdr]]// of //tree//. In other words, all //[[CL:Glossary:cons|conses]]// in the //[[CL:Glossary:tree]]// represented by //tree// are copied recursively, stopping only when non-//[[CL:Glossary:cons|conses]]// are encountered.
+
+**copy-tree** does not preserve circularities and the sharing of substructure.
+
+====Syntax====
+  * **copy-tree** //tree// → //new-tree//
+
+====Arguments and Values==== 
+  * //tree// - a //[[CL:Glossary:tree]]//.
+  * //new-tree// - a //[[CL:Glossary:tree]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] //*object*// ([[CL:Functions:list]] ([[CL:Functions:cons]] 1 "one")
+                       ([[CL:Functions:cons]] 2 ([[CL:Functions:list]] 'a 'b 'c)) → ((1 . "one") (2 A B C))
+([[CL:Macros:defparameter]] //*object-too*// //*object*//) → ((1 . "one") (2 A B C))
+([[CL:Macros:defparameter]] //*copy-as-list*// ([[CL:Functions:copy-list]] //*object*//))
+([[CL:Macros:defparameter]] //*copy-as-alist*// ([[CL:Functions:copy-alist]] //*object*//))
+([[CL:Macros:defparameter]] //*copy-as-tree*// (copy-tree //*object*//))
+([[CL:Functions:eq]] //*object*// //*object-too*//) → true
+([[CL:Functions:eq]] //*copy-as-tree*// //*object*//) → false
+([[CL:Functions:eql]] //*copy-as-tree*// //*object*//) → false
+([[CL:Functions:equal]] //*copy-as-tree*// //*object*//) → true
+([[Cl:Macros:setf]] ([[CL:Functions:first]] ([[CL:Functions:cdr]] ([[CL:Functions:second]] //*object*//))) "a"
+      ([[CL:Functions:car]] ([[CL:Functions:second]] //*object*//)) "two"
+      ([[CL:Functions:car]] //*object*//) '(one . 1)) → (ONE . 1)
+//*object*// → ((ONE . 1) ("two" "a" B C))
+//*object-too*// → ((ONE . 1) ("two" "a" B C))
+//*copy-as-list*// → ((1 . "one") ("two" "a" B C))
+//*copy-as-alist*// → ((1 . "one") (2 "a" B C))
+//*copy-as-tree*// → ((1 . "one") (2 A B C))
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See also====
+**[[CL:Functions:tree-equal|Function TREE-EQUAL]]**
+
+====Example Implementation====
+To be done.
+
+====Notes====
+None.

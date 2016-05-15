@@ -1,0 +1,86 @@
+====== Function LDIFF, TAILP ======
+If //object// is the //[[CL:Glossary:same]]// as some //[[CL:Glossary:tail]]// of //list//, **tailp** returns //[[CL:Glossary:true]]//; otherwise, it returns //[[CL:Glossary:false]]//.
+
+If //object// is the //[[CL:Glossary:same]]// as some //[[CL:Glossary:tail]]// of //list//, **ldiff** returns a //[[CL:Glossary:fresh]]// //[[CL:Glossary:list]]//  of the //[[CL:Glossary:elements]]// of //[[CL:Glossary:list]]//  that precede **[[CL:Functions:object]]** in the //[[CL:Glossary:list structure]]// of //list//; otherwise, it returns a //[[CL:Glossary:copy]]// of //list//.
+
+====Syntax====
+  * **ldiff** //list object// → //result-list//
+  * **tailp** //object list// → //generalized-boolean//
+
+====Arguments and Values====
+  * //list// - a //[[CL:Glossary:list]]//, which might be a //[[CL:Glossary:dotted list]]//.
+  * //object// - an //[[CL:Glossary:object]]//.
+  * //result-list// - a //[[CL:Glossary:list]]//.
+  * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Examples====
+<blockquote>
+([[CL:Special Operators:let]] ((//lists// '#((a b c) (a b c . d))))
+  ([[CL:Macros:dotimes]] (//i// ([[CL:Functions:length]] //lists//)) ()
+    ([[CL:Special Operators:let]] ((//list// ([[CL:Functions:aref]] //lists// //i//)))
+      ([[CL:Functions:format]] t "~2&list=~S ~21T(tailp object list)~44T(ldiff list object)~%" //list//)
+      ([[CL:Special Operators:let]] ((//objects// ([[CL:Functions:vector]] //list// ([[CL:Functions:cddr]] //list//) ([[CL:Functions:copy-list]] ([[CL:Functions:cddr]] //list//)) '(f g h) '() 'd 'x)))
+	([[CL:Macros:dotimes]] (//j// ([[CL:Functions:length]] //objects//)) ()
+	  ([[CL:Special Operators:let]] ((//object// ([[CL:Functions:aref]] //objects// //j//)))
+	    ([[CL:Functions:format]] t "~& object=~S ~21T~S ~44T~S" //object// ([[CL:Functions:tailp]] //object// //list//) ([[CL:Functions:ldiff]] //list// //object//))))))))
+▷ 
+▷ list=(A B C)         (tailp object list)    (ldiff list object)
+▷  object=(A B C)      T                      NIL
+▷  object=(C)          T                      (A B)
+▷  object=(C)          NIL                    (A B C)
+▷  object=(F G H)      NIL                    (A B C)
+▷  object=NIL          T                      (A B C)
+▷  object=D            NIL                    (A B C)
+▷  object=X            NIL                    (A B C)
+▷ 
+▷ list=(A B C . D)     (tailp object list)    (ldiff list object)
+▷  object=(A B C . D)  T                      NIL
+▷  object=(C . D)      T                      (A B)
+▷  object=(C . D)      NIL                    (A B C . D)
+▷  object=(F G H)      NIL                    (A B C . D)
+▷  object=NIL          NIL                    (A B C . D)
+▷  object=D            T                      (A B C)
+▷  object=X            NIL                    (A B C . D)
+→ [[CL:Constant Variable:nil|NIL]]
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if //list// is not a //[[CL:Glossary:proper list]]// or a //[[CL:Glossary:dotted list]]//.
+
+====See Also====
+**[[CL:Functions:set-difference|Function SET-DIFFERENCE]]**
+
+====Example Implementation====
+**tailp** could be defined as follows:
+
+<blockquote>
+([[CL:Macros:defun]] tailp (//object// //list//)
+  ([[CL:Macros:do]] ((//list// //list// ([[CL:Functions:cdr]] //list//)))
+      (([[CL:Functions:atom]] //list//) ([[CL:Functions:eql]] //list// //object//))
+    ([[CL:Special Operators:if]] ([[CL:Functions:eql]] //object// //list//)
+	([[CL:Macros:return]] t))))
+</blockquote>
+
+and **ldiff** could be defined by:
+
+<blockquote>
+([[CL:Macros:defun]] ldiff (//list// //object//)
+  ([[CL:Macros:do]] ((//list// //list// (cdr //list//))
+       (//r// '() ([[CL:Functions:cons]] ([[CL:Functions:car]] //list//) //r//)))
+      (([[CL:Functions:atom]] //list//)
+       ([[CL:Special Operators:if]] ([[CL:Functions:eql]] //list// //object//) ([[CL:Functions:nreverse]] //r//) ([[CL:Functions:nreconc]] //r// //list//)))
+    ([[CL:Macros:when]] ([[CL:Functions:eql]] //object// //list//)
+      ([[CL:Macros:return]] ([[CL:Functions:nreverse]] //r//)))))
+</blockquote>
+
+====Notes====
+If the //list// is a //[[CL:Glossary:circular list]]//, **tailp** will reliably //[[CL:Glossary:yield]]// a //[[CL:Glossary:value]]//  only if the given //object// is in fact a //[[CL:Glossary:tail]]// of //list//. Otherwise, the consequences are unspecified: a given //[[CL:Glossary:implementation]]// which detects the circularity must return //[[CL:Glossary:false]]//, but since an //[[CL:Glossary:implementation]]// is not obliged to detect such a //[[CL:Glossary:situation]]//, **tailp** might just loop indefinitely without returning in that case.
+
+\issue{TAILP-NIL:T}
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}

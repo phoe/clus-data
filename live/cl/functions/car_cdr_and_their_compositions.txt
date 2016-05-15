@@ -1,0 +1,50 @@
+====== Accessor CAR, CDR and their compositions ======
+If //x// is a //[[CL:Glossary:cons]]//, **car** returns the //[[CL:Glossary:car]]// of that //[[CL:Glossary:cons]]//. If //x// is **[[CL:Constant Variable:nil]]**, **car** returns **[[CL:Constant Variable:nil]].**
+
+If //x// is a //[[CL:Glossary:cons]]//, **cdr** returns the //[[CL:Glossary:cdr]]// of that //[[CL:Glossary:cons]]//. If //x// is **[[CL:Constant Variable:nil]]**, **cdr** returns **[[CL:Constant Variable:nil]]**.
+
+//[[CL:Glossary:function|Functions]]// are provided which perform compositions up to four **car** and **cdr** operations. Their //[[CL:Glossary:name|names]]// consist of a ''C'', followed by two, three or four occurrences of ''A'' or ''D'', and finally a ''R''. The series of ''A''s and ''D''s in each //[[CL:Glossary:function|function's]]// //[[CL:Glossary:name]]// is chosen to identify the series of **car** and **cdr** operations that is performed by the function. The order in which the ''A''s and ''D''s appear is the inverse of the order in which the corresponding operations are performed.
+
+**[[CL:Macros:setf]]** can also be used with any of these functions to change an existing component of //x//, but **[[CL:Macros:setf]]** will not make new components. So, for example, the //[[CL:Glossary:car]]// of a //[[CL:Glossary:cons]]// can be assigned with **[[CL:Macros:setf]]** of **car**, but the //[[CL:Glossary:car]]// of **[[CL:Constant Variable:nil]]** cannot be assigned with **[[CL:Macros:setf]]** of **car**. 
+
+Similarly, the //[[CL:Glossary:car]]// of the //[[CL:Glossary:car]]// of a //[[CL:Glossary:cons]]// whose //[[CL:Glossary:car]]// is a //[[CL:Glossary:cons]]// can be assigned with **[[CL:Macros:setf]]** of **caar**, but neither **[[CL:Constant Variable:nil]]** nor a //[[CL:Glossary:cons]]// whose //[[CL:Glossary:car]]// is **[[CL:Constant Variable:nil]]** can be assigned with **[[CL:Macros:setf]]** of **caar**.
+The argument //x// is permitted to be a //[[CL:Glossary:dotted list]]// or a //[[CL:Glossary:circular list]]//.
+
+====Syntax====
+  * **car** //x// → //object//
+  * **cdr** //x// → //object//
+  * (**setf** (**car** //x//) //new-object//)
+  * (**setf** (**cdr** //x//) //new-object//)
+  * //Click [[CL:Functions:Car, Cdr and their Compositions:Full List|here]] for the syntax and equivalence chart of all //**car**// and //**cdr**// compositions.//
+
+====Arguments and values==== 
+  * //x// - a //[[CL:Glossary:list]]//.
+  * //object// - an //[[CL:Glossary:object]]//.
+  * //new-object// - an //[[CL:Glossary:object]]//.
+
+====Examples====
+<blockquote>
+(car [[CL:Constant Variable:nil]]) → [[CL:Constant Variable:nil|NIL]]
+(cdr '(1 . 2)) → 2
+(cdr '(1 2)) → (2)
+(cadr '(1 2)) → 2
+(car '(a b c)) → A
+(cdr '(a b c)) → (B C)
+</blockquote>
+
+====Exceptional situations====
+The functions **car** and **cdr** should signal **[[CL:Errors:type-error]]** if they receive an argument which is not a //[[CL:Glossary:list]]//. The other functions (**caar**, **cadr**, ..., **cddddr**) should behave for the purpose of error checking as if defined by appropriate calls to **car** and **cdr**.
+
+====See also====
+**[[CL:Functions:rplaca|Function RPLACA]]**, **[[CL:Functions:rplacd|Function RPLACD]]**, **[[CL:Functions:first|Function FIRST]]**, **[[CL:Functions:rest|Function REST]]**
+
+====Example Implementation====
+To be done.
+
+====Notes====
+  * The //[[CL:Glossary:car]]// of a //[[CL:Glossary:cons]]// can also be altered by using **[[CL:Functions:rplaca]]**, and the //[[CL:Glossary:cdr]]// of a //[[CL:Glossary:cons]]// can be altered by using **[[CL:Functions:rplacd]]**.
+
+  * ''(**car** //x//)'' is equivalent to ''(**[[CL:Functions:first]]** //x//)''.
+  * ''(**cadr** //x//)'' is equivalent to ''(**[[CL:Functions:second]]** //x//)''.
+  * ''(**caddr** //x//)'' is equivalent to ''(**[[CL:Functions:third]]** //x//)''.
+  * ''(**cadddr** //x//)'' is equivalent to ''(**[[CL:Functions:fourth]]** //x//)''.

@@ -1,0 +1,53 @@
+====== Macro PUSH ======
+**push** prepends //item// to the //[[CL:Glossary:list]]// that is stored in //place//, stores the resulting //[[CL:Glossary:list]]// in //place//,  and returns the //[[CL:Glossary:list]]//.
+
+For information about the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subforms]]// of //place//, \seesection\GenRefSubFormEval.
+
+====Syntax====
+  * **push** //item place// → //new-place-value//
+
+====Arguments and Values====
+  * //item//---an //[[CL:Glossary:object]]//. 
+  * //place//---a //[[CL:Glossary:place]]//, the //[[CL:Glossary:value]]// of which may be any //[[CL:Glossary:object]]//.  
+  * //new-place-value//---a //[[CL:Glossary:list]]// (the new //[[CL:Glossary:value]]// of //place//).
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] //*list-in-list*// '(nil)) → (NIL)
+(push 1 ([[CL:Functions:car]] //*list-in-list*//)) → (1)
+//*list-in-list*// → ((1))
+(push 1 ([[CL:Functions:car]] //*list-in-list*//)) → (1 1)
+//*list-in-list*// → ((1 1))
+([[CL:Macros:defparameter]] //*x*// '(a (b c) d)) → (A (B C) D)
+(push 5 ([[CL:Functions:cadr]] //*x*//)) → (5 B C)  
+//*x*// → (A (5 B C) D)
+</blockquote>
+
+====Side Effects====
+The contents of //place// are modified.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Macros:pop]]**, **[[CL:Macros:pushnew]]**, {\secref\GeneralizedReference}
+
+====Example Implementation====
+To be done.
+
+The effect of ''(push //item// //place//)'' is equivalent to
+
+<blockquote>
+([[CL:Macros:setf]] //place// ([[CL:Functions:cons]] //item// //place//))
+</blockquote>
+
+except that the //[[CL:Glossary:subforms]]// of //place//  are evaluated only once, and //item// is evaluated before //place//.
+
+====Notes====
+None.
+
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}

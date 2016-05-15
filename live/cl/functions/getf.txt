@@ -1,0 +1,73 @@
+====== Accessor GETF ======
+**getf** finds a //[[CL:Glossary:property]]// on the //plist// whose //[[CL:Glossary:property indicator]]// is //[[CL:Glossary:identical]]// to //indicator//, and returns its corresponding //[[CL:Glossary:property value]]//. If there are multiple //[[CL:Glossary:property|properties]]// with that //[[CL:Glossary:property indicator]]//, **getf** uses the first such //[[CL:Glossary:property]]//. If there is no //[[CL:Glossary:property]]// with that //[[CL:Glossary:property indicator]]//,
+//default// is returned.
+
+**[[CL:Macros:setf]]** of **getf** may be used to associate a new //[[CL:Glossary:object]]// with an existing indicator in the //[[CL:Glossary:property list]]// held by //place//, or to create a new assocation if none exists. If there are multiple //[[CL:Glossary:properties]]// with that //[[CL:Glossary:property indicator]]//, **[[CL:Macros:setf]]** of **getf** associates the //new-value//  with the first such //[[CL:Glossary:property]]//. When a **getf** //[[CL:Glossary:form]]// is used as a **[[CL:Macros:setf]]** //place//, any //default// which is supplied is evaluated according to normal left-to-right evaluation rules, but its //[[CL:Glossary:value]]// is ignored.
+
+**[[CL:Macros:setf]]** of **getf** is permitted to either //[[CL:Glossary:write]]// the //[[CL:Glossary:value]]// of //place// itself, or modify of any part, //[[CL:Glossary:car]]// or //[[CL:Glossary:cdr]]//, of the //[[CL:Glossary:list structure]]// held by //place//.
+
+====Syntax====
+  * **getf** //plist indicator// ''&optional'' //default// → //value//
+  * (**setf** (**getf** //place indicator ''&optional'' default//) //new-value//)
+
+====Arguments and Values====
+  * //plist// - a //[[CL:Glossary:property list]]//.
+  * //place// - a //[[CL:Glossary:place]]//, the //[[CL:Glossary:value]]// of which is a //[[CL:Glossary:property list]]//.
+  * //indicator// - an //[[CL:Glossary:object]]//.
+  * //default// - an //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variable:nil]]**.
+  * //value// - an //[[CL:Glossary:object]]//.
+  * //new-value// - an //[[CL:Glossary:object]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] //*x*// '()) → [[CL:Constant Variable:nil|NIL]]
+(getf //*x*// '//prop1//) → [[CL:Constant Variable:nil|NIL]]
+(getf //*x*// '//prop1// 7) → 7
+(getf //*x*// '//prop1//) → [[CL:Constant Variable:nil|NIL]]
+([[CL:Macros:setf]] (getf //*x*// '//prop1//) '//val1//) → VAL1
+([[CL:Functions:eq]] (getf //*x*// '//prop1//) '//val1//) → //[[CL:Glossary:true]]//
+(getf //*x*// '//prop1//) → //VAL1//
+(getf //*x*// '//prop1// 7) → //VAL1//
+//*x*// → (//PROP1// //VAL1//)
+;; Examples of implementation variation permitted.
+([[CL:Macros:defparameter]] //*foo*// ([[CL:Functions:list]] 'a 'b 'c 'd 'e 'f)) → (A B C D E F)
+([[CL:Macros:defparameter]] //*bar*// ([[CL:Functions:cddr]] //*foo*//)) → (C D E F)
+([[CL:Macros:remf]] //*foo*// 'c) → //[[CL:Glossary:true]]//
+//*foo*// → (A B E F)
+//*bar*// → (C D E F)
+   //or// → (C)
+   //or// → ([[CL:Constant Variable:nil|NIL]])
+   //or// → (C [[CL:Constant Variable:nil|NIL]])
+   //or// → (C D)
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Functions:get|Function GET]]**, **[[CL:Functions:get-properties|Function GET-PROPERTIES]]**, **[[CL:Macros:setf|Macro SETF]]**, {\secref\FnFormsAsGenRefs}
+
+====Example Implementation====
+To be done.
+
+====Notes====
+There is no way (using **getf**) to distinguish an absent property from one whose value is //default//; but see **[[CL:Functions:get-properties]]**.
+
+Note that while supplying a //[[CL:Glossary:default]]// argument to **[[CL:Macros:getf]]** in a **[[CL:Macros:setf]]** situation is sometimes not very interesting, it is still important because some macros, such as **[[CL:Macros:push]]** and **[[CL:Macros:incf]]**, require a //place// argument which data is both //[[CL:Glossary:read]]// from and //[[CL:Glossary:write|written]]// to.  In such a context, if a //[[CL:Glossary:default]]//  argument is to be supplied for the //[[CL:Glossary:read]]// situation, it must be syntactically valid for the //[[CL:Glossary:write]]// situation as well. For example,
+
+<blockquote>
+([[CL:Special Operators:let]] ((//plist// '()))
+  ([[CL:Macros:incf]] (getf //plist// 'count 0))
+  //plist//) → (COUNT 1)
+</blockquote>
+
+
+\issue{SETF-GET-DEFAULT:EVALUATED-BUT-IGNORED}
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89}
+\issue{PLIST-DUPLICATES:ALLOW}

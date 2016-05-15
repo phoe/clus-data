@@ -1,0 +1,59 @@
+====== Function BUTLAST, NBUTLAST ======
+**[[CL:Functions:butlast]]** returns a copy of //list// from which the last //n// conses have been omitted. If //n// is not supplied, its value is 1.   If there are fewer than //n//   conses  in //list//, **[[CL:Constant Variable:nil]]** is returned and, in the case of **[[CL:Functions:nbutlast]]**, //list// is not modified.  
+
+**[[CL:Functions:nbutlast]]** is like **[[CL:Functions:butlast]]**, but **[[CL:Functions:nbutlast]]**  may modify //list//. It changes the //[[CL:Glossary:cdr]]// of the //[[CL:Glossary:cons]]// //n//+1 from the end of the //list// to **[[CL:Constant Variable:nil]]**.  
+
+====Syntax====
+  * **butlast ** //list ''&optional'' n// → //result-list//
+  * **nbutlast** //list ''&optional'' n// → //result-list//
+
+====Arguments and Values====
+  * //list// - a //[[CL:Glossary:list]]//, which might be a //[[CL:Glossary:dotted list]]// but must not be a //[[CL:Glossary:circular list]]//.
+  * //n// - a non-negative //[[CL:Glossary:integer]]//.
+  * //result-list// - a //[[CL:Glossary:list]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] //*list*// '(1 2 3 4 5 6 7 8 9)) → (1 2 3 4 5 6 7 8 9)
+(butlast //*list*//) → (1 2 3 4 5 6 7 8)
+(butlast //*list*// 5) → (1 2 3 4)
+(butlast //*list*// (+ 5 5)) → [[CL:Constant Variable:nil|NIL]]
+//*list*// → (1 2 3 4 5 6 7 8 9)
+(nbutlast //*list*// 3) → (1 2 3 4 5 6)
+//*list*// → (1 2 3 4 5 6)
+(nbutlast //*list*// 99) → [[CL:Constant Variable:nil|NIL]]
+//*list*// → (1 2 3 4 5 6)
+(butlast '(a b c d)) → (A B C)
+(butlast '((a b) (c d))) → ((A B))
+(butlast '(a)) → [[CL:Constant Variable:nil|NIL]]
+(butlast [[CL:Constant Variable:nil]]) → [[CL:Constant Variable:nil|NIL]]
+([[CL:Macros:defparameter]] //*foo*// ([[CL:Functions:list]] 'a 'b 'c 'd)) → (A B C D)
+(nbutlast //*foo*//) → (A B C)
+//*foo*// → (A B C)
+(nbutlast ([[CL:Functions:list]] 'a)) → [[CL:Constant Variable:nil|NIL]]
+(nbutlast '()) → [[CL:Constant Variable:nil|NIL]]
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should signal an error of type type-error if //list// is not a //[[CL:Glossary:proper list]]// or a //[[CL:Glossary:dotted list]]//.
+
+Should signal an error of type type-error if //n// is not a non-negative //[[CL:Glossary:integer]]//.
+
+====See Also====
+None.
+
+====Example Implementation====
+To be done.
+
+<blockquote>
+(butlast //list// //n//) ≡ ([[CL:Functions:ldiff]] //list// ([[CL:Functions:last]] //list// //n//))
+</blockquote>
+
+====Notes====
+None.
+
+\issue{BUTLAST-NEGATIVE:SHOULD-SIGNAL}
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}

@@ -1,0 +1,51 @@
+====== Macro POP ======
+**pop** //[[CL:Glossary:reads]]// the //[[CL:Glossary:value]]// of //place//, remembers the //[[CL:Glossary:car]]// of the //[[CL:Glossary:list]]// which was retrieved, //[[CL:Glossary:writes]]// the //[[CL:Glossary:cdr]]// of the //[[CL:Glossary:list]]// back into the //place//, and finally //[[CL:Glossary:yields]]// the //[[CL:Glossary:car]]// of the originally retrieved //[[CL:Glossary:list]]//.
+
+For information about the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subforms]]// of //place//, \seesection\GenRefSubFormEval.
+
+====Syntax====
+  * **pop** //place// → //element//
+
+====Arguments and Values==== 
+  * //place//---a //[[CL:Glossary:place]]//, the //[[CL:Glossary:value]]// of which is a //[[CL:Glossary:list]]//  (possibly, but necessarily, a //[[CL:Glossary:dotted list]]// or //[[CL:Glossary:circular list]]//).
+  * //element//---an //[[CL:Glossary:object]]// (the //[[CL:Glossary:car]]// of the contents of //place//).
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] //*stack*// '(a b c)) → (A B C)
+(pop //*stack*//) → A  
+//*stack*// → (B C)
+([[CL:Macros:defparameter]] //*list-in-list*// '((1 2 3 4))) → ((1 2 3 4))
+(pop (car //*list-in-list*//)) → 1
+//*list-in-list*// → ((2 3 4))
+</blockquote>
+
+====Side Effects====
+The contents of //place// are modified.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Macros:push]]**, **[[CL:Macros:pushnew]]**, {\secref\GeneralizedReference}
+
+====Example Implementation====
+To be done.
+
+The effect of ''(pop //place//)'' is roughly equivalent to
+
+<blockquote>
+([[CL:Special Operators:prog1]] ([[CL:Functions:car]] //place//) ([[CL:Macros:setf]] //place// ([[CL:Functions:cdr]] //place//)))
+</blockquote>
+
+except that the latter would evaluate any //[[CL:Glossary:subforms]]// of //place// three times, while **pop** evaluates them only once.
+
+====Notes====
+None.
+
+
+\issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
