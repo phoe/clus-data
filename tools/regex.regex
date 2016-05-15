@@ -1,0 +1,355 @@
+for f in *tex; do csplit $f '/\\begincom/' {*} -f xx-$f; done; for f in xx*; do mv $f splits/$f.tex; done
+
+rename 's/\,//g' *
+
+\\begincom\{([^\{]*?)\}\\ftype\{([^\{]*?)\}
+====== $2 \U$1 ======
+
+\\label (.*)::
+====$1====
+
+\\endissue\{([^\{]*?)\}
+USUŃ
+
+\\endcom
+USUŃ
+
+([^\\\n]*)(\%)+.*?$
+$1       KILKA RAZY
+
+\\f\{([^\{]*?)\}
+
+
+
+
+
+
+\\param\{([^\{]*?)\}---
+//$1// - 
+
+\\param\{([^\{]*?)\}
+//$1//
+
+(\\typeref\{([^\{]*?)\}\,)\n
+$1
+
+\\term\{([^\{]*?)\}
+//[[CL:Glossary:$1]]//
+
+\\newterm\{([^\{]*?)\}
+//[[CL:Glossary:$1]]//
+
+\\funref\{([^\{]*?)\}
+**[[CL:Functions:$1]]**
+
+\\EV
+→
+
+\\EQ
+≡
+
+\\code((?!\\endcode).)*(\\empty)((?!\\code).)*\\endcode
+RĘCZNIE ZMIENIĆ NA ()
+
+\\empty
+'''\(\)''
+
+
+
+
+
+
+
+\\typeref\{([^\{]*?)\}
+**\[\[CL:Types:$1\]\]**
+
+\\thetype\{([^\{]*?)\}
+the type **\[\[CL:Types:$1\]\]**
+
+\\subtypeof\{([^\{]*?)\}
+subtype of **\[\[CL:Types:$1\]\]**
+
+\\subtypesof\{([^\{]*?)\}
+subtypes of **\[\[CL:Types:$1\]\]**
+
+\\Thetype\{([^\{]*?)\}
+The type **\[\[CL:Types:$1\]\]**
+
+\\Thetypes\{([^\{]*?)\}
+The types **\[\[CL:Types:$1\]\]**
+
+\\thefunction\{([^\{]*?)\}
+the function **\[\[CL:Functions:$1\]\]**
+
+\\oftype\{([^\{]*?)\}
+of type **\[\[CL:Types:$1\]\]**
+
+\\Default\{([^\{]*?)\}
+The default is $1.
+
+\\nil\\
+**\[\[CL:Constant Variables:nil\]\]**
+
+\\nil
+**\[\[CL:Constant Variables:nil\]\]**
+
+\\t\\
+**\[\[CL:Constant Variables:t\]\]**
+
+\\t
+**\[\[CL:Constant Variables:t\]\]**
+
+\\brac\{([^\{]*?)\}
+\[$1\]
+
+\\curly\{([^\{]*?)\}
+\{$1\}
+
+\\ttbrac\{([^\{]*?)\}
+//\[$1\]//
+
+\\Deftype\{([^\{]*?)\}\{([^\{]*?)\}\{([^\{]*?)\}
+//**$1** $2 $3//
+
+\\Deftype\{([^\{]*?)\}\{([^\{]*?)\}
+//**$1** $2//
+
+\\misc\{\*\}
+UWAŻAJ: **[[CL:Types:wildcard|*]]**
+
+\\code
+<blockquote>
+
+\\endcode
+</blockquote>
+
+\\label (.*?):\\None.
+====$1====\n\nNone.
+
+\\DefunWithValues (.*?) \{([^\{]*?)\} \{([^\{]*?)\}
+**$1** //$2// → //$3//
+
+\\TypePredicate\{([^\{]*?)\}\{([^\{]*?)\}
+Returns //[[CL:Glossary:true]]// if //$1// is of //[[CL:Glossary:type]]// **[[CL:Types:$2]]**; otherwise, returns //[[CL:Glossary:false]]//.
+
+\\entry\{([^\{]*?)\}
+$1
+
+
+
+
+\\DefunMultiWithValues \{([^\{]*?)\} \{([^\{]*?)\}[ \t\n]+\{(.+?)[ \t\n]+(.*?)\}
+\\DefunWithValues {$3} \{$1\} \{$2\}\n\\DefunMultiWithValues \{$1\} \{$2\} \{$4\}
+
+\\DefunMultiWithValues \{(?:.*?)\} \{(?:.*?)\} \{\}
+USUŃ
+
+\\DefunWithValues (.*?) \{([^\{]*?)\} \{([^\{]*?)\}
+**$1** //$2// → //$3//
+
+====Pronunciation====\n\n
+USUŃ
+
+^(.*?)\\pronounced(.*?)$\n
+USUŃ
+
+\\blankline
+USUŃ
+
+\\Shouldchecktype[ \t]*?\{([^\{]*?)\}[ \t]*?\{([^\{]*?)\}
+Should signal an error of type type-error if //$1// is not $2.
+
+\\f\{([^\{]*?)\}
+\'\'$1\'\'
+
+\\macref\{([^\{]*?)\}
+**\[\[CL:Macros:$1\]\]**
+
+\]\]\\
+\]\]
+
+\\i\{([^\{]*?)\}
+\'\'$1\'\'
+
+\{\\key\}
+''&key''
+
+\\kwd\{([^\{]*?)\}
+**\'\'\:$1\'\'**
+
+\\eg
+//e.g.//
+
+\{\\rest\}
+''&rest''
+
+\\plus\{([^\{]*?)\}
+$1''+''
+
+\\ie
+i.e.
+
+\\DefmacWithValues (.*?) \{([^\{]*?)\} \{([^\{]*?)\}
+**$1** //$2// → //$3//
+
+\\DefunWithValues (.*?) \{([^\{]*?)\} \{([^\{]*?)\}
+**$1** //$2// → //$3//
+
+\\DefunMultiAccessorWithValues \{([^\{]*?)\} \{([^\{]*?)\} \{([^\{]*?)\}[ \t\n]*\{(.+)[ \t\n]*(.*?)\}
+\\DefunAccessorWithValues {$4} \{$1\} \{$2\} \{$3\}\n\\DefunMultiAccessorWithValues \{$1\} \{$2\} \{$3\} \{$5\}
+
+\\DefunMultiAccessorWithValues \{([^\{]*?)\} \{([^\{]*?)\} \{([^\{]*?)\}[ \t\n]*\{\}
+USUŃ
+
+\\DefunAccessorWithValues (.*?) \{([^\{]*?)\} \{([^\{]*?)\} \{([^\{]*?)\}
+**$1** //$2// → //$3//\n\(**setf** \(**$1 //$3//\) //$4//\)
+
+\\Defsetf[ \t\n]*(.*?)[ \t\n]*\{([^\{]*?)\}[ \t\n]*\{([^\{]*?)\}
+\(**setf** \(**$1** //$2//\) //$3//\)
+
+\\StrictPredicate[ \t\n]*\{([^\{]*?)\}[ \t\n]*\{([^\{]*?)\}
+Returns t if //$1// is $2; otherwise, returns nil.
+
+\\varref[ \t\n]*\{([^\{]*?)\}
+**\[\[CL:Variables:$1\]\]**
+
+\\conref[ \t\n]*\{([^\{]*?)\}
+**\[\[CL:Constant Variables:$1\]\]**
+
+\\#
+#
+
+\\meaning\{([^\{]*?)\}
+USUŃ
+
+\\OUT
+▷
+
+\{\\opt\}
+''&optional''
+
+\\Lazychecktype[ \t\n]*\{([^\{]*?)\}[ \t\n]*\{([^\{]*?)\}
+Should be prepared to signal an error of type type-error if //$1// is not $2.
+
+\\seefun[ \t\n]*\{([^\{]*?)\}
+see the //[[CL:Glossary:function]]// **[[CL:Functions:$1]]**
+
+\\seefuns[ \t\n]*\{([^\{]*?)\}
+see the //[[CL:Glossary:functions]]// **[[CL:Functions:$1]]**
+
+\\Thefunction[ \t\n]*\{([^\{]*?)\}
+The //[[CL:Glossary:function]]// **[[CL:Functions:$1]]**
+
+\\Lisp\\
+Lisp
+
+\\Lisp
+Lisp
+
+\\Lazycheckanytype[ \t\n]*\{([^\{]*?)\}[ \t\n]*\{([^\{]*?)\}
+Should be prepared to signal an error of type type-error if any //$1// is not $2.
+
+\\Lazychecktypes[ \t\n]*\{([^\{]*?)\}[ \t\n]*\{([^\{]*?)\}
+Should be prepared to signal an error of type type-error if $1 are not $2.
+
+\\Seefun[ \t\n]*\{([^\{]*?)\}
+See the //[[CL:Glossary:function]]// **[[CL:Functions:$1]]**
+
+\\OV
+//or// →
+
+\\SatisfyTest[ \t\n]*\{([^\{]*?)\}[ \t\n]*\{([^\{]*?)\}
+The test, test-not, and key affect how it is determined whether //$1// is the same as $2. For details, \{\seesection\SatisfyingTheTwoArgTest\}.
+
+\\DefmacWithValuesNewline (.*?) \{([^\{]*?)\} \{([^\{]*?)\}
+**$1** //$2// → //$3//
+
+\\bogusterm[ \t\n]*\{([^\{]*?)\}
+//$1//
+
+(<blockquote>.*?)^ (.*?</blockquote>)
+DO OPORU: $1$2
+
+``(.*?)''
+"$1"
+
+(<blockquote>.*?)setq (.*?</blockquote>)
+DO OPORU: $1\[\[CL:Macros:defparameter\]\]$2
+
+(<blockquote>.*?)\(setf(.*?</blockquote>)
+DO OPORU: $1\(\[\[CL:Macros:setf\]\]$2
+
+\{\\tt ([^\{]*?)\}
+''$1''
+
+\\sub\{([^\{]*?)\}
+<sub>$1</sub>
+
+\\dots
+...
+
+\$([^\$]*?)\$
+''$1''
+
+\\\{
+\{
+
+\\le
+≤
+
+(.*?)\\issue\{([^\{]*?)\}(.*)       WŁĄCZONY MULTILINE DO OPORU
+$1$3\\issue\{$2\}\n
+
+\n\n\n           WŁĄCZONY MULTILINE DO OPORU
+\n\n
+
+\t                                     BEZ REGEXÓW
+**[[CL:Constant Variables:t]]**
+
+**[[CL:Constant Variables:t]]**\       BEZ REGEXÓW
+**[[CL:Constant Variables:t]]**
+
+\\seesection\\([a-zA-Z]*)
+see section \{\\secref\\$1\}
+
+([^\n]+)$\n^(.+)
+$1 $2
+
+
+
+
+
+
+
+
+for f in xx*
+do 
+  NAME=$(head $f -n 1 | rev | cut -d ' ' -f 2- | rev | cut -d ' ' -f 2-)
+  echo $NAME
+  cp $f "${NAME}.txt"
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\/\/\[\[CL\:Functions\:(.*?)\]\]\/\/
+**\[\[CL:Functions:$1\]\]**
+
+
+====See Also====
+RĘCZNIE wszystkie funrefy tam na "Function XYZ"
