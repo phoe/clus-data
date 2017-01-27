@@ -30,7 +30,8 @@ None of the original contents of ''A'' appears in ''A'' afterwards; ''A'' now co
 
 ===''A'' is displaced to ''B'' before the call, and is displaced to ''C'' after the call===
 <blockquote>
-(adjust-array A ... :displaced-to B) (adjust-array A ... :displaced-to C)
+(adjust-array A ... :displaced-to B)
+(adjust-array A ... :displaced-to C)
 </blockquote>
 
 ''B'' and ''C'' might be the same. The contents of ''B'' do not appear in ''A'' afterward unless such contents also happen to be in ''C'' If //displaced-index-offset// is not supplied in the **adjust-array** call, it defaults to zero; the old offset into ''B'' is not retained.
@@ -62,18 +63,18 @@ If the //[[CL:Glossary:array]]// returned by **adjust-array** is //[[CL:Glossary
 Note that if an //[[CL:Glossary:array]]// ''A'' is displaced to another //[[CL:Glossary:array]]// ''B'', and ''B'' is displaced to another //[[CL:Glossary:array]]// ''C'', and ''B'' is altered by **adjust-array**, ''A'' must now refer to the adjust contents of ''B''. This means that an implementation cannot collapse the chain to make ''A'' refer to ''C'' directly and forget that the chain of reference passes through ''B''. However, caching techniques are permitted as long as they preserve the semantics specified here.
 
 ====Syntax====
-**adjust-array** //array new-dimensions ''&key'' element-type initial-element initial-contents fill-pointer displaced-to displaced-index-offset// → //adjusted-array//
+  * **adjust-array** //array new-dimensions ''&key'' element-type initial-element initial-contents fill-pointer displaced-to displaced-index-offset// → //adjusted-array//
 
 ====Arguments and Values====
-//array// - an //[[CL:Glossary:array]]//.
-//new-dimensions// - a //[[CL:Glossary:valid array dimension]]// or a //[[CL:Glossary:list]]// of //[[CL:Glossary:valid array dimension|valid array dimensions]]//.
-//element-type// - a //[[CL:Glossary:type specifier]]//.
-//initial-element// - an //[[CL:Glossary:object]]//. //initial-element// must not be supplied if either //initial-contents// or //displaced-to// is supplied.
-//initial-contents// - an //[[CL:Glossary:object]]//. If //[[CL:Glossary:array]]// has rank greater than zero, then //initial-contents// is composed of nested //[[CL:Glossary:sequence|sequences]]//, the depth of which must equal the rank of //array//. Otherwise, //[[CL:Glossary:array]]//is zero-dimensional and //initial-contents// supplies the single element. //initial-contents// must not be supplied if either //initial-element// or //displaced-to// is given.
-//fill-pointer// - a //[[CL:Glossary:valid fill pointer]]// for the //[[CL:Glossary:array]]// to be created, or **[[CL:Constant Variables:t]]**, or **[[CL:Constant Variables:nil]]**. The default is **[[CL:Constant Variables:nil]]**.
-//displaced-to// - an //[[CL:Glossary:array]]// or **[[CL:Constant Variables:nil]]**. //initial-elements// and //initial-contents// must not be supplied if //displaced-to// is supplied.
-//displaced-index-offset// - an object of type ''(fixnum 0 n)'' where ''n'' is ''(array-total-size //displaced-to//)''. //displaced-index-offset// may be supplied only if //displaced-to// is supplied.
-//adjusted-array// - an //[[CL:Glossary:array]]//.
+  * //array// - an //[[CL:Glossary:array]]//.
+  * //new-dimensions// - a //[[CL:Glossary:valid array dimension]]// or a //[[CL:Glossary:list]]// of //[[CL:Glossary:valid array dimension|valid array dimensions]]//.
+  * //element-type// - a //[[CL:Glossary:type specifier]]//.
+  * //initial-element// - an //[[CL:Glossary:object]]//. //initial-element// must not be supplied if either //initial-contents// or //displaced-to// is supplied.
+  * //initial-contents// - an //[[CL:Glossary:object]]//. If //[[CL:Glossary:array]]// has rank greater than zero, then //initial-contents// is composed of nested //[[CL:Glossary:sequence|sequences]]//, the depth of which must equal the rank of //array//. Otherwise, //[[CL:Glossary:array]]//is zero-dimensional and //initial-contents// supplies the single element. //initial-contents// must not be supplied if either //initial-element// or //displaced-to// is given.
+  * //fill-pointer// - a //[[CL:Glossary:valid fill pointer]]// for the //[[CL:Glossary:array]]// to be created, or **[[CL:Constant Variables:t]]**, or **[[CL:Constant Variables:nil]]**. The default is **[[CL:Constant Variables:nil]]**.
+  * //displaced-to// - an //[[CL:Glossary:array]]// or **[[CL:Constant Variables:nil]]**. //initial-elements// and //initial-contents// must not be supplied if //displaced-to// is supplied.
+  * //displaced-index-offset// - an object of type ''(fixnum 0 n)'' where ''n'' is ''(array-total-size //displaced-to//)''. //displaced-index-offset// may be supplied only if //displaced-to// is supplied.
+  * //adjusted-array// - an //[[CL:Glossary:array]]//.
 
 ====Examples====
 <blockquote> 
