@@ -1,0 +1,37 @@
+====== Function ARRAY-IN-BOUNDS-P ======
+Returns //[[CL:Glossary:true]]// if the //subscripts// are all in bounds for //array//; otherwise returns //[[CL:Glossary:false]]//. (If //array// is a //[[CL:Glossary:vector]]// with a //[[CL:Glossary:fill pointer]]//, that //[[CL:Glossary:fill pointer]]// is ignored.)
+
+====Syntax====
+**array-in-bounds-p** //array ''&rest'' subscripts// → //generalized-boolean//
+
+====Arguments and Values====
+//array// - an //[[CL:Glossary:array]]//.
+//subscripts// - a list of //[[CL:Glossary:integer|integers]]// of length equal to the //[[CL:Glossary:rank]]// of the //[[CL:Glossary:array]]//.
+//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:defparameter]] *array*
+([[CL:Functions:make-array]] '(7 11) :element-type '[[CL:Types:base-char))
+(array-in-bounds-p *array* 0 0) → //[[CL:Glossary:true]]// 
+(array-in-bounds-p *array* 6 10) → //[[CL:Glossary:true]]// 
+(array-in-bounds-p *array* 0 -1) → //[[CL:Glossary:false]]// 
+(array-in-bounds-p *array* 0 11) → //[[CL:Glossary:false]]// 
+(array-in-bounds-p *array* 7 0) → //[[CL:Glossary:false]]//
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Functions:array-dimensions|Function ARRAY-DIMENSIONS]]**
+
+====Notes====
+<blockquote>
+(array-in-bounds-p array subscripts) 
+  ≡ ([[CL:Macros:and]] ([[CL:Functions:not]] ([[CL:Functions:some]] #'[[CL:Functions:minusp]] ([[CL:Functions:list]] subscripts))) 
+              ([[CL:Functions:every]] #'[[CL:Functions:less]] ([[CL:Functions:list]] subscripts) ([[CL:Functions:array-dimensions]] array)))
+</blockquote>

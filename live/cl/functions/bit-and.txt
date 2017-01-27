@@ -1,0 +1,73 @@
+====== Function BIT-AND, BIT-ANDC1, BIT-ANDC2, BIT-EQV, BIT-IOR, BIT-NAND, BIT-NOR, BIT-NOT, BIT-ORC1, BIT-ORC2, BIT-XOR ======
+These functions perform bit-wise logical operations on //bit-array1// and //bit-array2// and return an //[[CL:Glossary:array]]// of matching //[[CL:Glossary:rank]]// and //[[CL:Glossary:dimension|dimensions]]//, such that any given bit of the result is produced by operating on corresponding bits from each of the arguments.
+
+In the case of **bit-not**, an //[[CL:Glossary:array]]// of //[[CL:Glossary:rank]]// and //[[CL:Glossary:dimension|dimensions]]// matching //bit-array// is returned that contains a copy of //bit-array// with all the bits inverted.
+
+If //opt-arg// is of type ''(array bit)'' the contents of the result are destructively placed into //opt-arg//. If //opt-arg// is the symbol **[[CL:Constant Variables:t]]**, //bit-array// or //bit-array1// is replaced with the result; if //opt-arg// is **[[CL:Constant Variables:nil]]** or omitted, a new //[[CL:Glossary:array]]// is created to contain the result.
+
+The table below indicates the logical operation performed by each of the //[[CL:Glossary:functions]]//.
+
+====Syntax====
+**bit-and** //bit-array1 bit-array2 ''&optional'' opt-arg// → //resulting-bit-array// 
+**bit-andc1** //bit-array1 bit-array2 ''&optional'' opt-arg// → //resulting-bit-array// 
+**bit-andc2** //bit-array1 bit-array2 ''&optional'' opt-arg// → //resulting-bit-array// 
+**bit-eqv** //bit-array1 bit-array2 ''&optional'' opt-arg// → //resulting-bit-array// 
+**bit-ior** //bit-array1 bit-array2 ''&optional'' opt-arg// → //resulting-bit-array// 
+**bit-nand** //bit-array1 bit-array2 ''&optional'' opt-arg// → //resulting-bit-array// 
+**bit-nor** //bit-array1 bit-array2 ''&optional'' opt-arg// → //resulting-bit-array// 
+**bit-orc1** //bit-array1 bit-array2 ''&optional'' opt-arg// → //resulting-bit-array//
+**bit-orc2** //bit-array1 bit-array2 ''&optional'' opt-arg// → //resulting-bit-array// 
+**bit-xor** //bit-array1 bit-array2 ''&optional'' opt-arg// → //resulting-bit-array//
+**bit-not** //bit-array ''&optional opt-arg// → //resulting-bit-array//
+
+====Arguments and Values====
+//bit-array//, //bit-array1//, //bit-array2// - a //[[CL:Glossary:bit array]]//.
+//opt-arg// - a //[[CL:Glossary:bit array]]//, or **[[CL:Constant Variables:t]]**, or **[[CL:Constant Variables:nil]]**. The default is **[[CL:Constant Variables:nil]]**.
+//bit-array//, //bit-array1//, //bit-array2//, and //opt-arg// (if an //[[CL:Glossary:array]]//) must all be of the same //[[CL:Glossary:rank]]// and //[[CL:Glossary:dimension|dimensions]]//.
+//resulting-bit-array// - a //[[CL:Glossary:bit array]]//.
+
+===Bit-wise Logical Operations on Bit Arrays=== 
+^ Function      ^ Operation                                            ^
+| ''bit-and''   | and                                                  |
+| ''bit-eqv''   | equivalence (exclusive nor)                          |
+| ''bit-not''   | complement                                           |
+| ''bit-ior''   | inclusive or                                         |
+| ''bit-xor''   | exclusive or                                         |
+| ''bit-nand''  | complement of //bit-array1// and //bit-array2//      |
+| ''bit-nor''   | complement of //bit-array1// or //bit-array2//       |
+| ''bit-andc1'' | and complement of //bit-array1// with //bit-array2// |
+| ''bit-andc2'' | and //bit-array1// with complement of //bit-array2// |
+| ''bit-orc1''  | or complement of //bit-array1// with //bit-array2//  |
+| ''bit-orc2''  | or //bit-array1// with complement of //bit-array2//  |
+
+====Examples====
+<blockquote>
+(bit-and #*1100 #*1010) → #*1000 
+(bit-andc1 #*1100 #*1010) → #*0010 
+(bit-xor #*1100 #*1010) → #*0110 
+
+([[CL:Macros:defparameter]] *bit-array* #*11101010)
+(bit-and *bit-array* #*01101011) → #*01101010
+([[CL:Macros:defparameter]] *bit-array-2* (bit-andc2 *bit-array* #*00110011 t)) → #*11001000 
+(eq *bit-array-2* *bit-array*) → //[[CL:Glossary:true]]//
+([[CL:Macros:setf]] *bit-array* #*11101010)
+(bit-not *bit-array*) → #*00010101
+([[CL:Macros:defparameter]] *bit-array-3* ([[CL:Functions:make-array]] 8 :element-type '[[CL:Types:bit]]))
+([[CL:Macros:setf]] *bit-array-2* (bit-not *bit-array* *bit-array-3*))
+*bit-array-3* → #*00010101 
+(equal *bit-array-2* *bit-array-3*) → //[[CL:Glossary:true]]// 
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Functions:lognot|Function LOGNOT]]**, **[[CL:Functions:logand|Function LOGAND]]**
+
+====Notes====
+
+None.
+

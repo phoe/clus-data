@@ -1,0 +1,44 @@
+====== Accessor BIT, SBIT ======
+**bit** and **sbit** //[[CL:Glossary:access]]// the //bit-array// //[[CL:Glossary:element]]// specified by //subscripts//.
+
+These //[[CL:Glossary:function|functions]]// ignore the //[[CL:Glossary:fill pointer]]// when //[[CL:Glossary:access|accessing]]// //[[CL:Glossary:element|elements]]//.
+
+====Syntax====
+**bit** //bit-array ''&rest'' subscripts// → //bit// 
+**sbit** //bit-array ''&rest'' subscripts// → //bit// 
+(**setf** (**bit* //bit-array ''&rest'' subscripts//) //new-bit//) 
+(**setf** (**sbit** //bit-array ''&rest'' subscripts//) //new-bit//)
+
+====Arguments and Values====
+//bit-array// - for **bit**, a //[[CL:Glossary:bit array]]//; for **sbit**, a //[[CL:Glossary:simple bit array]]//.
+//subscripts// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:valid array index|valid array indices]]// for the //bit-array//.
+//bit// - a //[[CL:Glossary:bit]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] *bit-array* 
+  ([[CL:Functions:make-array]] 8 :element-type '[[CL:Types:bit]] 
+                :initial-element 1))
+(bit *bit-array* 3) → 1 
+([[CL:Macros:setf]] (bit *bit-array* 3) 0) → 0 
+(bit *bit-array* 3) → 0 
+(sbit *bit-array* 5) → 1 
+([[CL:Macros:setf]] (sbit *bit-array* 5) 1) → 1 
+(sbit *bit-array* 5) → 1 
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Functions:aref|Function AREF]]**, {\secref\ConstantModification}
+
+====Notes====
+**bit** and **sbit** are like **[[CL:Functions:aref]]** except that they require //arrays// to be a //[[CL:Glossary:bit array]]// and a //[[CL:Glossary:simple bit array]]//, respectively.
+
+**bit** and **sbit**, unlike **[[CL:Functions:char]]** and **[[CL:Functions:schar]]**, allow the first argument to be an //[[CL:Glossary:array]]// of any //[[CL:Glossary:rank]]//.
+
+\issue{CONSTANT-MODIFICATION:DISALLOW}

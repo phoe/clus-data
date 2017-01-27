@@ -1,0 +1,46 @@
+====== Function ARRAY-ROW-MAJOR-INDEX ======
+Computes the position according to the row-major ordering of //array// for the element that is specified by //subscripts//, and returns the offset of the element in the computed position from the beginning of //array//.
+
+For a one-dimensional //array//, the result of **array-row-major-index** equals //subscript//.
+
+**array-row-major-index** ignores //[[CL:Glossary:fill pointer|fill pointers]]//.
+
+====Syntax====
+**array-row-major-index** //array ''&rest'' subscripts// → //index//
+
+====Arguments and Values====
+
+//array// - an //[[CL:Glossary:array]]//.
+//subscripts// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:valid array index|valid array indices]]// for the //array//.
+//index// - a //[[CL:Glossary:valid array row-major index]]// for the //array//.
+
+====Examples====
+
+<blockquote>
+([[CL:Macros:defparameter]] *a* 
+  ([[CL:Functions:make-array]] '(4 7) :element-type '([[CL:Types:unsigned-byte]] 8))) 
+(array-row-major-index a 1 2) → 9
+([[CL:Macros:defparameter]] *b* 
+  ([[CL:Functions:make-array]] '(2 3 4) :element-type '([[CL:Types:unsigned-byte]] 8) 
+                       :displaced-to *a* 
+                       :displaced-index-offset 4))
+(array-row-major-index *b* 0 2 1) → 9
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+None.
+
+====Notes====
+A possible definition of **array-row-major-index**, with no error-checking, is
+
+<blockquote>
+([[CL:Macros:defun]] array-row-major-index (a &rest subscripts)
+  ([[CL:Functions:apply]] #'[[CL:Functions:add|+]] ([[CL:Functions:maplist]] #'([[CL:Special Operators:lambda]] (x y) ([[CL:Functions:multiply|*]] ([[CL:Functions:car]] x) ([[CL:Functions:apply]] #'[[CL:Functions:multiply|*]] ([[CL:Functions:cdr]] y)))) 
+                      subscripts ([[CL:Functions:array-dimensions]] a))))
+</blockquote>

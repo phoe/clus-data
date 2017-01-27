@@ -1,0 +1,43 @@
+====== Accessor FILL-POINTER ======
+//[[CL:Glossary:access|Accesses]]// the //[[CL:Glossary:fill pointer]]// of //vector//.
+
+====Syntax====
+**fill-pointer** //vector// → //fill-pointer// 
+(**setf** (**fill-pointer** //vector//) //new-fill-pointer//)
+
+====Arguments and Values====
+//vector// - a //[[CL:Glossary:vector]]// with a //[[CL:Glossary:fill pointer]]//.
+//fill-pointer//, //new-fill-pointer// - a //[[CL:Glossary:valid fill pointer]]// for the //vector//.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:defparameter]] *array* ([[CL:Functions:make-array]] 8 :fill-pointer 4))
+*array* → #(NIL NIL NIL NIL) 
+(fill-pointer *array*) → 4 
+
+([[CL:Macros:dotimes]] (i ([[CL:Functions:length]] *array*))
+  ([[CL:Macros:setf]] ([[CL:Functions:aref]] *array* i) (* i i)))
+*array* → #(0 1 4 9)
+
+([[CL:Macros:setf]] (fill-pointer *array*) 3) → 3 
+(fill-pointer *array*) → 3 
+*array* → #(0 1 4)
+
+([[CL:Macros:setf]] (fill-pointer *array*) 8) → 8 
+*array* → #(0 1 4 9 NIL NIL NIL NIL) 
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should signal an error of type type-error if //vector// is not a //[[CL:Glossary:vector]]// with a //[[CL:Glossary:fill pointer]]//.
+
+====See Also====
+**[[CL:Functions:make-array|Function MAKE-ARRAY]]**, **[[CL:Functions:length|Function LENGTH]]**
+
+====Notes====
+There is no //[[CL:Glossary:operator]]// that will remove a //[[CL:Glossary:vector]]//'s //[[CL:Glossary:fill pointer]]//.

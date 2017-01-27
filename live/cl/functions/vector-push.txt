@@ -1,0 +1,55 @@
+====== Function VECTOR-PUSH, VECTOR-PUSH-EXTEND ======
+**vector-push** and **vector-push-extend** store //new-element// in //vector//. **vector-push** attempts to store //new-element// in the element of //vector// designated by the //[[CL:Glossary:fill pointer]]//, and to increase the //[[CL:Glossary:fill pointer]]// by one. If the ''([[CL:Functions:greater-or-equal|>=]] ([[CL:Functions:fill-pointer]] //vector//) ([[CL:Functions:array-dimension]] //vector// 0))'', neither //vector// nor its //[[CL:Glossary:fill pointer]]// are affected. Otherwise, the store and increment take place and **vector-push** returns the former value of the //[[CL:Glossary:fill pointer]]// which is one less than the one it leaves in //vector//.
+
+**vector-push-extend** is just like **vector-push** except that if the //[[CL:Glossary:fill pointer]]// gets too large, //vector// is extended using **[[CL:Functions:adjust-array]]** so that it can contain more elements. //extension// is the minimum number of elements to be added to //vector// if it must be extended.
+
+**vector-push** and **vector-push-extend** return the index of //new-element// in //vector//. If ''([[CL:Functions:greater-or-equal|>=]] ([[CL:Functions:fill-pointer]] //vector//) ([[CL:Functions:array-dimension]] //vector// 0))'', **vector-push** returns **[[CL:Constant Variables:nil]]**.
+
+====Syntax====
+**vector-push** //new-element vector// → //new-index-p//
+**vector-push-extend** //new-element vector ''&optional'' extension// → //new-index//
+
+====Arguments and Values====
+//new-element// - an //[[CL:Glossary:object]]//.
+//vector// - a //[[CL:Glossary:vector]]// with a //[[CL:Glossary:fill pointer]]//.
+//extension// - a positive //[[CL:Glossary:integer]]//. The default is //[[CL:Glossary:implementation-dependent]]//.
+//new-index-p// - a //[[CL:Glossary:valid array index]]// for //vector//, or **[[CL:Constant Variables:nil]]**.
+//new-index// - a //[[CL:Glossary:valid array index]]// for //vector//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] *fable* ([[CL:Functions:list]] 'fable))
+([[CL:Macros:defparameter]] *fa* 
+  ([[CL:Functions:make-array]] 8 :fill-pointer 2 
+                :initial-element 'first-one))
+([[CL:Functions:vector-push]] *fable* *fa*) → 2 
+([[CL:Functions:fill-pointer]] fa) → 3
+([[CL:Functions:eq]] ([[CL:Functions:aref]] fa 2) fable) → //[[CL:Glossary:true]]// 
+
+([[CL:Macros:defparameter]] *array* 
+  ([[CL:Functions:make-array]] 5 :element-type '[[CL:Types:character]] 
+                :adjustable [[CL:Constant Variables:t]]
+                :fill-pointer 3))
+(vector-push-extend #\X *array*) → 3 
+([[CL:Functions:fill-pointer]] *array*) → 4 
+(vector-push-extend #\Y *array* 4) → 4 
+([[CL:Functions:array-total-size]] *array*) → 5 ;(or more)
+(vector-push-extend #\Z *array* 4) → 5 
+([[CL:Functions:array-total-size]] *array*) → 9 ;(or more)
+</blockquote>
+
+====Affected By==== 
+The value of the //[[CL:Glossary:fill pointer]]//.
+
+How //vector// was created.
+
+====Exceptional Situations====
+An error of type **[[CL:Types:error]]** is signaled by **vector-push-extend** if it tries to extend //vector// and //vector// is not //[[CL:Glossary:actually adjustable]]//.
+
+An error of type **[[CL:Types:error]]** is signaled if //vector// does not have a //[[CL:Glossary:fill pointer]]//.
+
+====See Also====
+**[[CL:Functions:adjustable-array-p|Function ADJUSTABLE-ARRAY-P]]**, **[[CL:Functions:fill-pointer|Function FILL-POINTER]]**, **[[CL:Functions:vector-pop|Function VECTOR-POP]]**
+
+====Notes====
+None.
