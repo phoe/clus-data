@@ -26,17 +26,17 @@ The result only ever differs from //character// in its //[[CL:Glossary:code]]// 
 
 ;; Note that this next example might run for a very long time in some implementations 
 ;; if CHAR-CODE-LIMIT happens to be very large for that implementation. 
-(dotimes (code char-code-limit)
-  (let ((char (code-char code)))
-    (when char
-      (unless (cond ((upper-case-p char) 
-                     (char= (char-upcase (char-downcase char)) char))
-                    ((lower-case-p char) 
-                     (char= (char-downcase (char-upcase char)) char))
-                    (t 
-                     (and (char= (char-upcase (char-downcase char)) char) 
-                          (char= (char-downcase (char-upcase char)) char)))) 
-      (return char))))) → NIL
+([[CL:Macros:dotimes]] (code [[CL:Constant Variables:char-code-limit]])
+  ([[CL:Special Operators:let]] ((char ([[CL:Functions:code-char]] code)))
+    ([[CL:Macros:when]] char
+      ([[CL:Macros:unless]] ([[CL:Macros:cond]] (([[CL:Functions:upper-case-p]] char) 
+                     ([[CL:Functions:char-equal|char=]] (char-upcase (char-downcase char)) char))
+                    (([[CL:Functions:lower-case-p]] char) 
+                     ([[CL:Functions:char-equal|char=]] (char-downcase (char-upcase char)) char))
+                    ([[CL:Constant Variables:t]] 
+                     ([[CL:Macros:and]] ([[CL:Functions:char-equal|char=]] (char-upcase (char-downcase char)) char) 
+                          ([[CL:Functions:char-equal|char=]] (char-downcase (char-upcase char)) char)))) 
+      ([[CL:Macros:return]] char))))) → [[CL:Constant Variables:nil|NIL]]
 </blockquote>
 
 ====Affected By====
