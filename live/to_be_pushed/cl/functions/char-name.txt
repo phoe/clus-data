@@ -1,0 +1,48 @@
+====== Function CHAR-NAME ======
+Returns a //[[CL:Glossary:string]]// that is the //[[CL:Glossary:name]]// of the //character//, or **[[CL:Constant Variables:nil]]** if the //character// has no //[[CL:Glossary:name]]//.
+
+All //[[CL:Glossary:non-graphic]]// characters are required to have //[[CL:Glossary:name|names]]// unless they have some //[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:attribute]]// which is not //[[CL:Glossary:null]]//. Whether or not other //[[CL:Glossary:character|characters]]// have //[[CL:Glossary:names]]// is //[[CL:Glossary:implementation-dependent]]//.
+
+The //[[CL:Glossary:standard characters]]// <Newline> and <Space> have the respective names ''"Newline"'' and ''"Space"''.
+
+The //[[CL:Glossary:semi-standard]]// //[[CL:Glossary:character|characters]]// <Tab>, <Page>, <Rubout>, <Linefeed>, <Return>, and <Backspace> (if they are supported by the //[[CL:Glossary:implementation]]//) have the respective names ''"Tab"'', ''"Page"'', ''"Rubout"'', ''"Linefeed"'', ''"Return"'', and ''"Backspace"'' (in the indicated case, even though name lookup by "#\" and by the function **[[CL:Functions:name-char]]** is not case sensitive).
+
+====Syntax====
+  * **char-name** //character// → //name//
+
+====Arguments and Values====
+  * //character// - a //[[CL:Glossary:character]]//.
+  * //name// - a //[[CL:Glossary:string]]// or **[[CL:Constant Variables:nil]]**.
+
+====Examples====
+
+<blockquote>
+(char-name #\ ) → "Space"
+(char-name #\Space) → "Space"
+(char-name #\Page) → "Page"
+
+(char-name #\a) → NIL 
+         //or// → "LOWERCASE-a"
+         //or// → "Small-A"
+         //or// → "LA01"
+
+(char-name #\A) → NIL //or// → "UPPERCASE-A" //or// → "Capital-A" //or// → "LA02"
+
+;; Even though its CHAR-NAME can vary, #\A prints as #\A
+(prin1-to-string (read-from-string (format nil "#\\\~A" 
+                                           (or (char-name #\A) "A")))) → "#\\\A"
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should signal an error of type type-error if //character// is not a //[[CL:Glossary:character]]//.
+
+====See Also====
+**[[CL:Functions:name-char|Function NAME-CHAR]]**, {\secref\PrintingCharacters}
+
+====Notes====
+//[[CL:Glossary:non-graphic|Non-graphic]]// //[[CL:Glossary:character|characters]]// having //[[CL:Glossary:names]]// are written by the //[[CL:Glossary:Lisp printer]]// as "#\"# followed by the their //[[CL:Glossary:name]]//; see section {\secref\PrintingCharacters}.
+
+\issue{CHAR-NAME-CASE:X3J13-MAR-91}

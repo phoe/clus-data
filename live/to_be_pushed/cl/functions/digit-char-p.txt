@@ -1,0 +1,45 @@
+====== Function DIGIT-CHAR-P ======
+Tests whether //char// is a digit in the specified //radix// (i.e. with a weight less than //radix//). If it is a digit in that //radix//, its weight is returned as an //[[CL:Glossary:integer]]//; otherwise **[[CL:Constant Variables:nil]]** is returned.
+
+====Syntax====
+  * **digit-char-p //char ''&optional'' radix// → //weight//
+
+====Arguments and Values====
+  * //char// - a //[[CL:Glossary:character]]//.
+  * //radix// - a //[[CL:Glossary:radix]]//. The default is ''10''.
+  * //weight// - either a non-negative //[[CL:Glossary:integer]]// less than //radix//, or //[[CL:Glossary:false]]//.
+
+====Examples====
+<blockquote> 
+(digit-char-p #\5) → 5
+(digit-char-p #\5 2) → //[[CL:Glossary:false]]// 
+(digit-char-p #\A) → //[[CL:Glossary:false]]// 
+(digit-char-p #\a) → //[[CL:Glossary:false]]// 
+(digit-char-p #\A 11) → 10 
+(digit-char-p #\a 11) → 10 
+
+(mapcar #'(lambda (radix) (map 'list #'(lambda (x) (digit-char-p x radix)) "059AaFGZ")) 
+       '(2 8 10 16 36)) 
+  → ((0 NIL NIL NIL NIL NIL NIL NIL) 
+     (0 5   NIL NIL NIL NIL NIL NIL) 
+     (0 5   9   NIL NIL NIL NIL NIL) 
+     (0 5   9   10  10  15  NIL NIL) 
+     (0 5   9   10  10  15  16  35 ))
+</blockquote>
+
+====Affected By====
+None. (In particular, the results of this predicate are independent of any special syntax which might have been enabled in the //[[CL:Glossary:current readtable]]//.)
+
+====Exceptional Situations====
+None.
+
+====Editor Notes====
+The output of **digit-char-p** might be confusing, as this function's [[CL:Glossary:return value]] also serves a different purpose. **digit-char-p**, aside from being a [[CL:Glossary:predicate]], is also a converting function: it converts a [[CL:Glossary:digit]] in a given [[CL:Glossary:radix]] to its corresponding [[CL:Glossary:integer]] value.
+
+====See Also====
+**[[CL:Functions:alphanumericp|Function ALPHANUMERICP]]**
+
+====Notes====
+
+Digits are //[[CL:Glossary:graphic]]// //[[CL:Glossary:character|characters]]//.
+
