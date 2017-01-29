@@ -1,0 +1,54 @@
+====== Variable *DEBUGGER-HOOK* ======
+
+====Value Type====
+a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// (a //[[CL:Glossary:condition]]// and the //[CL:Glossary:value]]// of ***debugger-hook*** at the time the debugger was entered), or **[[CL:Constant Variables:nil]]**.
+
+====Initial Value====
+**[[CL:Constant Variables:nil]]**.
+
+====Description====
+When the //[CL:Glossary:value]]// of ***debugger-hook*** is //[[CL:Glossary:non-nil]]//, it is called prior to normal entry into the debugger, either due to a call to **[[CL:Functions:invoke-debugger]]** or due to automatic entry into the debugger from a call to **[[CL:Functions:error]]** or **[[CL:Functions:cerror]]** with a condition that is not handled. The //[[CL:Glossary:function]]// may either handle the //[[CL:Glossary:condition]]// (transfer control) or return normally (allowing the standard debugger to run). To minimize recursive errors while debugging, ***debugger-hook*** is bound to **[[CL:Constant Variables:nil]]** by **[[CL:Functions:invoke-debugger]]** prior to calling the //[[CL:Glossary:function]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defun]] one-of (choices &optional (prompt "Choice"))
+  ([[CL:Special Operators:let]] ((n (length choices)) i)
+    ([[CL:Macros:do]] ((c choices ([[CL:Functions:cdr]] c))
+         (i 1 ([[CL:Functions:math-add|+]] i 1)))
+        (([[CL:Functions:null]] c)) 
+      ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&[~D] ~A~%" i ([[CL:Functions:car]] c)))
+    ([[CL:Macros:do]] () (([[CL:Functions:typep]] i `([[CL:Types:integer]] 1 ,n))) 
+      ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~A: " prompt) 
+      ([[CL:Macros:setf]] i ([[CL:Functions:read]])) 
+      ([[CL:Functions:fresh-line]]))
+    ([[CL:Functions:nth]] ([[CL:Functions:math-subtract|-]] i 1) choices)))
+
+([[CL:Macros:defun]] my-debugger (condition me-or-my-encapsulation) 
+  ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&Fooey: ~A" condition) 
+  ([[CL:Special Operators:let]] ((restart (one-of ([[CL:Functions:compute-restarts]]))))
+    ([[CL:Special Operators:if]] ([[CL:Functions:not]] restart) ([[CL:Functions:error]] "My debugger got an error."))
+    ([[CL:Special Operators:let]] (([[CL:Functions:star-debugger-hook-star|*debugger-hook*]] me-or-my-encapsulation)) 
+      ([[CL:Functions:invoke-restart-interactively]] restart))))
+
+([[CL:Special Operators:let]] (([[CL:Functions:star-debugger-hook-star|*debugger-hook*]] #'my-debugger))
+  ([[CL:Functions:math-add|+]] 3 'a))
+▷ Fooey: The argument to +, A, is not a number.
+▷ [1] Supply a replacement for A.
+▷ [2] Return to Cloe Toplevel.
+▷ Choice: 1
+▷ Form to evaluate and use: (+ 5 'b)
+▷ Fooey: The argument to +, B, is not a number.
+▷ [1] Supply a replacement for B.
+▷ [2] Supply a replacement for A.
+▷ [3] Return to Cloe Toplevel.
+▷ Choice: 1
+▷ Form to evaluate and use: 1 → 9 </blockquote>
+
+====Affected By====
+**[[CL:Functions:invoke-debugger]]**
+
+====See Also====
+None.
+
+====Notes====
+When evaluating code typed in by the user interactively, it is sometimes useful to have the hook function bind ***debugger-hook*** to the //[[CL:Glossary:function]]// that was its second argument so that recursive errors can be handled using the same interactive facility.

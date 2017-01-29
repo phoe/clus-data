@@ -1,0 +1,55 @@
+====== Function INVOKE-RESTART-INTERACTIVELY ======
+
+====Syntax====
+  * **invoke-restart-interactively**  //restart// → //result''*''//
+
+====Arguments and Values====
+  * //restart// - a //[[CL:Glossary:restart designator]]//.
+  * //results// - the //[[CL:Glossary:value|values]]// returned by the //[[CL:Glossary:function]]// associated with //restart//, if that //[[CL:Glossary:function]]// returns.
+
+====Description====
+**invoke-restart-interactively** calls the //[[CL:Glossary:function]]// associated with //restart//, prompting for any necessary arguments. If //restart// is a name, it must be valid in the current //[[CL:Glossary:dynamic environment]]//.
+
+**invoke-restart-interactively** prompts for arguments by executing the code provided in the **'':interactive''** keyword to **[[CL:Macros:restart-case]]** or **'':interactive-function''** keyword to **[[CL:Macros:restart-bind]]**.
+
+If no such options have been supplied in the corresponding **[[CL:Macros:restart-bind]]** or **[[CL:Macros:restart-case]]**, then the consequences are undefined if the //restart// takes required arguments. If the arguments are optional, an argument list of **[[CL:Constant Variables:nil]]** is used.
+
+Once the arguments have been determined, **invoke-restart-interactively** executes the following:
+
+<blockquote>
+([[CL:Functions:apply]] #'[[CL:Functions:invoke-restart]] ''restart'' ''arguments'')
+</blockquote>
+
+====Examples====
+
+<blockquote> 
+([[CL:Macros:defun]] add3 (x) 
+  ([[CL:Macros:check-type]] x [[CL:Types:number]])
+  ([[CL:Functions:math-add|+]] x 3))
+
+(add3 'seven)
+▷ Error: The value SEVEN was not of type NUMBER.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Specify a different value to use.
+▷ 2: Return to Lisp Toplevel.
+▷ Debug> (invoke-restart-interactively 'store-value)
+▷ Type a form to evaluate and use: 7
+  → 10
+</blockquote>
+
+====Side Effects====
+If prompting for arguments is necesary, some typeout may occur (on //[[CL:Glossary:query I/O]]//).
+
+A non-local transfer of control might be done by the restart.
+
+====Affected By====
+**[[CL:Variables:*query-io*]]**, active //[[CL:Glossary:restart|restarts]]//
+
+====Exceptional Situations====
+If //restart// is not valid, an error of type **[[CL:Types:control-error]]** is signaled.
+
+====See Also====
+**[[CL:Functions:find-restart|Function FIND-RESTART]]**, **[[CL:Functions:invoke-restart|Function INVOKE-RESTART]]**, **[[CL:Macros:restart-case|Macro RESTART-CASE]]**, **[[CL:Macros:restart-bind|Macro RESTART-BIND]]**
+
+====Notes====
+**invoke-restart-interactively** is used internally by the debugger and may also be useful in implementing other portable, interactive debugging tools.

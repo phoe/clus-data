@@ -1,0 +1,44 @@
+====== Function INVOKE-RESTART ======
+
+====Syntax====
+  * **invoke-restart** //restart ''&rest'' arguments// → //result''*''//
+
+====Arguments and Values====
+  * //restart// - a //[[CL:Glossary:restart designator]]//.
+  * //argument// - an //[[CL:Glossary:object]]//.
+  * //results// - the //[[CL:Glossary:value|values]]// returned by the //[[CL:Glossary:function]]// associated with //restart//, if that //[[CL:Glossary:function]]// returns.
+
+====Description====
+Calls the //[[CL:Glossary:function]]// associated with //restart//, passing //arguments// to it. //Restart// must be valid in the current //[[CL:Glossary:dynamic environment]]//.
+
+====Examples==== 
+<blockquote> 
+([[CL:Macros:defun]] add3 (x) 
+  ([[CL:Macros:check-type]] x [[CL:Types:number]])
+  ([[CL:Functions:math-add|+]] x 3))
+
+(add3 'seven)
+▷ Error: The value SEVEN was not of type NUMBER.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Specify a different value to use.
+▷ 2: Return to Lisp Toplevel.
+▷ Debug> (invoke-restart 'store-value 7) 
+  → 10
+</blockquote>
+
+====Side Effects====
+A non-local transfer of control might be done by the restart.
+
+====Affected By====
+Existing restarts.
+
+====Exceptional Situations====
+If //restart// is not valid, an error of type **[[CL:Types:control-error]]** is signaled.
+
+====See Also====
+**[[CL:Functions:find-restart|Function FIND-RESTART]]**, **[[CL:Macros:restart-bind|Macro RESTART-BIND]]**, **[[CL:Macros:restart-case|Macro RESTART-CASE]]**, **[[CL:Functions:invoke-restart-interactively|Function INVOKE-RESTART-INTERACTIVELY]]**
+
+====Notes====
+The most common use for **[[CL:Functions:invoke-restart]]** is in a //[[CL:Glossary:handler]]//. It might be used explicitly, or implicitly through **[[CL:Functions:invoke-restart-interactively]]** or a //[[CL:Glossary:restart function]]//.
+
+//[[CL:Glossary:restart-function|Restart functions]]// call **[[CL:Functions:invoke-restart]]**, not vice versa. That is, //[[CL:Glossary:invoke-restart]]// provides primitive functionality, and //[[CL:Glossary:restart function|restart functions]]// are non-essential "syntactic sugar."

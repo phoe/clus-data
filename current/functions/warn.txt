@@ -1,0 +1,70 @@
+====== Function WARN ======
+
+====Syntax====
+  * **warn** //datum ''&rest'' arguments// → //**[[CL:Constant Variables:nil]]**//
+
+====Arguments and Values====
+  * //datum//, //arguments// - //[[CL:Glossary:designator|designators]]// for a //[[CL:Glossary:condition]]// of default type **[[CL:Types:simple-warning]]**.
+
+====Description====
+
+//[[CL:Glossary:signal|Signals]]// a //[[CL:Glossary:condition]]// of type **[[CL:Types:warning]]**. If the //[[CL:Glossary:condition]]// is not //[[CL:Glossary:handled]]//, reports the //[[CL:Glossary:condition]]// to //[[CL:Glossary:error output]]//.
+
+The precise mechanism for warning is as follows:
+
+
+===The warning condition is signaled===
+While the **[[CL:Types:warning]]** //[[CL:Glossary:condition]]// is being signaled, the **[[CL:Restarts:muffle-warning]]** //[[CL:Glossary:restart]]// is established for use by a //[[CL:Glossary:handler]]//. If invoked, this //[[CL:Glossary:restart]]// bypasses further action by **[[CL:Functions:warn]]**, which in turn causes **[[CL:Functions:warn]]** to immediately return **[[CL:Constant Variables:nil]]**.
+
+===If no handler for the warning condition is found===
+If no handlers for the warning condition are found, or if all such handlers decline, then the //[[CL:Glossary:condition]]// is reported to //[[CL:Glossary:error output]]// by **[[CL:Functions:warn]]** in an //[[CL:Glossary:implementation-dependent]]// format.
+
+===**[[CL:Constant Variables:nil]]** is returned===
+The value returned by **[[CL:Functions:warn]]** if it returns is **[[CL:Constant Variables:nil]]**. 
+
+====Examples====
+<blockquote>
+([[CL:Macros:defun]] foo (x)
+  ([[CL:Special Operators:let]] ((result (* x 2)))
+    ([[CL:Special Operators:if]] ([[CL:Functions:not]] ([[CL:Functions:typep]] result '[[CL:Types:fixnum]])) 
+        (warn "You're using very big numbers."))
+        result))
+
+(foo 3) → 6
+
+(foo [[CL:Constant Variables:most-positive-fixnum]])
+▷ Warning: You're using very big numbers.
+  → 4294967294
+
+([[CL:Macros:setf]] [[CL:Variables:star-break-on-signals-star|*break-on-signals*]] t) → T
+
+(foo most-positive-fixnum)
+▷ Break: Caveat emptor.
+▷ To continue, type :CONTINUE followed by an option number.
+▷ 1: Return from Break.
+▷ 2: Abort to Lisp Toplevel.
+▷ Debug> :continue 1
+▷ Warning: You're using very big numbers. 
+  → 4294967294
+</blockquote>
+
+====Side Effects====
+A warning is issued. The debugger might be entered.
+
+====Affected By====
+Existing handler bindings.
+
+**[[CL:Variables:star-break-on-signals-star|*break-on-signals*]]**, **[[CL:Variables:star-error-output-star|*error-output*]]**.
+
+====Exceptional Situations====
+If //datum// is a //[[CL:Glossary:condition]]// and if the //[[CL:Glossary:condition]]// is not of type **[[CL:Types:warning]]**, or //arguments// is //[[CL:Glossary:non-nil]]//, an error of type **[[CL:Types:type-error]]** is signaled.
+
+If //datum// is a condition type, the result of **[[CL:Functions:(apply #'make-condition datum arguments)]]** must be of type **[[CL:Types:warning]]** or an error of type **[[CL:Types:type-error]]** is signaled.
+
+====See Also====
+**[[CL:Variables:star-break-on-signals-star|Variable *BREAK-ON-SIGNALS*]]**, **[[CL:Functions:muffle-warning|Function MUFFLE-WARNING]]**, **[[CL:Functions:signal|Function SIGNAL]]**
+
+====Notes====
+None.
+
+\issue{BREAK-ON-WARNINGS-OBSOLETE:REMOVE}

@@ -1,0 +1,155 @@
+====== Function ABORT, CONTINUE, MUFFLE-WARNING, STORE-VALUE, USE-VALUE ====== 
+
+====Syntax====
+  * **abort** //''&optional'' condition//
+  * **continue** //''&optional'' condition// → //**[[CL:Constant Variables:nil]]**//
+  * **muffle-warning** //''&optional'' condition//
+  * **store-value** //value ''&optional'' condition// → //**[[CL:Constant Variables:nil]]**
+  * **use-value** //value ''&optional'' condition// → //**[[CL:Constant Variables:nil]]**
+
+====Arguments and Values====
+  * //value// - an //[[CL:Glossary:object]]//.
+  * //condition// - a //[[CL:Glossary:condition]]// //[[CL:Glossary:object]]//, or **[[CL:Constant Variables:nil]]**.
+
+====Description====
+Transfers control to the most recently established //[[CL:Glossary:applicable restart]]// having the same name as the function. That is, the function **[[CL:Functions:abort]]** searches for an //[[CL:Glossary:applicable]]// **[[CL:Restarts:abort]]** //[[CL:Glossary:restart]]//, the function **[[CL:Functions:continue]]** searches for an //[[CL:Glossary:applicable]]// **[[CL:Restarts:continue]]** //[[CL:Glossary:restart]]//, and so on.
+
+If no such //[[CL:Glossary:restart]]// exists, the functions **[[CL:Functions:continue]]**, **[[CL:Functions:store-value]]**, and **[[CL:Functions:use-value]]** return **[[CL:Constant Variables:nil]]**, and the functions **[[CL:Functions:abort]]** and **[[CL:Functions:muffle-warning]]** signal an error of type **[[CL:Types:control-error]]**.
+
+When //condition// is //[[CL:Glossary:non-nil]]//, only those //[[CL:Glossary:restart|restarts]]// are considered that are either explicitly associated with that //condition//, or not associated with any //[[CL:Glossary:condition]]//; that is, the excluded //[[CL:Glossary:restart|restarts]]// are those that are associated with a non-empty set of //[[CL:Glossary:condition|conditions]]// of which the given //condition// is not an //[[CL:Glossary:element]]//. If //condition// is **[[CL:Constant Variables:nil]]**, all //[[CL:Glossary:restart|restarts]]// are considered.
+
+====Examples====
+<blockquote>
+;;; Example of the ABORT restart
+
+([[CL:Macros:defmacro]] abort-on-error (&body forms)
+  `([[CL:Macros:handler-bind]] ((error #'abort)) ,@forms))
+
+(abort-on-error (+ 3 5)) → 8
+(abort-on-error (error "You lose."))
+▷ Returned to Lisp Top Level.
+
+;;; Example of the CONTINUE restart
+
+([[CL:Macros:defun]] real-sqrt (n)
+  ([[CL:Macros:when]] ([[CL:Functions:minusp]] n)
+    ([[CL:Functions:cerror]] "Return sqrt(~D) instead." "Tried to take sqrt(-~D)." n)
+    ([[CL:Macros:setf]] n ([[CL:Functions:math-subtract|-]] n)))
+  (sqrt n))
+
+(real-sqrt 4) → 2
+(real-sqrt -9)
+▷ Error: Tried to take sqrt(-9).
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Return sqrt(9) instead.
+▷ 2: Return to Lisp Toplevel.
+▷ Debug> (continue)
+▷ Return sqrt(9) instead.
+  → 3
+
+([[CL:Macros:handler-bind]]
+    (([[CL:Functions:error]] #'([[CL:Symbols:lambda]] (c) (continue))))
+  (real-sqrt -9))
+  → 3
+
+;;; Example of the MUFFLE-WARNING restart
+
+([[CL:Macros:defun]] count-down (x)
+  ([[CL:Macros:do]] ((counter x ([[CL:Functions:math-one-minus|1-]] counter)))
+      (([[CL:Functions:math-equal|=]] counter 0) 'done)
+    ([[CL:Macros:when]] ([[CL:Functions:math-equal|=]] counter 1)
+      ([[CL:Functions:warn]] "Almost done"))
+    ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~D~%" counter)))
+    
+(count-down 3)
+▷ 3
+▷ 2
+▷ Warning: Almost done
+▷ 1
+  → DONE
+  
+([[CL:Macros:defun]] ignore-warning (condition)
+  ([[CL:Special Operators:declare]] ([[CL:Declarations:ignore]] condition))
+  (muffle-warning))
+([[CL:Macros:defun]] ignore-warnings-while-counting (x)
+  ([[CL:Macros:handler-bind]] (([[CL:Types:warning]] #'ignore-warning))
+    (count-down x)))
+
+(ignore-warnings-while-counting 3)
+▷ 3
+▷ 2
+▷ 1 → DONE
+
+;;; Example of the STORE-VALUE and USE-VALUE restarts
+
+([[CL:Macros:defun]] careful-symbol-value (symbol)
+  ([[CL:Macros:check-type]] symbol [[CL:Types:symbol]])
+  ([[CL:Macros:restart-case]]
+      ([[CL:Special Operators:if]] ([[CL:Functions:boundp]] symbol)
+          ([[CL:Special Operators:return-from]] careful-symbol-value ([[CL:Functions:symbol-value]] symbol))
+          ([[CL:Types:error]] '[[CL:Types:unbound-variable]] :name symbol))
+    (use-value (value)
+      :report "Specify a value to use this time."
+      value)
+    (store-value (value) 
+      :report "Specify a value to store and use in the future." 
+      ([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] symbol) value))))
+    
+([[CL:Macros:defparameter]] *a* 1234) → 1234
+(careful-symbol-value '*a*) → 1234
+([[CL:Functions:makunbound]] '*a*) → A
+(careful-symbol-value '*a*)
+▷ Error: *A* is not bound.
+▷ To continue, type :CONTINUE followed by an option number.
+▷ 1: Specify a value to use this time.
+▷ 2: Specify a value to store and use in the future.
+▷ 3: Return to Lisp Toplevel.
+▷ Debug> (use-value 12)
+  → 12
+(careful-symbol-value '*a*)
+▷ Error: *A* is not bound.
+▷ To continue, type :CONTINUE followed by an option number.
+▷ 1: Specify a value to use this time.
+▷ 2: Specify a value to store and use in the future.
+▷ 3: Return to Lisp Toplevel.
+▷ Debug> (store-value 24)
+  → 24
+(careful-symbol-value '*a*) → 24
+
+;;; Example of the USE-VALUE restart
+
+([[CL:Macros:defun]] add-symbols-with-default (default &rest symbols)
+  ([[CL:Macros:handler-bind]] (([[CL:Types:unbound-symbol]] #'([[CL:Symbols:lambda]] (c)
+                                     ([[CL:Special Operators:declare]] ([[CL:Declarations:ignore]] c))
+                                     (use-value default))))
+  ([[CL:Functions:apply]] #'[[CL:Functions:math-add|+]] ([[CL:Functions:mapcar]] #'careful-symbol-value symbols))))
+([[CL:Macros:defparameter]] *x* 1)
+([[CL:Macros:defparameter]] *y* 2)
+
+(add-symbols-with-default 3 '*x* '*y* '*z*) → 6
+</blockquote>
+
+====Side Effects====
+A transfer of control may occur if an appropriate //[[CL:Glossary:restart]]// is available, or (in the case of the function **[[CL:Functions:abort]]** or the function **[[CL:Functions:muffle-warning]]**) execution may be stopped.
+
+====Affected By====
+Each of these functions can be affected by the presence of a //[[CL:Glossary:restart]]// having the same name.
+
+====Exceptional Situations====
+If an appropriate **[[CL:Restarts:abort]]** //[[CL:Glossary:restart]]// is not available for the function **[[CL:Functions:abort]]**, or an appropriate **[[CL:Restarts:muffle-warning]]** //[[CL:Glossary:restart]]// is not available for the function **[[CL:Functions:muffle-warning]]**, an error of type **[[CL:Types:control-error]]** is signaled.
+
+====See Also====
+**[[CL:Functions:invoke-restart|Function INVOKE-RESTART]]**, {\secref\Restarts}, {\secref\InterfacesToRestarts}, **[[CL:Macros:assert|Macro ASSERT]]**, **[[CL:Macros:ccase|Macro CCASE]]**, **[[CL:Functions:cerror|Function CERROR]]**, **[[CL:Macros:check-type|Macro CHECK-TYPE]]**, **[[CL:Macros:ctypecase|Macro CTYPECASE]]**, **[[CL:Functions:use-value|Function USE-VALUE]]**, **[[CL:Functions:warn|Function WARN]]**
+
+====Notes====
+<blockquote>
+(abort condition) ≡ ([[CL:Functions:invoke-restart]] 'abort)
+(muffle-warning) ≡ ([[CL:Functions:invoke-restart]] 'muffle-warning)
+(continue) ≡ ([[CL:Special Operators:let]] ((r ([[CL:Functions:find-restart]] 'continue))) ([[CL:Macros:when]] r ([[CL:Functions:invoke-restart]] r)))
+(use-value //x//) ≡ ([[CL:Special Operators:let]] ((r ([[CL:Functions:find-restart]] 'use-value))) ([[CL:Macros:when]] r ([[CL:Functions:invoke-restart]] r //x//)))
+(store-value x) ≡ ([[CL:Special Operators:let]] ((r ([[CL:Functions:find-restart]] 'store-value))) ([[CL:Macros:when]] r ([[CL:Functions:invoke-restart]] r //x//)))
+</blockquote>
+
+No functions defined in this specification are required to provide a **[[CL:Restarts:use-value]]** //[[CL:Glossary:restart]]//.
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION} \issue{MUFFLE-WARNING-CONDITION-ARGUMENT} \issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION} \issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}

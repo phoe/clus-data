@@ -1,0 +1,68 @@
+====== Macro HANDLER-BIND ======
+
+====Syntax====
+  * **handler-bind** //({binding}''*'') form''*''// → //result''*''//
+
+<blockquote>
+//binding// ::= //(type handler)//
+</blockquote>
+
+====Arguments and Values====
+  * //type// - a //[[CL:Glossary:type specifier]]//.
+  * //handler// - a //[[CL:Glossary:form]]//; evaluated to produce a //handler-function//.
+  * //handler-function// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]//.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - the //[[CL:Glossary:values]]// returned by the //[[CL:Glossary:form|forms]]//.
+
+====Description====
+Executes //forms// in a //[[CL:Glossary:dynamic environment]]// where the indicated //handler// //[[CL:Glossary:binding|bindings]]// are in effect.
+
+Each //handler// should evaluate to a //[[CL:Glossary:handler-function]]//, which is used to handle //[[CL:Glossary:condition|conditions]]// of the given //type// during execution of the //forms//. This //[[CL:Glossary:function]]// should take a single argument, the //[[CL:Glossary:condition]]// being signaled.
+
+If more than one //handler// //[[CL:Glossary:binding]]// is supplied, the //handler// //[[CL:Glossary:binding|bindings]]// are searched sequentially from top to bottom in search of a match (by visual analogy with **[[CL:Macros:typecase]]**). If an appropriate //[[CL:Glossary:type]]// is found, the associated handler is run in a //[[CL:Glossary:dynamic environment]]// where none of these //handler// bindings are visible (to avoid recursive errors). If the //[[CL:Glossary:handler]]// //[[CL:Glossary:decline|declines]]//, the search continues for another //[[CL:Glossary:handler]]//.
+
+If no appropriate //[[CL:Glossary:handler]]// is found, other //[[CL:Glossary:handler|handlers]]// are sought from dynamically enclosing contours. If no //[[CL:Glossary:handler]]// is found outside, then **[[CL:Functions:signal]]** returns or **[[CL:Functions:error]]** enters the debugger.
+
+====Examples====
+In the following code, if an unbound variable error is signaled in the body (and not handled by an intervening handler), the first function is called.
+
+<blockquote> 
+(handler-bind (([[CL:Types:unbound-variable]] #'([[CL:Symbols:lambda]] ...)) 
+               ([[CL:Types:error]] #'([[CL:Symbols:lambda]] ...)))
+  ...) </blockquote>
+
+If any other kind of error is signaled, the second function is called. In either case, neither handler is active while executing the code in the associated function.
+
+<blockquote>
+([[CL:Macros:defun]] trap-error-handler (condition) 
+  ([[CL:Functions:format]] [[CL:Variables:star-error-output-star|*error-output*]] "~&~A~&" condition)
+  ([[CL:Special Operators:throw]] 'trap-errors [[CL:Constant Variables:nil]]))
+
+([[CL:Macros:defmacro]] trap-errors (&rest forms) 
+  `([[CL:Special Operators:catch]] 'trap-errors 
+     (handler-bind (([[CL:Types:error]] #'trap-error-handler)) 
+       ,@forms)))
+
+([[CL:Functions:list]] (trap-errors ([[CL:Functions:signal]] "Foo.") 1) 
+      (trap-errors ([[CL:Functions:error]] "Bar.") 2) 
+      ([[CL:Functions:math-add|+]] 1 2))
+▷ Bar. 
+  → (1 [[CL:Constant Variables:nil|NIL]] 3)
+</blockquote>
+
+Note that "Foo." is not printed because the condition made by **[[CL:Functions:signal]]** is a //[[CL:Glossary:simple condition]]//, which is not of type **[[CL:Types:error]]**, so it doesn't trigger the handler for **[[CL:Types:error]]** set up by ''trap-errors''.
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Macros:handler-case|Macro HANDLER-CASE]]**
+
+====Notes====
+None.

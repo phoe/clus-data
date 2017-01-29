@@ -1,0 +1,49 @@
+====== Macro IGNORE-ERRORS ======
+
+====Syntax====
+  * **ignore-errors** //form''*''// → //result''*''//
+
+====Arguments and Values====
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - In the normal situation, the //[[CL:Glossary:values]]// of the //[[CL:Glossary:forms]]// are returned; in the exceptional situation, two values are returned: **[[CL:Constant Variables:nil]]** and the //[[CL:Glossary:condition]]//.
+
+====Description====
+**ignore-errors** is used to prevent //[[CL:Glossary:condition|conditions]]// of type **[[CL:Types:error]]** from causing entry into the debugger.
+
+Specifically, **ignore-errors** //[[CL:Glossary:executes]]// //[[CL:Glossary:form|forms]]// in a //[[CL:Glossary:dynamic environment]]// where a //[[CL:Glossary:handler]]// for //[[CL:Glossary:condition|conditions]]// of type **[[CL:Types:error]]** has been established; if invoked, it //[[CL:Glossary:handle|handles]]// such //[[CL:Glossary:condition|conditions]]// by returning two //[[CL:Glossary:value|values]]//, **[[CL:Constant Variables:nil]]** and the //[[CL:Glossary:condition]]// that was //[[CL:Glossary:signaled]]//, from the **ignore-errors** //[[CL:Glossary:form]]//.
+
+If a //[[CL:Glossary:normal return]]// from the //[[CL:Glossary:form|forms]]// occurs, any //[[CL:Glossary:values]]// returned are returned by **ignore-errors**.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defun]] load-init-file (program)
+  ([[CL:Special Operators:let]] ((win [[CL:Constant Variables:nil]]))
+    (ignore-errors ;if this fails, don't enter debugger
+      ([[CL:Functions:load]] ([[CL:Functions:merge-pathnames]] ([[CL:Functions:make-pathname]] :name program :type :lisp) 
+                             ([[CL:Functions:user-homedir-pathname]])))
+      ([[CL:Macros:setf]] win [[CL:Constant Variables:t]]))
+    ([[CL:Macros:unless]] win ([[CL:Functions:format]] [[CL:Constant Variables:t]] ~&Init file failed to load.~%"))
+    win))
+
+(load-init-file "no-such-program")
+▷ Init file failed to load.
+  → [[CL:Constant Variables:nil|NIL]]
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Macros:handler-case]]**, {\secref\ConditionSystemConcepts}
+
+====Notes====
+<blockquote>
+(ignore-errors . forms) 
+  ≡ (handler-case (progn . forms) 
+      (error (condition) (values nil condition)))
+</blockquote>
+
+Because the second return value is a //[[CL:Glossary:condition]]// in the exceptional case, it is common (but not required) to arrange for the second return value in the normal case to be missing or **[[CL:Constant Variables:nil]]** so that the two situations can be distinguished.

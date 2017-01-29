@@ -1,0 +1,119 @@
+====== Macro HANDLER-CASE ======
+
+====Syntax====
+  * handler-case //expression <nowiki>[[{error-clause}</nowiki>''*''<nowiki> | no-error-clause]]</nowiki> → //result//
+  
+<blockquote>
+//clause// ::= //error-clause | no-error-clause//
+//error-clause// ::= //(typespec ([var]) declaration''*'' form''*'')//
+//no-error-clause// ::= //(**'':no-error''** lambda-list declaration''*'' form''*'')//
+</blockquote>
+
+====Arguments and Values====
+  * //expression// - a //[[CL:Glossary:form]]//.
+  * //typespec// - a //[[CL:Glossary:type specifier]]//.
+  * //var// - a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
+  * //lambda-list// - an //[[CL:Glossary:ordinary lambda list]]//.
+  * //declaration// - a **[[CL:Symbols:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //form// - a //[[CL:Glossary:form]]//.
+  * //results// - In the normal situation, the values returned are those that result from the evaluation of //expression//; in the exceptional situation when control is transferred to a //clause//, the value of the last //form// in that //clause// is returned.
+
+====Description====
+*handler-case* executes //expression// in a //[[CL:Glossary:dynamic environment]]// where various handlers are active. Each ''error-clause'' specifies how to handle a //[[CL:Glossary:condition]]// matching the indicated //typespec//. A ''no-error-clause'' allows the specification of a particular action if control returns normally.
+
+If a //[[CL:Glossary:condition]]// is signaled for which there is an appropriate ''error-clause'' during the execution of //expression// (i.e. one for which ''(typep //[[CL:Glossary:condition]]// '//typespec//)'' returns //[[CL:Glossary:true]]//) and if there is no intervening handler for a //[[CL:Glossary:condition]]// of that //[[CL:Glossary:type]]//, then control is transferred to the body of the relevant ''error-clause''. In this case, the dynamic state is unwound appropriately (so that the handlers established around the //expression// are no longer active), and //var// is bound to the //[[CL:Glossary:condition]]// that had been signaled.
+
+If more than one case is provided, those cases are made accessible in parallel. That is, in
+
+<blockquote>
+(handler-case form 
+  (typespec1 (var1) form1) 
+  (typespec2 (var2) form2))
+</blockquote>
+
+if the first ''clause'' (containing ''form1'') has been selected, the handler for the second is no longer visible (or vice versa).
+
+The ''clauses'' are searched sequentially from top to bottom. If there is //[[CL:Glossary:type]]// overlap between //typespecs//, the earlier of the ''clauses'' is selected.
+
+If //var// is not needed, it can be omitted. That is, a ''clause'' such as: ''(//typespec// (//var//) (declare (ignore //var//)) //form//)'' can be written ''(//typespec// () //form//)''.
+
+If there are no //forms// in a selected ''clause'', the case, and therefore *handler-case*, returns **[[CL:Constant Variables:nil]]**. If execution of //expression// returns normally and no ''no-error-clause'' exists, the values returned by //expression// are returned by *handler-case*. If execution of //expression// returns normally and a ''no-error-clause'' does exist, the values returned are used as arguments to the function described by constructing //(lambda lambda-list form''*'')// from the ''no-error-clause'', and the //[[CL:Glossary:values]]// of that function call are returned by *handler-case*.
+
+The handlers which were established around the //expression// are no longer active at the time of this call.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defun]] assess-condition (condition)
+  ([[CL:Macros:handler-case]] ([[CL:Functions:signal]] condition) 
+    ([[CL:Types:warning]] ()
+      "Lots of smoke, but no fire.")
+    (([[CL:Types:or]] [[CL:Types:arithmetic-error]] [[CL:Types:control-error]] [[CL:Types:cell-error]] [[CL:Types:stream-error]]) 
+        (condition) 
+      ([[CL:Functions:format]] [[CL:Constant Variables:nil]] "~S looks especially bad." condition))
+   ([[CL:Types:serious-condition]] (condition)
+     ([[CL:Functions:format]] [[CL:Constant Variables:nil]] "~S looks serious." condition))
+   ([[CL:Types:condition]] () "Hardly worth mentioning.")))
+   
+(assess-condition ([[CL:Functions:make-condition]] '[[CL:Types:stream-error]] :stream [[CL:Variables:star-terminal-io-star|*terminal-io*]])) 
+  → "#<STREAM-ERROR 12352256> looks especially bad."
+
+([[CL:Macros:define-condition]] random-condition (condition) () 
+  (:report ([[CL:Symbol:lambda]] (condition stream) 
+             ([[CL:Symbol:declare]] ([[CL:Declaration:ignore]] condition))
+             ([[CL:Functions:princ]] "Yow" stream))))
+             
+(assess-condition ([[CL:Functions:make-condition]] 'random-condition)) → "Hardly worth mentioning."
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Macros:handler-bind|Macro HANDLER-BIND]]**, **[[CL:Macros:ignore-errors|Macro IGNORE-ERRORS]]**, {\secref\ConditionSystemConcepts}
+
+====Notes====
+<blockquote>
+(handler-case form 
+  (type1 (var1) . body1)
+  (type2 (var2) . body2) 
+  ...)
+</blockquote> 
+
+is approximately equivalent to:
+
+<blockquote>
+([[CL:Special Operators:block]] #1=#:g0001
+  ([[CL:Special Operators:let]] ((#2=#:g0002 [[CL:Constant Variables:nil]]))
+    ([[CL:Special Operators:tagbody]]
+       ([[CL:Macros:handler-bind]] ((type1 #'([[CL:Symbol:lambda]] (temp) ([[CL:Macros:setf]] #1# temp) ([[CL:Special Operators:go]] #3=#:g0003)))
+                      (type2 #'([[CL:Symbols:lambda]] (temp) ([[CL:Macros:setf]] #2# temp) ([[CL:Special Operators:go]] #4=#:g0004)))
+                      ...)
+         ([[CL:Special Operators:return-from]] #1# form))
+       #3# ([[CL:Special Operators:return-from]] #1# ([[CL:Special Operators:let]] ((var1 #2#)) . body1)) 
+       #4# ([[CL:Special Operators:return-from]] #1# ([[CL:Special Operators:let]] ((var2 #2#)) . body2))
+     ...)))
+</blockquote>
+
+<blockquote>
+(handler-case form 
+  (type1 (var1) . body1) 
+  ...
+  (:no-error (varN-1 varN-2 ...) . bodyN))
+</blockquote> 
+
+is approximately equivalent to:
+
+<blockquote>
+([[CL:Special Operators:block]] #1=#:error-return
+  ([[CL:Macros:multiple-value-call]] #'([CL:Symbols:lambda]] (varN-1 varN-2 ...) . bodyN)
+    ([[CL:Special Operators:block]] #2=#:normal-return
+      ([[CL:Special Operators:return-from]] #1#
+        (handler-case (return-from #2# form)
+          (type1 (var1) . body1) 
+          ...)))))
+</blockquote>
+
+\issue{DECLS-AND-DOC}

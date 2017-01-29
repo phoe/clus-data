@@ -1,0 +1,93 @@
+====== Macro WITH-SIMPLE-RESTART ======
+
+====Syntax====
+  * **with-simple-restart** //(name format-control format-argument''*'' form''*'')// → //result''*''//
+
+====Arguments and Values====
+  * //name// - a //[[CL:Glossary:symbol]]//.
+  * //format-control// - a //[[CL:Glossary:format control]]//.
+  * //format-argument// - an //[[CL:Glossary:object]]// (i.e. a //[[CL:Glossary:format argument]]//).
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - in the normal situation, the //[[CL:Glossary:values]]// returned by the //forms//; in the exceptional situation where the //[[CL:Glossary:restart]]// named //name// is invoked, two values---**[[CL:Constant Variables:nil]]** and \t.
+
+====Description====
+**with-simple-restart** establishes a restart.
+
+If the restart designated by //name// is not invoked while executing //forms//, all values returned by the last of //forms// are returned. If the restart designated by //name// is invoked, control is transferred to **with-simple-restart**, which returns two values, **[[CL:Constant Variables:nil]]** and **[[CL:Constant Variables:t]]**.
+
+If //name// is **[[CL:Constant Variables:nil]]**, an anonymous restart is established.
+
+The //format-control// and //format-arguments// are used report the //[[CL:Glossary:restart]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defun]] read-eval-print-loop (level)
+  (with-simple-restart ([[CL:Restarts:abort]] "Exit command level ~D." level)
+    ([[CL:Macros:loop]]
+      (with-simple-restart ([[CL:Restarts:abort]] "Return to command level ~D." level)
+        ([[CL:Special Operators:let]] ((form ([[CL:Functions:prog2]] (fresh-line) ([[CL:Functions:read]]) ([[CL:Functions:fresh-line]]))))
+          ([[CL:Functions:prin1]] ([[CL:Functions:eval]] form)))))))
+
+(read-eval-print-loop 1)
+(+ 'a 3)
+▷ Error: The argument, A, to the function + was of the wrong type.
+▷ The function expected a number.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Specify a value to use this time.
+▷ 2: Return to command level 1.
+▷ 3: Exit command level 1.
+▷ 4: Return to Lisp Toplevel.
+
+([[CL:Macros:defun]] compute-fixnum-power-of-2 (x)
+  (with-simple-restart (nil "Give up on computing 2^~D." x)
+    ([[CL:Special Operators:let]] ((result 1))
+      ([[CL:Macros:dotimes]] (i x result)
+        ([[CL:Macros:setf]] result ([[CL:Functions:math-multiply|*]] 2 result))
+        ([[CL:Macros:unless]] ([[CL:Functions:fixnump]] result)
+          ([[CL:Function:error]] "Power of 2 is too large."))))))
+          
+([[CL:Macros:defun]] compute-power-of-2 (x)
+  ([[CL:Macros:or]] (compute-fixnum-power-of-2 x) 'something-big))
+
+(compute-power-of-2 10) → 1024
+
+(compute-power-of-2 10000)
+▷ Error: Power of 2 is too large.
+▷ To continue, type :CONTINUE followed by an option number.
+▷ 1: Give up on computing 2^10000.
+▷ 2: Return to Lisp Toplevel
+▷ Debug> :continue 1 
+  → SOMETHING-BIG
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Macros:restart-case|Macro RESTART-CASE]]**
+
+====Notes====
+**with-simple-restart** is shorthand for one of the most common uses of **[[CL:Macros:restart-case]]**.
+
+**with-simple-restart** could be defined by:
+
+<blockquote>
+([[CL:Macros:defmacro]] with-simple-restart 
+    ((restart-name format-control &rest format-arguments)
+     &body forms)
+`([[CL:Macros:restart-case]] (progn ,@forms)
+   (,restart-name ()
+       :report ([[CL:Symbols:lambda]] (stream)
+                 ([[CL:Functions:format]] stream ,format-control ,@format-arguments))
+     ([[CL:Functions:values]] [[CL:Constant Variables:nil]] [[CL:Constant Variables:t]]))))
+</blockquote>
+
+Because the second return value is **[[CL:Constant Variables:t]]** in the exceptional case, it is common (but not required) to arrange for the second return value in the normal case to be missing or **[[CL:Constant Variables:nil]]** so that the two situations can be distinguished.
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY} \issue{FORMAT-STRING-ARGUMENTS:SPECIFY}

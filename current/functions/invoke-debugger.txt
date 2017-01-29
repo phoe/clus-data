@@ -1,0 +1,44 @@
+====== Function INVOKE-DEBUGGER ======
+
+====Syntax====
+  * **invoke-debugger** //condition//
+  
+====Arguments and Values====
+  * //condition// - a //[[CL:Glossary:condition]]// //[[CL:Glossary:object]]//.
+
+====Description====
+**invoke-debugger** attempts to enter the debugger with //condition//.
+
+If **[[CL:Variables:|star-debugger-hook-star*|debugger-hook*]]** is not **[[CL:Constant Variables:nil]]**, it should be a //[[CL:Glossary:function]]// (or the name of a //[[CL:Glossary:function]]//) to be called prior to entry to the standard debugger. The //[[CL:Glossary:function]]// is called with **[[CL:Variables:|star-debugger-hook-star*|debugger-hook*]]** bound to **[[CL:Constant Variables:nil]]**, and the //[[CL:Glossary:function]]// must accept two arguments: the //condition// and the [[CL:Glossary:value]] of **[[CL:Variables:|star-debugger-hook-star*|debugger-hook*]]** prior to binding it to **[[CL:Constant Variables:nil]]**. If the //[[CL:Glossary:function]]// returns normally, the standard debugger is entered.
+
+The standard debugger never directly returns. Return can occur only by a non-local transfer of control, such as the use of a restart function.
+
+====Examples====
+<blockquote>
+([[CL:Macros:ignore-errors]]
+  ; Normally, this would suppress debugger entry 
+  ([[CL:Macros:handler-bind]] (([[CL:Types:error]] #'invoke-debugger)) 
+  ; But this forces debugger entry 
+    ([[CL:Functions:error]] "Foo."))) 
+▷ Debug: Foo.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Return to Lisp Toplevel.
+▷ Debug>
+</blockquote>
+
+
+====Side Effects====
+**[[CL:Variables:|star-debugger-hook-star*|debugger-hook*]]** is bound to **[[CL:Constant Variables:nil]]**, program execution is discontinued, and the debugger is entered.
+
+====Affected By====
+**[[CL:Variables:star-debug-io-star|*debug-io*]]** and **[[CL:Variables:star-debugger-hook-star|*debugger-hook*]]**.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Functions:error|Function ERROR]]**, **[[CL:Functions:break|Function BREAK]]**
+
+====Notes====
+None.
+

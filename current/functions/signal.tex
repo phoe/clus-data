@@ -1,0 +1,60 @@
+====== Function SIGNAL ======
+
+====Syntax====
+  * **signal** //datum ''&rest arguments// → //**[[CL:Constant Variables:nil]]**//
+
+====Arguments and Values====
+  * //datum//, //arguments// - //[[CL:Glossary:designators]]// for a //[[CL:Glossary:condition]]// of default type **[[CL:Types:simple-condition]]**.
+
+====Description====
+//[[CL:Glossary:signal|Signals]]// the //[[CL:Glossary:condition]]// denoted by the given //datum// and //arguments//. If the //[[CL:Glossary:condition]]// is not handled, **signal** returns **[[CL:Constant Variables:nil]]**.
+
+====Examples====
+
+<blockquote>
+([[CL:Macros:defun]] handle-division-conditions (condition) 
+  ([[CL:Functions:format]] [[CL:Constant Variables:t]] "Considering condition for division condition handling~%"
+          ([[CL:Macros:when]] ([[CL:Macros:and]] ([[CL:Functions:typep]] condition 'arithmetic-error) 
+                     ([[CL:Functions:eq]] '/ (arithmetic-error-operation condition))) 
+            ([[CL:Functions:invoke-debugger]] condition))) 
+
+([[CL:Macros:defun]] handle-other-arithmetic-errors (condition) 
+  ([[CL:Functions:format]] [[CL:Constant Variables:t]] "Considering condition for arithmetic condition handling~%"
+    ([[CL:Macros:when]] ([[CL:Functions:typep]] condition 'arithmetic-error) ([[CL:Functions:abort]]))) 
+
+([[CL:Macros:define-condition]] a-condition-with-no-handler (condition) ())
+(signal 'a-condition-with-no-handler) → [[CL:Constant Variables:nil|NIL]] 
+
+([[CL:Macros:handler-bind]] ((condition #'handle-division-conditions) 
+               (condition #'handle-other-arithmetic-errors)) 
+  (signal 'a-condition-with-no-handler)) 
+▷ Considering condition for division condition handling 
+▷ Considering condition for arithmetic condition handling 
+→ [[CL:Constant Variables:nil|NIL]] 
+([[CL:Macros:handler-bind]] ((arithmetic-error #'handle-division-conditions) 
+               (arithmetic-error #'handle-other-arithmetic-errors))
+  (signal 'arithmetic-error :operation '* :operands '(1.2 b)))
+▷ Considering condition for division condition handling
+▷ Considering condition for arithmetic condition handling
+→ [[CL:Constant Variables:nil|NIL]] 
+</blockquote>
+
+====Side Effects====
+The debugger might be entered due to **[[CL:Variables:star-break-on-signals-star|*break-on-signals*]]**.
+
+Handlers for the condition being signaled might transfer control.
+
+====Affected By====
+Existing handler bindings.
+
+**[[CL:Variables:star-break-on-signals-star|*break-on-signals*]]**
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Variables:star-break-on-signals-star|Variable *BREAK-ON-SIGNALS*]]**, **[[CL:Functions:error|Function ]]**, **[[CL:Types:simple-condition|Condition Type SIMPLE-CONDITION]]**,{\secref\CondSignalHandle}
+
+====Notes====
+If ''([[CL:Functions:typep]] //datum// *break-on-signals*)'' //[[CL:Glossary:yield|yields]]// //[[CL:Glossary:true]]//, the debugger is entered prior to beginning the signaling process. the **[[CL:Restarts:continue]]** //[[CL:Glossary:restart]]// can be used to continue with the signaling process. This is also true for all other //[[CL:Glossary:functions]]// and //[[CL:Glossary:macros]]// that should, might, or must //[[CL:Glossary:signal]]// //[[CL:Glossary:condition|conditions]]//.
+

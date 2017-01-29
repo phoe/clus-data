@@ -1,0 +1,141 @@
+====== Function CERROR ======
+
+====Syntax====
+  * **cerror** //continue-format-control datum ''&rest'' arguments// → //**[[CL:Constant Variables:nil]]**//
+
+====Arguments and Values====
+  * //continue-format-control// - a //[[CL:Glossary:format control]]//.
+  * //datum//, //arguments// - //[[CL:Glossary:designators]]// for a //[[CL:Glossary:condition]]// of default type **[[CL:Types:simple-error]]**.
+
+====Description====
+**cerror** effectively invokes **[[CL:Functions:error]]** on the //[[CL:Glossary:condition]]// named by //datum//. As with any function that implicitly calls **[[CL:Functions:error]]**, if the //[[CL:Glossary:condition]]// is not handled, ''([[CL:Functions:invoke-debugger]] condition)'' is executed. While signaling is going on, and while in the debugger if it is reached, it is possible to continue code execution (i.e. to return from **cerror**) using the **[[CL:Restarts:continue]]** //[[CL:Glossary:restart]]//.
+
+If //datum// is a //[[CL:Glossary:condition]]//, //arguments// can be supplied, but are used only in conjunction with the //continue-format-control//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defun]] real-sqrt (n) 
+  ([[CL:Macros:when]] ([[CL:Functions:minusp]] n) 
+    (cerror "Return sqrt(~D) instead." 
+            "Tried to take sqrt(-~D)." n)
+    ([[CL:Macros:setf]] n (- n)))
+  ([[CL:Functions:sqrt]] n))
+
+(real-sqrt 4) → 2.0
+
+(real-sqrt -9)
+▷ Correctable error in REAL-SQRT: Tried to take sqrt(-9).
+▷ Restart options:
+▷ 1: Return sqrt(9) instead.
+▷ 2: Top level.
+▷ Debug> :continue 1
+   → 3.0
+
+([[CL:Macros:define-condition]] not-a-number (error) 
+    ((argument :reader not-a-number-argument :initarg :argument)) 
+  (:report ([[CL:Symbols:lambda]] (condition stream) 
+             ([[CL:Functions:format]] stream "~S is not a number." 
+                     (not-a-number-argument condition)))))
+
+([[CL:Macros:defun]] assure-number (n) 
+  ([[CL:Macros:loop]] 
+    ([[CL:Macros:when]] ([[CL:Functions:numberp]] n) 
+      ([[CL:Macros:return]] n)) 
+    (cerror "Enter a number." 'not-a-number :argument n)
+    ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&Type a number: ")
+    ([[CL:Macros:setf]] n ([[CL:Functions:read]]))
+    ([[CL:Functions:fresh-line]])))
+
+(assure-number 'a)
+▷ Correctable error in ASSURE-NUMBER: A is not a number.
+▷ Restart options:
+▷ 1: Enter a number.
+▷ 2: Top level.
+▷ Debug> :continue 1
+▷ Type a number: 1/2
+  → 1/2
+
+([[CL:Macros:defun]] assure-large-number (n) 
+  ([[CL:Macros:loop]] 
+    ([[CL:Macros:when]] ([[CL:Macros:and]] ([[CL:Functions:numberp]] n) ([[CL:Functions:math-greater|>]] n 73)) 
+      ([[CL:Macros:return]] n))
+    (cerror "Enter a number~:[~; a bit larger than ~D~]."
+            "~*~A is not a large number." ([[CL:Functions:numberp]] n) n)
+    ([[CL:Functions:format]] [CL:Constant Variables:t]] "~&Type a large number: ")
+    ([[CL:Macros:setf]] n ([[CL:Functions:read]]))
+    ([[CL:Functions:fresh-line]])))
+
+(assure-large-number 10000) → 10000
+
+(assure-large-number 'a)
+▷ Correctable error in ASSURE-LARGE-NUMBER: A is not a large number.
+▷ Restart options:
+▷ 1: Enter a number.
+▷ 2: Top level.
+▷ Debug> \IN{:continue 1}
+▷ Type a large number: \IN{88} → 88
+
+(assure-large-number 37)
+▷ Correctable error in ASSURE-LARGE-NUMBER: 37 is not a large number.
+▷ Restart options:
+▷ 1: Enter a number a bit larger than 37.
+▷ 2: Top level.
+▷ Debug> \IN{:continue 1}
+▷ Type a large number: \IN{259} → 259
+
+([[CL:Macros:define-condition]] not-a-large-number (error) 
+    ((argument :reader not-a-large-number-argument :initarg :argument))
+  (:report ([[CL:Symbols:lambda]] (condition stream) 
+             ([[CL:Functions:format]] stream "~S is not a large number." 
+                     (not-a-large-number-argument condition)))))
+
+([[CL:Macros:defun]] assure-large-number (n) 
+  ([[CL:Macros:loop]] 
+    ([[CL:Macros:when]] ([[CL:Macros:and]] ([[CL:Functions:numberp]] n) ([[CL:Macros:math-greater|>]] n 73))
+      ([[CL:Macros:return]] n))
+    (cerror "Enter a number~3*~:[~; a bit larger than ~*~D~]." 
+            'not-a-large-number :argument n :ignore ([[CL:Functions:numberp]] n) 
+                                :ignore n :allow-other-keys [[CL:Constant Variables:t]]) 
+    ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&Type a large number: ")
+    ([[CL:Macros:defparameter]] n ([[CL:Functions:read]])) 
+    ([[CL:Functions:fresh-line]])))
+
+(assure-large-number 'a)
+▷ Correctable error in ASSURE-LARGE-NUMBER: A is not a large number.
+▷ Restart options:
+▷ 1: Enter a number.
+▷ 2: Top level.
+▷ Debug> :continue 1
+▷ Type a large number: 88
+  → 88
+
+(assure-large-number 37)
+▷ Correctable error in ASSURE-LARGE-NUMBER: A is not a large number.
+▷ Restart options:
+▷ 1: Enter a number a bit larger than 37.
+▷ 2: Top level.
+▷ Debug> :continue 1
+▷ Type a large number: 259
+  → 259
+</blockquote>
+
+====Affected By====
+**[[CL:Variables:star-break-on-signals-star|*break-on-signals*]]**.
+
+Existing handler bindings.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Functions:error|Function ERROR]]**, **[[CL:Functions:format|Function FORMAT]]**, **[[CL:Macros:handler-bind|Macro HANDLER-BIND]]**, **[[CL:Variables:star-break-on-signals-star|Variable *BREAK-ON-SIGNALS*]]**, **[[CL:Types:simple-type-error|Condition Type SIMPLE-TYPE-ERROR]]**
+
+====Notes====
+If //datum// is a //[[CL:Glossary:condition]]// //[[CL:Glossary:type]]// rather than a //[[CL:Glossary:string]]//, the **[[CL:Functions:format]]** directive **[[CL:Functions:~*]]** may be especially useful in the //continue-format-control// in order to ignore the //[[CL:Glossary:keywords]]// in the //[[CL:Glossary:initialization argument list]]//. For example:
+
+<blockquote>
+(cerror "enter a new value to replace ~*~s" 
+        'not-a-number :argument a)
+</blockquote>
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}

@@ -1,0 +1,58 @@
+====== Variable *BREAK-ON-SIGNALS* ======
+
+====Value Type====
+a //[[CL:Glossary:type specifier]]//.
+
+====Initial Value====
+**[[CL:Constant Variables:nil]]**.
+
+====Description====
+When ''([[CL:Functions:typep]] ''condition'' *break-on-signals*)'' returns //[[CL:Glossary:true]]//, calls to **[[CL:Functions:signal]]**, and to other //[[CL:Glossary:operator|operators]]// such as **[[CL:Functions:error]]** that implicitly call **[[CL:Functions:signal]]**, enter the debugger prior to //[[CL:Glossary:signal|signaling]]// the //[[CL:Glossary:condition]]//.
+
+The **[[CL:Restarts:continue]]** //[[CL:Glossary:restart]]// can be used to continue with the normal //[[CL:Glossary:signal|signaling]]// process when a break occurs process due to ***break-on-signals***.
+
+====Examples====
+<blockquote> 
+*break-on-signals* → [[CL:Constant Variables:nil|NIL]]
+([[CL:Macroc:ignore-errors]] ([[CL:Functions:error]] '[[CL:Types:simple-error]] :format-control "Fooey!"))
+  → [[CL:Constant Variables:nil|NIL]], #<SIMPLE-ERROR 32207172>
+
+([[CL:Special Operators:let]] ((*break-on-signals* '[[CL:Types:error]])) 
+  ([[CL:Macroc:ignore-errors]] ([[CL:Functions:error]] '[[CL:Types:simple-error]] :format-control "Fooey!")))
+▷ Break: Fooey!
+▷ BREAK entered because of *BREAK-ON-SIGNALS*.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Continue to signal.
+▷ 2: Top level.
+▷ Debug> :continue 1
+▷ Continue to signal. 
+  → [[CL:Constant Variables:nil|NIL]], #<SIMPLE-ERROR 32212257>
+
+([[CL:Special Operators:let]] ((*break-on-signals* '[[CL:Types:error]])) 
+  ([[CL:Functions:error]] '[[CL:Types:simple-error]] :format-control "Fooey!"))
+▷ Break: Fooey!
+▷ BREAK entered because of *BREAK-ON-SIGNALS*.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Continue to signal.
+▷ 2: Top level.
+▷ Debug> :continue 1
+▷ Continue to signal.
+▷ Error: Fooey!
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Top level.
+▷ Debug> :continue 1
+▷ Top level.
+</blockquote>
+
+====Affected By====
+None.
+
+====See Also====
+**[[CL:Functions:break|Function BREAK]]**, **[[CL:Functions:signal|Function SIGNAL]]**, **[[CL:Functions:warn|Function WARN]]**, **[[CL:Functions:error|Function ERROR]]**, **[[CL:Functions:typep|Function TYPEP]]**, {\secref\ConditionSystemConcepts}
+
+====Notes====
+***break-on-signals*** is intended primarily for use in debugging code that does signaling. When setting ***break-on-signals***, the user is encouraged to choose the most restrictive specification that suffices. Setting ***break-on-signals*** effectively violates the modular handling of //[[CL:Glossary:condition]]// signaling. In practice, the complete effect of setting ***break-on-signals*** might be unpredictable in some cases since the user might not be aware of the variety or number of calls to **[[CL:Functions:signal]]** that are used in code called only incidentally.
+
+***break-on-signals*** enables an early entry to the debugger but such an entry does not preclude an additional entry to the debugger in the case of operations such as **[[CL:Functions:error]]** and **[[CL:Functions:cerror]]**.
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY} \issue{BREAK-ON-WARNINGS-OBSOLETE:REMOVE}

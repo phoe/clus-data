@@ -1,0 +1,27 @@
+====== Restart STORE-VALUE ======
+
+====Data Arguments Required====
+a value to use instead (on an ongoing basis).
+
+====Description====
+The **store-value** //[[CL:Glossary:restart]]// is generally used by //[[CL:Glossary:handler|handlers]]// trying to recover from errors of //[[CL:Glossary:type|types]]// such as **[[CL:Types:cell-error]]** or **[[CL:Types:type-error]]**, which may wish to supply a replacement datum to be stored permanently.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defun]] type-error-auto-coerce (c)
+  ([[CL:Macros:when]] ([[CL:Functions:typep]] c '[[CL:Types:type-error]])
+    ([[CL:Special Operators:let]] ((r ([[CL:Functions:find-restart]] 'store-value c)))
+      ([[CL:Macros:handler-case]]
+          ([[CL:Special Operators:let]] ((v ([[CL:Functions:coerce]] (type-error-datum c) (type-error-expected-type c))))
+            ([[CL:Functions:invoke-restart]] r v))
+        ([[CL:Types:error]] ())))))
+
+([[CL:Special Operators:let]] ((x 3))
+  ([[CL:Macros:handler-bind]] (([[CL:Types:type-error]] #'type-error-auto-coerce))
+    ([[CL:Macros:check-type]] x [[CL:Types:float]]) x))
+  → 3.0
+</blockquote>
+
+====See Also====
+
+{\secref\Restarts}, {\secref\InterfacesToRestarts}, **[[CL:Functions:invoke-restart|Function INVOKE-RESTART]]**, **[[CL:Functions:store-value|Function STORE-VALUE]]**, **[[CL:Macros:ccase|Macro CCASE]]**, **[[CL:Macros:check-type|Macro CHECK-TYPE]]**, **[[CL:Macros:ctypecase|Macro CTYPECASE]]**, **[[CL:Functions:use-value|Function USE-VALUE]]**, **[[CL:Restarts:use-value|Restart USE-VALUE]]**

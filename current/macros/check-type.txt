@@ -1,0 +1,98 @@
+====== Macro CHECK-TYPE ======
+
+====Syntax====
+  * **check-type** //place typespec [string]// → //**[[CL:Constant Variables:nil]]**//
+
+====Arguments and Values====
+  * //place// - a //[[CL:Glossary:place]]//.
+  * //typespec// - a //[[CL:Glossary:type specifier]]//.
+  * //string// - a //[[CL:Glossary:string]]//; evaluated.
+
+====Description====
+**[[CL:Functions:check-type]]** signals a //[[CL:Glossary:correctable]]// //[[CL:Glossary:error]]// of type **[[CL:Types:type-error]]** if the contents of //place// are not of the type //typespec//.
+
+**check-type** can return only if the **[[CL:Restarts:store-value]]** //[[CL:Glossary:restart]]// is invoked, either explicitly from a handler or implicitly as one of the options offered by the debugger. If the **[[CL:Restarts:store-value]]** //[[CL:Glossary:restart]]// is invoked, **check-type** stores the new value that is the argument to the //[[CL:Glossary:restart]]// invocation (or that is prompted for interactively by the debugger) in //place// and starts over, checking the type of the new value and signaling another error if it is still not of the desired //[[CL:Glossary:type]]//.
+
+The first time //place// is //[[CL:Glossary:evaluate|evaluated]]//, it is //[[CL:Glossary:evaluate|evaluated]]// by normal evaluation rules. It is later //[[CL:Glossary:evaluate|evaluated]]// as a //[[CL:Glossary:place]]// if the type check fails and the **[[CL:Restarts:store-value]]** //[[CL:Glossary:restart]]// is used; see section {\secref\GenRefSubFormEval}.
+
+//[[CL:Glossary:string]]// should be an English description of the type, starting with an indefinite article ("a" or "an"). If //[[CL:Glossary:string]]// is not supplied, it is computed automatically from //typespec//. The automatically generated message mentions //place//, its contents, and the desired type. An implementation may choose to generate a somewhat differently worded error message if it recognizes that //place// is of a particular form, such as one of the arguments to the function that called **check-type**. //[[CL:Glossary:string]]// is allowed because some applications of **check-type** may require a more specific description of what is wanted than can be generated automatically from //typespec//.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:defparameter]] *aardvarks* '(sam harry fred))
+
+(check-type aardvarks ([[CL:Types:array]] [[CL:Types:wildcard|*]] (3)))
+▷ Error: The value of AARDVARKS, (SAM HARRY FRED),
+▷ is not a 3-long array.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Specify a value to use instead.
+▷ 2: Return to Lisp Toplevel.
+▷ Debug> :continue 1
+▷ Use Value: #(SAM FRED HARRY)
+  → [[CL:Constant Variables:nil|NIL]] 
+aardvarks → #<ARRAY-T-3 13571>
+
+([[CL:Functions:map]] '[[CL:Types:list]] #'[[CL:Functions:identity]] aardvarks) 
+  → (SAM FRED HARRY) 
+  
+([[CL:Macros:defparameter]] *aardvark-count* 'foo)
+(check-type aardvark-count ([[CL:Functions:integer]] 0 [[CL:Types:wildcard|*]]) "A positive integer")
+▷ Error: The value of AARDVARK-COUNT, FOO, is not a positive integer.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Specify a value to use instead.
+▷ 2: Top level.
+▷ Debug> :continue 2
+</blockquote>
+
+<blockquote> 
+([[CL:Macros:defmacro]] define-adder (name amount) 
+  (check-type name ([[CL:Types:and]] [[CL:Types:symbol]] ([[CL:Types:not]] [[CL:Types:null]])) "a name for an adder function") 
+  (check-type amount [[CL:Types:integer]]) 
+  `([[CL:Macros:defun]] ,name (x) ([[CL:Functions:math-add|+]] x ,amount)))
+
+([[CL:Functions:macroexpand]] '(define-adder add3 3)) → (DEFUN ADD3 (x) (+ X 3))
+
+([[CL:Functions:macroexpand]] '(define-adder 7 7))
+▷ Error: The value of NAME, 7, is not a name for an adder function.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Specify a value to use instead.
+▷ 2: Top level.
+▷ Debug> :continue 1
+▷ Specify a value to use instead.
+▷ Type a form to be evaluated and used instead: 'ADD7
+  → ([[CL:Macros:defun|DEFUN]] ADD7 (X) (+ X 7))
+
+([[CL:Functions:macroexpand]] '(define-adder add5 something))
+▷ Error: The value of AMOUNT, SOMETHING, is not an integer.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Specify a value to use instead.
+▷ 2: Top level.
+▷ Debug> continue 1
+▷ Type a form to be evaluated and used instead: 5
+  → ([[CL:Macros:defun|DEFUN]] ADD5 (X) (+ X 5))
+</blockquote>
+
+Control is transferred to a handler.
+
+====Side Effects====
+The debugger might be entered.
+
+====Affected By====
+**[[CL:Variables:break-on-signals*]]**
+
+The implementation.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+{\secref\ConditionSystemConcepts}
+
+====Notes====
+<blockquote>
+(check-type //place// //typespec//) 
+  ≡ (assert (typep //place// '//typespec//) 
+            (//place//) 'type-error :datum //place// 
+                                    :expected-type '//typespec//)
+</blockquote>
+

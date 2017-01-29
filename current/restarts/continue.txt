@@ -1,0 +1,23 @@
+====== Restart CONTINUE ======
+
+====Data Arguments Required====
+None.
+
+====Description====
+The **continue** //[[CL:Glossary:restart]]// is generally part of protocols where there is a single "obvious" way to continue, such as in **[[CL:Functions:break]]** and **[[CL:Functions:cerror]]**. Some user-defined protocols may also wish to incorporate it for similar reasons. In general, however, it is more reliable to design a special purpose restart with a name that more directly suits the particular application.
+
+====Examples====
+<blockquote>
+([[CL:Special Operators:let]] ((x 3))
+  ([[CL:Macros:handler-bind]] (([[CL:Types:error]] #'([[CL:Symbols:lambda]] (c) 
+                            ([[CL:Special Operators:let]] ((r ([[CL:Functions:find-restart]] 'continue c))) 
+                              ([[CL:Macros:when]] r ([[CL:Functions:invoke-restart]] r))))))
+    ([[CL:Macros:cond]] (([[CL:Functions:not]] ([[CL:Functions:floatp]] x))
+           ([[CL:Functions:cerror]] "Try floating it." "~D is not a float." x) ([[CL:Functions:float]] x))
+          (t x)))) 
+  → 3.0
+</blockquote>
+
+====See Also====
+\secref\Restarts, {\secref\InterfacesToRestarts}, **[[CL:Functions:invoke-restart|Function INVOKE-RESTART]]**, **[[CL:Functions:continue|Function CONTINUE]]**, **[[CL:Macros:assert|Macro ASSERT]]**, **[[CL:Functions:cerror|Function CERROR]]**
+

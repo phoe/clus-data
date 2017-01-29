@@ -1,0 +1,66 @@
+====== Macro RESTART-BIND ======
+
+====Syntax====
+  * **restart-bind** //({(name function {key-val-pair}''*'')}) form''*''// → //result//
+
+<blockquote>
+//key-val-pair// ::= **'':interactive-function''** //interactive-function// |
+                 **'':report-function''** report-function |
+                 **'':test-function''** test-function
+</blockquote>
+
+====Arguments and Values====
+  * //name// - a //[[CL:Glossary:symbol]]//; not evaluated.
+  * //function// - a //[[CL:Glossary:form]]//; evaluated.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //interactive-function// - a //[[CL:Glossary:form]]//; evaluated.
+  * //report-function// - a //[[CL:Glossary:form]]//; evaluated.
+  * //test-function// - a //[[CL:Glossary:form]]//; evaluated.
+  * //results// - the //[[CL:Glossary:values]]// returned by the //[[CL:Glossary:forms]]//.
+
+====Description====
+**restart-bind** executes the body of //forms// in a //[[CL:Glossary:dynamic environment]]// where //[[CL:Glossary:restart|restarts]]// with the given //names// are in effect.
+
+If a //name// is **[[CL:Constant Variables:nil]]**, it indicates an anonymous restart; if a //name// is a //[[CL:Glossary:non-nil]]// //[[CL:Glossary:symbol]]//, it indicates a named restart.
+
+The //function//, //interactive-function//, and //report-function// are unconditionally evaluated in the current lexical and dynamic environment prior to evaluation of the body. Each of these //[[CL:Glossary:forms]]// must evaluate to a //[[CL:Glossary:function]]//.
+
+If **[[CL:Functions:invoke-restart]]** is done on that restart, the //[[CL:Glossary:function]]// which resulted from evaluating //function// is called, in the //[[CL:Glossary:dynamic environment]]// of the **[[CL:Functions:invoke-restart]]**, with the //[[CL:Glossary:argument|arguments]]// given to **[[CL:Functions:invoke-restart]]**. The //[[CL:Glossary:function]]// may either perform a non-local transfer of control or may return normally.
+
+If the restart is invoked interactively from the debugger (using **[[CL:Functions:invoke-restart-interactively]]**), the arguments are defaulted by calling the //[[CL:Glossary:function]]// which resulted from evaluating //interactive-function//. That //[[CL:Glossary:function]]// may optionally prompt interactively on //[[CL:Glossary:query IO|query I/O]]//, and should return a //[[CL:Glossary:list]]// of arguments to be used by **[[CL:Functions:invoke-restart-interactively]]** when invoking the restart.
+
+If a restart is invoked interactively but no //interactive-function// is used, then an argument list of **[[CL:Constant Variables:nil]]** is used. In that case, the //[[CL:Glossary:function]]// must be compatible with an empty argument list.
+
+If the restart is presented interactively (e.g. by the debugger), the presentation is done by calling the //[[CL:Glossary:function]]// which resulted from evaluating //report-function//. This //[[CL:Glossary:function]]// must be a //[[CL:Glossary:function]]// of one argument, a //[[CL:Glossary:stream]]//. It is expected to print a description of the action that the restart takes to that //[[CL:Glossary:stream]]//. This //[[CL:Glossary:function]]// is called any time the restart is printed while **[[CL:Variables:star-print-escape-star|*print-escape*]]** is **[[CL:Constant Variables:nil]]**.
+
+In the case of interactive invocation, the result is dependent on the value of **'':interactive-function''** as follows.
+
+===**'':interactive-function''**===
+//value// is evaluated in the current lexical environment and should return a //[[CL:Glossary:function]]// of no arguments which constructs a //[[CL:Glossary:list]]// of arguments to be used by **[[CL:Functions:invoke-restart-interactively]]** when invoking this restart. The //[[CL:Glossary:function]]// may prompt interactively using //[[CL:Glossary:query I/O]]// if necessary.
+
+===**'':report-function''**===
+//value// is evaluated in the current lexical environment and should return a //[[CL:Glossary:function]]// of one argument, a //[[CL:Glossary:stream]]//, which prints on the //[[CL:Glossary:stream]]// a summary of the action that this restart takes. This //[[CL:Glossary:function]]// is called whenever the restart is reported (printed while **[[CL:Variables:star-print-escape-star|*print-escape*]]** is **[[CL:Constant Variables:nil]]**).
+
+If no **'':report-function''** option is provided, the manner in which the //[[CL:Glossary:restart]]// is reported is //[[CL:Glossary:implementation-dependent]]//.
+
+===**'':test-function''**===
+//value// is evaluated in the current lexical environment and should return a //[[CL:Glossary:function]]// of one argument, a //[[CL:Glossary:condition]]//, which returns //[[CL:Glossary:true]]// if the restart is to be considered visible.
+
+----
+
+====Side Effects====
+None.
+
+====Affected By====
+**[[CL:Variables:*query-io*]]**.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Macros:restart-case|Macro RESTART-CASE]]**, **[[CL:Macros:with-simple-restart|Macro WITH-SIMPLE-RESTART]]**
+
+====Notes====
+**restart-bind** is primarily intended to be used to implement **[[CL:Macros:restart-case]]** and might be useful in implementing other macros. Programmers who are uncertain about whether to use **[[CL:Macros:restart-case]]** or **restart-bind** should prefer **[[CL:Macros:restart-case]]** for the cases where it is powerful enough, using **restart-bind** only in cases where its full generality is really needed.
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
