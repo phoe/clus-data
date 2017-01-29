@@ -20,11 +20,11 @@ For example:
 <blockquote>
 ;; The binding of the parameter *mod* is visible to hack1, but not that of thing.
 ([[CL:Macros:defun]] hack (thing *mod*)
-  ([[CL:Special Operators:declare]] (special *mod*))
+  ([[CL:Symbols:declare]] (special *mod*))
   (hack1 ([[CL:Functions:car]] thing)))
    
 ([[CL:Macros:defun]] hack1 (arg)
-  ([[CL:Special Operators:declare]] (special *mod*))
+  ([[CL:Symbols:declare]] (special *mod*))
   ;; Declare references to *mod* within hack1 to be special.
   ([[CL:Special Operators:if]] ([[CL:Functions:atom]] arg)
       *mod*
@@ -53,10 +53,10 @@ the parameter ''x'' is bound as a dynamic variable rather than as a lexical vari
 ====Examples====
 <blockquote>
 ([[CL:Macros:defun]] declare-eg (y) ; This y is special.
-  ([[CL:Special Operators:declare]] (special y))
+  ([[CL:Symbols:declare]] (special y))
   ([[CL:Special Operators:let]] ((y [[CL:Constant Variables:t]])) ; This y is lexical.
     ([[CL:Functions:list]] y
-          ([[CL:Special Operators:locally]] ([[CL:Special Operators:declare]] (special y))
+          ([[CL:Special Operators:locally]] ([[CL:Symbols:declare]] (special y))
             y)))) ; This y refers to the special binding of y.
 (declare-eg [[CL:Constant Variables:nil]]) → ([[CL:Constant Variables:t|T]] [[CL:Constant Variables:nil|NIL]])
 </blockquote>
@@ -66,12 +66,12 @@ the parameter ''x'' is bound as a dynamic variable rather than as a lexical vari
 ([[CL:Macros:defun]] foo (x) ; A lexical binding of x.
   ([[CL:Functions:print]] x)
   ([[CL:Special Operators:let]] ((x ([[CL:Functions:math-one-plus|1+]] x))) ; A special binding of x.
-    ([[CL:Special Operators:declare]] (special x)) ; And a lexical reference.
+    ([[CL:Symbols:declare]] (special x)) ; And a lexical reference.
       (bar))
   ([[CL:Functions:math-one-plus|1+]] x))
 
 ([[CL:Macros:defun]] bar ()
-  ([[CL:Functions:print]] ([[CL:Special Operators:locally]] ([[CL:Special Operators:declare]] (special x))
+  ([[CL:Functions:print]] ([[CL:Special Operators:locally]] ([[CL:Symbols:declare]] (special x))
            x)))
 
 (foo 10)
@@ -84,14 +84,14 @@ the parameter ''x'' is bound as a dynamic variable rather than as a lexical vari
 ([[CL:Macros:defun]] bar (x y)  ; [1] 1st occurrence of x
   ([[CL:Special Operators:let]] ((old-x x) ; [2] 2nd occurrence of x -- same as 1st occurrence
         (x y))    ;[3] 3rd occurrence of x
-    ([[CL:Special Operators:declare]] (special x))
+    ([[CL:Symbols:declare]] (special x))
     ([[CL:Functions:list]] old-x x)))
 (bar 'first 'second) → (FIRST SECOND)
 </blockquote>
 
 <blockquote>
 ([[CL:Macros:defun]] few (x &optional (y *foo*))
-  ([[CL:Special Operators:declare]] (special *foo*)) 
+  ([[CL:Symbols:declare]] (special *foo*)) 
   ...)
 </blockquote>
 
@@ -110,12 +110,12 @@ The reference to ''*foo*'' in the first line of this example is not **special** 
 
 ([[CL:Macros:declaim]] (special x)) ;x is always special.
 ([[CL:Macros:defun]] example (x y)
-  ([[CL:Special Operators:declare]] (special y))
+  ([[CL:Symbols:declare]] (special y))
   ([[CL:Special Operators:let]] ((y 3) (x ([[CL:Functions:math-multiply|*]] x 2)))
-    ([[CL:Functions:print]] ([[CL:Functions:math-add|+]] y ([[CL:Special Operators:locally]] ([[CL:Special Operators:declare]] (special y)) 
+    ([[CL:Functions:print]] ([[CL:Functions:math-add|+]] y ([[CL:Special Operators:locally]] ([[CL:Symbols:declare]] (special y)) 
                   y)))
     ([[CL:Special Operators:let]] ((y 4))
-      ([[CL:Special Operators:declare]] (special y))
+      ([[CL:Symbols:declare]] (special y))
         (foo x))))
 </blockquote>
 

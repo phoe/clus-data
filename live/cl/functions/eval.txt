@@ -42,10 +42,26 @@ To obtain the current dynamic value of a //[[CL:Glossary:symbol]]//, use of **[[
 Note that an **eval** //[[CL:Glossary:form]]// involves two levels of //[[CL:Glossary:evaluation]]// for its //[[CL:Glossary:argument]]//. First, //form// is //[[CL:Glossary:evaluated]]// by the normal argument evaluation mechanism as would occur with any //[[CL:Glossary:call]]//. The //[[CL:Glossary:object]]// that results from this normal //[[CL:Glossary:argument]]// //[[CL:Glossary:evaluation]]// becomes the //[[CL:Glossary:value]]// of the //form// //[[CL:Glossary:parameter]]//, and is then //[[CL:Glossary:evaluated]]// as part of the **eval** //[[CL:Glossary:form]]//. For example:
 
 <blockquote>
-(eval (list 'cdr (car '((quote (a . b)) c)))) → b
+(eval ([[CL:Functions:list]] '[[CL:Functions:cdr]] ([[CL:Functions:car]] '(([[CL:Special Operators:quote]] (a . b)) c)))) → b
 </blockquote>
-The //[[CL:Glossary:argument]]// //[[CL:Glossary:form]]// ''(list 'cdr (car '((quote (a . b)) c)))'' is evaluated in the usual way to produce the //[[CL:Glossary:argument]]// ''(cdr (quote (a . b)))'';
 
-**eval** then evaluates its //[[CL:Glossary:argument]]//, ''(cdr (quote (a . b)))'', to produce ''b''. Since a single //[[CL:Glossary:evaluation]]// already occurs for any //[[CL:Glossary:argument]]// //[[CL:Glossary:form]]// in any //[[CL:Glossary:function form]]//, **eval** is sometimes said to perform "an extra level of evaluation."
+The //[[CL:Glossary:argument]]// //[[CL:Glossary:form]]//
+
+<blockquote>
+([[CL:Functions:list]] '[[CL:Functions:cdr]] ([[CL:Functions:car]] '(([[CL:Special Operators:quote]] (a . b)) c)))
+</blockquote>
+
+is evaluated in the usual way to produce the //[[CL:Glossary:argument]]//
+
+<blockquote>
+([[CL:Functions:cdr]] ([[CL:Special Operators:quote]] (a . b)))
+</blockquote>
+
+**eval** then evaluates its //[[CL:Glossary:argument]]//,
+
+<blockquote>
+([[CL:Functions:cdr]] ([[CL:Special Operators:quote]] (a . b)))
+</blockquote>
+to produce ''b''. Since a single //[[CL:Glossary:evaluation]]// already occurs for any //[[CL:Glossary:argument]]// //[[CL:Glossary:form]]// in any //[[CL:Glossary:function form]]//, **eval** is sometimes said to perform "an extra level of evaluation."
 
 \issue{QUOTE-SEMANTICS:NO-COPYING} \issue{EVALHOOK-STEP-CONFUSION:X3J13-NOV-89} \issue{EVALHOOK-STEP-CONFUSION:FIX}

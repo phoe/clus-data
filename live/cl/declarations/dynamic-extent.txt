@@ -30,7 +30,7 @@ Since stack allocation of the initial value entails knowing at the //[[CL:Glossa
 <blockquote>
 ([[CL:Macros:defun]] f ()
   ([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] 1 2 3)))
-    ([[CL:Special Operators:declare]] (dynamic-extent x)) 
+    ([[CL:Symbols:declare]] (dynamic-extent x)) 
     ...))
 </blockquote>
 
@@ -38,7 +38,7 @@ This would permit those compilers that wish to do so to //[[CL:Glossary:stack al
 
 <blockquote>
 ([[CL:Macros:defun]] g (x)
-  ([[CL:Special Operators:declare]] (dynamic-extent x)) 
+  ([[CL:Symbols:declare]] (dynamic-extent x)) 
   ...)
   
 ([[CL:Macros:defun]] f ()
@@ -52,14 +52,14 @@ Here is another example:
 <blockquote>
 ([[CL:Macros:declaim]] ([[CL:Declarations:inline]] g))
 ([[CL:Macros:defun]] g (x)
-  ([[CL:Special Operators:declare]] (dynamic-extent x)) 
+  ([[CL:Symbols:declare]] (dynamic-extent x)) 
   ...)
 ([[CL:Macros:defun]] f ()
   (g ([[CL:Functions:list]] 1 2 3)))
 
 ([[CL:Macros:defun]] f ()
   ([[CL:Special Operators:flet]] ((g (x)
-           ([[CL:Special Operators:declare]] (dynamic-extent x)) 
+           ([[CL:Symbols:declare]] (dynamic-extent x)) 
            ...))
     (g ([[CL:Functions:list]] 1 2 3))))
 </blockquote>
@@ -70,7 +70,7 @@ A variant of this is the so-called "stack allocated rest list" that can be achie
 
 <blockquote>
 ([[CL:Macros:defun]] f (&rest x)
-  ([[CL:Special Operators:declare]] (dynamic-extent x)) 
+  ([[CL:Symbols:declare]] (dynamic-extent x)) 
   ...)
 </blockquote>
 
@@ -81,7 +81,7 @@ In the following example,
 <blockquote>
 ([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] 'a1 'b1 'c1)) 
       (y ([[CL:Functions:cons]] 'a2 ([[CL:Functions:cons]] 'b2 ([[CL:Functions:cons]] 'c2 nil)))))
-  ([[CL:Special Operators:declare]] (dynamic-extent x y))
+  ([[CL:Symbols:declare]] (dynamic-extent x y))
   ...)
 </blockquote>
 
@@ -91,7 +91,7 @@ The //[[CL:Glossary:otherwise inaccessible part|otherwise inaccessible parts]]//
 ;;; In this example, the implementation is permitted to stack-allocate the list
 ;;; that is bound to X.
 ([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] 1 2 3)))
-  ([[CL:Special Operators:declare]] (dynamic-extent x))
+  ([[CL:Symbols:declare]] (dynamic-extent x))
   ([[CL:Functions:print]] x)
   :done)
 ▷ (1 2 3)
@@ -101,7 +101,7 @@ The //[[CL:Glossary:otherwise inaccessible part|otherwise inaccessible parts]]//
 ([[CL:Macros:defun]] zap (x y z)
   ([[CL:Macros:do]] ((l ([[CL:Functions:list]] x y z) (cdr l)))
       (([[CL:Functions:null]] l))
-    ([[CL:Special Operators:declare]] (dynamic-extent l))
+    ([[CL:Symbols:declare]] (dynamic-extent l))
     ([[CL:Functions:prin1]] ([[CL:Functions:car]] l)))) 
 (zap 1 2 3)
 ▷ 123
@@ -111,7 +111,7 @@ The //[[CL:Glossary:otherwise inaccessible part|otherwise inaccessible parts]]//
 ;;; using stack-allocation of the list to be bound to L. 
 ([[CL:Macros:do]] ((l ([[CL:Functions:list-all-packages]]) ([[CL:Functions:cdr]] l)))
     (([[CL:Functions:null]] l))
-  ([[CL:Special Operators:declare]] (dynamic-extent l))
+  ([[CL:Symbols:declare]] (dynamic-extent l))
   ([[CL:Special Operators:let]] ((name ([[CL:Functions:package-name]] ([[CL:Functions:car]] l))))
     ([[CL:Macros:when]] ([[CL:Functions:search]] "COMMON-LISP" name)
       ([[CL:Functions:print]] name))))
@@ -123,7 +123,7 @@ The //[[CL:Glossary:otherwise inaccessible part|otherwise inaccessible parts]]//
 ;;; A declaration such as the following should be a cue to such implementations 
 ;;; that stack-allocation of the rest list would be desirable.
 ([[CL:Macros:defun]] add (&rest x)
-  ([[CL:Special Operators:declare]] (dynamic-extent x))
+  ([[CL:Symbols:declare]] (dynamic-extent x))
   ([[CL:Functions:apply]] #'[[CL:Functions:math-add|+]] x))
 
 (add 1 2 3) → 6
@@ -132,9 +132,9 @@ The //[[CL:Glossary:otherwise inaccessible part|otherwise inaccessible parts]]//
   "Computes (RANDOM (+ M 1)) at relative speed of roughly O(N). It may be slow,
 but with a good compiler at least it doesn't waste much heap storage. :-}"
   ([[CL:Special Operators:let]] ((a ([[CL:Functions:make-array]] n)))
-    ([[CL:Special Operators:declare]] (dynamic-extent a))
+    ([[CL:Symbols:declare]] (dynamic-extent a))
     ([[CL:Macros:dotimes]] (i n)
-      ([[CL:Special Operators:declare]] (dynamic-extent i))
+      ([[CL:Symbols:declare]] (dynamic-extent i))
       ([[CL:Macros:setf]] ([[CL:Functions:aref]] a i) ([[CL:Functions:random]] ([[CL:Functions:math-one-plus|1+]] i))))
     ([[CL:Functions:aref]] a m)))
 
@@ -145,10 +145,10 @@ The following are in error, since the value of ''x'' is used outside of its //[[
 
 <blockquote>
 ([[CL:Functions:length]] ([[CL:Functions:list]] ([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] 1 2 3))) ; invalid 
-                ([[CL:Special Operators:declare]] (dynamic-extent x)) x)))
+                ([[CL:Symbols:declare]] (dynamic-extent x)) x)))
 
 ([[CL:Special Operators:progn]] ([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] 1 2 3))) ; invalid 
-         ([[CL:Special Operators:declare]] (dynamic-extent x)) x)
+         ([[CL:Symbols:declare]] (dynamic-extent x)) x)
   [[CL:Constant Variables:nil]])
 </blockquote>
 

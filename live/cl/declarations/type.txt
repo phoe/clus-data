@@ -43,15 +43,15 @@ A compiler can treat the code within the scope of the **[[CL:Types:array]]** typ
 ====Examples====
 <blockquote>
 ([[CL:Macros:defun]] f (x y)
-  ([[CL:Special Operators:declare]] (type [[CL:Types:fixnum]] x y))
+  ([[CL:Symbols:declare]] (type [[CL:Types:fixnum]] x y))
   ([[CL:Special Operators:let]] ((z ([[CL:Functions:math-add|+]] x y)))
-    ([[CL:Special Operators:declare]] (type [[CL:Types:fixnum]] z))
+    ([[CL:Symbols:declare]] (type [[CL:Types:fixnum]] z))
     z))
 (f 1 2) → 3 
 ;;; The previous definition of F is equivalent to 
 ([[CL:Macros:defun]] f (x y)
   ;; This declaration is a shorthand form of the TYPE declaration 
-  ([[CL:Special Operators:declare]] ([[CL:Types:fixnum]] x y)) 
+  ([[CL:Symbols:declare]] ([[CL:Types:fixnum]] x y)) 
   ;; To declare the type of a return value, it's not necessary to create a named variable.
   ;;; A THE special form can be used instead.
   ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y)))
@@ -65,12 +65,12 @@ A compiler can treat the code within the scope of the **[[CL:Types:array]]** typ
   ([[CL:Functions:make-array]] 10 :element-type '([[CL:Types:signed-byte]] 8)))
 
 ([[CL:Macros:defun]] frob (an-array)
-  ([[CL:Special Operators:declare]] (type ([[CL:Types:array]] ([[CL:Types:signed-byte]] 5) 1) an-array))
+  ([[CL:Symbols:declare]] (type ([[CL:Types:array]] ([[CL:Types:signed-byte]] 5) 1) an-array))
   ([[CL:Macros:setf]] ([[CL:Functions:aref]] an-array 1) 31)
   ([[CL:Macros:setf]] ([[CL:Functions:aref]] an-array 2) 127)
   ([[CL:Macros:setf]] ([[CL:Functions:aref]] an-array 3) ([[CL:Functions:math-multiply|*]] 2 ([[CL:Functions:aref]] an-array 3)))
   ([[CL:Special Operators:let]] ((foo 0))
-    ([[CL:Special Operators:declare]] (type ([[CL:Types:signed-byte]] 5) foo))
+    ([[CL:Symbols:declare]] (type ([[CL:Types:signed-byte]] 5) foo))
     ([[CL:Macros:setf]] foo ([[CL:Functions:aref]] an-array 0))))
 
 (frob *one-array*)
@@ -86,7 +86,7 @@ The above definition of ''frob'' is equivalent to:
   ([[CL:Macros:setf]] ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 3)) 
                       ([[CL:Functions:math-multiply|*]] 2 ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 3))))
   ([[CL:Special Operators:let]] ((foo 0))
-  ([[CL:Special Operators:declare]] (type ([[CL:Types:signed-byte]] 5) foo))
+  ([[CL:Symbols:declare]] (type ([[CL:Types:signed-byte]] 5) foo))
   ([[CL:Macros:setf]] foo ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 0)))))
 </blockquote>
 
@@ -94,7 +94,7 @@ Given an implementation in which //[[CL:Glossary:fixnum|fixnums]]// are 29 bits 
 
 <blockquote>
 ([[CL:Macros:defun]] bump-counters (counters)
-  ([[CL:Special Operators:declare]] (type ([[CL:Types:array]] [[CL:Types:fixnum]] [[CL:Types:wildcard|*]]) bump-counters))
+  ([[CL:Symbols:declare]] (type ([[CL:Types:array]] [[CL:Types:fixnum]] [[CL:Types:wildcard|*]]) bump-counters))
   ([[CL:Macros:dotimes]] (i ([[CL:Functions:length]] counters))
     ([[CL:Macros:incf]] ([[CL:Functions:aref]] counters i))))
 </blockquote>
@@ -109,7 +109,7 @@ A **type** declaration for the arguments to a function does not necessarily impl
 
 <blockquote>
 ([[CL:Macros:defun]] f (x y)
-  ([[CL:Special Operators:declare]] ([[CL:Types:fixnum]] x y))
+  ([[CL:Symbols:declare]] ([[CL:Types:fixnum]] x y))
   ([[CL:Functions:math-add|+]] x y))
 </blockquote>
 
@@ -117,7 +117,7 @@ To see why, consider ''(f [[CL:Constant Variables:most-positive-fixnum]] 1)''. C
 
 <blockquote>
 ([[CL:Macros:defun]] f (x y)
-  ([[CL:Special Operators:declare]] ([[CL:Types:fixnum]] x y))
+  ([[CL:Symbols:declare]] ([[CL:Types:fixnum]] x y))
   ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y)))
 </blockquote>
 
@@ -125,7 +125,7 @@ Note, however, that in the three-argument case, because of the possibility of an
 
 <blockquote>
 ([[CL:Macros:defun]] f (x y)
-  ([[CL:Special Operators:declare]] ([[CL:Types:fixnum]] x y z))
+  ([[CL:Symbols:declare]] ([[CL:Types:fixnum]] x y z))
   ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y z)))
 </blockquote>
 
@@ -133,7 +133,7 @@ To see why, consider ''(f [[CL:Constant Variables:most-positive-fixnum]] 1 -1).'
 
 <blockquote>
 ([[CL:Macros:defun]] f (x y)
-  ([[CL:Special Operators:declare]] ([[CL:Types:fixnum]] x y z))
+  ([[CL:Symbols:declare]] ([[CL:Types:fixnum]] x y z))
   ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y)) z)))
 </blockquote>
 

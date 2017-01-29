@@ -1,8 +1,7 @@
 ====== Special Operator EVAL-WHEN ======
 
 ====Syntax====
-
-  * **eval-when** {\paren{\starparam{situation}} \starparam{form}} {\starparam{result}}
+  * **eval-when** //(situation''*'') form''*''// → //result''*''//
 
 ====Arguments and Values====
   * //situation// - One of the //[[CL:Glossary:symbols]]// **'':compile-toplevel''**, **'':load-toplevel''**, **'':execute''**, **''compile''**, **''load''**, or **''eval''**. 
@@ -12,7 +11,6 @@
 The use of **''eval''**, **''compile''**, and **''load''** is deprecated.
 
 ====Description====
-
 The body of an **eval-when** form is processed as an //[[CL:Glossary:implicit progn]]//, but only in the //situations// listed.
 
 The use of the //situations// **'':compile-toplevel''** (or **''compile''**) and **'':load-toplevel''** (or **''load''**) controls whether and when //[[CL:Glossary:evaluation]]// occurs when **eval-when** appears as a //[[CL:Glossary:top level form]]// in code processed by **[[CL:Functions:compile-file]]**; see section {\secref\FileCompilation}.
@@ -28,29 +26,33 @@ One example of the use of **eval-when** is that for the compiler to be able to r
 (eval-when (:compile-toplevel :load-toplevel :execute)
   ([[CL:Macros:set-macro-character]] #\$ 
     #'([[CL:Symbol:lambda]] (stream char)
-        ([[CL:Special Operators:declare]] ([[CL:Declarations:ignore]] char))
+        ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] char))
         ([[CL:Functions:list]] 'dollar ([[CL:Functions:read]] stream)))))
 </blockquote>
 
 This causes the call to **[[CL:Functions:set-macro-character]]** to be executed in the compiler's execution environment, thereby modifying its reader syntax table.
 
 <blockquote>
-;;; The EVAL-WHEN in this case is not at toplevel, so only the :EXECUTE keyword is considered.
-;;; At compile time, this has no effect. At load time (if the LET is at toplevel), or at execution
-;;; time (if the LET is embedded in some other form which does not execute until later) this sets 
-;;; (SYMBOL-FUNCTION 'FOO1) to a function which returns 1.
+;;; The EVAL-WHEN in this case is not at toplevel, so only the 
+;;; :EXECUTE keyword is considered. At compile time, this has no 
+;;; effect. At load time (if the LET is at toplevel), or at execution
+;;; time (if the LET is embedded in some other form which does not 
+;;; execute until later) this sets (SYMBOL-FUNCTION 'FOO1) to a function 
+;;; which returns 1.
 ([[CL:Special Operators:let]] ((x 1))
   (eval-when (:execute :load-toplevel :compile-toplevel)
     ([[CL:Macros:setf]] ([[CL:Function:symbol-function]] 'foo1) #'([[CL:Symbol:lambda]] () x))))
 
-;;; If this expression occurs at the toplevel of a file to be compiled, it has BOTH a compile time 
-;;; AND a load-time effect of setting (SYMBOL-FUNCTION 'FOO2) to a function which returns 2. 
+;;; If this expression occurs at the toplevel of a file to be compiled, 
+;;; it has BOTH a compile time AND a load-time effect of setting 
+;;; (SYMBOL-FUNCTION 'FOO2) to a function which returns 2. 
 (eval-when (:execute :load-toplevel :compile-toplevel)
   ([[CL:Special Operators:let]] ((x 2)) (eval-when (:execute :load-toplevel :compile-toplevel)
     ([[CL:Macros:setf]] ([[CL:Function:symbol-function]] 'foo2) #'([[CL:Symbol:lambda]] () x)))))
 
-;;; If this expression occurs at the toplevel of a file to be compiled, it has BOTH a compile time 
-;;; AND a load-time effect of setting the function cell of FOO3 to a function which returns 3.
+;;; If this expression occurs at the toplevel of a file to be compiled,
+;;; it has BOTH a compile time AND a load-time effect of setting the 
+;;; function cell of FOO3 to a function which returns 3.
 (eval-when (:execute :load-toplevel :compile-toplevel)
   ([[CL:Macros:setf]] ([[CL:Function:symbol-function]] 'foo3) #'([[CL:Symbol:lambda]] () 3)))
 
@@ -59,16 +61,18 @@ This causes the call to **[[CL:Functions:set-macro-character]]** to be executed 
   (eval-when (:compile-toplevel)
     ([[CL:Functions:print]] 'foo4)))
 
-;;; If this form occurs at toplevel of a file to be compiled, FOO5 is printed at compile time. 
-;;; If this form occurs in a non-top-level position, nothing is printed at compile time. 
-;;; Regardless of context, nothing is ever printed at load time or execution time.
+;;; If this form occurs at toplevel of a file to be compiled, FOO5 
+;;; is printed at compile time. If this form occurs in a non-top-level
+;;; position, nothing is printed at compile time. Regardless of context, 
+;;; nothing is ever printed at load time or execution time.
 (eval-when (:compile-toplevel)
   (eval-when (:execute) 
     ([[CL:Functions:print]] 'foo5)))
 
-;;; If this form occurs at toplevel of a file to be compiled, FOO6 is printed at compile time.
-;;; If this form occurs in a non-top-level ;;; position, nothing is printed at compile time. 
-;;; Regardless of context, ;;; nothing is ever printed at load time or execution time.
+;;; If this form occurs at toplevel of a file to be compiled, FOO6 is 
+;;; printed at compile time. If this form occurs in a non-top-level 
+;;; position, nothing is printed at compile time. Regardless of context,
+;;; nothing is ever printed at load time or execution time.
 (eval-when (:execute :load-toplevel)
   (eval-when (:compile-toplevel)
     ([[CL:Functions:print]] 'foo6)))

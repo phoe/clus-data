@@ -30,38 +30,42 @@ Their //[[CL:Glossary:values]]// may not be coalescedunless //read-only-p// is *
 
 ====Examples====
 <blockquote>
-;;; The function INCR1 always returns the same value, even in different images.
-;;;  The function INCR2 always returns the same value in a given image, but the value it returns
-;;; might vary from image to image.
+;;; The function INCR1 always returns the same value, even in different
+;;; images. The function INCR2 always returns the same value in a given 
+;;; image, but the value it returns might vary from image to image.
 ([[CL:Macros:defun]] incr1 (x) ([[CL:Functions:math-add|+]] x #.([[CL:Functions:random]] 17)))
 ([[CL:Macros:defun]] incr2 (x) ([[CL:Functions:math-add|+]] x (load-time-value ([[CL:Functions:random]] 17))))
 
-;;; The function FOO1-REF references the nth element of the first of the *FOO-ARRAYS* that is 
-;;; available at load time. It is permissible for that array to be modified (e.g., by SET-FOO1-REF);
-;;; FOO1-REF will see the ;;; updated values.
+;;; The function FOO1-REF references the nth element of the first of the 
+;;; *FOO-ARRAYS* that is available at load time. It is permissible for that
+;;; array to be modified (e.g., by SET-FOO1-REF); FOO1-REF will see the updated
+;;; values.
 ([[CL:Macros:defvar]] *foo-arrays* ([[CL:Functions:list]] ([[CL:Functions:make-array]] 7) ([[CL:Functions:make-array]] 8)))
 ([[CL:Macros:defun]] foo1-ref (n)
   ([[Cl:Functions:aref]] (load-time-value ([[CL:Functions:first]] *my-arrays*) [[CL:Constant Variables:nil]]) n))
 ([[CL:Macros:defun]] set-foo1-ref (n val)
-  ([[CL:Macros:setf]] ([[Cl:Functions:aref]] (load-time-value ([[CL:Functions:first]] *my-arrays*) [CL:Constant Variables:nil]]) n) val))
+  ([[CL:Macros:setf]] ([[Cl:Functions:aref]] (load-time-value ([[CL:Functions:first]] *my-arrays*) [[CL:Constant Variables:nil]]) n) val))
 
-;;; The function BAR1-REF references the nth element of the first of the *BAR-ARRAYS* that is 
-;;; available at load time. The programmer has promised that the array will be treated as read-only,
-;;; so the system can copy or coalesce the array.
+;;; The function BAR1-REF references the nth element of the first of the 
+;;; *BAR-ARRAYS* that is available at load time. The programmer has promised
+;;; that the array will be treated as read-only, so the system can copy or 
+;;; coalesce the array.
 ([[CL:Macros:defvar]] *bar-arrays* ([[CL:Functions:list]] ([[CL:Functions:make-array]] 7) ([[CL:Functions:make-array]] 8)))
 ([[CL:Macros:defun]] bar1-ref (n)
   ([[Cl:Functions:aref]] (load-time-value ([[CL:Functions:first]] *my-arrays*) [[CL:Constant Variables:t]]) n))
 
-;;; This use of LOAD-TIME-VALUE permits the indicated vector to be coalesced even though NIL was 
-;;; specified, because the object was already read-only when it was written as a literal vector 
-;;; rather than created by a constructor. User programs must treat the vector v as read-only.
+;;; This use of LOAD-TIME-VALUE permits the indicated vector to be coalesced
+;;; even though NIL was specified, because the object was already read-only 
+;;; when it was written as a literal vector rather than created by a 
+;;; constructor. User programs must treat the vector v as read-only.
 ([[CL:Macros:defun]] baz-ref (n)
   ([[CL:Special Operators:let]] ((v (load-time-value #(A B C) [[CL:Constant Variables:nil]])))
     ([[CL:Functions:values]] ([[CL:Functions:svref]] v n) v)))
 
-;;; This use of LOAD-TIME-VALUE permits the indicated vector to be coalesced even though NIL was
-;;; specified in the outer situation because T was specified in the inner situation. User programs
-;;; must treat the vector v as read-only.
+;;; This use of LOAD-TIME-VALUE permits the indicated vector to be coalesced 
+;;; even though NIL was specified in the outer situation because T was 
+;;; specified in the inner situation. User programs must treat the vector v as
+;;; read-only.
 ([[CL:Macros:defun]] baz-ref (n)
   ([[CL:Special Operators:let]] ((v (load-time-value (load-time-value ([[CL:Functions:vector]] 1 2 3) [[CL:Constant Variables:t]]) [[CL:Constant Variables:nil]])))
     ([[CL:Functions:values]] ([[CL:Functions:svref]] v n) v)))
