@@ -1,0 +1,58 @@
+====== Function COMPILE ======
+
+====Syntax====
+  * **compile //name ''&optional'' definition// → //function, warnings-p, failure-p//
+
+====Arguments and Values====
+  * //name// - a //[[CL:Glossary:function name]]//, or **[[CL:Constant Variables:nil]]**.
+  * //definition// - a //[[CL:Glossary:lambda expression]]// or a //[[CL:Glossary:function]]//. The default is the function definition of //name// if it names a //[[CL:Glossary:function]]//, or the //[[CL:Glossary:macro function]]// of //name// if it names a //[[CL:Glossary:macro]]//. The consequences are undefined if no //definition// is supplied when the //name// is **[[CL:Constant Variables:nil]]**.
+  * //function// - the //function-name//, or a //[[CL:Glossary:compiled function]]//.
+  * //warnings-p// - a //[[CL:Glossary:generalized boolean]]//.
+  * //failure-p// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+Compiles an //[[CL:Glossary:interpreted function]]//.
+
+**[[CL:Functions:compile]]** produces a //[[CL:Glossary:compiled function]]// from //definition//. If the //definition// is a //[[CL:Glossary:lambda expression]]//, it is coerced to a //[[CL:Glossary:function]]//.
+
+If the //definition// is already a //[[CL:Glossary:compiled function]]//, **[[CL:Functions:compile]]** either produces that function itself (i.e. is an identity operation) or an equivalent function.
+
+If the //name// is **[[CL:Constant Variables:nil]]**, the resulting //[[CL:Glossary:compiled function]]// is returned directly as the //[[CL:Glossary:primary value]]//. If a //[[CL:Glossary:non-nil]]// //name// is given, then the resulting //[[CL:Glossary:compiled function]]// replaces the existing //[[CL:Glossary:function]]// definition of //name// and the //name// is returned as the //[[CL:Glossary:primary value]]//; if //name// is a //[[CL:Glossary:symbol]]// that names a //[[CL:Glossary:macro]]//, its //[[CL:Glossary:macro function]]// is updated and the //name// is returned as the //[[CL:Glossary:primary value]]//.
+
+//[[CL:Glossary:literal object|Literal objects]]// appearing in code processed by the **[[CL:Functions:compile]]** function are neither copied nor //[[CL:Glossary:coalesce|coalesced]]//. The code resulting from the execution of **[[CL:Functions:compile]]** references //[[CL:Glossary:object|objects]]// that are **[[CL:Functions:eql]]** to the corresponding //[[CL:Glossary:object|objects]]// in the source code.
+
+**[[CL:Functions:compile]]** is permitted, but not required, to //[[CL:Glossary:establish]]// a //[[CL:Glossary:handler]]// for //[[CL:Glossary:condition|conditions]]// of type **[[CL:Types:error]]**. For example, the //[[CL:Glossary:handler]]// might issue a warning and restart compilation from some //[[CL:Glossary:implementation-dependent]]// point in order to let the compilation proceed without manual intervention.
+
+The //[[CL:Glossary:secondary value]]//, //warnings-p//, is //[[CL:Glossary:false]]// if no //[[CL:Glossary:condition|conditions]]// of type **[[CL:Types:error]]** or **[[CL:Types:warning]]** were detected by the compiler, and //[[CL:Glossary:true]]// otherwise.
+
+The //[[CL:Glossary:tertiary value]]//, //failure-p//, is //[[CL:Glossary:false]]// if no //[[CL:Glossary:condition|conditions]]// of type **[[CL:Types:error]]** or **[[CL:Types:warning]]** (other than **[[CL:Types:style-warning]]**) were detected by the compiler, and //[[CL:Glossary:true]]// otherwise.
+
+====Examples====
+<blockquote>
+(defun foo () "bar")
+(compiled-function-p #'foo) → //[[CL:Glossary:implementation-dependent]]//
+(compile 'foo)
+(compiled-function-p #'foo) → //[[CL:Glossary:true]]//
+([[CL:Macros:setf]] (symbol-function 'foo) (compile nil '(lambda () "replaced")))
+(foo) → "replaced"
+</blockquote>
+
+====Affected By====
+**[[CL:Variables:*error-output*]]**,
+
+**[[CL:Variables:*macroexpand-hook*]]**.
+
+The presence of macro definitions and proclamations.
+
+====Exceptional Situations====
+The consequences are undefined if the //[[CL:Glossary:lexical environment]]// surrounding the //[[CL:Glossary:function]]// to be compiled contains any //[[CL:Glossary:binding|bindings]]// other than those for //[[CL:Glossary:macro|macros]]//, //[[CL:Glossary:symbol macro|symbol macros]]//, or //[[CL:Glossary:declaration|declarations]]//.
+
+For information about errors detected during the compilation process, see section {\secref\FileCompilerExceptions}.
+
+====See Also====
+**[[CL:Functions:compile-file|Function COMPILE-FILE]]**
+
+====Notes====
+None.
+
+\issue{QUOTE-SEMANTICS:NO-COPYING} \issue{COMPILER-DIAGNOSTICS:USE-HANDLER} \issue{COMPILER-WARNING-STREAM} \issue{COMPILE-ARGUMENT-PROBLEMS-AGAIN:FIX} \issue{FUNCTION-NAME:LARGE} \issue{COMPILED-FUNCTION-REQUIREMENTS:TIGHTEN} \issue{COMPILE-ARGUMENT-PROBLEMS-AGAIN:FIX}

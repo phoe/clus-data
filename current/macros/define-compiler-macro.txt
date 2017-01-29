@@ -1,0 +1,146 @@
+====== Macro DEFINE-COMPILER-MACRO ======
+
+====Syntax====
+  * define-compiler-macro //name lambda-list <nowiki>[[</nowiki>declaration''*'' | documentation<nowiki>]]</nowiki> form''*''// → //name//
+
+====Arguments and Values====
+  * //name// - a //[[CL:Glossary:function name]]//.
+  * //lambda-list// - a //[[CL:Glossary:macro lambda list]]//.
+  * //declaration// - a **[[CL:Special Operators:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //documentation// - a //[[CL:Glossary:string]]//; not evaluated.
+  * //form// - a //[[CL:Glossary:form]]//.
+
+====Description====
+This is the normal mechanism for defining a //[[CL:Glossary:compiler macro function]]//. Its manner of definition is the same as for **[[CL:Macros:defmacro]]**; the only differences are:
+
+  * The //name// can be a //[[CL:Glossary:function name]]// naming any //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]//.
+  * The expander function is installed as a //[[CL:Glossary:compiler macro function]]// for the //name//, rather than as a //[[CL:Glossary:macro function]]//.
+  * The ''&whole'' argument is bound to the form argument that is passed to the //[[CL:Glossary:compiler macro function]]//. The remaining lambda-list parameters are specified as if this form contained the function name in the //[[CL:Glossary:car]]// and the actual arguments in the //[[CL:Glossary:cdr]]//, but if the //[[CL:Glossary:car]]// of the actual form is the symbol **[[CL:Functions:funcall]]**, then the destructuring of the arguments is actually performed using its //[[CL:Glossary:cddr]]// instead.
+  * //Documentation// is attached as a //[[CL:Glossary:documentation string]]// to //name// (as kind **compiler-macro**) and to the //[[CL:Glossary:compiler macro function]]//.
+  * Unlike an ordinary //[[CL:Glossary:macro]]//, a //[[CL:Glossary:compiler macro]]// can decline to provide an expansion merely by returning a form that is the //[[CL:Glossary:same]]// as the original (which can be obtained by using ''&whole'').
+
+====Examples====
+
+<blockquote>
+([[CL:Macros:defun]] square (x) ([[CL:Functions:expt]] x 2))
+
+(define-compiler-macro square (&whole form arg)
+  ([[CL:Special Operators:if]] ([[CL:Functions:atom]] arg)
+      `([[CL:Functions:expt]] ,arg 2)
+      ([[CL:Macros:case]] ([[CL:Functions:car]] arg)
+        (square ([[CL:Special Operators:if]] ([[CL:Functions:math-equal|=]] ([[CL:Functions:length]] arg) 2)
+                    `([[CL:Functions:expt]] ,([[CL:Functions:nth]] 1 arg) 4)
+                    form))
+        ([[CL:Functions:expt]] ([[CL:Special Operators:if]] ([[CL:Functions:math-equal|=]] ([[CL:Functions:length]] arg) 3)
+                  ([[CL:Special Operators:if]] ([[CL:Functions:numberp]] ([[CL:Functions:nth]] 2 arg)) 
+                      `([[CL:Functions:expt]] ,([[CL:Functions:nth]] 1 arg) ,(* 2 ([[CL:Functions:nth]] 2 arg))) 
+                      `([[CL:Functions:expt]] ,([[CL:Functions:nth]] 1 arg) (* 2 ,([[CL:Functions:nth]] 2 arg))))
+                  form))
+        (otherwise `([[CL:Functions:expt]] ,arg 2)))))
+
+(square (square 3)) → 81
+
+([[CL:Functions:macroexpand]] '(square x)) → (SQUARE X), //[[CL:Glossary:false]]//
+
+([[CL:Functions:funcall]] ([[CL:Functions:compiler-macro-function]] 'square)
+         '(square x) [[CL:Constant Variables:nil]])
+  → ([[CL:Functions:expt|EXPT]] X 2)
+  
+([[CL:Functions:funcall]] ([[CL:Functions:compiler-macro-function]] 'square) 
+         '(square (square x)) [[CL:Constant Variables:nil]])
+  → ([[CL:Functions:expt|EXPT]] X 4)
+  
+([[CL:Functions:funcall]] ([[CL:Functions:compiler-macro-function]] 'square) 
+         '([[CL:Functions:funcall]] #'square x) [[CL:Constant Variables:nil]])
+  → ([[CL:Functions:expt|EXPT]] X 2)
+</blockquote>
+
+<blockquote>
+([[CL:Macros:defun]] distance-positional (x1 y1 x2 y2)
+  ([[CL:Functions:sqrt]] ([[CL:Functions:math-add|+]] ([[CL:Functions:expt]] ([[CL:Functions:math-subtract|-]] x2 x1) 2) ([[CL:Functions:expt]] ([[CL:Functions:math-subtract|-]] y2 y1) 2))))
+  
+([[CL:Macros:defun]] distance (&key (x1 0) (y1 0) (x2 x1) (y2 y1))
+  (distance-positional x1 y1 x2 y2))
+  
+(define-compiler-macro distance (&whole form
+                                 &rest key-value-pairs
+                                 &key (x1 0 x1-p)
+                                      (y1 0 y1-p) 
+                                      (x2 x1 x2-p) 
+                                      (y2 y1 y2-p) 
+                                 &allow-other-keys 
+                                 &environment env)
+  (flet ((key (n) ([[CL:Functions:nth]] ([[CL:Functions:math-multiply|*]] n 2) key-value-pairs))
+         (arg (n) ([[CL:Functions:nth]] ([[CL:Functions:math-one-plus|1+]] ([[CL:Functions:math-multiply|*]] n 2)) key-value-pairs))
+         (simplep (x) 
+           ([[CL:Special Operators:let]] ((expanded-x ([[CL:Functions:macroexpand]] x env)))
+             ([[CL:Macros:or]] ([[CL:Functions:constantp]] expanded-x env)
+                 ([[CL:Functions:symbolp]] expanded-x)))))
+    ([[CL:Special Operators:let]] ((n ([[CL:Functions:math-divide|/]] ([[CL:Functions:length]] key-value-pairs) 2)))
+      ([[CL:Macros:multiple-value-bind]] (x1s y1s x2s y2s others) 
+          ([[CL:Macros:loop]] for (key) on key-value-pairs by #'[[CL:Functions:cddr]]
+                count ([[CL:Functions:eq]] key ':x1) into x1s 
+                count ([[CL:Functions:eq]] key ':y1) into y1s 
+                count ([[CL:Functions:eq]] key ':x2) into x2s 
+                count ([[CL:Functions:eq]] key ':y1) into y2s 
+                count ([[CL:Functions:not]] ([[CL:Functions:member]] key '(:x1 :x2 :y1 :y2))) 
+                  into others 
+                finally ([[CL:Macros:return]] ([[CL:Functions:values]] x1s y1s x2s y2s others)))
+        ([[CL:Macros:cond]] (([[CL:Macros:and]] ([[CL:Functions:math-equal|=]] n 4) 
+                    ([[CL:Functions:eq]] (key 0) :x1)
+                    ([[CL:Functions:eq]] (key 1) :y1) 
+                    ([[CL:Functions:eq]] (key 2) :x2) 
+                    ([[CL:Functions:eq]] (key 3) :y2))
+               `(distance-positional ,x1 ,y1 ,x2 ,y2))
+              (([[CL:Macros:and]] ([[CL:Special Operators:if]] x1-p ([[CL:Macros:and]] ([[CL:Functions:math-equal|=]] x1s 1) (simplep x1)) [[CL:Constant Variables:t]]) 
+                    ([[CL:Special Operators:if]] y1-p ([[CL:Macros:and]] ([[CL:Functions:math-equal|=]] y1s 1) (simplep y1)) [[CL:Constant Variables:t]])
+                    ([[CL:Special Operators:if]] x2-p ([[CL:Macros:and]] ([[CL:Functions:math-equal|=]] x2s 1) (simplep x2)) [[CL:Constant Variables:t]])
+                    ([[CL:Special Operators:if]] y2-p ([[CL:Macros:and]] ([[CL:Functions:math-equal|=]] y2s 1) (simplep y2)) [[CL:Constant Variables:t]])
+                    ([[CL:Functions:zerop]] others))
+               `(distance-positional ,x1 ,y1 ,x2 ,y2))
+              (([[CL:Macros:and]] ([[CL:Functions:math-less|<]] x1s 2) ([[CL:Functions:math-less|<]] y1s 2) ([[CL:Functions:math-less|<]] x2s 2) ([[CL:Functions:math-less|<]] y2s 2)
+                    ([[CL:Functions:zerop]] others))
+               ([[CL:Special Operators:let]] ((temps ([[CL:Macros:loop]] repeat n collect ([[CL:Functions:gensym]]))))
+                 `([[CL:Special Operators:let]] ,([[CL:Macros:loop]] for i below n 
+                              collect ([[CL:Functions:list]] ([[CL:Functions:nth]] i temps) (arg i)))
+                    (distance ,@([[CL:Macros:loop]] for i below n 
+                                      append ([[CL:Functions:list]] (key i) ([[CL:Functions:nth]] i temps)))))))
+              ([[CL:Constant Variables:t]] form))))))
+              
+([[CL:Macros:dolist]] (form 
+          '((distance :x1 ([[CL:Macros:setf]] x 7) :x2 ([[CL:Macros:decf]] x) :y1 ([[CL:Macros:decf]] x) :y2 ([[CL:Macros:decf]] x))
+            (distance :x1 ([[CL:Macros:setf]] x 7) :y1 ([[CL:Macros:decf]] x) :x2 ([[CL:Macros:decf]] x) :y2 ([[CL:Macros:decf]] x))
+            (distance :x1 ([[CL:Macros:setf]] x 7) :y1 ([[CL:Macros:incf]] x))
+            (distance :x1 ([[CL:Macros:setf]] x 7) :y1 ([[CL:Macros:incf]] x) :x1 ([[CL:Macros:incf]] x))
+            (distance :x1 a1 :y1 b1 :x2 a2 :y2 b2)
+            (distance :x1 a1 :x2 a2 :y1 b1 :y2 b2)
+            (distance :x1 a1 :y1 b1 :z1 c1 :x2 a2 :y2 b2 :z2 c2)))
+  ([[CL:Functions:print]] ([[CL:Functions:funcall]] ([[CL:Functions:compiler-macro-function]] 'distance) form [[CL:Constant Variables:nil]])))
+▷ ([[CL:Special Operators:let|LET]] ((#:G6558 ([[CL:Macros:setf|SETF]] X 7))
+▷       (#:G6559 ([[CL:Macros:decf|DECF]] X))
+▷       (#:G6560 ([[CL:Macros:decf|DECF]] X))
+▷       (#:G6561 ([[CL:Macros:decf|DECF]] X)))
+▷ (DISTANCE :X1 #:G6558 :X2 #:G6559 :Y1 #:G6560 :Y2 #:G6561))
+▷ (DISTANCE-POSITIONAL ([[CL:Macros:setf|SETF]] X 7) ([[CL:Macros:decf|DECF]] X) ([[CL:Macros:decf|DECF]] X) ([[CL:Macros:decf|DECF]] X))
+▷ ([[CL:Special Operators:let|LET]] ((#:G6567 ([[CL:Macros:setf|SETF]] X 7))
+▷       (#:G6568 ([[CL:Macros:incf|INCF]] X)))
+▷   (DISTANCE :X1 #:G6567 :Y1 #:G6568))
+▷ (DISTANCE :X1 ([[CL:Macros:setf|SETF]] X 7) :Y1 ([[CL:Macros:incf|INCF]] X) :X1 ([[CL:Macros:incf|INCF]] X))
+▷ (DISTANCE-POSITIONAL A1 B1 A2 B2)
+▷ (DISTANCE-POSITIONAL A1 B1 A2 B2)
+▷ (DISTANCE :X1 A1 :Y1 B1 :Z1 C1 :X2 A2 :Y2 B2 :Z2 C2)
+  → [[CL:Constant Variables:nil|NIL]] </blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Functions:compiler-macro-function|Function COMPILER-MACRO-FUNCTION]]**, **[[CL:Macros:defmacro|Macro DEFMACRO]]**, **[[CL:Functions:documentation|Generic Function DOCUMENTATION]]**, {\secref\DocVsDecls}
+
+====Notes====
+The consequences of writing a //[[CL:Glossary:compiler macro]]// definition for a function in the ''COMMON-LISP'' //[[CL:Glossary:package]]// are undefined; it is quite possible that in some //[[CL:Glossary:implementation|implementations]]// such an attempt would override an equivalent or equally important definition. In general, it is recommended that a programmer only write //[[CL:Glossary:compiler macro]]// definitions for //[[CL:Glossary:function|functions]]// he or she personally maintains - writing a //[[CL:Glossary:compiler macro]]// definition for a function maintained elsewhere is normally considered a violation of traditional rules of modularity and data abstraction.
+
+\issue{DECLS-AND-DOC} \issue{DOCUMENTATION-FUNCTION-BUGS:FIX}

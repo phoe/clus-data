@@ -1,0 +1,51 @@
+====== Accessor MACRO-FUNCTION ======
+
+====Syntax====
+  * **macro-function** //symbol ''&optional'' environment// → //function//
+  * (**setf** (**macro-function** //symbol ''&optional'' environment//) //new-function//)
+
+====Arguments and Values====
+  * //symbol// - a //[[CL:Glossary:symbol]]//.
+  * //environment// - an //[[CL:Glossary:environment]]// //[[CL:Glossary:object]]//.
+  * //function// - a //[[CL:Glossary:macro function]]// or **[[CL:Constant Variables:nil]]**.
+  * //new-function// - a //[[CL:Glossary:macro function]]//.
+
+====Description====
+Determines whether //symbol// has a function definition as a macro in the specified //environment//.
+
+If so, the macro expansion function, a function of two arguments, is returned. If //symbol// has no function definition in the lexical environment //environment//, or its definition is not a //[[CL:Glossary:macro]]//, **macro-function** returns **[[CL:Constant Variables:nil]]**.
+
+It is possible for both **macro-function** and **[[CL:Functions:special-operator-p]]** to return //[[CL:Glossary:true]]// of //symbol//. The //[[CL:Glossary:macro]]// definition must be available for use by programs that understand only the standard Common Lisp //[[CL:Glossary:special form|special forms]]//.
+
+====Examples====
+<blockquote>
+(defmacro macfun (x) '(macro-function 'macfun))
+(not (macro-function 'macfun)) → //[[CL:Glossary:false]]//
+</blockquote>
+
+<blockquote>
+(macrolet ((foo (&environment env) 
+             (if (macro-function 'bar env) ''yes ''no)))
+  (list (foo) (macrolet ((bar () :beep)) (foo))))
+  → (NO YES)
+</blockquote>
+
+====Affected By==== 
+**[[CL:Macros:defmacro]]**, **[[CL:Special Operators:macrolet]]**.
+
+====Exceptional Situations====
+The consequences are undefined if //environment// is //[[CL:Glossary:non-nil]]// in a use of **[[CL:Macros:setf]]** of **macro-function**.
+
+====See Also====
+**[[CL:Macros:defmacro|Macro DEFMACRO]]**, {\secref\Evaluation}
+
+====Notes====
+**[[CL:Macros:setf]]** can be used with **macro-function** to install a //[[CL:Glossary:macro]]// as a symbol's global function definition:
+
+<blockquote>
+([[CL:Macros:setf]] (macro-function symbol) fn)
+</blockquote>
+
+The value installed must be a //[[CL:Glossary:function]]// that accepts two arguments, the entire macro call and an //[[CL:Glossary:environment]]//, and computes the expansion for that call. Performing this operation causes //symbol// to have only that macro definition as its global function definition; any previous definition, whether as a //[[CL:Glossary:macro]]// or as a //[[CL:Glossary:function]]//, is lost.
+
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92} \issue{MACRO-FUNCTION-ENVIRONMENT} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92} \issue{MACRO-FUNCTION-ENVIRONMENT} \issue{MACRO-FUNCTION-ENVIRONMENT} \issue{SPECIAL-FORM-P-MISNOMER:RENAME} \issue{MACRO-FUNCTION-ENVIRONMENT} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}

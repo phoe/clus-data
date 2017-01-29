@@ -1,0 +1,56 @@
+====== Special Operator THE ======
+
+====Syntax====
+  * **the** //value-type form// → //result''*''//
+
+====Arguments and Values====
+  * //value-type// - a //[[CL:Glossary:type specifier]]//; not evaluated.
+  * //form// - a //[[CL:Glossary:form]]//; evaluated.
+  * //results// - the //[[CL:Glossary:value|values]]// resulting from the //[[CL:Glossary:evaluation]]// of //form//. These //[[CL:Glossary:value|values]]// must conform to the //[[CL:Glossary:type]]// supplied by //value-type//; see below.
+
+====Description====
+**the** specifies that the //[[CL:Glossary:value|values]]// returned by //form// are of the //[[CL:Glossary:type|types]]// specified by //value-type//. The consequences are undefined if any //result// is not of the declared type.
+
+It is permissible for //form// to //[[CL:Glossary:yield]]// a different number of //[[CL:Glossary:values]]// than are specified by //value-type//, provided that the values for which //types// are declared are indeed of those //[[CL:Glossary:type|types]]//. Missing values are treated as **[[CL:Constant Variables:nil]]** for the purposes of checking their //[[CL:Glossary:type|types]]//.
+
+Regardless of number of //[[CL:Glossary:value|values]]// declared by //value-type//, the number of //[[CL:Glossary:values]]// returned by **the** is the same as the number of //[[CL:Glossary:value|values]]// returned by //form//.
+
+====Examples====
+<blockquote>
+(the [[CL:Types:symbol]] ([[CL:Functions:car]] ([[CL:Functions:list]] ([[CL:Functions:gensym]])))) → #:G9876
+(the [[CL:Types:fixnum]] ([[CL:Functions:|math-add|+]] 5 7)) → 12
+(the ([[CL:Types:values]]) ([[CL:Functions:truncate]] 3.2 2)) → 1, 1.2
+(the [[CL:Types:integer]] ([[CL:Functions:truncate]] 3.2 2)) → 1, 1.2
+(the ([[CL:Types:values]] [[CL:Types:integer]]) ([[CL:Functions:truncate]] 3.2 2)) → 1, 1.2
+(the ([[CL:Types:values]] [[CL:Types:integer]] [[CL:Types:float]]) ([[CL:Functions:truncate]] 3.2 2)) → 1, 1.2
+(the ([[CL:Types:values]] [[CL:Types:integer]] [[CL:Types:float]] [[CL:Types:symbol]]) ([[CL:Functions:truncate]] 3.2 2)) → 1, 1.2
+(the ([[CL:Types:values]] [[CL:Types:integer]] [[CL:Types:float]] [[CL:Types:symbol]] [[CL:Types:t]] [[CL:Types:null]] [[CL:Types:list]]) ([[CL:Functions:truncate]] 3.2 2)) → 1, 1.2
+([[CL:Special Operators:let]] ((i 100))
+  ([[CL:Special Operators:declare]] ([[CL:Types:fixnum]] i))
+  (the [[CL:Types:fixnum]] ([[CL:Functions:math-one-plus|1+]] i)))
+  → 101
+(let* ((x ([[CL:Functions:list]] 'a 'b 'c)) (y 5))
+  ([[CL:Macros:setf]] (the [[CL:Types:fixnum]] ([[CL:Functions:car]] x)) y) x) 
+  → (5 B C)
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+The consequences are undefined if the //[[CL:Glossary:value|values]]// //[[CL:Glossary:yielded]]// by the //form// are not of the //[[CL:Glossary:type]]// specified by //value-type//.
+
+====See Also====
+**[[CL:Types:values|Type VALUES]]**
+
+====Notes====
+The **[[CL:Declarations:values]]** //[[CL:Glossary:type specifier]]// can be used to indicate the types of //[[CL:Glossary:multiple values]]//:
+
+<blockquote>
+(the (values integer integer) (floor x y))
+(the (values string t) (gethash the-key the-string-table))
+</blockquote>
+
+**[[CL:Macros:setf]]** can be used with **the** type declarations. In this case the declaration is transferred to the form that specifies the new value. The resulting **[[CL:Macros:setf]]** //[[CL:Glossary:form]]// is then analyzed.
+
+\issue{THE-VALUES:RETURN-NUMBER-RECEIVED} \issue{THE-VALUES:RETURN-NUMBER-RECEIVED} \issue{THE-AMBIGUITY:FOR-DECLARATION} \issue{JUN90-TRIVIAL-ISSUES:27} \issue{THE-VALUES:RETURN-NUMBER-RECEIVED}

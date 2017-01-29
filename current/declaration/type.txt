@@ -1,0 +1,140 @@
+====== Declaration TYPE ======
+
+====Syntax====
+  * (**type** //typespec var''*''//)
+  * (//typespec var''*''//)
+
+====Arguments====
+  * //typespec// - a //[[CL:Glossary:type specifier]]//.
+  * //var// - a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
+
+====Valid Context====
+//[[CL:Glossary:declaration]]// or //[[CL:Glossary:proclamation]]//
+
+====Binding Types Affected====
+//[[CL:Glossary:variable]]//
+
+====Description====
+Affects only variable //[[CL:Glossary:binding|bindings]]// and specifies that the //vars// take on values only of the specified //typespec//. In particular, values assigned to the variables by **[[CL:Special Operators:setq]]**, as well as the initial values of the //vars// must be of the specified //typespec//. **type** declarations never apply to function //[[CL:Glossary:binding|bindings]]// (see **[[CL:Declarations:ftype]]**).
+
+A type declaration of a //[[CL:Glossary:symbol]]// defined by **[[CL:Special Operators:symbol-macrolet]]** is equivalent to wrapping a **[[CL:Special Operators:the]]** expression around the expansion of that //[[CL:Glossary:symbol]]//, although the //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:macro expansion]]// is not actually affected.
+
+The meaning of a type declaration is equivalent to changing each reference to a variable (//var//) within the scope of the declaration to **[[CL:Functions:(the //typespec// //var//)]]**, changing each expression assigned to the variable (//new-value//) within the scope of the declaration to **[[CL:Functions:(the //typespec// //new-value//)]]**, and executing **[[CL:Functions:(the //typespec// //var//)]]** at the moment the scope of the declaration is entered.
+
+A //[[CL:Glossary:type]]// declaration is valid in all declarations. The interpretation of a type declaration is as follows:
+  - During the execution of any reference to the declared variable within the scope of the declaration, the consequences are undefined if the value of the declared variable is not of the declared //[[CL:Glossary:type]]//.
+  - During the execution of any **[[CL:Special Operators:setq]]** of the declared variable within the scope of the declaration, the consequences are undefined if the newly assigned value of the declared variable is not of the declared //[[CL:Glossary:type]]//.
+  - At the moment the scope of the declaration is entered, the consequences are undefined if the value of the declared variable is not of the declared //[[CL:Glossary:type]]//.
+
+A //[[CL:Glossary:type]]// declaration affects only variable references within its scope.
+
+If nested //[[CL:Glossary:type]]// declarations refer to the same variable, then the value of the variable must be a member of the intersection of the declared //[[CL:Glossary:types]]//.
+
+If there is a local **[[CL:Functions:type]]** declaration for a dynamic variable, and there is also a global **[[CL:Functions:type]]** proclamation for that same variable, then the value of the variable within the scope of the local declaration must be a member of the intersection of the two declared //[[CL:Glossary:types]]//.
+
+**type** declarations can be //[[CL:Glossary:free declaration|free declarations]]// or //[[CL:Glossary:bound declaration|bound declarations]]//.
+
+A //[[CL:Glossary:symbol]]// cannot be both the name of a //[[CL:Glossary:type]]// and the name of a declaration. Defining a //[[CL:Glossary:symbol]]// as the //[[CL:Glossary:name]]// of a //[[CL:Glossary:class]]//, //[[CL:Glossary:structure]]//, //[[CL:Glossary:condition]]//, or //[[CL:Glossary:type]]//, when the //[[CL:Glossary:symbol]]// has been //[[CL:Glossary:declared]]// as a declaration name, or vice versa, signals an error.
+
+Within the //[[CL:Glossary:lexical scope]]// of an **[[CL:Types:array]]** type declaration, all references to //[[CL:Glossary:array]]// //[[CL:Glossary:element|elements]]// are assumed to satisfy the //[[CL:Glossary:expressed array element type]]// (as opposed to the //[[CL:Glossary:upgraded array element type]]//).
+
+A compiler can treat the code within the scope of the **[[CL:Types:array]]** type declaration as if each //[[CL:Glossary:access]]// of an //[[CL:Glossary:array]]// //[[CL:Glossary:element]]// were surrounded by an appropriate **[[CL:Special Operators:the]]** form.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defun]] f (x y)
+  ([[CL:Special Operators:declare]] (type [[CL:Types:fixnum]] x y))
+  ([[CL:Special Operators:let]] ((z ([[CL:Functions:math-add|+]] x y)))
+    ([[CL:Special Operators:declare]] (type [[CL:Types:fixnum]] z))
+    z))
+(f 1 2) → 3 
+;;; The previous definition of F is equivalent to 
+([[CL:Macros:defun]] f (x y)
+  ;; This declaration is a shorthand form of the TYPE declaration 
+  ([[CL:Special Operators:declare]] ([[CL:Types:fixnum]] x y)) 
+  ;; To declare the type of a return value, it's not necessary to create a named variable.
+  ;;; A THE special form can be used instead.
+  ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y)))
+(f 1 2) → 3
+</blockquote>
+
+<blockquote>
+([[CL:Macros:defvar]] *one-array*
+  ([[CL:Functions:make-array]] 10 :element-type '([[CL:Types:signed-byte]] 5)))
+([[CL:Macros:defvar]] *another-array*
+  ([[CL:Functions:make-array]] 10 :element-type '([[CL:Types:signed-byte]] 8)))
+
+([[CL:Macros:defun]] frob (an-array)
+  ([[CL:Special Operators:declare]] (type ([[CL:Types:array]] ([[CL:Types:signed-byte]] 5) 1) an-array))
+  ([[CL:Macros:setf]] ([[CL:Functions:aref]] an-array 1) 31)
+  ([[CL:Macros:setf]] ([[CL:Functions:aref]] an-array 2) 127)
+  ([[CL:Macros:setf]] ([[CL:Functions:aref]] an-array 3) ([[CL:Functions:math-multiply|*]] 2 ([[CL:Functions:aref]] an-array 3)))
+  ([[CL:Special Operators:let]] ((foo 0))
+    ([[CL:Special Operators:declare]] (type ([[CL:Types:signed-byte]] 5) foo))
+    ([[CL:Macros:setf]] foo ([[CL:Functions:aref]] an-array 0))))
+
+(frob *one-array*)
+(frob *another-array*)
+</blockquote>
+
+The above definition of ''frob'' is equivalent to:
+
+<blockquote>
+([[CL:Macros:defun]] frob (an-array)
+  ([[CL:Macros:setf]] ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 1)) 31)
+  ([[CL:Macros:setf]] ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 2)) 127)
+  ([[CL:Macros:setf]] ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 3)) 
+                      ([[CL:Functions:math-multiply|*]] 2 ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 3))))
+  ([[CL:Special Operators:let]] ((foo 0))
+  ([[CL:Special Operators:declare]] (type ([[CL:Types:signed-byte]] 5) foo))
+  ([[CL:Macros:setf]] foo ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 0)))))
+</blockquote>
+
+Given an implementation in which //[[CL:Glossary:fixnum|fixnums]]// are 29 bits but **[[CL:Types:fixnum]]** //[[CL:Glossary:array|arrays]]// are upgraded to signed 32-bit //[[CL:Glossary:array|arrays]]//, the following could be compiled with all //[[CL:Glossary:fixnum]]// arithmetic:
+
+<blockquote>
+([[CL:Macros:defun]] bump-counters (counters)
+  ([[CL:Special Operators:declare]] (type ([[CL:Types:array]] [[CL:Types:fixnum]] [[CL:Types:wildcard|*]]) bump-counters))
+  ([[CL:Macros:dotimes]] (i ([[CL:Functions:length]] counters))
+    ([[CL:Macros:incf]] ([[CL:Functions:aref]] counters i))))
+</blockquote>
+
+====See Also====
+**[[CL:Special Operators:declare|Special Operator DECLARE]]**, **[[CL:Macros:declaim]]**, **[[CL:Functions:proclaim]]**
+
+====Notes====
+(//typespec var''*''//) is an abbreviation for (**type** //typespec var''*''//).
+
+A **type** declaration for the arguments to a function does not necessarily imply anything about the type of the result. The following function is not permitted to be compiled using //[[CL:Glossary:implementation-dependent]]// //[[CL:Glossary:fixnum]]//-only arithmetic:
+
+<blockquote>
+([[CL:Macros:defun]] f (x y)
+  ([[CL:Special Operators:declare]] ([[CL:Types:fixnum]] x y))
+  ([[CL:Functions:math-add|+]] x y))
+</blockquote>
+
+To see why, consider ''(f [[CL:Constant Variables:most-positive-fixnum]] 1)''. Common Lisp defines that ''F'' must return a //[[CL:Glossary:bignum]]// here, rather than signal an error or produce a mathematically incorrect result. If you have special knowledge such "//[[CL:Glossary:fixnum]]// overflow" cases will not come up, you can declare the result value to be in the //[[CL:Glossary:fixnum]]// range, enabling some compilers to use more efficient arithmetic:
+
+<blockquote>
+([[CL:Macros:defun]] f (x y)
+  ([[CL:Special Operators:declare]] ([[CL:Types:fixnum]] x y))
+  ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y)))
+</blockquote>
+
+Note, however, that in the three-argument case, because of the possibility of an implicit intermediate value growing too large, the following will not cause //[[CL:Glossary:implementation-dependent]]// //[[CL:Glossary:fixnum]]//-only arithmetic to be used:
+
+<blockquote>
+([[CL:Macros:defun]] f (x y)
+  ([[CL:Special Operators:declare]] ([[CL:Types:fixnum]] x y z))
+  ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y z)))
+</blockquote>
+
+To see why, consider ''(f [[CL:Constant Variables:most-positive-fixnum]] 1 -1).'' Although the arguments and the result are all //[[CL:Glossary:fixnum|fixnums]]//, an intermediate value is not a //[[CL:Glossary:fixnum]]//. If it is important that //[[CL:Glossary:implementation-dependent]]// //[[CL:Glossary:fixnum]]//-only arithmetic be selected in //[[CL:Glossary:implementation|implementations]]// that provide it, consider writing something like this instead:
+
+<blockquote>
+([[CL:Macros:defun]] f (x y)
+  ([[CL:Special Operators:declare]] ([[CL:Types:fixnum]] x y z))
+  ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y)) z)))
+</blockquote>
+
+\issue{SYMBOL-MACROLET-DECLARE:ALLOW} \issue{SYMBOL-MACROLET-TYPE-DECLARATION:NO} \issue{DECLARE-TYPE-FREE:LEXICAL} \issue{SPECIAL-TYPE-SHADOWING:CLARIFY} \issue{TYPE-DECLARATION-ABBREVIATION:ALLOW-ALL} \issue{DECLARE-ARRAY-TYPE-ELEMENT-REFERENCES:RESTRICTIVE} \issue{DECLARE-ARRAY-TYPE-ELEMENT-REFERENCES:RESTRICTIVE} \issue{TYPE-DECLARATION-ABBREVIATION:ALLOW-ALL}

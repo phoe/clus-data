@@ -1,0 +1,60 @@
+====== Special Operator SYMBOL-MACROLET ======
+
+====Syntax====
+  * **symbol-macrolet** //((symbol expansion)''*'') declaration''*'' form''*''// → //result''*''//
+
+====Arguments and Values====
+  * //symbol// - a //[[CL:Glossary:symbol]]//.
+  * //expansion// - a //[[CL:Glossary:form]]//.
+  * //declaration// - a **[[CL:Special Operators:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - the //[[CL:Glossary:value|values]]// returned by the //forms//.
+
+====Description====
+**symbol-macrolet** provides a mechanism for affecting the //[[CL:Glossary:macro expansion]]// environment for //[[CL:Glossary:symbols]]//.
+
+**symbol-macrolet** lexically establishes expansion functions for each of the //[[CL:Glossary:symbol macros]]// named by //symbols//.
+
+The only guaranteed property of an expansion //[[CL:Glossary:function]]// for a //[[CL:Glossary:symbol macro]]// is that when it is applied to the //[[CL:Glossary:form]]// and the //[[CL:Glossary:environment]]// it returns the correct expansion. (In particular, it is //[[CL:Glossary:implementation-dependent]]// whether the expansion is conceptually stored in the expansion function, the //[[CL:Glossary:environment]]//, or both.)
+
+Each reference to //symbol// as a variable within the lexical //[[CL:Glossary:scope]]// of **symbol-macrolet** is expanded by the normal macro expansion process; see section {\secref\SymbolsAsForms}. The expansion of a symbol macro is subject to further macro expansion in the same lexical environment as the symbol macro invocation, exactly analogous to normal //[[CL:Glossary:macro|macros]]//.
+
+Exactly the same //declarations// are allowed as for **[[CL:Special Operators:let]]** with one exception: **symbol-macrolet** signals an error if a **[[CL:Declarations:special]]** declaration names one of the //[[CL:Glossary:symbol|symbols]]// being defined by **symbol-macrolet**.
+
+
+When the //forms// of the **symbol-macrolet** form are expanded, any use of **[[CL:Special Operators:setq]]** to set the value of one of the specified variables is treated as if it were a **[[CL:Macros:setf]]**. **[[CL:Macros:psetq]]** of a //[[CL:Glossary:symbol]]// defined as a symbol macro is treated as if it were a **[[CL:Macros:psetf]]**, and **[[CL:Macros:multiple-value-setq]]** is treated as if it were a **[[CL:Special Operators:setf]]** of **[[CL:Functions:values]]**.
+
+The use of **symbol-macrolet** can be shadowed by **[[CL:Special Operators:let]]**. In other words, **symbol-macrolet** only substitutes for occurrences of //symbol// that would be in the //[[CL:Glossary:scope]]// of a lexical binding of //symbol// surrounding the //forms//.
+
+====Examples====
+
+<blockquote>
+;;; The following is equivalent to ([[CL:Functions:list]] 'foo ([[CL:Special Operators:let]] ((x 'bar)) x)),
+;;; not ([[CL:Functions:list]] 'foo ([[CL:Special Operators:let]] (('foo 'bar)) 'foo))
+(symbol-macrolet ((x 'foo))
+  ([[CL:Functions:list]] x ([[CL:Special Operators:let]] ((x 'bar)) x))) 
+  → (foo bar) 
+;; //not// → (foo foo)
+
+(symbol-macrolet ((x '(foo x)))
+  ([[CL:Functions:list]] x)) 
+  → ((FOO X))
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+If an attempt is made to bind a //[[CL:Glossary:symbol]]// that is defined as a //[[CL:Glossary:global variable]]//, an error of type **[[CL:Types:program-error]]** is signaled.
+
+If //declaration// contains a **[[CL:Declarations:special]]** declaration that names one of the //[[CL:Glossary:symbol|symbols]]// being bound by **symbol-macrolet**, an error of type **[[CL:Types:program-error]]** is signaled.
+
+====See Also====
+**[[CL:Macros:with-slots|Macro WITH-SLOTS]]**, **[[CL:Functions:macroexpand|Function MACROEXPAND]]**
+
+====Notes====
+The special form **symbol-macrolet** is the basic mechanism that is used to implement **[[CL:Macros:with-slots]]**.
+
+If a **symbol-macrolet** //[[CL:Glossary:form]]// is a //[[CL:Glossary:top level form]]//, the //forms// are also processed as //[[CL:Glossary:top level form|top level forms]]//. see section {\secref\FileCompilation}.
+
+\issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM} \issue{SYMBOL-MACROLET-DECLARE:ALLOW} \issue{SYMBOL-MACROS-AND-PROCLAIMED-SPECIALS:SIGNALS-AN-ERROR} \issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13} \issue{DECLS-AND-DOC} \issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM} \issue{SYMBOL-MACROLET-DECLARE:ALLOW}

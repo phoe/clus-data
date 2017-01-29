@@ -1,0 +1,61 @@
+====== Special Operator LOCALLY ======
+
+====Syntax====
+  * **locally** //declaration''*'' form''*''// → //result''*''//
+
+====Arguments and Values====
+  * //declaration// - a **[[CL:Special Operators:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - the //[[CL:Glossary:values]]// of the //forms//.
+
+====Description====
+Sequentially evaluates a body of //forms// in a //[[CL:Glossary:lexical environment]]// where the given //declarations// have effect.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defun]] sample-function (y) ; This y is regarded as special.
+  ([[CL:Special Operators:declare]] (special y))
+    ([[CL:Special Operators:let]] ((y [[CL:Constant Variables:t]]))           ; This y is regarded as lexical. 
+      ([[CL:Functions:list]] y (locally ([[CL:Special Operators:declare]] (special y))
+                y))))      ; This y is regarded as special.
+(sample-function [[CL:Constant Variables:nil]]) → ([[CL:Constant Variables:t|T]] [[CL:Constant Variables:nil|NIL]])
+
+([[CL:Macros:defparameter]] *x* '(1 2 3))
+([[CL:Macros:defparameter]] *y* '(4 . 5))
+;;; The following declarations are not notably useful in specific. They just offer 
+;;; a sample of valid declaration syntax using LOCALLY.
+(locally ([[CL:Special Operators:declare]] ([[CL:Declarations:inline]] floor) ([[CL:Declarations:notinline]] car cdr))
+         ([[CL:Special Operators:declare]] ([[CL:Declarations:optimize]] space))
+  (floor (car *x*) (cdr *y*))) → 0, 1
+
+;;; This example shows a definition of a function that has a particular set of OPTIMIZE
+;;; settings made locally to that definition.
+(locally ([[CL:Special Operators:declare]] ([[CL:Declarations:optimize]] (safety 3) (space 3) (speed 0)))
+  ([[CL:Macros:defun]] frob (w x y &optional (z (foo x y)))
+    (mumble x y z w)))
+
+;;; This is like the previous example, except that the optimize settings remain in effect
+;;; for subsequent definitions in the same compilation unit.
+(declaim ([[CL:Declarations:optimize]] (safety 3) (space 3) (speed 0)))
+([[CL:Macros:defun]] frob (w x y &optional (z (foo x y)))
+  (mumble x y z w))
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Special Operators:declare|Special Operator DECLARE]]**
+
+====Notes====
+The **[[CL:Declarations:special]]** declaration may be used with **locally** to affect references to, rather than //[[CL:Glossary:binding|bindings]]// of, //[[CL:Glossary:variables]]//.
+
+If a **locally** //[[CL:Glossary:form]]// is a //[[CL:Glossary:top level form]]//, the body //forms// are also processed as //[[CL:Glossary:top level forms]]//. see section {\secref\FileCompilation}.
+
+\issue{LOCALLY-TOP-LEVEL:SPECIAL-FORM} \issue{DECLS-AND-DOC} \issue{LOCALLY-TOP-LEVEL:SPECIAL-FORM} \issue{RETURN-VALUES-UNSPECIFIED:SPECIFY} \issue{LOCALLY-TOP-LEVEL:SPECIAL-FORM}

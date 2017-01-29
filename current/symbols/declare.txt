@@ -1,0 +1,68 @@
+====== Symbol DECLARE ======
+
+====Syntax====
+  * **declare** //declaration-specifier''*''//
+
+====Arguments====
+  * //declaration-specifier// - a //[[CL:Glossary:declaration specifier]]//; not evaluated.
+
+====Description====
+
+A **declare** //[[CL:Glossary:expression]]//, sometimes called a //[[CL:Glossary:declaration]]//, can occur only at the beginning of the bodies of certain //[[CL:Glossary:form|forms]]//; that is, it may be preceded only by other **declare** //[[CL:Glossary:expression|expressions]]//, or by a //[[CL:Glossary:documentation string]]// if the context permits.
+
+A **declare** //[[CL:Glossary:expression]]// can occur in a //[[CL:Glossary:lambda expression]]// or in any of the //[[CL:Glossary:form|forms]]// listed below.
+
+| **[[CL:Macros:defgeneric]]**                | **[[CL:Macros:do-external-symbols]]**  | **[[CL:Macros:prog]]**                       |
+| **[[CL:Macros:define-compiler-macro]]**     | **[[CL:Macros:do-symbols]]**           | **[[CL:Macros:prog*]]**                      |
+| **[[CL:Macros:define-method-combination]]** | **[[CL:Macros:dolist ]]**              | **[[CL:Macros:restart-case]]**               |
+| **[[CL:Macros:define-setf-expander]]**      | **[[CL:Macros:dotimes]]**              | **[[CL:Special Operators:symbol-macrolet]]** |
+| **[[CL:Macros:defmacro]]**                  | **[[CL:Special Operators:flet]]**      | **[[CL:Macros:with-accessors]]**             |
+| **[[CL:Macros:defmethod]]**                 | **[[CL:Macros:handler-case]]**         | **[[CL:Macros:with-hash-table-iterator]]**   |
+| **[[CL:Macros:defsetf]]**                   | **[[CL:Special Operators:labels]]**    | **[[CL:Macros:with-input-from-string]]**     |
+| **[[CL:Macros:deftype]]**                   | **[[CL:Special Operators:let]]**       | **[[CL:Macros:with-open-file]]**             |
+| **[[CL:Macros:defun]]**                     | **[[CL:Special Operators:let*]]**      | **[[CL:Macros:with-open-stream]]**           |
+| **[[CL:Macros:destructuring-bind]]**        | **[[CL:Special Operators:locally]]**   | **[[CL:Macros:with-output-to-string]]**      |
+| **[[CL:Macros:do]]**                        | **[[CL:Special Operators:macrolet]]**  | **[[CL:Macros:with-package-iterator]]**      |
+| **[[CL:Macros:do*]]**                       | **[[CL:Macros:multiple-value-bind]]**  | **[[CL:Macros:with-slots]]**                 |
+| **[[CL:Macros:do-all-symbols]]**            | **[[CL:Macros:pprint-logical-block]]** |                                              |
+
+A **declare** //[[CL:Glossary:expression]]// can only occur where specified by the syntax of these //[[CL:Glossary:form|forms]]//.
+
+The consequences of attempting to evaluate a **declare** //[[CL:Glossary:expression]]// are undefined. In situations where such //[[CL:Glossary:expression|expressions]]// can appear, explicit checks are made for their presence and they are never actually evaluated; it is for this reason that they are called "**declare** //[[CL:Glossary:expression|expressions]]//" rather than "**declare** //[[CL:Glossary:form|forms]]//."
+
+//[[CL:Glossary:|macro formMacro forms]]// cannot expand into declarations; **declare** //[[CL:Glossary:expression|expressions]]// must appear as actual //[[CL:Glossary:subexpression|subexpressions]]// of the //[[CL:Glossary:form]]// to which they refer.
+
+The list below shows a list of //[[CL:Glossary:declaration identifier|declaration identifiers]]// that can be used with **declare**.
+
+| **[[CL:Declarations:dynamic-extent]]** | **[[CL:Declarations:ignore]]**    | **[[CL:Declarations:optimize]]** |
+| **[[CL:Declarations:ftype]]**          | **[[CL:Declarations:inline]]**    | **[[CL:Declarations:special]]**  |
+| **[[CL:Declarations:ignorable]]**      | **[[CL:Declarations:notinline]]** | **[[CL:Declarations:type]]**     |
+
+An implementation is free to support other (//[[CL:Glossary:implementation-defined]]//) //[[CL:Glossary:declaration identifier|declaration identifiers]]// as well.
+
+====Examples====
+<blockquote>
+(defun nonsense (k x z) 
+  (foo z x) ; first call to foo 
+  (let ((j (foo k x)) ; second call to foo 
+        (x (* k k)))
+    (declare (inline foo) (special x z))
+      (foo x j z)))
+</blockquote>
+
+In this example, the **[[CL:Declarations:inline]]** declaration applies only to the third call to ''foo'', but not to the first or second ones. The **[[CL:Declarations:special]]** declaration of ''x'' causes **[[CL:Special Operators:let]]** to make a dynamic //[[CL:Glossary:binding]]// for ''x'', and causes the reference to ''x'' in the body of **[[CL:Special Operators:let]]** to be a dynamic reference. The reference to ''x'' in the second call to ''foo'' is a local reference to the second parameter of ''nonsense''. The reference to ''x'' in the first call to ''foo'' is a local reference, not a **[[CL:Declarations:special]]** one. The **[[CL:Declarations:special]]** declaration of ''z'' causes the reference to ''z'' in the third call to ''foo'' to be a dynamic reference; it does not refer to the parameter to ''nonsense'' named ''z'', because that parameter //[[CL:Glossary:binding]]// has not been declared to be **[[CL:Declarations:special]]**. (The **[[CL:Declarations:special]]** declaration of ''z'' does not appear in the body of **[[CL:Macros:defun]]**, but in an inner //[[CL:Glossary:form]]//, and therefore does not affect the //[[CL:Glossary:binding]]// of the //[[CL:Glossary:parameter]]//.)
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+The consequences of trying to use a **declare** //[[CL:Glossary:expression]]// as a //[[CL:Glossary:form]]// to be //[[CL:Glossary:evaluate|evaluated]]// are undefined.
+
+====See Also====
+
+**[[CL:Functions:proclaim|Function PROCLAIM]]**, \secref\TypeSpecifiers, **[[CL:Declarations:declaration|Declaration DECLARATION]]**, **[[CL:Declarations:dynamic-extent|Declaration DYNAMIC-EXTENT]]**, **[[CL:Declarations:ftype|Declaration FTYPE]]**, **[[CL:Declarations:ignorable|Declaration IGNORABLE]]**, **[[CL:Declarations:ignore|Declaration IGNORE]]**, **[[CL:Declarations:inline|Declaration INLINE]]**, **[[CL:Declarations:notinline|Declaration NOTLINE]]**, **[[CL:Declarations:optimize|Declaration OPTIMIZE]]**, **[[CL:Declarations:type|Declaration TYPE]]**
+
+====Notes====
+None.
+
+\issue{DECLS-AND-DOC} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{SYMBOL-MACROLET-DECLARE:ALLOW} \issue{WITH-ADDED-METHODS:DELETE} \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE} \issue{DECLARE-MACROS:FLUSH} \issue{DYNAMIC-EXTENT:NEW-DECLARATION} \issue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}

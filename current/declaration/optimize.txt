@@ -1,0 +1,53 @@
+====== Declaration OPTIMIZE ======
+
+====Syntax====
+  * (**optimize** //{quality | (quality value)}''*''//)
+
+====Arguments====
+  * //quality// - an //[[CL:Glossary:optimize quality]]//.
+  * //value// - one of the //[[CL:Glossary:integers]]// ''0'', ''1'', ''2'', or ''3''.
+
+====Valid Context====
+//[[CL:Glossary:declaration]]// or //[[CL:Glossary:proclamation]]//
+
+====Binding Types Affected====
+None.
+
+====Description====
+Advises the compiler that each //quality// should be given attention according to the specified corresponding //value//. Each //quality// must be a //[[CL:Glossary:symbol]]// naming an //[[CL:Glossary:optimize quality]]//; the names and meanings of the standard //optimize qualities// are shown below.
+
+^ Name                                      ^ Meaning                           ^
+| **[[CL:Declarations:compilation-speed]]** | speed of the compilation process  | 
+| **[[CL:Declarations:debug]]**             | ease of debugging                 | 
+| **[[CL:Declarations:safety]]**            | run-time error checking           | 
+| **[[CL:Declarations:space]]**             | both code size and run-time space | 
+| **[[CL:Declarations:speed]]**             | speed of the object code          | 
+
+There may be other, //[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:optimize qualities]]//.
+
+A //value// ''0'' means that the corresponding //quality// is totally unimportant, and ''3'' that the //quality// is extremely important; ''1'' and ''2'' are intermediate values, with ''1'' the neutral value. ''(//quality// 3)'' can be abbreviated to //quality//.
+
+Note that //[[CL:Glossary:code]]// which has the optimization ''(safety 3)'', or just **[[CL:Types:safety]]**,is called //[[CL:Glossary:safe]]// //[[CL:Glossary:code]]//.
+
+The consequences are unspecified if a //quality// appears more than once with //[[CL:Glossary:different]]// //values//.
+
+====Examples====
+<blockquote>
+(defun often-used-subroutine (x y)
+  (declare (optimize (safety 2)))
+  (error-check x y)
+  (hairy-setup x)
+  (do ((i 0 (+ i 1)) (z x (cdr z)))
+      ((null z)) ;; This inner loop really needs to burn.
+    (declare (optimize speed))
+    (declare (fixnum i))))
+</blockquote>
+
+====See Also====
+**[[CL:Special Operators:declare|Special Operator DECLARE]]**, **[[CL:Macros:declaim|Macro DECLAIM]]**, **[[CL:Functions:proclaim|Function PROCLAIM]]**, {\secref\DeclScope}
+
+====Notes====
+
+An **optimize** declaration never applies to either a //[[CL:Glossary:variable]]// or a //[[CL:Glossary:function]]// //[[CL:Glossary:binding]]//. An **optimize** declaration can only be a //[[CL:Glossary:free declaration]]//. For more information, see section {\secref\DeclScope}.
+
+\issue{OPTIMIZE-DEBUG-INFO:NEW-QUALITY}

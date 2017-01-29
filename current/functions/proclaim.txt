@@ -1,0 +1,60 @@
+====== Function PROCLAIM ======
+
+====Syntax====
+  * **proclaim** //declaration-specifier// → ////[[CL:Glossary:implementation-dependent]]////
+
+====Arguments and Values====
+  * //declaration-specifier// - a //[[CL:Glossary:declaration specifier]]//.
+
+====Description====
+//[[CL:Glossary:establish|Establishes]]// the //[[CL:Glossary:declaration]]// specified by //declaration-specifier// in the //[[CL:Glossary:global environment]]//.
+
+Such a //[[CL:Glossary:declaration]]//, sometimes called a //[[CL:Glossary:global declaration]]// or a //[[CL:Glossary:proclamation]]//, is always in force unless locally //[[CL:Glossary:shadow|shadowed]]//.
+
+//[[CL:Glossary:name|Names]]// of //[[CL:Glossary:variable|variables]]// and //[[CL:Glossary:function|functions]]// within //declaration-specifier// refer to //[[CL:Glossary:dynamic variable|dynamic variables]]// and global //[[CL:Glossary:function]]// definitions, respectively.
+
+A list of //declaration identifiers// that can be used with **proclaim**.
+| **[[CL:Declarations:declaration]]** | **[[CL:Declarations:notinline]]** | **[[CL:Declarations:special]]** |
+| **[[CL:Declarations:ftype]]**       | **[[CL:Declarations:optimize]]**  |                                 |
+| **[[CL:Declarations:inline]]**      | **[[CL:Declarations:type]]**      |                                 |
+
+An implementation is free to support other (//[[CL:Glossary:implementation-defined]]//) //[[CL:Glossary:declaration identifiers]]// as well.
+
+====Examples====
+<blockquote>
+(defun declare-variable-types-globally (type vars)
+  (proclaim `(type ,type ,@vars))
+  type)
+
+;; Once this form is executed, the dynamic variable *TOLERANCE* must always contain a float.
+(declare-variable-types-globally 'float '(*tolerance*)) → FLOAT
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Macros:declaim|Macro DECLAIM]]**, **[[CL:Special Operators:declare|Special Operator DECLARE]]**, {\secref\Compilation}
+
+====Notes====
+Although the //[[CL:Glossary:execution]]// of a **proclaim** //[[CL:Glossary:form]]// has effects that might affect compilation, the compiler does not make any attempt to recognize and specially process **proclaim** //[[CL:Glossary:form|forms]]//. A //[[CL:Glossary:proclamation]]// such as the following, even if a //[[CL:Glossary:top level form]]//, does not have any effect until it is executed:
+
+<blockquote>
+(proclaim '(special *x*))
+</blockquote>
+
+If compile time side effects are desired, **[[CL:Special Operators:eval-when]]** may be useful. For example:
+
+<blockquote>
+(eval-when (:execute :compile-toplevel :load-toplevel) 
+  (proclaim '(special *x*)))
+</blockquote>
+
+In most such cases, however, it is preferrable to use **[[CL:Macros:declaim]]** for this purpose.
+
+Since **proclaim** //[[CL:Glossary:form|forms]]// are ordinary //[[CL:Glossary:function form|function forms]]//, //[[CL:Glossary:macro forms]]// can expand into them.
+
+\issue{DYNAMIC-EXTENT:NEW-DECLARATION} \issue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION} \issue{DECLARE-MACROS:FLUSH}

@@ -1,0 +1,47 @@
+====== Macro LAMBDA ======
+
+====Syntax====
+  * **lambda** //lambda-list <nowiki>[[</nowiki>declaration''*'' | documentation<nowiki>]]</nowiki> form''*''//
+→ //function//
+
+====Arguments and Values====
+  * //lambda-list// - an //[[CL:Glossary:ordinary lambda list]]//.
+  * //declaration// - a **[[CL:Special Operators:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //documentation// - a //[[CL:Glossary:string]]//; not evaluated.
+  * //form// - a //[[CL:Glossary:form]]//.
+  * //function// - a //[[CL:Glossary:function]]//.
+
+====Description====
+Provides a shorthand notation for a **[[CL:Special Operators:function]]** //[[CL:Glossary:special form]]// involving a //[[CL:Glossary:lambda expression]]// such that:
+
+<blockquote> (lambda //lambda-list <nowiki>[[</nowiki>declaration''*'' | documentation<nowiki>]]</nowiki> form''*''//) 
+  ≡ (function (lambda //lambda-list <nowiki>[[</nowiki>declaration''*'' | documentation<nowiki>]]</nowiki> form''*''//)) 
+  ≡ #'(lambda //lambda-list <nowiki>[[</nowiki>declaration''*'' | documentation<nowiki>]]</nowiki> form''*''//)
+  </blockquote>
+
+====Examples====
+<blockquote>
+([[CL:Functions:funcall]] (lambda (x) ([[CL:Functions:math-add|+]] x 3)) 4) → 7
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Symbols:lambda|Symbol LAMBDA]]**
+
+====Notes====
+This macro could be implemented by:
+
+<blockquote>
+([[CL:Macros:defmacro]] lambda (&whole form &rest bvl-decls-and-body)
+  ([[CL:Special Operators:declare]] ([[CL:Declarations:ignore]] bvl-decls-and-body))
+  `#',form)
+</blockquote>
+

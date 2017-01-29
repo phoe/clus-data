@@ -1,0 +1,153 @@
+====== Special Operator EVAL-WHEN ======
+
+====Syntax====
+
+  * **eval-when** {\paren{\starparam{situation}} \starparam{form}} {\starparam{result}}
+
+====Arguments and Values====
+  * //situation// - One of the //[[CL:Glossary:symbols]]// **'':compile-toplevel''**, **'':load-toplevel''**, **'':execute''**, **''compile''**, **''load''**, or **''eval''**. 
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - the //[[CL:Glossary:values]]// of the //[[CL:Glossary:forms]]// if they are executed, or **[[CL:Constant Variables:nil]]** if they are not.
+  
+The use of **''eval''**, **''compile''**, and **''load''** is deprecated.
+
+====Description====
+
+The body of an **eval-when** form is processed as an //[[CL:Glossary:implicit progn]]//, but only in the //situations// listed.
+
+The use of the //situations// **'':compile-toplevel''** (or **''compile''**) and **'':load-toplevel''** (or **''load''**) controls whether and when //[[CL:Glossary:evaluation]]// occurs when **eval-when** appears as a //[[CL:Glossary:top level form]]// in code processed by **[[CL:Functions:compile-file]]**; see section {\secref\FileCompilation}.
+
+The use of the //situation// **'':execute''** (or **''eval''**) controls whether evaluation occurs for other **eval-when** //[[CL:Glossary:forms]]//; that is, those that are not //[[CL:Glossary:top level forms]]//, or those in code processed by **[[CL:Functions:eval]]** or **[[CL:Variables:compile]]**. If the **'':execute''** situation is specified in such a //[[CL:Glossary:form]]//, then the body //forms// are processed as an //[[CL:Glossary:implicit progn]]//; otherwise, the **eval-when** //[[CL:Glossary:form]]// returns **[[CL:Constant Variables:nil]]**.
+
+**eval-when** normally appears as a //[[CL:Glossary:top level form]]//, but it is meaningful for it to appear as a //[[CL:Glossary:non-top-level form]]//. However, the compile-time side effects described in {\secref\Compilation} only take place when **eval-when** appears as a //[[CL:Glossary:top level form]]//.
+
+====Examples====
+One example of the use of **eval-when** is that for the compiler to be able to read a file properly when it uses user-defined //[[CL:Glossary:reader macros]]//, it is necessary to write
+
+<blockquote>
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  ([[CL:Macros:set-macro-character]] #\$ 
+    #'([[CL:Symbol:lambda]] (stream char)
+        ([[CL:Special Operators:declare]] ([[CL:Declarations:ignore]] char))
+        ([[CL:Functions:list]] 'dollar ([[CL:Functions:read]] stream)))))
+</blockquote>
+
+This causes the call to **[[CL:Functions:set-macro-character]]** to be executed in the compiler's execution environment, thereby modifying its reader syntax table.
+
+<blockquote>
+;;; The EVAL-WHEN in this case is not at toplevel, so only the :EXECUTE keyword is considered.
+;;; At compile time, this has no effect. At load time (if the LET is at toplevel), or at execution
+;;; time (if the LET is embedded in some other form which does not execute until later) this sets 
+;;; (SYMBOL-FUNCTION 'FOO1) to a function which returns 1.
+([[CL:Special Operators:let]] ((x 1))
+  (eval-when (:execute :load-toplevel :compile-toplevel)
+    ([[CL:Macros:setf]] ([[CL:Function:symbol-function]] 'foo1) #'([[CL:Symbol:lambda]] () x))))
+
+;;; If this expression occurs at the toplevel of a file to be compiled, it has BOTH a compile time 
+;;; AND a load-time effect of setting (SYMBOL-FUNCTION 'FOO2) to a function which returns 2. 
+(eval-when (:execute :load-toplevel :compile-toplevel)
+  ([[CL:Special Operators:let]] ((x 2)) (eval-when (:execute :load-toplevel :compile-toplevel)
+    ([[CL:Macros:setf]] ([[CL:Function:symbol-function]] 'foo2) #'([[CL:Symbol:lambda]] () x)))))
+
+;;; If this expression occurs at the toplevel of a file to be compiled, it has BOTH a compile time 
+;;; AND a load-time effect of setting the function cell of FOO3 to a function which returns 3.
+(eval-when (:execute :load-toplevel :compile-toplevel)
+  ([[CL:Macros:setf]] ([[CL:Function:symbol-function]] 'foo3) #'([[CL:Symbol:lambda]] () 3)))
+
+;;; This always does nothing. It simply returns NIL.
+(eval-when (:compile-toplevel)
+  (eval-when (:compile-toplevel)
+    ([[CL:Functions:print]] 'foo4)))
+
+;;; If this form occurs at toplevel of a file to be compiled, FOO5 is printed at compile time. 
+;;; If this form occurs in a non-top-level position, nothing is printed at compile time. 
+;;; Regardless of context, nothing is ever printed at load time or execution time.
+(eval-when (:compile-toplevel)
+  (eval-when (:execute) 
+    ([[CL:Functions:print]] 'foo5)))
+
+;;; If this form occurs at toplevel of a file to be compiled, FOO6 is printed at compile time.
+;;; If this form occurs in a non-top-level ;;; position, nothing is printed at compile time. 
+;;; Regardless of context, ;;; nothing is ever printed at load time or execution time.
+(eval-when (:execute :load-toplevel)
+  (eval-when (:compile-toplevel)
+    ([[CL:Functions:print]] 'foo6)))
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Functions:compile-file|Function COMPILE-FILE]]**, {\secref\Compilation}
+
+====Notes====
+The following effects are logical consequences of the definition of **eval-when**:
+
+----
+
+Execution of a single **eval-when** expression executes the body code at most once.
+
+----
+
+//[[CL:Glossary:Macros]]// intended for use in //[[CL:Glossary:top level form|top level forms]]// should be written so that side-effects are done by the //[[CL:Glossary:forms]]// in the macro expansion. The macro-expander itself should not do the side-effects.
+
+For example:
+
+Wrong:
+
+<blockquote>
+([[CL:Macros:defmacro]] foo () 
+  (really-foo)
+  `(really-foo))
+</blockquote>
+
+Right:
+
+<blockquote>
+([[CL:Macros:defmacro]] foo ()
+  `(eval-when (:compile-toplevel :execute :load-toplevel)
+     (really-foo)))
+</blockquote>
+
+Adherence to this convention means that such //[[CL:Glossary:macros]]// behave intuitively when appearing as //[[CL:Glossary:non-top-level form|non-top-level forms]]//.
+
+----
+
+Placing a variable binding around an **eval-when** reliably captures the binding because the compile-time-too mode cannot occur (i.e. introducing a variable binding means that the **eval-when** is not a //[[CL:Glossary:top level form]]//). For example,
+
+<blockquote>
+([[CL:Special Operators:let]] ((x 3))
+  (eval-when (:execute :load-toplevel :compile-toplevel)
+    ([[CL:Functions:print]] x))) </blockquote>
+
+prints ''3'' at execution (i.e. load) time, and does not print anything at compile time. This is important so that expansions of **[[CL:Macros:defun]]** and **[[CL:Macros:defmacro]]** can be done in terms of **eval-when** and can correctly capture the //[[CL:Glossary:lexical environment]]//.
+
+<blockquote>
+([[CL:Macros:defun]] bar (x)
+  ([[CL:Macros:defun]] foo () ([[CL:Functions:math-add|+]] x 3)))
+</blockquote>
+
+might expand into
+
+<blockquote>
+([[CL:Macros:defun]] bar (x)
+  (progn 
+    (eval-when (:compile-toplevel)
+      (compiler::notice-function-definition 'foo '(x)))
+    (eval-when (:execute :load-toplevel)
+      ([[CL:Macros:setf]] ([[CL:Functions:symbol-function]] 'foo) #'([[CL:Symbol:lambda]] () (+ x 3))))))
+</blockquote>
+
+which would be treated by the above rules the same as
+
+<blockquote>
+  ([[CL:Macros:defun]] bar (x)
+    ([[CL:Macros:setf]] ([[CL:Functions:symbol-function]] 'foo) #'([[CL:Symbol:lambda]] () (+ x 3))))
+</blockquote>
+
+when the definition of ''bar'' is not a //[[CL:Glossary:top level form]]//.
+
+\issue{EVAL-WHEN-NON-TOP-LEVEL:GENERALIZE-EVAL-NEW-KEYWORDS} \issue{EVAL-WHEN-NON-TOP-LEVEL:GENERALIZE-EVAL-NEW-KEYWORDS} \issue{EVAL-WHEN-OBSOLETE-KEYWORDS:X3J13-MAR-1993} \issue{EVAL-WHEN-NON-TOP-LEVEL:GENERALIZE-EVAL-NEW-KEYWORDS} \issue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW}

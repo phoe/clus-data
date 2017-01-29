@@ -1,0 +1,59 @@
+====== Function CONSTANTP ======
+
+====Syntax====
+  * **constantp** //form ''&optional'' environment// → //generalized-boolean//
+
+====Arguments and Values====
+  * //form// - a //[[CL:Glossary:form]]//.
+  * //environment// - an //[[CL:Glossary:environment]]// //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**.
+  * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+
+Returns //[[CL:Glossary:true]]// if //form// can be determined by the //[[CL:Glossary:implementation]]// to be a //[[CL:Glossary:constant form]]// in the indicated //environment//; otherwise, it returns //[[CL:Glossary:false]]// indicating either that the //[[CL:Glossary:form]]// is not a //[[CL:Glossary:constant form]]// or that it cannot be determined whether or not //[[CL:Glossary:form]]// is a //[[CL:Glossary:constant form]]//.
+
+The following kinds of //[[CL:Glossary:form|forms]]// are considered //[[CL:Glossary:constant form|constant forms]]//:
+  * //[[CL:Glossary:self-evaluating object|Self-evaluating objects]]// (such as //[[CL:Glossary:number|numbers]]//, //[[CL:Glossary:character|characters]]//, and the various kinds of //[[CL:Glossary:array|arrays]]//) are always considered //[[CL:Glossary:constant form|constant forms]]// and must be recognized as such by **[[CL:Functions:constantp]]**.
+  * //[[CL:Glossary:constant variable|Constant variables]]//, such as //[[CL:Glossary:keyword|keywords]]//, symbols defined by Common Lisp as constant (such as **[[CL:Constant Variables:nil]]**, **[[CL:Constant Variables:t]]**, and **[[CL:Constant Variables:pi]]**), and symbols declared as constant by the user in the indicated //environment// using **[[CL:Macros:defconstant]]** are always considered //[[CL:Glossary:constant form|constant forms]]// and must be recognized as such by **[[CL:Functions:constantp]]**.
+  * **[[CL:Special Operators:quote]]** //[[CL:Glossary:form|forms]]// are always considered //[[CL:Glossary:constant form|constant forms]]// and must be recognized as such by **[[CL:Functions:constantp]]**.
+  * An //[[CL:Glossary:implementation]]// is permitted, but not required, to detect additional //[[CL:Glossary:constant form|constant forms]]//. If it does, it is also permitted, but not required, to make use of information in the //environment//. Examples of //[[CL:Glossary:constant form|constant forms]]// for which **[[CL:Functions:constantp]]** might or might not return //[[CL:Glossary:true]]// are: ''(sqrt pi)'', ''(+ 3 2)'', ''(length '(a b c))'', and ''(let ((x 7)) (zerop x))''.
+
+If an //[[CL:Glossary:implementation]]// chooses to make use of the //environment// information, such actions as expanding //[[CL:Glossary:macro|macros]]// or performing function inlining are permitted to be used, but not required; however, expanding //[[CL:Glossary:compiler macro|compiler macros]]// is not permitted.
+
+====Examples====
+
+<blockquote>
+(constantp 1) → //[[CL:Glossary:true]]//
+(constantp 'temp) → //[[CL:Glossary:false]]//
+(constantp ''temp)) → //[[CL:Glossary:true]]//
+([[CL:Macros:defconstant]] +this-is-a-constant+ 'never-changing)
+(constantp '+this-is-a-constant+) → //[[CL:Glossary:true]]//
+(constantp "temp") → //[[CL:Glossary:true]]//
+([[CL:Macros:defparameter]] *a* 6)
+(constantp *a*) → //[[CL:Glossary:true]]//
+(constantp '([[CL:Functions:sin]] pi)) → //[[CL:Glossary:implementation-dependent]]//
+(constantp '([[CL:Functions:car]] '(x))) → //[[CL:Glossary:implementation-dependent]]//
+(constantp '([[CL:Functions:eql]] x x)) → //[[CL:Glossary:implementation-dependent]]//
+(constantp '([[CL:Functions:typep]] x '[[CL:Types:nil]])) → //[[CL:Glossary:implementation-dependent]]//
+(constantp '([[CL:Functions:typep]] x '[[CL:Types:t]])) → //[[CL:Glossary:implementation-dependent]]//
+(constantp '([[CL:Functions:values]] +this-is-a-constant+)) → //[[CL:Glossary:implementation-dependent]]//
+(constantp '([[CL:Functions:values]] 'x 'y)) → //[[CL:Glossary:implementation-dependent]]//
+(constantp '([[CL:Special Operators:let]] ((a '(a b c))) ([[CL:Functions:|math-plus|+]] ([[CL:Functions:length]] a) 6))) → //[[CL:Glossary:implementation-dependent]]//
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+The state of the global environment (//e.g.// which //[[CL:Glossary:symbol|symbols]]// have been declared to be the //[[CL:Glossary:name|names]]// of //[[CL:Glossary:constant variable|constant variables]]//).
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Macros:defconstant|Macro DEFCONSTANT]]**
+
+====Notes====
+None.
+
+\issue{CONSTANTP-DEFINITION:INTENTIONAL} \issue{CONSTANTP-ENVIRONMENT:ADD-ARG} \issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}

@@ -1,0 +1,81 @@
+====== Declaration INLINE, NOTINLINE ======
+
+====Syntax====
+  * (**inline** //function-name''*''//)
+  * (**notinline** //function-name''*''//)
+
+====Arguments====
+  * //function-name// - a //[[CL:Glossary:function name]]//.
+
+====Valid Context====
+//[[CL:Glossary:declaration]]// or //[[CL:Glossary:proclamation]]//
+
+====Binding Types Affected====
+//[[CL:Glossary:function]]//
+
+====Description====
+**inline** specifies that it is desirable for the compiler to produce inline calls to the //[[CL:Glossary:function|functions]]// named by //function-names//; that is, the code for a specified //function-name//
+
+should be integrated into the calling routine, appearing "in line" in place of a procedure call.
+
+A compiler is free to ignore this declaration. **inline** declarations never apply to variable //[[CL:Glossary:binding|bindings]]//.
+
+If one of the //[[CL:Glossary:function|functions]]// mentioned has a lexically apparent local definition (as made by **[[CL:Special Operators:flet]]** or **[[CL:Special Operators:labels]]**), then the declaration applies to that local definition and not to the global function definition.
+
+While no //[[CL:Glossary:conforming implementation]]// is required to perform inline expansion of user-defined functions, those //[[CL:Glossary:implementation|implementations]]// that do attempt to recognize the following paradigm:
+
+To define a //[[CL:Glossary:function]]// ''f'' that is not **inline** by default but for which ''([[CL:Special Operators:declare]] (inline f))'' will make //f// be locally inlined, the proper definition sequence is:
+
+<blockquote>
+([[CL:Macros:declaim]] (inline f))
+([[CL:Macros:defun]] f ...)
+([[CL:Macros:declaim]] (notinline f))
+</blockquote>
+
+The **inline** proclamation preceding the **[[CL:Macros:defun]]** //[[CL:Glossary:form]]// ensures that the //[[CL:Glossary:compiler]]// has the opportunity save the information necessary for inline expansion, and the **notinline** proclamation following the **[[CL:Macros:defun]]** //[[CL:Glossary:form]]// prevents ''f'' from being expanded inline everywhere.
+
+**notinline** specifies that it is undesirable to compile the //[[CL:Glossary:function|functions]]// named by //function-names// in-line. A compiler is not free to ignore this declaration; calls to the specified functions must be implemented as out-of-line subroutine calls.
+
+If one of the //[[CL:Glossary:function|functions]]// mentioned has a lexically apparent local definition (as made by **[[CL:Special Operators:flet]]** or **[[CL:Special Operators:labels]]**), then the declaration applies to that local definition and not to the global function definition.
+
+In the presence of a //[[CL:Glossary:compiler macro]]// definition for //function-name//, a **notinline** declaration prevents that //[[CL:Glossary:compiler macro]]// from being used.
+
+An **inline** declaration may be used to encourage use of //[[CL:Glossary:compiler macro]]// definitions. **inline** and **notinline** declarations otherwise have no effect when the lexically visible definition of //function-name// is a //[[CL:Glossary:macro]]// definition.
+
+**inline** and **notinline** declarations can be //[[CL:Glossary:free declaration|free declarations]]// or //[[CL:Glossary:bound declaration|bound declarations]]//. **inline** and **notinline** declarations of functions that appear before the body of a **[[CL:Special Operators:flet]]** or **[[CL:Special Operators:labels]]**
+
+//[[CL:Glossary:form]]// that defines that function are //[[CL:Glossary:bound declaration|bound declarations]]//. Such declarations in other contexts are //[[CL:Glossary:free declaration|free declarations]]//.
+
+====Examples====
+<blockquote>
+;;; The globally defined function DISPATCH should be open-coded, if the
+;;; implementation supports inlining, unless a NOTINLINE declaration overrides 
+;;; this effect.
+([[CL:Macros:declaim]] (inline dispatch))
+([[CL:Macros:defun]] dispatch (x)
+  ([[CL:Functions:funcall]] ([[CL:Functions:get]] ([[CL:Functions:car]] x) 'dispatch) x))
+  
+;;; Here is an example where inlining would be encouraged.
+([[CL:Macros:defun]] top-level-1 ()
+  (dispatch (read-command)))
+  
+;;; Here is an example where inlining would be prohibited.
+([[CL:Macros:defun]] top-level-2 ()
+  ([[CL:Special Operators:declare]] (notinline dispatch))
+  (dispatch (read-command)))
+
+;;; Here is an example where inlining would be prohibited.
+([[CL:Macros:declaim]] (notinline dispatch))
+([[CL:Macros:defun]] top-level-3 ()
+  (dispatch (read-command)))
+
+;;; Here is an example where inlining would be encouraged.
+([[CL:Macros:defun]] top-level-4 ()
+  ([[CL:Special Operators:declare]] (inline dispatch))
+  (dispatch (read-command)))
+</blockquote>
+
+====See Also====
+**[[CL:Special Operators:declare|Special Operator DECLARE]]**, **[[CL:Macros:declaim|Macro DECLAIM]]**, **[[CL:Functions:proclaim|Function PROCLAIM]]**
+
+\issue{MACRO-DECLARATIONS:MAKE-EXPLICIT} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92} \issue{WITH-ADDED-METHODS:DELETE} \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE} \issue{FUNCTION-NAME:LARGE} \issue{ALLOW-LOCAL-INLINE:INLINE-NOTINLINE} \issue{FUNCTION-NAME:LARGE}

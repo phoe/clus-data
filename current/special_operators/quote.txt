@@ -1,0 +1,55 @@
+====== Special Operator QUOTE ======
+
+====Syntax====
+  * quote //object// → //object//
+
+====Arguments and Values====
+  * //object// - an //[[CL:Glossary:object]]//; not evaluated.
+
+====Description====
+The //[[CL:Glossary:special operator]]// **quote** just returns //object//.
+
+The consequences are undefined if //[[CL:Glossary:literal objects]]// (including //[[CL:Glossary:quoted objects]]//) are destructively modified.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] *a* 1) → *A*
+(quote ([[CL:Macros:defparameter]] a 3)) → (DEFPARAMETER A 3)
+*a* → 1
+'*a* → A
+''*a* → (QUOTE *A*)
+'''*a* → (QUOTE (QUOTE *A*))
+
+([[CL:Macros:defparameter]] a 43) → 43
+([[CL:Functions:list]] a ([[CL:Functions:cons]] a 3)) → (43 (43 . 3))
+([[CL:Functions:list]] (quote a) (quote ([[CL:Functions:cons]] a 3))) → (A ([[CL:Functions:cons|CONS]] A 3))
+
+1 → 1
+'1 → 1
+
+"foo" → "foo"
+'"foo" → "foo"
+
+([[CL:Functions:car]] '(a b)) → A
+'([[CL:Functions:car]] '(a b)) → ([[CL:Functions:car|CAR]] (QUOTE (A B)))
+#([[CL:Functions:car]] '(a b)) → #([[CL:Functions:car|CAR]] (QUOTE (A B)))
+'#([[CL:Functions:car]] '(a b)) → #([[CL:Functions:car|CAR]] (QUOTE (A B)))
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+{\secref\Evaluation}, {\secref\QuoteMacro},
+
+{\secref\ConstantModification}
+
+====Notes====
+The textual notation '''//object//'' is equivalent to ''(quote //object//)''; see section {\secref\ConstantModification}.
+
+Some //[[CL:Glossary:object|objects]]//, called //[[CL:Glossary:self-evaluating objects]]//, do not require quotation by **[[CL:Special Operators:quote]]**. However, //[[CL:Glossary:symbols]]// and //[[CL:Glossary:lists]]// are used to represent parts of programs, and so would not be useable as constant data in a program without **[[CL:Special Operators:quote]]**. Since **[[CL:Special Operators:quote]]** suppresses the //[[CL:Glossary:evaluation]]// of these //[[CL:Glossary:object|objects]]//, they become data rather than program.
+
+\issue{CONSTANT-MODIFICATION:DISALLOW}
