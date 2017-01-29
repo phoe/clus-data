@@ -1,0 +1,62 @@
+====== Macro TRACE, UNTRACE ======
+
+====Syntax====
+  * **trace** //function-name''*''// → //trace-result//
+  * **untrace** //function-name''*''// → //untrace-result//
+
+====Arguments and Values====
+  * //function-name// - a //[[CL:Glossary:function name]]//.
+  * //trace-result// - //[[CL:Glossary:implementation-dependent]]//, unless no //[[CL:Glossary:function name|function-names]]// are supplied, in which case //trace-result// is a //[[CL:Glossary:list]]// of //[[CL:Glossary:function names]]//.
+  * //untrace-result// - //[[CL:Glossary:implementation-dependent]]//.
+
+====Description====
+**trace** and **untrace** control the invocation of the trace facility.
+
+Invoking **trace** with one or more //function-names// causes the denoted //[[CL:Glossary:function|functions]]// to be "traced". Whenever a traced //[[CL:Glossary:function]]// is invoked, information about the call, about the arguments passed, and about any eventually returned values is printed to //[[CL:Glossary:trace output]]//. If **trace** is used with no //function-names//, no tracing action is performed; instead, a list of the //[[CL:Glossary:functions]]// currently being traced is returned.
+
+Invoking **untrace** with one or more function names causes those functions to be "untraced" (i.e. no longer traced).
+
+If **untrace** is used with no //function-names//, all //[[CL:Glossary:function|functions]]// currently being traced are untraced.
+
+If a //[[CL:Glossary:function]]// to be traced has been open-coded (//e.g.// because it was declared **[[CL:Declarations:inline]]**), a call to that //[[CL:Glossary:function]]// might not produce trace output.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defun]] fact (n)
+  ([[CL:Special Operators:if]] ([[CL:Functions:zerop]] n)
+      1
+      ([[CL:Functions:math-multiply|*]] n (fact ([[CL:Functions:math-subtract|-]] n 1)))))
+
+(trace fact) → (FACT)
+
+;; Of course, the format of traced output is implementation-dependent.
+(fact 3)
+▷ 1 Enter FACT 3
+▷ | 2 Enter FACT 2
+▷ | 3 Enter FACT 1
+▷ | | 4 Enter FACT 0
+▷ | | 4 Exit FACT 1
+▷ | 3 Exit FACT 1
+▷ | 2 Exit FACT 2
+▷ 1 Exit FACT 6 → 6
+
+</blockquote>
+
+====Side Effects====
+Might change the definitions of the //[[CL:Glossary:functions]]// named by //function-names//.
+
+====Affected By====
+Whether the functions named are defined or already being traced.
+
+====Exceptional Situations====
+Tracing an already traced function, or untracing a function not currently being traced, should produce no harmful effects, but might signal a warning.
+
+====See Also====
+**[[CL:Variables:star-trace-output-star|Variable *TRACE-OUTPUT*]]**, **[[CL:Macros:step|Macro STEP]]**
+
+====Notes====
+**trace** and **untrace** may also accept additional //[[CL:Glossary:implementation-dependent]]// argument formats. The format of the trace output is //[[CL:Glossary:implementation-dependent]]//.
+
+Although **trace** can be extended to permit non-standard options, //[[CL:Glossary:implementation|implementations]]// are nevertheless encouraged (but not required) to warn about the use of syntax or options that are neither specified by this standard nor added as an extension by the //[[CL:Glossary:implementation]]//, since they could be symptomatic of typographical errors or of reliance on features supported in //[[CL:Glossary:implementation|implementations]]// other than the current //[[CL:Glossary:implementation]]//.
+
+\issue{FUNCTION-NAME:LARGE}

@@ -1,0 +1,38 @@
+====== Variable +, ++, +++ ======
+
+====Value Type====
+an //[[CL:Glossary:object]]//.
+
+====Initial Value====
+//[[CL:Glossary:implementation-dependent]]//.
+
+====Description====
+
+The //[[CL:Glossary:variable|variables]]// **+**, **++**, and **+++** are maintained by the //[[CL:Glossary:Lisp read-eval-print loop]]// to save //[[CL:Glossary:forms]]// that were recently //[[CL:Glossary:evaluated]]//.
+
+The value of **+** is the last //[[CL:Glossary:form]]// that was //[[CL:Glossary:evaluated]]//, the value of **++** is the previous value of **+**, and **+++** is the previous value of **++**.
+
+====Examples====
+<blockquote>
+([[CL:Functions:math-add|+]] 0 1) → 1
+([[CL:Functions:math-subtract|-]] 4 2) → 2
+([[CL:Functions:math-divide|/]] 9 3) → 3
+([[CL:Functions:list]] + ++ +++) → ((/ 9 3) (- 4 2) (+ 0 1))
+([[CL:Macros:defparameter]] *a* 1)
+([[CL:Macros:defparameter]] *b* 2)
+([[CL:Macros:defparameter]] *c* 3)
+([[CL:Macros:defparameter]] *d* ([[CL:Functions:list]] *a* *b* *c*))
+([[CL:Macros:setf]] *a* 4 *b* 5 *c* 6 *d* ([[CL:Functions:list]] a b c)) → (4 5 6)
+([[CL:Functions:list]] *a* *b* *c*) → (4 5 6)
+([[CL:Functions:eval]] +++) → (1 2 3)
+#.`(,@++ *d*) → (1 2 3 (1 2 3)) </blockquote>
+
+====Affected By====
+//[[CL:Glossary:Lisp read-eval-print loop]]//.
+
+====See Also====
+**[[CL:Variables:repl-minus|Variable -]]**, **[[CL:Variables:repl-star|Variable *]]**, **[[CL:Variables:repl-slash|Variable/]]**, {\secref\TopLevelLoop}
+
+====Notes====
+None.
+

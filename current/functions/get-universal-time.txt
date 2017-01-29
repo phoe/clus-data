@@ -1,0 +1,49 @@
+====== Function GET-UNIVERSAL-TIME, GET-DECODED-TIME ======
+
+====Syntax====
+  * **get-universal-time** → //universal-time//
+  * **get-decoded-time** → //second, minute, hour, date, month, year, day, daylight-p, zone//
+
+====Arguments and Values====
+  * //universal-time// - a //[[CL:Glossary:universal time]]//.
+  * //second//, //minute//, //hour//, //date//, //month//, //year//, //day//, //daylight-p//, //zone// - a //[[CL:Glossary:decoded time]]//.
+
+====Description====
+**get-universal-time** returns the current time, represented as a //[[CL:Glossary:universal time]]//.
+
+**get-decoded-time** returns the current time, represented as a //[[CL:Glossary:decoded time]]//.
+
+====Examples====
+<blockquote>
+;;; At noon on July 4, 1976 in Eastern Daylight Time.
+(get-decoded-time) → 0, 0, 12, 4, 7, 1976, 6, //[[CL:Glossary:true]]//, 5
+
+;;; At exactly the same instant.
+(get-universal-time) → 2414332800
+
+;;; Exactly five minutes later.
+(get-universal-time) → 2414333100
+
+;;; The difference is 300 seconds (five minutes)
+([[CL:Functions:math-subtract|-]] [[CL:Variables:star|*]] [[CL:Variables:star-star|**]]) → 300
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+The time of day (i.e. the passage of time), the system clock's ability to keep accurate time, and the accuracy of the system clock's initial setting.
+
+====Exceptional Situations====
+An error of type **[[CL:Types:error]]** might be signaled if the current time cannot be determined.
+
+====See Also====
+**[[CL:Functions:decode-universal-time]]**, **[[CL:Functions:encode-universal-time]]**, {\secref\Time}
+
+====Notes====
+<blockquote>
+(get-decoded-time) ≡ ([[CL:Functions:decode-universal-time]] (get-universal-time))
+</blockquote>
+
+No //[[CL:Glossary:implementation]]// is required to have a way to verify that the time returned is correct. However, if an //[[CL:Glossary:implementation]]// provides a validity check (//e.g.// the failure to have properly initialized the system clock can be reliably detected) and that validity check fails, the //[[CL:Glossary:implementation]]// is strongly encouraged (but not required) to signal an error of type **[[CL:Types:error]]** (rather than, for example, returning a known-to-be-wrong value) that is //[[CL:Glossary:correctable]]// by allowing the user to interactively set the correct time.
+

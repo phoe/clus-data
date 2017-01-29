@@ -1,0 +1,37 @@
+====== Function DRIBBLE ======
+
+====Syntax====
+  * **dribble** //''&optional'' pathname// → ////[[CL:Glossary:implementation-dependent]]////
+
+====Arguments and Values====
+  * //pathname// - a //[[CL:Glossary:pathname designator]]//.
+
+====Description====
+Either //[[CL:Glossary:binds]]// **[[CL:Variables:*standard-input*]]** and **[[CL:Variables:*standard-output*]]** or takes other appropriate action, so as to send a record of the input/output interaction to a file named by //pathname//. **dribble** is intended to create a readable record of an interactive session.
+
+If //pathname// is a //[[CL:Glossary:logical pathname]]//, it is translated into a physical pathname as if by calling **[[CL:Functions:translate-logical-pathname]]**.
+
+''(dribble)'' terminates the recording of input and output and closes the dribble file.
+
+If **dribble** is //[[CL:Glossary:called]]// while a //[[CL:Glossary:stream]]// to a "dribble file" is still open from a previous //[[CL:Glossary:call]]// to **dribble**, the effect is //[[CL:Glossary:implementation-defined]]//. For example, the already-//[[CL:Glossary:open]]// //[[CL:Glossary:stream]]// might be //[[CL:Glossary:closed]]//, or dribbling might occur both to the old //[[CL:Glossary:stream]]// and to a new one, or the old //[[CL:Glossary:stream]]// might stay open but not receive any further output, or the new request might be ignored, or some other action might be taken.
+
+====Examples====
+None.
+
+====Affected By====
+The //[[CL:Glossary:implementation]]//.
+
+====Exceptional Situations====
+If a failure occurs when performing some operation on the //[[CL:Glossary:file system]]// while creating the dribble file, an error of type **[[CL:Types:file-error]]** is signaled.
+
+An error of type **[[CL:Types:file-error]]** might be signaled if //pathname// is a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:wild]]// //[[CL:Glossary:pathname]]//.
+
+====See Also====
+{\secref\PathnamesAsFilenames}
+
+====Notes====
+**dribble** can return before subsequent //[[CL:Glossary:form|forms]]// are executed. It also can enter a recursive interaction loop, returning only when ''(dribble)'' is done.
+
+**dribble** is intended primarily for interactive debugging; its effect cannot be relied upon when used in a program.
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES} \issue{DRIBBLE-TECHNIQUE} \issue{PATHNAME-LOGICAL:ADD} \issue{JUN90-TRIVIAL-ISSUES:25} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}

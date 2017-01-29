@@ -1,0 +1,63 @@
+====== Standard Generic Function DESCRIBE-OBJECT ======
+
+====Syntax====
+  * **describe-object** //object stream// → //[[CL:Glossary:implementation-dependent]]//
+
+====Method Signatures====
+  * **describe-object** //(object [[CL:Types:standard-object]]) stream//
+
+====Arguments and Values====
+  * //object// - an //[[CL:Glossary:object]]//.
+  * //stream// - a //[[CL:Glossary:stream]]//.
+
+====Description====
+The generic function **describe-object** prints a description of //object// to a //stream//. **describe-object** is called by **[[CL:Functions:describe]]**; it must not be called by the user.
+
+Each implementation is required to provide a //[[CL:Glossary:method]]// on the class [[CL:Types:standard-object]] and //[[CL:Glossary:methods]]// on enough other //[[CL:Glossary:classes]]// so as to ensure that there is always an applicable //[[CL:Glossary:method]]//. Implementations are free to add //[[CL:Glossary:methods]]// for other //[[CL:Glossary:classes]]//. Users can write //[[CL:Glossary:methods]]// for **describe-object** for their own //[[CL:Glossary:classes]]// if they do not wish to inherit an implementation-supplied //[[CL:Glossary:method]]//.
+
+//[[CL:Glossary:Methods]]// on **describe-object** can recursively call **[[CL:Functions:describe]]**. Indentation, depth limits, and circularity detection are all taken care of automatically, provided that each //[[CL:Glossary:method]]// handles exactly one level of structure and calls **[[CL:Functions:describe]]** recursively if there are more structural levels. The consequences are undefined if this rule is not obeyed.
+
+In some implementations the //stream// argument passed to a **describe-object** method is not the original //stream//, but is an intermediate //[[CL:Glossary:stream]]// that implements parts of **[[CL:Functions:describe]]**. //[[CL:Glossary:Methods]]// should therefore not depend on the identity of this //[[CL:Glossary:stream]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defclass]] spaceship ()
+  ((captain :initarg :captain 
+            :accessor spaceship-captain)
+   (serial-number :initarg :serial-number
+                  :accessor spaceship-serial-number)))
+
+([[CL:Macros:defclass]] federation-starship (spaceship) ())
+
+([[CL:Macros:defmethod]] describe-object ((s spaceship) stream)
+  ([[CL:Macros:with-slots]] (captain serial-number) s
+    ([[CL:Functions:format]] stream "~&~S is a spaceship of type ~S,~%~
+            with ~A at the helm and with serial number ~D.~%" 
+            s ([[CL:Functions:type-of]] s) captain serial-number)))
+
+([CL:Functions:make-instance]] 'federation-starship 
+               :captain "Rachel Garrett" 
+               :serial-number "NCC-1701-C")
+  → #<FEDERATION-STARSHIP 26312465>
+
+(describe [[CL:Variables:star|*]])
+▷ #<FEDERATION-STARSHIP 26312465> is a spaceship of type FEDERATION-STARSHIP,
+▷ with Rachel Garrett at the helm and with serial number NCC-1701-C.
+  → <no values>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+**[[CL:Functions:describe|Function DESCRIBE]]**
+
+====Notes====
+The same implementation techniques that are applicable to **[[CL:Functions:print-object]]** are applicable to **describe-object**.
+
+The reason for making the return values for **describe-object** unspecified is to avoid forcing users to include explicit ''([[CL:Functions:values]])'' in all of their //[[CL:Glossary:methods]]//. **[[CL:Functions:describe]]** takes care of that.
+
+\issue{DESCRIBE-UNDERSPECIFIED:DESCRIBE-OBJECT}
