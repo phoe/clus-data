@@ -5,10 +5,10 @@
 
 <blockquote>
 //clause// ::= (case-name lambda-list 
-            [[**'':interactive''** interactive-expression | 
-              **'':report''** report-expression | 
-              **'':test''** test-expression]]  
-            declaration''*'' form''*'') 
+<nowiki>            [[</nowiki>**'':interactive''** interactive-expression | 
+<nowiki>              </nowiki>**'':report''** report-expression | 
+<nowiki>              </nowiki>**'':test''** test-expression<nowiki>]]</nowiki>
+<nowiki>            </nowiki>declaration''*'' form''*'') 
 </blockquote>
 
 ====Arguments and Values====
@@ -37,26 +37,26 @@ By default, **[[CL:Functions:invoke-restart-interactively]]** passes no argument
 
 //Keyword// options have the following meaning.
 
-===**'':interactive''**===
+===:interactive===
 The //value// supplied by '':interactive //value//'' must be a suitable argument to **[[CL:Special Operators:function]]**. ''([[CL:Special Operators:function]] //value//)'' is evaluated in the current lexical environment. It should return a //[[CL:Glossary:function]]// of no arguments which returns arguments to be used by **[[CL:Functions:invoke-restart-interactively]]** when it is invoked. **[[CL:Functions:invoke-restart-interactively]]** is called in the dynamic environment available prior to any restart attempt, and uses //[[CL:Glossary:query IO|query IO]]// for user interaction.
 
 If a restart is invoked interactively but no **'':interactive''** option was supplied, the argument list used in the invocation is the empty list.
 
-===**'':report''**===
-If the //value// supplied by '':report //value//'' is a //[[CL:Glossary:lambda expression]]// or a //[[CL:Glossary:symbol]]//, it must be acceptable to **[[CL:Special Operators:function]]**. ''(function //value//)'' is evaluated in the current lexical environment. It should return a //[[CL:Glossary:function]]// of one argument, a //[[CL:Glossary:stream]]//, which prints on the //[[CL:Glossary:stream]]// a description of the restart. This //[[CL:Glossary:function]]// is called whenever the restart is printed while **[[CL:Variables:star-print-escape-star|*print-escape*]]** is **[[CL:Constant Variables:nil]]**.
+===:report===
+If the //value// supplied by '':report //value//'' is a //[[CL:Glossary:lambda expression]]// or a //[[CL:Glossary:symbol]]//, it must be acceptable to **[[CL:Special Operators:function]]**. ''([[CL:Special Operators:function]] //value//)'' is evaluated in the current lexical environment. It should return a //[[CL:Glossary:function]]// of one argument, a //[[CL:Glossary:stream]]//, which prints on the //[[CL:Glossary:stream]]// a description of the restart. This //[[CL:Glossary:function]]// is called whenever the restart is printed while **[[CL:Variables:star-print-escape-star|*print-escape*]]** is **[[CL:Constant Variables:nil]]**.
 
 If //value// is a //[[CL:Glossary:string]]//, it is a shorthand for ''([[CL:Symbols:lambda]] (stream) ([[CL:Functions:write-string]] //value// stream))''.
 
 If a named restart is asked to report but no report information has been supplied, the name of the restart is used in generating default report text.
 
-When **[[CL:Variables:star-print-escape-star|*print-escape*]]** is **[[CL:Constant Variables:nil]]**, the printer uses the report information for a restart. For example, a debugger might announce the action of typing a "continue" command by ''(format t "~&~S -- ~A~%" ':continue some-restart)'' which might then display as something like '':CONTINUE -- Return to command level''
+When **[[CL:Variables:star-print-escape-star|*print-escape*]]** is **[[CL:Constant Variables:nil]]**, the printer uses the report information for a restart. For example, a debugger might announce the action of typing a "continue" command by ''([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~S -- ~A~%" ':continue some-restart)'' which might then display as something like '':CONTINUE -- Return to command level''.
 
 The consequences are unspecified if an unnamed restart is specified but no **'':report''** option is provided.
 
-===**'':test''**===
+===:test===
 The //value// supplied by '':test //value//'' must be a suitable argument to **[[CL:Special Operators:function]]**. ''(function //value//)'' is evaluated in the current lexical environment. It should return a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]//, the //[[CL:Glossary:condition]]//, that returns //[[CL:Glossary:true]]// if the restart is to be considered visible.
 
-The default for this option is equivalent to ''([[CL:Symbols:lambda]] (c) ([[CL:Special Operators:declare]] ([[CL:Declarations:ignore]] c)) [[CL:Constant Variables:t]])''.
+The default for this option is equivalent to ''([[CL:Symbols:lambda]] <nowiki>(c)</nowiki> ([[CL:Special Operators:declare]] ([[CL:Declarations:ignore]] c)) [[CL:Constant Variables:t]])''.
 
 ----
 
@@ -64,10 +64,10 @@ If the //restartable-form// is a //[[CL:Glossary:list]]// whose //[[CL:Glossary:
 
 ====Examples====
 <blockquote>
-(restart-case 
+(restart-case
   ([[CL:Macros:handler-bind]] (([[CL:Types:error]] #'([[CL:Symbol:lambda]] (c) ([[CL:Special Operators:declare]] ([[CL:Declaration:ignore]] c))
                                       ([[Cl:Functions:invoke-restart]] 'my-restart 7))))
-    (error "Foo."))
+    ([[CL:Functions:error]] "Foo."))
   (my-restart (&optional v) v)) → 7
 
 ([[CL:Macros:define-condition]] food-error ([[CL:Types:error]]) ())
