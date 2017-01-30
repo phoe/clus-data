@@ -7,8 +7,9 @@
 **** l1sp.org
 **** Quickdocs
 ** My work
-*** Source - dpANS
 *** My idea
+*** Source - dpANS
+    The whole process was made possible by the availability of the LaTeX source code for "draft preview Americal National Standard", abbreviated as dpANS, for Common Lisp. These sources were put into public domain by Kent M. Pitman and other members of the X3J13 committee. While not being the actual standard itself, the dpANS is close enough to it to be usable for
 *** Demonstration of used methods and tools
 **** Notepad++ - the text editor
      When it came to the main editor for doing most of the parsing work, I could choose between Emacs and Notepad++, a pair of GPL-Licensed programmer's editors. I chose the latter mostly because I have been using Notepad++ for the past few years and also due to the entry threshold associated with Emacs; I am still learning this editor despite having used it for more than a year now, and I have been using it mostly as a Lisp programming environment. Notepad++ is a WYSIWYG, mouse-oriented editor written for Windows that I was able to run on my Linux setup using the Wine toolkit.
@@ -17,7 +18,7 @@
 **** Regular expressions, Unix coreutils - the tool for parsing the sources
      The most important choice that I have had to make in the beginning was, how to parse the source files of the dpANS. The source code is a large body of LaTeX code, created by multiple people over a large span of time. It contains highly customized TeX macros, used irregularly among the source code.
      The initial research led me towards TeX parsers written in various languages, such as Parsec written in Haskell. My initial attempts of feeding the dpANS sources to the parsers I found were failures though; the individual bodies of code were too complex and my knowledge about these parsers was too little for me to succeed. I realized that, in order to properly parse the TeX source code of the draft, I would need to create a substantially large set of parsing rules; even afterwards, I would need to spend a lot of time doing manual polishing and fixing of the corner cases, such as macros used only in a few places within the source files or actual mistakes within formatting, such as utilizing function markup for macros and vice versa.
-     Because of this, I decided to abandon the approach of parsing the standard with
+     Because of this, I decided to abandon the approach of parsing the standard with a parser capable of processing TeX directly and instead go for a simpler choice: utilizing regular expressions to parse a subset of utilized TeX macros and formatting and later polishing the preprocessed data by hand; the latter would be necessary anyway regardless of the technique used.
      My editor of choice, Notepad++, contained a powerful enough RegEx engine that was capable of guiding me through the process. Various bulk edits were also made through the assorted unix utilities: grep, sed, awk, rename.
 **** Git - versioning system, GitHub - project hosting
      The data for the whole project is kept in a Git repository and available at https://github.com/phoe/clus-data. Because DokuWiki keeps all data as flat text files, I can easily modify and deploy new versions of data to upstream websites. A sample deployment available at the moment of writing this paper is available at http://phoe.tymoon.eu/clus/.
