@@ -42,52 +42,44 @@ A compiler can treat the code within the scope of the **[[CL:Types:array]]** typ
 
 ====Examples====
 <blockquote>
+;;TODO: fix this example, it is completely messed up
+
 ([[CL:Macros:defun]] f (x y)
   ([[CL:Symbols:declare]] (type [[CL:Types:fixnum]] x y))
   ([[CL:Special Operators:let]] ((z ([[CL:Functions:math-add|+]] x y)))
     ([[CL:Symbols:declare]] (type [[CL:Types:fixnum]] z))
-    z))
-(f 1 2) → 3 
+    z)) <return>F</return>
+(f 1 2) <return>3</return>
 ;;; The previous definition of F is equivalent to 
 ([[CL:Macros:defun]] f (x y)
   ;; This declaration is a shorthand form of the TYPE declaration 
   ([[CL:Symbols:declare]] ([[CL:Types:fixnum]] x y)) 
   ;; To declare the type of a return value, it's not necessary to create a named variable.
-  ;;; A THE special form can be used instead.
-  ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y)))
-(f 1 2) → 3
-</blockquote>
-
-<blockquote>
-([[CL:Macros:defvar]] *one-array*
-  ([[CL:Functions:make-array]] 10 :element-type '([[CL:Types:signed-byte]] 5)))
-([[CL:Macros:defvar]] *another-array*
-  ([[CL:Functions:make-array]] 10 :element-type '([[CL:Types:signed-byte]] 8)))
+  ;; A THE special form can be used instead.
+  ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y))) <return>F</return>
+(f 1 2) <return>3</return>
 
 ([[CL:Macros:defun]] frob (an-array)
-  ([[CL:Symbols:declare]] (type ([[CL:Types:array]] ([[CL:Types:signed-byte]] 5) 1) an-array))
+  ([[CL:Symbols:declare]] (type ([[CL:Types:array]] ([[CL:Types:signed-byte]] 8) 1) an-array))
   ([[CL:Macros:setf]] ([[CL:Functions:aref]] an-array 1) 31)
   ([[CL:Macros:setf]] ([[CL:Functions:aref]] an-array 2) 127)
   ([[CL:Macros:setf]] ([[CL:Functions:aref]] an-array 3) ([[CL:Functions:math-multiply|*]] 2 ([[CL:Functions:aref]] an-array 3)))
   ([[CL:Special Operators:let]] ((foo 0))
-    ([[CL:Symbols:declare]] (type ([[CL:Types:signed-byte]] 5) foo))
-    ([[CL:Macros:setf]] foo ([[CL:Functions:aref]] an-array 0))))
-
-(frob *one-array*)
-(frob *another-array*)
+    ([[CL:Symbols:declare]] (type ([[CL:Types:signed-byte]] 8) foo))
+    ([[CL:Macros:setf]] foo ([[CL:Functions:aref]] an-array 0)))) <return>FROB</return>
 </blockquote>
 
 The above definition of ''frob'' is equivalent to:
 
 <blockquote>
 ([[CL:Macros:defun]] frob (an-array)
-  ([[CL:Macros:setf]] ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 1)) 31)
-  ([[CL:Macros:setf]] ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 2)) 127)
-  ([[CL:Macros:setf]] ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 3)) 
-                      ([[CL:Functions:math-multiply|*]] 2 ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 3))))
+  ([[CL:Macros:setf]] ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 8) ([[CL:Functions:aref]] an-array 1)) 31)
+  ([[CL:Macros:setf]] ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 8) ([[CL:Functions:aref]] an-array 2)) 127)
+  ([[CL:Macros:setf]] ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 8) ([[CL:Functions:aref]] an-array 3)) 
+        ([[CL:Functions:math-multiply|*]] 2 ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 8) ([[CL:Functions:aref]] an-array 3))))
   ([[CL:Special Operators:let]] ((foo 0))
-  ([[CL:Symbols:declare]] (type ([[CL:Types:signed-byte]] 5) foo))
-  ([[CL:Macros:setf]] foo ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 0)))))
+    ([[CL:Symbols:declare]] (type ([[CL:Types:signed-byte]] 8) foo))
+    ([[CL:Macros:setf]] foo ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 0)))))<return>FROB</return>
 </blockquote>
 
 Given an implementation in which //[[CL:Glossary:fixnum|fixnums]]// are 29 bits but **[[CL:Types:fixnum]]** //[[CL:Glossary:array|arrays]]// are upgraded to signed 32-bit //[[CL:Glossary:array|arrays]]//, the following could be compiled with all //[[CL:Glossary:fixnum]]// arithmetic:
