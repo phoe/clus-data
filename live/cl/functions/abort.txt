@@ -19,69 +19,70 @@ If no such //[[CL:Glossary:restart]]// exists, the functions **[[CL:Functions:co
 When //condition// is //[[CL:Glossary:non-nil]]//, only those //[[CL:Glossary:restart|restarts]]// are considered that are either explicitly associated with that //condition//, or not associated with any //[[CL:Glossary:condition]]//; that is, the excluded //[[CL:Glossary:restart|restarts]]// are those that are associated with a non-empty set of //[[CL:Glossary:condition|conditions]]// of which the given //condition// is not an //[[CL:Glossary:element]]//. If //condition// is **[[CL:Constant Variables:nil]]**, all //[[CL:Glossary:restart|restarts]]// are considered.
 
 ====Examples====
+==Example of the **abort** restart==
 <blockquote>
-;;; Example of the ABORT restart
-
 ([[CL:Macros:defmacro]] abort-on-error (&body forms)
   `([[CL:Macros:handler-bind]] ((error #'abort)) ,@forms))
-
-(abort-on-error (+ 3 5)) → 8
+<r>ABORT-ON-ERROR</r>
+(abort-on-error (+ 3 5)) <r>8</r>
 (abort-on-error (error "You lose."))
-▷ Returned to Lisp Top Level.
-
-;;; Example of the CONTINUE restart
-
+<o>▷ Returned to Lisp Top Level.</o>
+</blockquote>
+==Example of the **continue** restart==
+<blockquote>
 ([[CL:Macros:defun]] real-sqrt (n)
   ([[CL:Macros:when]] ([[CL:Functions:minusp]] n)
     ([[CL:Functions:cerror]] "Return sqrt(~D) instead." "Tried to take sqrt(-~D)." n)
     ([[CL:Macros:setf]] n ([[CL:Functions:math-subtract|-]] n)))
-  (sqrt n))
+  (sqrt n)) <r>REAL-SQRT</r>
 
-(real-sqrt 4) → 2
+(real-sqrt 4) <r>2</r>
 (real-sqrt -9)
-▷ Error: Tried to take sqrt(-9).
-▷ To continue, type :CONTINUE followed by an option number:
-▷ 1: Return sqrt(9) instead.
-▷ 2: Return to Lisp Toplevel.
-▷ Debug> (continue)
-▷ Return sqrt(9) instead.
-  → 3
+<e>Error: Tried to take sqrt(-9).
+To continue, type :CONTINUE followed by an option number:
+1: Return sqrt(9) instead.
+2: Return to Lisp Toplevel.
+Debug> (continue)
+Return sqrt(9) instead.</e>
+<r>3</r>
 
 ([[CL:Macros:handler-bind]]
     (([[CL:Functions:error]] #'([[CL:Symbols:lambda]] (c) (continue))))
   (real-sqrt -9))
-  → 3
-
-;;; Example of the MUFFLE-WARNING restart
-
+<r>3</r>
+</blockquote>
+==Example of the **muffle-warning** restart==
+<blockquote>
 ([[CL:Macros:defun]] count-down (x)
   ([[CL:Macros:do]] ((counter x ([[CL:Functions:math-one-minus|1-]] counter)))
       (([[CL:Functions:math-equal|=]] counter 0) 'done)
     ([[CL:Macros:when]] ([[CL:Functions:math-equal|=]] counter 1)
       ([[CL:Functions:warn]] "Almost done"))
     ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~D~%" counter)))
+<r>COUNT-DOWN</r>
     
 (count-down 3)
-▷ 3
-▷ 2
-▷ Warning: Almost done
-▷ 1
-  → DONE
+<o>3
+2
+Warning: Almost done
+1</o>
+<r>DONE</r>
   
 ([[CL:Macros:defun]] ignore-warning (condition)
   ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] condition))
-  (muffle-warning))
+  (muffle-warning)) <r>IGNORE-WARNING</r>
 ([[CL:Macros:defun]] ignore-warnings-while-counting (x)
   ([[CL:Macros:handler-bind]] (([[CL:Types:warning]] #'ignore-warning))
-    (count-down x)))
+    (count-down x))) <r>IGNORE-WARNINGS-WHILE-COUNTING</r>
 
 (ignore-warnings-while-counting 3)
-▷ 3
-▷ 2
-▷ 1 → DONE
-
-;;; Example of the STORE-VALUE and USE-VALUE restarts
-
+<o>3
+2
+1 </o>
+<r>DONE</r>
+</blockquote>
+==Example of the **store-value** and **use-value** restarts==
+<blockquote>
 ([[CL:Macros:defun]] careful-symbol-value (symbol)
   ([[CL:Macros:check-type]] symbol [[CL:Types:symbol]])
   ([[CL:Macros:restart-case]]
@@ -94,39 +95,41 @@ When //condition// is //[[CL:Glossary:non-nil]]//, only those //[[CL:Glossary:re
     (store-value (value) 
       :report "Specify a value to store and use in the future." 
       ([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] symbol) value))))
+<r>CAREFUL-SYMBOL-VALUE</r>
     
-([[CL:Macros:defparameter]] *a* 1234) → 1234
-(careful-symbol-value '*a*) → 1234
-([[CL:Functions:makunbound]] '*a*) → A
+([[CL:Macros:defparameter]] *a* 1234) <r>1234</r>
+(careful-symbol-value '*a*) <r>1234</r>
+([[CL:Functions:makunbound]] '*a*) <r>A</r>
 (careful-symbol-value '*a*)
-▷ Error: *A* is not bound.
+<e>Error: *A* is not bound.
+To continue, type :CONTINUE followed by an option number.
+1: Specify a value to use this time.
+2: Specify a value to store and use in the future.
+3: Return to Lisp Toplevel.
+Debug> (use-value 12)</e>
+<r>12</r>
+(careful-symbol-value '*a*)
+<e>▷ Error: *A* is not bound.
 ▷ To continue, type :CONTINUE followed by an option number.
 ▷ 1: Specify a value to use this time.
 ▷ 2: Specify a value to store and use in the future.
 ▷ 3: Return to Lisp Toplevel.
-▷ Debug> (use-value 12)
-  → 12
-(careful-symbol-value '*a*)
-▷ Error: *A* is not bound.
-▷ To continue, type :CONTINUE followed by an option number.
-▷ 1: Specify a value to use this time.
-▷ 2: Specify a value to store and use in the future.
-▷ 3: Return to Lisp Toplevel.
-▷ Debug> (store-value 24)
-  → 24
-(careful-symbol-value '*a*) → 24
-
-;;; Example of the USE-VALUE restart
-
+▷ Debug> (store-value 24)</e>
+<r>24</r>
+(careful-symbol-value '*a*) <r>24</r>
+</blockquote>
+==Example of the **use-value** restart==
+<blockquote>
 ([[CL:Macros:defun]] add-symbols-with-default (default &rest symbols)
   ([[CL:Macros:handler-bind]] (([[CL:Types:unbound-symbol]] #'([[CL:Symbols:lambda]] (c)
                                      ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] c))
                                      (use-value default))))
   ([[CL:Functions:apply]] #'[[CL:Functions:math-add|+]] ([[CL:Functions:mapcar]] #'careful-symbol-value symbols))))
-([[CL:Macros:defparameter]] *x* 1)
-([[CL:Macros:defparameter]] *y* 2)
+<r>ADD-SYMBOLS-WITH-DEFAULT</r>
+([[CL:Macros:defparameter]] *x* 1) <r>*X*</r>
+([[CL:Macros:defparameter]] *y* 2) <r>*Y*</r>
 
-(add-symbols-with-default 3 '*x* '*y* '*z*) → 6
+(add-symbols-with-default 3 '*x* '*y* '*z*) <r>6</r>
 </blockquote>
 
 ====Side Effects====

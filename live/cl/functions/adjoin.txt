@@ -1,7 +1,7 @@
 ====== Function ADJOIN ======
 
 ====Syntax====
-  * **adjoin** //item list// ''&key'' //key test test-not// → //new-list//
+  * **adjoin** //item list ''&key'' key test test-not// → //new-list//
 
 ====Arguments and Values==== 
   * //item// - an //[[CL:Glossary:object]]//.
@@ -18,14 +18,14 @@ The //test//, //test-not//, and //key// affect how it is determined whether //it
 
 ====Examples====
 <blockquote>
-([[CL:Macros:defparameter]] *slist* '()) → [[CL:Constant Variable:nil|NIL]] 
-(adjoin 'a *slist*) → (A) 
-*slist* → [[CL:Constant Variable:nil|NIL]] 
-([[CL:Macros:setf]] *slist* (adjoin '(test-item 1) *slist*)) → ((TEST-ITEM 1)) 
-(adjoin '(test-item 1) *slist*) → ((TEST-ITEM 1) (TEST-ITEM 1)) 
-(adjoin '(test-item 1) *slist* :test #'[[CL:Functions:equal]]) → ((TEST-ITEM 1)) 
-(adjoin '(new-test-item 1) *slist* :key #'[[CL:Functions:cadr]]) → ((TEST-ITEM 1)) 
-(adjoin '(new-test-item 1) *slist*) → ((NEW-TEST-ITEM 1) (TEST-ITEM 1)) 
+([[CL:Macros:defparameter]] *slist* '()) <r>*SLIST*</r>
+(adjoin 'a *slist*) <r>(A) </r>
+*slist* <r>[[CL:Constant Variable:nil|NIL]] </r>
+([[CL:Macros:setf]] *slist* (adjoin '(test-item 1) *slist*)) <r>((TEST-ITEM 1)) </r>
+(adjoin '(test-item 1) *slist*) <r>((TEST-ITEM 1) (TEST-ITEM 1)) </r>
+(adjoin '(test-item 1) *slist* :test #'[[CL:Functions:equal]]) <r>((TEST-ITEM 1)) </r>
+(adjoin '(new-test-item 1) *slist* :key #'[[CL:Functions:cadr]]) <r>((TEST-ITEM 1)) </r>
+(adjoin '(new-test-item 1) *slist*) <r>((NEW-TEST-ITEM 1) (TEST-ITEM 1)) </r>
 </blockquote>
 
 ====Side Effects====
@@ -42,7 +42,7 @@ Should be prepared to signal an error of type type-error if //list// is not a //
 
 ====Example Implementation====
 <blockquote>
-(adjoin //item// //list// :key //fn//) ≡ (if (member (funcall //fn// //item//) //list// :key //fn//) list (cons //item// //list//))
+(adjoin //item// //list// :key //fn//) ≡ ([[CL:Macros:if]] ([[CL:Functions:member]] ([[CL:Functions:funcall]] //fn// //item//) //list// :key //fn//) //list// ([[CL:Functions:cons]] //item// //list//))
 </blockquote>
 
 ====Notes====

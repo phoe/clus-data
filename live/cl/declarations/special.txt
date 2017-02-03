@@ -15,21 +15,21 @@
 ====Description====
 Specifies that all of the //var//s named are dynamic. This specifier affects variable //[[CL:Glossary:binding|bindings]]// and affects references. All variable //[[CL:Glossary:binding|bindings]]// affected are made to be dynamic //[[CL:Glossary:binding|bindings]]//, and affected variable references refer to the current dynamic //[[CL:Glossary:binding]]//.
 
-For example:
-
+In the below example, the binding of the parameter ''*mod*'' is visible to ''hack1'', but the binding of ''thing'' is not.
 <blockquote>
-;; The binding of the parameter *mod* is visible to hack1, but not that of thing.
 ([[CL:Macros:defun]] hack (thing *mod*)
   ([[CL:Symbols:declare]] (special *mod*))
   (hack1 ([[CL:Functions:car]] thing)))
+<r>HACK</r>
    
 ([[CL:Macros:defun]] hack1 (arg)
   ([[CL:Symbols:declare]] (special *mod*))
   ;; Declare references to *mod* within hack1 to be special.
   ([[CL:Special Operators:if]] ([[CL:Functions:atom]] arg)
-      *mod*
+      <nowiki>*mod*</nowiki>
       ([[CL:Functions:cons]] (hack1 ([[CL:Functions:car]] arg))
             (hack1 ([[CL:Functions:cdr]] arg)))))
+<r>HACK1</r>
 </blockquote>
 
 A **special** declaration does not affect inner //[[CL:Glossary:binding|bindings]]// of a //var//; the inner //[[CL:Glossary:binding|bindings]]// implicitly shadow a **special** declaration and must be explicitly re-declared to be **special**. **special** declarations never apply to function //[[CL:Glossary:binding|bindings]]//.
@@ -58,57 +58,63 @@ the parameter ''x'' is bound as a dynamic variable rather than as a lexical vari
     ([[CL:Functions:list]] y
           ([[CL:Special Operators:locally]] ([[CL:Symbols:declare]] (special y))
             y)))) ; This y refers to the special binding of y.
-(declare-eg [[CL:Constant Variables:nil]]) → ([[CL:Constant Variables:t|T]] [[CL:Constant Variables:nil|NIL]])
-</blockquote>
-
-<blockquote>
+<r>DECLARE-EG</r>
+(declare-eg [[CL:Constant Variables:nil]])
+<r>([[CL:Constant Variables:t|T]] [[CL:Constant Variables:nil|NIL]])</r>
 ([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] 'x) 6)
+<r>6</r>
 ([[CL:Macros:defun]] foo (x) ; A lexical binding of x.
   ([[CL:Functions:print]] x)
   ([[CL:Special Operators:let]] ((x ([[CL:Functions:math-one-plus|1+]] x))) ; A special binding of x.
     ([[CL:Symbols:declare]] (special x)) ; And a lexical reference.
       (bar))
   ([[CL:Functions:math-one-plus|1+]] x))
-
+<r>FOO</r>
 ([[CL:Macros:defun]] bar ()
   ([[CL:Functions:print]] ([[CL:Special Operators:locally]] ([[CL:Symbols:declare]] (special x))
            x)))
-
+<r>BAR</r>
 (foo 10)
-▷ 10
-▷ 11
-  → 11 </blockquote>
+<o>10
+11</o>
+<r>11</r>
 
-<blockquote>
 ([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] 'x) 6)
+<r>6</r>
 ([[CL:Macros:defun]] bar (x y)  ; [1] 1st occurrence of x
-  ([[CL:Special Operators:let]] ((old-x x) ; [2] 2nd occurrence of x -- same as 1st occurrence
+  ([[CL:Special Operators:let]] ((old-x x) ; [2] 2nd occurrence of x - same as 1st occurrence
         (x y))    ;[3] 3rd occurrence of x
     ([[CL:Symbols:declare]] (special x))
     ([[CL:Functions:list]] old-x x)))
-(bar 'first 'second) → (FIRST SECOND)
-</blockquote>
+<r>BAR</r>
+(bar 'first 'second)
+<r>(FIRST SECOND)</r>
 
-<blockquote>
 ([[CL:Macros:defun]] few (x &optional (y *foo*))
   ([[CL:Symbols:declare]] (special *foo*)) 
-  ...)
-</blockquote>
+  ...)</blockquote>
 
 The reference to ''*foo*'' in the first line of this example is not **special** even though there is a **special** declaration in the second line.
 
 <blockquote>
 ([[CL:Macros:declaim]] (special *prosp*))
+<r>//[[CL:Glossary:implementation-dependent]]//</r>
 ([[CL:Macros:defparameter]] *prosp* 1)
+<r>*PROSP*</r>
 ([[CL:Macros:defparameter]] *reg* 1)
-([[CL:Special Operators:let]] ((*prosp* 2) (*reg* 2)) ; the binding of *prosp* is special
-  ([[CL:Functions:set]] '*prosp* 3)         ; due to the preceding proclamation,
-  ([[CL:Functions:set]] '*reg* 3)           ; whereas the variable *reg* is lexical
+<r>*REG*</r>
+</blockquote>
+In the example below, the binding of ''*prosp*'' is special due to the preceding proclamation, whereas the variable ''*reg*'' is lexical.
+<blockquote>
+([[CL:Special Operators:let]] ((*prosp* 2) (*reg* 2))
+  ([[CL:Functions:set]] '*prosp* 3)
+  ([[CL:Functions:set]] '*reg* 3)
   ([[CL:Functions:list]] *prosp* *reg*)) 
-  → (3 2)
-([[CL:Functions:list]] *prosp* *reg*) → (1 3)
+<r>(3 2)</r>
+([[CL:Functions:list]] *prosp* *reg*)<r>(1 3)</r>
 
-([[CL:Macros:declaim]] (special x)) ;x is always special.
+([[CL:Macros:declaim]] (special x)) ; x is always special.
+<r>//[[CL:Glossary:implementation-dependent]]//</r>
 ([[CL:Macros:defun]] example (x y)
   ([[CL:Symbols:declare]] (special y))
   ([[CL:Special Operators:let]] ((y 3) (x ([[CL:Functions:math-multiply|*]] x 2)))
@@ -117,6 +123,7 @@ The reference to ''*foo*'' in the first line of this example is not **special** 
     ([[CL:Special Operators:let]] ((y 4))
       ([[CL:Symbols:declare]] (special y))
         (foo x))))
+<r>EXAMPLE</r>
 </blockquote>
 
 In the contorted code above, the outermost and innermost //[[CL:Glossary:binding|bindings]]// of ''y'' are dynamic, but the middle binding is lexical. The two arguments to ''+'' are different, one being the value, which is ''3'', of the lexical variable ''y'', and the other being the value of the dynamic variable named ''y'' (a //[[CL:Glossary:binding]]// of which happens, coincidentally, to lexically surround it at an outer level). All the //[[CL:Glossary:binding|bindings]]// of ''x'' and references to ''x'' are dynamic, however, because of the proclamation that ''x'' is always **special**.
