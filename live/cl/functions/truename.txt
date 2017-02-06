@@ -22,22 +22,22 @@ If //filespec// is a //[[CL:Glossary:pathname]]// it represents the name used to
 ;;; truename is implementation-dependent while the file is still open.
 ([[CL:Macros:with-open-file]] (stream ">vistor>test.text.newest")
   ([[CL:Functions:values]] ([[CL:Functions:pathname]] stream) (truename stream)))
-  → #P"S:>vistor>test.text.newest", #P"S:>vistor>test.text.1" 
-  //or// → #P"S:>vistor>test.text.newest", #P"S:>vistor>test.text.newest" 
-  //or// → #P"S:>vistor>test.text.newest", #P"S:>vistor>_temp_._temp_.1"
+<r>#P"S:>vistor>test.text.newest", #P"S:>vistor>test.text.1" 
+//or// #P"S:>vistor>test.text.newest", #P"S:>vistor>test.text.newest" 
+//or// #P"S:>vistor>test.text.newest", #P"S:>vistor>_temp_._temp_.1"</r>
 
 ;;; In this case, the file is closed when the truename is tried, so the 
 ;;; truename information is reliable.
 ([[CL:Macros:with-open-file]] (stream ">vistor>test.text.newest")
   ([[CL:Functions:close]] stream)
   ([[CL:Functions:values]] ([[CL:Functions:pathname]] stream) (truename stream)))
-  → #P"S:>vistor>test.text.newest", #P"S:>vistor>test.text.1"
+<r>#P"S:>vistor>test.text.newest", #P"S:>vistor>test.text.1"</r>
 
 ;;; An example involving TOP-20's implementation-dependent concept of logical
 ;;; devices -- in this case, "DOC:" is shorthand for "PS:<DOCUMENTATION>" ...
 ([[CL:Macros:with-open-file]] (stream "CMUC::DOC:DUMPER.HLP")
   ([[CL:Functions:values]] ([[CL:Functions:pathname]] stream) (truename stream)))
-  → #P"CMUC::DOC:DUMPER.HLP", #P"CMUC::PS:<DOCUMENTATION>DUMPER.HLP.13"
+<r>#P"CMUC::DOC:DUMPER.HLP", #P"CMUC::PS:<DOCUMENTATION>DUMPER.HLP.13"</r>
 </blockquote>
 
 ====Affected By====

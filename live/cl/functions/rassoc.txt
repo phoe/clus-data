@@ -1,35 +1,34 @@
 ====== Function RASSOC, RASSOC-IF, RASSOC-IF-NOT ======
 
 ====Syntax====
-  * **rassoc       ** //item      alist ''&key'' key test test-not// → //entry//
-  * **rassoc-if    ** //predicate alist ''&key'' key// → //entry//
-  * **rassoc-if-not** //predicate alist ''&key'' key// → //entry//
+  * **rassoc** //item alist ''&key'' key test test-not// → entry
+  * **rassoc-if** //predicate alist ''&key'' key// → entry
+  * **rassoc-if-not** //predicate alist ''&key'' key// → entry
 
 ====Arguments and Values==== 
-
-  * //item// - an //[[CL:Glossary:object]]//.
-  * //alist// - an //[[CL:Glossary:association list]]//.
-  * //predicate// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]// that returns a //[[CL:Glossary:generalized boolean]]//.
-  * //test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
-  * //test-not// - a //[[CL:Glossary:designator]]// for  a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
-  * //key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one [[CL:Glossary:argument]], or **[[CL:Constant Variable:nil]]**.
-  * //entry// - a //[[CL:Glossary:cons]]// that is an //[[CL:Glossary:element]]// of the //alist//, or **[[CL:Constant Variable:nil]]**.
+  * item - an //[[CL:Glossary:object]]//.
+  * alist - an //[[CL:Glossary:association list]]//.
+  * predicate - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * test - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * test-not - a //[[CL:Glossary:designator]]// for  a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * key - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]//, or **[[CL:Constant Variable:nil]]**.
+  * entry - a //[[CL:Glossary:cons]]// that is an //[[CL:Glossary:element]]// of the alist, or **[[CL:Constant Variable:nil]]**.
 
 ====Description====
 **rassoc**, **rassoc-if**, and **rassoc-if-not** return the first //[[CL:Glossary:cons]]// whose //[[CL:Glossary:cdr]]//  //[[CL:Glossary:satisfy the test|satisfies the test]]//. If no such //[[CL:Glossary:cons]]// is found, **[[CL:Constant Variable:nil]]** is returned.
 
-If **[[CL:Constant Variable:nil]]** appears in //alist// in place of a pair, it is  ignored.
+If **[[CL:Constant Variable:nil]]** appears in alist in place of a pair, it is  ignored.
 
 ====Examples====
 <blockquote>
-([[CL:Macros:defparameter]] //*alist*// '((1 . "one") (2 . "two") (3 . 3))) → ((1 . "one") (2 . "two") (3 . 3))
-(rassoc 3 //*alist*//) → (3 . 3)
-(rassoc "two" //*alist*//) → [[CL:Constant Variable:nil|NIL]]
-(rassoc "two" //*alist*// :test #'[[CL:Functions:equal]]) → (2 . "two")
-(rassoc 1 //*alist*// :key #'([[CL:Macros:lambda]] (//x//) ([[CL:Special Operators:if]] ([[CL:Functions:numberp]] //x//) ([[CL:Functions:divide|/]] //x// 3)))) → (3 . 3)
-(rassoc 'a '((a . b) (b . c) (c . a) (z . a))) → (C . A)
-(rassoc-if #'[[CL:Functions:stringp]] //*alist*//) → (1 . "one")
-(rassoc-if-not #'[[CL:Functions:vectorp]] //*alist*//) → (3 . 3)
+([[CL:Macros:defparameter]] *alist* '((1 . "one") (2 . "two") (3 . 3))) <r>*ALIST*</r>
+(rassoc 3 *alist*) <r>(3 . 3)</r>
+(rassoc "two" *alist*) <r>[[CL:Constant Variables:nil|NIL]]</r>
+(rassoc "two" *alist* :test #'[[CL:Functions:equal]]) <r>(2 . "two")</r>
+(rassoc 1 *alist* :key #'([[CL:Symbols:lambda]] (x) ([[CL:Special Operators:if]] ([[CL:Functions:numberp]] x) ([[CL:Functions:math-divide|/]] x 3)))) <r>(3 . 3)</r>
+(rassoc 'a '((a . b) (b . c) (c . a) (z . a))) <r>(C . A)</r>
+(rassoc-if #'[[CL:Functions:stringp]] *alist*) <r>(1 . "one")</r>
+(rassoc-if-not #'[[CL:Functions:vectorp]] *alist*) <r>(3 . 3)</r>
 </blockquote>
 
 ====Side Effects====
@@ -48,23 +47,23 @@ None.
 The expressions
 
 <blockquote>
-(rassoc //item// //list// :test //fn//)
+(rassoc item list :test fn)
 </blockquote>
 
 and
 
 <blockquote>
-([[CL:Functions:find]] //item// //list// :test //fn// :key #'[[CL:Functions:cdr]])
+([[CL:Functions:find]] item list :test fn :key #'[[CL:Functions:cdr]])
 </blockquote>
 
-are equivalent in meaning, except when the ''item'' is **[[CL:Constant Variable:nil]]** and **[[CL:Constant Variable:nil]]** appears in place of a pair in the //alist//. See the //[[CL:Glossary:function]]// **[[CL:Functions:assoc]]**. 
+are equivalent in meaning, except when the ''item'' is **[[CL:Constant Variable:nil]]** and **[[CL:Constant Variable:nil]]** appears in place of a pair in the alist. See the //[[CL:Glossary:function]]// **[[CL:Functions:assoc]]**. 
 
 ====Notes====
 The **'':test-not''** parameter is deprecated.
 
 The //[[CL:Glossary:function]]// **rassoc-if-not** is deprecated.
 
-It is possible to **[[CL:Functions:rplaca]]** the result of **rassoc**, provided that it is not **[[CL:Constant Variable:nil]]**, in order to "update" //alist//. 
+It is possible to **[[CL:Functions:rplaca]]** the result of **rassoc**, provided that it is not **[[CL:Constant Variable:nil]]**, in order to "update" alist. 
 
 
 

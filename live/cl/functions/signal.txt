@@ -16,27 +16,31 @@
   ([[CL:Functions:format]] [[CL:Constant Variables:t]] "Considering condition for division condition handling~%"
           ([[CL:Macros:when]] ([[CL:Macros:and]] ([[CL:Functions:typep]] condition 'arithmetic-error) 
                      ([[CL:Functions:eq]] '/ (arithmetic-error-operation condition))) 
-            ([[CL:Functions:invoke-debugger]] condition))) 
+            ([[CL:Functions:invoke-debugger]] condition)))
+<r>HANDLE-DIVISION-CONDITION</r>
 
 ([[CL:Macros:defun]] handle-other-arithmetic-errors (condition) 
   ([[CL:Functions:format]] [[CL:Constant Variables:t]] "Considering condition for arithmetic condition handling~%"
     ([[CL:Macros:when]] ([[CL:Functions:typep]] condition 'arithmetic-error) ([[CL:Functions:abort]]))) 
+<r>HANDLE-OTHER-ARITHMETIC-ERRORS</r>
 
 ([[CL:Macros:define-condition]] a-condition-with-no-handler (condition) ())
-(signal 'a-condition-with-no-handler) → [[CL:Constant Variables:nil|NIL]] 
+<r>A-CONDITION-WITH-NO-HANDLER</r>
+(signal 'a-condition-with-no-handler)
+<r>[[CL:Constant Variables:nil|NIL]] </r>
 
 ([[CL:Macros:handler-bind]] ((condition #'handle-division-conditions) 
                (condition #'handle-other-arithmetic-errors)) 
   (signal 'a-condition-with-no-handler)) 
-▷ Considering condition for division condition handling 
-▷ Considering condition for arithmetic condition handling 
-→ [[CL:Constant Variables:nil|NIL]] 
+<o>Considering condition for division condition handling 
+Considering condition for arithmetic condition handling</o>
+<r>[[CL:Constant Variables:nil|NIL]] </r>
 ([[CL:Macros:handler-bind]] ((arithmetic-error #'handle-division-conditions) 
                (arithmetic-error #'handle-other-arithmetic-errors))
   (signal 'arithmetic-error :operation '* :operands '(1.2 b)))
-▷ Considering condition for division condition handling
-▷ Considering condition for arithmetic condition handling
-→ [[CL:Constant Variables:nil|NIL]] 
+<o>Considering condition for division condition handling
+Considering condition for arithmetic condition handling</o>
+<r>[[CL:Constant Variables:nil|NIL]]</r>
 </blockquote>
 
 ====Side Effects====

@@ -25,18 +25,21 @@ If **sublis** succeeds, a new copy of //tree// is returned in which each occurre
 
 ====Examples====
 <blockquote>
-(sublis '((x . 100) (z . zprime)) '(plus x (minus g z x p) 4 . x)) → (PLUS 100 (MINUS G ZPRIME 100 P) 4 . 100)
-(sublis '(((+ x y) . (- x y)) ((- x y) . (+ x y))) '(* (/ (+ x y) (+ x p)) (- x y)) :test #'[[CL:Functions:equal]]) → (* (/ (- X Y) (+ X P)) (+ X Y))
-([[CL:Macros:defparameter]] //*tree-1*// '(1 (1 2) ((1 2 3)) (((1 2 3 4))))) → (1 (1 2) ((1 2 3)) (((1 2 3 4))))
-(sublis '((3 . "three")) //*tree-1*//)  → (1 (1 2) ((1 2 "three")) (((1 2 "three" 4))))
-(sublis '((t . "string")) (sublis '((1 . "") (4 . 44)) //*tree-1*//) :key #'[[CL:Functions:stringp]]) → ("string" ("string" 2) (("string" 2 3)) ((("string" 2 3 44))))
-//*tree-1*// → (1 (1 2) ((1 2 3)) (((1 2 3 4))))
-([[CL:Macros:defparameter]] //*tree-2*// '("one" ("one" "two") (("one" "Two" "three")))) → ("one" ("one" "two") (("one" "Two" "three"))) 
-(sublis '(("two" . 2)) //*tree-2*//) → ("one" ("one" "two") (("one" "Two" "three"))) 
-//*tree-2*// → ("one" ("one" "two") (("one" "Two" "three"))) 
-(sublis '(("two" . 2)) //*tree-2*// :test #'[[CL:Functions:equal]]) → ("one" ("one" 2) (("one" "Two" "three"))) 
+;;; TODO fix indentation on this one
+(sublis '((x . 100) (z . zprime)) '(plus x (minus g z x p) 4 . x))
+<r>(PLUS 100 (MINUS G ZPRIME 100 P) 4 . 100)</r>
+(sublis '(((+ x y) . (- x y)) ((- x y) . (+ x y))) '(* (/ (+ x y) (+ x p)) (- x y)) :test #'[[CL:Functions:equal]]) 
+<r>(* (/ (- X Y) (+ X P)) (+ X Y))</r>
+([[CL:Macros:defparameter]] //*tree-1*// '(1 (1 2) ((1 2 3)) (((1 2 3 4))))) <r>*TREE-1*</r>
+(sublis '((3 . "three")) //*tree-1*//) <r>(1 (1 2) ((1 2 "three")) (((1 2 "three" 4))))</r>
+(sublis '((t . "string")) (sublis '((1 . "") (4 . 44)) //*tree-1*//) :key #'[[CL:Functions:stringp]]) <r>("string" ("string" 2) (("string" 2 3)) ((("string" 2 3 44))))</r>
+//*tree-1*// <r>(1 (1 2) ((1 2 3)) (((1 2 3 4))))</r>
+([[CL:Macros:defparameter]] //*tree-2*// '("one" ("one" "two") (("one" "Two" "three")))) <r>*TREE-2*</r>
+(sublis '(("two" . 2)) //*tree-2*//) <r>("one" ("one" "two") (("one" "Two" "three"))) </r>
+//*tree-2*// <r>("one" ("one" "two") (("one" "Two" "three"))) </r>
+(sublis '(("two" . 2)) //*tree-2*// :test #'[[CL:Functions:equal]]) <r>("one" ("one" 2) (("one" "Two" "three"))) </r>
 
-(nsublis '((t . 'temp)) //*tree-1*// :key #'([[CL:Macros:lambda]] (//x//) ([[CL:Macros:or]] ([[CL:Functions:atom]] //x//) ([[CL:Functions:less|<]] ([[CL:Functions:list-length]] //x//) 3)))) → ((QUOTE TEMP) (QUOTE TEMP) QUOTE TEMP) 
+(nsublis '((t . 'temp)) //*tree-1*// :key #'([[CL:Macros:lambda]] (//x//) ([[CL:Macros:or]] ([[CL:Functions:atom]] //x//) ([[CL:Functions:less|<]] ([[CL:Functions:list-length]] //x//) 3)))) <r>((QUOTE TEMP) (QUOTE TEMP) QUOTE TEMP) </r>
 </blockquote>
 
 ====Side Effects====
@@ -64,8 +67,9 @@ Because the side-effecting variants (//e.g.// **nsublis**) potentially change th
   ([[CL:Special Operators:let*]] ((//shared-piece// ([[CL:Functions:list]] 'a 'b))
          (//data// ([[CL:Functions:list]] //shared-piece// //shared-piece//)))
     ([[CL:Functions:funcall]] //fn// '((a . b) (b . a)) data)))
-(test-it #'sublis) → ((B A) (B A))
-(test-it #'nsublis) → ((A B) (A B))
+<r>TEST-IT</r>
+(test-it #'sublis) <r>((B A) (B A))</r>
+(test-it #'nsublis) <r>((A B) (A B))</r>
 </blockquote>
 
 \issue{DOTTED-LIST-ARGUMENTS:CLARIFY}

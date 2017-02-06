@@ -21,25 +21,25 @@
 
 ====Examples====
 <blockquote>
-([[CL:Macros:defparameter]] //*x*// '()) → [[CL:Constant Variable:nil|NIL]]
-(getf //*x*// '//prop1//) → [[CL:Constant Variable:nil|NIL]]
-(getf //*x*// '//prop1// 7) → 7
-(getf //*x*// '//prop1//) → [[CL:Constant Variable:nil|NIL]]
-([[CL:Macros:setf]] (getf //*x*// '//prop1//) '//val1//) → VAL1
-([[CL:Functions:eq]] (getf //*x*// '//prop1//) '//val1//) → //[[CL:Glossary:true]]//
-(getf //*x*// '//prop1//) → //VAL1//
-(getf //*x*// '//prop1// 7) → //VAL1//
-//*x*// → (//PROP1// //VAL1//)
-;; Examples of implementation variation permitted.
-([[CL:Macros:defparameter]] //*foo*// ([[CL:Functions:list]] 'a 'b 'c 'd 'e 'f)) → (A B C D E F)
-([[CL:Macros:defparameter]] //*bar*// ([[CL:Functions:cddr]] //*foo*//)) → (C D E F)
-([[CL:Macros:remf]] //*foo*// 'c) → //[[CL:Glossary:true]]//
-//*foo*// → (A B E F)
-//*bar*// → (C D E F)
-   //or// → (C)
-   //or// → ([[CL:Constant Variable:nil|NIL]])
-   //or// → (C [[CL:Constant Variable:nil|NIL]])
-   //or// → (C D)
+([[CL:Macros:defparameter]] *x* '()) <r>*X*</r>
+(getf *x* 'prop1) <r>[[CL:Constant Variable:nil|NIL]]</r>
+(getf *x* 'prop1 7) <r>7</r>
+(getf *x* 'prop1) <r>[[CL:Constant Variable:nil|NIL]]</r>
+([[CL:Macros:setf]] (getf *x* 'prop1) 'val1) <r>VAL1</r>
+([[CL:Functions:eq]] (getf *x* 'prop1) 'val1) <r>[[CL:Glossary:true]]</r>
+(getf *x* 'prop1) <r>VAL1</r>
+(getf *x* 'prop1 7) <r>VAL1</r>
+*x* <r>(PROP1 VAL1)</r>
+([[CL:Macros:defparameter]] *foo* ([[CL:Functions:list]] 'a 'b 'c 'd 'e 'f)) <r>*FOO*</r>
+([[CL:Macros:defparameter]] *bar* ([[CL:Functions:cddr]] *foo*)) <r>*BAR*</r>
+([[CL:Macros:remf]] *foo* 'c) <r>[[CL:Glossary:true]]</r>
+*foo* <r>(A B E F)</r>
+*bar* 
+<r>(C D E F)
+//or// (C)
+//or// ([[CL:Constant Variable:nil|NIL]])
+//or// (C [[CL:Constant Variable:nil|NIL]])
+//or// (C D)</r>
 </blockquote>
 
 ====Side Effects====
@@ -63,9 +63,9 @@ There is no way (using **getf**) to distinguish an absent property from one whos
 Note that while supplying a //[[CL:Glossary:default]]// argument to **[[CL:Macros:getf]]** in a **[[CL:Macros:setf]]** situation is sometimes not very interesting, it is still important because some macros, such as **[[CL:Macros:push]]** and **[[CL:Macros:incf]]**, require a //place// argument which data is both //[[CL:Glossary:read]]// from and //[[CL:Glossary:write|written]]// to.  In such a context, if a //[[CL:Glossary:default]]//  argument is to be supplied for the //[[CL:Glossary:read]]// situation, it must be syntactically valid for the //[[CL:Glossary:write]]// situation as well. For example,
 
 <blockquote>
-([[CL:Special Operators:let]] ((//plist// '()))
-  ([[CL:Macros:incf]] (getf //plist// 'count 0))
-  //plist//) → (COUNT 1)
+([[CL:Special Operators:let]] ((plist '()))
+  ([[CL:Macros:incf]] (getf plist 'count 0))
+  plist) <r>(COUNT 1)</r>
 </blockquote>
 
 
