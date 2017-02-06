@@ -32,6 +32,10 @@ If //initial-element// is supplied, it is used to initialize each //[[CL:Glossar
               ((d e f) (3 1 2)) 
               ((g h i) (2 3 1)) 
               ((j k l) (0 0 0))))
+<o>#3A(((A B C) (1 2 3)) 
+    ((D E F) (3 1 2)) 
+    ((G H I) (2 3 1))
+    ((J K L) (0 0 0)))</o>
 </blockquote>
 
 //initial-contents// is composed of a nested structure of //[[CL:Glossary:sequences]]//. The numbers of levels in the structure must equal the rank of //[[CL:Glossary:array]]//. Each leaf of the nested structure must be of the //[[CL:Glossary:type]]// given by //element-type//. If //[[CL:Glossary:array]]// is zero-dimensional, then //initial-contents// specifies the single //[[CL:Glossary:element]]//. Otherwise, //initial-contents// must be a //[[CL:Glossary:sequence]]// whose length is equal to the first dimension; each element must be a nested structure for an //[[CL:Glossary:array]]// whose dimensions are the remaining dimensions, and so on. //Initial-contents// cannot be supplied if either //initial-element// is supplied or //displaced-to// is //[[CL:Glossary:non-nil]]//. If //initial-contents// is not supplied, the consequences of later reading an uninitialized //[[CL:Glossary:element]]// of //new-array// are undefined unless either //initial-element// is supplied or //displaced-to// is //[[CL:Glossary:non-nil]]//.
@@ -55,68 +59,74 @@ When an array A is given as the '':displaced-to'' argument to **make-array** whe
 ====Examples====
 <blockquote>
 (make-array 5) 
-;; Creates a one-dimensional array of five elements.
+;;; Creates a one-dimensional array of five elements.
 
 (make-array '(3 4) :element-type '(mod 16)) 
-;; Creates a two-dimensional array, 3 by 4, with four-bit elements.
+;;; Creates a two-dimensional array, 3 by 4, with four-bit elements.
 
 (make-array 5 :element-type 'single-float) 
-;; Creates an array of single-floats.
+;;; Creates an array of single-floats.
 
-(make-array nil :initial-element nil) → #0ANIL
-(make-array 4 :initial-element nil) → #(NIL NIL NIL NIL)
+(make-array nil :initial-element nil) <r>#0ANIL</r>
+(make-array 4 :initial-element nil) <r>#(NIL NIL NIL NIL)</r>
 (make-array '(2 4) :element-type '(unsigned-byte 2) 
-                   :initial-contents '((0 1 2 3) (3 2 1 0))) → #2A((0 1 2 3) (3 2 1 0))
-(make-array 6 :element-type 'character :initial-element #\a :fill-pointer 3) → "aaa"
+                   :initial-contents '((0 1 2 3) (3 2 1 0))) <r>#2A((0 1 2 3) (3 2 1 0))</r>
+(make-array 6 :element-type 'character :initial-element #\a :fill-pointer 3) <r>"aaa"</r>
 </blockquote>
 
 The following is an example of making a //[[CL:Glossary:displaced array]]//.
 
 <blockquote> 
-([[CL:Macros:defparameter]] a (make-array '(4 3))) → #<ARRAY 4x3 simple 32546632> 
+([[CL:Macros:defparameter]] a (make-array '(4 3))) <r>#<ARRAY 4x3 simple 32546632> </r>
 (dotimes (i 4) 
   (dotimes (j 3) 
-    ([[CL:Macros:setf]] (aref a i j) (list i 'x j '= (* i j))))) → NIL 
+    ([[CL:Macros:setf]] (aref a i j) (list i 'x j '= (* i j))))) <r>NIL </r>
 ([[CL:Macros:defparameter]] b 
-  (make-array 8 :displaced-to a :displaced-index-offset 2)) → #<ARRAY 8 indirect 32550757> 
+  (make-array 8 :displaced-to a :displaced-index-offset 2)) <r>#<ARRAY 8 indirect 32550757> </r>
   
 (dotimes (i 8) (print (list i (aref b i))))
-▷ (0 (0 X 2 = 0))
-▷ (1 (1 X 0 = 0))
-▷ (2 (1 X 1 = 1))
-▷ (3 (1 X 2 = 2))
-▷ (4 (2 X 0 = 0))
-▷ (5 (2 X 1 = 2))
-▷ (6 (2 X 2 = 4))
-▷ (7 (3 X 0 = 0))
-→ NIL 
+<o>(0 (0 X 2 = 0))
+(1 (1 X 0 = 0))
+(2 (1 X 1 = 1))
+(3 (1 X 2 = 2))
+(4 (2 X 0 = 0))
+(5 (2 X 1 = 2))
+(6 (2 X 2 = 4))
+(7 (3 X 0 = 0))</o>
+<r>NIL </r>
 </blockquote> 
 The last example depends on the fact that //[[CL:Glossary:array|arrays]]// are, in effect, stored in row-major order.
 
 <blockquote> 
-([[CL:Macros:defparameter]] a1 
-  (make-array 50)) → #<ARRAY 50 simple 32562043> 
-([[CL:Macros:defparameter]] b1 
-  (make-array 20 :displaced-to a1 
-                 :displaced-index-offset 10)) → #<ARRAY 20 indirect 32563346> 
-(length b1) → 20
+([[CL:Macros:defparameter]] *a1*
+  (make-array 50)) <r>*A1*</r>
+*a1* <r>#<ARRAY 50 simple 32562043> </r>
+([[CL:Macros:defparameter]] *b1* 
+  (make-array 20 :displaced-to *a1* 
+                 :displaced-index-offset 10)) <r>*B1*</r>
+*b1* <r>#<ARRAY 20 indirect 32563346></r>
+(length *b1*) <r>20</r>
 
-([[CL:Macros:defparameter]] a2 
-  (make-array 50 :fill-pointer 10)) → #<ARRAY 50 fill-pointer 10 46100216> 
-([[CL:Macros:defparameter]] b2 
-  (make-array 20 :displaced-to a2 
-                 :displaced-index-offset 10)) → #<ARRAY 20 indirect 46104010> 
-(length a2) → 10 
-(length b2) → 20
+([[CL:Macros:defparameter]] *a2* 
+  (make-array 50 :fill-pointer 10)) <r>*A2*</r>
+*a2* <r>#<ARRAY 50 fill-pointer 10 46100216> </r>
+([[CL:Macros:defparameter]] *b2* 
+  (make-array 20 :displaced-to *a2* 
+                 :displaced-index-offset 10)) *B2*
+*b2* <r>#<ARRAY 20 indirect 46104010> </r>
+(length *a2*) <r>10 </r>
+(length *b2*) <r>20</r>
 
-([[CL:Macros:defparameter]] a3 
-  (make-array 50 :fill-pointer 10)) → #<ARRAY 50 fill-pointer 10 46105663> 
-([[CL:Macros:defparameter]] b3 
-  (make-array 20 :displaced-to a3 
+([[CL:Macros:defparameter]] *a3* 
+  (make-array 50 :fill-pointer 10)) <r>*A3*</r>
+*a3* <r>#<ARRAY 50 fill-pointer 10 46105663> </r>
+([[CL:Macros:defparameter]] *b3* 
+  (make-array 20 :displaced-to *a3* 
                  :displaced-index-offset 10 
-                 :fill-pointer 5)) → #<ARRAY 20 indirect, fill-pointer 5 46107432> 
-(length a3) → 10 
-(length b3) → 5
+                 :fill-pointer 5)) <r>*B3*</r>
+*b3* <r>#<ARRAY 20 indirect, fill-pointer 5 46107432> </r>
+(length *a3*) <r>10 </r>
+(length *b3*) <r>5</r>
 </blockquote>
 
 ====Affected By====

@@ -32,98 +32,128 @@ These macros are defined in the three examples below:
 ;;; Helper macros
 ([[CL:Macros:defmacro]] expand (form &environment env)
   ([[CL:Macros:multiple-value-bind]] (expansion expanded-p) (macroexpand form env) 
-    `([[CL:Functions:values]] ',expansion ',expanded-p)))
+    `([[CL:Functions:values]] ',expansion ',expanded-p))) <r>EXPAND</r>
 
 ([[CL:Macros:defmacro]] expand-1 (form &environment env)
   ([[CL:Macros:multiple-value-bind]] (expansion expanded-p) (macroexpand-1 form env)
-    `([[CL:Functions:values]] ',expansion ',expanded-p)))
+    `([[CL:Functions:values]] ',expansion ',expanded-p))) <r>EXPAND-1</r>
 
 ;;; Sample macros
-([[CL:Macros:defmacro]] alpha (x y) `(beta ,x ,y))
-([[CL:Macros:defmacro]] beta (x y) `(gamma ,x ,y))
-([[CL:Macros:defmacro]] delta (x y) `(gamma ,x ,y))
+([[CL:Macros:defmacro]] alpha (x y) `(beta ,x ,y)) <r>ALPHA</r>
+([[CL:Macros:defmacro]] beta (x y) `(gamma ,x ,y)) <r>BETA</r>
+([[CL:Macros:defmacro]] delta (x y) `(gamma ,x ,y)) <r>DELTA</r>
 </blockquote>
 
 ==Simple examples involving just the global environment==
 <blockquote>
-(macroexpand-1 '(alpha a b)) → (BETA A B), //[[CL:Glossary:true]]// 
-(expand-1 (alpha a b)) → (BETA A B), //[[CL:Glossary:true]]// 
+(macroexpand-1 '(alpha a b)) 
+<r>(BETA A B)
+//[[CL:Glossary:true]]// </r>
+(expand-1 (alpha a b)) 
+<r>(BETA A B)
+//[[CL:Glossary:true]]// </r>
 
-(macroexpand '(alpha a b)) → (GAMMA A B), //[[CL:Glossary:true]]// 
-(expand (alpha a b)) → (GAMMA A B), //[[CL:Glossary:true]]//
+(macroexpand '(alpha a b))
+<r>(GAMMA A B)
+ //[[CL:Glossary:true]]// </r>
+(expand (alpha a b)) 
+<r>(GAMMA A B)
+//[[CL:Glossary:true]]//</r>
 
-(macroexpand-1 'not-a-macro) → NOT-A-MACRO, //[[CL:Glossary:false]]// 
-(expand-1 not-a-macro) → NOT-A-MACRO, //[[CL:Glossary:false]]// 
+(macroexpand-1 'not-a-macro)
+<r>NOT-A-MACRO
+//[[CL:Glossary:false]]// </r>
+(expand-1 not-a-macro)
+<r>NOT-A-MACRO
+//[[CL:Glossary:false]]// </r>
 
-(macroexpand '(not-a-macro a b)) → (NOT-A-MACRO A B), //[[CL:Glossary:false]]// 
-(expand (not-a-macro a b)) → (NOT-A-MACRO A B), //[[CL:Glossary:false]]//
+(macroexpand '(not-a-macro a b)) 
+<r>(NOT-A-MACRO A B)
+//[[CL:Glossary:false]]// </r>
+(expand (not-a-macro a b)) 
+<r>(NOT-A-MACRO A B)
+//[[CL:Glossary:false]]//</r>
 </blockquote>
 
 ==Examples involving lexical environments==
 <blockquote>
 ([[CL:Special Operators:macrolet]] ((alpha (x y) `(delta ,x ,y)))
   (macroexpand-1 '(alpha a b))) 
-  → (BETA A B), //[[CL:Glossary:true]]// 
+<r>(BETA A B)
+//[[CL:Glossary:true]]// </r>
 
 ([[CL:Special Operators:macrolet]] ((alpha (x y) `(delta ,x ,y))) 
   (expand-1 (alpha a b))) 
-  → (DELTA A B), //[[CL:Glossary:true]]// 
+<r>(DELTA A B)
+//[[CL:Glossary:true]]// </r>
   
 ([[CL:Special Operators:macrolet]] ((alpha (x y) `(delta ,x ,y))) 
   (macroexpand '(alpha a b))) 
-  → (GAMMA A B), //[[CL:Glossary:true]]//
+<r>(GAMMA A B)
+//[[CL:Glossary:true]]//</r>
   
 ([[CL:Special Operators:macrolet]] ((alpha (x y) `(delta ,x ,y))) 
   (expand (alpha a b))) 
-  → (GAMMA A B), //[[CL:Glossary:true]]// 
+<r>(GAMMA A B)
+//[[CL:Glossary:true]]// </r>
   
 ([[CL:Special Operators:macrolet]] ((beta (x y) `(epsilon ,x ,y))) 
   (expand (alpha a b))) 
-  → (EPSILON A B), //[[CL:Glossary:true]]// 
+<r>(EPSILON A B)
+//[[CL:Glossary:true]]// </r>
   
 ([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] 1 2 3))) 
   ([[CL:Special Operators:symbol-macrolet]] ((a ([[CL:Functions:first]] x))) 
     (expand a))) 
-  → ([[CL:Functions:first|FIRST]] X), //[[CL:Glossary:true]]// 
+<r>([[CL:Functions:first|FIRST]] X)
+//[[CL:Glossary:true]]// </r>
   
 ([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] 1 2 3))) 
   ([[CL:Special Operators:symbol-macrolet]] ((a ([[CL:Functions:first]] x))) 
     (macroexpand 'a))) 
-  → A, //[[CL:Glossary:false]]// 
+<r>A
+//[[CL:Glossary:false]]// </r>
   
 ([[CL:Special Operators:symbol-macrolet]] ((b (alpha x y))) 
   (expand-1 b)) 
-  → (ALPHA X Y), //[[CL:Glossary:true]]// 
+<r>(ALPHA X Y)
+//[[CL:Glossary:true]]// </r>
   
 ([[CL:Special Operators:symbol-macrolet]] ((b (alpha x y))) 
   (expand b)) 
-  → (GAMMA X Y), //[[CL:Glossary:true]]// 
+<r>(GAMMA X Y)
+//[[CL:Glossary:true]]// </r>
   
 ([[CL:Special Operators:symbol-macrolet]] ((b (alpha x y)) (a b)) 
   (expand-1 a)) 
-  → B, //[[CL:Glossary:true]]// 
+<r>B
+//[[CL:Glossary:true]]//</r> 
   
 ([[CL:Special Operators:symbol-macrolet]] ((b (alpha x y)) (a b)) 
   (expand a)) 
-  → (GAMMA X Y), //[[CL:Glossary:true]]// 
+<r>(GAMMA X Y)
+//[[CL:Glossary:true]]// </r>
 </blockquote>
 
 ==Examples of shadowing behavior==
 <blockquote>
 ([[CL:Special Operators:flet]] ((beta (x y) (+ x y)))
   (expand (alpha a b))) 
-  → (BETA A B), //[[CL:Glossary:true]]//
+<r>(BETA A B)
+//[[CL:Glossary:true]]//</r>
 
 ([[CL:Special Operators:macrolet]] ((alpha (x y) `(delta ,x ,y)))
   ([[CL:Special Operators:flet]] ((alpha (x y) (+ x y))) 
     (expand (alpha a b)))) 
-  → (ALPHA A B), //[[CL:Glossary:false]]// 
+<r>(ALPHA A B)
+//[[CL:Glossary:false]]// </r>
   
 ([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] 1 2 3)))
   ([[CL:Special Operators:symbol-macrolet]] ((a ([[CL:Functions:first]] x))) 
     ([[CL:Special Operators:let]] ((a x)) 
       (expand a)))) 
-  → A, //[[CL:Glossary:false]]//
+<r>A
+//[[CL:Glossary:false]]//</r>
 </blockquote>
 
 ====Affected By====

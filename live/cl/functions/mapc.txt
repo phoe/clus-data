@@ -1,4 +1,21 @@
 ====== Function MAPC, MAPCAR, MAPCAN, MAPL, MAPLIST, MAPCON ======
+
+====Syntax====
+  * **mapc   ** //function ''&rest'' lists''+''// → //list-1//
+  * **mapcar ** //function ''&rest'' lists''+''// → //result-list//
+  * **mapcan ** //function ''&rest'' lists''+''// → //concatenated-results//
+  * **mapl   ** //function ''&rest'' lists''+''// → //list-1//
+  * **maplist** //function ''&rest'' lists''+''// → //result-list//
+  * **mapcon ** //function ''&rest'' lists''+''// → //concatenated-results//
+
+====Arguments and Values==== 
+  * //function// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// that must take as many //[[CL:Glossary:arguments]]// as there are //lists//.
+  * //list// - a //[[CL:Glossary:proper list]]//.
+  * //list-1// - the first //list// (which must be a //[[CL:Glossary:proper list]]//).
+  * //result-list// - a //[[CL:Glossary:list]]//.
+  * //concatenated-results// - a //[[CL:Glossary:list]]//.
+  
+====Description====
 The mapping operation involves applying //function// to successive sets of arguments in which one argument is obtained from each //[[CL:Glossary:sequence]]//. Except for **mapc** and **mapl**, the result contains the results returned by //function//. In the cases of **mapc** and **mapl**, the resulting //[[CL:Glossary:sequence]]// is //list//.
 
 //function// is called first on all the elements with index ''0'', then on all those with index ''1'', and so on. //result-type// specifies the //[[CL:Glossary:type]]// of the  resulting //[[CL:Glossary:sequence]]//. If //function// is a //[[CL:Glossary:symbol]]//, it is **[[CL:Functions:coerce]]**d to a //[[CL:Glossary:function]]// as if by **[[CL:Functions:symbol-function]]**.
@@ -18,48 +35,33 @@ The mapping operation involves applying //function// to successive sets of argum
 </blockquote>
 
 and similarly for the relationship between **mapcan**  and **mapcar**. 
-
-====Syntax====
-  * **mapc   ** //function ''&rest'' lists''+''// → //list-1//
-  * **mapcar ** //function ''&rest'' lists''+''// → //result-list//
-  * **mapcan ** //function ''&rest'' lists''+''// → //concatenated-results//
-  * **mapl   ** //function ''&rest'' lists''+''// → //list-1//
-  * **maplist** //function ''&rest'' lists''+''// → //result-list//
-  * **mapcon ** //function ''&rest'' lists''+''// → //concatenated-results//
-
-====Arguments and Values==== 
-  * //function// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// that must take as many //[[CL:Glossary:arguments]]// as there are //lists//.
-  * //list// - a //[[CL:Glossary:proper list]]//.
-  * //list-1// - the first //list// (which must be a //[[CL:Glossary:proper list]]//).
-  * //result-list// - a //[[CL:Glossary:list]]//.
-  * //concatenated-results// - a //[[CL:Glossary:list]]//.
-
+  
 ====Examples====
 <blockquote>
-(mapcar #'[[CL:Functions:car]] '((1 a) (2 b) (3 c))) → (1 2 3) 
-(mapcar #'[[CL:Functions:abs]] '(3 -4 2 -5 -6)) → (3 4 2 5 6)
-(mapcar #'[[CL:Functions:cons]] '(a b c) '(1 2 3)) → ((A . 1) (B . 2) (C . 3))
+(mapcar #'[[CL:Functions:car]] '((1 a) (2 b) (3 c))) <r>(1 2 3) </r>
+(mapcar #'[[CL:Functions:abs]] '(3 -4 2 -5 -6)) <r>(3 4 2 5 6)</r>
+(mapcar #'[[CL:Functions:cons]] '(a b c) '(1 2 3)) <r>((A . 1) (B . 2) (C . 3))</r>
 
-(maplist #'[[CL:Functions:append]] '(1 2 3 4) '(1 2) '(1 2 3))  → ((1 2 3 4 1 2 1 2 3) (2 3 4 2 2 3)) 
-(maplist #'([[CL:Macros:lambda]] (//x//) ([[CL:Functions:cons]] 'foo //x//)) '(a b c d)) → ((FOO A B C D) (FOO B C D) (FOO C D) (FOO D))
-(maplist #'([[CL:Macros:lambda]] (//x//) ([[CL:Special Operators:if]] ([[CL:Functions:member]] ([[CL:Functions:car]] //x//) ([[CL:Functions:cdr]] //x//)) 0 1)) '(a b a c d b c)) → (0 0 1 0 1 1 1)
-;  An entry is 1 if the corresponding element of the input list was the last instance of that element in the input list.
+(maplist #'[[CL:Functions:append]] '(1 2 3 4) '(1 2) '(1 2 3)) <r>((1 2 3 4 1 2 1 2 3) (2 3 4 2 2 3)) </r>
+(maplist #'([[CL:Macros:lambda]] (x) ([[CL:Functions:cons]] 'foo x)) '(a b c d)) <r>((FOO A B C D) (FOO B C D) (FOO C D) (FOO D))</r>
+(maplist #'([[CL:Macros:lambda]] (x) ([[CL:Special Operators:if]] ([[CL:Functions:member]] ([[CL:Functions:car]] x) ([[CL:Functions:cdr]] x)) 0 1)) '(a b a c d b c)) <r>(0 0 1 0 1 1 1)</r>
+;;; An entry is 1 if the corresponding element of the input list was the last instance of that element in the input list.
 
-([[CL:Macros:defparameter]] //*dummy-mapc*// [[CL:Constant Variables:nil]]) → [[CL:Constant Variable:nil|NIL]] 
-(mapc #'([[CL:Macros:lambda]] (&rest //x//) ([[CL:Macros:setf]] //*dummy-mapc*// ([[CL:Functions:append]] //*dummy-mapc*// //x//))) '(1 2 3 4) '(a b c d e) '(x y z)) → (1 2 3 4) 
-//*dummy-mapc*// → (1 A X 2 B Y 3 C Z)                   
+([[CL:Macros:defparameter]] *dummy-mapc* [[CL:Constant Variables:nil]]) → [[CL:Constant Variable:nil|NIL]] <r>*DUMMY-MAPC*</r>
+(mapc #'([[CL:Macros:lambda]] (&rest x) ([[CL:Macros:setf]] *dummy-mapc* ([[CL:Functions:append]] *dummy-mapc* x))) '(1 2 3 4) '(a b c d e) '(x y z)) <r>(1 2 3 4) </r>
+*dummy-mapc* <r>(1 A X 2 B Y 3 C Z)</r>
 
-([[CL:Macros:defparameter]] //*dummy-mapl*// [[CL:Constant Variables:nil]]) → [[CL:Constant Variable:nil|NIL]] 
-(mapl #'([[CL:Macros:lambda]] (//x//) (push //x// //*dummy-mapl*//)) '(1 2 3 4)) → (1 2 3 4) 
-//*dummy-mapl*// → ((4) (3 4) (2 3 4) (1 2 3 4)) 
-
-(mapcan #'([[CL:Macros:lambda]] (//x y//) ([[CL:Special Operators:if]] ([[CL:Functions:null]] //x//) [[Cl:Constant Variables:nil]] ([[CL:Functions:list]] //x y//))) '(nil nil nil d e) '(1 2 3 4 5 6)) → (D 4 E 5) 
-(mapcan #'([[CL:Macros:lambda]] (//x//) ([[CL:Macros:and]] ([[CL:Functions:numberp]] //x//) ([[CL:Functions:list]] //x//))) '(a 1 b c 3 4 d 5)) → (1 3 4 5)
+([[CL:Macros:defparameter]] *dummy-mapl* [[CL:Constant Variables:nil]]) <r>*DUMMY-MAPL*</r>
+(mapl #'([[CL:Macros:lambda]] (x) (push x *dummy-mapl*)) '(1 2 3 4)) <r>(1 2 3 4) </r>
+*dummy-mapl* <r>((4) (3 4) (2 3 4) (1 2 3 4)) </r>
 </blockquote>
-In this case the function serves as a filter; this is a standard Lisp idiom using **mapcan**.
+
+In the below case, the function serves as a filter; this is a standard Lisp idiom using **mapcan**.
 
 <blockquote>
-(mapcon #'[[CL:Functions:list]] '(1 2 3 4)) → ((1 2 3 4) (2 3 4) (3 4) (4)) 
+(mapcan #'([[CL:Macros:lambda]] (x y) ([[CL:Special Operators:if]] ([[CL:Functions:null]] x) [[Cl:Constant Variables:nil]] ([[CL:Functions:list]] x y))) '(nil nil nil d e) '(1 2 3 4 5 6)) <r>(D 4 E 5) </r>
+(mapcan #'([[CL:Macros:lambda]] (x) ([[CL:Macros:and]] ([[CL:Functions:numberp]] x) ([[CL:Functions:list]] x))) '(a 1 b c 3 4 d 5)) <r>(1 3 4 5)</r>
+(mapcon #'[[CL:Functions:list]] '(1 2 3 4)) <r>((1 2 3 4) (2 3 4) (3 4) (4)) </r>
 </blockquote>
 
 ====Side Effects====
