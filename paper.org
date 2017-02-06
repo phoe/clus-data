@@ -1,7 +1,11 @@
 * Common Lisp UltraSpec - A Project For Modern Common Lisp Documentation
   by Michal "phoe" Herda 2017
-** TODO Abstract
+** Abstract
+The Common Lisp programming language has many bodies of documentation - the language specification itself, language extensions and multiple libraries. I outline issues with the current state of Common Lisp documentation and propose an improvement in form of Common Lisp UltraSpec. It is a project of modernizing the LaTeX sources of the draft standard of Common Lisp and ultimately unifying it with other bodies of Common Lisp documentation.
 
+This is achieved through semi-automatic parsing and formatting of the sources using a text editor, regular expressions and other text processing tools. The processed text is then displayed in a web browser by means of a wiki engine, DokuWiki.
+
+The project is currently in its early phase with a part of the specification parsed. A demo of the project is available.
 ** TODO Introduction
 
 ** Previous work
@@ -27,7 +31,7 @@ ol created by Zach Beane. Its main purpose is to enable lookup of symbols inside
 **** Quicklisp
      Quicklisp (https://www.quicklisp.org/), created by Zach Beane, provides a centralized repository of Lisp libraries through a piece of Lisp code, which in turn allows the programmer to automatically resolve dependencies, download and compile a particular library on their Lisp system.
 
-     While Quicklisp is invaluable as a library repository, it does not provide any sort of documentation service as such is out of scope of the Quicklisp project. Therefore it cannot be a direct aid in creating a Lisp documentation project.
+     While Quicklisp is invaluable as a library repository, it does not provide any sort of documentation service - it is out of scope of the Quicklisp project. Therefore it cannot be a direct aid in creating a Lisp documentation project.
 **** Quickdocs
      The Quickdocs service (http://quickdocs.org/) is a content aggregation tool created by Eitaro Fukamachi expressly for automated collection and generation of documentation for Common Lisp libraries; therefore, it aids the issue outlined in the paragraph above by expanding Quicklisp with documentation capabilities. The documentation itself is generated automatically from the source code of libraries found in the Quicklisp repositories. It consists of a system's Quicklisp description and a list of exported symbols along with the type of objects they refer to and any documentation strings they may contain.
 
@@ -88,8 +92,8 @@ ol created by Zach Beane. Its main purpose is to enable lookup of symbols inside
 
      I chose the latter mostly because I have been using Notepad++ for the past few years and also due to the entry threshold associated with Emacs; I am still learning this editor despite having used it for more than a year now, and I have been using it mostly as a Lisp programming environment.
 **** DokuWiki - the engine for displaying HTML
-     DokuWiki is a GPL-licensed wiki software written in PHP (http://php.net/). In my experience, it was able to fulfill all the requirements I had for a displaying engine: it does not need database access and instead relies on flat files, which allows me for easy versioning the data with Git; it has a simple markup syntax that I consider sane; it is extensible and hackable, which so far proves very useful; I have had some previous experience in using and configuring; and last but not least, it simply works and allows me to deliver the contents in a readable and aesthetically pleasing way, which is the most important reason.
-**** Regular expressions, Unix coreutils - the tool for parsing the sources
+     DokuWiki is a GPL-licensed wiki software written in PHP (http://php.net/). In my experience, it was able to fulfill all the requirements I had for a displaying engine. It simply works and allows me to deliver the contents in a readable and aesthetically pleasing way. It does not need database access and instead relies on flat files, which allows me for easy versioning the data with Git. It has a simple markup syntax that I consider sane. It is extensible and hackable, which so far proves very useful. Also, I have had some previous experience in using and configuring it.
+**** Regular expressions, GNU coreutils - the tool for parsing the sources
      The most important choice that I have had to make in the beginning was, how to parse the source files of the dpANS. The source code is a large body of LaTeX code, created by multiple people over a large span of time. It contains highly customized TeX macros, used irregularly among the source code.
 
      The initial research led me towards TeX parsers written in various languages, such as Parsec (https://wiki.haskell.org/Parsec) written in Haskell (https://wiki.haskell.org/). My initial attempts of feeding the dpANS sources to the parsers I found were failures though; the individual bodies of code were too complex and my knowledge about these parsers was too little for me to succeed. I realized that, in order to properly parse the TeX source code of the draft, I would need to create a substantially large set of parsing rules; even afterwards, I would need to spend a lot of time doing manual polishing and fixing of the corner cases, such as TeX macros used only in a few places within the source files or actual mistakes within formatting, such as utilizing function markup for macros and vice versa.
@@ -127,9 +131,9 @@ ol created by Zach Beane. Its main purpose is to enable lookup of symbols inside
 
     Third, the legal status and licensing issues of the various pieces of documentation will require separate thought. Creating a compilation work of all these elements will be essentially creating a derivative of them all and legal caution will need to be taken in case of documents with unknown or confusing legal status. It might be required to negotiate the terms of inclusion of particular pieces of work into CLUS with the respective holders of rights to them.
 *** Thoughts
-    Among all the literature available for studying Common Lisp, I would like to mention the the dpANS source files as a valuable read from a non-technical point of view.
+    Among all the literature available for studying Common Lisp, I would like to mention the dpANS source files as a valuable read from a non-technical point of view.
 
-    The standard was created before the era of ubiquitous versioning systems. Because of this, the draft source contains many comments, some of them timestamped. They show the technical problems and decisions the langauge specifiers faced and solved in the process of creating a formal standard for a programming language. They alsooutline the features which were deprecated and removed - or, on the contrary, created and added along the way, some of which I personally find quite enlightening. What I want to emphasize here, though, is that they show X3J13 as a group of human beings working on a common goal. The comments there show various aspects of their work: from communicating messages between particular people, through decision-making and commented-out pieces of specification itself, to the in-jokes and humor of the people.
+    The standard was created before the era of ubiquitous versioning systems. Because of this, the draft source contains many comments, some of them timestamped. They show the technical problems and decisions the langauge specifiers faced and solved in the process of creating a formal standard for a programming language. They also outline the features which were deprecated and removed - or, on the contrary, created and added along the way, some of which I personally find quite enlightening. What I want to emphasize here, though, is that they show X3J13 as a group of human beings working on a common goal. The comments there show various aspects of their work: from communicating messages between particular people, through decision-making and commented-out pieces of specification itself, to the in-jokes and humor of the people.
 
     In my opinion, studying the original sources for all three draft previews (all of which are available online) might be valuable for any person who wants to research specification development or software development in general from a more humane point of view as well as Lisp programmers who are interested in extending their background and the process through which Common Lisp came to life.
 
@@ -145,7 +149,7 @@ ol created by Zach Beane. Its main purpose is to enable lookup of symbols inside
 
     The Common Lisp UltraSpec was meant from the start to be a community-based project, meaning that it belongs to the Lisp community and is meant to be utilized and expanded within it. I hope that other people will aid me in my process by suggesting changes, submitting patches, possibly integrating the documentation for respective Common Lisp libraries into the code and maintaining them later on.
 
-    Once the specification is completely integrated, I intend on extending its scope to include common facilities and extensions included and/or used in most contemporary Common Lisp implementations, such as the Metaobject Protocol, ASDF, Quicklisp and the compatibility libraries which provide cross-platform functionalities not included in the standard such as parallelism or networking.
+    Once the specification is completely integrated, I intend on extending its scope to include common facilities and extensions included and/or used in most contemporary Common Lisp implementations, such as the Metaobject Protocol, ASDF, Quicklisp and the compatibility libraries which provide cross-platform functionalities not included in the standard such as concurrency or networking.
 
     I want to create quality standards for the respective types of pages and enforce them in order to keep the quality of the documentation high and its style consistent across pages and modules.
 ** TODO Bibliography
