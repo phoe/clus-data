@@ -19,14 +19,14 @@ When //condition// is //[[CL:Glossary:non-nil]]//, only those //[[CL:Glossary:re
 Implementations are permitted, but not required, to return //[[CL:Glossary:distinct]]// //[[CL:Glossary:list|lists]]// from repeated calls to **compute-restarts** while in the same dynamic environment. The consequences are undefined if the //[[CL:Glossary:list]]// returned by **compute-restarts** is modified.
 
 ====Examples====
+This example shows one possible way in which an interactive debugger might present restarts to the user.
 <blockquote>
-;;; One possible way in which an interactive debugger might present restarts to the user.
 ([[CL:Macros:defun]] invoke-a-restart () 
   ([[CL:Special Operators:let]] ((restarts (compute-restarts)))
     ([[CL:Macros:do]] ((i 0 ([[CL:Functions:math-one-plus|1+]] i)) 
          (r restarts ([[CL:Functions:cdr]] r)))
         (([[CL:Functions:null]] r))
-      ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~D: ~A~ 
+      ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~D: ~A~%" i ([[CL:Functions:car]] r)))
               ([[CL:Special Operators:let]] ((n [[CL:Constant Variables:nil]])
                     (k ([[CL:Functions:length]] restarts)))
                 ([[CL:Macros:loop]]
@@ -35,7 +35,7 @@ Implementations are permitted, but not required, to return //[[CL:Glossary:disti
                   ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&Option: ")
                   ([[CL:Macros:setf]] n ([[CL:Functions:read]]))
                   ([[CL:Functions:fresh-line]]))
-                ([[CL:Functions:invoke-restart-interactively]] ([[CL:Functions:nth]] n restarts)))))
+                ([[CL:Functions:invoke-restart-interactively]] ([[CL:Functions:nth]] n restarts))))) <r>INVOKE-A-RESTART</r>
 
 ([[CL:Macros:restart-case]] (invoke-a-restart)
   (one () 1)
@@ -43,14 +43,14 @@ Implementations are permitted, but not required, to return //[[CL:Glossary:disti
   (nil () :report "Who knows?" 'anonymous)
   (one () 'I)
   (two () 'II))
-▷ 0: ONE
-▷ 1: TWO
-▷ 2: Who knows?
-▷ 3: ONE
-▷ 4: TWO
-▷ 5: Return to Lisp Toplevel.
-▷ Option: 4 
-  → II
+<o>0: ONE
+1: TWO
+2: Who knows?
+3: ONE
+4: TWO
+5: Return to Lisp Toplevel.
+Option: 4 </o>
+<r>II</r>
 </blockquote>
 
 Note that in addition to user-defined restart points, **compute-restarts** also returns information about any system-supplied [[CL:Glossary:restart|restarts]], such as the "Return to Lisp Toplevel" [[CL:Glossary:restart]] offered above.

@@ -48,16 +48,16 @@ A compiler can treat the code within the scope of the **[[CL:Types:array]]** typ
   ([[CL:Symbols:declare]] (type [[CL:Types:fixnum]] x y))
   ([[CL:Special Operators:let]] ((z ([[CL:Functions:math-add|+]] x y)))
     ([[CL:Symbols:declare]] (type [[CL:Types:fixnum]] z))
-    z)) <return>F</return>
-(f 1 2) <return>3</return>
+    z)) <r>F</r>
+(f 1 2) <r>3</r>
 ;;; The previous definition of F is equivalent to 
 ([[CL:Macros:defun]] f (x y)
   ;; This declaration is a shorthand form of the TYPE declaration 
   ([[CL:Symbols:declare]] ([[CL:Types:fixnum]] x y)) 
   ;; To declare the type of a return value, it's not necessary to create a named variable.
   ;; A THE special form can be used instead.
-  ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y))) <return>F</return>
-(f 1 2) <return>3</return>
+  ([[CL:Special Operators:the]] [[CL:Types:fixnum]] ([[CL:Functions:math-add|+]] x y))) <r>F</r>
+(f 1 2) <r>3</r>
 
 ([[CL:Macros:defun]] frob (an-array)
   ([[CL:Symbols:declare]] (type ([[CL:Types:array]] ([[CL:Types:signed-byte]] 8) 1) an-array))
@@ -66,7 +66,7 @@ A compiler can treat the code within the scope of the **[[CL:Types:array]]** typ
   ([[CL:Macros:setf]] ([[CL:Functions:aref]] an-array 3) ([[CL:Functions:math-multiply|*]] 2 ([[CL:Functions:aref]] an-array 3)))
   ([[CL:Special Operators:let]] ((foo 0))
     ([[CL:Symbols:declare]] (type ([[CL:Types:signed-byte]] 8) foo))
-    ([[CL:Macros:setf]] foo ([[CL:Functions:aref]] an-array 0)))) <return>FROB</return>
+    ([[CL:Macros:setf]] foo ([[CL:Functions:aref]] an-array 0)))) <r>FROB</r>
 </blockquote>
 
 The above definition of ''frob'' is equivalent to:
@@ -79,7 +79,7 @@ The above definition of ''frob'' is equivalent to:
         ([[CL:Functions:math-multiply|*]] 2 ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 8) ([[CL:Functions:aref]] an-array 3))))
   ([[CL:Special Operators:let]] ((foo 0))
     ([[CL:Symbols:declare]] (type ([[CL:Types:signed-byte]] 8) foo))
-    ([[CL:Macros:setf]] foo ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 0)))))<return>FROB</return>
+    ([[CL:Macros:setf]] foo ([[CL:Special Operators:the]] ([[CL:Types:signed-byte]] 5) ([[CL:Functions:aref]] an-array 0)))))<r>FROB</r>
 </blockquote>
 
 Given an implementation in which //[[CL:Glossary:fixnum|fixnums]]// are 29 bits but **[[CL:Types:fixnum]]** //[[CL:Glossary:array|arrays]]// are upgraded to signed 32-bit //[[CL:Glossary:array|arrays]]//, the following could be compiled with all //[[CL:Glossary:fixnum]]// arithmetic:

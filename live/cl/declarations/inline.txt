@@ -48,31 +48,44 @@ An **inline** declaration may be used to encourage use of //[[CL:Glossary:compil
 
 ====Examples====
 <blockquote>
-;;; The globally defined function DISPATCH should be open-coded, if the
-;;; implementation supports inlining, unless a NOTINLINE declaration overrides 
-;;; this effect.
+The globally defined function ''dispatch'' should be open-coded, if the implementation supports inlining, unless a **notinline** declaration overrides this effect.
 ([[CL:Macros:declaim]] (inline dispatch))
+<r>//[[CL:Glossary:implementation-dependent]]//</r>
 ([[CL:Macros:defun]] dispatch (x)
   ([[CL:Functions:funcall]] ([[CL:Functions:get]] ([[CL:Functions:car]] x) 'dispatch) x))
+<r>DISPATCH</r>
+</blockquote>
   
-;;; Here is an example where inlining would be encouraged.
+Here is an example where inlining would be encouraged.
+<blockquote>
 ([[CL:Macros:defun]] top-level-1 ()
   (dispatch (read-command)))
+<r>TOP-LEVEL-1</r>
+</blockquote>
   
-;;; Here is an example where inlining would be prohibited.
+Here is an example where inlining would be prohibited.
+<blockquote>
 ([[CL:Macros:defun]] top-level-2 ()
   ([[CL:Symbols:declare]] (notinline dispatch))
   (dispatch (read-command)))
+<r>TOP-LEVEL-2</r>
+</blockquote>
 
-;;; Here is an example where inlining would be prohibited.
+Here is an example where inlining would be prohibited.
+<blockquote>
 ([[CL:Macros:declaim]] (notinline dispatch))
+<r>//[[CL:Glossary:implementation-dependent]]//</r>
 ([[CL:Macros:defun]] top-level-3 ()
   (dispatch (read-command)))
+<r>TOP-LEVEL-3</r>
+</blockquote>
 
-;;; Here is an example where inlining would be encouraged.
+Here is an example where inlining would be encouraged.
+<blockquote>
 ([[CL:Macros:defun]] top-level-4 ()
   ([[CL:Symbols:declare]] (inline dispatch))
   (dispatch (read-command)))
+<r>TOP-LEVEL-4</r>
 </blockquote>
 
 ====See Also====

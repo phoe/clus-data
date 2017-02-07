@@ -51,9 +51,11 @@ Here is another example:
 
 <blockquote>
 ([[CL:Macros:declaim]] ([[CL:Declarations:inline]] g))
+
 ([[CL:Macros:defun]] g (x)
   ([[CL:Symbols:declare]] (dynamic-extent x)) 
   ...)
+  
 ([[CL:Macros:defun]] f ()
   (g ([[CL:Functions:list]] 1 2 3)))
 
@@ -94,19 +96,18 @@ The //[[CL:Glossary:otherwise inaccessible part|otherwise inaccessible parts]]//
   ([[CL:Symbols:declare]] (dynamic-extent x))
   ([[CL:Functions:print]] x)
   :done)
-▷ (1 2 3)
-  → :DONE
-
+<o>(1 2 3)</o>
+<r>:DONE</r>
 ;;; In this example, the list to be bound to L can be stack-allocated. 
 ([[CL:Macros:defun]] zap (x y z)
   ([[CL:Macros:do]] ((l ([[CL:Functions:list]] x y z) (cdr l)))
       (([[CL:Functions:null]] l))
     ([[CL:Symbols:declare]] (dynamic-extent l))
-    ([[CL:Functions:prin1]] ([[CL:Functions:car]] l)))) 
+    ([[CL:Functions:prin1]] ([[CL:Functions:car]] l))))
+<r>ZAP</r>
 (zap 1 2 3)
-▷ 123
-  → NIL
-
+<o>123</o>
+<r>NIL</r>
 ;;; Some implementations might open-code LIST-ALL-PACKAGES in a way that permits
 ;;; using stack-allocation of the list to be bound to L. 
 ([[CL:Macros:do]] ((l ([[CL:Functions:list-all-packages]]) ([[CL:Functions:cdr]] l)))
@@ -115,9 +116,9 @@ The //[[CL:Glossary:otherwise inaccessible part|otherwise inaccessible parts]]//
   ([[CL:Special Operators:let]] ((name ([[CL:Functions:package-name]] ([[CL:Functions:car]] l))))
     ([[CL:Macros:when]] ([[CL:Functions:search]] "COMMON-LISP" name)
       ([[CL:Functions:print]] name))))
-▷ "COMMON-LISP"
-▷ "COMMON-LISP-USER" 
-  → NIL
+<o>"COMMON-LISP"
+"COMMON-LISP-USER" </o>
+<r>NIL</r>
 
 ;;; Some implementations might have the ability to stack allocate rest lists.
 ;;; A declaration such as the following should be a cue to such implementations 
@@ -125,8 +126,10 @@ The //[[CL:Glossary:otherwise inaccessible part|otherwise inaccessible parts]]//
 ([[CL:Macros:defun]] add (&rest x)
   ([[CL:Symbols:declare]] (dynamic-extent x))
   ([[CL:Functions:apply]] #'[[CL:Functions:math-add|+]] x))
+<r>ADD</r>
 
-(add 1 2 3) → 6
+(add 1 2 3)
+<r>6</r>
 
 ([[CL:Macros:defun]] zap (n m)
   "Computes (RANDOM (+ M 1)) at relative speed of roughly O(N). It may be slow,
@@ -137,8 +140,9 @@ but with a good compiler at least it doesn't waste much heap storage. :-}"
       ([[CL:Symbols:declare]] (dynamic-extent i))
       ([[CL:Macros:setf]] ([[CL:Functions:aref]] a i) ([[CL:Functions:random]] ([[CL:Functions:math-one-plus|1+]] i))))
     ([[CL:Functions:aref]] a m)))
+<r>ZAP</r>
 
-([[CL:Functions:math-less|<]] (zap 5 3) 3) → //[[CL:Glossary:true]]//
+([[CL:Functions:math-less|<]] (zap 5 3) 3) <r>//[[CL:Glossary:true]]//</r>
 </blockquote>
 
 The following are in error, since the value of ''x'' is used outside of its //[[CL:Glossary:extent]]//:
@@ -146,6 +150,7 @@ The following are in error, since the value of ''x'' is used outside of its //[[
 <blockquote>
 ([[CL:Functions:length]] ([[CL:Functions:list]] ([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] 1 2 3))) ; invalid 
                 ([[CL:Symbols:declare]] (dynamic-extent x)) x)))
+
 
 ([[CL:Special Operators:progn]] ([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] 1 2 3))) ; invalid 
          ([[CL:Symbols:declare]] (dynamic-extent x)) x)
