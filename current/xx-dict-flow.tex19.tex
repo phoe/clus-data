@@ -1,44 +1,50 @@
 ====== Special Operator PROGV ======
 
 ====Syntax====
-
-\DefspecWithValues progv {//symbols// //values// \starparam{form}} {\starparam{result}}
+  * **progv** //symbols values form''*''// → //result''*''//
 
 ====Arguments and Values====
-
-//symbols// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:symbols]]//; evaluated.
-
-//values// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:object|objects]]//; evaluated.
-
-//forms// - an //[[CL:Glossary:implicit progn]]//.
-
-//results// - the //[[CL:Glossary:value|values]]// returned by the //[[CL:Glossary:form|forms]]//.
+  * //symbols// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:symbol|symbols]]//; evaluated.
+  * //values// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:object|objects]]//; evaluated.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - the //[[CL:Glossary:value|values]]// returned by the //[[CL:Glossary:form|forms]]//.
 
 ====Description====
+**progv** creates new dynamic variable //[[CL:Glossary:binding|bindings]]// and executes each //form// using those //[[CL:Glossary:binding|bindings]]//. Each //form// is evaluated in order.
 
-**[[CL:Special Operators:progv]]** creates new dynamic variable //[[CL:Glossary:binding|bindings]]// and executes each //form// using those //[[CL:Glossary:binding|bindings]]//. Each //form// is evaluated in order.
+**progv** allows //[[CL:Glossary:binding]]// one or more dynamic variables whose names may be determined at run time. Each //form// is evaluated in order with the dynamic variables whose names are in //symbols// bound to corresponding //values//. If too few //values// are supplied, the remaining //[[CL:Glossary:symbol|symbols]]// are bound and then made to have no value. If too many //values// are supplied, the excess values are ignored. The //[[CL:Glossary:binding|bindings]]// of the dynamic variables are undone on exit from **progv**.
 
-**[[CL:Special Operators:progv]]** allows //[[CL:Glossary:binding]]// one or more dynamic variables whose names may be determined at run time. Each //form// is evaluated in order with the dynamic variables whose names are in //symbols// bound to corresponding //values//. If too few //values// are supplied, the remaining //[[CL:Glossary:symbols]]// are bound and then made to have no value. If too many //values// are supplied, the excess values are ignored. The //[[CL:Glossary:binding|bindings]]// of the dynamic variables are undone on exit from **[[CL:Special Operators:progv]]**.
+====Examples====
+<blockquote>
+;;; TODO rewrite this example, toplevel SETQ is not good
 
-====Examples==== <blockquote> ([[CL:Macros:defparameter]] *x* 1) → 1 (progv '(*x*) '(2) *x*) → 2 *x* → 1
+([[CL:Special Operators:setq]] *x* 1) <r>1 </r>
+(progv '(*x*) '(2) *x*) <r>2</r>
+*x* <r>1</r>
+
+([[CL:Special Operators:let]] ((foo 1))
+  ([[CL:Symbols:declare]] ([[CL:Declarations:special]] foo))
+  ([[CL:Functions:list]] (progv '(foo) '(2) foo) 
+        foo))
+<r>(1 2)</r>
 
 Assuming *x* is not globally special,
 
-(let ((*x* 3)) (progv '(*x*) '(4) (list *x* (symbol-value '*x*)))) → (3 4) </blockquote>
+([[CL:Special Operators:let]] ((*x* 3)) 
+  (progv '(*x*) '(4) 
+    ([[CL:Functions:list]] *x* ([[CL:Functions:symbol-value]] '*x*)))) <r>(3 4)</r>
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Special Operators:let]]**, {\secref\Evaluation}
+  * **[[CL:Special Operators:let|Special Operator LET]]**
+  * {\secref\Evaluation}
 
 ====Notes====
-
-Among other things, **[[CL:Special Operators:progv]]** is useful when writing interpreters for languages embedded in Lisp; it provides a handle on the mechanism for //[[CL:Glossary:binding]]// //[[CL:Glossary:dynamic variables]]//.
+Among other things, **progv** is useful when writing interpreters for languages embedded in Lisp; it provides a handle on the mechanism for //[[CL:Glossary:binding]]// //[[CL:Glossary:dynamic variable|dynamic variables]]//.
 

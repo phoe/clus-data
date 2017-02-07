@@ -1,53 +1,57 @@
 ====== Special Form SETQ ======
 
 ====Syntax====
-
-\DefspecWithValues setq {\stardown{pair}} {result}
-
-\auxbnf{pair}{var form}
+  * **setq** //{pair''*''}// → //result//
+  
+<blockquote>
+//pair// ::= //var form//
+</blockquote>
 
 ====Arguments and Values====
-
-//var// - a //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:variable]]// other than a //[[CL:Glossary:constant variable]]//.
-
-//form// - a //[[CL:Glossary:form]]//.
-
-//result// - the //[[CL:Glossary:primary value]]// of the last //form//, or **[[CL:Constant Variables:nil]]** if no //pairs// were supplied.
+  * //var// - a //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:variable]]// other than a //[[CL:Glossary:constant variable]]//.
+  * //form// - a //[[CL:Glossary:form]]//.
+  * //result// - the //[[CL:Glossary:primary value]]// of the last //form//, or **[[CL:Constant Variables:nil]]** if no //pairs// were supplied.
 
 ====Description====
-
 Assigns values to //[[CL:Glossary:variables]]//.
 
-''(setq ''var1'' ''form1'' ''var2'' ''form2'' ...)'' is the simple variable assignment statement of Lisp. First //form1// is evaluated and the result is stored in the variable //var1//, then //form2// is evaluated and the result stored in //var2//, and so forth. **[[CL:Special Operators:setq]]** may be used for assignment of both lexical and dynamic variables.
+''(setq var1 form1 var2 form2 ...)'' is the simple variable assignment statement of Lisp. First //form1// is evaluated and the result is stored in the variable //var1//, then //form2// is evaluated and the result stored in //var2//, and so forth. **setq** may be used for assignment of both lexical and dynamic variables.
 
-If any //var// refers to a //[[CL:Glossary:binding]]// made by **[[CL:Special Operators:symbol-macrolet]]**, then that //var// is treated as if **[[CL:Macros:setf]]** (not **[[CL:Special Operators:setq]]**) had been used.
+If any //var// refers to a //[[CL:Glossary:binding]]// made by **[[CL:Special Operators:symbol-macrolet]]**, then that //var// is treated as if **[[CL:Macros:setf]]** (not **setq**) had been used.
 
 ====Examples====
+<blockquote>
+;;; TODO condemn toplevel SETQ
 
-<blockquote> ;; A simple use of SETQ to establish values for variables. ([[CL:Macros:defparameter]] a 1 b 2 c 3) → 3 a → 1 b → 2 c → 3
+:;; A simple use of SETQ to establish values for variables. 
+(setq a 1 b 2 c 3) → 3
+a → 1 
+b → 2
+c → 3
 
-;; Use of SETQ to update values by sequential assignment. ([[CL:Macros:defparameter]] a (1+ b) b (1+ a) c (+ a b)) → 7 a → 3 b → 4 c → 7
+;:; Use of SETQ to update values by sequential assignment. 
+(setq a (1+ b) b (1+ a) c (+ a b)) → 7 a → 3 b → 4 c → 7
 
-;; This illustrates the use of SETQ on a symbol macro. (let ((x (list 10 20 30))) (symbol-macrolet ((y (car x)) (z (cadr x))) ([[CL:Macros:defparameter]] y (1+ z) z (1+ y)) (list x y z))) → ((21 22 30) 21 22) </blockquote>
+;:; This illustrates the use of SETQ on a symbol macro. 
+([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] 10 20 30)))
+  ([[CL:Special Operators:symbol-macrolet]] ((y ([[CL:Functions:car]] x)) (z ([[CL:Functions:cadr]] x))) 
+    (setq y ([[CL:Functions:math-one-plus|1+]] z) z ([[CL:Functions:math-one-plus|1+]] y))
+    ([[CL:Functions:list]] x y z))) → ((21 22 30) 21 22)
+</blockquote>
 
 ====Side Effects====
-
 The //[[CL:Glossary:primary value]]// of each //form// is assigned to the corresponding //var//.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Macros:psetq]]**, **[[CL:Functions:set]]**, **[[CL:Macros:setf]]**
+**[[CL:Macros:psetq|Macro PSETQ]]**, **[[CL:Functions:set|Function SET]]**, **[[CL:Macros:setf|Macro SETF]]**
 
 ====Notes====
-
 None.
 
 \issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM}
