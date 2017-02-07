@@ -1,19 +1,14 @@
 ====== Special Operator CATCH ======
 
 ====Syntax====
-
-\DefspecWithValues catch {//tag// \starparam{form}} {\starparam{result}}
+* **catch** //tag form''*''// → //result''*''//
 
 ====Arguments and Values====
-
-//tag// - a //[[CL:Glossary:catch tag]]//; evaluated.
-
-//forms// - an //[[CL:Glossary:implicit progn]]//.
-
-//results// - if the //forms// exit normally, the //[[CL:Glossary:value|values]]// returned by the //forms//; if a throw occurs to the //tag//, the //[[CL:Glossary:value|values]]// that are thrown.
+  * //tag// - a //[[CL:Glossary:catch tag]]//; evaluated.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - if the //forms// exit normally, the //[[CL:Glossary:value|values]]// returned by the //forms//; if a throw occurs to the //tag//, the //[[CL:Glossary:value|values]]// that are thrown.
 
 ====Description====
-
 **[[CL:Special Operators:catch]]** is used as the destination of a non-local control transfer by **[[CL:Special Operators:throw]]**. //Tags// are used to find the **[[CL:Special Operators:catch]]** to which a **[[CL:Special Operators:throw]]** is transferring control. ''(catch 'foo ''form'')'' catches a ''(throw 'foo ''form'')'' but not a ''(throw 'bar ''form'')''.
 
 The order of execution of **[[CL:Special Operators:catch]]** follows:\idxtext{order of evaluation}\idxtext{evaluation order}
@@ -34,20 +29,20 @@ If during the execution of one of the //forms//, a **[[CL:Special Operators:thro
 
 The mechanism for **[[CL:Special Operators:catch]]** and **[[CL:Special Operators:throw]]** works even if **[[CL:Special Operators:throw]]** is not within the lexical scope of **[[CL:Special Operators:catch]]**. **[[CL:Special Operators:throw]]** must occur within the //[[CL:Glossary:dynamic extent]]// of the //[[CL:Glossary:evaluation]]// of the body of a **[[CL:Special Operators:catch]]** with a corresponding //tag//.
 
-====Examples==== <blockquote> (catch 'dummy-tag 1 2 (throw 'dummy-tag 3) 4) → 3 (catch 'dummy-tag 1 2 3 4) → 4 (defun throw-back (tag) (throw tag t)) → THROW-BACK (catch 'dummy-tag (throw-back 'dummy-tag) 2) → T
+====Examples==== 
+<blockquote> (catch 'dummy-tag 1 2 (throw 'dummy-tag 3) 4) → 3 (catch 'dummy-tag 1 2 3 4) → 4 (defun throw-back (tag) (throw tag t)) → THROW-BACK (catch 'dummy-tag (throw-back 'dummy-tag) 2) → T
 
 ;; Contrast behavior of this example with corresponding example of BLOCK. (catch 'c (flet ((c1 () (throw 'c 1))) (catch 'c (c1) (print 'unreachable)) 2)) → 2 </blockquote>
 
 ====Affected By====
+None. 
 
-None. ====Exceptional Situations==== An error of type **[[CL:Types:control-error]]** is signaled if **[[CL:Special Operators:throw]]** is done when there is no suitable **[[CL:Special Operators:catch]]** //tag//. ====See Also====
+====Exceptional Situations==== 
+An error of type **[[CL:Types:control-error]]** is signaled if **[[CL:Special Operators:throw]]** is done when there is no suitable **[[CL:Special Operators:catch]]** //tag//. ====See Also====
 
 **[[CL:Special Operators:throw]]**, {\secref\Evaluation}
 
 ====Notes====
-
 It is customary for //[[CL:Glossary:symbol|symbols]]// to be used as //tags//, but any //[[CL:Glossary:object]]// is permitted. However, numbers should not be used because the comparison is done using **[[CL:Functions:eq]]**.
 
 **[[CL:Special Operators:catch]]** differs from **[[CL:Special Operators:block]]** in that **[[CL:Special Operators:catch]]** tags have dynamic //[[CL:Glossary:scope]]// while **[[CL:Special Operators:block]]** names have //[[CL:Glossary:lexical scope]]//.
-
-
