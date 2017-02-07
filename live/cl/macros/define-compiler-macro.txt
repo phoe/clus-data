@@ -22,7 +22,7 @@ This is the normal mechanism for defining a //[[CL:Glossary:compiler macro funct
 ====Examples====
 
 <blockquote>
-([[CL:Macros:defun]] square (x) ([[CL:Functions:expt]] x 2))
+([[CL:Macros:defun]] square (x) ([[CL:Functions:expt]] x 2)) <r>SQUARE</r>
 
 (define-compiler-macro square (&whole form arg)
   ([[CL:Special Operators:if]] ([[CL:Functions:atom]] arg)
@@ -36,31 +36,31 @@ This is the normal mechanism for defining a //[[CL:Glossary:compiler macro funct
                       `([[CL:Functions:expt]] ,([[CL:Functions:nth]] 1 arg) ,(* 2 ([[CL:Functions:nth]] 2 arg))) 
                       `([[CL:Functions:expt]] ,([[CL:Functions:nth]] 1 arg) (* 2 ,([[CL:Functions:nth]] 2 arg))))
                   form))
-        (otherwise `([[CL:Functions:expt]] ,arg 2)))))
+        (otherwise `([[CL:Functions:expt]] ,arg 2))))) <r>SQUARE</r>
 
-(square (square 3)) → 81
+(square (square 3)) <r>81</r>
 
-([[CL:Functions:macroexpand]] '(square x)) → (SQUARE X), //[[CL:Glossary:false]]//
+([[CL:Functions:macroexpand]] '(square x)) 
+<r>(SQUARE X)
+//[[CL:Glossary:false]]//</r>
 
 ([[CL:Functions:funcall]] ([[CL:Functions:compiler-macro-function]] 'square)
          '(square x) [[CL:Constant Variables:nil]])
-  → ([[CL:Functions:expt|EXPT]] X 2)
+<r>([[CL:Functions:expt|EXPT]] X 2)</r>
   
 ([[CL:Functions:funcall]] ([[CL:Functions:compiler-macro-function]] 'square) 
          '(square (square x)) [[CL:Constant Variables:nil]])
-  → ([[CL:Functions:expt|EXPT]] X 4)
+<r>([[CL:Functions:expt|EXPT]] X 4)</r>
   
 ([[CL:Functions:funcall]] ([[CL:Functions:compiler-macro-function]] 'square) 
          '([[CL:Functions:funcall]] #'square x) [[CL:Constant Variables:nil]])
-  → ([[CL:Functions:expt|EXPT]] X 2)
-</blockquote>
+<r>([[CL:Functions:expt|EXPT]] X 2)</r>
 
-<blockquote>
 ([[CL:Macros:defun]] distance-positional (x1 y1 x2 y2)
-  ([[CL:Functions:sqrt]] ([[CL:Functions:math-add|+]] ([[CL:Functions:expt]] ([[CL:Functions:math-subtract|-]] x2 x1) 2) ([[CL:Functions:expt]] ([[CL:Functions:math-subtract|-]] y2 y1) 2))))
+  ([[CL:Functions:sqrt]] ([[CL:Functions:math-add|+]] ([[CL:Functions:expt]] ([[CL:Functions:math-subtract|-]] x2 x1) 2) ([[CL:Functions:expt]] ([[CL:Functions:math-subtract|-]] y2 y1) 2)))) <r>DISTANCE-POSITIONAL</r>
   
 ([[CL:Macros:defun]] distance (&key (x1 0) (y1 0) (x2 x1) (y2 y1))
-  (distance-positional x1 y1 x2 y2))
+  (distance-positional x1 y1 x2 y2)) <r>DISTANCE</r>
   
 (define-compiler-macro distance (&whole form
                                  &rest key-value-pairs
@@ -105,7 +105,7 @@ This is the normal mechanism for defining a //[[CL:Glossary:compiler macro funct
                               collect ([[CL:Functions:list]] ([[CL:Functions:nth]] i temps) (arg i)))
                     (distance ,@([[CL:Macros:loop]] for i below n 
                                       append ([[CL:Functions:list]] (key i) ([[CL:Functions:nth]] i temps)))))))
-              ([[CL:Constant Variables:t]] form))))))
+              ([[CL:Constant Variables:t]] form)))))) <r>DISTANCE</r>
               
 ([[CL:Macros:dolist]] (form 
           '((distance :x1 ([[CL:Macros:setf]] x 7) :x2 ([[CL:Macros:decf]] x) :y1 ([[CL:Macros:decf]] x) :y2 ([[CL:Macros:decf]] x))
@@ -116,20 +116,21 @@ This is the normal mechanism for defining a //[[CL:Glossary:compiler macro funct
             (distance :x1 a1 :x2 a2 :y1 b1 :y2 b2)
             (distance :x1 a1 :y1 b1 :z1 c1 :x2 a2 :y2 b2 :z2 c2)))
   ([[CL:Functions:print]] ([[CL:Functions:funcall]] ([[CL:Functions:compiler-macro-function]] 'distance) form [[CL:Constant Variables:nil]])))
-▷ ([[CL:Special Operators:let|LET]] ((#:G6558 ([[CL:Macros:setf|SETF]] X 7))
-▷       (#:G6559 ([[CL:Macros:decf|DECF]] X))
-▷       (#:G6560 ([[CL:Macros:decf|DECF]] X))
-▷       (#:G6561 ([[CL:Macros:decf|DECF]] X)))
-▷ (DISTANCE :X1 #:G6558 :X2 #:G6559 :Y1 #:G6560 :Y2 #:G6561))
-▷ (DISTANCE-POSITIONAL ([[CL:Macros:setf|SETF]] X 7) ([[CL:Macros:decf|DECF]] X) ([[CL:Macros:decf|DECF]] X) ([[CL:Macros:decf|DECF]] X))
-▷ ([[CL:Special Operators:let|LET]] ((#:G6567 ([[CL:Macros:setf|SETF]] X 7))
-▷       (#:G6568 ([[CL:Macros:incf|INCF]] X)))
-▷   (DISTANCE :X1 #:G6567 :Y1 #:G6568))
-▷ (DISTANCE :X1 ([[CL:Macros:setf|SETF]] X 7) :Y1 ([[CL:Macros:incf|INCF]] X) :X1 ([[CL:Macros:incf|INCF]] X))
-▷ (DISTANCE-POSITIONAL A1 B1 A2 B2)
-▷ (DISTANCE-POSITIONAL A1 B1 A2 B2)
-▷ (DISTANCE :X1 A1 :Y1 B1 :Z1 C1 :X2 A2 :Y2 B2 :Z2 C2)
-  → [[CL:Constant Variables:nil|NIL]] </blockquote>
+<o>([[CL:Special Operators:let|LET]] ((#:G6558 ([[CL:Macros:setf|SETF]] X 7))
+      (#:G6559 ([[CL:Macros:decf|DECF]] X))
+      (#:G6560 ([[CL:Macros:decf|DECF]] X))
+      (#:G6561 ([[CL:Macros:decf|DECF]] X)))
+(DISTANCE :X1 #:G6558 :X2 #:G6559 :Y1 #:G6560 :Y2 #:G6561))
+(DISTANCE-POSITIONAL ([[CL:Macros:setf|SETF]] X 7) ([[CL:Macros:decf|DECF]] X) ([[CL:Macros:decf|DECF]] X) ([[CL:Macros:decf|DECF]] X))
+([[CL:Special Operators:let|LET]] ((#:G6567 ([[CL:Macros:setf|SETF]] X 7))
+      (#:G6568 ([[CL:Macros:incf|INCF]] X)))
+  (DISTANCE :X1 #:G6567 :Y1 #:G6568))
+(DISTANCE :X1 ([[CL:Macros:setf|SETF]] X 7) :Y1 ([[CL:Macros:incf|INCF]] X) :X1 ([[CL:Macros:incf|INCF]] X))
+(DISTANCE-POSITIONAL A1 B1 A2 B2)
+(DISTANCE-POSITIONAL A1 B1 A2 B2)
+(DISTANCE :X1 A1 :Y1 B1 :Z1 C1 :X2 A2 :Y2 B2 :Z2 C2)</o>
+<r>[[CL:Constant Variables:nil|NIL]]</r>
+</blockquote>
 
 ====Affected By====
 None.

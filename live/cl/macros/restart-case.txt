@@ -68,9 +68,9 @@ If the //restartable-form// is a //[[CL:Glossary:list]]// whose //[[CL:Glossary:
   ([[CL:Macros:handler-bind]] (([[CL:Types:error]] #'([[CL:Symbol:lambda]] (c) ([[CL:Symbols:declare]] ([[CL:Declaration:ignore]] c))
                                       ([[Cl:Functions:invoke-restart]] 'my-restart 7))))
     ([[CL:Functions:error]] "Foo."))
-  (my-restart (&optional v) v)) → 7
+  (my-restart (&optional v) v)) <r>7</r>
 
-([[CL:Macros:define-condition]] food-error ([[CL:Types:error]]) ())
+([[CL:Macros:define-condition]] food-error ([[CL:Types:error]]) ()) <r>FOOD-ERROR</r>
 
 ([[CL:Macros:define-condition]] bad-tasting-sundae (food-error)
     ((ice-cream :initarg :ice-cream 
@@ -83,16 +83,18 @@ If the //restartable-form// is a //[[CL:Glossary:list]]// whose //[[CL:Glossary:
              ([[CL:Functions:format]] stream "Bad tasting sundae with ~S, ~S, and ~S"
                      (bad-tasting-sundae-ice-cream condition)
                      (bad-tasting-sundae-sauce condition)
-                     (bad-tasting-sundae-topping condition)))))
+                     (bad-tasting-sundae-topping condition))))) <r>BAD-TASTING-SUNDAE</r>
 
 ([[CL:Macros:defun]] all-start-with-same-letter (symbol1 symbol2 symbol3)
   ([[CL:Special Operators:let]] ((first-letter ([[CL:Functions:char]] ([[CL:Functions:symbol-name]] symbol1) 0)))
     ([[CL:Macros:and]] ([[CL:Functions:eql]] first-letter ([[CL:Functions:char]] ([[CL:Functions:symbol-name]] symbol2) 0))
          ([[CL:Functions:eql]] first-letter ([[CL:Functions:char]] ([[CL:Functions:symbol-name]] symbol3) 0)))))
+<r>ALL-START-WITH-SAME-LETTER</r>
 
 ([[CL:Macros:defun]] read-new-value ()
   ([[CL:Functions:format]] [[CL:Constant Variables:t]] "Enter a new value: ")
   ([[CL:Macros:multiple-value-list]] ([[CL:Functions:eval]] ([[CL:Functions:read]]))))
+<r>READ-NEW-VALUE</r>
   
 ([[CL:Macros:defun]] verify-or-fix-perfect-sundae (ice-cream sauce topping)
   ([[CL:Macros:do]] () ((all-start-with-same-letter ice-cream sauce topping))
@@ -111,18 +113,21 @@ If the //restartable-form// is a //[[CL:Glossary:list]]// whose //[[CL:Glossary:
        :interactive read-new-value
        ([[CL:Macros:setf]] topping new-topping))))
   ([[CL:Functions:values]] ice-cream sauce topping))
+<r>VERIFY-OR-FIX-PERFECT-SUNDAE</r>
   
 (verify-or-fix-perfect-sundae 'vanilla 'caramel 'cherry)
-▷ Error: Bad tasting sundae with VANILLA, CARAMEL, and CHERRY.
-▷ To continue, type :CONTINUE followed by an option number:
-▷ 1: Use a new ice cream.
-▷ 2: Use a new sauce.
-▷ 3: Use a new topping.
-▷ 4: Return to Lisp Toplevel.
-▷ Debug> :continue 1
-▷ Use a new ice cream.
-▷ Enter a new ice cream: 'chocolate
-  → CHOCOLATE, CARAMEL, CHERRY
+<e>Error: Bad tasting sundae with VANILLA, CARAMEL, and CHERRY.
+To continue, type :CONTINUE followed by an option number:
+1: Use a new ice cream.
+2: Use a new sauce.
+3: Use a new topping.
+4: Return to Lisp Toplevel.
+Debug> :continue 1
+Use a new ice cream.
+Enter a new ice cream: 'chocolate</e>
+<r>CHOCOLATE
+CARAMEL
+CHERRY</r>
 </blockquote>
 
 ====Side Effects====

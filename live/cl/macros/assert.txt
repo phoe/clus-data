@@ -21,53 +21,44 @@ The order of evaluation of the //places// is not specified; see section {\secref
 If a //place// //[[CL:Glossary:form]]// is supplied that produces more values than there are store variables, the extra values are ignored. If the supplied //[[CL:Glossary:form]]// produces fewer values than there are store variables, the missing values are set to **[[CL:Constant Variables:nil]]**.
 
 ====Examples====
+In the below example, we assert that the //[[CL:Glossary:function]]// ''really-matrix-multiply'' is already defined and implements matrix multiplication.
 <blockquote>
-([[CL:Macros:defparameter]] *x* ([[CL:Functions:make-array]] '(3 5) :initial-element 3))
-([[CL:Macros:defparameter]] *y* ([[CL:Functions:make-array]] '(3 5) :initial-element 7)) 
-*x* → #2A((3 3 3 3 3) (3 3 3 3 3) (3 3 3 3 3)) 
-*y* → #2A((7 7 7 7 7) (7 7 7 7 7) (7 7 7 7 7)) 
-
-;;; We assert that the function REALLY-MATRIX-MULTIPLY is already
-;;; defined and implements matrix multiplication.
-
+([[CL:Macros:defparameter]] *x* ([[CL:Functions:make-array]] '(3 5) :initial-element 3)) <r>*X*</r>
+([[CL:Macros:defparameter]] *y* ([[CL:Functions:make-array]] '(3 5) :initial-element 7)) <r>*Y*</r>
+*x* <r>#2A((3 3 3 3 3) (3 3 3 3 3) (3 3 3 3 3)) </r>
+*y* <r>#2A((7 7 7 7 7) (7 7 7 7 7) (7 7 7 7 7)) </r>
 ([[CL:Macros:defun]] matrix-multiply (a b) 
   ([[CL:Special Operators:let]] (([[CL:Variables:star-print-array-star|*print-array*]] [[CL:Constant Variables:nil]])) 
     (assert ([[CL:Macros:and]] ([[CL:Functions:math-equal|=]] ([[CL:Functions:array-rank]] a) ([[CL:Functions:array-rank]] b) 2) 
                  ([[CL:Functions:math-equal|=]] ([[CL:Functions:array-dimension]] a 1) ([[CL:Functions:array-dimension]] b 0))) 
         (a b) "Cannot multiply ~S by ~S." a b) 
-    (really-matrix-multiply a b)))
-
+    (really-matrix-multiply a b))) <r>MATRIX-MULTIPLY</r>
 (matrix-multiply *x* *y*)
-▷ Correctable error in MATRIX-MULTIPLY:
-▷ Cannot multiply #<ARRAY ...> by #<ARRAY ...>.
-▷ Restart options:
-▷ 1: You will be prompted for one or more new values.
-▷ 2: Top level.
-▷ Debug> :continue 1
-▷ Value for A: *x*
-▷ Value for B: ([[CL:Functions:make-array]] '(5 3) :initial-element 6) 
-  → #2A((54 54 54 54 54) 
-        (54 54 54 54 54)
-        (54 54 54 54 54)
-        (54 54 54 54 54)
-        (54 54 54 54 54))
-</blockquote>
-
-<blockquote> 
+<e>Correctable error in MATRIX-MULTIPLY:
+Cannot multiply #<ARRAY ...> by #<ARRAY ...>.
+Restart options:
+1: You will be prompted for one or more new values.
+2: Top level.
+Debug> :continue 1
+Value for A: *x*
+Value for B: ([[CL:Functions:make-array]] '(5 3) :initial-element 6)</e>
+<r>#2A((54 54 54 54 54) 
+    (54 54 54 54 54)
+    (54 54 54 54 54)
+    (54 54 54 54 54)
+    (54 54 54 54 54))</r>
 ([[CL:Macros:defun]] double-safely (x) 
   (assert ([[CL:Functions:numberp]] x) (x))
-  ([[CL:Functions:math-add|+]] x x))
-
-(double-safely 4) → 8
-
+  ([[CL:Functions:math-add|+]] x x)) <r>DOUBLE-SAFELY</r>
+(double-safely 4) <r>8</r>
 (double-safely [[CL:Constant Variables:t]])
-▷ Correctable error in DOUBLE-SAFELY: The value of (NUMBERP X) must be non-NIL.
-▷ Restart options:
-▷ 1: You will be prompted for one or more new values.
-▷ 2: Top level.
-▷ Debug> :continue 1
-▷ Value for X: 7 
-  → 14
+<e>Correctable error in DOUBLE-SAFELY: The value of (NUMBERP X) must be non-NIL.
+Restart options:
+1: You will be prompted for one or more new values.
+2: Top level.
+Debug> :continue 1
+Value for X: 7</e>
+<r>14</r>
 </blockquote>
 
 ====Affected By====

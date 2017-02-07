@@ -1,4 +1,17 @@
 ====== Macro PUSHNEW ======
+
+====Syntax====
+  * **pushnew** //item place ''&key'' key test test-not// → //new-place-value//
+
+====Arguments and Values==== 
+  * //item//---an //[[CL:Glossary:object]]//.  
+  * //place//---a //[[CL:Glossary:place]]//, the //[[CL:Glossary:value]]// of which is a //[[CL:Glossary:proper list]]//. 
+  * //test//---a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //test-not//---a //[[CL:Glossary:designator]]// for   a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]//  that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //key//---a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument,  or **[[CL:Constant Variable:nil]]**.
+  * //new-place-value//---a //[[CL:Glossary:list]]// (the new //[[CL:Glossary:value]]// of //place//).
+
+====Description====
 **pushnew** tests whether  //item// is the same as any existing element of the //[[CL:Glossary:list]]// stored in //place//.  If //item// is not, it is prepended to the //[[CL:Glossary:list]]//, and the new //[[CL:Glossary:list]]// is stored in //place//.
 
 **pushnew** returns the new //[[CL:Glossary:list]]// that is stored in //place//.
@@ -13,29 +26,18 @@ For information about the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subf
 
 It is //[[CL:Glossary:implementation-dependent]]// whether or not **pushnew**  actually executes the storing form for its //place// in the situation where the //item// is already a member of the //[[CL:Glossary:list]]// held by //place//.
 
-====Syntax====
-  * **pushnew** //item place ''&key'' key test test-not// → //new-place-value//
-
-====Arguments and Values==== 
-  * //item//---an //[[CL:Glossary:object]]//.  
-  * //place//---a //[[CL:Glossary:place]]//, the //[[CL:Glossary:value]]// of which is a //[[CL:Glossary:proper list]]//. 
-  * //test//---a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
-  * //test-not//---a //[[CL:Glossary:designator]]// for   a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]//  that returns a //[[CL:Glossary:generalized boolean]]//.
-  * //key//---a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument,  or **[[CL:Constant Variable:nil]]**.
-  * //new-place-value//---a //[[CL:Glossary:list]]// (the new //[[CL:Glossary:value]]// of //place//).
-
 ====Examples====
 <blockquote>
-([[CL:Macros:defparameter]] //*x*// '(a (b c) d)) → (A (B C) D)
-(pushnew 5 ([[CL:Functions:cadr]] //*x*//)) → (5 B C)   
-//*x*// → (A (5 B C) D)
-(pushnew 'b ([[CL:Functions:cadr]] //*x*//)) → (5 B C)  
-//*x*// → (A (5 B C) D)
-([[CL:Macros:defparameter]] //*list*// '((1) (1 2) (1 2 3))) → ((1) (1 2) (1 2 3))
-(pushnew '(2) //*list*//) → ((2) (1) (1 2) (1 2 3))
-(pushnew '(1) //*list*//) → ((1) (2) (1) (1 2) (1 2 3))
-(pushnew '(1) //*list*// :test #'[[CL:Functions:equal]]) → ((1) (2) (1) (1 2) (1 2 3))
-(pushnew '(1) //*list*// :key #'[[CL:Functions:car]]) → ((1) (2) (1) (1 2) (1 2 3)) 
+([[CL:Macros:defparameter]] *x* '(a (b c) d)) <r>*X*</r>
+(pushnew 5 ([[CL:Functions:cadr]] *x*)) <r>(5 B C)   </r>
+*x* <r>(A (5 B C) D)</r>
+(pushnew 'b ([[CL:Functions:cadr]] *x*)) <r>(5 B C)  </r>
+*x* <r>(A (5 B C) D)</r>
+([[CL:Macros:defparameter]] *list* '((1) (1 2) (1 2 3))) <r>*LIST*</r>
+(pushnew '(2) *list*) <r>((2) (1) (1 2) (1 2 3))</r>
+(pushnew '(1) *list*) <r>((1) (2) (1) (1 2) (1 2 3))</r>
+(pushnew '(1) *list* :test #'[[CL:Functions:equal]]) <r>((1) (2) (1) (1 2) (1 2 3))</r>
+(pushnew '(1) *list* :key #'[[CL:Functions:car]]) <r>((1) (2) (1) (1 2) (1 2 3)) </r>
 </blockquote>
 
 ====Side Effects====

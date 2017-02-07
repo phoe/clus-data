@@ -26,17 +26,17 @@ The //format-control// and //format-arguments// are used report the //[[CL:Gloss
     ([[CL:Macros:loop]]
       (with-simple-restart ([[CL:Restarts:abort]] "Return to command level ~D." level)
         ([[CL:Special Operators:let]] ((form ([[CL:Functions:prog2]] (fresh-line) ([[CL:Functions:read]]) ([[CL:Functions:fresh-line]]))))
-          ([[CL:Functions:prin1]] ([[CL:Functions:eval]] form)))))))
+          ([[CL:Functions:prin1]] ([[CL:Functions:eval]] form))))))) <r>READ-EVAL-PRINT-LOOP</r>
 
 (read-eval-print-loop 1)
 (+ 'a 3)
-▷ Error: The argument, A, to the function + was of the wrong type.
-▷ The function expected a number.
-▷ To continue, type :CONTINUE followed by an option number:
-▷ 1: Specify a value to use this time.
-▷ 2: Return to command level 1.
-▷ 3: Exit command level 1.
-▷ 4: Return to Lisp Toplevel.
+<e>Error: The argument, A, to the function + was of the wrong type.
+The function expected a number.
+To continue, type :CONTINUE followed by an option number:
+1: Specify a value to use this time.
+2: Return to command level 1.
+3: Exit command level 1.
+4: Return to Lisp Toplevel.</e>
 
 ([[CL:Macros:defun]] compute-fixnum-power-of-2 (x)
   (with-simple-restart (nil "Give up on computing 2^~D." x)
@@ -44,20 +44,20 @@ The //format-control// and //format-arguments// are used report the //[[CL:Gloss
       ([[CL:Macros:dotimes]] (i x result)
         ([[CL:Macros:setf]] result ([[CL:Functions:math-multiply|*]] 2 result))
         ([[CL:Macros:unless]] ([[CL:Functions:fixnump]] result)
-          ([[CL:Function:error]] "Power of 2 is too large."))))))
+          ([[CL:Function:error]] "Power of 2 is too large.")))))) <r>COMPUTE-FIXNUM-POWER-OF-2</r>
           
 ([[CL:Macros:defun]] compute-power-of-2 (x)
-  ([[CL:Macros:or]] (compute-fixnum-power-of-2 x) 'something-big))
+  ([[CL:Macros:or]] (compute-fixnum-power-of-2 x) 'something-big)) <r>COMPUTE-POWER-OF-2</r>
 
-(compute-power-of-2 10) → 1024
+(compute-power-of-2 10) <r>1024</r>
 
 (compute-power-of-2 10000)
-▷ Error: Power of 2 is too large.
-▷ To continue, type :CONTINUE followed by an option number.
-▷ 1: Give up on computing 2^10000.
-▷ 2: Return to Lisp Toplevel
-▷ Debug> :continue 1 
-  → SOMETHING-BIG
+<e>Error: Power of 2 is too large.
+To continue, type :CONTINUE followed by an option number.
+1: Give up on computing 2^10000.
+2: Return to Lisp Toplevel
+Debug> :continue 1</e>
+<r>SOMETHING-BIG</r>
 </blockquote>
 
 ====Side Effects====
@@ -81,11 +81,11 @@ None.
 ([[CL:Macros:defmacro]] with-simple-restart 
     ((restart-name format-control &rest format-arguments)
      &body forms)
-`([[CL:Macros:restart-case]] (progn ,@forms)
-   (,restart-name ()
-       :report ([[CL:Symbols:lambda]] (stream)
-                 ([[CL:Functions:format]] stream ,format-control ,@format-arguments))
-     ([[CL:Functions:values]] [[CL:Constant Variables:nil]] [[CL:Constant Variables:t]]))))
+  `([[CL:Macros:restart-case]] (progn ,@forms)
+     (,restart-name ()
+         :report ([[CL:Symbols:lambda]] (stream)
+                   ([[CL:Functions:format]] stream ,format-control ,@format-arguments))
+       ([[CL:Functions:values]] [[CL:Constant Variables:nil]] [[CL:Constant Variables:t]]))))
 </blockquote>
 
 Because the second return value is **[[CL:Constant Variables:t]]** in the exceptional case, it is common (but not required) to arrange for the second return value in the normal case to be missing or **[[CL:Constant Variables:nil]]** so that the two situations can be distinguished.

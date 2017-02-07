@@ -1,59 +1,41 @@
 ====== Accessor FDEFINITION ======
 
 ====Syntax====
-
-**fdefinition** //function-name// → //definition// (**setf** (**fdefinition** //function-name//) //new-definition//)
+  * **fdefinition** //function-name// → //definition//
+  * (**setf** (**fdefinition** //function-name//) //new-definition//)
 
 ====Arguments and Values====
-
-//function-name// - a //[[CL:Glossary:function name]]//.
-
-In the non-**[[CL:Macros:setf]]** case, the //[[CL:Glossary:name]]// must be //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]//.
-
-//definition// - Current global function definition named by //function-name//.
-
-//new-definition// - a //[[CL:Glossary:function]]//.
+  * //function-name// - a //[[CL:Glossary:function name]]//. In the non-**[[CL:Macros:setf]]** case, the //[[CL:Glossary:name]]// must be //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]//.
+  * //definition// - Current global function definition named by //function-name//.
+  * //new-definition// - a //[[CL:Glossary:function]]//.
 
 ====Description====
+**fdefinition** //[[CL:Glossary:access|accesses]]// the current global function definition named by //function-name//. The definition may be a //[[CL:Glossary:function]]// or may be an //[[CL:Glossary:object]]// representing a //[[CL:Glossary:special form]]// or //[[CL:Glossary:macro]]//.
 
-**[[CL:Functions:fdefinition]]** //[[CL:Glossary:accesses]]// the current global function definition named by //function-name//. The definition may be a //[[CL:Glossary:function]]// or may be an //[[CL:Glossary:object]]// representing a //[[CL:Glossary:special form]]// or //[[CL:Glossary:macro]]//.
-
-The value returned by **[[CL:Functions:fdefinition]]** when **[[CL:Functions:fboundp]]** returns true but the //function-name// denotes a //[[CL:Glossary:macro]]// or //[[CL:Glossary:special form]]// is not well-defined, but **[[CL:Functions:fdefinition]]** does not signal an error.
+The value returned by **fdefinition** when **[[CL:Functions:fboundp]]** returns true but the //function-name// denotes a //[[CL:Glossary:macro]]// or //[[CL:Glossary:special form]]// is not well-defined, but **fdefinition** does not signal an error.
 
 ====Examples====
-
 None.
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 Should signal an error of type type-error if //function-name// is not a //[[CL:Glossary:function name]]//.
 
 An error of type **[[CL:Types:undefined-function]]** is signaled in the non-**[[CL:Macros:setf]]** case if //function-name// is not //[[CL:Glossary:fbound]]//.
 
 ====See Also====
-
-**[[CL:Functions:fboundp]]**, **[[CL:Functions:fmakunbound]]**, **[[CL:Functions:macro-function]]**,
-
-**[[CL:Functions:special-operator-p]]**,
-
-**[[CL:Functions:symbol-function]]**
+**[[CL:Functions:fboundp|Function FBOUNP]]**, **[[CL:Functions:fmakunbound|Function FMAKUNBOUND]]**, **[[CL:Functions:macro-function|Function MACRO-FUNCTION]]**, **[[CL:Functions:special-operator-p|Function SPECIAL-OPERATOR-P]]**, **[[CL:Functions:symbol-function|Function SYMBOL-FUNCTION]]**
 
 ====Notes====
+**fdefinition** cannot //[[CL:Glossary:access]]// the value of a lexical function name produced by **[[CL:Special Operators:flet]]** or **[[CL:Special Operators:labels]]**; it can //[[CL:Glossary:access]]// only the global function value.
 
-**[[CL:Functions:fdefinition]]** cannot //[[CL:Glossary:access]]// the value of a lexical function name produced by \specref{flet} or \specref{labels}; it can //[[CL:Glossary:access]]// only the global function value.
+**[[CL:Macros:setf]]** can be used with **fdefinition** to replace a global function definition when the //function-name//'s function definition does not represent a //[[CL:Glossary:special form]]//.
 
-**[[CL:Macros:setf]]** can be used with **[[CL:Functions:fdefinition]]** to replace a global function definition when the //function-name//'s function definition does not represent a //[[CL:Glossary:special form]]//.
-
-**[[CL:Macros:setf]]** of **[[CL:Functions:fdefinition]]** requires a //[[CL:Glossary:function]]// as the new value. It is an error to set the **[[CL:Functions:fdefinition]]** of a //function-name// to a //[[CL:Glossary:symbol]]//, a //[[CL:Glossary:list]]//, or the value returned by **[[CL:Functions:fdefinition]]** on the name of a //[[CL:Glossary:macro]]// or //[[CL:Glossary:special form]]//.
-
-
+**[[CL:Macros:setf]]** of **fdefinition** requires a //[[CL:Glossary:function]]// as the new value. It is an error to set the **fdefinition** of a //function-name// to a //[[CL:Glossary:symbol]]//, a //[[CL:Glossary:list]]//, or the value returned by **fdefinition** on the name of a //[[CL:Glossary:macro]]// or //[[CL:Glossary:special form]]//.
 
 \issue{FUNCTION-TYPE:X3J13-MARCH-88} \issue{FUNCTION-NAME:LARGE} \issue{FUNCTION-TYPE:X3J13-MARCH-88} \issue{FUNCTION-TYPE:X3J13-MARCH-88} \issue{SPECIAL-FORM-P-MISNOMER:RENAME}

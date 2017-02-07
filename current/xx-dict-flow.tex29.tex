@@ -14,15 +14,15 @@
 
 ====Description====
 
-\specref{unwind-protect} evaluates //protected-form// and guarantees that //cleanup-forms// are executed before \specref{unwind-protect} exits, whether it terminates normally or is aborted by a control transfer of some kind. \specref{unwind-protect} is intended to be used to make sure that certain side effects take place after the evaluation of //protected-form//.
+**[[CL:Special Operators:unwind-protect]]** evaluates //protected-form// and guarantees that //cleanup-forms// are executed before **[[CL:Special Operators:unwind-protect]]** exits, whether it terminates normally or is aborted by a control transfer of some kind. **[[CL:Special Operators:unwind-protect]]** is intended to be used to make sure that certain side effects take place after the evaluation of //protected-form//.
 
-If a //[[CL:Glossary:non-local exit]]// occurs during execution of //cleanup-forms//, no special action is taken. The //cleanup-forms// of \specref{unwind-protect} are not protected by that \specref{unwind-protect}.
+If a //[[CL:Glossary:non-local exit]]// occurs during execution of //cleanup-forms//, no special action is taken. The //cleanup-forms// of **[[CL:Special Operators:unwind-protect]]** are not protected by that **[[CL:Special Operators:unwind-protect]]**.
 
-\specref{unwind-protect} protects against all attempts to exit from //protected-form//, including \specref{go}, **[[CL:Macros:handler-case]]**, **[[CL:Macros:ignore-errors]]**, **[[CL:Macros:restart-case]]**, \specref{return-from}, \specref{throw}, and **[[CL:Macros:with-simple-restart]]**.
+**[[CL:Special Operators:unwind-protect]]** protects against all attempts to exit from //protected-form//, including **[[CL:Special Operators:go]]**, **[[CL:Macros:handler-case]]**, **[[CL:Macros:ignore-errors]]**, **[[CL:Macros:restart-case]]**, **[[CL:Special Operators:return-from]]**, **[[CL:Special Operators:throw]]**, and **[[CL:Macros:with-simple-restart]]**.
 
-Undoing of //[[CL:Glossary:handler]]// and //[[CL:Glossary:restart]]// //[[CL:Glossary:bindings]]// during an exit happens in parallel with the undoing of the bindings of //[[CL:Glossary:dynamic variables]]// and \specref{catch} tags, in the reverse order in which they were established. The effect of this is that //cleanup-form// sees the same //[[CL:Glossary:handler]]// and //[[CL:Glossary:restart]]// //[[CL:Glossary:bindings]]//, as well as //[[CL:Glossary:dynamic variable]]// //[[CL:Glossary:bindings]]// and \specref{catch} tags, as were visible when the \specref{unwind-protect} was entered.
+Undoing of //[[CL:Glossary:handler]]// and //[[CL:Glossary:restart]]// //[[CL:Glossary:binding|bindings]]// during an exit happens in parallel with the undoing of the bindings of //[[CL:Glossary:dynamic variables]]// and **[[CL:Special Operators:catch]]** tags, in the reverse order in which they were established. The effect of this is that //cleanup-form// sees the same //[[CL:Glossary:handler]]// and //[[CL:Glossary:restart]]// //[[CL:Glossary:binding|bindings]]//, as well as //[[CL:Glossary:dynamic variable]]// //[[CL:Glossary:binding|bindings]]// and **[[CL:Special Operators:catch]]** tags, as were visible when the **[[CL:Special Operators:unwind-protect]]** was entered.
 
-====Examples==== <blockquote> (tagbody (let ((x 3)) (unwind-protect (if (numberp x) (go out)) (print x))) out ...) </blockquote> When \specref{go} is executed, the call to **[[CL:Functions:print]]** is executed first, and then the transfer of control to the tag ''out'' is completed.
+====Examples==== <blockquote> (tagbody (let ((x 3)) (unwind-protect (if (numberp x) (go out)) (print x))) out ...) </blockquote> When **[[CL:Special Operators:go]]** is executed, the call to **[[CL:Functions:print]]** is executed first, and then the transfer of control to the tag ''out'' is completed.
 
 <blockquote> (defun dummy-function (x) ([[CL:Macros:defparameter]] state 'running) (unless (numberp x) (throw 'abort 'not-a-number)) ([[CL:Macros:defparameter]] state (1+ x))) → DUMMY-FUNCTION (catch 'abort (dummy-function 1)) → 2 state → 2 (catch 'abort (dummy-function 'trash)) → NOT-A-NUMBER state → RUNNING (catch 'abort (unwind-protect (dummy-function 'trash) ([[CL:Macros:defparameter]] state 'aborted))) → NOT-A-NUMBER state → ABORTED </blockquote>
 
@@ -66,7 +66,7 @@ None.
 
 ====See Also====
 
-\specref{catch}, \specref{go}, **[[CL:Macros:handler-case]]**, **[[CL:Macros:restart-case]]**, **[[CL:Macros:return]]**, \specref{return-from}, \specref{throw}, {\secref\Evaluation}
+**[[CL:Special Operators:catch]]**, **[[CL:Special Operators:go]]**, **[[CL:Macros:handler-case]]**, **[[CL:Macros:restart-case]]**, **[[CL:Macros:return]]**, **[[CL:Special Operators:return-from]]**, **[[CL:Special Operators:throw]]**, {\secref\Evaluation}
 
 ====Notes====
 

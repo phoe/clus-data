@@ -106,7 +106,7 @@ The following form defines a condition of //[[CL:Glossary:type]]// ''peg/hole-mi
   (:report ([[CL:Symbols:lambda]] (condition stream) 
              ([[CL:Functions:format]] stream "A ~A peg cannot go in a ~A hole." 
                      (peg/hole-mismatch-peg-shape condition) 
-                     (peg/hole-mismatch-hole-shape condition)))))
+                     (peg/hole-mismatch-hole-shape condition))))) <r>PEG/HOLE-MISMATCH</r>
 </blockquote>
 
 The new type has slots ''peg-shape'' and ''hole-shape'', so **[[CL:Functions:make-condition]]** accepts '':peg-shape'' and '':hole-shape'' keywords. The //[[CL:Glossary:reader|readers]]// ''peg/hole-mismatch-peg-shape'' and ''peg/hole-mismatch-hole-shape'' apply to objects of this type, as illustrated in the **'':report''** information.
@@ -119,7 +119,7 @@ The following form defines a //[[CL:Glossary:condition]]// //[[CL:Glossary:type]
                    :reader machine-error-machine-name))
   (:report ([[CL:Symbols:lambda]] (condition stream) 
              ([[CL::Functions:format]] stream "There is a problem with ~A." 
-                     (machine-error-machine-name condition)))))
+                     (machine-error-machine-name condition))))) <r>MACHINE-ERROR</r>
 </blockquote>
 
 Building on this definition, a new error condition can be defined which is a subtype of ''machine-error'' for use when machines are not available:
@@ -128,7 +128,7 @@ Building on this definition, a new error condition can be defined which is a sub
 (define-condition machine-not-available-error (machine-error) () 
   (:report ([[CL:Symbols:lambda]] (condition stream) 
              ([[CL::Functions:format]] stream "The machine ~A is not available." 
-                     (machine-error-machine-name condition)))))
+                     (machine-error-machine-name condition))))) <r>MACHINE-NOT-AVAILABLE-ERROR</r>
 </blockquote>
 
 This defines a still more specific condition, built upon ''machine-not-available-error'', which provides a slot initialization form for ''machine-name'' but which does not provide any new slots or report information. It just gives the ''machine-name'' slot a default initialization:
@@ -136,7 +136,7 @@ This defines a still more specific condition, built upon ''machine-not-available
 <blockquote>
 (define-condition my-favorite-machine-not-available-error
     (machine-not-available-error)
-  ((machine-name :initform "mc.lcs.mit.edu")))
+  ((machine-name :initform "mc.lcs.mit.edu"))) <r>my-favorite-machine-not-available-error</r>
 </blockquote>
 
 Note that since no **'':report''** clause was given, the information inherited from ''machine-not-available-error'' is used to report this type of condition.
@@ -148,7 +148,7 @@ Note that since no **'':report''** clause was given, the information inherited f
      (weight :initarg :weight 
              :reader ate-too-much-weight)
      (kind-of-food :initarg :kind-of-food
-                   :reader :ate-too-much-kind-of-food)))
+                   :reader :ate-too-much-kind-of-food))) <r>ATE-TOO-MUCH</r>
      
 (define-condition ate-too-much-ice-cream (ate-too-much) 
     ((kind-of-food :initform 'ice-cream) 
@@ -158,16 +158,16 @@ Note that since no **'':report''** clause was given, the information inherited f
   (:report ([[CL:Symbols:lambda]] (condition stream)
              ([[CL::Functions:format]] stream "~A ate too much ~A ice-cream"
                     (ate-too-much-person condition)
-                    (ate-too-much-ice-cream-flavor condition)))))
+                    (ate-too-much-ice-cream-flavor condition))))) <r>ate-too-much-ice-cream</r>
                     
 ([[CL:Functions:make-condition]] 'ate-too-much-ice-cream 
                 :person 'fred :weight 300 
                 :flavor 'chocolate)
-                
-  → #<ATE-TOO-MUCH-ICE-CREAM 32236101> 
+<r>#<ATE-TOO-MUCH-ICE-CREAM 32236101> </r>
 (format t "~A" *)
-▷ FRED ate too much CHOCOLATE ice-cream
-  → [[CL:Constant Variables:nil|NIL]] </blockquote>
+<o>FRED ate too much CHOCOLATE ice-cream</o>
+<r>[[CL:Constant Variables:nil|NIL]]</r>
+</blockquote>
 
 ====Affected By====
 None.

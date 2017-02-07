@@ -8,21 +8,21 @@ This //[[CL:Glossary:restart]]// is established by **[[CL:Functions:warn]]** so 
 
 ====Examples====
 <blockquote>
-([[CL:Macros:defvar]] *all-quiet* [[CL:Constant Variables:nil]])
-([[CL:Macros:defvar]] *saved-warnings* '())
+([[CL:Macros:defvar]] *all-quiet* [[CL:Constant Variables:nil]]) <r>*ALL-QUIET*</r>
+([[CL:Macros:defvar]] *saved-warnings* '()) <r>*SAVED-WARNINGS*</r>
 
 ([[CL:Macros:defun]] quiet-warning-handler (c)
   ([[CL:Macros:when]] *all-quiet*
     ([[CL:Special Operators:let]] ((r ([[CL:Functions:find-restart]] 'muffle-warning c)))
       ([[CL:Macros:when]] r
         ([[CL:Macros:push]] c *saved-warnings*)
-        ([[CL:Functions:invoke-restart] r)))))
+        ([[CL:Functions:invoke-restart] r))))) <r>QUIET-WARNING-HANDLER</r>
         
 ([[CL:Macros:defmacro]] with-quiet-warnings (&body forms)
   `([[CL:Special Operators:let]] ((*all-quiet* [[CL:Constant Variables:t]])
          (*saved-warnings* '()))
      ([[CL:Macros:handler-bind]] (([[CL:Types:warning]] #'quiet-warning-handler))
-       ,@forms *saved-warnings*)))
+       ,@forms *saved-warnings*))) <r>WITH-QUIET-WARNINGS</r>
        
 ([[CL:Macros:defparameter]] *saved*
   (with-quiet-warnings
@@ -30,13 +30,14 @@ This //[[CL:Glossary:restart]]// is established by **[[CL:Functions:warn]]** so 
     ([[CL:Special Operators:let]] ((*all-quiet* [[CL:Constant Variables:nil]]))
       ([[CL:Functions:warn]] "Situation #2."))
     ([[CL:Functions:warn]] "Situation #3.")))
-▷ Warning: Situation #2.
-  → (#<SIMPLE-WARNING 42744421> #<SIMPLE-WARNING 42744365>)
+<o>Warning: Situation #2.</o>
+<r>*SAVED*</r>
+*saved* <r>(#<SIMPLE-WARNING 42744421> #<SIMPLE-WARNING 42744365>)</r>
   
 ([[CL:Macros:dolist]] (s *saved*) ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~A~%" s))
-▷ Situation #3.
-▷ Situation #1.
-  → [[CL:Constant Variables:nil|NIL]]
+<o>Situation #3.
+Situation #1.</o>
+<r>[[CL:Constant Variables:nil|NIL]]</r>
 </blockquote>
 
 ====See Also====

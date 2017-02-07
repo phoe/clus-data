@@ -1,45 +1,60 @@
 ====== Function FBOUNDP ======
 
 ====Syntax====
-
-**fboundp** //name// → //generalized-boolean//
-
+  * **fboundp** //name// → //generalized-boolean//
 
 ====Arguments and Values====
-
-//name// - a //[[CL:Glossary:function name]]//.
-
-//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+  * //name// - a //[[CL:Glossary:function name]]//.
+  * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
 
 ====Description====
-
-\Predicate{name}{//[[CL:Glossary:fbound]]//}
+Returns true if //name// is //[[CL:Glossary:fbound]]//; otherwise, returns false.
 
 ====Examples====
+<blockquote>
+(fboundp 'car) <r>//[[CL:Glossary:true]]//</r>
+(fboundp 'nth-value) <r>//[[CL:Glossary:false]]//</r>
+(fboundp 'with-open-file) <r>//[[CL:Glossary:true]]//</r>
+(fboundp 'unwind-protect) <r>//[[CL:Glossary:true]]//</r>
 
-<blockquote> (fboundp 'car) → //[[CL:Glossary:true]]// (fboundp 'nth-value) → //[[CL:Glossary:false]]// (fboundp 'with-open-file) → //[[CL:Glossary:true]]// (fboundp 'unwind-protect) → //[[CL:Glossary:true]]// (defun my-function (x) x) → MY-FUNCTION (fboundp 'my-function) → //[[CL:Glossary:true]]// (let ((saved-definition (symbol-function 'my-function))) (unwind-protect (progn (fmakunbound 'my-function) (fboundp 'my-function)) ([[CL:Macros:setf]] (symbol-function 'my-function) saved-definition))) → //[[CL:Glossary:false]]// (fboundp 'my-function) → //[[CL:Glossary:true]]// (defmacro my-macro (x) `',x) → MY-MACRO (fboundp 'my-macro) → //[[CL:Glossary:true]]// (fmakunbound 'my-function) → MY-FUNCTION (fboundp 'my-function) → //[[CL:Glossary:false]]// (flet ((my-function (x) x)) (fboundp 'my-function)) → //[[CL:Glossary:false]]// </blockquote>
+([[CL:Macros:defun]] my-function (x) x) <r>MY-FUNCTION</r>
+(fboundp 'my-function) <r>//[[CL:Glossary:true]]// </r>
+([[Cl:Special Operators:let]] ((saved-definition ([[CL:Functions:symbol-function]] 'my-function)))
+  ([[CL:Special Operators:unwind-protect]]
+      ([[CL:Special Operators:progn]]
+        ([[CL:Functions:fmakunbound]] 'my-function)
+        ([[CL:Functions:fboundp]] 'my-function))
+    ([[CL:Macros:setf]] ([[CL:Functions:symbol-function]] 'my-function) saved-definition)))
+  <r>//[[CL:Glossary:false]]//</r>
+(fboundp 'my-function) <r>//[[CL:Glossary:true]]//</r>
+([[CL:Maros:defmacro]] my-macro (x) `',x) <r>MY-MACRO</r>
+(fboundp 'my-macro) <r>//[[CL:Glossary:true]]//</r>
+([[CL:Functions:fmakunbound]] 'my-function) <r>MY-FUNCTION</r>
+(fboundp 'my-function) <r>//[[CL:Glossary:false]]//</r>
+([[CL:Special Operators:flet]] ((my-function (x) x)) 
+  (fboundp 'my-function)) 
+  <r>//[[CL:Glossary:false]]//</r>
+</blockquote>
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 Should signal an error of type type-error if //name// is not a //[[CL:Glossary:function name]]//.
 
 ====See Also====
-
-**[[CL:Functions:symbol-function]]**, **[[CL:Functions:fmakunbound]]**, **[[CL:Functions:fdefinition]]**
+**[[CL:Functions:symbol-function|Function SYMBOL-FUNCTION]]**, **[[CL:Functions:fmakunbound|Function FMAKUNBOUND]]**, **[[CL:Functions:fdefinition|Function FDEFINITION]]**
 
 ====Notes====
-
 It is permissible to call **[[CL:Functions:symbol-function]]** on any //[[CL:Glossary:symbol]]// that is //[[CL:Glossary:fbound]]//.
 
-**[[CL:Functions:fboundp]]** is sometimes used to "guard" an access to the //[[CL:Glossary:function cell]]//, as in: <blockquote> (if (fboundp x) (symbol-function x)) </blockquote>
+**fboundp** is sometimes used to "guard" an access to the //[[CL:Glossary:function cell]]//, as in: 
+<blockquote>
+(if (fboundp x) (symbol-function x))
+</blockquote>
 
 Defining a //[[CL:Glossary:setf expander]]// //F// does not cause the //[[CL:Glossary:setf function]]// ''(setf //F//)'' to become defined.
 

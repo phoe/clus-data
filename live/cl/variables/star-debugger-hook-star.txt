@@ -21,28 +21,29 @@ When the //[[CL:Glossary:value]]// of ***debugger-hook*** is //[[CL:Glossary:non
       ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~A: " prompt) 
       ([[CL:Macros:setf]] i ([[CL:Functions:read]])) 
       ([[CL:Functions:fresh-line]]))
-    ([[CL:Functions:nth]] ([[CL:Functions:math-subtract|-]] i 1) choices)))
+    ([[CL:Functions:nth]] ([[CL:Functions:math-subtract|-]] i 1) choices))) <r>ONE-OF</r>
 
 ([[CL:Macros:defun]] my-debugger (condition me-or-my-encapsulation) 
   ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&Fooey: ~A" condition) 
   ([[CL:Special Operators:let]] ((restart (one-of ([[CL:Functions:compute-restarts]]))))
     ([[CL:Special Operators:if]] ([[CL:Functions:not]] restart) ([[CL:Functions:error]] "My debugger got an error."))
     ([[CL:Special Operators:let]] (([[CL:Functions:star-debugger-hook-star|*debugger-hook*]] me-or-my-encapsulation)) 
-      ([[CL:Functions:invoke-restart-interactively]] restart))))
+      ([[CL:Functions:invoke-restart-interactively]] restart)))) <r>MY-DEBUGGER</r>
 
 ([[CL:Special Operators:let]] (([[CL:Functions:star-debugger-hook-star|*debugger-hook*]] #'my-debugger))
   ([[CL:Functions:math-add|+]] 3 'a))
-▷ Fooey: The argument to +, A, is not a number.
-▷ [1] Supply a replacement for A.
-▷ [2] Return to Cloe Toplevel.
-▷ Choice: 1
-▷ Form to evaluate and use: (+ 5 'b)
-▷ Fooey: The argument to +, B, is not a number.
-▷ [1] Supply a replacement for B.
-▷ [2] Supply a replacement for A.
-▷ [3] Return to Cloe Toplevel.
-▷ Choice: 1
-▷ Form to evaluate and use: 1 → 9 </blockquote>
+<o>Fooey: The argument to +, A, is not a number.
+[1] Supply a replacement for A.
+[2] Return to Cloe Toplevel.
+Choice: 1
+Form to evaluate and use: (+ 5 'b)
+Fooey: The argument to +, B, is not a number.
+[1] Supply a replacement for B.
+[2] Supply a replacement for A.
+[3] Return to Cloe Toplevel.
+Choice: 1
+Form to evaluate and use: 1 </o>
+<r>9</r> </blockquote>
 
 ====Affected By====
 **[[CL:Functions:invoke-debugger]]**

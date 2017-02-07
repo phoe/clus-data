@@ -47,7 +47,7 @@ An implementation is free to support other (//[[CL:Glossary:implementation-defin
   ([[CL:Special Operators:let]] ((j (foo k x)) ; second call to foo 
         (x (* k k)))
     (declare ([[CL:Declarations:inline]] foo) ([[CL:Declarations:special]] x z))
-      (foo x j z)))
+      (foo x j z))) <r>NONSENSE</r>
 </blockquote>
 
 In this example, the **[[CL:Declarations:inline]]** declaration applies only to the third call to ''foo'', but not to the first or second ones. The **[[CL:Declarations:special]]** declaration of ''x'' causes **[[CL:Special Operators:let]]** to make a dynamic //[[CL:Glossary:binding]]// for ''x'', and causes the reference to ''x'' in the body of **[[CL:Special Operators:let]]** to be a dynamic reference. The reference to ''x'' in the second call to ''foo'' is a local reference to the second parameter of ''nonsense''. The reference to ''x'' in the first call to ''foo'' is a local reference, not a **[[CL:Declarations:special]]** one. The **[[CL:Declarations:special]]** declaration of ''z'' causes the reference to ''z'' in the third call to ''foo'' to be a dynamic reference; it does not refer to the parameter to ''nonsense'' named ''z'', because that parameter //[[CL:Glossary:binding]]// has not been declared to be **[[CL:Declarations:special]]**. (The **[[CL:Declarations:special]]** declaration of ''z'' does not appear in the body of **[[CL:Macros:defun]]**, but in an inner //[[CL:Glossary:form]]//, and therefore does not affect the //[[CL:Glossary:binding]]// of the //[[CL:Glossary:parameter]]//.)

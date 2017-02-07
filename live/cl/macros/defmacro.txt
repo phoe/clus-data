@@ -38,21 +38,21 @@ If a **[[CL:Macros:defmacro]]** //[[CL:Glossary:form]]// appears as a //[[CL:Glo
 (defmacro mac1 (a b)
   "Mac1 multiplies and adds"
   `([[CL:Functions:math-add|+]] ,a ([[CL:Functions:math-multiply|*]] ,b 3)))
-  → MAC1 
-(mac1 4 5) → 19 
-([[CL:Functions:documentation]] 'mac1 '[[CL:Types:function]]) → "Mac1 multiplies and adds"
+<r>MAC1 </r>
+(mac1 4 5) <r>19 </r>
+([[CL:Functions:documentation]] 'mac1 '[[CL:Types:function]]) <r>"Mac1 multiplies and adds"</r>
 
 (defmacro mac2 (&optional (a 2 b) (c 3 d) &rest x)
   `'(,a ,b ,c ,d ,x))
-  → MAC2
-(mac2 6) → (6 [[CL:Constant Variables:t|T]] 3 [[CL:Constant Variables:nil|NIL]] [[CL:Constant Variables:nil|NIL]])
-(mac2 6 3 8) → (6 [[CL:Constant Variables:t|T]] 3 [[CL:Constant Variables:t|T]] (8))
+<r>MAC2</r>
+(mac2 6) <r>(6 [[CL:Constant Variables:t|T]] 3 [[CL:Constant Variables:nil|NIL]] [[CL:Constant Variables:nil|NIL]])</r>
+(mac2 6 3 8) <r>(6 [[CL:Constant Variables:t|T]] 3 [[CL:Constant Variables:t|T]] (8))</r>
 
 (defmacro mac3 (&whole r a &optional (b 3) &rest x &key c (d a))
   `'(,r ,a ,b ,c ,d ,x))
-  → MAC3
+<r>MAC3</r>
 (mac3 1 6 :d 8 :c 9 :d 10) 
-  → ((MAC3 1 6 :D 8 :C 9 :D 10) 1 6 9 8 (:D 8 :C 9 :D 10))
+<r>((MAC3 1 6 :D 8 :C 9 :D 10) 1 6 9 8 (:D 8 :C 9 :D 10))</r>
 </blockquote>
 
 The stipulation that an embedded //[[CL:Glossary:destructuring lambda list]]// is permitted only where //[[CL:Glossary:ordinary lambda list]]// syntax would permit a parameter name but not a //[[CL:Glossary:list]]// is made to prevent ambiguity. For example, the following is not valid:
@@ -92,36 +92,44 @@ These differ slightly: the first requires that if the macro call specifies ''a''
 would be a valid call for the second definition but not for the first.
 
 <blockquote>
-(defmacro dm1a (&whole x) `',x)
-([[CL:Functions:macroexpand]] '(dm1a)) → ([[CL:Special Operators:quote|QUOTE]] (DM1A))
-([[CL:Functions:macroexpand]] '(dm1a a)) is an error.
+(defmacro dm1a (&whole x) `',x) <r>DM1A</r>
+([[CL:Functions:macroexpand]] '(dm1a)) <r>([[CL:Special Operators:quote|QUOTE]] (DM1A))</r>
+([[CL:Functions:macroexpand]] '(dm1a a))
+<e>Error: while parsing arguments to DEFMACRO DM1A:
+exactly 0 expected, but got 1.</e>
 
-(defmacro dm1b (&whole x a &optional b) `'(,x ,a ,b))
-([[CL:Functions:macroexpand]] '(dm1b)) is an error.
-([[CL:Functions:macroexpand]] '(dm1b q)) → ([[CL:Special Operators:quote|QUOTE]] ((DM1B Q) Q NIL))
-([[CL:Functions:macroexpand]] '(dm1b q r)) → ([[CL:Special Operators:quote|QUOTE]] ((DM1B Q R) Q R))
-([[CL:Functions:macroexpand]] '(dm1b q r s)) is an error.
-</blockquote>
+(defmacro dm1b (&whole x a &optional b) `'(,x ,a ,b)) <r>DM1B</r>
+([[CL:Functions:macroexpand]] '(dm1b))
+<e>Error: while parsing arguments to DEFMACRO DM1A:
+between 1 and 2 expected, but got 0.</e>
+([[CL:Functions:macroexpand]] '(dm1b q)) <r>([[CL:Special Operators:quote|QUOTE]] ((DM1B Q) Q NIL))</r>
+([[CL:Functions:macroexpand]] '(dm1b q r)) <r>([[CL:Special Operators:quote|QUOTE]] ((DM1B Q R) Q R))</r>
+([[CL:Functions:macroexpand]] '(dm1b q r s))
+<e>Error: while parsing arguments to DEFMACRO DM1A:
+between 1 and 2 expected, but got 3.</e>
 
-<blockquote>
 (defmacro dm2a (&whole form a b)
   `'(form ,form a ,a b ,b))
-([[CL:Functions:macroexpand]] '(dm2a x y)) → ([[CL:Special Operators:quote|QUOTE]] (FORM (DM2A X Y) A X B Y))
-(dm2a x y) → (FORM (DM2A X Y) A X B Y)
+([[CL:Functions:macroexpand]] '(dm2a x y)) <r>([[CL:Special Operators:quote|QUOTE]] (FORM (DM2A X Y) A X B Y))
+T</r>
+(dm2a x y) <r>(FORM (DM2A X Y) A X B Y)</r>
 
 (defmacro dm2b (&whole form a (&whole b (c . d) &optional (e 5)) 
                 &body f &environment env) 
   ``(,',form ,,a ,',b ,',([[CL:Functions:macroexpand]] c env) ,',d ,',e ,',f))
-;;; Note that because backquote is involved, implementations may differ slightly
-;;; in the nature (though not the functionality) of the expansion.
 ([[CL:Functions:macroexpand]] '(dm2b x1 ((([[CL:Macros:incf]] x2) x3 x4)) x5 x6)) 
-  → (LIST* '(DM2B X1 ((([[CL:Macros:incf|INCF]] X2) X3 X4)) X5 X6) X1 '(((([[CL:Macros:incf|INCF]] X2) X3 X4)) ([[CL:Macros:setf|SETF]] X2 ([[CL:Functions:math-one-plus|1+]] X2)) (X3 X4) 5 (X5 X6))), [[CL:Constant Variables:T]] 
+<r>(LIST* '(DM2B X1 ((([[CL:Macros:incf|INCF]] X2) X3 X4)) X5 X6) X1 '(((([[CL:Macros:incf|INCF]] X2) X3 X4)) ([[CL:Macros:setf|SETF]] X2 ([[CL:Functions:math-one-plus|1+]] X2)) (X3 X4) 5 (X5 X6)))
+[[CL:Constant Variables:T]] </r>
+</blockquote>
 
+In the above example, note that because backquote is involved, implementations may differ slightly in the nature (though not the functionality) of the expansion.
+
+<blockquote>
 ([[CL:Special Operators:let]] ((x1 5)) 
   ([[CL:Special Operators:macrolet]] ((segundo (x) `([[CL:Functions:cadr]] ,x)))
     (dm2b x1 (((segundo x2) x3 x4)) x5 x6)))
-  → ((DM2B X1 (((SEGUNDO X2) X3 X4)) X5 X6) 5 
-     (((SEGUNDO X2) X3 X4)) (CADR X2) (X3 X4) 5 (X5 X6)) 
+<r>((DM2B X1 (((SEGUNDO X2) X3 X4)) X5 X6) 5 
+ (((SEGUNDO X2) X3 X4)) (CADR X2) (X3 X4) 5 (X5 X6)) </r>
 </blockquote>
 
 ====Affected By====

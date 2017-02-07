@@ -11,34 +11,54 @@
 ====Description====
 //[[CL:Glossary:apply|Applies]]// the //function// to the //args//.
 
-When the //function// receives its arguments via ''&rest'', it is permissible (but not required) for the //[[CL:Glossary:implementation]]// to //[[CL:Glossary:bind]]// the //[[CL:Glossary:rest parameter]]// to an //[[CL:Glossary:object]]// that shares structure with the last argument to **[[CL:Functions:apply]]**. Because a //[[CL:Glossary:function]]// can neither detect whether it was called via **[[CL:Functions:apply]]** nor whether (if so) the last argument to **[[CL:Functions:apply]]** was a //[[CL:Glossary:constant]]//, //[[CL:Glossary:conforming programs]]// must neither rely on the //[[CL:Glossary:list]]// structure of a //[[CL:Glossary:rest list]]// to be freshly consed, nor modify that //[[CL:Glossary:list]]// structure.
+When the //function// receives its arguments via ''&rest'', it is permissible (but not required) for the //[[CL:Glossary:implementation]]// to //[[CL:Glossary:bind]]// the //[[CL:Glossary:rest parameter]]// to an //[[CL:Glossary:object]]// that shares structure with the last argument to **apply**. Because a //[[CL:Glossary:function]]// can neither detect whether it was called via **apply** nor whether (if so) the last argument to **apply** was a //[[CL:Glossary:constant]]//, //[[CL:Glossary:conforming program|conforming programs]]// must neither rely on the //[[CL:Glossary:list]]// structure of a //[[CL:Glossary:rest list]]// to be freshly consed, nor modify that //[[CL:Glossary:list]]// structure.
 
-**[[CL:Macros:setf]]** can be used with **[[CL:Functions:apply]]** in certain circumstances; see section {\secref\SETFofAPPLY}.
+**[[CL:Macros:setf]]** can be used with **apply** in certain circumstances; see section {\secref\SETFofAPPLY}.
 
 ====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] *f* '[[CL:Functions:math-add|+]]) 
+<r>[[CL:Functions:math-add|+]]</r>
+(apply *f* '(1 2)) <r>3</r>
+([[CL:Macros:setf]] *f* #'-) <r>#<FUNCTION -> </r>
+(apply *f* '(1 2)) <r>-1 </r>
+(apply #'[[CL:Functions:max]] 3 5 '(2 7 3)) <r>7 </r>
+(apply '[[CL:Functions:cons]] '(([[CL:Functions:math-add|+]] 2 3) 4)) <r>(([[CL:Functions:math-add|+]] 2 3) . 4) </r>
+(apply #'[[CL:Functions:math-add|+]] '()) <r>0</r>
 
-<blockquote> ([[CL:Macros:defparameter]] f '+) → + (apply f '(1 2)) → 3 ([[CL:Macros:defparameter]] f #'-) → #<FUNCTION -> (apply f '(1 2)) → -1 (apply #'max 3 5 '(2 7 3)) → 7 (apply 'cons '((+ 2 3) 4)) → ((+ 2 3) . 4) (apply #'+ '()) → 0
+([[CL:Macros:defparameter]] *some-list* '(a b c)) <r>*SOME-LIST*</r>
+([[CL:Macros:defun]] strange-test (&rest x)
+  ([[CL:Functions:eq]] x *some-list*)) <r>STRANGE-TEST</r>
+(apply #'strange-test *some-list*) <r>//[[CL:Glossary:implementation-dependent]]//</r>
 
-(defparameter *some-list* '(a b c)) (defun strange-test (&rest x) (eq x *some-list*)) (apply #'strange-test *some-list*) → //[[CL:Glossary:implementation-dependent]]//
+([[CL:Macros:defun]] bad-boy (&rest x) 
+  ([[CL:Functions:rplacd]] x 'y)) <r>BAD-BOY</r>
+(bad-boy 'a 'b 'c)
+<u>The above has undefined consequences.</u>
 
-(defun bad-boy (&rest x) (rplacd x 'y)) (bad-boy 'a 'b 'c) has undefined consequences. (apply #'bad-boy *some-list*) has undefined consequences. </blockquote>
+(apply #'bad-boy *some-list*)
+<u>The above has undefined consequences.</u>
 
-<blockquote> (defun foo (size &rest keys &key double &allow-other-keys) (let ((v (apply #'make-array size :allow-other-keys t keys))) (if double (concatenate (type-of v) v v) v))) (foo 4 :initial-contents '(a b c d) :double t) → #(A B C D A B C D) </blockquote>
+([[CL:Macros:defun]] foo (size &rest keys &key double &allow-other-keys)
+  ([[CL:Special Operators:let]] ((v (apply #'[[CL:Functions:make-array]] size :allow-other-keys t keys)))
+    ([[CL:Special Operators:if]] double 
+        ([[CL:Functions:concatenate]] ([[CL:Functions:type-of]] v) v v)
+        v))) <r>FOO</r>
+        
+(foo 4 :initial-contents '(a b c d) :double t)
+<r>#(A B C D A B C D)</r>
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Functions:funcall]]**, **[[CL:Functions:fdefinition]]**, \specref{function}, {\secref\Evaluation}, {\secref\SETFofAPPLY}
+**[[CL:Functions:funcall|Function FUNCALL]]**, **[[CL:Functions:fdefinition|Function FDEFINITION]]**, **[[CL:Special Operators:function|Special Operator FUNCTION]]**, {\secref\Evaluation}, {\secref\SETFofAPPLY}
 
 ====Notes====
-
 None.
 
 \issue{FUNCTION-TYPE:X3J13-MARCH-88} \issue{REST-LIST-ALLOCATION:MAY-SHARE} \issue{REST-LIST-ALLOCATION:MAY-SHARE}

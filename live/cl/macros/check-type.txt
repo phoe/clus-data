@@ -19,60 +19,49 @@ The first time //place// is //[[CL:Glossary:evaluate|evaluated]]//, it is //[[CL
 
 ====Examples====
 <blockquote> 
-([[CL:Macros:defparameter]] *aardvarks* '(sam harry fred))
-
+([[CL:Macros:defparameter]] *aardvarks* '(sam harry fred)) <r>*AARDVARKS*</r>
 (check-type aardvarks ([[CL:Types:array]] [[CL:Types:wildcard|*]] (3)))
-▷ Error: The value of AARDVARKS, (SAM HARRY FRED),
-▷ is not a 3-long array.
-▷ To continue, type :CONTINUE followed by an option number:
-▷ 1: Specify a value to use instead.
-▷ 2: Return to Lisp Toplevel.
-▷ Debug> :continue 1
-▷ Use Value: #(SAM FRED HARRY)
-  → [[CL:Constant Variables:nil|NIL]] 
-aardvarks → #<ARRAY-T-3 13571>
-
+<e>Error: The value of AARDVARKS, (SAM HARRY FRED),
+is not a 3-long array.
+To continue, type :CONTINUE followed by an option number:
+1: Specify a value to use instead.
+2: Return to Lisp Toplevel.
+Debug> :continue 1
+Use Value: #(SAM FRED HARRY)</e>
+<r>[[CL:Constant Variables:nil|NIL]]</r>
+*aardvarks* <r>#<ARRAY-T-3 13571></r>
 ([[CL:Functions:map]] '[[CL:Types:list]] #'[[CL:Functions:identity]] aardvarks) 
-  → (SAM FRED HARRY) 
-  
-([[CL:Macros:defparameter]] *aardvark-count* 'foo)
+<r>(SAM FRED HARRY) </r>
+([[CL:Macros:defparameter]] *aardvark-count* 'foo) <r>*AARDVARK-COUNT*</r>
 (check-type aardvark-count ([[CL:Functions:integer]] 0 [[CL:Types:wildcard|*]]) "A positive integer")
-▷ Error: The value of AARDVARK-COUNT, FOO, is not a positive integer.
-▷ To continue, type :CONTINUE followed by an option number:
-▷ 1: Specify a value to use instead.
-▷ 2: Top level.
-▷ Debug> :continue 2
-</blockquote>
-
-<blockquote> 
+<e>Error: The value of AARDVARK-COUNT, FOO, is not a positive integer.
+To continue, type :CONTINUE followed by an option number:
+1: Specify a value to use instead.
+2: Top level.
+Debug> :continue 2</e> 
 ([[CL:Macros:defmacro]] define-adder (name amount) 
   (check-type name ([[CL:Types:and]] [[CL:Types:symbol]] ([[CL:Types:not]] [[CL:Types:null]])) "a name for an adder function") 
   (check-type amount [[CL:Types:integer]]) 
-  `([[CL:Macros:defun]] ,name (x) ([[CL:Functions:math-add|+]] x ,amount)))
-
-([[CL:Functions:macroexpand]] '(define-adder add3 3)) → (DEFUN ADD3 (x) (+ X 3))
-
+  `([[CL:Macros:defun]] ,name (x) ([[CL:Functions:math-add|+]] x ,amount))) <r>DEFINE-ADDER</r>
+([[CL:Functions:macroexpand]] '(define-adder add3 3)) <r>(DEFUN ADD3 (x) (+ X 3))</r>
 ([[CL:Functions:macroexpand]] '(define-adder 7 7))
-▷ Error: The value of NAME, 7, is not a name for an adder function.
-▷ To continue, type :CONTINUE followed by an option number:
-▷ 1: Specify a value to use instead.
-▷ 2: Top level.
-▷ Debug> :continue 1
-▷ Specify a value to use instead.
-▷ Type a form to be evaluated and used instead: 'ADD7
-  → ([[CL:Macros:defun|DEFUN]] ADD7 (X) (+ X 7))
-
+<e>Error: The value of NAME, 7, is not a name for an adder function.
+To continue, type :CONTINUE followed by an option number:
+1: Specify a value to use instead.
+2: Top level.
+Debug> :continue 1
+Specify a value to use instead.
+Type a form to be evaluated and used instead: 'ADD7</e>
+<r>([[CL:Macros:defun|DEFUN]] ADD7 (X) (+ X 7))</r>
 ([[CL:Functions:macroexpand]] '(define-adder add5 something))
-▷ Error: The value of AMOUNT, SOMETHING, is not an integer.
-▷ To continue, type :CONTINUE followed by an option number:
-▷ 1: Specify a value to use instead.
-▷ 2: Top level.
-▷ Debug> continue 1
-▷ Type a form to be evaluated and used instead: 5
-  → ([[CL:Macros:defun|DEFUN]] ADD5 (X) (+ X 5))
+<e>Error: The value of AMOUNT, SOMETHING, is not an integer.
+To continue, type :CONTINUE followed by an option number:
+1: Specify a value to use instead.
+2: Top level.
+Debug> continue 1
+Type a form to be evaluated and used instead: 5</e>
+<r>([[CL:Macros:defun|DEFUN]] ADD5 (X) (+ X 5))</r>
 </blockquote>
-
-Control is transferred to a handler.
 
 ====Side Effects====
 The debugger might be entered.
