@@ -1,43 +1,48 @@
 ====== Function FUNCALL ======
 
 ====Syntax====
-
-\DefunWithValues funcall {function ''&rest'' args} {\starparam{result}}
+  *  **funcall** //function ''&rest'' args// → //result''*''//
 
 ====Arguments and Values====
-
-//function// - a //[[CL:Glossary:function designator]]//.
-
-//args// - //[[CL:Glossary:arguments]]// to the //function//.
-
-//results// - the //[[CL:Glossary:value|values]]// returned by the //function//.
+  * //function// - a //[[CL:Glossary:function designator]]//.
+  * //args// - //[[CL:Glossary:arguments]]// to the //function//.
+  * //results// - the //[[CL:Glossary:value|values]]// returned by the //function//.
 
 ====Description====
-
-**[[CL:Functions:funcall]]** applies //function// to //args//.
+**funcall** applies //function// to //args//.
 
 If //function// is a //[[CL:Glossary:symbol]]//, it is coerced to a //[[CL:Glossary:function]]// as if by finding its //[[CL:Glossary:functional value]]// in the //[[CL:Glossary:global environment]]//.
 
 ====Examples====
-
-<blockquote> (funcall #'+ 1 2 3) → 6 (funcall 'car '(1 2 3)) → 1 (funcall 'position 1 '(1 2 3 2 1) :start 1) → 4 (cons 1 2) → (1 . 2) (flet ((cons (x y) `(kons ,x ,y))) (let ((cons (symbol-function '+))) (funcall #'cons (funcall 'cons 1 2) (funcall cons 1 2)))) → (KONS (1 . 2) 3) </blockquote>
+<blockquote>
+(funcall #'+ 1 2 3) <r>6</r>
+(funcall 'car '(1 2 3)) <r>1</r>
+(funcall 'position 1 '(1 2 3 2 1) :start 1) <r>4</r>
+(cons 1 2) <r>(1 . 2)</r>
+(flet ((cons (x y) `(kons ,x ,y)))
+  (let ((cons (symbol-function '+)))
+    (funcall #'cons (funcall 'cons 1 2) (funcall cons 1 2)))) <r>(KONS (1 . 2) 3)</r>
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 An error of type **[[CL:Types:undefined-function]]** should be signaled if //function// is a //[[CL:Glossary:symbol]]// that does not have a global definition as a //[[CL:Glossary:function]]// or that has a global definition as a //[[CL:Glossary:macro]]// or a //[[CL:Glossary:special operator]]//.
 
 ====See Also====
-
-**[[CL:Functions:apply]]**, **[[CL:Special Operators:function]]**, {\secref\Evaluation}
+  * **[[CL:Functions:apply|Function APPLY]]**
+  * **[[CL:Special Operators:function|Special Operator FUNCTION]]**
+  * {\secref\Evaluation}
 
 ====Notes====
 
-<blockquote> (funcall //function// //arg1// //arg2// ...) ≡ (apply //function// //arg1// //arg2// ... nil) ≡ (apply //function// (list //arg1// //arg2// ...)) </blockquote>
+<blockquote>
+(funcall //function// //arg1// //arg2// ...) 
+  ≡ (apply //function// //arg1// //arg2// ... nil) 
+  ≡ (apply //function// (list //arg1// //arg2// ...))
+</blockquote>
 
-The difference between **[[CL:Functions:funcall]]** and an ordinary function call is that in the former case the //function// is obtained by ordinary //[[CL:Glossary:evaluation]]// of a //[[CL:Glossary:form]]//, and in the latter case it is obtained by the special interpretation of the function position that normally occurs.
+The difference between **funcall** and an ordinary function call is that in the former case the //function// is obtained by ordinary //[[CL:Glossary:evaluation]]// of a //[[CL:Glossary:form]]//, and in the latter case it is obtained by the special interpretation of the function position that normally occurs.
 
 \issue{FUNCTION-TYPE:X3J13-MARCH-88}

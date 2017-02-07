@@ -1,69 +1,93 @@
 ====== Special Operator LET, LET* ======
 
 ====Syntax====
-
-\DefspecWithValues let {\paren{\star{\VarValue}} \starparam{declaration} \starparam{form}} {\starparam{result}}
-
-\DefspecWithValues let* {\paren{\star{\VarValue}} \starparam{declaration} \starparam{form}} {\starparam{result}}
+  * **let** //({var | (var [init-form])}''*'') declaration''*'' form''*''// → //result''*''//
+  * **let<nowiki>*</nowiki>** //({var | (var [init-form])}''*'') declaration''*'' form''*''// → //result''*''//
 
 ====Arguments and Values====
-
-//var// - a //[[CL:Glossary:symbol]]//.
-
-//init-form// - a //[[CL:Glossary:form]]//.
-
-//declaration// - a **[[CL:Special Operators:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
-
-//form// - a //[[CL:Glossary:form]]//.
-
-//results// - the //[[CL:Glossary:value|values]]// returned by the //[[CL:Glossary:forms]]//.
+  * //var// - a //[[CL:Glossary:symbol]]//.
+  * //init-form// - a //[[CL:Glossary:form]]//.
+  * //declaration// - a **[[CL:Special Operators:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //form// - a //[[CL:Glossary:form]]//.
+  * //results// - the //[[CL:Glossary:value|values]]// returned by the //[[CL:Glossary:form|forms]]//.
 
 ====Description====
+**let** and **let<nowiki>*</nowiki>** create new variable //[[CL:Glossary:binding|bindings]]// and execute a series of //forms// that use these //[[CL:Glossary:binding|bindings]]//. **let** performs the //[[CL:Glossary:binding|bindings]]// in parallel and **let<nowiki>*</nowiki>** does them sequentially.
 
-**[[CL:Special Operators:let]]** and **[[CL:Special Operators:let*]]** create new variable //[[CL:Glossary:binding|bindings]]// and execute a series of //forms// that use these //[[CL:Glossary:binding|bindings]]//. **[[CL:Special Operators:let]]** performs the //[[CL:Glossary:binding|bindings]]// in parallel and **[[CL:Special Operators:let*]]** does them sequentially.
+The form:
 
+<blockquote>
+(let ((//var1// //init-form-1//) 
+      (//var2// //init-form-2//) 
+      ... 
+      (//varm// //init-form-m//)) 
+  //declaration1//
+  //declaration2// 
+  ... 
+  //declarationp// 
+  //form1// 
+  //form2// 
+  ... 
+  //formn//)
+</blockquote> 
 
-The form
+first evaluates the expressions //init-form-1//, //init-form-2//, and so on, in that order, saving the resulting values. Then all of the variables //var<sub>j</sub>// are bound to the corresponding values; each //[[CL:Glossary:binding]]// is lexical unless there is a **[[CL:Declarations:special]]** declaration to the contrary. The expressions //form<sub>k</sub>// are then evaluated in order; the values of all but the last are discarded (that is, the body of a **let** is an //[[CL:Glossary:implicit progn]]//).
 
-<blockquote> (let ((//var1// //init-form-1//) (//var2// //init-form-2//) ... (//varm// //init-form-m//)) //declaration1// //declaration2// ... //declarationp// //form1// //form2// ... //formn//) </blockquote> first evaluates the expressions //init-form-1//, //init-form-2//, and so on,
+**let<nowiki>*</nowiki>** is similar to **let**, but the //[[CL:Glossary:binding|bindings]]// of variables are performed sequentially rather than in parallel. The expression for the //init-form// of a //var// can refer to //vars// previously bound in the **let<nowiki>*</nowiki>**.
 
-in that order, saving the resulting values. Then all of the variables //varj// are bound to the corresponding values; each //[[CL:Glossary:binding]]// is lexical unless there is a **[[CL:Declarations:special]]** declaration to the contrary. The expressions //formk// are then evaluated in order; the values of all but the last are discarded (that is, the body of a **[[CL:Special Operators:let]]** is an //[[CL:Glossary:implicit progn]]//).
+The form:
 
-**[[CL:Special Operators:let*]]** is similar to **[[CL:Special Operators:let]]**, but the //[[CL:Glossary:binding|bindings]]// of variables are performed sequentially rather than in parallel. The expression for the //init-form// of a //var// can refer to //vars// previously bound in the **[[CL:Special Operators:let*]]**.
+<blockquote>
+(let* ((//var1// //init-form-1//) 
+       (//var2// //init-form-2//) 
+       ... 
+       (//varm// //init-form-m//))
+  //declaration1// 
+  //declaration2// 
+  ... 
+  //declarationp//
+  //form1// 
+  //form2// 
+  ... 
+  //formn//) 
+</blockquote> 
 
+first evaluates the expression //init-form-1//, then binds the variable //var1// to that value; then it evaluates //init-form-2// and binds //var2//, and so on. The expressions //var<sub>j</sub>// are then evaluated in order; the values of all but the last are discarded (that is, the body of **let<nowiki>*</nowiki>** is an implicit **[[CL:Special Operators:progn]]**).
 
-The form
+For both **let** and **let<nowiki>*</nowiki>**, if there is not an //init-form// associated with a //var//, //var// is initialized to **[[CL:Constant Variables:nil]]**.
 
-<blockquote> (let* ((//var1// //init-form-1//) (//var2// //init-form-2//) ... (//varm// //init-form-m//)) //declaration1// //declaration2// ... //declarationp// //form1// //form2// ... //formn//) </blockquote> first evaluates the expression //init-form-1//, then binds the variable //var1// to that value; then it evaluates //init-form-2// and binds
-
-//var2//, and so on. The expressions //formj// are then evaluated in order; the values of all but the last are discarded (that is, the body of **[[CL:Special Operators:let*]]** is an implicit **[[CL:Special Operators:progn]]**).
-
-For both **[[CL:Special Operators:let]]** and **[[CL:Special Operators:let*]]**, if there is not an //init-form// associated with a //var//, //var// is initialized to **[[CL:Constant Variables:nil]]**.
-
-The special form **[[CL:Special Operators:let]]** has the property that the //[[CL:Glossary:scope]]// of the name binding does not include any initial value form. For **[[CL:Special Operators:let*]]**, a variable's //[[CL:Glossary:scope]]// also includes the remaining initial value forms for subsequent variable bindings.
+The special form **let** has the property that the //[[CL:Glossary:scope]]// of the name binding does not include any initial value form. For **let<nowiki>*</nowiki>**, a variable's //[[CL:Glossary:scope]]// also includes the remaining initial value forms for subsequent variable bindings.
 
 ====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] *a* 'top) <r>*A* </r>
+([[CL:Macros:defun]] dummy-function () *a*) <r>DUMMY-FUNCTION </r>
+(let ((*a* 'inside) (b *a*)) 
+  ([[CL:Functions:format]] [[CL:Constant Variables:nil]] "~S ~S ~S" *a* b (dummy-function))) <r>"INSIDE TOP TOP" </r>
+(let* ((*a* 'inside) (b *a*)) 
+  ([[CL:Functions:format]] [[CL:Constant Variables:nil]] "~S ~S ~S" *a* b (dummy-function))) <r>"INSIDE INSIDE TOP" </r>
+(let ((*a* 'inside) (b *a*)) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:special]] *a*)) ([[CL:Functions:format]] [[CL:Constant Variables:nil]] "~S ~S ~S" *a* b (dummy-function))) <r>"INSIDE TOP INSIDE" </r>
+</blockquote>
 
-<blockquote> ([[CL:Macros:defparameter]] a 'top) → TOP (defun dummy-function () a) → DUMMY-FUNCTION (let ((a 'inside) (b a)) (format nil "~S ~S ~S" a b (dummy-function))) → "INSIDE TOP TOP" (let* ((a 'inside) (b a)) (format nil "~S ~S ~S" a b (dummy-function))) → "INSIDE INSIDE TOP" (let ((a 'inside) (b a)) (declare (special a)) (format nil "~S ~S ~S" a b (dummy-function))) → "INSIDE TOP INSIDE" </blockquote>
+The example below is incorrect; although ''x'' is indeed set before it is used, and is set to a value of the declared type //[[CL:Glossary:integer]]//, nevertheless ''x'' initially takes on the value **[[CL:Constant Variables:nil]]** in violation of the type declaration.
 
-\medbreak The code
-
-<blockquote> (let (x) (declare (integer x)) ([[CL:Macros:defparameter]] x (gcd y z)) ...) </blockquote> is incorrect; although ''x'' is indeed set before it is used, and is set to a value of the declared type //[[CL:Glossary:integer]]//, nevertheless ''x'' initially takes on the value **[[CL:Constant Variables:nil]]** in violation of the type declaration.
+<blockquote>
+(let (x) 
+  ([[CL:Symbols:declare]] ([[CL:Types:integer]] x)) 
+  ([[CL:Macros:setf]] x (gcd y z)) ...)
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Special Operators:progv]]**
+**[[CL:Special Operators:progv|Special Operator PROGV]]**
 
 ====Notes====
-
 None.
 
 \issue{DECLS-AND-DOC} \issue{VARIABLE-LIST-ASYMMETRY:SYMMETRIZE} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}

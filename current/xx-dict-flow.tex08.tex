@@ -1,55 +1,56 @@
 ====== Special Operator FUNCTION ======
 
 ====Syntax====
-
-\DefspecWithValues function {name} {function}
+  * **function** //name// → //function//
 
 ====Arguments and Values====
-
-//name// - a //[[CL:Glossary:function name]]// or //[[CL:Glossary:lambda expression]]//.
-
-//function// - a //[[CL:Glossary:function]]// //[[CL:Glossary:object]]//.
+  * //name// - a //[[CL:Glossary:function name]]// or //[[CL:Glossary:lambda expression]]//.
+  * //function// - a //[[CL:Glossary:function]]// //[[CL:Glossary:object]]//.
 
 ====Description====
+The //[[CL:Glossary:value]]// of **function** is the //[[CL:Glossary:functional value]]// of //name// in the current //[[CL:Glossary:lexical environment]]//.
 
-The //[[CL:Glossary:value]]// of **[[CL:Special Operators:function]]** is the //[[CL:Glossary:functional value]]// of //name// in the current //[[CL:Glossary:lexical environment]]//.
-
-If //name// is a //[[CL:Glossary:function name]]//, the functional definition of that name
-
-is that
-
-established by the innermost lexically enclosing **[[CL:Special Operators:flet]]**, **[[CL:Special Operators:labels]]**, or **[[CL:Special Operators:macrolet]]** //[[CL:Glossary:form]]//,
-
-if there is one. Otherwise the global functional definition of the //[[CL:Glossary:function name]]// is returned.
+If //name// is a //[[CL:Glossary:function name]]//, the functional definition of that name is that established by the innermost lexically enclosing **[[CL:Special Operators:flet]]**, **[[CL:Special Operators:labels]]**, or **[[CL:Special Operators:macrolet]]** //[[CL:Glossary:form]]//, if there is one. Otherwise the global functional definition of the //[[CL:Glossary:function name]]// is returned.
 
 If //name// is a //[[CL:Glossary:lambda expression]]//, then a //[[CL:Glossary:lexical closure]]// is returned. In situations where a //[[CL:Glossary:closure]]// over the same set of //[[CL:Glossary:binding|bindings]]// might be produced more than once, the various resulting //[[CL:Glossary:closures]]// might or might not be **[[CL:Functions:eq]]**.
 
-It is an error to use **[[CL:Special Operators:function]]** on a //[[CL:Glossary:function name]]// that does not denote a //[[CL:Glossary:function]]// in the lexical environment in which the **[[CL:Special Operators:function]]** form appears. Specifically, it is an error to use **[[CL:Special Operators:function]]** on a //[[CL:Glossary:symbol]]// that denotes a //[[CL:Glossary:macro]]// or //[[CL:Glossary:special form]]//. An implementation may choose not to signal this error for performance reasons, but implementations are forbidden from defining the failure to signal an error as a useful behavior.
+It is an error to use **function** on a //[[CL:Glossary:function name]]// that does not denote a //[[CL:Glossary:function]]// in the lexical environment in which the **function** form appears. Specifically, it is an error to use **function** on a //[[CL:Glossary:symbol]]// that denotes a //[[CL:Glossary:macro]]// or //[[CL:Glossary:special form]]//. An implementation may choose not to signal this error for performance reasons, but implementations are forbidden from defining the failure to signal an error as a useful behavior.
 
 ====Examples====
+<blockquote>
+(defun adder (x)
+  (function (lambda (y) (+ x y)))) <r>ADDER</r>
+</blockquote>
 
-<blockquote> (defun adder (x) (function (lambda (y) (+ x y)))) </blockquote> The result of ''(adder 3)'' is a function that adds ''3'' to its argument:
+The result of ''(adder 3)'' is a function that adds ''3'' to its argument:
 
-<blockquote> ([[CL:Macros:defparameter]] add3 (adder 3)) (funcall add3 5) → 8 </blockquote> This works because **[[CL:Special Operators:function]]** creates a //[[CL:Glossary:closure]]// of the //[[CL:Glossary:lambda expression]]// that is able to refer to the //[[CL:Glossary:value]]// ''3'' of the variable ''x'' even after control has returned from the function ''adder''.
+<blockquote>
+([[CL:Macros:defparameter]] *add3* (adder 3)) <r>ADD3</r>
+(funcall *add3* 5) <r>8</r>
+</blockquote>
+
+This works because **function** creates a //[[CL:Glossary:closure]]// of the //[[CL:Glossary:lambda expression]]// that is able to refer to the //[[CL:Glossary:value]]// ''3'' of the variable ''x'' even after control has returned from the function ''adder''.
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Macros:defun]]**, **[[CL:Functions:fdefinition]]**, **[[CL:Special Operators:flet]]**, **[[CL:Special Operators:labels]]**, **[[CL:Functions:symbol-function]]**, {\secref\SymbolsAsForms}, {\secref\SharpsignQuote}, {\secref\PrintingOtherObjects}
+  * **[[CL:Macros:defun|Macro DEFUN]]**
+  * **[[CL:Functions:fdefinition|Function FDEFINITION]]**
+  * **[[CL:Special Operators:flet|Special Operator FLET]]**
+  * **[[CL:Special Operators:labels|Special Operator LABELS]]**
+  * **[[CL:Functions:symbol-function|Function SYMBOL-FUNCTION]]**
+  * {\secref\SymbolsAsForms}
+  * {\secref\SharpsignQuote}
+  * {\secref\PrintingOtherObjects}
 
 ====Notes====
-
-The notation **[[CL:Functions:#'//name//]]** may be used as an abbreviation for **[[CL:Functions:(function //name//)]]**.
+The notation ''#'//name//'' may be used as an abbreviation for ''(function //name//)''.
 
 \issue{FUNCTION-NAME:LARGE} \issue{FUNCTION-TYPE:X3J13-MARCH-88}

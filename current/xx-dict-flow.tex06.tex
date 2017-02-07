@@ -52,27 +52,83 @@ Declarations and **macrolet** and **[[CL:Special Operators:symbol-macrolet]]** d
 Any //local-documentation// is attached to the corresponding local //macro function// as a //[[CL:Glossary:documentation string]]//.
 
 ====Examples====
+<blockquote>
+([[CL:Macros:defun]] foo (x flag)
+  (macrolet ((fudge (z) 
+               ; The parameters x and flag are not accessible 
+               ; at this point; a reference to flag would be to 
+               ; the global variable of that name.
+               ([[CL:Special Operators:if]] flag ([[CL:Functions:math-multiply|*]] ,z ,z) ,z)))
+    ; The parameters x and flag are accessible here.
+    ([[CL:Functions:math-add|+]] x (fudge x) (fudge ([[CL:Functions:math-add|+]] x 1)))))
+</blockquote>
 
-<blockquote> (defun foo (x flag) (macrolet ((fudge (z) ;The parameters x and flag are not accessible ; at this point; a reference to flag would be to ; the global variable of that name. \bq\ (if flag (* ,z ,z) ,z))) ;The parameters x and flag are accessible here. (+ x (fudge x) (fudge (+ x 1))))) ≡ (defun foo (x flag) (+ x (if flag (* x x) x) (if flag (* (+ x 1) (+ x 1)) (+ x 1)))) </blockquote> after macro expansion. The occurrences of ''x'' and ''flag'' legitimately refer to the parameters of the function ''foo'' because those parameters are visible at the site of the macro call which produced the expansion.
+After macroexpansion, this is equivalent to:
 
-<blockquote> (flet ((flet1 (n) (+ n n))) (flet ((flet1 (n) (+ 2 (flet1 n)))) (flet1 2))) → 6
+<blockquote>
+([[CL:Macros:defun]] foo (x flag) 
+  ([[CL:Functions:math-add|+]] x ([[CL:Special Operators:if]] flag ([[CL:Functions:math-multiply|*]] x x) x) ([[CL:Special Operators:if]] flag ([[CL:Functions:math-multiply|*]] ([[CL:Functions:math-add|+]] x 1) ([[CL:Functions:math-add|+]] x 1)) ([[CL:Functions:math-add|+]] x 1))))
+</blockquote>
 
-(defun dummy-function () 'top-level) → DUMMY-FUNCTION (funcall #'dummy-function) → TOP-LEVEL (flet ((dummy-function () 'shadow)) (funcall #'dummy-function)) → SHADOW (eq (funcall #'dummy-function) (funcall 'dummy-function)) → //[[CL:Glossary:true]]// (flet ((dummy-function () 'shadow)) (eq (funcall #'dummy-function) (funcall 'dummy-function))) → //[[CL:Glossary:false]]//
+The occurrences of ''x'' and ''flag'' legitimately refer to the parameters of the function ''foo'' because those parameters are visible at the site of the macro call which produced the expansion.
 
-(defun recursive-times (k n) (labels ((temp (n) (if (zerop n) 0 (+ k (temp (1- n)))))) (temp n))) → RECURSIVE-TIMES (recursive-times 2 3) → 6
+<blockquote>
+(flet ((flet1 (n) ([[CL:Functions:math-add|+]] n n)))
+  (flet ((flet1 (n) ([[CL:Functions:math-add|+]] 2 (flet1 n))))
+    (flet1 2))) <r>6</r>
 
-(defmacro mlets (x &environment env) (let ((form `(babbit ,x))) (macroexpand form env))) → MLETS (macrolet ((babbit (z) `(+ ,z ,z))) (mlets 5)) → 10 </blockquote>
+([[CL:Macros:defun]] dummy-function () 'top-level) <r>DUMMY-FUNCTION</r>
+([[CL:Functions:funcall]] #'dummy-function) <r>TOP-LEVEL</r>
+(flet ((dummy-function () 'shadow))
+  ([[CL:Functions:funcall]] #'dummy-function)) → SHADOW 
+([[CL:Functions:eq]] ([[CL:Functions:funcall]] #'dummy-function) ([[CL:Functions:funcall]] 'dummy-function)) <r>//[[CL:Glossary:true]]// </r>
+(flet ((dummy-function () 'shadow))
+  ([[CL:Functions:eq]] ([[CL:Functions:funcall]] #'dummy-function) ([[CL:Functions:funcall]] 'dummy-function))) <r>//[[CL:Glossary:false]]//</r>
 
-<blockquote> (flet ((safesqrt (x) (sqrt (abs x)))) ;; The safesqrt function is used in two places. (safesqrt (apply #'+ (map 'list #'safesqrt '(1 2 3 4 5 6))))) → 3.291173 </blockquote>
+([[CL:Macros:defun]] recursive-times (k n) 
+  (labels ((temp (n) ([[CL:Special Operators:if]] ([[CL:Functions:zerop]] n) 0 ([[CL:Functions:math-add|+]] k (temp ([[CL:Functions:math-one-minus|1-]] n))))))
+    (temp n))) <r>RECURSIVE-TIMES </r>
+(recursive-times 2 3) <r>6</r>
 
-<blockquote> (defun integer-power (n k) (declare (integer n)) (declare (type (integer 0 *) k)) (labels ((expt0 (x k a) (declare (integer x a) (type (integer 0 *) k)) (cond ((zerop k) a) ((evenp k) (expt1 (* x x) (floor k 2) a)) (t (expt0 (* x x) (floor k 2) (* x a))))) (expt1 (x k a) (declare (integer x a) (type (integer 0 *) k)) (cond ((evenp k) (expt1 (* x x) (floor k 2) a)) (t (expt0 (* x x) (floor k 2) (* x a)))))) (expt0 n k 1))) → INTEGER-POWER </blockquote>
+([[CL:Macros:defmacro]] mlets (x &environment env)
+  ([[CL:Special Operators:let]] ((form `(babbit ,x)))
+    ([[CL:Functions:macroexpand]] form env))) <r>MLETS</r>
+(macrolet ((babbit (z) `(+ ,z ,z)))
+  (mlets 5)) <r>10</r>
 
-<blockquote> (defun example (y l) (flet ((attach (x) ([[CL:Macros:defparameter]] l (append l (list x))))) (declare (inline attach)) (dolist (x y) (unless (null (cdr x)) (attach x))) l))
+(flet ((safesqrt (x) ([[CL:Functions:sqrt]] ([[CL:Functions:abs]] x))))
+  (safesqrt ([[CL:Functions:apply]] #'[[CL:Functions:math-add|+]] ([[CL:Functions:map]] '[[CL:Types:list]] #'safesqrt '(1 2 3 4 5 6))))) <r>3.291173</r>
+</blockquote>
 
-(example '((a apple apricot) (b banana) (c cherry) (d) (e)) '((1) (2) (3) (4 2) (5) (6 3 2))) → ((1) (2) (3) (4 2) (5) (6 3 2) (A APPLE APRICOT) (B BANANA) (C CHERRY)) </blockquote>
+In the example above, the ''safesqrt'' function is used in two places. 
+
+<blockquote>
+([[CL:Macros:defun]] integer-power (n k)
+  ([[CL:Symbols:declare]] ([[CL:Types:integer]] n))
+  ([[CL:Symbols:declare]] ([[CL:Declarations:type]] ([[CL:Types:integer]] 0 [[CL:Types:wildcard|*]]) k))
+  (labels ((expt0 (x k a)
+             ([[CL:Symbols:declare]] ([[CL:Types:integer]] x a) ([[CL:Declarations:type]] ([[CL:Types:integer]] 0 [[CL:Types:wildcard|*]]) k))
+             ([[CL:Macros:cond]] (([[CL:Functions:zerop]] k) a)
+                   (([[CL:Functions:evenp]] k) (expt1 ([[CL:Functions:math-multiply|*]] x x) ([[CL:Functions:floor]] k 2) a))
+                   ([[CL:Constant Variables:t]] (expt0 (* x x) ([[CL:Functions:floor]] k 2) (* x a)))))
+           (expt1 (x k a)
+             ([[CL:Symbols:declare]] ([[CL:Types:integer]] x a) ([[CL:Declarations:type]] ([[CL:Types:integer]] 0 [[CL:Types:wildcard|*]]) k))
+             ([[CL:Macros:cond]] (([[CL:Functions:evenp]] k) (expt1 ([[CL:Functions:math-multiply|*]] x x) ([[CL:Functions:floor]] k 2) a))
+                    ([[CL:Constant Variables:t]] (expt0 ([[CL:Functions:math-multiply|*]] x x) ([[CL:Functions:floor]] k 2) ([[CL:Functions:math-multiply|*]] x a))))))
+  (expt0 n k 1))) <r>INTEGER-POWER</r>
+
+([[CL:Macros:defun]] example (y l)
+  (flet ((attach (x) ([[CL:Macros:setf]] l ([[CL:Functions:append]] l ([[CL:Functions:list]] x)))))
+    ([[CL:Symbols:declare]] ([[CL:Declarations:inline]] attach))
+    ([[CL:Macros:dolist]] (x y) ([[CL:Macros:unless]] ([[CL:Functions:null]] ([[CL:Functions:cdr]] x)) (attach x)))
+    l)) <r>EXAMPLE</r>
+
+(example '((a apple apricot) (b banana) (c cherry) (d) (e)) 
+         '((1) (2) (3) (4 2) (5) (6 3 2)))
+<r>((1) (2) (3) (4 2) (5) (6 3 2) (A APPLE APRICOT) (B BANANA) (C CHERRY))</r>
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
