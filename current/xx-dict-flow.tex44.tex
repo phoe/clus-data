@@ -1,19 +1,37 @@
 ====== Macro OR ======
 
 ====Syntax====
-\DefmacWithValues or {\starparam{form}} {\starparam{results}}
+  * **or** //form''*''// → //''result''*''//
 
 ====Arguments and Values====
   * //form// - a //[[CL:Glossary:form]]//.
   * //results// - the //[[CL:Glossary:value|values]]// or //[[CL:Glossary:primary value]]// (see below) resulting from the evaluation of the last //form// executed or **[[CL:Constant Variables:nil]]**.
 
 ====Description====
-**[[CL:Macros:or]]** evaluates each //form//, one at a time, from left to right. The evaluation of all //forms// terminates when a //form// evaluates to //[[CL:Glossary:true]]// (i.e. something other than **[[CL:Constant Variables:nil]]**).
+**or** evaluates each //form//, one at a time, from left to right. The evaluation of all //forms// terminates when a //form// evaluates to //[[CL:Glossary:true]]// (i.e. something other than **[[CL:Constant Variables:nil]]**).
 
-If the //[[CL:Glossary:evaluation]]// of any //form// other than the last returns a //[[CL:Glossary:primary value]]// that is //[[CL:Glossary:true]]//, **[[CL:Macros:or]]** immediately returns that //[[CL:Glossary:value]]// (but no additional //[[CL:Glossary:value|values]]//) without evaluating the remaining //forms//. If every //form// but the last returns //[[CL:Glossary:false]]// as its //[[CL:Glossary:primary value]]//, **[[CL:Macros:or]]** returns all //[[CL:Glossary:value|values]]// returned by the last //form//. If no //forms// are supplied, **[[CL:Macros:or]]** returns **[[CL:Constant Variables:nil]]**.
+If the //[[CL:Glossary:evaluation]]// of any //form// other than the last returns a //[[CL:Glossary:primary value]]// that is //[[CL:Glossary:true]]//, **or** immediately returns that //[[CL:Glossary:value]]// (but no additional //[[CL:Glossary:value|values]]//) without evaluating the remaining //forms//. If every //form// but the last returns //[[CL:Glossary:false]]// as its //[[CL:Glossary:primary value]]//, **or** returns all //[[CL:Glossary:value|values]]// returned by the last //form//. If no //forms// are supplied, **or** returns **[[CL:Constant Variables:nil]]**.
 
 ====Examples====
-<blockquote> (or) → NIL ([[CL:Macros:defparameter]] temp0 nil temp1 10 temp2 20 temp3 30) → 30 (or temp0 temp1 ([[CL:Macros:defparameter]] temp2 37)) → 10 temp2 → 20 (or (incf temp1) (incf temp2) (incf temp3)) → 11 temp1 → 11 temp2 → 20 temp3 → 30 (or (values) temp1) → 11 (or (values temp1 temp2) temp3) → 11 (or temp0 (values temp1 temp2)) → 11, 20 (or (values temp0 temp1) (values temp2 temp3)) → 20, 30 </blockquote>
+<blockquote>
+(or) <r>NIL</r>
+(defvar *temp0* nil) <r>*TEMP0*</r>
+(defvar *temp1* 10) <r>*TEMP1*</r>
+(defvar *temp2* 20) <r>*TEMP2*</r>
+(defvar *temp3* 30) <r>*TEMP3*</r>
+(or *temp0* *temp1* ([[CL:Macros:setf]] *temp2* 37)) <r>10</r>
+*temp2* <r>20</r>
+(or ([[CL:Macros:incf]] *temp1*) ([[CL:Macros:incf]] *temp2*) ([[CL:Macros:incf]] *temp3*)) <r>11</r>
+*temp1* <r>11</r>
+*temp2* <r>20</r>
+*temp3* <r>30</r>
+(or ([[CL:Functions:values]]) *temp1*) <r>11</r>
+(or ([[CL:Functions:values]] *temp1* *temp2*) *temp3*) <r>11</r>
+(or *temp0* ([[CL:Functions:values]] *temp1* *temp2*)) <r>11
+20</r>
+(or ([[CL:Functions:values]] *temp0* *temp1*) ([[CL:Functions:values]] *temp2* *temp3*)) <r>20
+30</r>
+</blockquote>
 
 ====Side Effects====
 None.
@@ -26,7 +44,7 @@ None.
 
 ====See Also====
   * **[[CL:Macros:and|Macro AND]]**
-  * **[[CL:Macros:some|Macro SOME]]**
+  * **[[CL:Functions:some|Function SOME]]**
   * **[[CL:Macros:unless|Macro UNLESS]]**
 
 ====Notes====

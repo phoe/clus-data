@@ -1,23 +1,40 @@
 ====== Macro AND ======
 
 ====Syntax====
-\DefmacWithValues and {\starparam{form}} {\starparam{result}}
+  * **and** //form''*''// → //''result''*''//
 
 ====Arguments and Values====
   * //form// - a //[[CL:Glossary:form]]//.
-  * //results// - the //[[CL:Glossary:value|values]]// resulting from the evaluation of the last //form//, or the symbols **[[CL:Constant Variables:nil]]** or \t.
+  * //results// - the //[[CL:Glossary:value|values]]// resulting from the evaluation of the last //form//, or the symbols **[[CL:Constant Variables:nil]]** or **[[CL:Constant Variables:t]]**.
 
 ====Description====
-The macro **[[CL:Macros:and]]** evaluates each //form// one at a time from left to right. As soon as any //form// evaluates to **[[CL:Constant Variables:nil]]**, **[[CL:Macros:and]]** returns **[[CL:Constant Variables:nil]]** without evaluating the remaining //forms//. If all //forms// but the last evaluate to //[[CL:Glossary:true]]// values, **[[CL:Macros:and]]** returns the results produced by evaluating the last //form//.
+The macro **and** evaluates each //form// one at a time from left to right. As soon as any //form// evaluates to **[[CL:Constant Variables:nil]]**, **and** returns **[[CL:Constant Variables:nil]]** without evaluating the remaining //forms//. If all //forms// but the last evaluate to //[[CL:Glossary:true]]// values, **and** returns the results produced by evaluating the last //form//.
 
-If no //forms// are supplied, ''(and)'' returns \t.
+If no //forms// are supplied, ''(and)'' returns **[[CL:Constant Variables:t]]**.
 
-**[[CL:Macros:and]]** passes back multiple values from the last //[[CL:Glossary:subform]]// but not from subforms other than the last.
+**and** passes back multiple values from the last //[[CL:Glossary:subform]]// but not from subforms other than the last.
 
 ====Examples====
-<blockquote> (if (and (>= n 0) (< n (length a-simple-vector)) (eq (elt a-simple-vector n) 'foo)) (princ "Foo!")) </blockquote> The above expression prints ''Foo!'' if element ''n'' of ''a-simple-vector'' is the symbol ''foo'', provided also that ''n'' is indeed a valid index for ''a-simple-vector''. Because **[[CL:Macros:and]]** guarantees left-to-right testing of its parts, **[[CL:Functions:elt]]** is not called if ''n'' is out of range.
+<blockquote>
+([[CL:Macros:when]] (and (>= n 0) 
+           ([[CL:Functions:math-less|<]] n ([[CL:Functions:length]] a-simple-vector))
+           ([[CL:Functions:eq]] ([[CL:Functions:elt]] a-simple-vector n) 'foo))
+      ([[CL:Functions:princ]] "Foo!"))
+</blockquote>
 
-<blockquote> ([[CL:Macros:defparameter]] temp1 1 temp2 1 temp3 1) → 1 (and (incf temp1) (incf temp2) (incf temp3)) → 2 (and (eql 2 temp1) (eql 2 temp2) (eql 2 temp3)) → //[[CL:Glossary:true]]// (decf temp3) → 1 (and (decf temp1) (decf temp2) (eq temp3 'nil) (decf temp3)) → NIL (and (eql temp1 temp2) (eql temp2 temp3)) → //[[CL:Glossary:true]]// (and) → T </blockquote>
+The above expression prints ''Foo!'' if element ''n'' of ''a-simple-vector'' is the symbol ''foo'', provided also that ''n'' is indeed a valid index for ''a-simple-vector''. Because **and** guarantees left-to-right testing of its parts, **[[CL:Functions:elt]]** is not called if ''n'' is out of range.
+
+<blockquote>
+([[CL:Macros:defvar]] *temp1* 1) <r>*TEMP1*</r>
+([[CL:Macros:defvar]] *temp2* 1) <r>*TEMP2*</r>
+([[CL:Macros:defvar]] *temp3* 1) <r>*TEMP3*</r>
+(and ([[CL:Macros:incf]] temp1) ([[CL:Macros:incf]] temp2) ([[CL:Macros:incf]] temp3)) <r>2 </r>
+(and ([[CL:Functions:eql]] 2 temp1) ([[CL:Functions:eql]] 2 temp2) ([[CL:Functions:eql]] 2 temp3)) <r>//[[CL:Glossary:true]]// </r>
+([[CL:Macros:decf]] temp3) <r>1 </r>
+(and ([[CL:Macros:decf]] temp1) ([[CL:Macros:decf]] temp2) ([[CL:Functions:eq]] temp3 '[[CL:Constant Variables:nil]]) ([[CL:Macros:decf]] temp3)) <r>[[CL:Constant Variables:t|NIL]] </r>
+(and ([[CL:Functions:eql]] temp1 temp2) ([[CL:Functions:eql]] temp2 temp3)) <r>//[[CL:Glossary:true]]// </r>
+(and) <r>[[CL:Constant Variables:t|T]] </r>
+</blockquote>
 
 ====Affected By====
 None.
@@ -33,5 +50,8 @@ None.
   * **[[CL:Macros:when|Macro WHEN]]**
 
 ====Notes====
-<blockquote> (and //form//) ≡ (let () //form//) (and //form1// //form2// ...) ≡ (when //form1// (and //form2// ...)) </blockquote>
+<blockquote>
+(and //form//) ≡ (let () //form//)
+(and //form1// //form2// ...) ≡ (when //form1// (and //form2// ...))
+</blockquote>
 

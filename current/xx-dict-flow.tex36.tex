@@ -9,44 +9,67 @@
   * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
 
 ====Description====
-Returns //[[CL:Glossary:true]]// if //x// and //y// are **[[CL:Functions:equal]]**, or if they have components that are of the same //[[CL:Glossary:type]]// as each other and if those components are **[[CL:Functions:equalp]]**; specifically, **[[CL:Functions:equalp]]** returns //[[CL:Glossary:true]]// in the following cases: \beginlist \itemitem{//[[CL:Glossary:Characters]]//}
+Returns //[[CL:Glossary:true]]// if //x// and //y// are **[[CL:Functions:equal]]**, or if they have components that are of the same //[[CL:Glossary:type]]// as each other and if those components are **equalp**; specifically, **equalp** returns //[[CL:Glossary:true]]// in the following cases: 
 
+===Characters===
 If two //[[CL:Glossary:characters]]// are **[[CL:Functions:char-equal]]**.
 
-\itemitem{//[[CL:Glossary:Numbers]]//}
-
+===Numbers===
 If two //[[CL:Glossary:numbers]]// are the //[[CL:Glossary:same]]// under **[[CL:Functions:=]]**.
 
-\itemitem{//[[CL:Glossary:Conses]]//}
+===Conses===
+If the two //[[CL:Glossary:cars]]// in the //[[CL:Glossary:conses]]// are **equalp** and the two //[[CL:Glossary:cdrs]]// in the //[[CL:Glossary:conses]]// are **equalp**.
 
-If the two //[[CL:Glossary:cars]]// in the //[[CL:Glossary:conses]]// are **[[CL:Functions:equalp]]** and the two //[[CL:Glossary:cdrs]]// in the //[[CL:Glossary:conses]]// are **[[CL:Functions:equalp]]**.
+===Arrays===
+If two //[[CL:Glossary:array|arrays]]// have the same number of dimensions, the dimensions match, and the corresponding //[[CL:Glossary:active elements]]// are **equalp**. The //[[CL:Glossary:types]]// for which the //[[CL:Glossary:array|arrays]]// are //[[CL:Glossary:specialized]]// need not match; for example, a //[[CL:Glossary:string]]// and a general //[[CL:Glossary:array]]// that happens to contain the same //[[CL:Glossary:characters]]// are **equalp**.
 
-\itemitem{//[[CL:Glossary:array|arrays]]//}
+Because **equalp** performs //[[CL:Glossary:element]]//-by-//[[CL:Glossary:element]]// comparisons of //[[CL:Glossary:strings]]// and ignores the //[[CL:Glossary:case]]// of //[[CL:Glossary:characters]]//, //[[CL:Glossary:case]]// distinctions are ignored when **equalp** compares //[[CL:Glossary:strings]]//.
 
-If two //[[CL:Glossary:array|arrays]]// have the same number of dimensions, the dimensions match, and the corresponding
+===Structures===
+If two //[[CL:Glossary:structures]]// ''S<sub>1</sub>'' and ''S<sub>2</sub>'' have the same //[[CL:Glossary:class]]// and the value of each //[[CL:Glossary:slot]]// in ''S<sub>1</sub>'' is the //[[CL:Glossary:same]]// under **equalp** as the value of the corresponding //[[CL:Glossary:slot]]// in ''S<sub>2</sub>''.
 
-//[[CL:Glossary:active elements]]// are **[[CL:Functions:equalp]]**. The //[[CL:Glossary:types]]// for which the //[[CL:Glossary:array|arrays]]// are //[[CL:Glossary:specialized]]// need not match; for example, a //[[CL:Glossary:string]]// and a general //[[CL:Glossary:array]]// that happens to contain the same //[[CL:Glossary:characters]]// are **[[CL:Functions:equalp]]**.
+===Hash tables===
+**equalp** descends //[[CL:Glossary:hash-tables]]// by first comparing the count of entries and the **'':test''** function; if those are the same, it compares the keys of the tables using the **'':test''** function and then the values of the matching keys using **equalp** recursively.
 
-Because **[[CL:Functions:equalp]]** performs //[[CL:Glossary:element]]//-by-//[[CL:Glossary:element]]// comparisons of //[[CL:Glossary:strings]]// and ignores the //[[CL:Glossary:case]]// of //[[CL:Glossary:characters]]//, //[[CL:Glossary:case]]// distinctions are ignored when **[[CL:Functions:equalp]]** compares //[[CL:Glossary:strings]]//.
+**equalp** does not descend any //[[CL:Glossary:object|objects]]// other than the ones explicitly specified above. The below table summarizes the information given in the previous list. In addition, the table specifies the priority of the behavior of **equalp**, with upper entries taking priority over lower ones.
 
-\itemitem{//[[CL:Glossary:Structures]]//}
-
-If two //[[CL:Glossary:structures]]// ''S\sub 1'' and ''S\sub 2'' have the same //[[CL:Glossary:class]]// and the value of each //[[CL:Glossary:slot]]// in ''S\sub 1'' is the //[[CL:Glossary:same]]// under **[[CL:Functions:equalp]]** as the value of the corresponding //[[CL:Glossary:slot]]// in ''S\sub 2''.
-
-\itemitem{//[[CL:Glossary:Hash Tables]]//}
-
-**[[CL:Functions:equalp]]** descends //[[CL:Glossary:hash-tables]]// by first comparing the count of entries and the **'':test''** function; if those are the same, it compares the keys of the tables using the **'':test''** function and then the values of the matching keys using **[[CL:Functions:equalp]]** recursively.
-
-\endlist
-
-**[[CL:Functions:equalp]]** does not descend any //[[CL:Glossary:object|objects]]// other than the ones explicitly specified above. \Thenextfigure\ summarizes the information given in the previous list. In addition, the figure specifies the priority of the behavior of **[[CL:Functions:equalp]]**, with upper entries taking priority over lower ones.
-
-\tablefigtwo{Summary and priorities of behavior of **[[CL:Functions:equalp]]**}{Type}{Behavior}{ //[[CL:Glossary:number]]// & uses **[[CL:Functions:=]]** \cr //[[CL:Glossary:character]]// & uses **[[CL:Functions:char-equal]]** \cr //[[CL:Glossary:cons]]// & descends \cr //[[CL:Glossary:bit vector]]// & descends \cr //[[CL:Glossary:string]]// & descends \cr //[[CL:Glossary:pathname]]// & same as **[[CL:Functions:equal]]** \cr //[[CL:Glossary:structure]]// & descends, as described above \cr Other //[[CL:Glossary:array]]// & descends \cr //[[CL:Glossary:hash table]]// & descends, as described above \cr
-
-Other //[[CL:Glossary:object]]// & uses **[[CL:Functions:eq]]** \cr }
+^ Type                             ^ Behavior                             ^
+| //[[CL:Glossary:number]]//       | uses **[[CL:Functions:=]]**          |
+| //[[CL:Glossary:character]]//    | uses **[[CL:Functions:char-equal]]** |
+| //[[CL:Glossary:cons]]//         | descends                             |
+| //[[CL:Glossary:bit vector]]//   | descends                             |
+| //[[CL:Glossary:string]]//       | descends                             |
+| //[[CL:Glossary:pathname]]//     | same as **[[CL:Functions:equal]]**   |
+| //[[CL:Glossary:structure]]//    | descends, as described above         |
+| Other //[[CL:Glossary:array]]//  | descends                             |
+| //[[CL:Glossary:hash table]]//   | descends, as described above         |
+| Other //[[CL:Glossary:object]]// | uses **[[CL:Functions:eq]]**         |
 
 ====Examples====
-<blockquote> (equalp 'a 'b) → //[[CL:Glossary:false]]// (equalp 'a 'a) → //[[CL:Glossary:true]]// (equalp 3 3) → //[[CL:Glossary:true]]// (equalp 3 3.0) → //[[CL:Glossary:true]]// (equalp 3.0 3.0) → //[[CL:Glossary:true]]// (equalp #c(3 -4) #c(3 -4)) → //[[CL:Glossary:true]]// (equalp #c(3 -4.0) #c(3 -4)) → //[[CL:Glossary:true]]// (equalp (cons 'a 'b) (cons 'a 'c)) → //[[CL:Glossary:false]]// (equalp (cons 'a 'b) (cons 'a 'b)) → //[[CL:Glossary:true]]// (equalp #\\A #\\A) → //[[CL:Glossary:true]]// (equalp #\\A #\\a) → //[[CL:Glossary:true]]// (equalp "Foo" "Foo") → //[[CL:Glossary:true]]// (equalp "Foo" (copy-seq "Foo")) → //[[CL:Glossary:true]]// (equalp "FOO" "foo") → //[[CL:Glossary:true]]// </blockquote> <blockquote> ([[CL:Macros:defparameter]] array1 (make-array 6 :element-type 'integer :initial-contents '(1 1 1 3 5 7))) → #(1 1 1 3 5 7) ([[CL:Macros:defparameter]] array2 (make-array 8 :element-type 'integer :initial-contents '(1 1 1 3 5 7 2 6) :fill-pointer 6)) → #(1 1 1 3 5 7) (equalp array1 array2) → //[[CL:Glossary:true]]// ([[CL:Macros:defparameter]] vector1 (vector 1 1 1 3 5 7)) → #(1 1 1 3 5 7) (equalp array1 vector1) → //[[CL:Glossary:true]]// </blockquote>
+<blockquote> 
+(equalp 'a 'b) <r>//[[CL:Glossary:false]]// </r>
+(equalp 'a 'a) <r>//[[CL:Glossary:true]]// </r>
+(equalp 3 3) <r>//[[CL:Glossary:true]]// </r>
+(equalp 3 3.0) <r>//[[CL:Glossary:true]]// </r>
+(equalp 3.0 3.0) <r>//[[CL:Glossary:true]]// </r>
+(equalp #c(3 -4) #c(3 -4)) <r>//[[CL:Glossary:true]]// </r>
+(equalp #c(3 -4.0) #c(3 -4)) <r>//[[CL:Glossary:true]]// </r>
+(equalp ([[CL:Functions:cons]] 'a 'b) ([[CL:Functions:cons]] 'a 'c)) <r>//[[CL:Glossary:false]]// </r>
+(equalp ([[CL:Functions:cons]] 'a 'b) ([[CL:Functions:cons]] 'a 'b)) <r>//[[CL:Glossary:true]]// </r>
+(equalp #\\A #\\A) <r>//[[CL:Glossary:true]]// </r>
+(equalp #\\A #\\a) <r>//[[CL:Glossary:true]]// </r>
+(equalp "Foo" "Foo") <r>//[[CL:Glossary:true]]// </r>
+(equalp "Foo" (copy-seq "Foo")) <r>//[[CL:Glossary:true]]// </r>
+(equalp "FOO" "foo") <r>//[[CL:Glossary:true]]// </r>
+([[CL:Macros:defparameter]] *array1*
+  ([[CL:Functions:make-array]] 6 :element-type '[[CL:Types:integer]] :initial-contents '(1 1 1 3 5 7))) <r>*ARRAY1*</r>
+([[CL:Macros:defparameter]] *array2*
+  ([[CL:Functions:make-array]] 8 :element-type '[[CL:Types:integer]] :initial-contents '(1 1 1 3 5 7 2 6) :fill-pointer 6)) <r>*ARRAY2*</r>
+(equalp *array1* *array2*) <r>//[[CL:Glossary:true]]// </r>
+([[CL:Macros:defparameter]] *vector1* 
+  ([[CL:Functions:vector]] 1 1 1 3 5 7)) <r>*VECTOR1*</r>
+(equalp *array1* *vector1*) <r>//[[CL:Glossary:true]]// </r>
+</blockquote>
 
 ====Side Effects====
 None.
@@ -68,6 +91,6 @@ None.
   * **[[CL:Functions:char-equal|Function CHAR-EQUAL]]**
 
 ====Notes====
-//[[CL:Glossary:Object]]// equality is not a concept for which there is a uniquely determined correct algorithm. The appropriateness of an equality predicate can be judged only in the context of the needs of some particular program. Although these functions take any type of argument and their names sound very generic, **[[CL:Functions:equal]]** and **[[CL:Functions:equalp]]** are not appropriate for every application.
+//[[CL:Glossary:Object]]// equality is not a concept for which there is a uniquely determined correct algorithm. The appropriateness of an equality predicate can be judged only in the context of the needs of some particular program. Although these functions take any type of argument and their names sound very generic, **[[CL:Functions:equal]]** and **equalp** are not appropriate for every application.
 
 \issue{EQUAL-STRUCTURE:MAYBE-STATUS-QUO} \issue{EQUAL-STRUCTURE:MAYBE-STATUS-QUO} \issue{EQUAL-STRUCTURE:MAYBE-STATUS-QUO}

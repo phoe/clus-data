@@ -13,22 +13,27 @@
   * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
 
 ====Description====
-**[[CL:Functions:every]]**, **[[CL:Functions:some]]**, **[[CL:Functions:notevery]]**, and **[[CL:Functions:notany]]** test //[[CL:Glossary:element|elements]]// of //sequences// for satisfaction of a given //predicate//.
+**every**, **some**, **notevery**, and **notany** test //[[CL:Glossary:element|elements]]// of //sequences// for satisfaction of a given //predicate//.
 
 The first argument to //predicate// is an //[[CL:Glossary:element]]// of the first //sequence//; each succeeding argument is an //[[CL:Glossary:element]]// of a succeeding //sequence//.
 
-//Predicate// is first applied to the elements with index ''0'' in each of the //sequences//, and possibly then to the elements with index ''1'', and so on, until a termination criterion is met or the end of the shortest of the //sequences// is reached.
+//predicate// is first applied to the elements with index ''0'' in each of the //sequences//, and possibly then to the elements with index ''1'', and so on, until a termination criterion is met or the end of the shortest of the //sequences// is reached.
 
-**[[CL:Functions:every]]** returns //[[CL:Glossary:false]]// as soon as any invocation of //predicate// returns //[[CL:Glossary:false]]//. If the end of a //sequence// is reached, **[[CL:Functions:every]]** returns //[[CL:Glossary:true]]//. Thus, **[[CL:Functions:every]]** returns //[[CL:Glossary:true]]// if and only if every invocation of //predicate// returns //[[CL:Glossary:true]]//.
+**every** returns //[[CL:Glossary:false]]// as soon as any invocation of //predicate// returns //[[CL:Glossary:false]]//. If the end of a //sequence// is reached, **every** returns //[[CL:Glossary:true]]//. Thus, **every** returns //[[CL:Glossary:true]]// if and only if every invocation of //predicate// returns //[[CL:Glossary:true]]//.
 
-**[[CL:Functions:some]]** returns the first //[[CL:Glossary:non-nil]]// value which is returned by an invocation of //predicate//. If the end of a //sequence// is reached without any invocation of the //predicate// returning //[[CL:Glossary:true]]//, **[[CL:Functions:some]]** returns //[[CL:Glossary:false]]//. Thus, **[[CL:Functions:some]]** returns //[[CL:Glossary:true]]// if and only if some invocation of //predicate// returns //[[CL:Glossary:true]]//.
+**some** returns the first //[[CL:Glossary:non-nil]]// value which is returned by an invocation of //predicate//. If the end of a //sequence// is reached without any invocation of the //predicate// returning //[[CL:Glossary:true]]//, **some** returns //[[CL:Glossary:false]]//. Thus, **some** returns //[[CL:Glossary:true]]// if and only if some invocation of //predicate// returns //[[CL:Glossary:true]]//.
 
-**[[CL:Functions:notany]]** returns //[[CL:Glossary:false]]// as soon as any invocation of //predicate// returns //[[CL:Glossary:true]]//. If the end of a //sequence// is reached, **[[CL:Functions:notany]]** returns //[[CL:Glossary:true]]//. Thus, **[[CL:Functions:notany]]** returns //[[CL:Glossary:true]]// if and only if it is not the case that any invocation of //predicate// returns //[[CL:Glossary:true]]//.
+**notany** returns //[[CL:Glossary:false]]// as soon as any invocation of //predicate// returns //[[CL:Glossary:true]]//. If the end of a //sequence// is reached, **notany** returns //[[CL:Glossary:true]]//. Thus, **notany** returns //[[CL:Glossary:true]]// if and only if it is not the case that any invocation of //predicate// returns //[[CL:Glossary:true]]//.
 
-**[[CL:Functions:notevery]]** returns //[[CL:Glossary:true]]// as soon as any invocation of //predicate// returns //[[CL:Glossary:false]]//. If the end of a //sequence// is reached, **[[CL:Functions:notevery]]** returns //[[CL:Glossary:false]]//. Thus, **[[CL:Functions:notevery]]** returns //[[CL:Glossary:true]]// if and only if it is not the case that every invocation of //predicate// returns //[[CL:Glossary:true]]//.
+**notevery** returns //[[CL:Glossary:true]]// as soon as any invocation of //predicate// returns //[[CL:Glossary:false]]//. If the end of a //sequence// is reached, **notevery** returns //[[CL:Glossary:false]]//. Thus, **notevery** returns //[[CL:Glossary:true]]// if and only if it is not the case that every invocation of //predicate// returns //[[CL:Glossary:true]]//.
 
 ====Examples====
-<blockquote> (every #'characterp "abc") → //[[CL:Glossary:true]]// (some #'= '(1 2 3 4 5) '(5 4 3 2 1)) → //[[CL:Glossary:true]]// (notevery #'< '(1 2 3 4) '(5 6 7 8) '(9 10 11 12)) → //[[CL:Glossary:false]]// (notany #'> '(1 2 3 4) '(5 6 7 8) '(9 10 11 12)) → //[[CL:Glossary:true]]// </blockquote>
+<blockquote>
+(every #'[[CL:Functions:characterp]] "abc") <r>//[[CL:Glossary:true]]//</r>
+(some #'[[CL:Functions:math-equal|=]] '(1 2 3 4 5) '(5 4 3 2 1)) <r>//[[CL:Glossary:true]]//</r>
+(notevery #'[[CL:Functions:math-less|<]] '(1 2 3 4) '(5 6 7 8) '(9 10 11 12)) <r>//[[CL:Glossary:false]]//</r>
+(notany #'[[CL:Functions:math-greater|>]] '(1 2 3 4) '(5 6 7 8) '(9 10 11 12)) <r>//[[CL:Glossary:true]]//</r>
+</blockquote>
 
 ====Affected By====
 None.
@@ -45,6 +50,9 @@ Other exceptional situations are possible, depending on the nature of the //pred
 {\secref\TraversalRules}
 
 ====Notes====
-<blockquote> (notany //predicate// \starparam{sequence}) ≡ (not (some //predicate// \starparam{sequence})) (notevery //predicate// \starparam{sequence}) ≡ (not (every //predicate// \starparam{sequence})) </blockquote>
+<blockquote>
+(notany //predicate// //sequence''*''//) ≡ (not (some //predicate// //sequence''*''//))
+(notevery //predicate// //sequence''*''//) ≡ (not (every //predicate// //sequence''*''//))
+</blockquote>
 
 \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}

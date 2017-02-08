@@ -1,26 +1,48 @@
 ====== Macro WHEN, UNLESS ======
 
 ====Syntax====
-\DefmacWithValues when {test-form \starparam{form}} {\starparam{result}}
-
-\DefmacWithValues unless {test-form \starparam{form}} {\starparam{result}}
+  * **when** //test-form form''*''// → //result''*''//
+  * **unless** //test-form form''*''// → //result''*''//
 
 ====Arguments and Values====
   * //test-form// - a //[[CL:Glossary:form]]//.
   * //forms// - an //[[CL:Glossary:implicit progn]]//.
-  * //results// - the //[[CL:Glossary:value|values]]// of the //[[CL:Glossary:form|forms]]// in a **[[CL:Macros:when]]** //[[CL:Glossary:form]]// if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:true]]// or in an **[[CL:Macros:unless]]** //[[CL:Glossary:form]]// if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:false]]//; otherwise **[[CL:Constant Variables:nil]]**.
+  * //results// - the //[[CL:Glossary:value|values]]// of the //[[CL:Glossary:form|forms]]// in a **when** //[[CL:Glossary:form]]// if the //test-form// //[[CL:Glossary:yield|yields]]// //[[CL:Glossary:true]]// or in an **unless** //[[CL:Glossary:form]]// if the //test-form// //[[CL:Glossary:yield|yields]]// //[[CL:Glossary:false]]//; otherwise **[[CL:Constant Variables:nil]]**.
 
 ====Description====
-**[[CL:Macros:when]]** and **[[CL:Macros:unless]]** allow the execution of //forms// to be dependent on a single //test-form//.
+**when** and **unless** allow the execution of //forms// to be dependent on a single //test-form//.
 
-In a **[[CL:Macros:when]]** //[[CL:Glossary:form]]//, if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:true]]//, the //forms// are //[[CL:Glossary:evaluate|evaluated]]// in order from left to right and the //[[CL:Glossary:value|values]]// returned by the //forms// are returned from the **[[CL:Macros:when]]** //[[CL:Glossary:form]]//. Otherwise, if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:false]]//, the //forms// are not //[[CL:Glossary:evaluate|evaluated]]//, and the **[[CL:Macros:when]]** //[[CL:Glossary:form]]// returns **[[CL:Constant Variables:nil]]**.
+In a **when** //[[CL:Glossary:form]]//, if the //test-form// //[[CL:Glossary:yield|yields]]// //[[CL:Glossary:true]]//, the //forms// are //[[CL:Glossary:evaluate|evaluated]]// in order from left to right and the //[[CL:Glossary:value|values]]// returned by the //forms// are returned from the **when** //[[CL:Glossary:form]]//. Otherwise, if the //test-form// //[[CL:Glossary:yield|yields]]// //[[CL:Glossary:false]]//, the //forms// are not //[[CL:Glossary:evaluate|evaluated]]//, and the **when** //[[CL:Glossary:form]]// returns **[[CL:Constant Variables:nil]]**.
 
-In an **[[CL:Macros:unless]]** //[[CL:Glossary:form]]//, if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:false]]//, the //forms// are //[[CL:Glossary:evaluate|evaluated]]// in order from left to right and the //[[CL:Glossary:value|values]]// returned by the //forms// are returned from the **[[CL:Macros:unless]]** //[[CL:Glossary:form]]//. Otherwise, if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:false]]//, the //forms// are not //[[CL:Glossary:evaluate|evaluated]]//, and the **[[CL:Macros:unless]]** //[[CL:Glossary:form]]// returns **[[CL:Constant Variables:nil]]**.
+In an **unless** //[[CL:Glossary:form]]//, if the //test-form// //[[CL:Glossary:yield|yields]]// //[[CL:Glossary:false]]//, the //forms// are //[[CL:Glossary:evaluate|evaluated]]// in order from left to right and the //[[CL:Glossary:value|values]]// returned by the //forms// are returned from the **unless** //[[CL:Glossary:form]]//. Otherwise, if the //test-form// //[[CL:Glossary:yield|yields]]// //[[CL:Glossary:false]]//, the //forms// are not //[[CL:Glossary:evaluate|evaluated]]//, and the **unless** //[[CL:Glossary:form]]// returns **[[CL:Constant Variables:nil]]**.
 
 ====Examples====
-<blockquote> (when t 'hello) → HELLO (unless t 'hello) → NIL (when nil 'hello) → NIL (unless nil 'hello) → HELLO (when t) → NIL (unless nil) → NIL (when t (prin1 1) (prin1 2) (prin1 3))
-▷ 123 → 3 (unless t (prin1 1) (prin1 2) (prin1 3)) → NIL (when nil (prin1 1) (prin1 2) (prin1 3)) → NIL (unless nil (prin1 1) (prin1 2) (prin1 3))
-▷ 123 → 3 (let ((x 3)) (list (when (oddp x) (incf x) (list x)) (when (oddp x) (incf x) (list x)) (unless (oddp x) (incf x) (list x)) (unless (oddp x) (incf x) (list x)) (if (oddp x) (incf x) (list x)) (if (oddp x) (incf x) (list x)) (if (not (oddp x)) (incf x) (list x)) (if (not (oddp x)) (incf x) (list x)))) → ((4) NIL (5) NIL 6 (6) 7 (7)) </blockquote>
+<blockquote>
+(when [[CL:Constant Variables:t]] 'hello) <r>HELLO</r>
+(unless [[CL:Constant Variables:t]] 'hello) <r>[[CL:Constant Variables:NIL]]</r>
+(when [[CL:Constant Variables:nil]] 'hello) <r>[[CL:Constant Variables:NIL]]</r>
+(unless [[CL:Constant Variables:nil]] 'hello) <r>HELLO</r>
+(when [[CL:Constant Variables:t]]) <r>[[CL:Constant Variables:NIL]]</r>
+(unless [[CL:Constant Variables:nil]]) <r>[[CL:Constant Variables:NIL]]</r>
+(when [[CL:Constant Variables:t]] (prin1 1) (prin1 2) (prin1 3))
+<o>123 </o>
+<r>3 </r>
+(unless [[CL:Constant Variables:t]] (prin1 1) (prin1 2) (prin1 3)) <r>[[CL:Constant Variables:NIL]] </r>
+(when [[CL:Constant Variables:nil]] (prin1 1) (prin1 2) (prin1 3)) <r>[[CL:Constant Variables:NIL]] </r>
+(unless [[CL:Constant Variables:nil]] (prin1 1) (prin1 2) (prin1 3))
+<o>123 </o>
+<r>3 </r>
+([[CL:Special Operators:let]] ((x 3)) 
+  ([[CL:Functions:list]] (when ([[CL:Functions:oddp]] x) ([[CL:Macros:incf]] x) ([[CL:Functions:list]] x)) 
+        (when ([[CL:Functions:oddp]] x) ([[CL:Macros:incf]] x) ([[CL:Functions:list x]])) 
+        (unless ([[CL:Functions:oddp]] x) ([[CL:Macros:incf]] x) ([[CL:Functions:list]] x)) 
+        (unless ([[CL:Functions:oddp]] x) ([[CL:Macros:incf]] x) ([[CL:Functions:list]] x)) 
+        ([[CL:Special Operators:if]] ([[CL:Functions:oddp]] x) ([[CL:Macros:incf]] x) ([[CL:Functions:list]] x)) 
+        ([[CL:Special Operators:if]] ([[CL:Functions:oddp]] x) ([[CL:Macros:incf]] x) ([[CL:Functions:list]] x)) 
+        ([[CL:Special Operators:if]] ([[CL:Functions:not]] ([[CL:Functions:oddp]] x)) ([[CL:Macros:incf]] x) ([[CL:Functions:list]] x)) 
+        ([[CL:Special Operators:if ([[CL:Functions:not]] ([[CL:Functions:oddp]] x)) ([[CL:Macros:incf]] x) ([[CL:Functions:list]] x)]]))) 
+<r>((4) [[CL:Constant Variables:NIL]] (5) [[CL:Constant Variables:NIL]] 6 (6) 7 (7)) </r>
+</blockquote>
 
 ====Side Effects====
 None.
@@ -32,19 +54,20 @@ None.
 None.
 
 ====See Also====
-**[[CL:Macros:and|Macro AND]]**
-**[[CL:Macros:cond|Macro COND]]**
-**[[CL:Special Operators:if|Special Operator IF]]**
-**[[CL:Macros:or|Macro OR]]**
+  * **[[CL:Macros:or|Macro OR]]**
+  * **[[CL:Macros:and|Macro AND]]**
+  * **[[CL:Macros:cond|Macro COND]]**
+  * **[[CL:Special Operators:if|Special Operator IF]]**
 
 ====Notes====
 <blockquote>
-(when //test// \plus{{//form//}}) ≡ (and //test// (progn \plus{{//form//}})) 
-(when //test// \plus{{//form//}}) ≡ (cond (//test// \plus{{//form//}})) 
-(when //test// \plus{{//form//}}) ≡ (if //test// (progn \plus{{//form//}}) nil) 
-(when //test// \plus{{//form//}}) ≡ (unless (not //test//) \plus{{//form//}}) 
-(unless //test// \plus{{//form//}}) ≡ (cond ((not //test//) \plus{{//form//}})) 
-(unless //test// \plus{{//form//}}) ≡ (if //test// nil (progn \plus{{//form//}})) 
-(unless //test// \plus{{//form//}}) ≡ (when (not //test//) \plus{{//form//}})
+(when //test// ...) ≡ ([[CL:Macros:and]] //test// (progn ...)) 
+(when //test// ...) ≡ ([[CL:Macros:cond]] (//test// ...)) 
+(when //test// ...) ≡ ([[CL:Special Operators:if]] //test// ([[CL:Special Operators:progn]] ...) [[CL:Constant Variables:nil]]) ≡ ([[CL:Special Operators:if]] //test// ([[CL:Special Operators:progn]] ...)) 
+(when //test// ...) ≡ (unless (not //test//) ...) 
+(unless //test// ...) ≡ ([[CL:Macros:and]] ([[CL:Functions:not]] //test//) ([[CL:Special Operators:progn ...]])) 
+(unless //test// ...) ≡ ([[CL:Macros:cond]] (([[CL:Functions:not]] //test//) ...)) 
+(unless //test// ...) ≡ ([[CL:Special Operators:if]] //test// [[CL:Constant Variables:nil]] ([[CL:Special Operators:progn]] ...)) 
+(unless //test// ...) ≡ (when ([[CL:Functions:not]] //test//) ...)
 </blockquote>
 
