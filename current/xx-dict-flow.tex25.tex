@@ -1,51 +1,89 @@
 ====== Special Operator RETURN-FROM ======
 
 ====Syntax====
-
-\DefspecNoReturn return-from {//name// [//result//]}
+  * **return-from** //name [result]//
 
 ====Arguments and Values====
   * //name// - a //[[CL:Glossary:block tag]]//; not evaluated.
   * //result// - a //[[CL:Glossary:form]]//; evaluated. The default is **[[CL:Constant Variables:nil]]**.
 
 ====Description====
-
 Returns control and //[[CL:Glossary:multiple values]]// from a lexically enclosing //[[CL:Glossary:block]]//.
 
-A **[[CL:Special Operators:block]]** //[[CL:Glossary:form]]// named //name// must lexically enclose the occurrence of **[[CL:Special Operators:return-from]]**; any //[[CL:Glossary:value|values]]// //[[CL:Glossary:yielded]]// by the //[[CL:Glossary:evaluation]]// of //result// are immediately returned from the innermost such lexically enclosing //[[CL:Glossary:block]]//.
+A **[[CL:Special Operators:block]]** //[[CL:Glossary:form]]// named //name// must lexically enclose the occurrence of **return-from**; any //[[CL:Glossary:value|values]]// //[[CL:Glossary:yield|yielded]]// by the //[[CL:Glossary:evaluation]]// of //result// are immediately returned from the innermost such lexically enclosing //[[CL:Glossary:block]]//.
 
-The transfer of control initiated by **[[CL:Special Operators:return-from]]** is performed as described in \secref\TransferOfControl.
+The transfer of control initiated by **return-from** is performed as described in \secref\TransferOfControl.
 
 ====Examples====
-
-<blockquote> (block alpha (return-from alpha) 1) → NIL (block alpha (return-from alpha 1) 2) → 1 (block alpha (return-from alpha (values 1 2)) 3) → 1, 2 (let ((a 0)) (dotimes (i 10) (incf a) (when (oddp i) (return))) a) → 2 (defun temp (x) (if x (return-from temp 'dummy)) 44) → TEMP (temp nil) → 44 (temp t) → DUMMY (block out (flet ((exit (n) (return-from out n))) (block out (exit 1))) 2) → 1 (block nil (unwind-protect (return-from nil 1) (return-from nil 2))) → 2 (dolist (flag '(nil t)) (block nil (let ((x 5)) (declare (special x)) (unwind-protect (return-from nil) (print x)))) (print 'here))
-▷ 5
-▷ HERE
-▷ 5
-▷ HERE → NIL (dolist (flag '(nil t)) (block nil (let ((x 5)) (declare (special x)) (unwind-protect (if flag (return-from nil)) (print x)))) (print 'here))
-▷ 5
-▷ HERE
-▷ 5
-▷ HERE → NIL </blockquote>
+<blockquote>
+([[CL:Special Operators:block]] alpha 
+  (return-from alpha) 
+  1) <r>[[CL:Constant Variables:NIL]] </r>
+([[CL:Special Operators:block]] alpha (return-from alpha 1) 2) <r>1 </r>
+([[CL:Special Operators:block]] alpha (return-from alpha ([[CL:Functions:values]] 1 2)) 3) <r>1
+2 </r>
+([[CL:Special Operators:let]] ((a 0)) 
+  ([[CL:Macros:dotimes]] (i 10) 
+    ([[CL:Macros:incf]] a) 
+    ([[CL:Macros:when]] ([[CL:Functions:oddp]] i) ([[CL:Macros:return]]))) 
+  a) <r>2 </r>
+([[CL:Macros:defun]] temp (x) 
+  ([[CL:Macros:when]] x (return-from temp 'dummy)) 
+  44) <r>TEMP </r>
+(temp [[CL:Constant Variables:nil]]) <r>44 </r>
+(temp [[CL:Constant Variables:t]]) <r>DUMMY </r>
+([[CL:Special Operators:block]] out ([[CL:Special Operators:flet]] ((exit (n) (return-from out n))) ([[CL:Special Operators:block]] out (exit 1))) 2) <r>1 </r>
+([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] 
+  ([[CL:Special Operators:unwind-protect]] 
+      (return-from [[CL:Constant Variables:nil]] 1)
+    (return-from [[CL:Constant Variables:nil]] 2))) <r>2 </r>
+([[CL:Macros:dolist]] (flag '([[CL:Constant Variables:nil]] [[CL:Constant Variables:t]])) 
+  ([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] 
+    ([[CL:Special Operators:let]] ((x 5)) 
+      ([[CL:Symbols:declare]] ([[CL:Declarations:special]] x)) 
+      ([[CL:Special Operators:unwind-protect]] 
+          (return-from [[CL:Constant Variables:nil]])
+        ([[CL:Functions:print]] x))))
+  ([[CL:Functions:print]] 'here))
+<o>5
+HERE
+5
+HERE </o>
+<r>[[CL:Constant Variables:NIL]] </r>
+([[CL:Macros:dolist]] (flag '([[CL:Constant Variables:nil]] [[CL:Constant Variables:t]])) 
+  ([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] 
+    ([[CL:Special Operators:let]] ((x 5)) 
+      ([[CL:Symbols:declare]] ([[CL:Declarations:special]] x))
+    ([[CL:Special Operators:unwind-protect]] 
+        ([[CL:Macros:when]] flag (return-from [[CL:Constant Variables:nil]]))
+      ([[CL:Functions:print]] x)))) 
+  ([[CL:Functions:print]] 'here))
+<o>5
+HERE
+5
+HERE </o>
+<r>[[CL:Constant Variables:NIL]] </r>
+</blockquote>
 
 The following has undefined consequences because the **[[CL:Special Operators:block]]** //[[CL:Glossary:form]]// exits normally before the **[[CL:Macros:return-from]]** //[[CL:Glossary:form]]// is attempted.
 
-<blockquote> (funcall (block nil #'(lambda () (return-from nil)))) is an error. </blockquote>
+<blockquote>
+([[CL:Functions:funcall]] ([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] #'([[CL:Symbols:lambda]] () (return-from [[CL:Constant Variables:nil]]))))
+<e>ERROR: attempt to RETURN-FROM a block that no longer exists.</e>
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Special Operators:block]]**, **[[CL:Macros:return]]**, {\secref\Evaluation}
+  * **[[CL:Special Operators:block|Special Operator BLOCK]]**
+  * **[[CL:Macros:return|Macro RETURN]]**
+  * {\secref\Evaluation}
 
 ====Notes====
-
 None.
 
 \issue{EXIT-EXTENT:MINIMAL}

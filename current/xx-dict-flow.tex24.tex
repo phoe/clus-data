@@ -1,29 +1,51 @@
 ====== Special Operator GO ======
 
 ====Syntax====
-
-\DefspecNoReturn go {tag}
+  * **go** //tag//
 
 ====Arguments and Values====
   * //tag// - a //[[CL:Glossary:go tag]]//.
 
 ====Description====
-**[[CL:Special Operators:go]]** transfers control to the point in the body of an enclosing **[[CL:Special Operators:tagbody]]** form labeled by a tag **[[CL:Functions:eql]]** to //tag//.
+**go** transfers control to the point in the body of an enclosing **[[CL:Special Operators:tagbody]]** form labeled by a tag **[[CL:Functions:eql]]** to //tag//.
 
-If there is no such //tag// in the body, the bodies of lexically containing **[[CL:Special Operators:tagbody]]** //[[CL:Glossary:form|forms]]// (if any) are examined as well. If several tags are **[[CL:Functions:eql]]** to //tag//, control is transferred to whichever matching //tag// is contained in the innermost **[[CL:Special Operators:tagbody]]** form that contains the **[[CL:Special Operators:go]]**. The consequences are undefined if there is no matching //tag// lexically visible to the point of the **[[CL:Special Operators:go]]**.
+If there is no such //tag// in the body, the bodies of lexically containing **[[CL:Special Operators:tagbody]]** //[[CL:Glossary:form|forms]]// (if any) are examined as well. If several tags are **[[CL:Functions:eql]]** to //tag//, control is transferred to whichever matching //tag// is contained in the innermost **[[CL:Special Operators:tagbody]]** form that contains the **go**. The consequences are undefined if there is no matching //tag// lexically visible to the point of the **go**.
 
-The transfer of control initiated by **[[CL:Special Operators:go]]** is performed as described in \secref\TransferOfControl.
+The transfer of control initiated by **go** is performed as described in \secref\TransferOfControl.
 
 ====Examples==== 
-<blockquote> (tagbody ([[CL:Macros:defparameter]] val 2) (go lp) (incf val 3) lp (incf val 4)) → NIL val → 6 </blockquote>
+<blockquote>
+([[CL:Macros:defvar]] *val*)
+([[Cl:Special Operators:tagbody]] 
+   ([[CL:Macros:setf]] *val* 2)
+   (go lp) 
+   ([[CL:Macros:incf]] *val* 3) 
+ lp 
+   ([[CL:Macros:incf]] *val* 4)) <r>NIL </r>
+*val* <r>6 </r>
+</blockquote>
 
-The following is in error because there is a normal exit of the **[[CL:Special Operators:tagbody]]** before the **[[CL:Special Operators:go]]** is executed.
+The following is in error because there is a normal exit of the **[[CL:Special Operators:tagbody]]** before the **go** is executed.
 
-<blockquote> (let ((a nil)) (tagbody t ([[CL:Macros:defparameter]] a #'(lambda () (go t)))) (funcall a)) </blockquote>
+<blockquote> 
+([[CL:Special Operators:let]] ((a [[CL:Constant Variables:nil]])) 
+  ([[Cl:Special Operators:tagbody]]
+   t 
+     ([[CL:Macros:setf]] a #'([[CL:Symbols:lambda]] () (go t))))
+  ([[CL:Functions:funcall]] a))
+<e>Error: attempt to GO to a tag that no longer exists.</e>
+</blockquote>
 
-The following is in error because the **[[CL:Special Operators:tagbody]]** is passed over before the **[[CL:Special Operators:go]]** //[[CL:Glossary:form]]// is executed.
+The following is in error because the **[[CL:Special Operators:tagbody]]** is passed over before the **go** //[[CL:Glossary:form]]// is executed.
 
-<blockquote> (funcall (block nil (tagbody a (return #'(lambda () (go a)))))) </blockquote>
+<blockquote>
+([[CL:Functions:funcall]] 
+  ([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] 
+    ([[Cl:Special Operators:tagbody]] 
+     a 
+       ([[CL:Macros:return]] #'([[CL:Symbols:lambda]] () (go a))))))
+<e>Error: attempt to GO to a tag that no longer exists.</e>
+</blockquote>
 
 ====Affected By====
 None.
@@ -32,7 +54,7 @@ None.
 None.
 
 ====See Also====
-**[[CL:Special Operators:tagbody]]**
+  * **[[CL:Special Operators:tagbody|Special Operator TAGBODY]]**
 
 ====Notes====
 None.

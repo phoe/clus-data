@@ -1,49 +1,71 @@
 ====== Special Operator TAGBODY ======
 
 ====Syntax====
-
-\DefspecWithValues tagbody {\star{{//tag// | //statement//}}} {**[[CL:Constant Variables:nil]]**}
+  * **tagbody** //{tag | statement}''*''// → //*[[CL:Constant Variables:nil]]**//
 
 ====Arguments and Values====
   * //tag// - a //[[CL:Glossary:go tag]]//; not evaluated.
   * //statement// - a //[[CL:Glossary:compound form]]//; evaluatedspecial.
 
 ====Description====
+Executes zero or more //[[CL:Glossary:statements]]// in a //[[CL:Glossary:lexical environment]]// that provides for control transfers to labels indicated by the //tags//.
 
-Executes zero or more //[[CL:Glossary:statements]]// in a
-
-//[[CL:Glossary:lexical environment]]// that provides for control transfers to labels indicated by the //tags//.
-
-The //statements// in a **[[CL:Special Operators:tagbody]]** are //[[CL:Glossary:evaluate|evaluated]]// in order from left to right, and their //[[CL:Glossary:value|values]]// are discarded. If at any time there are no remaining //statements//, **[[CL:Special Operators:tagbody]]** returns **[[CL:Constant Variables:nil]]**.
+The //statements// in a **tagbody** are //[[CL:Glossary:evaluate|evaluated]]// in order from left to right, and their //[[CL:Glossary:value|values]]// are discarded. If at any time there are no remaining //statements//, **tagbody** returns **[[CL:Constant Variables:nil]]**.
 
 However, if ''(go //tag//)'' is //[[CL:Glossary:evaluate|evaluated]]//, control jumps to the part of the body labeled with the //tag//. (Tags are compared with **[[CL:Functions:eql]]**.)
 
-A //tag// established by **[[CL:Special Operators:tagbody]]** has //[[CL:Glossary:lexical scope]]// and has //[[CL:Glossary:dynamic extent]]//. Once **[[CL:Special Operators:tagbody]]** has been exited, it is no longer valid to **[[CL:Special Operators:go]]** to a //tag// in its body. It is permissible for **[[CL:Special Operators:go]]** to jump to a **[[CL:Special Operators:tagbody]]** that is not the innermost **[[CL:Special Operators:tagbody]]** containing that **[[CL:Special Operators:go]]**; the //tags// established by a **[[CL:Special Operators:tagbody]]** only shadow other //tags// of like name.
+A //tag// established by **tagbody** has //[[CL:Glossary:lexical scope]]// and has //[[CL:Glossary:dynamic extent]]//. Once **tagbody** has been exited, it is no longer valid to **[[CL:Special Operators:go]]** to a //tag// in its body. It is permissible for **[[CL:Special Operators:go]]** to jump to a **tagbody** that is not the innermost **tagbody** containing that **[[CL:Special Operators:go]]**; the //tags// established by a **tagbody** only shadow other //tags// of like name.
 
 The determination of which elements of the body are //tags// and which are //statements// is made prior to any //[[CL:Glossary:macro expansion]]// of that element. If a //statement// is a //[[CL:Glossary:macro form]]// and its //[[CL:Glossary:macro expansion]]// is an //[[CL:Glossary:atom]]//, that //[[CL:Glossary:atom]]// is treated as a //statement//, not a //tag//.
 
 ====Examples====
-
-<blockquote> (let (val) (tagbody ([[CL:Macros:defparameter]] val 1) (go point-a) (incf val 16) point-c (incf val 04) (go point-b) (incf val 32) point-a (incf val 02) (go point-c) (incf val 64) point-b (incf val 08)) val) → 15 (defun f1 (flag) (let ((n 1)) (tagbody ([[CL:Macros:defparameter]] n (f2 flag #'(lambda () (go out)))) out (prin1 n)))) → F1 (defun f2 (flag escape) (if flag (funcall escape) 2)) → F2 (f1 nil)
-▷ 2 → NIL (f1 t)
-▷ 1 → NIL </blockquote>
-
+<blockquote> 
+([[CL:Special Operators:let]] ((val [[CL:Constant Variables:nil]]))
+  (tagbody
+     ([[CL:Macros:setf]] val 1)
+     ([[CL:Special Operators:go]] point-a)
+     ([[CL:Macros:incf]] val 16)
+   point-c
+     ([[CL:Macros:incf]] val 04)
+     ([[CL:Special Operators:go]] point-b)
+     ([[CL:Macros:incf]] val 32)
+   point-a
+     ([[CL:Macros:incf]] val 02)
+     ([[CL:Special Operators:go]] point-c)
+     ([[CL:Macros:incf]] val 64)
+   point-b
+     ([[CL:Macros:incf]] val 08))
+  val) <r>15 </r>
+  
+([[CL:Macros:defun]] f1 (flag) 
+  ([[CL:Special Operators:let]] ((n 1)) 
+    (tagbody 
+       ([[CL:Macros:setf]] n (f2 flag #'([[CL:Symbols:lambda]] () ([[CL:Special Operators:go]] out)))) 
+     out 
+       (prin1 n)))) <r>F1</r>
+([[CL:Macros:defun]] f2 (flag escape) 
+  ([[CL:Special Operators:if ]]flag ([[CL:Functions:funcall]] escape) 2)) <r>F2 </r>
+(f1 [[CL:Constant Variables:nil]])
+<o>2</o>
+<r>[[CL:Constant Variables:nil|NIL]] </r>
+(f1 [[CL:Constant Variables:t]])
+<o>1</o>
+<r>[[CL:Constant Variables:nil|NIL]]</r>
+</blockquote>
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Special Operators:go]]**
+  * **[[CL:Special Operators:go|Special Operator GO]]**
 
 ====Notes====
+The //[[CL:Glossary:macro|macros]]// listed below have //[[CL:Glossary:implicit tagbody|implicit tagbodies]]//.
 
-The //[[CL:Glossary:macro|macros]]// in \thenextfigure\ have //[[CL:Glossary:implicit tagbodies]]//.
-
-\displaythree{Macros that have implicit tagbodies.}{ do&do-external-symbols&dotimes\cr do*&do-symbols&prog\cr do-all-symbols&dolist&prog*\cr }
+| [[CL:Macros:do]]             | [[CL:Macros:do-external-symbols]] | [[CL:Macros:dotimes]] |
+| [[CL:Macros:do*]]            | [[CL:Macros:do-symbols]]          | [[CL:Macros:prog]]    |
+| [[CL:Macros:do-all-symbols]] | [[CL:Macros:dolist]]              | [[CL:Macros:prog*]]   |
 
 \issue{TAGBODY-TAG-EXPANSION:NO}

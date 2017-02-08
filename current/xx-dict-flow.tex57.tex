@@ -1,7 +1,6 @@
 ====== Macro PROG, PROG* ======
 
 ====Syntax====
-
 \DefmacWithValuesNewline prog {\paren{\star{\curly{//var// ''\vert'' \paren{//var// [//init-form//]}}}} \starparam{declaration} \star{{//tag// ''\vert'' //statement//}}} {\starparam{result}}
 
 \DefmacWithValuesNewline {prog*} {\paren{\star{\curly{//var// ''\vert'' \paren{//var// [//init-form//]}}}} \starparam{declaration} \star{{//tag// ''\vert'' //statement//}}} {\starparam{result}}
@@ -15,7 +14,6 @@
   * //results// - **[[CL:Constant Variables:nil]]** if a //[[CL:Glossary:normal return]]// occurs, or else, if an //[[CL:Glossary:explicit return]]// occurs, the //[[CL:Glossary:value|values]]// that were transferred.
 
 ====Description====
-
 Three distinct operations are performed by **[[CL:Macros:prog]]** and **[[CL:Macros:prog*]]**: they bind local variables, they permit use of the **[[CL:Macros:return]]** statement, and they permit use of the **[[CL:Special Operators:go]]** statement. A typical **[[CL:Macros:prog]]** looks like this:
 
 <blockquote> (prog (var1 var2 (var3 init-form-3) var4 (var5 init-form-5)) \starparam{declaration} statement1 tag1 statement2 statement3 statement4 tag2 statement5 ... ) </blockquote>
@@ -37,19 +35,20 @@ The difference between **[[CL:Macros:prog*]]** and **[[CL:Macros:prog]]** is tha
 <blockquote> (defun prince-of-clarity (w) "Take a cons of two lists and make a list of conses. Think of this function as being like a zipper." (do ((y (car w) (cdr y)) (z (cdr w) (cdr z)) (x '() (cons (cons (car y) (car z)) x))) ((null y) x) (when (null z) (cerror "Will self-pair extraneous items" "Mismatch - gleep! ~S" y) ([[CL:Macros:defparameter]] z y)))) → PRINCE-OF-CLARITY </blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Special Operators:block]]**, **[[CL:Special Operators:let]]**, **[[CL:Special Operators:tagbody]]**, **[[CL:Special Operators:go]]**, **[[CL:Macros:return]]**, {\secref\Evaluation}
+ * **[[CL:Special Operators:block|Special Operator BLOCK]]**
+ * **[[CL:Special Operators:let|Special Operator LET]]**
+ * **[[CL:Special Operators:tagbody|Special Operator TAGBODY]]**
+ * **[[CL:Special Operators:go|Special Operator GO]]**
+ * **[[CL:Macros:return|Macro RETURN]]**
+ * {\secref\Evaluation}
 
 ====Notes====
-
 **[[CL:Macros:prog]]** can be explained in terms of **[[CL:Special Operators:block]]**, **[[CL:Special Operators:let]]**, and **[[CL:Special Operators:tagbody]]** as follows:
 
 <blockquote> (prog //variable-list// //declaration// . //body//) ≡ (block nil (let //variable-list// //declaration// (tagbody . //body//))) </blockquote>

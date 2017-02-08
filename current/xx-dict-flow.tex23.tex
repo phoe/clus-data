@@ -1,7 +1,7 @@
 ====== Special Operator CATCH ======
 
 ====Syntax====
-* **catch** //tag form''*''// → //result''*''//
+  * **catch** //tag form''*''// → //result''*''//
 
 ====Arguments and Values====
   * //tag// - a //[[CL:Glossary:catch tag]]//; evaluated.
@@ -9,40 +9,47 @@
   * //results// - if the //forms// exit normally, the //[[CL:Glossary:value|values]]// returned by the //forms//; if a throw occurs to the //tag//, the //[[CL:Glossary:value|values]]// that are thrown.
 
 ====Description====
-**[[CL:Special Operators:catch]]** is used as the destination of a non-local control transfer by **[[CL:Special Operators:throw]]**. //Tags// are used to find the **[[CL:Special Operators:catch]]** to which a **[[CL:Special Operators:throw]]** is transferring control. ''(catch 'foo ''form'')'' catches a ''(throw 'foo ''form'')'' but not a ''(throw 'bar ''form'')''.
+**catch** is used as the destination of a non-local control transfer by **[[CL:Special Operators:throw]]**. //Tags// are used to find the **catch** to which a **[[CL:Special Operators:throw]]** is transferring control. ''(catch 'foo ''form'')'' catches a ''(throw 'foo ''form'')'' but not a ''(throw 'bar ''form'')''.
 
-The order of execution of **[[CL:Special Operators:catch]]** follows:\idxtext{order of evaluation}\idxtext{evaluation order}
+The order of execution of **catch** follows:
 
-\beginlist \itemitem{1.} //Tag// is evaluated. It serves as the name of the **[[CL:Special Operators:catch]]**.
+  * 1. //tag// is evaluated. It serves as the name of the **catch**.
+  * 2. //forms// are then evaluated as an implicit **[[CL:Special Operators:progn]]**, and the results of the last //form// are returned unless a **[[CL:Special Operators:throw]]** occurs.
+  * 3. If a **[[CL:Special Operators:throw]]** occurs during the execution of one of the //forms//, control is transferred to the **catch** //[[CL:Glossary:form]]// whose //tag// is **[[CL:Functions:eq]]** to the tag argument of the **[[CL:Special Operators:throw]]** and which is the most recently established **catch** with that //tag//. No further evaluation of //forms// occurs.
+  * 4. The //tag// //[[CL:Glossary:established]]// by **catch** is //[[CL:Glossary:disestablished]]// just before the results are returned.
 
-\itemitem{2.} //Forms// are then evaluated as an implicit **[[CL:Special Operators:progn]]**, and the results of the last //form// are returned unless a **[[CL:Special Operators:throw]]** occurs.
+--------
+  
+If during the execution of one of the //forms//, a **[[CL:Special Operators:throw]]** is executed whose tag is **[[CL:Functions:eq]]** to the **catch** tag, then the values specified by the **[[CL:Special Operators:throw]]** are returned as the result of the dynamically most recently established **catch** form with that tag.
 
-\itemitem{3.} If a **[[CL:Special Operators:throw]]** occurs during the execution of one of the //forms//, control is transferred to the **[[CL:Special Operators:catch]]** //[[CL:Glossary:form]]// whose //tag// is **[[CL:Functions:eq]]** to the tag argument of the **[[CL:Special Operators:throw]]** and which is the most recently established **[[CL:Special Operators:catch]]** with that //tag//.
-
-No further evaluation of //forms// occurs.
-
-\itemitem{4.} The //tag// //[[CL:Glossary:established]]// by **[[CL:Special Operators:catch]]** is //[[CL:Glossary:disestablished]]// just before the results are returned.
-
-\endlist
-
-If during the execution of one of the //forms//, a **[[CL:Special Operators:throw]]** is executed whose tag is **[[CL:Functions:eq]]** to the **[[CL:Special Operators:catch]]** tag, then the values specified by the **[[CL:Special Operators:throw]]** are returned as the result of the dynamically most recently established **[[CL:Special Operators:catch]]** form with that tag.
-
-The mechanism for **[[CL:Special Operators:catch]]** and **[[CL:Special Operators:throw]]** works even if **[[CL:Special Operators:throw]]** is not within the lexical scope of **[[CL:Special Operators:catch]]**. **[[CL:Special Operators:throw]]** must occur within the //[[CL:Glossary:dynamic extent]]// of the //[[CL:Glossary:evaluation]]// of the body of a **[[CL:Special Operators:catch]]** with a corresponding //tag//.
+The mechanism for **catch** and **[[CL:Special Operators:throw]]** works even if **[[CL:Special Operators:throw]]** is not within the lexical scope of **catch**. **[[CL:Special Operators:throw]]** must occur within the //[[CL:Glossary:dynamic extent]]// of the //[[CL:Glossary:evaluation]]// of the body of a **catch** with a corresponding //tag//.
 
 ====Examples==== 
-<blockquote> (catch 'dummy-tag 1 2 (throw 'dummy-tag 3) 4) → 3 (catch 'dummy-tag 1 2 3 4) → 4 (defun throw-back (tag) (throw tag t)) → THROW-BACK (catch 'dummy-tag (throw-back 'dummy-tag) 2) → T
+<blockquote>
+(catch 'dummy-tag 1 2 ([[CL:Special Operators:throw]] 'dummy-tag 3) 4) <r>3</r>
+(catch 'dummy-tag 1 2 3 4) <r>4</r>
+([[CL:Macros:defun]] throw-back (tag) ([[CL:Special Operators:throw]] tag [[CL:Constant Variables:t]])) <r>THROW-BACK</r>
+(catch 'dummy-tag (throw-back 'dummy-tag) 2) <r>T</r>
+</blockquote>
 
-;; Contrast behavior of this example with corresponding example of BLOCK. (catch 'c (flet ((c1 () (throw 'c 1))) (catch 'c (c1) (print 'unreachable)) 2)) → 2 </blockquote>
+In the below example, we contrast **catch** behavior with corresponding example of **[[CL:Special Operators:block]]**. 
 
+<blockquote>
+(catch 'c 
+  ([[CL:Special Operators:flet]] ((c1 () ([[CL:Special Operators:throw]] 'c 1)))
+    (catch 'c (c1) ([[CL:Functions:print]] 'unreachable)) 2)) <r>2 </r>
+</blockquote>
 ====Affected By====
 None. 
 
 ====Exceptional Situations==== 
-An error of type **[[CL:Types:control-error]]** is signaled if **[[CL:Special Operators:throw]]** is done when there is no suitable **[[CL:Special Operators:catch]]** //tag//. ====See Also====
+An error of type **[[CL:Types:control-error]]** is signaled if **[[CL:Special Operators:throw]]** is done when there is no suitable **catch** //tag//. 
 
-**[[CL:Special Operators:throw]]**, {\secref\Evaluation}
+====See Also====
+  * **[[CL:Special Operators:throw|Special Operator THROW]]**
+  * {\secref\Evaluation}
 
 ====Notes====
 It is customary for //[[CL:Glossary:symbol|symbols]]// to be used as //tags//, but any //[[CL:Glossary:object]]// is permitted. However, numbers should not be used because the comparison is done using **[[CL:Functions:eq]]**.
 
-**[[CL:Special Operators:catch]]** differs from **[[CL:Special Operators:block]]** in that **[[CL:Special Operators:catch]]** tags have dynamic //[[CL:Glossary:scope]]// while **[[CL:Special Operators:block]]** names have //[[CL:Glossary:lexical scope]]//.
+**catch** differs from **[[CL:Special Operators:block]]** in that **catch** tags have dynamic //[[CL:Glossary:scope]]// while **[[CL:Special Operators:block]]** names have //[[CL:Glossary:lexical scope]]//.

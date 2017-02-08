@@ -1,35 +1,41 @@
 ====== Macro RETURN ======
 
 ====Syntax====
-
-\DefmacNoReturn return {[//result//]}
+  * **return** //[result]//
 
 ====Arguments and Values====
   * //result// - a //[[CL:Glossary:form]]//; evaluated. The default is **[[CL:Constant Variables:nil]]**.
 
 ====Description====
-
 Returns, as if by **[[CL:Special Operators:return-from]]**, from the //[[CL:Glossary:block]]// named **[[CL:Constant Variables:nil]]**.
 
 ====Examples====
-
-<blockquote> (block nil (return) 1) → NIL (block nil (return 1) 2) → 1 (block nil (return (values 1 2)) 3) → 1, 2 (block nil (block alpha (return 1) 2)) → 1 (block alpha (block nil (return 1)) 2) → 2 (block nil (block nil (return 1) 2)) → 1 </blockquote>
+<blockquote>
+([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] (return) 1) <r>[[CL:Constant Variables:NIL]]</r>
+([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] (return 1) 2) <r>1</r>
+([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] (return ([[CL:Functions:values]] 1 2)) 3) <r>1
+2</r>
+([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] ([[CL:Special Operators:block]] alpha (return 1) 2)) <r>1</r>
+([[CL:Special Operators:block]] alpha ([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] (return 1)) 2) <r>2</r>
+([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] ([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] (return 1) 2)) <r>1</r>
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Conditions====
-
 None.
 
 ====See Also====
-
-**[[CL:Special Operators:block]]**, **[[CL:Special Operators:return-from]]**, {\secref\Evaluation}
+  * **[[CL:Special Operators:block|Special Operator BLOCK]]**
+  * **[[CL:Special Operators:return-from|Special Operator RETURN-FROM]]**
+  * {\secref\Evaluation}
 
 ====Notes====
-
-<blockquote> (return) ≡ (return-from nil) (return //form//) ≡ (return-from nil //form//) </blockquote>
+<blockquote>
+(return) ≡ ([[CL:Special Operators:return-from]] [[CL:Constant Variables:nil]]) 
+(return //form//) ≡ ([[CL:Special Operators:return-from]] [[CL:Constant Variables:nil]] //form//)
+</blockquote>
 
 The //[[CL:Glossary:implicit blocks]]// //[[CL:Glossary:established]]// by //[[CL:Glossary:macro|macros]]// such as **[[CL:Macros:do]]** are often named **[[CL:Constant Variables:nil]]**, so that **[[CL:Macros:return]]** can be used to exit from such //[[CL:Glossary:form|forms]]//.
 

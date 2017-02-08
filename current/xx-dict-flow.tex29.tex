@@ -1,8 +1,7 @@
 ====== Special Operator UNWIND-PROTECT ======
 
 ====Syntax====
-
-\DefspecWithValues unwind-protect {//protected-form// \starparam{cleanup-form}} {\starparam{result}}
+  * **unwind-protect** //protected-form cleanup-form''*''// → //result''*''//
 
 ====Arguments and Values====
   * //protected-form// - a //[[CL:Glossary:form]]//.
@@ -10,63 +9,173 @@
   * //results// - the //[[CL:Glossary:value|values]]// of the //[[CL:Glossary:protected-form]]//.
 
 ====Description====
+**unwind-protect** evaluates //protected-form// and guarantees that //cleanup-forms// are executed before **unwind-protect** exits, whether it terminates normally or is aborted by a control transfer of some kind. **unwind-protect** is intended to be used to make sure that certain side effects take place after the evaluation of //protected-form//.
 
-**[[CL:Special Operators:unwind-protect]]** evaluates //protected-form// and guarantees that //cleanup-forms// are executed before **[[CL:Special Operators:unwind-protect]]** exits, whether it terminates normally or is aborted by a control transfer of some kind. **[[CL:Special Operators:unwind-protect]]** is intended to be used to make sure that certain side effects take place after the evaluation of //protected-form//.
+If a //[[CL:Glossary:non-local exit]]// occurs during execution of //cleanup-forms//, no special action is taken. The //cleanup-forms// of **unwind-protect** are not protected by that **unwind-protect**.
 
-If a //[[CL:Glossary:non-local exit]]// occurs during execution of //cleanup-forms//, no special action is taken. The //cleanup-forms// of **[[CL:Special Operators:unwind-protect]]** are not protected by that **[[CL:Special Operators:unwind-protect]]**.
+**unwind-protect** protects against all attempts to exit from //protected-form//, including **[[CL:Special Operators:go]]**, **[[CL:Macros:handler-case]]**, **[[CL:Macros:ignore-errors]]**, **[[CL:Macros:restart-case]]**, **[[CL:Special Operators:return-from]]**, **[[CL:Special Operators:throw]]**, and **[[CL:Macros:with-simple-restart]]**.
 
-**[[CL:Special Operators:unwind-protect]]** protects against all attempts to exit from //protected-form//, including **[[CL:Special Operators:go]]**, **[[CL:Macros:handler-case]]**, **[[CL:Macros:ignore-errors]]**, **[[CL:Macros:restart-case]]**, **[[CL:Special Operators:return-from]]**, **[[CL:Special Operators:throw]]**, and **[[CL:Macros:with-simple-restart]]**.
+Undoing of //[[CL:Glossary:handler]]// and //[[CL:Glossary:restart]]// //[[CL:Glossary:binding|bindings]]// during an exit happens in parallel with the undoing of the bindings of //[[CL:Glossary:dynamic variable|dynamic variables]]// and **[[CL:Special Operators:catch]]** tags, in the reverse order in which they were established. The effect of this is that //cleanup-form// sees the same //[[CL:Glossary:handler]]// and //[[CL:Glossary:restart]]// //[[CL:Glossary:binding|bindings]]//, as well as //[[CL:Glossary:dynamic variable]]// //[[CL:Glossary:binding|bindings]]// and **[[CL:Special Operators:catch]]** tags, as were visible when the **unwind-protect** was entered.
 
-Undoing of //[[CL:Glossary:handler]]// and //[[CL:Glossary:restart]]// //[[CL:Glossary:binding|bindings]]// during an exit happens in parallel with the undoing of the bindings of //[[CL:Glossary:dynamic variables]]// and **[[CL:Special Operators:catch]]** tags, in the reverse order in which they were established. The effect of this is that //cleanup-form// sees the same //[[CL:Glossary:handler]]// and //[[CL:Glossary:restart]]// //[[CL:Glossary:binding|bindings]]//, as well as //[[CL:Glossary:dynamic variable]]// //[[CL:Glossary:binding|bindings]]// and **[[CL:Special Operators:catch]]** tags, as were visible when the **[[CL:Special Operators:unwind-protect]]** was entered.
+====Examples==== 
+In the below example, when **[[CL:Special Operators:go]]** is executed, the call to **[[CL:Functions:print]]** is executed first, and then the transfer of control to the tag ''out'' is completed.
 
-====Examples==== <blockquote> (tagbody (let ((x 3)) (unwind-protect (if (numberp x) (go out)) (print x))) out ...) </blockquote> When **[[CL:Special Operators:go]]** is executed, the call to **[[CL:Functions:print]]** is executed first, and then the transfer of control to the tag ''out'' is completed.
+<blockquote>
+(tagbody 
+   (let ((x 3)) 
+     (unwind-protect 
+         (if (numberp x) (go out)) 
+       (print x))) 
+ out 
+   ...)
+</blockquote>
 
-<blockquote> (defun dummy-function (x) ([[CL:Macros:defparameter]] state 'running) (unless (numberp x) (throw 'abort 'not-a-number)) ([[CL:Macros:defparameter]] state (1+ x))) → DUMMY-FUNCTION (catch 'abort (dummy-function 1)) → 2 state → 2 (catch 'abort (dummy-function 'trash)) → NOT-A-NUMBER state → RUNNING (catch 'abort (unwind-protect (dummy-function 'trash) ([[CL:Macros:defparameter]] state 'aborted))) → NOT-A-NUMBER state → ABORTED </blockquote>
+-------
+
+<blockquote>
+([[CL:Macros:defvar]] *state*) <r>*STATE*</r>
+([[CL:Macros:defun]] dummy-function (x) 
+  ([[CL:Macros:setf]] *state* 'running) 
+  ([[CL:Macros:unless]] ([[CL:Functions:numberp]] x) 
+    ([[CL:Special Operators:throw]] 'abort 'not-a-number))
+  ([[CL:Macros:setf]] *state* ([[CL:Functions:math-one-plus|1+]] x))) <r>DUMMY-FUNCTION </r>
+([[CL:Special Operators:catch]] 'abort (dummy-function 1)) <r>2 </r>
+*state* <r>2 </r>
+([[CL:Special Operators:catch]] 'abort (dummy-function 'trash)) <r>NOT-A-NUMBER</r>
+*state* <r>RUNNING </r>
+([[CL:Special Operators:catch]] 'abort 
+  (unwind-protect 
+      (dummy-function 'trash) 
+    ([[CL:Macros:setf]] *state* 'aborted))) <r>NOT-A-NUMBER </r>
+*state* <r>ABORTED</r>
+</blockquote>
 
 The following code is not correct:
 
-<blockquote> (unwind-protect (progn (incf *access-count*) (perform-access)) (decf *access-count*)) </blockquote> If an exit occurs before completion of **[[CL:Macros:incf]]**, the **[[CL:Macros:decf]]** //[[CL:Glossary:form]]// is executed anyway, resulting in an incorrect value for ''*access-count*''. The correct way to code this is as follows:
+<blockquote>
+(unwind-protect
+    ([[CL:Special Operators:progn]
+      ([[CL:Macros:incf]] *access-count*)
+      (perform-access))
+  ([[CL:Macros:decf]] *access-count*)) 
+</blockquote>
 
-<blockquote> (let ((old-count *access-count*)) (unwind-protect (progn (incf *access-count*) (perform-access)) ([[CL:Macros:defparameter]] *access-count* old-count))) </blockquote>
+If an exit occurs before completion of **[[CL:Macros:incf]]**, the **[[CL:Macros:decf]]** //[[CL:Glossary:form]]// is executed anyway, resulting in an incorrect value for ''*access-count*''. The correct way to code this is as follows:
 
+<blockquote>
+([[CL:Special Operators:let]] ((old-count *access-count*))
+  (unwind-protect
+    ([[CL:Special Operators:progn]]
+      ([[CL:Macros:incf]] *access-count*)
+      (perform-access)) 
+    ([[CL:Macros:setf]] *access-count* old-count)))
+</blockquote>
 
-<blockquote> ;;; The following returns 2. (block nil (unwind-protect (return 1) (return 2)))
+--------
 
-;;; The following has undefined consequences. (block a (block b (unwind-protect (return-from a 1) (return-from b 2))))
+<blockquote> 
+([[CL:Special Operators:block]] [[CL:Constant Variables:nil]]
+  (unwind-protect 
+      ([[CL:Macros:return]] 1)
+    ([[CL:Macros:return]] 2))) <r>2</r>
 
-;;; The following returns 2. (catch nil (unwind-protect (throw nil 1) (throw nil 2)))
+([[CL:Special Operators:block]] a 
+  ([[CL:Special Operators:block]] b 
+    (unwind-protect 
+        ([[CL:Special Operators:return-from]] a 1) 
+      ([[CL:Special Operators:return-from]] b 2))))
+<u>This has undefined consequences.</u>
 
-;;; The following has undefined consequences because the catch of B is ;;; passed over by the first THROW, hence portable programs must assume ;;; its dynamic extent is terminated. The binding of the catch tag is not ;;; yet disestablished and therefore it is the target of the second throw. (catch 'a (catch 'b (unwind-protect (throw 'a 1) (throw 'b 2))))
+([[CL:Special Operators:catch]] [[CL:Constant Variables:nil]] 
+  (unwind-protect 
+      ([[CL:Special Operators:throw]] [[CL:Constant Variables:nil]] 1) 
+    ([[CL:Special Operators:throw]] [[CL:Constant Variables:nil]] 2))) <r>2</r>
+</blockquote>
 
-;;; The following prints "The inner catch returns :SECOND-THROW" ;;; and then returns :OUTER-CATCH. (catch 'foo (format t "The inner catch returns ~s.~ (catch 'foo (unwind-protect (throw 'foo :first-throw) (throw 'foo :second-throw)))) :outer-catch)
+The following has undefined consequences because the **[[CL:Special Operators:catch]]** of ''b'' is passed over by the first **[[CL:Special Operators:throw]]**, hence //[[CL:Glossary:portable program|portable programs]]// must assume its //[[CL:Glossary:dynamic extent]]// is terminated. The //[[CL:Glossary:binding]]// of the **[[CL:Special Operators:catch]]** tag is not yet disestablished and therefore it is the target of the second **[[CL:Special Operators:throw]]**. 
 
+<blockquote> 
+([[CL:Special Operators:catch]] 'a 
+  ([[CL:Special Operators:catch]] 'b 
+    (unwind-protect 
+      ([[CL:Special Operators:throw]] 'a 1) 
+    ([[CL:Special Operators:throw]] 'b 2))))
+</blockquote>
 
-;;; The following returns 10. The inner CATCH of A is passed over, but ;;; because that CATCH is disestablished before the THROW to A is executed, ;;; it isn't seen. (catch 'a (catch 'b (unwind-protect (1+ (catch 'a (throw 'b 1))) (throw 'a 10))))
+<blockquote> 
+([[CL:Special Operators:catch]] 'foo
+  ([[CL:Functions:format]] [[CL:Constant Variables:t]] "The inner catch returns ~s.~%"
+    ([[CL:Special Operators:catch]] 'foo 
+      (unwind-protect 
+          ([[CL:Special Operators:throw]] 'foo :first-throw) 
+        ([[CL:Special Operators:throw]] 'foo :second-throw))))
+  :outer-catch)
+<o>The inner catch returns :SECOND-THROW</o>
+<r>:OUTER-CATCH</r>
+</blockquote>
 
+In the following example, the inner **[[CL:Special Operators:catch]]** of ''a'' is passed over, but because that **[[CL:Special Operators:catch]]** is disestablished before the **[[CL:Special Operators:throw]]** to ''a'' is executed, it isn't seen. 
 
-;;; The following has undefined consequences because the extent of ;;; the (CATCH 'BAR ...) exit ends when the (THROW 'FOO ...) ;;; commences. (catch 'foo (catch 'bar (unwind-protect (throw 'foo 3) (throw 'bar 4) (print 'xxx))))
+<blockquote>  
+([[CL:Special Operators:catch]] 'a 
+  ([[CL:Special Operators:catch]] 'b 
+    (unwind-protect 
+        ([[CL:Functions:math-one-plus|1+]] ([[CL:Special Operators:catch]] 'a ([[CL:Special Operators:throw]] 'b 1))) 
+      ([[CL:Special Operators:throw]] 'a 10)))) <r>10</r>
+</blockquote>
 
+The following has undefined consequences because the extent of the ''(catch 'bar ...)'' exit ends when the ''(throw 'foo ...)'' commences. 
 
-;;; The following returns 4; XXX is not printed. ;;; The (THROW 'FOO ...) has no effect on the scope of the BAR ;;; catch tag or the extent of the (CATCH 'BAR ...) exit. (catch 'bar (catch 'foo (unwind-protect (throw 'foo 3) (throw 'bar 4) (print 'xxx))))
+<blockquote> 
+([[CL:Special Operators:catch]] 'foo 
+  ([[CL:Special Operators:catch]] 'bar 
+    (unwind-protect 
+        ([[CL:Special Operators:throw]] 'foo 3) 
+      ([[CL:Special Operators:throw]] 'bar 4) 
+      ([[CL:Functions:print]] 'xxx))))
+<u>This has undefined consequences.</u>
+</blockquote>
 
+In the following example, the ''(throw 'foo ...)'' has no effect on the scope of the ''bar'' catch tag or the extent of the ''(catch 'bar ...)'' exit. 
 
-;;; The following prints 5. (block nil (let ((x 5)) (declare (special x)) (unwind-protect (return) (print x)))) </blockquote>
+<blockquote> 
+([[CL:Special Operators:catch]] 'bar 
+  ([[CL:Special Operators:catch]] 'foo 
+    (unwind-protect 
+        ([[CL:Special Operators:throw]] 'foo 3) 
+      ([[CL:Special Operators:throw]] 'bar 4) 
+      ([[CL:Functions:print]] 'xxx))))
+<r>4</r>
+</blockquote>
 
+<blockquote>
+([[CL:Special Operators:block]] [[CL:Constant Variables:nil]] 
+  ([[CL:Special Operators:let]] ((x 5))
+    ([[CL:Symbols:declare]] ([[CL:Declarations:special]] x))
+    (unwind-protect 
+        ([[CL:Macros:return]]) 
+      ([[CL:Functions:print]] x))))
+<o>5</o>
+<r>NIL</r>
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Special Operators:catch]]**, **[[CL:Special Operators:go]]**, **[[CL:Macros:handler-case]]**, **[[CL:Macros:restart-case]]**, **[[CL:Macros:return]]**, **[[CL:Special Operators:return-from]]**, **[[CL:Special Operators:throw]]**, {\secref\Evaluation}
+  * **[[CL:Special Operators:catch|Special Operator CATCH]]**
+  * **[[CL:Special Operators:go|Special Operator GO]]**
+  * **[[CL:Macros:handler-case|Macro HANDLER-CASE]]**
+  * **[[CL:Macros:restart-case|Macro RESTART-CASE]]**
+  * **[[CL:Macros:return|Macro RETURN]]**
+  * **[[CL:Special Operators:return-from|Special Operator RETURN-FROM]]**
+  * **[[CL:Special Operators:throw|Special Operator THROW]]**
+  * {\secref\Evaluation}
 
 ====Notes====
-
 None.
 
 \issue{EXIT-EXTENT-AND-CONDITION-SYSTEM:LIKE-DYNAMIC-BINDINGS} \issue{EXIT-EXTENT:MINIMAL}

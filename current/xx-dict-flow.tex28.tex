@@ -1,55 +1,72 @@
 ====== Special Operator THROW ======
 
 ====Syntax====
-
-\DefspecNoReturn throw {tag result-form}
+  * **throw** //tag result-form//
 
 ====Arguments and Values====
   * //tag// - a //[[CL:Glossary:catch tag]]//; evaluated.
   * //result-form// - a //[[CL:Glossary:form]]//; evaluatedspecial.
 
 ====Description====
+**throw** causes a non-local control transfer to a **[[CL:Special Operators:catch]]** whose tag is **[[CL:Functions:eq]]** to //tag//.
 
-**[[CL:Special Operators:throw]]** causes a non-local control transfer to a **[[CL:Special Operators:catch]]** whose tag is **[[CL:Functions:eq]]** to //tag//.
+//tag// is evaluated first to produce an //[[CL:Glossary:object]]// called the throw tag; then //result-form// is evaluated, and its results are saved. If the //result-form// produces multiple values, then all the values are saved. The most recent outstanding **[[CL:Special Operators:catch]]** whose //tag// is **[[CL:Functions:eq]]** to the throw tag is exited; the saved results are returned as the value or values of **[[CL:Special Operators:catch]]**.
 
-//Tag// is evaluated first to produce an //[[CL:Glossary:object]]// called the throw tag; then //result-form// is evaluated, and its results are saved. If the //result-form// produces multiple values, then all the values are saved. The most recent outstanding **[[CL:Special Operators:catch]]** whose //tag// is **[[CL:Functions:eq]]** to the throw tag is exited; the saved results are returned as the value or values of **[[CL:Special Operators:catch]]**.
-
-The transfer of control initiated by **[[CL:Special Operators:throw]]** is performed as described in \secref\TransferOfControl.
+The transfer of control initiated by **throw** is performed as described in \secref\TransferOfControl.
 
 ====Examples====
-
-<blockquote> (catch 'result ([[CL:Macros:defparameter]] i 0 j 0) (loop (incf j 3) (incf i) (if (= i 3) (throw 'result (values i j))))) → 3, 9
-
+<blockquote> 
+([[CL:Special Operators:catch]] 'result 
+  ([[CL:Special Operators:let]] ((i 0) (j 0)) 
+    ([[CL:Macros:loop]] 
+      ([[CL:Macros:incf]] j 3) 
+      ([[CL:Macros:incf]] i) 
+      ([[CL:Macros:when]] ([[CL:Functions:math-equal|=]] i 3) 
+        (throw 'result ([[CL:Functions:values]] i j)))))) <r>3
+        9</r>
+        
+([[CL:Special Operators:catch]] [[CL:Constant Variables:nil]]
+  ([[CL:Special Operators:unwind-protect]]
+      (throw [[CL:Constant Variables:nil]] 1) 
+    (throw [[CL:Constant Variables:nil]] 2))) → 2 
 </blockquote>
 
-<blockquote> (catch nil (unwind-protect (throw nil 1) (throw nil 2))) → 2 </blockquote>
+<blockquote>
+([[CL:Special Operators:catch]] 'foo
+  ([[CL:Functions:format]] [[CL:Constant Variables:t]] "The inner catch returns ~s.~%"
+    ([[CL:Special Operators:catch]] 'foo 
+      ([[CL:Special Operators:unwind-protect]] 
+          (throw 'foo :first-throw) 
+        (throw 'foo :second-throw))))
+  :outer-catch)
+<o>The inner catch returns :SECOND-THROW </o>
+<r>:OUTER-CATCH</r>
+</blockquote>
 
-The consequences of the following are undefined because the **[[CL:Special Operators:catch]]** of ''b'' is passed over by the first **[[CL:Special Operators:throw]]**, hence portable programs must assume that its //[[CL:Glossary:dynamic extent]]// is terminated. The //[[CL:Glossary:binding]]// of the //[[CL:Glossary:catch tag]]// is not yet //[[CL:Glossary:disestablished]]// and therefore it is the target of the second **[[CL:Special Operators:throw]]**.
+The consequences of the following are undefined because the **[[CL:Special Operators:catch]]** of ''b'' is passed over by the first **throw**, hence portable programs must assume that its //[[CL:Glossary:dynamic extent]]// is terminated. The //[[CL:Glossary:binding]]// of the //[[CL:Glossary:catch tag]]// is not yet //[[CL:Glossary:disestablished]]// and therefore it is the target of the second **throw**.
 
-<blockquote> (catch 'a (catch 'b (unwind-protect (throw 'a 1) (throw 'b 2)))) </blockquote>
-
-The following prints ""The inner catch returns :SECOND-THROW'''' and then returns '':outer-catch''.
-
-<blockquote> (catch 'foo (format t "The inner catch returns ~s.~ (catch 'foo (unwind-protect (throw 'foo :first-throw) (throw 'foo :second-throw)))) :outer-catch)
-▷ The inner catch returns :SECOND-THROW → :OUTER-CATCH </blockquote>
-
+<blockquote>
+([[CL:Special Operators:catch]] 'a 
+  ([[CL:Special Operators:catch]] 'b 
+    ([[CL:Special Operators:unwind-protect]] 
+        (throw 'a 1) 
+      (throw 'b 2))))
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
-If there is no outstanding //[[CL:Glossary:catch tag]]// that matches the throw tag, no unwinding of the stack is performed, and an error of type **[[CL:Types:control-error]]** is signaled. When the error is signaled,
-
-the //[[CL:Glossary:dynamic environment]]// is that which was in force at the point of the **[[CL:Special Operators:throw]]**.
+If there is no outstanding //[[CL:Glossary:catch tag]]// that matches the throw tag, no unwinding of the stack is performed, and an error of type **[[CL:Types:control-error]]** is signaled. When the error is signaled, the //[[CL:Glossary:dynamic environment]]// is that which was in force at the point of the **throw**.
 
 ====See Also====
-
-**[[CL:Special Operators:block]]**, **[[CL:Special Operators:catch]]**, **[[CL:Special Operators:return-from]]**, **[[CL:Special Operators:unwind-protect]]**, {\secref\Evaluation}
+  * **[[CL:Special Operators:block|Special Operator BLOCK]]**
+  * **[[CL:Special Operators:catch|Special Operator CATCH]]**
+  * **[[CL:Special Operators:return-from|Special Operator RETURN-FROM]]**
+  * **[[CL:Special Operators:unwind-protect|Special Operator UNWIND-PROTECT]]**
+  * {\secref\Evaluation}
 
 ====Notes====
-
-**[[CL:Special Operators:catch]]** and **[[CL:Special Operators:throw]]** are normally used when the //[[CL:Glossary:exit point]]// must have //[[CL:Glossary:dynamic scope]]// (//e.g.// the **[[CL:Special Operators:throw]]** is not lexically enclosed by the **[[CL:Special Operators:catch]]**), while **[[CL:Special Operators:block]]** and **[[CL:Special Operators:return]]** are used when //[[CL:Glossary:lexical scope]]// is sufficient.
+**[[CL:Special Operators:catch]]** and **throw** are normally used when the //[[CL:Glossary:exit point]]// must have //[[CL:Glossary:dynamic scope]]// (//e.g.// the **throw** is not lexically enclosed by the **[[CL:Special Operators:catch]]**), while **[[CL:Special Operators:block]]** and **[[CL:Special Operators:return]]** are used when //[[CL:Glossary:lexical scope]]// is sufficient.
 
 \issue{EXIT-EXTENT:MINIMAL}

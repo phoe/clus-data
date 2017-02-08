@@ -1,7 +1,6 @@
 ====== Macro PROG1, PROG2 ======
 
 ====Syntax====
-
 \DefmacWithValues prog1 {first-form \starparam{form}} {result-1} \DefmacWithValues prog2 {first-form second-form \starparam{form}} {result-2}
 
 ====Arguments and Values====
@@ -12,35 +11,29 @@
   * //result-2// - the //[[CL:Glossary:primary value]]// resulting from the //[[CL:Glossary:evaluation]]// of //second-form//.
 
 ====Description====
-
 **[[CL:Macros:prog1]]** //[[CL:Glossary:evaluate|evaluates]]// //first-form// and then //forms//, //[[CL:Glossary:yielding]]// as its only //[[CL:Glossary:value]]// the //[[CL:Glossary:primary value]]// //[[CL:Glossary:yielded]]// by //first-form//.
 
 **[[CL:Macros:prog2]]** //[[CL:Glossary:evaluate|evaluates]]// //first-form//, then //second-form//, and then //forms//, //[[CL:Glossary:yielding]]// as its only //[[CL:Glossary:value]]// the //[[CL:Glossary:primary value]]// //[[CL:Glossary:yielded]]// by //first-form//.
 
 ====Examples====
-
 <blockquote> ([[CL:Macros:defparameter]] temp 1) → 1 (prog1 temp (print temp) (incf temp) (print temp))
 ▷ 1
 ▷ 2 → 1 (prog1 temp ([[CL:Macros:defparameter]] temp nil)) → 2 temp → NIL (prog1 (values 1 2 3) 4) → 1 ([[CL:Macros:defparameter]] temp (list 'a 'b 'c)) (prog1 (car temp) ([[CL:Macros:setf]] (car temp) 'alpha)) → A temp → (ALPHA B C) (flet ((swap-symbol-values (x y) ([[CL:Macros:setf]] (symbol-value x) (prog1 (symbol-value y) ([[CL:Macros:setf]] (symbol-value y) (symbol-value x)))))) (let ((*foo* 1) (*bar* 2)) (declare (special *foo* *bar*)) (swap-symbol-values '*foo* '*bar*) (values *foo* *bar*))) → 2, 1 ([[CL:Macros:defparameter]] temp 1) → 1 (prog2 (incf temp) (incf temp) (incf temp)) → 3 temp → 4 (prog2 1 (values 2 3 4) 5) → 2 </blockquote>
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Special Operators:multiple-value-prog1]]**, **[[CL:Special Operators:progn]]**
+  * **[[CL:Special Operators:multiple-value-prog1|Special Operator MULTIPLE-VALUE-PROG1]]**
+  * **[[CL:Special Operators:progn|Special Operator PROGN]]**
 
 ====Notes====
-
 **[[CL:Macros:prog1]]** and **[[CL:Macros:prog2]]** are typically used to //[[CL:Glossary:evaluate]]// one or more //[[CL:Glossary:form|forms]]// with side effects and return a //[[CL:Glossary:value]]// that must be computed before some or all of the side effects happen.
 
 <blockquote> (prog1 \starparam{form}) ≡ (values (multiple-value-prog1 \starparam{form})) (prog2 //form1// \starparam{form}) ≡ (let () //form1// (prog1 \starparam{form})) </blockquote>

@@ -1,7 +1,6 @@
 ====== Macro DEFINE-SETF-EXPANDER ======
 
 ====Syntax====
-
 \DefmacWithValuesNewline define-setf-expander {\vtop{access-fn lambda-list \hbox{{\DeclsAndDoc} \starparam{form}}}} {access-fn}
 
 ====Arguments and Values====
@@ -12,7 +11,6 @@
   * //forms// - an //[[CL:Glossary:implicit progn]]//.
 
 ====Description====
-
 **[[CL:Macros:define-setf-expander]]** specifies the means by which **[[CL:Macros:setf]]** updates a //[[CL:Glossary:place]]// that is referenced by //access-fn//.
 
 When **[[CL:Macros:setf]]** is given a //[[CL:Glossary:place]]// that is specified in terms of //access-fn// and a new value for the //[[CL:Glossary:place]]//, it is expanded into a form that performs the appropriate update.
@@ -48,19 +46,19 @@ If a **[[CL:Macros:define-setf-expander]]** //[[CL:Glossary:form]]// appears as 
 <blockquote> ;;; Setf expander for the form (LDB bytespec int). ;;; Recall that the int form must itself be suitable for SETF. (define-setf-expander ldb (bytespec int &environment env) (multiple-value-bind (temps vals stores store-form access-form) (get-setf-expansion int env);Get setf expansion for int. (let ((btemp (gensym)) ;Temp var for byte specifier. (store (gensym)) ;Temp var for byte to store. (stemp (first stores))) ;Temp var for int to store. (if (cdr stores) (error "Can't expand this.")) ;;; Return the setf expansion for LDB as five values. (values (cons btemp temps) ;Temporary variables. (cons bytespec vals) ;Value forms. (list store) ;Store variables. \bq(let ((,stemp (dpb ,store ,btemp ,access-form))) ,store-form ,store) ;Storing form. \bq(ldb ,btemp ,access-form) ;Accessing form. )))) </blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Macros:setf]]**, **[[CL:Macros:defsetf]]**, **[[CL:Functions:documentation]]**, **[[CL:Functions:get-setf-expansion]]**, {\secref\DocVsDecls}
+  * **[[CL:Macros:setf|Macro SETF]]**
+  * **[[CL:Macros:defsetf|Macro DEFSETF]]**
+  * **[[CL:Functions:documentation|Generic Function DOCUMENTATION]]**
+  * **[[CL:Functions:get-setf-expansion|Function GET-SETF-EXPANSION]]**
+  * {\secref\DocVsDecls}
 
 ====Notes====
-
 **[[CL:Macros:define-setf-expander]]** differs from the long form of **[[CL:Macros:defsetf]]** in that while the body is being executed the //[[CL:Glossary:variables]]// in //lambda-list// are bound to parts of the //[[CL:Glossary:place]]// //[[CL:Glossary:form]]//, not to temporary variables that will be bound to the values of such parts. In addition, **[[CL:Macros:define-setf-expander]]** does not have **[[CL:Macros:defsetf]]**'s restriction that //access-fn// must be a //[[CL:Glossary:function]]// or a function-like //[[CL:Glossary:macro]]//; an arbitrary **[[CL:Macros:defmacro]]** destructuring pattern is permitted in //lambda-list//.
 
 \issue{DEFMACRO-BLOCK-SCOPE:EXCLUDES-BINDINGS} \issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{DECLS-AND-DOC} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{DOCUMENTATION-FUNCTION-BUGS:FIX} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW} \issue{FLET-IMPLICIT-BLOCK:YES}

@@ -1,7 +1,6 @@
 ====== Macro WHEN, UNLESS ======
 
 ====Syntax====
-
 \DefmacWithValues when {test-form \starparam{form}} {\starparam{result}}
 
 \DefmacWithValues unless {test-form \starparam{form}} {\starparam{result}}
@@ -12,7 +11,6 @@
   * //results// - the //[[CL:Glossary:value|values]]// of the //[[CL:Glossary:form|forms]]// in a **[[CL:Macros:when]]** //[[CL:Glossary:form]]// if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:true]]// or in an **[[CL:Macros:unless]]** //[[CL:Glossary:form]]// if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:false]]//; otherwise **[[CL:Constant Variables:nil]]**.
 
 ====Description====
-
 **[[CL:Macros:when]]** and **[[CL:Macros:unless]]** allow the execution of //forms// to be dependent on a single //test-form//.
 
 In a **[[CL:Macros:when]]** //[[CL:Glossary:form]]//, if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:true]]//, the //forms// are //[[CL:Glossary:evaluate|evaluated]]// in order from left to right and the //[[CL:Glossary:value|values]]// returned by the //forms// are returned from the **[[CL:Macros:when]]** //[[CL:Glossary:form]]//. Otherwise, if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:false]]//, the //forms// are not //[[CL:Glossary:evaluate|evaluated]]//, and the **[[CL:Macros:when]]** //[[CL:Glossary:form]]// returns **[[CL:Constant Variables:nil]]**.
@@ -20,28 +18,33 @@ In a **[[CL:Macros:when]]** //[[CL:Glossary:form]]//, if the //test-form// //[[C
 In an **[[CL:Macros:unless]]** //[[CL:Glossary:form]]//, if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:false]]//, the //forms// are //[[CL:Glossary:evaluate|evaluated]]// in order from left to right and the //[[CL:Glossary:value|values]]// returned by the //forms// are returned from the **[[CL:Macros:unless]]** //[[CL:Glossary:form]]//. Otherwise, if the //test-form// //[[CL:Glossary:yields]]// //[[CL:Glossary:false]]//, the //forms// are not //[[CL:Glossary:evaluate|evaluated]]//, and the **[[CL:Macros:unless]]** //[[CL:Glossary:form]]// returns **[[CL:Constant Variables:nil]]**.
 
 ====Examples====
-
 <blockquote> (when t 'hello) → HELLO (unless t 'hello) → NIL (when nil 'hello) → NIL (unless nil 'hello) → HELLO (when t) → NIL (unless nil) → NIL (when t (prin1 1) (prin1 2) (prin1 3))
 ▷ 123 → 3 (unless t (prin1 1) (prin1 2) (prin1 3)) → NIL (when nil (prin1 1) (prin1 2) (prin1 3)) → NIL (unless nil (prin1 1) (prin1 2) (prin1 3))
 ▷ 123 → 3 (let ((x 3)) (list (when (oddp x) (incf x) (list x)) (when (oddp x) (incf x) (list x)) (unless (oddp x) (incf x) (list x)) (unless (oddp x) (incf x) (list x)) (if (oddp x) (incf x) (list x)) (if (oddp x) (incf x) (list x)) (if (not (oddp x)) (incf x) (list x)) (if (not (oddp x)) (incf x) (list x)))) → ((4) NIL (5) NIL 6 (6) 7 (7)) </blockquote>
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Macros:and]]**, **[[CL:Macros:cond]]**, **[[CL:Macros:if]]**, **[[CL:Macros:or]]**
+**[[CL:Macros:and|Macro AND]]**
+**[[CL:Macros:cond|Macro COND]]**
+**[[CL:Special Operators:if|Special Operator IF]]**
+**[[CL:Macros:or|Macro OR]]**
 
 ====Notes====
-
-<blockquote> (when //test// \plus{{//form//}}) ≡ (and //test// (progn \plus{{//form//}})) (when //test// \plus{{//form//}}) ≡ (cond (//test// \plus{{//form//}})) (when //test// \plus{{//form//}}) ≡ (if //test// (progn \plus{{//form//}}) nil) (when //test// \plus{{//form//}}) ≡ (unless (not //test//) \plus{{//form//}}) (unless //test// \plus{{//form//}}) ≡ (cond ((not //test//) \plus{{//form//}})) (unless //test// \plus{{//form//}}) ≡ (if //test// nil (progn \plus{{//form//}})) (unless //test// \plus{{//form//}}) ≡ (when (not //test//) \plus{{//form//}}) </blockquote>
+<blockquote>
+(when //test// \plus{{//form//}}) ≡ (and //test// (progn \plus{{//form//}})) 
+(when //test// \plus{{//form//}}) ≡ (cond (//test// \plus{{//form//}})) 
+(when //test// \plus{{//form//}}) ≡ (if //test// (progn \plus{{//form//}}) nil) 
+(when //test// \plus{{//form//}}) ≡ (unless (not //test//) \plus{{//form//}}) 
+(unless //test// \plus{{//form//}}) ≡ (cond ((not //test//) \plus{{//form//}})) 
+(unless //test// \plus{{//form//}}) ≡ (if //test// nil (progn \plus{{//form//}})) 
+(unless //test// \plus{{//form//}}) ≡ (when (not //test//) \plus{{//form//}})
+</blockquote>
 

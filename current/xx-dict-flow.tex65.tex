@@ -1,7 +1,6 @@
 ====== Macro SHIFTF ======
 
 ====Syntax====
-
 \DefmacWithValues shiftf {\plusparam{place} newvalue} {old-value-1}
 
 ====Arguments and Values====
@@ -10,7 +9,6 @@
   * //old-value-1// - an //[[CL:Glossary:object]]// (the old //[[CL:Glossary:value]]// of the first //place//).
 
 ====Description====
-
 **[[CL:Macros:shiftf]]** modifies the values of each //place// by storing //newvalue// into the last //place//, and shifting the values of the second through the last //place// into the remaining //places//.
 
 If //newvalue// produces more values than there are store variables, the extra values are ignored. If //newvalue// produces fewer values than there are store variables, the missing values are set to **[[CL:Constant Variables:nil]]**.
@@ -20,25 +18,22 @@ In the form **[[CL:Functions:(shiftf ''place1'' ''place2'' ... ''placen'' ''newv
 For information about the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subforms]]// of //places//, see section {\secref\GenRefSubFormEval}.
 
 ====Examples====
-
 <blockquote> ([[CL:Macros:defparameter]] x (list 1 2 3) y 'trash) → TRASH (shiftf y x (cdr x) '(hi there)) → TRASH x → (2 3) y → (1 HI THERE)
 
 ([[CL:Macros:defparameter]] x (list 'a 'b 'c)) → (A B C) (shiftf (cadr x) 'z) → B x → (A Z C) (shiftf (cadr x) (cddr x) 'q) → Z x → (A (C) . Q) ([[CL:Macros:defparameter]] n 0) → 0 ([[CL:Macros:defparameter]] x (list 'a 'b 'c 'd)) → (A B C D) (shiftf (nth ([[CL:Macros:defparameter]] n (+ n 1)) x) 'z) → B x → (A Z C D) </blockquote>
 
 ====Affected By====
-
 **[[CL:Macros:define-setf-expander]]**, **[[CL:Macros:defsetf]]**, **[[CL:Variables:*macroexpand-hook*]]**
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Macros:setf]]**, **[[CL:Macros:rotatef]]**, {\secref\GeneralizedReference}
+  * **[[CL:Macros:setf|Macro SETF]]**
+  * **[[CL:Macros:rotatef|Macro ROTATEF]]**
+  * {\secref\GeneralizedReference}
 
 ====Notes====
-
 The effect of ''(shiftf //place1// //place2// ... //placen// //newvalue//)'' is roughly equivalent to
 
 <blockquote> (let ((var1 //place1//) (var2 //place2//) ... (varn //placen//) (var0 //newvalue//)) ([[CL:Macros:setf]] //place1// var2) ([[CL:Macros:setf]] //place2// var3) ... ([[CL:Macros:setf]] //placen// var0) var1) </blockquote> except that the latter would evaluate any //[[CL:Glossary:subforms]]// of each ''place'' twice, whereas **[[CL:Macros:shiftf]]** evaluates them once. For example,

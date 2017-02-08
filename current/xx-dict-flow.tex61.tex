@@ -1,7 +1,6 @@
 ====== Macro DEFSETF ======
 
 ====Syntax====
-
 The "short form":
 
 \DefmacWithValuesNewline defsetf {access-fn update-fn [documentation]} {access-fn}
@@ -20,7 +19,6 @@ The "long form":
   * //form// - a //[[CL:Glossary:form]]//.
 
 ====Description====
-
 **[[CL:Macros:defsetf]]** defines how to **[[CL:Macros:setf]]** a //[[CL:Glossary:place]]// of the form ''(''access-fn'' ...)'' for relatively simple cases. (See **[[CL:Macros:define-setf-expander]]** for more general access to this facility.)
 
 It must be the case that the //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]// named by //access-fn// evaluates all of its arguments.
@@ -76,23 +74,20 @@ An example of the use of the long form of **[[CL:Macros:defsetf]]**:
 <blockquote> (defvar *xy* (make-array '(10 10))) (defun xy (&key ((x x) 0) ((y y) 0)) (aref *xy* x y)) → XY (defun set-xy (new-value &key ((x x) 0) ((y y) 0)) ([[CL:Macros:setf]] (aref *xy* x y) new-value)) → SET-XY (defsetf xy (&key ((x x) 0) ((y y) 0)) (store) `(set-xy ,store 'x ,x 'y ,y)) → XY (get-setf-expansion '(xy a b)) → (#:t0 #:t1), (a b), (#:store), ((lambda (&key ((x #:x)) ((y #:y))) (set-xy #:store 'x #:x 'y #:y)) #:t0 #:t1), (xy #:t0 #:t1) (xy 'x 1) → NIL ([[CL:Macros:setf]] (xy 'x 1) 1) → 1 (xy 'x 1) → 1 (let ((a 'x) (b 'y)) ([[CL:Macros:setf]] (xy a 1 b 2) 3) ([[CL:Macros:setf]] (xy b 5 a 9) 14)) → 14 (xy 'y 0 'x 1) → 1 (xy 'x 1 'y 2) → 3 </blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Functions:documentation]]**, **[[CL:Macros:setf]]**,
-
-**[[CL:Macros:define-setf-expander]]**, **[[CL:Functions:get-setf-expansion]]**,
-
-{\secref\GeneralizedReference}, {\secref\DocVsDecls}
+  * **[[CL:Functions:documentation|Generic Function DOCUMENTATION]]**
+  * **[[CL:Macros:setf|Macro SETF]]**
+  * **[[CL:Macros:define-setf-expander|Macro DEFINE-SETF-EXPANDER]]**
+  * **[[CL:Functions:get-setf-expansion|Function GET-SETF-EXPANSION]]**
+  * {\secref\GeneralizedReference}
+  * {\secref\DocVsDecls}
 
 ====Notes====
-
 //forms// must include provision for returning the correct value (the value
 
 or values
