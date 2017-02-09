@@ -1,0 +1,94 @@
+====== Macro DEFINE-SETF-EXPANDER ======
+
+====Syntax====
+  * **define-setf-expander** //access-fn lambda-list <nowiki>[[</nowiki>declaration''*'' | documentation<nowiki>]]</nowiki> form''*''// → //access-fn//
+
+====Arguments and Values====
+  * //access-fn// - a //[[CL:Glossary:symbol]]// that //[[CL:Glossary:name|names]]// a //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]//.
+  * //lambda-list// -- //[[CL:Glossary:macro lambda list]]//.
+  * //declaration// - a **[[CL:Special Operators:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //documentation// - a //[[CL:Glossary:string]]//; not evaluated.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+
+====Description====
+**define-setf-expander** specifies the means by which **[[CL:Macros:setf]]** updates a //[[CL:Glossary:place]]// that is referenced by //access-fn//.
+
+When **[[CL:Macros:setf]]** is given a //[[CL:Glossary:place]]// that is specified in terms of //access-fn// and a new value for the //[[CL:Glossary:place]]//, it is expanded into a form that performs the appropriate update.
+
+The //lambda-list// supports destructuring. see section {\secref\MacroLambdaLists}.
+
+//documentation// is attached to //access-fn// as a //[[CL:Glossary:documentation string]]// of kind \misc{setf}.
+
+//forms// constitute the body of the //[[CL:Glossary:setf expander]]// definition and must compute the //[[CL:Glossary:setf expansion]]// for a call on **[[CL:Macros:setf]]** that references the //[[CL:Glossary:place]]// by means of the given //access-fn//.
+
+The //[[CL:Glossary:setf expander]]// function is defined in the same //[[CL:Glossary:lexical environment]]// in which the **define-setf-expander** //[[CL:Glossary:form]]// appears.
+
+While //forms// are being executed, the variables in //lambda-list// are bound to parts of the //[[CL:Glossary:place]]// //[[CL:Glossary:form]]//.
+
+The body //forms// (but not the //lambda-list//) in a **define-setf-expander** //[[CL:Glossary:form]]// are implicitly enclosed in a //[[CL:Glossary:block]]// whose name is //access-fn//.
+
+The evaluation of //forms// must result in the five values described in \secref\SetfExpansions.
+
+If a **define-setf-expander** //[[CL:Glossary:form]]// appears as a //[[CL:Glossary:top level form]]//, the //[[CL:Glossary:compiler]]// must make the //[[CL:Glossary:setf expander]]// available so that it may be used to expand calls to **[[CL:Macros:setf]]** later on in the //[[CL:Glossary:file]]//. //[[CL:GlossarypProgrammer|Programmers]]// must ensure that the //forms// can be evaluated at compile time if the //access-fn// is used in a //[[CL:Glossary:place]]// later in the same //[[CL:Glossary:file]]//. The //[[CL:Glossary:compiler]]// must make these //[[CL:Glossary:setf expanders]]// available to compile-time calls to **[[CL:Functions:get-setf-expansion]]** when its //environment// argument is a value received as the //[[CL:Glossary:environment parameter]]// of a //[[CL:Glossary:macro]]//.
+
+====Examples==== 
+<blockquote>
+([[CL:Macros:defun]] lastguy (x) ([[CL:Functions:car]] ([[CL:Functions:last]] x))) <r>LASTGUY</r>
+(define-setf-expander lastguy (x &environment env) 
+  "Set the last element in a list to the given value."
+  ([[CL:Functions:multiple-value-bind]] (dummies vals newval setter getter) 
+      ([[CL:Macros:get-setf-expansion]] x env)
+    ([[CL:Special Operators:let]] ((store ([[CL:Functions:gensym]]))) 
+      ([[CL:Functions:values]] dummies vals 
+              `(,store) 
+              `([[CL:Special Operators:progn]] ([[CL:Functions:rplaca]] ([[CL:Functions:last]] ,getter) ,store) ,store) 
+              `(lastguy ,getter))))) <r>LASTGUY</r>
+([[CL:Macros:defvar]] *a* ([[CL:Functions:list]] 'a 'b 'c 'd)) <r>*A*</r>
+([[CL:Macros:defvar]] *b* ([[CL:Functions:list]] 'x)) <r>*B*</r>
+([[CL:Macros:defvar]] *c* ([[CL:Functions:list]] 1 2 3 ([[CL:Functions:list]] 4 5 6))) <r>*C*</r>
+([[CL:Macros:setf]] (lastguy *a*) 3) <r>3 </r>
+([[CL:Macros:setf]] (lastguy *b*) 7) <r>7 </r>
+([[CL:Macros:setf]] (lastguy (lastguy *c*)) 'lastguy-symbol) <r>LASTGUY-SYMBOL </r>
+*a* <r>(A B C 3) </r>
+*b* <r>(7) </r>
+*c* <r>(1 2 3 (4 5 LASTGUY-SYMBOL))</r>
+</blockquote>
+
+In the example below, we show a //[[CL:Glossary:setf expander]]// for the form ''([[CL:Functions:ldb]] bytespec integer-place)''. Recall that the ''integer-place'' form must itself be a //[[CL:Glossary:place]]//. 
+
+<blockquote> 
+(define-setf-expander ldb (bytespec integer-place &environment env) 
+  ([[CL:Macros:multiple-value-bind]] (temps vals stores store-form access-form) 
+      ([[CL:Functions:get-setf-expansion]] integer-place env); Get setf expansion for integer-place. 
+    ([[CL:Special Operators:let]] ((btemp ([[CL:Functions:gensym]])) ; Temp var for byte specifier. 
+          (store ([[CL:Functions:gensym]])) ; Temp var for byte to store. 
+          (stemp ([[CL:Functions:first]] stores))) ; Temp var for integer-place to store.
+      ([[CL:Macros:when]] ([[CL:Functions:cdr]] stores) ([[CL:Functions:error]] "Can't expand this.")) 
+          ;;; Return the setf expansion for LDB as five values.
+          ([[CL:Functions:values]] ([[CL:Functions:cons]] btemp temps) ; Temporary variables. 
+                  ([[CL:Functions:cons]] bytespec vals) ; Value forms. 
+                  ([[CL:Functions:list]] store) ; Store variables. 
+                  `([[CL:Special Operators:let]] ((,stemp ([[CL:Functions:dpb]] ,store ,btemp ,access-form))) 
+                     ,store-form 
+                     ,store) ; Storing form. 
+                  `([[CL:Functions:ldb]] ,btemp ,access-form) ; Accessing form. 
+                  ))))
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Macros:setf|Macro SETF]]**
+  * **[[CL:Macros:defsetf|Macro DEFSETF]]**
+  * **[[CL:Functions:documentation|Generic Function DOCUMENTATION]]**
+  * **[[CL:Functions:get-setf-expansion|Function GET-SETF-EXPANSION]]**
+  * {\secref\DocVsDecls}
+
+====Notes====
+**define-setf-expander** differs from the long form of **[[CL:Macros:defsetf]]** in that while the body is being executed the //[[CL:Glossary:variables]]// in //lambda-list// are bound to parts of the //[[CL:Glossary:place]]// //[[CL:Glossary:form]]//, not to temporary variables that will be bound to the values of such parts. In addition, **define-setf-expander** does not have **[[CL:Macros:defsetf]]**'s restriction that //access-fn// must be a //[[CL:Glossary:function]]// or a function-like //[[CL:Glossary:macro]]//; an arbitrary **[[CL:Macros:defmacro]]** destructuring pattern is permitted in //lambda-list//.
+
+\issue{DEFMACRO-BLOCK-SCOPE:EXCLUDES-BINDINGS} \issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{DECLS-AND-DOC} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{DOCUMENTATION-FUNCTION-BUGS:FIX} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{DEFINING-MACROS-NON-TOP-LEVEL:ALLOW} \issue{FLET-IMPLICIT-BLOCK:YES}

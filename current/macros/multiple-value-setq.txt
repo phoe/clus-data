@@ -1,0 +1,59 @@
+====== Macro MULTIPLE-VALUE-SETQ ======
+
+====Syntax====
+  * **multiple-value-setq** //vars form// → //result//
+
+====Arguments and Values====
+  * //vars// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:symbol|symbols]]// that are either //[[CL:Glossary:variable]]// //[[CL:Glossary:name|names]]// or //[[CL:Glossary:name|names]]// of //[[CL:Glossary:symbol macro|symbol macros]]//.
+  * //form// - a //[[CL:Glossary:form]]//.
+  * //result// - The //[[CL:Glossary:primary value]]// returned by the //form//.
+
+====Description====
+**multiple-value-setq** assigns values to //vars//.
+
+The //form// is evaluated, and each //var// is //[[CL:Glossary:assign|assigned]]// to the corresponding //[[CL:Glossary:value]]// returned by that //[[CL:Glossary:form]]//. If there are more //vars// than //[[CL:Glossary:value|values]]// returned, **[[CL:Constant Variables:nil]]** is //[[CL:Glossary:assign|assigned]]// to the extra //vars//. If there are more //[[CL:Glossary:value|values]]// than //vars//, the extra //[[CL:Glossary:value|values]]// are discarded.
+
+If any //var// is the //[[CL:Glossary:name]]// of a //[[CL:Glossary:symbol macro]]//, then it is //[[CL:Glossary:assign|assigned]]// as if by **[[CL:Macros:setf]]**. Specifically,
+
+<blockquote>
+(multiple-value-setq (symbol<sub>1</sub> ... symbol<sub>n</sub>) value-producing-form)
+</blockquote> is defined to always behave in the same way as
+
+<blockquote>
+([[CL:Functions:values]] ([[CL:Macros:setf]] ([[CL:Functions:values]] symbol<sub>1</sub> ... symbol<sub>n</sub>) value-producing-form))
+</blockquote>
+in order that the rules for order of evaluation and side-effects be consistent with those used by **[[CL:Macros:setf]]**. See section {\secref\SETFofVALUES}.
+
+====Examples====
+<blockquote>
+;;; TODO condemn toplevel MULTIPLE-VALUE-SETQ
+
+(multiple-value-setq (quotient remainder) ([[CL:Functions:truncate]] 3.2 2)) <r>1 </r>
+quotient <r>1 </r>
+remainder <r>1.2 </r>
+(multiple-value-setq (a b c) ([[CL:Functions:values]] 1 2)) <r>1 </r>
+a <r>1 </r>
+b <r>2 </r>
+c <r>[[CL:Constant Variables:NIL]] </r>
+(multiple-value-setq (a b) ([[CL:Functions:values]] 4 5 6)) <r>4 </r>
+a <r>4 </r>
+b <r>5</r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Special Operators:setq|Special Operator SETQ]]**
+  * **[[CL:Special Operators:symbol-macrolet|Special Operator SYMBOL-MACROLET]]**
+
+====Notes====
+None.
+
+\issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM} \issue{MULTIPLE-VALUE-SETQ-ORDER:LIKE-SETF-OF-VALUES}

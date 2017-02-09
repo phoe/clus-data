@@ -1,0 +1,67 @@
+====== Macro DEFINE-MODIFY-MACRO ======
+
+====Syntax====
+  * define-modify-macro //name lambda-list function [documentation]// → //name//
+
+====Arguments and Values====
+  * //name// - a //[[CL:Glossary:symbol]]//.
+  * //lambda-list// - a //[[CL:Glossary:define-modify-macro lambda list]]//
+  * //function// - a //[[CL:Glossary:symbol]]//.
+  * //documentation// - a //[[CL:Glossary:string]]//; not evaluated.
+
+====Description====
+**define-modify-macro** defines a //[[CL:Glossary:macro]]// named //name// to //[[CL:Glossary:read]]// and //[[CL:Glossary:write]]// a //[[CL:Glossary:place]]//.
+
+The arguments to the new //[[CL:Glossary:macro]]// are a //[[CL:Glossary:place]]//, followed by the arguments that are supplied in //lambda-list//.
+
+//[[CL:Glossary:macro|macros]]// defined with **define-modify-macro** correctly pass the //[[CL:Glossary:environment parameter]]// to **[[CL:Functions:get-setf-expansion]]**.
+
+When the //[[CL:Glossary:macro]]// is invoked, //function// is applied to the old contents of the //[[CL:Glossary:place]]// and the //lambda-list// arguments to obtain the new value, and the //[[CL:Glossary:place]]// is updated to contain the result.
+
+Except for the issue of avoiding multiple evaluation (see below), the expansion of a **define-modify-macro** is equivalent to the following:
+
+<blockquote>
+([[CL:Macros:defmacro]] //name// (reference . //lambda-list//) 
+  //documentation// 
+  `([[CL:Macros:setf]] ,reference 
+         (//function// ,reference ,arg1 ,arg2 ...)))
+</blockquote>
+
+where ''arg1'', ''arg2'', ''...'', are the parameters appearing in //lambda-list//; appropriate provision is made for a //[[CL:Glossary:rest parameter]]//.
+
+The //[[CL:Glossary:subforms]]// of the macro calls defined by **define-modify-macro** are evaluated as specified in \secref\GenRefSubFormEval.
+
+//documentation// is attached as a //[[CL:Glossary:documentation string]]// to //name// (as kind **[[CL:Types:function]]**) and to the //[[CL:Glossary:macro function]]//.
+
+If a **define-modify-macro** //[[CL:Glossary:form]]// appears as a //[[CL:Glossary:top level form]]//, the //[[CL:Glossary:compiler]]// must store the //[[CL:Glossary:macro]]// definition at compile time, so that occurrences of the macro later on in the file can be expanded correctly.
+
+====Examples====
+<blockquote>
+(define-modify-macro appendf (&rest args) [[CL:Functions:append]] "Append onto list") <r>APPENDF</r>
+([[CL:Macros:defparameter]] x '(a b c) y x) <r>(A B C)</r>
+(appendf x '(d e f) '(1 2 3)) <r>(A B C D E F 1 2 3) </r>
+x <r>(A B C D E F 1 2 3) </r>
+y <r>(A B C) </r>
+(define-modify-macro new-incf (&optional (delta 1)) [[CL:Functions:math-add|+]]) <r>NEW-INCF</r>
+(define-modify-macro unionf (other-set &rest keywords) [[CL:Functions:union]]) <r>UNIONF</r>
+</blockquote>
+
+====Side Effects====
+A macro definition is assigned to //name//.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Macros:defsetf|Macro DEFSETF]]**
+  * **[[CL:Macros:define-setf-expander|Macro DEFINE-SETF-EXPANDER]]**
+  * **[[CL:Functions:documentation|Generic Function DOCUMENTATION]]**
+  * {\secref\DocVsDecls}
+
+====Notes====
+None.
+
+\issue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{PUSH-EVALUATION-ORDER:FIRST-ITEM} \issue{DOCUMENTATION-FUNCTION-BUGS:FIX} \issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}

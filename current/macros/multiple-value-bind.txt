@@ -1,7 +1,7 @@
 ====== Macro MULTIPLE-VALUE-BIND ======
 
 ====Syntax====
-\DefmacWithValuesNewline multiple-value-bind {\paren{\starparam{var}} //values-form// \starparam{declaration} \starparam{form}} {\starparam{result}}
+  * multiple-value-bind //(var''*'') values-form declaration''*'' form''*''// → //result''*''//
 
 ====Arguments and Values====
   * //var// - a //[[CL:Glossary:symbol]]// naming a variable; not evaluated.
@@ -20,7 +20,11 @@ The variable //[[CL:Glossary:binding|bindings]]// created are lexical unless **[
 The //[[CL:Glossary:scopes]]// of the name binding and //declarations// do not include the //values-form//.
 
 ====Examples====
-<blockquote> (multiple-value-bind (f r) (floor 130 11) (list f r)) → (11 9) </blockquote>
+<blockquote>
+(multiple-value-bind (f r)
+  ([[CL:Functions:floor]] 130 11)
+  ([[CL:Functions:list]] f r)) <r>(11 9)</r>
+</blockquote>
 
 ====Affected By====
 None.
@@ -33,6 +37,12 @@ None.
   * **[[CL:Special Operators:multiple-value-call|Special Operator MULTIPLE-VALUE-CALL]]**
 
 ====Notes====
-<blockquote> (multiple-value-bind (\starparam{var}) //values-form// \starparam{form}) ≡ (multiple-value-call #'(lambda (&optional \starparam{var} &rest #1=#:ignore) (declare (ignore #1#)) \starparam{form}) //values-form//) </blockquote>
+<blockquote>
+(multiple-value-bind (//var''*''//) //values-form// //form''*''//) 
+  ≡ ([[CL:Special Operators:multiple-value-call]] #'([[CL:Symbols:lambda]] (&optional //var''*''// &rest #1=#:ignore) 
+                             ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] #1#)) 
+                             //form''*''//) 
+      //values-form//)
+</blockquote>
 
 \issue{DECLS-AND-DOC}

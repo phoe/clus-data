@@ -1,7 +1,7 @@
 ====== Function GET-SETF-EXPANSION ======
 
 ====Syntax====
-\DefunWithValuesNewline get-setf-expansion {place ''&optional'' environment} {vars, vals, store-vars, writer-form, reader-form}
+  * **get-setf-expansion** //place ''&optional'' environment// → //vars, vals, store-vars, writer-form, reader-form//
 
 ====Arguments and Values====
   * //place// - a //[[CL:Glossary:place]]//.
@@ -11,22 +11,35 @@
 ====Description====
 Determines five values constituting the //[[CL:Glossary:setf expansion]]// for //place// in //environment//; see section {\secref\SetfExpansions}.
 
-
-
 If //environment// is not supplied or **[[CL:Constant Variables:nil]]**, the environment is the //[[CL:Glossary:null lexical environment]]//.
 
 ====Examples====
-<blockquote> (get-setf-expansion 'x) → NIL, NIL, (#:G0001), (SETQ X #:G0001), X </blockquote>
+<blockquote>
+(get-setf-expansion 'x) 
+<r>[[CL:Constant Variables:NIL]]
+[[CL:Constant Variables:NIL]]
+(#:G0001)
+([[CL:Special Operators:SETQ]] X #:G0001)
+X</r>
 
-<blockquote> ;;; This macro is like POP
+;;; TODO fix the below example, it seems very broken -
+;;; complains about the NEW variable etc.
 
-(defmacro xpop (place &environment env) (multiple-value-bind (dummies vals new setter getter) (get-setf-expansion place env) `(let* (,@(mapcar #'list dummies vals) (,(car new) ,getter)) (if (cdr new) (error "Can't expand this.")) (prog1 (car ,(car new)) ([[CL:Macros:defparameter]] ,(car new) (cdr ,(car new))) ,setter))))
+([[CL:Macros:defmacro]] xpop (place &environment env) ; This macro is like POP
+  ([[CL:Macros:multiple-value-bind]] (dummies vals new setter getter) 
+      (get-setf-expansion place env) 
+    `([[CL:Special Operators:let-star|let*]] (,@([[CL:Functions:mapcar]] #'[[CL:Functions:list]] dummies vals) (,([[CL:Functions:car]] new) ,getter)) 
+       ([[CL:Macros:when]] ([[CL:Functions:cdr]] new) ([[CL:Functions:error]] "Can't expand this."))
+       ([[CL:Macros:prog1]] (car ,([[CL:Functions:car]] new)) 
+         ([[CL:Macros:setf]] ,([[CL:Functions:car]] new) ([[CL:Functions:cdr]] ,([[CL:Functions:car]] new)))
+         ,setter))))
 
-(defsetf frob (x) (value) `([[CL:Macros:setf]] (car ,x) ,value)) → FROB ;;; The following is an error; an error might be signaled at macro expansion time (flet ((frob (x) (cdr x))) ;Invalid (xpop (frob z)))
-
+([[CL:Macros:defsetf]] frob (x) (value) 
+  `([[CL:Macros:setf]] ([[CL:Functions:car]] ,x) ,value)) → FROB 
+;;; The following is an error; an error might be signaled at macro expansion time 
+([[CL:Special Operators:flet]] ((frob (x) ([[CL:Functions:cdr]] x))) ;Invalid 
+  (xpop (frob z)))
 </blockquote>
-
-
 
 ====Affected By====
 None.

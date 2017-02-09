@@ -1,0 +1,77 @@
+====== Macro SHIFTF ======
+
+====Syntax====
+  * **shiftf** //place''+'' newvalue// → //old-value-1//
+
+====Arguments and Values====
+  * //place// - a //[[CL:Glossary:place]]//.
+  * //newvalue// - a //[[CL:Glossary:form]]//; evaluated.
+  * //old-value-1// - an //[[CL:Glossary:object]]// (the old //[[CL:Glossary:value]]// of the first //place//).
+
+====Description====
+**shiftf** modifies the values of each //place// by storing //newvalue// into the last //place//, and shifting the values of the second through the last //place// into the remaining //places//.
+
+If //newvalue// produces more values than there are store variables, the extra values are ignored. If //newvalue// produces fewer values than there are store variables, the missing values are set to **[[CL:Constant Variables:nil]]**.
+
+In the form ''(shiftf place1 place2 ... placen newvalue)'', the values in ''place1'' through ''placen'' are //[[CL:Glossary:read]]// and saved, and ''newvalue'' is evaluated, for a total of ''n+1'' values in all. Values ''2'' through ''n+1'' are then stored into ''place1'' through ''placen'', respectively. It is as if all the //places// form a shift register; the //newvalue// is shifted in from the right, all values shift over to the left one place, and the value shifted out of ''place1'' is returned.
+
+For information about the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subforms]]// of //places//, see section {\secref\GenRefSubFormEval}.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] *x* ([[CL:Functions:list]] 1 2 3)) <r>*X*</r>
+([[CL:Macros:defparameter]] *y* 'trash) <r>*Y*</r>
+(shiftf *y* *x* (cdr *x*) '(hi there)) <r>TRASH </r>
+*x* <r>(2 3) </r>
+*y* <r>(1 HI THERE)</r>
+
+([[CL:Macros:setf]] *x* ([[CL:Functions:list]] 'a 'b 'c)) <r>(A B C)</r>
+(shiftf ([[CL:Functions:cadr]] *x*) 'z) <r>B </r>
+*x* <r>(A Z C) </r>
+(shiftf ([[CL:Functions:cadr]] *x*) ([[CL:Functions:cddr]] *x*) 'q) <r>Z </r>
+*x* <r>(A (C) . Q) </r>
+([[CL:Macros:defparameter]] *n* 0) <r>*N*</r>
+([[CL:Macros:setf]] *x* ([[CL:Functions:list]] 'a 'b 'c 'd)) <r>(A B C D) </r>
+(shiftf ([[CL:Functions:nth]] ([[CL:Macros:incf]] *n*) *x*) 'z) <r>B </r>
+*x* <r>(A Z C D) </r>
+</blockquote>
+
+====Affected By====
+**[[CL:Macros:define-setf-expander]]**, **[[CL:Macros:defsetf]]**, **[[CL:Variables:*macroexpand-hook*]]**
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Macros:setf|Macro SETF]]**
+  * **[[CL:Macros:rotatef|Macro ROTATEF]]**
+  * {\secref\GeneralizedReference}
+
+====Notes====
+The effect of ''(shiftf //place1// //place2// ... //placen// //newvalue//)'' is roughly equivalent to
+
+<blockquote>
+([[CL:Special Operators:let]] ((var1 //place1//) 
+      (var2 //place2//) 
+      ... 
+      (varn //placen//) 
+      (var0 //newvalue//))
+  ([[CL:Macros:setf]] //place1// var2)
+  ([[CL:Macros:setf]] //place2// var3) 
+  ... 
+  ([[CL:Macros:setf]] //placen// var0) 
+  var1)
+</blockquote>
+
+except that the latter would evaluate any //[[CL:Glossary:subforms]]// of each ''place'' twice, whereas **shiftf** evaluates them once. For example,
+
+<blockquote>
+([[CL:Macros:defparameter]] *n* 0) <r>0 </r>
+([[CL:Macros:defparameter]] *x* ([[CL:Functions:list]] 'a 'b 'c 'd)) <r>(A B C D) </r>
+([[CL:Macros:prog1]] 
+  ([[CL:Functions:nth]] ([[CL:Macros:incf]] *n*) *x*) 
+  ([[CL:Macros:setf]] ([[CL:Functions:nth]] ([[CL:Macros:incf]] *n*) *x*) 'z)) <r>B </r>
+*x* <r>(A B Z D)</r>
+</blockquote>
+
+\issue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW} \issue{PUSH-EVALUATION-ORDER:FIRST-ITEM}

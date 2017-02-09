@@ -1,0 +1,67 @@
+====== Macro PROG1, PROG2 ======
+
+====Syntax====
+  * **prog1** //first-form form''*''// → //result-1//
+  * **prog2** {first-form second-form form''*''// → //result-2//
+
+====Arguments and Values====
+  * //first-form// - a //[[CL:Glossary:form]]//; evaluated as described below.
+  * //second-form// - a //[[CL:Glossary:form]]//; evaluated as described below.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//; evaluated as described below.
+  * //result-1// - the //[[CL:Glossary:primary value]]// resulting from the //[[CL:Glossary:evaluation]]// of //first-form//.
+  * //result-2// - the //[[CL:Glossary:primary value]]// resulting from the //[[CL:Glossary:evaluation]]// of //second-form//.
+
+====Description====
+**prog1** //[[CL:Glossary:evaluate|evaluates]]// //first-form// and then //forms//, //[[CL:Glossary:yielding]]// as its only //[[CL:Glossary:value]]// the //[[CL:Glossary:primary value]]// //[[CL:Glossary:yield|yielded]]// by //first-form//.
+
+**prog2** //[[CL:Glossary:evaluate|evaluates]]// //first-form//, then //second-form//, and then //forms//, //[[CL:Glossary:yielding]]// as its only //[[CL:Glossary:value]]// the //[[CL:Glossary:primary value]]// //[[CL:Glossary:yield|yielded]]// by //second-form//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] *temp* 1) <r>1 </r>
+(prog1 *temp* (print *temp*) ([[CL:Macros:incf]] *temp*) ([[CL:Functions:print]] *temp*))
+<o>1
+2 </o>
+<r>1 </r>
+(prog1 *temp* ([[CL:Macros:defparameter]] *temp* [[CL:Constant Variables:nil]])) <r>2</r>
+*temp* <r>[[CL:Constant Variables:nil|NIL]] </r>
+(prog1 (values 1 2 3) 4) <r>1 </r>
+([[CL:Macros:defparameter]] *temp* ([[CL:Functions:list]] 'a 'b 'c)) 
+(prog1 ([[CL:Functions:car]] *temp*) ([[CL:Macros:setf]] ([[CL:Functions:car]] *temp*) 'alpha)) <r>A </r>
+*temp* <r>(ALPHA B C) </r>
+([[CL:Special Operators:flet]] ((swap-symbol-values (x y) 
+        ([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] x) 
+              (prog1 ([[CL:Functions:symbol-value]] y) 
+                     ([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] y) ([[CL:Functions:symbol-value]] x))))))
+  ([[CL:Special Operators:let]] ((*foo* 1) (*bar* 2)) 
+    ([[CL:Symbols:declare]] ([[CL:Declarations:special]] *foo* *bar*)) 
+    (swap-symbol-values '*foo* '*bar*) 
+    ([[CL:Functions:values]] *foo* *bar*))) <r>2
+1 </r>
+([[CL:Macros:setf]] *temp* 1) <r>1 </r>
+(prog2 ([[CL:Macros:incf]] *temp*) ([[CL:Macros:incf]] *temp*) ([[CL:Macros:incf]] *temp*)) <r>3 </r>
+*temp* <r>4 </r>
+(prog2 1 ([[CL:Functions:values]] 2 3 4) 5) <r>2 </r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Special Operators:multiple-value-prog1|Special Operator MULTIPLE-VALUE-PROG1]]**
+  * **[[CL:Special Operators:progn|Special Operator PROGN]]**
+
+====Notes====
+**prog1** and **prog2** are typically used to //[[CL:Glossary:evaluate]]// one or more //[[CL:Glossary:form|forms]]// with side effects and return a //[[CL:Glossary:value]]// that must be computed before some or all of the side effects happen.
+
+<blockquote>
+(prog1 //form''*''//) ≡ ([[CL:Functions:values]] ([[CL:Special Operators:multiple-value-prog1]] //form''*''//))
+(prog2 //form1// //form''*''//) ≡ ([[CL:Special Operators:let]] () //form1// (prog1 //form''*''//))
+</blockquote>
+

@@ -1,0 +1,111 @@
+====== Macro TYPECASE, CTYPECASE, ETYPECASE ======
+
+====Syntax====
+  * typecase //keyform {normal-clause}''*'' [otherwise-clause]// → //result''*''//
+  * ctypecase //keyplace {normal-clause}''*''// → //result''*''//
+  * etypecase //keyform {normal-clause}''*''// → //result''*''//
+  
+<blockquote>
+//normal-clause// ::= //(type form''*'')//
+//otherwise-clause// ::= //({otherwise | t} form''*'')//
+//clause// ::= //normal-clause | otherwise-clause//
+</blockquote>
+
+====Arguments and Values====
+  * //keyform// - a //[[CL:Glossary:form]]//; evaluated to produce a //test-key//.
+  * //keyplace// - a //[[CL:Glossary:form]]//; evaluated initially to produce a //test-key//. Possibly also used later as a //[[CL:Glossary:place]]// if no //types// match.
+  * //test-key// - an object produced by evaluating //keyform// or //keyplace//.
+  * //type// - a //[[CL:Glossary:type specifier]]//.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - the //[[CL:Glossary:value|values]]// returned by the //forms// in the matching //clause//.
+
+====Description====
+These //[[CL:Glossary:macro|macros]]// allow the conditional execution of a body of //forms// in a //clause// that is selected by matching the //test-key// on the basis of its //[[CL:Glossary:type]]//.
+
+The //keyform// or //keyplace// is //[[CL:Glossary:evaluate|evaluated]]// to produce the //test-key//.
+
+Each of the //normal-clauses// is then considered in turn. If the //test-key// is of the //[[CL:Glossary:type]]// given by the //clauses//'s //type//, the //forms// in that //clause// are //evaluated// as an //[[CL:Glossary:implicit progn]]//, and the //[[CL:Glossary:value|values]]// it returns are returned as the value of the **typecase**, **ctypecase**, or **etypecase** //[[CL:Glossary:form]]//.
+
+These //[[CL:Glossary:macro|macros]]// differ only in their //[[CL:Glossary:behavior]]// when no //normal-clause// matches; specifically:
+
+===typecase===
+If no //normal-clause// matches, and there is an //otherwise-clause//, then that //otherwise-clause// automatically matches; the //forms// in that //clause// are //evaluated// as an //[[CL:Glossary:implicit progn]]//, and the //[[CL:Glossary:value|values]]// it returns are returned as the value of the **typecase**.
+
+If there is no //otherwise-clause//, **typecase** returns **[[CL:Constant Variables:nil]]**.
+
+===ctypecase===
+If no //normal-clause// matches, a //[[CL:Glossary:correctable]]// //[[CL:Glossary:error]]// of type **[[CL:Types:type-error]]** is signaled. The offending datum is the //test-key// and the expected type is //[[CL:Glossary:type equivalent]]// to ''(or //type1// //type2// ...)''. The //[[CL:Glossary:restart]]// **[[CL:Restarts:store-value]]** can be used to correct the error.
+
+If the //[[CL:Glossary:restart]]// **[[CL:Restarts:store-value]]** is invoked, its //[[CL:Glossary:argument]]// becomes the new //test-key//, and is stored in //keyplace// as if by ''(setf //keyplace// //test-key//)''. Then **ctypecase** starts over, considering each //clause// anew.
+
+If the //[[CL:Glossary:restart]]// **[[CL:Restarts:store-value]]** is invoked interactively, the user is prompted for a new //test-key// to use.
+
+The subforms of //keyplace// might be evaluated again if none of the cases holds.
+
+===etypecase===
+If no //normal-clause// matches, a //[[CL:Glossary:non-correctable]]// //[[CL:Glossary:error]]// of type **[[CL:Types:type-error]]** is signaled. The offending datum is the //test-key// and the expected type is //[[CL:Glossary:type equivalent]]// to ''(or //type1// //type2// ...)''.
+
+Note that in contrast with **ctypecase**, the caller of **etypecase** may rely on the fact that **etypecase** does not return if a //normal-clause// does not match.
+
+-------------
+
+In all three cases, is permissible for more than one //clause// to specify a matching //[[CL:Glossary:type]]//, particularly if one is a //[[CL:Glossary:subtype]]// of another; the earliest applicable //clause// is chosen.
+
+====Examples====
+Note that the parts of this example which use **[[CL:Functions:type-of]]** are implementation-dependent.
+<blockquote> 
+([[CL:Macros:defun]] what-is-it (x) 
+  ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~S is ~A.~%" 
+    x (typecase x 
+        ([[CL:Types:float]] "a float") 
+        ([[CL:Types:null]] "a symbol, boolean false, or the empty list") 
+        ([[CL:Types:list]] "a list") 
+        ([[CL:Types:t]] ([[CL:Functions:format]] [[CL:Constant Variables:nil]] "a(n) ~(~A~)" ([[CL:Functions:type-of]] x))))))
+<r>WHAT-IS-IT </r>
+([[CL:Functions:map]] '[[CL:Constant Variables:nil]] #'what-is-it '([[CL:Constant Variables:nil]] (a b) 7.0 7 box))
+▷ [[CL:Constant Variables:nil|NIL]] is a symbol, boolean false, or the empty list.
+▷ (A B) is a list.
+▷ 7.0 is a float.
+▷ 7 is a(n) integer.
+▷ BOX is a(n) symbol. <r>[[CL:Constant Variables:nil|NIL]] </r>
+([[CL:Macros:defparameter]] *x* 1/3) <r>1/3 </r>
+(ctypecase *x* 
+  ([[CL:Types:integer]] ([[CL:Functions:math-multiply|*]] *x* 4)) 
+  ([[CL:Types:symbol]] ([[CL:Functions:symbol-value]] *x*)))
+<e>▷ Error: The value of *X*, 1/3, is neither an integer nor a symbol.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Specify a value to use instead.
+▷ 2: Return to Lisp Toplevel.
+▷ Debug> :CONTINUE 1
+▷ Use value: 3.7</e>
+<e>▷ Error: The value of *X*, 3.7, is neither an integer nor a symbol.
+▷ To continue, type :CONTINUE followed by an option number:
+▷ 1: Specify a value to use instead.
+▷ 2: Return to Lisp Toplevel.
+▷ Debug> :CONTINUE 1
+▷ Use value: 12 </e>
+<r>48 </r>
+x <r>12 </r>
+</blockquote>
+
+====Affected By====
+**ctypecase** and **etypecase**, since they might signal an error, are potentially affected by existing //handlers// and **[[CL:Variables:*debug-io*]]**.
+
+====Exceptional Situations====
+**ctypecase** and **etypecase** signal an error of type **[[CL:Types:type-error]]** if no //normal-clause// matches.
+
+The //[[CL:Glossary:compiler]]// may choose to issue a warning of type **[[CL:Types:style-warning]]** if a //clause// will never be selected because it is completely shadowed by earlier clauses.
+
+====See Also====
+  * **[[CL:Macros:case|Macro CASE]]**
+  * **[[CL:Macros:cond|Macro COND]]**
+  * **[[CL:Macros:setf|Macro SETF]]**
+  * {\secref\GeneralizedReference}
+
+====Notes====
+<blockquote>
+(typecase //test-key// {(//type// //form''*''//)}''*'') 
+  ≡ ([[CL:Special Operators:let]] ((#1=#:g0001 //test-key//)) ([[CL:Macros:cond]] {(([[CL:Functions:typep]] #1# '//type//) //form''*''//)}''*''))
+</blockquote>
+
+The specific error message used by **etypecase** and **ctypecase** can vary between implementations. In situations where control of the specific wording of the error message is important, it is better to use **typecase** with an //otherwise-clause// that explicitly signals an error with an appropriate message.

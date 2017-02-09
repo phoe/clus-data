@@ -1,0 +1,105 @@
+====== Macro PROG, PROG* ======
+
+====Syntax====
+  * **prog** //({var | (var [init-form])}''*'') declaration''*'' {tag | statement}''*''// → //result''*''//
+  * **prog<nowiki>*</nowiki>** //({var | (var [init-form])}''*'') declaration''*'' {tag | statement}''*''// → //result''*''//
+
+====Arguments and Values====
+  * //var// - variable name.
+  * //init-form// - a //[[CL:Glossary:form]]//.
+  * //declaration// - a **[[CL:Special Operators:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //tag// - a //[[CL:Glossary:go tag]]//; not evaluated.
+  * //statement// - a //[[CL:Glossary:compound form]]//; evaluated as described below.
+  * //results// - **[[CL:Constant Variables:nil]]** if a //[[CL:Glossary:normal return]]// occurs, or else, if an //[[CL:Glossary:explicit return]]// occurs, the //[[CL:Glossary:value|values]]// that were transferred.
+
+====Description====
+Three distinct operations are performed by **prog** and **prog<nowiki>*</nowiki>**: they bind local variables, they permit use of the **[[CL:Macros:return]]** statement, and they permit use of the **[[CL:Special Operators:go]]** statement. A typical **prog** looks like this:
+
+<blockquote>
+(prog (var1 var2 (var3 init-form-3) var4 (var5 init-form-5)) 
+   declaration''*'' 
+   statement1 
+ tag1 
+   statement2 
+   statement3 
+   statement4 
+ tag2
+   statement5 
+   ...)
+</blockquote>
+
+For **prog**, //init-forms// are evaluated first, in the order in which they are supplied. The //vars// are then bound to the corresponding values in parallel. If no //init-form// is supplied for a given //var//, that //var// is bound to **[[CL:Constant Variables:nil]]**.
+
+The body of **prog** is executed as if it were a **[[CL:Special Operators:tagbody]]** //[[CL:Glossary:form]]//; the **[[CL:Special Operators:go]]** statement can be used to transfer control to a //tag//. //Tags// label //statements//.
+
+**prog** implicitly establishes a **[[CL:Special Operators:block]]** named **[[CL:Constant Variables:nil]]** around the entire **prog** //[[CL:Glossary:form]]//, so that **[[CL:Macros:return]]** can be used at any time to exit from the **prog** //[[CL:Glossary:form]]//.
+
+The difference between **prog<nowiki>*</nowiki>** and **prog** is that in **prog<nowiki>*</nowiki>** the //[[CL:Glossary:binding]]// and initialization of the //vars// is done //[[CL:Glossary:sequentially]]//, so that the //init-form// for each one can use the values of previous ones.
+
+====Examples====
+<blockquote>
+(prog* ((y '(1 2 3)) 
+        (x ([[CL:Functions:car]] y)))
+   ([[CL:Macros:return]] x)) <r>1</r>
+
+([[CL:Macros:defparameter]] *a* 1) <r>*A* </r>
+(prog ((*a* 2) (b *a*))
+   ([[CL:Macros:return]] ([[CL:Special Operators:if]] ([[CL:Functions:math-equal|=]] *a* b) '[[CL:Functions:math-equal|=]] '[[CL:Functions:math-nequal|\=]]))) <r>[[CL:Functions:math-nequal|\=]]</r>
+(prog* ((*a* 2) (b *a*)) 
+   ([[CL:Macros:return]] ([[CL:Special Operators:if]] ([[CL:Functions:math-equal|=]] *a* b) '[[CL:Functions:math-equal|=]] '[[CL:Functions:math-nequal|\=]]))) <r>[[CL:Functions:math-equal|=]] </r>
+(prog () 'no-return-value) <r>NIL</r>
+
+([[CL:Macros:defun]] king-of-confusion (w) 
+  "Take a cons of two lists and make a list of conses. 
+Think of this function as being like a zipper." 
+  (prog (x y z) ; Initialize x, y, z to NIL 
+     ([[CL:Macros:setf]] y ([[CL:Functions:car]] w) z ([[CL:Functions:cdr]] w))
+   loop
+     ([[CL:Macros:cond]] (([[CL:Functions:null]] y) ([[CL:Macros:return]] x))
+           (([[CL:Functions:null]] z) ([[CL:Special Operators:go]] err))) 
+   rejoin 
+     ([[CL:Macros:setf]] x ([[CL:Functions:cons]] ([[CL:Functions:cons]] ([[CL:Functions:car]] y) ([[CL:Functions:car]] z)) x)
+           y ([[CL:Functions:cdr]] y) z ([[CL:Functions:cdr]] z))
+     ([[CL:Special Operators:go]] loop) 
+   err 
+     ([[CL:Functions:cerror]] "Will self-pair extraneous items" "Mismatch - gleep! ~S" y) 
+     ([[CL:Macros:setf]] z y) 
+     ([[CL:Special Operators:go]] rejoin))) <r>KING-OF-CONFUSION </r>
+</blockquote> This can be accomplished more perspicuously as follows:
+
+<blockquote>
+([[CL:Macros:defun]] prince-of-clarity (w) 
+  "Take a cons of two lists and make a list of conses. 
+Think of this function as being like a zipper." 
+  ([[CL:Macros:do]] ((y ([[CL:Functions:car]] w) ([[CL:Functions:cdr]] y))
+       (z ([[CL:Functions:cdr]] w) ([[CL:Functions:cdr]] z)) 
+       (x '() ([[CL:Functions:cons]] ([[CL:Functions:cons]] ([[CL:Functions:car]] y) ([[CL:Functions:car]] z)) x)))
+      (([[CL:Functions:null]] y) x)
+    ([[CL:Macros:when]] ([[CL:Functions:null]] z) 
+      ([[CL:Functions:cerror]] "Will self-pair extraneous items" "Mismatch - gleep! ~S" y)
+      ([[CL:Macros:setf]] z y)))) <r>PRINCE-OF-CLARITY</r>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+ * **[[CL:Special Operators:block|Special Operator BLOCK]]**
+ * **[[CL:Special Operators:let|Special Operator LET]]**
+ * **[[CL:Special Operators:tagbody|Special Operator TAGBODY]]**
+ * **[[CL:Special Operators:go|Special Operator GO]]**
+ * **[[CL:Macros:return|Macro RETURN]]**
+ * {\secref\Evaluation}
+
+====Notes====
+**prog** can be explained in terms of **[[CL:Special Operators:block]]**, **[[CL:Special Operators:let]]**, and **[[CL:Special Operators:tagbody]]** as follows:
+
+<blockquote>
+(prog //variable-list// //declaration// . //body//) 
+  ≡ ([[CL:Special Operators:block]] [[CL:Special Operators:nil]] (let //variable-list// //declaration// ([[CL:Special Operators:tagbody]] . //body//)))
+</blockquote>
+
+\issue{DECLS-AND-DOC}

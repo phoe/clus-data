@@ -1,0 +1,72 @@
+====== Macro SETF, PSETF ======
+
+====Syntax====
+  * **setf** //pair''*''// → //result''*''//
+  * **psetf** //pair''*''// → //**[[CL:Constant Variables:nil]]**//
+  
+<blockquote>
+//pair// ::= //place newvalue//
+</blockquote>
+
+====Arguments and Values====
+  * //place// - a //[[CL:Glossary:place]]//.
+  * //newvalue// - a //[[CL:Glossary:form]]//.
+  * //results// - the //[[CL:Glossary:multiple values]]// returned by the storing form for the last //place//, or **[[CL:Constant Variables:nil]]** if there are no //pairs//.
+
+====Description====
+**setf** changes the //[[CL:Glossary:value]]// of //place// to be //newvalue//.
+
+''(setf place newvalue)'' expands into an update form that stores the result of evaluating //newvalue// into the location referred to by //place//.
+
+Some //place// forms involve uses of accessors that take optional arguments. Whether those optional arguments are permitted by **setf**, or what their use is, is up to the **setf** expander function and is not under the control of **setf**. The documentation for any //[[CL:Glossary:function]]// that accepts ''&optional'', ''&rest'', or ''&key'' arguments and that claims to be usable with **setf** must specify how those arguments are treated.
+
+If more than one //pair// is supplied, the //pairs// are processed sequentially; that is,
+
+<blockquote> 
+(setf place-1 newvalue-1 place-2 newvalue-2 ... place-N newvalue-N)
+</blockquote> 
+
+is precisely equivalent to:
+
+<blockquote>
+([[CL:Special Operators:progn]] 
+  (setf place-1 newvalue-1) 
+  (setf place-2 newvalue-2) 
+  ... 
+  (setf place-N newvalue-N))
+</blockquote>
+
+For **psetf**, if more than one //pair// is supplied then the assignments of new values to places are done in parallel. More precisely, all //[[CL:Glossary:subforms]]// (in both the //place// and //newvalue// //[[CL:Glossary:form|forms]]//) that are to be evaluated are evaluated from left to right; after all evaluations have been performed, all of the assignments are performed in an unpredictable order.
+
+For detailed treatment of the expansion of **setf** and **psetf**, see section {\secref\KindsOfPlaces}.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] *x* ([[CL:Functions:cons]] 'a 'b) *y* ([[CL:Functions:list]] 1 2 3)) <r>(1 2 3) </r>
+(setf ([[CL:Functions:car]] *x*) '*x* ([[CL:Functions:cadr]] *y*) ([[CL:Functions:car]] *x*) ([[CL:Functions:cdr]] *x*) *y*) <r>(1 X 3) </r>
+*x* <r>(X 1 X 3) </r>
+*y* <r>(1 X 3) </r>
+([[CL:Macros:defparameter]] *x* ([[CL:Functions:cons]] 'a 'b) *y* ([[CL:Functions:list]] 1 2 3)) <r>(1 2 3) </r>
+(psetf ([[CL:Functions:car]] *x*) '*x* ([[CL:Functions:cadr]] *y*) ([[CL:Functions:car]] *x*) ([[CL:Functions:cdr]] *x*) *y*) <r>NIL </r>
+*x* <r>(X 1 A 3) </r>
+*y* <r>(1 A 3)</r>
+</blockquote>
+
+====Affected By====
+**[[CL:Macros:define-setf-expander]]**, **[[CL:Macros:defsetf]]**, **[[CL:Variables:*macroexpand-hook*]]**
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Macros:define-setf-expander|Macro DEFINE-SETF-EXPANDER]]**
+  * **[[CL:Macros:defsetf|Macro DEFSETF]]**
+  * **[[CL:Functions:macroexpand-1|Function MACROEXPAND-1]]**
+  * **[[CL:Macros:rotatef|Macro ROTATEF]]**
+  * **[[CL:Macros:shiftf|Macro SHIFTF]]**
+  * {\secref\GeneralizedReference}
+
+====Notes====
+None.
+
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92} \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}

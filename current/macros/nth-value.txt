@@ -5,14 +5,25 @@
 
 ====Arguments and Values====
   * //n// - a non-negative //[[CL:Glossary:integer]]//; evaluated.
-  * //form// - a //[[CL:Glossary:form]]//; evaluatedspecial.
+  * //form// - a //[[CL:Glossary:form]]//; evaluated as described below.
   * //object// - an //[[CL:Glossary:object]]//.
 
 ====Description====
 Evaluates //n// and then //form//, returning as its only value the //n//th value //[[CL:Glossary:yield|yielded]]// by //form//, or **[[CL:Constant Variables:nil]]** if //n// is greater than or equal to the number of //[[CL:Glossary:value|values]]// returned by //form//. (The first returned value is numbered ''0''.)
 
 ====Examples====
-<blockquote> (nth-value 0 (values 'a 'b)) → A (nth-value 1 (values 'a 'b)) → B (nth-value 2 (values 'a 'b)) → NIL (let* ((x 83927472397238947423879243432432432) (y 32423489732) (a (nth-value 1 (floor x y))) (b (mod x y))) (values a b (= a b))) → 3332987528, 3332987528, //[[CL:Glossary:true]]// </blockquote>
+<blockquote>
+(nth-value 0 ([[CL:Functions:values]] 'a 'b)) <r>A</r>
+(nth-value 1 ([[CL:Functions:values]] 'a 'b)) <r>B</r>
+(nth-value 2 ([[CL:Functions:values]] 'a 'b)) <r>[[CL:Constant Variables:NIL]]</r>
+([[CL:Special Operators:let-star|let*]] ((x 83927472397238947423879243432432432) 
+       (y 32423489732) 
+       (a (nth-value 1 ([[CL:Functions:floor]] x y)))
+       (b ([[CL:Functions:mod]] x y)))
+  ([[CL:Functions:values]] a b ([[CL:Functions:math-equal|=]] a b))) <r>3332987528
+3332987528
+//[[CL:Glossary:true]]//</r>
+</blockquote>
 
 ====Side Effects====
 None.
@@ -30,6 +41,8 @@ None.
 ====Notes====
 Operationally, the following relationship is true, although **[[CL:Special Operators:nth-value]]** might be more efficient in some //[[CL:Glossary:implementation|implementations]]// because, for example, some //[[CL:Glossary:consing]]// might be avoided.
 
-<blockquote> (nth-value //n// //form//) ≡ (nth //n// (multiple-value-list //form//)) </blockquote>
+<blockquote>
+(nth-value //n// //form//) ≡ ([[CL:Functions:nth]] //n// ([[CL:Macros:multiple-value-list]] //form//))
+</blockquote>
 
 \issue{NTH-VALUE:ADD}

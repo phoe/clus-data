@@ -1,0 +1,46 @@
+====== Special Operator PROGN ======
+
+====Syntax====
+  * **progn** //form''*''// → //result''*''//
+
+====Arguments and Values====
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - the //[[CL:Glossary:value|values]]// of the //[[CL:Glossary:form|forms]]//.
+
+====Description====
+**progn** evaluates //forms//, in the order in which they are given.
+
+The values of each //form// but the last are discarded.
+
+If **progn** appears as a //[[CL:Glossary:top level form]]//, then all //[[CL:Glossary:form|forms]]// within that **progn** are considered by the compiler to be //[[CL:Glossary:top level forms]]//.
+
+====Examples====
+<blockquote> 
+(progn) <r>[[CL:Constant Variables:nil|NIL]] </r>
+(progn 1 2 3) <r>3 </r>
+(progn ([[CL:Functions:values]] 1 2 3)) <r>1
+2
+3 </r>
+([[CL:Macros:defparameter]] *a* 1) <r>1 </r>
+([[CL:Special Operators:if]] *a* 
+    (progn ([[CL:Macros:setf]] *a* [[CL:Constant Variables:nil]])
+           'here) 
+    (progn ([[CL:Macros:setf]] *a* [[CL:Constant Variables:t]]) 
+           'there)) <r>HERE </r>
+*a* <r>[[CL:Constant Variables:nil|NIL]]</r>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Macros:prog1|Macro PROG1]]**
+  * **[[CL:Macros:prog2|Macro PROG2]]**
+  * {\secref\Evaluation}
+
+====Notes====
+Many places in Common Lisp involve syntax that uses //[[CL:Glossary:implicit progns]]//. That is, part of their syntax allows many //[[CL:Glossary:form|forms]]// to be written that are to be evaluated sequentially, discarding the results of all //[[CL:Glossary:form|forms]]// but the last and returning the results of the last //[[CL:Glossary:form]]//. Such places include, but are not limited to, the following: the body of a //[[CL:Glossary:lambda expression]]//; the bodies of various control and conditional //[[CL:Glossary:form|forms]]// (//e.g.// **[[CL:Macros:case]]**, **[[CL:Special Operators:catch]]**, **progn**, and **[[CL:Macros:when]]**).
+
