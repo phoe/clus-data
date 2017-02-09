@@ -1,32 +1,16 @@
 ====== Function MAKE-HASH-TABLE ======
 
 ====Syntax====
-
-\DefunWithValues make-hash-table {''&key'' test size rehash-size rehash-threshold} {hash-table}
+  * **make-hash-table** //''&key'' test size rehash-size rehash-threshold// → //hash-table//
 
 ====Arguments and Values====
-
-//test// - a //[[CL:Glossary:designator]]// for one of the //[[CL:Glossary:functions]]// **[[CL:Functions:eq]]**, **[[CL:Functions:eql]]**, **[[CL:Functions:equal]]**, or
-
-**[[CL:Functions:equalp]]**.
-
-The default is **[[CL:Functions:eql]]**.
-
-//size// - a non-negative //[[CL:Glossary:integer]]//.
-
-The default is //[[CL:Glossary:implementation-dependent]]//.
-
-//rehash-size// - a //[[CL:Glossary:real]]// of //[[CL:Glossary:type]]// ''(or (integer 1 *) (float (1.0) *))''. The default is //[[CL:Glossary:implementation-dependent]]//.
-
-
-//rehash-threshold// - a //[[CL:Glossary:real]]// of //[[CL:Glossary:type]]// ''(real 0 1)''. The default is //[[CL:Glossary:implementation-dependent]]//.
-
-
-
-//hash-table// - a //[[CL:Glossary:hash table]]//.
+  * //test// - a //[[CL:Glossary:designator]]// for one of the //[[CL:Glossary:functions]]// **[[CL:Functions:eq]]**, **[[CL:Functions:eql]]**, **[[CL:Functions:equal]]**, or **[[CL:Functions:equalp]]**. The default is **[[CL:Functions:eql]]**.
+  * //size// - a non-negative //[[CL:Glossary:integer]]//. The default is //[[CL:Glossary:implementation-dependent]]//.
+  * //rehash-size// - a //[[CL:Glossary:real]]// of //[[CL:Glossary:type]]// ''(or (integer 1 *) (float (1.0) *))''. The default is //[[CL:Glossary:implementation-dependent]]//.
+  * //rehash-threshold// - a //[[CL:Glossary:real]]// of //[[CL:Glossary:type]]// ''(real 0 1)''. The default is //[[CL:Glossary:implementation-dependent]]//.
+  * //hash-table// - a //[[CL:Glossary:hash table]]//.
 
 ====Description====
-
 Creates and returns a new //[[CL:Glossary:hash table]]//.
 
 //test// determines how //[[CL:Glossary:keys]]// are compared.
@@ -49,26 +33,31 @@ As with //size//, the actual size of the increase might be rounded up.
 
 It specifies the maximum desired hash-table occupancy level.
 
-The //[[CL:Glossary:values]]// of //rehash-size// and //rehash-threshold// do not constrain the //[[CL:Glossary:implementation]]// to use any particular method for computing when and by how much the size of //hash-table// should be enlarged. Such decisions are //[[CL:Glossary:implementation-dependent]]//, and these //[[CL:Glossary:values]]// only hints from the //[[CL:Glossary:programmer]]// to the //[[CL:Glossary:implementation]]//, and the //[[CL:Glossary:implementation]]// is permitted to ignore them.
+The //[[CL:Glossary:value|values]]// of //rehash-size// and //rehash-threshold// do not constrain the //[[CL:Glossary:implementation]]// to use any particular method for computing when and by how much the size of //hash-table// should be enlarged. Such decisions are //[[CL:Glossary:implementation-dependent]]//, and these //[[CL:Glossary:value|values]]// only hints from the //[[CL:Glossary:programmer]]// to the //[[CL:Glossary:implementation]]//, and the //[[CL:Glossary:implementation]]// is permitted to ignore them.
 
 ====Examples====
-
-<blockquote> ([[CL:Macros:defparameter]] table (make-hash-table)) → #<HASH-TABLE EQL 0/120 46142754> ([[CL:Macros:setf]] (gethash "one" table) 1) → 1 (gethash "one" table) → NIL, //[[CL:Glossary:false]]// ([[CL:Macros:defparameter]] table (make-hash-table :test 'equal)) → #<HASH-TABLE EQUAL 0/139 46145547> ([[CL:Macros:setf]] (gethash "one" table) 1) → 1 (gethash "one" table) → 1, T (make-hash-table :rehash-size 1.5 :rehash-threshold 0.7) → #<HASH-TABLE EQL 0/120 46156620> </blockquote>
+<blockquote>
+([[CL:Macros:defparameter]] *table* (make-hash-table)) <r>*TABLE*</r> 
+*table* <r>#<HASH-TABLE [[CL:Functions:EQL]] 0/120 46142754></r>
+([[CL:Macros:setf]] ([[CL:Functions:gethash]] "one" *table*) 1) <r>1</r>
+([[CL:Functions:gethash]] "one" *table*) <r>[[CL:Constant Variables:nil|NIL]], //[[CL:Glossary:false]]//</r>
+([[CL:Macros:setf]] *table* (make-hash-table :test '[[CL:Functions:equal]])) <r>#<HASH-TABLE [[CL:Functions:EQUAL]] 0/139 46145547></r>
+([[CL:Macros:setf]] ([[CL:Functions:gethash]] "one" *table*) 1) <r>1</r>
+([[CL:Functions:gethash]] "one" *table*) <r>1, [[CL:Constant Variables:t|T]]</r>
+(make-hash-table :rehash-size 1.5 :rehash-threshold 0.7) <r>#<HASH-TABLE [[CL:Functions:EQL]] 0/120 46156620></r>
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Functions:gethash]]**, **[[CL:Types:hash-table]]**
+  * **[[CL:Functions:gethash|Function GETHASH]]**
+  * **[[CL:Types:hash-table|System Class HASH-TABLE]]**
 
 ====Notes====
-
 None.
 
 \issue{HASH-TABLE-TESTS:ADD-EQUALP} \issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY} \issue{HASH-TABLE-SIZE:INTENDED-ENTRIES} \issue{HASH-TABLE-SIZE:INTENDED-ENTRIES} \issue{HASH-TABLE-REHASH-SIZE-INTEGER} \issue{HASH-TABLE-SIZE:INTENDED-ENTRIES} \issue{HASH-TABLE-REHASH-SIZE-INTEGER} \issue{HASH-TABLE-SIZE:INTENDED-ENTRIES}

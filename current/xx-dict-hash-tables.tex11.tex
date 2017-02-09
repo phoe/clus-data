@@ -1,45 +1,57 @@
 ====== Function MAPHASH ======
 
 ====Syntax====
-
-**maphash** //function hash-table// → //**[[CL:Constant Variables:nil]]**//
+  * **maphash** //function hash-table// → //**[[CL:Constant Variables:nil]]**//
 
 ====Arguments and Values====
-
-//function// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]//, the //[[CL:Glossary:key]]// and the //[[CL:Glossary:value]]//.
-
-//hash-table// - a //[[CL:Glossary:hash table]]//.
+  * //function// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]//, the //[[CL:Glossary:key]]// and the //[[CL:Glossary:value]]//.
+  * //hash-table// - a //[[CL:Glossary:hash table]]//.
 
 ====Description====
-
 Iterates over all entries in the //hash-table//. For each entry, the //function// is called with two //[[CL:Glossary:arguments]]//--the //[[CL:Glossary:key]]// and the //[[CL:Glossary:value]]// of that entry.
 
 The consequences are unspecified if any attempt is made to add or remove an entry from the //hash-table// while a **[[CL:Functions:maphash]]** is in progress, with two exceptions: the //function// can use can use **[[CL:Macros:setf]]** of **[[CL:Functions:gethash]]** to change the //[[CL:Glossary:value]]// part of the entry currently being processed, or it can use **[[CL:Functions:remhash]]** to remove that entry.
 
 ====Examples====
-
-<blockquote> ([[CL:Macros:defparameter]] table (make-hash-table)) → #<HASH-TABLE EQL 0/120 32304110> (dotimes (i 10) ([[CL:Macros:setf]] (gethash i table) i)) → NIL (let ((sum-of-squares 0)) (maphash #'(lambda (key val) (let ((square (* val val))) (incf sum-of-squares square) ([[CL:Macros:setf]] (gethash key table) square))) table) sum-of-squares) → 285 (hash-table-count table) → 10 (maphash #'(lambda (key val) (when (oddp val) (remhash key table))) table) → NIL (hash-table-count table) → 5 (maphash #'(lambda (k v) (print (list k v))) table) (0 0) (8 64) (2 4) (6 36) (4 16) → NIL </blockquote>
+<blockquote>
+([[CL:Macros:defparameter]] *table* ([[CL:Functions:make-hash-table]])) <r>*TABLE*</r>
+([[CL:Macros:dotimes]] (i 10) ([[CL:Macros:setf]] ([[CL:Functions:gethash]] i *table*) i)) <r>[[CL:Constant Variables:nil|NIL]] </r>
+([[CL:Special Operators:let]] ((sum-of-squares 0)) 
+  (maphash #'([[CL:Symbols:lambda]] (key val) 
+               ([[CL:Special Operators:let]] ((square ([[CL:Functions:math-multiply|*]] val val))) 
+                 ([[CL:Macros:incf]] sum-of-squares square) 
+                 ([[CL:Macros:setf]] ([[CL:Functions:gethash]] key *table*) square)))
+           *table*) 
+  sum-of-squares) <r>285 </r>
+([[CL:Functions:hash-table-count]] *table*) <r>10 </r>
+(maphash #'([[CL:Symbols:lambda]] (key val) 
+             ([[CL:Macros:when]] ([[CL:Functions:oddp]] val) ([[CL:Functions:remhash]] key *table*)))
+         *table*) <r>[[CL:Constant Variables:nil|NIL]] </r>
+([[CL:Functions:hash-table-count]] *table*) <r>5 </r>
+(maphash #'([[CL:Symbols:lambda]] (k v) ([[CL:Functions:print]] ([[CL:Functions:list]] k v))) *table*)
+<o>(0 0)
+(8 64) 
+(2 4) 
+(6 36) 
+(4 16) </o>
+<r>[[CL:Constant Variables:nil|NIL]] </blockquote></r>
 
 ====Side Effects====
-
 None, other than any which might be done by the //function//.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Macros:loop]]**, **[[CL:Macros:with-hash-table-iterator]]**,
+  * **[[CL:Macros:loop|Macro LOOP]]**
+  * **[[CL:Macros:with-hash-table-iterator|Macro WITH-HASH-TABLE-ITERATOR]]**,
 
 {\secref\TraversalRules}
 
 ====Notes====
-
 None.
 
 \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}

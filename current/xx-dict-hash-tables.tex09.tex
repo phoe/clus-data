@@ -1,53 +1,72 @@
 ====== Accessor GETHASH ======
 
 ====Syntax====
-
-**gethash {key hash-table** //\opt} default// → //value, present-p// (**setf** (**gethash {key hash-table** //\opt} default//) //new-value//)
+  * **gethash** //key hash-table ''&optional'' default// → //value, present-p// 
+  * (**setf** (**gethash** //key hash-table ''&optional'' default//) //new-value//)
 
 ====Arguments and Values====
-
-//key// - an //[[CL:Glossary:object]]//.
-
-//hash-table// - a //[[CL:Glossary:hash table]]//.
-
-//default// - an //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**.
-
-//value// - an //[[CL:Glossary:object]]//.
-
-//present-p// - a //[[CL:Glossary:generalized boolean]]//.
+  * //key// - an //[[CL:Glossary:object]]//.
+  * //hash-table// - a //[[CL:Glossary:hash table]]//.
+  * //default// - an //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**.
+  * //value// - an //[[CL:Glossary:object]]//.
+  * //present-p// - a //[[CL:Glossary:generalized boolean]]//.
 
 ====Description====
+//value// is the //[[CL:Glossary:object]]// in //hash-table// whose //[[CL:Glossary:key]]// is the //[[CL:Glossary:same]]// as //key// under the //hash-table//'s equivalence test. If there is no such entry, //value// is the //default//.
 
-//Value// is the //[[CL:Glossary:object]]// in //hash-table// whose //[[CL:Glossary:key]]// is the //[[CL:Glossary:same]]// as //key// under the //hash-table//'s equivalence test. If there is no such entry, //value// is the //default//.
+//present-p// is //[[CL:Glossary:true]]// if an entry is found; otherwise, it is //[[CL:Glossary:false]]//.
 
-//Present-p// is //[[CL:Glossary:true]]// if an entry is found; otherwise, it is //[[CL:Glossary:false]]//.
+**[[CL:Macros:setf]]** may be used with **gethash** to modify the //[[CL:Glossary:value]]// associated with a given //[[CL:Glossary:key]]//, or to add a new entry.
 
-**[[CL:Macros:setf]]** may be used with **[[CL:Functions:gethash]]** to modify the //[[CL:Glossary:value]]// associated with a given //[[CL:Glossary:key]]//, or to add a new entry.
-
-When a **[[CL:Functions:gethash]]** //[[CL:Glossary:form]]// is used as a **[[CL:Macros:setf]]** //place//, any //default// which is supplied is evaluated according to normal left-to-right evaluation rules, but its //[[CL:Glossary:value]]// is ignored.
+When a **gethash** //[[CL:Glossary:form]]// is used as a **[[CL:Macros:setf]]** //place//, any //default// which is supplied is evaluated according to normal left-to-right evaluation rules, but its //[[CL:Glossary:value]]// is ignored.
 
 ====Examples====
-
-<blockquote> ([[CL:Macros:defparameter]] table (make-hash-table)) → #<HASH-TABLE EQL 0/120 32206334> (gethash 1 table) → NIL, //[[CL:Glossary:false]]// (gethash 1 table 2) → 2, //[[CL:Glossary:false]]// ([[CL:Macros:setf]] (gethash 1 table) "one") → "one" ([[CL:Macros:setf]] (gethash 2 table "two") "two") → "two" (gethash 1 table) → "one", //[[CL:Glossary:true]]// (gethash 2 table) → "two", //[[CL:Glossary:true]]// (gethash nil table) → NIL, //[[CL:Glossary:false]]// ([[CL:Macros:setf]] (gethash nil table) nil) → NIL (gethash nil table) → NIL, //[[CL:Glossary:true]]// (defvar *counters* (make-hash-table)) → *COUNTERS* (gethash 'foo *counters*) → NIL, //[[CL:Glossary:false]]// (gethash 'foo *counters* 0) → 0, //[[CL:Glossary:false]]// (defmacro how-many (obj) `(values (gethash ,obj *counters* 0))) → HOW-MANY (defun count-it (obj) (incf (how-many obj))) → COUNT-IT (dolist (x '(bar foo foo bar bar baz)) (count-it x)) (how-many 'foo) → 2 (how-many 'bar) → 3 (how-many 'quux) → 0 </blockquote>
+<blockquote>
+([[CL:Macros:defparameter]] *table* (make-hash-table)) <r>*TABLE*</r>
+(gethash 1 *table*) <r>[[CL:Constant Variables:nil|NIL]]
+//[[CL:Glossary:false]]// </r>
+(gethash 1 *table* 2) <r>2
+//[[CL:Glossary:false]]// </r>
+([[CL:Macros:setf]] (gethash 1 *table*) "one") <r>"one" </r>
+([[CL:Macros:setf]] (gethash 2 *table* "two") "two") <r>"two" </r>
+(gethash 1 *table*) <r>"one"
+//[[CL:Glossary:true]]// </r>
+(gethash 2 *table*) <r>"two"
+//[[CL:Glossary:true]]// </r>
+(gethash [[CL:Constant Variables:nil]] *table*) <r>[[CL:Constant Variables:nil|NIL]]
+//[[CL:Glossary:false]]// </r>
+([[CL:Macros:setf]] (gethash [[CL:Constant Variables:nil]] *table*) [[CL:Constant Variables:nil]]) <r>[[CL:Constant Variables:nil|NIL]] </r>
+(gethash [[CL:Constant Variables:nil]] *table*) <r>[[CL:Constant Variables:nil|NIL]]
+//[[CL:Glossary:true]]// </r>
+(defvar *counters* (make-hash-table)) <r>*COUNTERS* </r>
+(gethash 'foo *counters*) <r>[[CL:Constant Variables:nil|NIL]]
+//[[CL:Glossary:false]]// </r>
+(gethash 'foo *counters* 0) <r>0
+//[[CL:Glossary:false]]// </r>
+(defmacro how-many (obj) 
+  `(values (gethash ,obj *counters* 0))) <r>HOW-MANY </r>
+(defun count-it (obj) 
+  (incf (how-many obj))) <r>COUNT-IT </r>
+(dolist (x '(bar foo foo bar bar baz)) 
+  (count-it x)) <r>[[CL:Constant Variables:nil|NIL]]</r>
+(how-many 'foo) <r>2 </r>
+(how-many 'bar) <r>3 </r>
+(how-many 'quux) <r>0 </r>
+</blockquote>
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Functions:remhash]]**
+  * **[[CL:Functions:remhash|Function REMHASH]]**
 
 ====Notes====
-
 The //[[CL:Glossary:secondary value]]//, //present-p//, can be used to distinguish the absence of an entry from the presence of an entry that has a value of //default//.
 
 \issue{SETF-GET-DEFAULT:EVALUATED-BUT-IGNORED}
