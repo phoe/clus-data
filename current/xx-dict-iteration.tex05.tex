@@ -1,44 +1,64 @@
 ====== Local Macro LOOP-FINISH ======
 
 ====Syntax====
-
-\DefmacNoReturn loop-finish {\noargs}
+  * **loop-finish**
 
 ====Description====
-
-\Themacro{loop-finish} can be used lexically within an extended **[[CL:Macros:loop]]** //[[CL:Glossary:form]]// to terminate that //[[CL:Glossary:form]]// "normally." That is, it transfers control to the loop epilogue of the lexically innermost extended **[[CL:Macros:loop]]** //[[CL:Glossary:form]]//. This permits execution of any **[[CL:Macros:finally]]** clause (for effect) and
-
-the return of any accumulated result.
+The **loop-finish** macro can be used lexically within an extended **[[CL:Macros:loop]]** //[[CL:Glossary:form]]// to terminate that //[[CL:Glossary:form]]// "normally." That is, it transfers control to the loop epilogue of the lexically innermost extended **[[CL:Macros:loop]]** //[[CL:Glossary:form]]//. This permits execution of any **[[CL:Macros:finally]]** clause (for effect) and the return of any accumulated result.
 
 ====Examples====
+The below example terminates the loop, but returns the accumulated count. 
 
-<blockquote> ;; Terminate the loop, but return the accumulated count. (loop for i in '(1 2 3 stop-here 4 5 6) when (symbolp i) do (loop-finish) count i) → 3
+<blockquote> 
+(loop for i in '(1 2 3 stop-here 4 5 6) 
+      when ([[CL:Functions:symbolp]] i) 
+        do (loop-finish)
+      count i) → 3
+</blockquote>
 
-;; The preceding loop is equivalent to: (loop for i in '(1 2 3 stop-here 4 5 6) until (symbolp i) count i) → 3
+This loop is equivalent to: 
+<blockquote> 
+(loop for i in '(1 2 3 stop-here 4 5 6)
+      until ([[CL:Functions:symbolp]] i) 
+      count i) → 3
+</blockquote>
 
-;; While LOOP-FINISH can be used can be used in a variety of ;; situations it is really most needed in a situation where a need ;; to exit is detected at other than the loop's `top level' ;; (where UNTIL or WHEN often work just as well), or where some ;; computation must occur between the point where a need to exit is ;; detected and the point where the exit actually occurs. For example: (defun tokenize-sentence (string) (macrolet ((add-word (wvar svar) `(when ,wvar (push (coerce (nreverse ,wvar) 'string) ,svar) ([[CL:Macros:defparameter]] ,wvar nil)))) (loop with word = '() and sentence = '() and endpos = nil for i below (length string) do (let ((char (aref string i))) (case char (#\\Space (add-word word sentence)) (#\\. ([[CL:Macros:defparameter]] endpos (1+ i)) (loop-finish)) (otherwise (push char word)))) finally (add-word word sentence) (return (values (nreverse sentence) endpos))))) → TOKENIZE-SENTENCE
 
-(tokenize-sentence "this is a sentence. this is another sentence.") → ("this" "is" "a" "sentence"), 19
+While **loop-finish** can be used can be used in a variety of situations, it is really most needed in a situation where a need to exit is detected at other than the loop's "top level" (where **until** or **when** often work just as well), or where some computation must occur between the point where a need to exit is detected and the point where the exit actually occurs. For example:
 
-(tokenize-sentence "this is a sentence") → ("this" "is" "a" "sentence"), NIL
-
+<blockquote>
+([[CL:Macros:defun]] tokenize-sentence (string) 
+  ([[CL:Special Operators:macrolet]] ((add-word (wvar svar) 
+              `([[CL:Macros:when]] ,wvar 
+                 ([[CL:Macros:push]] ([[CL:Functions:coerce]] ([[CL:Functions:nreverse]] ,wvar) '[[CL:Types:string]]) ,svar) 
+                 ([[CL:Macros:setf]] ,wvar [[CL:Constant Variables:nil]]))))
+    (loop with word = '() and sentence = '() and endpos = [[CL:Constant Variables:nil]] 
+          for i below ([[CL:Functions:length]] string) 
+          do ([[CL:Special Operators:let]] ((char ([[CL:Functions:aref]] string i)))
+               ([[CL:Macros:case]] char 
+                 (#\Space (add-word word sentence))
+                 (#\. ([[CL:Macros:setf]] endpos ([[CL:Functions:math-one-plus|1+]] i)) (loop-finish))
+                 (otherwise ([[CL:Functions:push]] char word))))
+          finally (add-word word sentence) 
+                  ([[CL:Macros:return]] ([[CL:Functions:values]] ([[CL:Functions:nreverse]] sentence) endpos))))) <r>TOKENIZE-SENTENCE</r>
+(tokenize-sentence "this is a sentence. this is another sentence.") <r>("this" "is" "a" "sentence")
+19</r>
+(tokenize-sentence "this is a sentence") <r>("this" "is" "a" "sentence")
+NIL</r>
 </blockquote>
 
 ====Side Effects====
-
 Transfers control.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
-Whether or not **[[CL:Macros:loop-finish]]** is //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]// is //[[CL:Glossary:implementation-dependent]]//; however, the restrictions on redefinition and //[[CL:Glossary:shadowing]]// of **[[CL:Macros:loop-finish]]** are the same as for //[[CL:Glossary:symbols]]// in \thepackage{common-lisp} which are //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]//. The consequences of attempting to use **[[CL:Macros:loop-finish]]** outside of **[[CL:Macros:loop]]** are undefined.
+Whether or not **loop-finish** is //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]// is //[[CL:Glossary:implementation-dependent]]//; however, the restrictions on redefinition and //[[CL:Glossary:shadow|shadowing]]// of **loop-finish** are the same as for //[[CL:Glossary:symbol|symbols]]// in the **COMMON-LISP** //[[CL:Glossary:package]]// which are //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]//. The consequences of attempting to use **loop-finish** outside of **[[CL:Macros:loop]]** are undefined.
 
 ====See Also====
-
-**[[CL:Macros:loop]]**, {\secref\LoopFacility}
+  * **[[CL:Macros:loop|Macro LOOP]]**
+  * {\secref\LoopFacility}
 
 ====Notes====
 
