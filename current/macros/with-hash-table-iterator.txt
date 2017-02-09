@@ -1,0 +1,81 @@
+====== Macro WITH-HASH-TABLE-ITERATOR ======
+
+====Syntax====
+  * with-hash-table-iterator //(name hash-table) declaration''*'' form''*''// →//result''*''//
+
+====Arguments and Values====
+  * //name// - a name suitable for the first argument to **[[CL:Special Operators:macrolet]]**.
+  * //hash-table// - a //[[CL:Glossary:form]]//, evaluated once, that should produce a //[[CL:Glossary:hash table]]//.
+  * //declaration// - a **[[CL:Symbols:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - the //[[CL:Glossary:values]]// returned by //forms//.
+
+====Description====
+Within the lexical scope of the body, //name// is defined via **[[CL:Special Operators:macrolet]]** such that successive invocations of ''(//name//)'' return the items, one by one, from the //[[CL:Glossary:hash table]]// that is obtained by evaluating //hash-table// only once.
+
+An invocation ''(//name//)'' returns three values as follows:
+
+  * 1. A //[[CL:Glossary:generalized boolean]]// that is //[[CL:Glossary:true]]// if an entry is returned. 
+  * 2. The key from the //hash-table// entry. 
+  * 3. The value from the //hash-table// entry. 
+
+After all entries have been returned by successive invocations of ''(//name//)'', then only one value is returned, namely **[[CL:Constant Variables:nil]]**.
+
+It is unspecified what happens if any of the implicit interior state of an iteration is returned outside the dynamic extent of the **with-hash-table-iterator** //[[CL:Glossary:form]]// such as by returning some //[[CL:Glossary:closure]]// over the invocation //[[CL:Glossary:form]]//.
+
+Any number of invocations of **with-hash-table-iterator** can be nested, and the body of the innermost one can invoke all of the locally //[[CL:Glossary:establish|established]]// //[[CL:Glossary:macro|macros]]//, provided all of those //[[CL:Glossary:macro|macros]]// have //[[CL:Glossary:distinct]]// names.
+
+====Examples====
+The following function should return **[[CL:Constant Variables:t]]** on any //[[CL:Glossary:hash table]]//, and signal an error if the usage of **with-hash-table-iterator** does not agree with the corresponding usage of **[[CL:Functions:maphash]]**.
+
+<blockquote>
+([[CL:Macros:defun]] test-hash-table-iterator (hash-table) 
+  ([[CL:Special Operators:let]] ((all-entries '()) 
+        (generated-entries '()) 
+        (unique ([[CL:Functions:list]] [[CL:Constant Variables:nil]]))) 
+    ([[CL:Functions:maphash]] #'([[CL:Symbols:lambda]] (key value) 
+                 ([[CL:Macros:push]] ([[CL:Functions:list]] key value) all-entries)) 
+             hash-table)
+    (with-hash-table-iterator (generator-fn hash-table) 
+      ([[CL:Macros:loop]] 
+        ([[CL:Macros:multiple-value-bind]] (more? key value) (generator-fn)
+          ([[CL:Macros:unless]] more? ([[CL:Macros:return]])) 
+          ([[CL:Macros:unless]] ([[CL:Functions:eql]] value ([[CL:Functions:gethash]] key hash-table unique)) 
+            ([[CL:Functions:error]] "Key ~S not found for value ~S" key value)) 
+          ([[CL:Macros:push]] ([[CL:Functions:list]] key value) generated-entries))))
+    ([[CL:Macros:unless]] ([[CL:Functions:math-equal|=]] ([[CL:Functions:length]] all-entries) 
+               ([[CL:Functions:length]] generated-entries) 
+               ([[CL:Functions:length]] ([[CL:Functions:union]] all-entries generated-entries 
+                              :key #'[[CL:Functions:car]] 
+                              :test (hash-table-test hash-table)))) 
+      ([[CL:Functions:error]] "Generated entries and Maphash entries don't correspond"))
+    [[CL:Constant Variables:t]]))
+</blockquote>
+
+The following could be an acceptable definition of **[[CL:Functions:maphash]]**, implemented by **with-hash-table-iterator**.
+
+<blockquote>
+([[CL:Macros:defun]] maphash (function hash-table) 
+  (with-hash-table-iterator (next-entry hash-table) 
+    ([[CL:Macros:loop]] 
+      (m[[CL:Macros:ultiple-value-bind]] (more key value) (next-entry)
+        ([[CL:Macros:unless]] more ([[CL:Macros:return]] [[CL:Constant Variables:nil]])) 
+        ([[CL:Functions:funcall]] function key value)))))
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+The consequences are undefined if the local function named //name// //[[CL:Glossary:established]]// by **with-hash-table-iterator** is called after it has returned //[[CL:Glossary:false]]// as its //[[CL:Glossary:primary value]]//.
+
+====See Also====
+  * {\secref\TraversalRules}
+
+====Notes====
+None.
+
+\issue{DECLS-AND-DOC} \issue{HASH-TABLE-PACKAGE-GENERATORS:ADD-WITH-WRAPPER} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
