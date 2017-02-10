@@ -1,0 +1,129 @@
+====== Macro LOOP ======
+
+====Syntax====
+  * The "simple" **loop** //[[CL:Glossary:form]]//:
+    * **loop** //compound-form<sup>*</sup>// → //result<sup>*</sup>// 
+  * The "extended" **loop** //[[CL:Glossary:form]]//:
+    * **loop** //[name-clause] {variable-clause}<sup>*</sup> {main-clause}<sup>*</sup>// → //result<sup>*</sup>//
+
+<blockquote>
+name-clause ::= **named** //name//
+variable-clause ::= with-clause | initial-final | for-as-clause
+with-clause ::= **with** //var1// [//type-spec//] [**=** //form1//] {**and** //var2// [//type-spec//] [**=** //form2//]}<sup>*</sup>
+main-clause ::= unconditional | accumulation | conditional | termination-test | initial-final
+initial-final ::= **initially** //compound-form//<sup>+</sup> | **finally** //compound-form//<sup>+</sup>
+unconditional ::= {**do** | **doing**} //compound-form//<sup>+</sup> | **return** {//form// | **it**}
+accumulation ::= list-accumulation | numeric-accumulation
+list-accumulation ::= {**collect** | **collecting** | **append** | **appending** | **nconc** | **nconcing**} {//form// | **it**} [**into** //simple-var//]
+numeric-accumulation ::= {**count** | **counting** | **sum** | **summing** | **maximize** | **maximizing** | **minimize** | **minimizing**} {//form// | **it**} [**into** //simple-var//] [//type-spec//]
+conditional ::= {**if** | **when** | **unless**} //form// selectable-clause {**and** selectable-clause}<sup>*</sup> [**else** selectable-clause {**and** selectable-clause}<sup>*</sup>] [**end**]
+selectable-clause ::= unconditional | accumulation | conditional
+termination-test ::= **while** //form// | **until** //form// | **repeat** //form// | **always** //form// | **never** //form// | **thereis** //form//
+for-as-clause ::= {**for** | **as**} for-as-subclause {**and** for-as-subclause}<sup>*</sup>
+for-as-subclause ::= for-as-arithmetic | for-as-in-list | for-as-on-list | for-as-equals-then |for-as-across | for-as-hash | for-as-package
+for-as-arithmetic ::= //var// [//type-spec//] for-as-arithmetic-subclause
+for-as-arithmetic-subclause ::= arithmetic-up | arithmetic-downto | arithmetic-downfrom
+arithmetic-up ::= ⟦{**from** | **upfrom**} //form1// | {**to** | **upto** | **below**} //form2// |  //form3//⟧<sup>+</sup>
+arithmetic-downto ::= ⟦ {**from** //form1//}<sup>1</sup> | {{**downto** | **above**} //form2//}<sup>1</sup> |  //form3// ⟧
+arithmetic-downfrom ::= ⟦ {**downfrom** //form1//}<sup>1</sup> | {**to** | **downto** | **above**} //form2// |  //form3// ⟧
+for-as-in-list ::= //var// [//type-spec//] **in** //form1// [**by** //step-fun//]
+for-as-on-list ::= //var// [//type-spec//] **on** //form1// [**by** //step-fun//]
+for-as-equals-then ::= //var// [//type-spec//] **=** //form1// [**then** //form2//]
+for-as-across ::= //var// [//type-spec//] **across** //vector//
+for-as-hash ::= //var// [//type-spec//] **being** {**each** | **the**} {{**hash-key** | **hash-keys**} {**in** | **of**} //hash-table// [**using** (**hash-value** //other-var//)] | {**hash-value** | **hash-values**} {**in** | **of**} //hash-table// [**using** (**hash-key** //other-var//)]}
+for-as-package ::= //var// [//type-spec//] **being** {**each** | **the**} {**symbol** | **symbols** | **present-symbol** | **present-symbols** | **external-symbol** | **external-symbols**} [{**in** | **of**} //package//]
+type-spec ::= simple-type-spec | destructured-type-spec
+simple-type-spec ::= **[[CL:Types:fixnum]]** | **[[CL:Types:float]]** | **[[CL:Types:t]]** | **[[CL:Types:nil]]**
+destructured-type-spec ::= **of-type** //d-type-spec//
+d-type-spec ::= //type-specifier// | ''(//d-type-spec// . //d-type-spec//)''
+var ::= d-var-spec
+var1 ::= d-var-spec
+var2 ::= d-var-spec
+other-var ::= d-var-spec
+d-var-spec ::= //simple-var// | **[[CL:Constant Variables:nil]]** | (d-var-spec ''.'' d-var-spec)
+</blockquote>
+====Arguments and Values====
+  * //compound-form// - a //[[CL:Glossary:compound form]]//.
+  * //name// - a //[[CL:Glossary:symbol]]//.
+  * //simple-var// - a //[[CL:Glossary:symbol]]// (a //[[CL:Glossary:variable]]// name).
+  * //form//, //form1//, //form2//, //form3// - a //[[CL:Glossary:form]]//.
+  * //step-fun// - a //[[CL:Glossary:form]]// that evaluates to a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]//.
+  * //vector// - a //[[CL:Glossary:form]]// that evaluates to a //[[CL:Glossary:vector]]//.
+  * //hash-table// - a //[[CL:Glossary:form]]// that evaluates to a //[[CL:Glossary:hash table]]//.
+  * //package// - a //[[CL:Glossary:form]]// that evaluates to a //[[CL:Glossary:package designator]]//.
+  * //type-specifier// - a //[[CL:Glossary:type specifier]]//. This might be either an //[[CL:Glossary:atomic type specifier]]// or a //[[CL:Glossary:compound type specifier]]//, which introduces some additional complications to proper parsing in the face of destructuring; for further information, see section {\secref\DestructuringLOOPVars}.
+  * //result// - an //[[CL:Glossary:object]]//.
+
+====Description====
+
+For details, see section {\secref\LoopFacility}.
+
+====Examples====
+An example of the simple form of **loop**.
+
+<blockquote>
+([[CL:Macros:defun]] sqrt-advisor () 
+  (loop 
+    ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&Number: ") 
+    ([[CL:Macros:let]] ((n ([[CL:Functions:parse-integer]] ([[CL:Functions:read-line]]) :junk-allowed [[CL:Constant Variables:t]]))) 
+      ([[CL:Macros:when]] ([[CL:Functions:not]] n) 
+        ([[CL:Macros:return]])) 
+      ([[CL:Functions:format]] [[CL:Functions:t]] "~&The square root of ~D is ~D.~%" n ([[CL:Functions:sqrt]] n)))))
+<r>SQRT-ADVISOR </r>
+(sqrt-advisor)
+<o>Number: __5__
+The square root of 5 is 2.236068.
+Number: __4__
+The square root of 4 is 2.
+Number: __done__ </o>
+<r>NIL</r>
+</blockquote>
+
+Two examples of the extended form of LOOP.
+
+<blockquote>
+([[CL:Macros:defun]] square-advisor () 
+  (loop as n = ([[CL:Special Operators:progn]] ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&Number: ") 
+                      ([[CL:Functions:parse-integer]] ([[CL:Functions:read-line]]) :junk-allowed [[CL:Constant Variables:t]])) 
+        while n 
+          do ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&The square of ~D is ~D.~%" n ([[CL:Functions:math-multiply|*]] n n))))
+<r>SQUARE-ADVISOR</r>
+(square-advisor)
+<o>Number: __4__
+The square of 4 is 16.
+Number: __23__
+The square of 23 is 529.
+Number: __done__ </o>
+<r>NIL</r>
+ 
+(loop for n from 1 to 10 
+      when ([[CL:Functions:oddp]] n) collect n) 
+<r>(1 3 5 7 9) </r>
+</blockquote>
+
+====Affected By====
+
+None.
+
+====Exceptional Situations====
+
+None.
+
+====See Also====
+  * **[[CL:Macros:do|Macro DO]]**
+  * **[[CL:Macros:dolist|Macro DOLIST]]**
+  * **[[CL:Macros:dotimes|Macro DOTIMES]]**
+  * **[[CL:Macros:return|Macro RETURN]]**
+  * **[[CL:Special Operators:go|Special Operator GO]]**
+  * **[[CL:Special Operators:throw|Special Operator THROW]]**
+  * {\secref\DestructuringLOOPVars}
+
+====Notes====
+
+Except that **[[CL:Macros:loop-finish]]** cannot be used within a simple **[[CL:Functions:loop]]** //[[CL:Glossary:form]]//, a simple **[[CL:Macros:loop]]** //[[CL:Glossary:form]]// is related to an extended **[[CL:Macros:loop]]** //[[CL:Glossary:form]]// in the following way:
+
+<blockquote>
+(loop compound-form<sup>*</sup>) ≡ (loop do compound-form<sup>*</sup>)
+</blockquote>
+
+\issue{LOOP-SYNTAX-OVERHAUL:REPAIR} \issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
