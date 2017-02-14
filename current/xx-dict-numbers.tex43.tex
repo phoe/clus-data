@@ -1,32 +1,43 @@
 ====== Variable *RANDOM-STATE* ======
 
 ====Value Type====
-
 a //[[CL:Glossary:random state]]//.
 
 ====Initial Value====
-
 //[[CL:Glossary:implementation-dependent]]//.
 
 ====Description====
-
 The //[[CL:Glossary:current random state]]//, which is used, for example, by the function **[[CL:Functions:random]]** when a //[[CL:Glossary:random state]]// is not explicitly supplied.
 
 ====Examples====
-
-<blockquote> (random-state-p *random-state*) → //[[CL:Glossary:true]]// ([[CL:Macros:defparameter]] snap-shot (make-random-state)) ;; The series from any given point is random, ;; but if you backtrack to that point, you get the same series. (list (loop for i from 1 to 10 collect (random)) (let ((*random-state* snap-shot)) (loop for i from 1 to 10 collect (random))) (loop for i from 1 to 10 collect (random)) (let ((*random-state* snap-shot)) (loop for i from 1 to 10 collect (random)))) → ((19 16 44 19 96 15 76 96 13 61) (19 16 44 19 96 15 76 96 13 61) (16 67 0 43 70 79 58 5 63 50) (16 67 0 43 70 79 58 5 63 50)) </blockquote>
+<blockquote> 
+(random-state-p *random-state*) <r>//[[CL:Glossary:true]]//</r>
+</blockquote>
+In the example below, the series from any given point is random, but if you backtrack to that point, you get the same series. 
+<blockquote>
+([[CL:Macros:defparameter]] *snapshot* ([[CL:Functions:make-random-state]])) <r>*SNAPSHOT*</r>
+([[CL:Functions:list]] ([[CL:Macros:loop]] for i from 1 to 10 collect ([[CL:Functions:random]])) 
+      ([[CL:Special Operators:let]] ((*random-state* *snapshot*)) 
+        ([[CL:Macros:loop]] for i from 1 to 10 collect ([[CL:Functions:random]])))
+      ([[CL:Macros:loop]] for i from 1 to 10 collect ([[CL:Functions:random]])) 
+      ([[CL:Special Operators:let]] ((*random-state* *snapshot*)) 
+        ([[CL:Macros:loop]] for i from 1 to 10 collect ([[CL:Functions:random]]))))
+<r>((19 16 44 19 96 15 76 96 13 61) 
+ (19 16 44 19 96 15 76 96 13 61) 
+ (16 67 0 43 70 79 58 5 63 50) 
+ (16 67 0 43 70 79 58 5 63 50))</r>
+</blockquote>
 
 ====Affected By====
-
 The //[[CL:Glossary:implementation]]//.
 
 **[[CL:Functions:random]]**.
 
 ====See Also====
-
-**[[CL:Functions:make-random-state]]**, **[[CL:Functions:random]]**, **[[CL:Types:random-state]]**
+  * **[[CL:Functions:make-random-state|Function MAKE-RANDOM-STATE]]**
+  * **[[CL:Functions:random|Function RANDOM]]**
+  * **[[CL:Types:random-state|Type RANDOM-STATE]]**
 
 ====Notes====
-
-//[[CL:Glossary:Binding]]// **[[CL:Variables:*random-state*]]** to a different //[[CL:Glossary:random state]]// //[[CL:Glossary:object]]// correctly saves and restores the old //[[CL:Glossary:random state]]// //[[CL:Glossary:object]]//.
+//[[CL:Glossary:binding|Binding]]// **[[CL:Variables:*random-state*]]** to a different //[[CL:Glossary:random state]]// //[[CL:Glossary:object]]// correctly saves and restores the old //[[CL:Glossary:random state]]// //[[CL:Glossary:object]]//.
 
