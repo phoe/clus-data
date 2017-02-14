@@ -1,25 +1,36 @@
 ====== System Class FLOAT ======
 
-====Class Precedence List==== **[[CL:Types:float]]**, **[[CL:Types:real]]**, **[[CL:Types:number]]**, **[[CL:Types:t]]**
+====Class Precedence List==== 
+**float**, **[[CL:Types:real]]**, **[[CL:Types:number]]**, **[[CL:Types:t]]**
 
 ====Description====
 
-A //[[CL:Glossary:float]]// is a mathematical rational (but ''not'' a Common Lisp //[[CL:Glossary:rational]]//) of the form ''s\cdot f\cdot b^{e-p}'', where ''s'' is ''+1'' or ''-1'', the ''sign''; ''b'' is an //[[CL:Glossary:integer]]// greater than~1, the ''base'' or ''radix'' of the representation; ''p'' is a positive //[[CL:Glossary:integer]]//, the ''precision'' (in base-''b'' digits) of the //[[CL:Glossary:float]]//; ''f'' is a positive //[[CL:Glossary:integer]]// between ''b^{p-1}'' and ''b^p-1'' (inclusive), the significand; and ''e'' is an //[[CL:Glossary:integer]]//, the exponent. The value of ''p'' and the range of~''e'' depends on the implementation and on the type of //[[CL:Glossary:float]]// within that implementation. In addition, there is a floating-point zero; depending on the implementation, there can also be a "minus zero". If there is no minus zero, then ''0.0'' and~''-0.0'' are both interpreted as simply a floating-point zero. **[[CL:Functions:(= 0.0 -0.0)]]** is always true. If there is a minus zero, **[[CL:Functions:(eql -0.0 0.0)]]** is //[[CL:Glossary:false]]//, otherwise it is //[[CL:Glossary:true]]//.
+A //[[CL:Glossary:float]]// is a mathematical rational (but __not__ a Common Lisp //[[CL:Glossary:rational]]//) of the form ''s * f * b<sup>e - p</sup>'', where ''s'' is ''+1'' or ''-1'', the ''sign''; ''b'' is an //[[CL:Glossary:integer]]// greater than~1, the ''base'' or ''radix'' of the representation; ''p'' is a positive //[[CL:Glossary:integer]]//, the ''precision'' (in base-''b'' digits) of the //[[CL:Glossary:float]]//; ''f'' is a positive //[[CL:Glossary:integer]]// between ''b<sup>p - 1</sup>'' and ''b<sup>p - 1</sup>'' (inclusive), the significand; and ''e'' is an //[[CL:Glossary:integer]]//, the exponent. The value of ''p'' and the range of~''e'' depends on the implementation and on the type of //[[CL:Glossary:float]]// within that implementation. In addition, there is a floating-point zero; depending on the implementation, there can also be a "minus zero". If there is no minus zero, then ''0.0'' and~''-0.0'' are both interpreted as simply a floating-point zero. **[[CL:Functions:(= 0.0 -0.0)]]** is always true. If there is a minus zero, **[[CL:Functions:(eql -0.0 0.0)]]** is //[[CL:Glossary:false]]//, otherwise it is //[[CL:Glossary:true]]//.
 
 \reviewer{Barmar: What about IEEE NaNs and infinities?}
 
 \reviewer{RWK: In the following, what is the "ordering"? precision? range? Can there be additional subtypes of float or does "others" in the list of four?}
 
-The //[[CL:Glossary:type|types]]// **[[CL:Types:short-float]]**, **[[CL:Types:single-float]]**, **[[CL:Types:double-float]]**, and **[[CL:Types:long-float]]** are subtypes of **[[CL:Types:float]]**. Any two of them must be either //[[CL:Glossary:disjoint]]// //[[CL:Glossary:type|types]]// or the //[[CL:Glossary:same]]// //[[CL:Glossary:type]]//; if the //[[CL:Glossary:same]]// //[[CL:Glossary:type]]//, then any other //[[CL:Glossary:type|types]]// between them in the above ordering must also be the //[[CL:Glossary:same]]// //[[CL:Glossary:type]]//. For example, if the type **[[CL:Types:single-float]]** and the type **[[CL:Types:long-float]]** are the //[[CL:Glossary:same]]// //[[CL:Glossary:type]]//, then the type **[[CL:Types:double-float]]** must be the //[[CL:Glossary:same]]// //[[CL:Glossary:type]]// also.
+The //[[CL:Glossary:type|types]]// **[[CL:Types:short-float]]**, **[[CL:Types:single-float]]**, **[[CL:Types:double-float]]**, and **[[CL:Types:long-float]]** are subtypes of **float**. Any two of them must be either //[[CL:Glossary:disjoint]]// //[[CL:Glossary:type|types]]// or the //[[CL:Glossary:same]]// //[[CL:Glossary:type]]//; if the //[[CL:Glossary:same]]// //[[CL:Glossary:type]]//, then any other //[[CL:Glossary:type|types]]// between them in the above ordering must also be the //[[CL:Glossary:same]]// //[[CL:Glossary:type]]//. For example, if the type **[[CL:Types:single-float]]** and the type **[[CL:Types:long-float]]** are the //[[CL:Glossary:same]]// //[[CL:Glossary:type]]//, then the type **[[CL:Types:double-float]]** must be the //[[CL:Glossary:same]]// //[[CL:Glossary:type]]// also.
 
-\realtypespec{float}
+====Compound Type Specifier Kind====
+Abbreviating.
+
+====Compound Type Specifier Syntax====
+  * //**float** [lower-limit [upper-limit]]//
+
+====Compound Type Specifier Arguments====
+  * //lower-limit//, //upper-limit// - //[[CL:Glossary:interval designator|interval designators]]// for //[[CL:Glossary:type]]// **[[CL:Types:float]]**. The defaults for each of //lower-limit// and //upper-limit// is the //[[CL:Glossary:symbol]]// **[[CL:Types:wildcard|*]]**.
+  
+====Compound Type Specifier Description====
+This denotes the //[[CL:Glossary:float|floats]]// on the interval described by //lower-limit// and //upper-limit//. 
 
 ====See Also====
-
-{\figref\SyntaxForNumericTokens}, {\secref\NumsFromTokens}, {\secref\PrintingFloats}
+  * {\figref\SyntaxForNumericTokens}
+  * {\secref\NumsFromTokens}
+  * {\secref\PrintingFloats}
 
 ====Notes====
-
 Note that all mathematical integers are representable not only as Common Lisp //[[CL:Glossary:real|reals]]//, but also as //[[CL:Glossary:complex float|complex floats]]//. For example, possible representations of the mathematical number ''1'' include the //[[CL:Glossary:integer]]// ''1'', the //[[CL:Glossary:float]]// ''1.0'', or the //[[CL:Glossary:complex]]// ''#C(1.0 0.0)''.
 
 \issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
