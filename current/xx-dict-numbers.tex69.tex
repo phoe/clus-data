@@ -1,58 +1,61 @@
 ====== Accessor LDB ======
 
 ====Syntax====
-
-**ldb** //bytespec integer// → //byte//
-
-(**setf** (**ldb** //bytespec place//) //new-byte//)
+  * **ldb** //bytespec integer// → //byte//
+  * (**setf** (**ldb** //bytespec place//) //new-byte//)
 
 ====Arguments and Values====
-
-//bytespec// - a //[[CL:Glossary:byte specifier]]//.
-
-//integer// - an //[[CL:Glossary:integer]]//.
-
-//byte//, //new-byte// - a non-negative //[[CL:Glossary:integer]]//.
+  * //bytespec// - a //[[CL:Glossary:byte specifier]]//.
+  * //integer// - an //[[CL:Glossary:integer]]//.
+  * //byte//, //new-byte// - a non-negative //[[CL:Glossary:integer]]//.
 
 ====Description====
+**ldb** extracts and returns the //[[CL:Glossary:byte]]// of //integer// specified by //bytespec//.
 
-**[[CL:Functions:ldb]]** extracts and returns the //[[CL:Glossary:byte]]// of //integer// specified by //bytespec//.
+**ldb** returns an //[[CL:Glossary:integer]]// in which the bits with weights ''2^<sup>(s - 1)</sup>'' through ''2^<sup>0</sup>'' are the same as those in //integer// with weights ''2^<sup>(p + s - 1)</sup>'' through ''2^<sup>p</sup>'', and all other bits zero; ''s'' is ''(byte-size //bytespec//)'' and ''p'' is ''(byte-position //bytespec//)''.
 
-**[[CL:Functions:ldb]]** returns an //[[CL:Glossary:integer]]// in which the bits with weights ''2^{(''s''-1)}'' through ''2^{0}'' are the same as those in //integer// with weights ''2^{(''p''+''s''-1)}'' through ''2^''p'''', and all other bits zero; ''s'' is ''(byte-size //bytespec//)'' and ''p'' is ''(byte-position //bytespec//)''.
+**[[CL:Macros:setf]]** may be used with **ldb** to modify a byte within the //integer// that is stored in a given //place//.
 
-**[[CL:Macros:setf]]** may be used with **[[CL:Functions:ldb]]** to modify a byte within the //integer// that is stored in a given //place//.
-
-The order of evaluation, when an **[[CL:Functions:ldb]]** form is supplied to **[[CL:Macros:setf]]**, is exactly left-to-right. \idxtext{order of evaluation}\idxtext{evaluation order}
+The order of evaluation, when an **ldb** form is supplied to **[[CL:Macros:setf]]**, is exactly left-to-right.
 
 The effect is to perform a **[[CL:Functions:dpb]]** operation and then store the result back into the //place//.
 
 ====Examples====
-
-<blockquote> (ldb (byte 2 1) 10) → 1 ([[CL:Macros:defparameter]] a (list 8)) → (8) ([[CL:Macros:setf]] (ldb (byte 2 1) (car a)) 1) → 1 a → (10) </blockquote>
+<blockquote>
+(ldb ([[CL:Functions:byte]] 2 1) 10) <r>1 </r>
+([[CL:Macros:defparameter]] *a* ([[CL:Functions:list]] 8)) *a*
+*a* <r>(8) </r>
+([[CL:Macros:setf]] (ldb ([[CL:Functions:byte]] 2 1) ([[CL:Functions:car]] *a*)) 1) <r>1 </r>
+*a* <r>(10) </r>
+</blockquote>
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Functions:byte]]**, **[[CL:Functions:byte-position]]**, **[[CL:Functions:byte-size]]**, **[[CL:Functions:dpb]]**
+  * **[[CL:Functions:byte|Function BYTE]]**
+  * **[[CL:Functions:byte-position|Function BYTE-POSITION]]**
+  * **[[CL:Functions:byte-size|Function BYTE-SIZE]]**
+  * **[[CL:Functions:dpb|Function DPB]]**
 
 ====Notes====
+<blockquote>
+([[CL:Functions:logbitp]] //j// (ldb ([[CL:Functions:byte]] //s// //p//) //n//)) 
+  ≡ ([[CL:Macros:and]] ([[CL:Functions:math-less|<]] //j// //s//) 
+         ([[CL:Functions:logbitp]] (+ //j// //p//) //n//))
+</blockquote>
 
-<blockquote> (logbitp //j// (ldb (byte //s// //p//) //n//)) ≡ (and (< //j// //s//) (logbitp (+ //j// //p//) //n//)) </blockquote>
+In general:
 
-In general,
-
-<blockquote> (ldb (byte 0 //x//) //y//) → 0 </blockquote>
+<blockquote> 
+(ldb ([[CL:Functions:byte]] 0 //x//) //y//) <r>0 </r>
+</blockquote>
 
 for all valid values of //x// and //y//.
 

@@ -1,42 +1,47 @@
 ====== Function MAKE-RANDOM-STATE ======
 
 ====Syntax====
-
-**make-random-state** //''&optional'' state// → //new-state//
+  * **make-random-state** //''&optional'' state// → //new-state//
 
 ====Arguments and Values====
-
-//state// - a //[[CL:Glossary:random state]]//, or **[[CL:Constant Variables:nil]]**, or \t. The default is **[[CL:Constant Variables:nil]]**.
-
-//new-state// - a //[[CL:Glossary:random state]]// //[[CL:Glossary:object]]//.
+  * //state// - a //[[CL:Glossary:random state]]//, or **[[CL:Constant Variables:nil]]**, or **[[CL:Constant Variables:t]]**. The default is **[[CL:Constant Variables:nil]]**.
+  * //new-state// - a //[[CL:Glossary:random state]]// //[[CL:Glossary:object]]//.
 
 ====Description====
-
 Creates a //[[CL:Glossary:fresh]]// //[[CL:Glossary:object]]// of type **[[CL:Types:random-state]]** suitable for use as \thevalueof{*random-state*}.
 
-If //state// is a //[[CL:Glossary:random state]]// //[[CL:Glossary:object]]//, the //new-state// is a //[[CL:Glossary:copy]]// of that //[[CL:Glossary:object]]//. If //state// is **[[CL:Constant Variables:nil]]**, the //new-state// is a //[[CL:Glossary:copy]]// of the //[[CL:Glossary:current random state]]//. If //state// is \t, the //new-state// is a //[[CL:Glossary:fresh]]// //[[CL:Glossary:random state]]// //[[CL:Glossary:object]]// that has been randomly initialized by some means.
+If //state// is a //[[CL:Glossary:random state]]// //[[CL:Glossary:object]]//, the //new-state// is a //[[CL:Glossary:copy]]// of that //[[CL:Glossary:object]]//. If //state// is **[[CL:Constant Variables:nil]]**, the //new-state// is a //[[CL:Glossary:copy]]// of the //[[CL:Glossary:current random state]]//. If //state// is **[[CL:Constant Variables:t]]**, the //new-state// is a //[[CL:Glossary:fresh]]// //[[CL:Glossary:random state]]// //[[CL:Glossary:object]]// that has been randomly initialized by some means.
 
 ====Examples====
-
-<blockquote> (let* ((rs1 (make-random-state nil)) (rs2 (make-random-state t)) (rs3 (make-random-state rs2)) (rs4 nil)) (list (loop for i from 1 to 10 collect (random 100) when (= i 5) do ([[CL:Macros:defparameter]] rs4 (make-random-state))) (loop for i from 1 to 10 collect (random 100 rs1)) (loop for i from 1 to 10 collect (random 100 rs2)) (loop for i from 1 to 10 collect (random 100 rs3)) (loop for i from 1 to 10 collect (random 100 rs4)))) → ((29 25 72 57 55 68 24 35 54 65) (29 25 72 57 55 68 24 35 54 65) (93 85 53 99 58 62 2 23 23 59) (93 85 53 99 58 62 2 23 23 59) (68 24 35 54 65 54 55 50 59 49)) </blockquote>
+<blockquote> 
+([[CL:Special Operators:let*]] ((rs1 (make-random-state [[CL:Constant Variables:nil]])) 
+       (rs2 (make-random-state [[CL:Constant Variables:t]]))
+       (rs3 (make-random-state rs2)) 
+       (rs4 [[CL:Constant Variables:nil]])) 
+  ([[CL:Functions:list]] ([[CL:Macros:loop]] for i from 1 to 10 collect ([[CL:Functions:random]] 100) when ([[CL:Functions:math-equal|=]] i 5) do ([[CL:Macros:setf]] rs4 (make-random-state))) 
+        ([[CL:Macros:loop]] for i from 1 to 10 collect ([[CL:Functions:random]] 100 rs1)) 
+        ([[CL:Macros:loop]] for i from 1 to 10 collect ([[CL:Functions:random]] 100 rs2)) 
+        ([[CL:Macros:loop]] for i from 1 to 10 collect ([[CL:Functions:random]] 100 rs3)) 
+        ([[CL:Macros:loop]] for i from 1 to 10 collect ([[CL:Functions:random]] 100 rs4)))) 
+<r>((29 25 72 57 55 68 24 35 54 65) 
+ (29 25 72 57 55 68 24 35 54 65) 
+ (93 85 53 99 58 62 2 23 23 59) 
+ (93 85 53 99 58 62 2 23 23 59) 
+ (68 24 35 54 65 54 55 50 59 49)) </r>
+ </blockquote>
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
-Should signal an error of type type-error if //state// is not a //[[CL:Glossary:random state]]//, or **[[CL:Constant Variables:nil]]**, or \t.
+Should signal an error of type type-error if //state// is not a //[[CL:Glossary:random state]]//, or **[[CL:Constant Variables:nil]]**, or **[[CL:Constant Variables:t]]**.
 
 ====See Also====
-
-**[[CL:Functions:random]]**, **[[CL:Variables:*random-state*]]**
+  * **[[CL:Functions:random|Function RANDOM]]**
+  * **[[CL:Variables:star-random-state-star|Variable *RANDOM-STATE*]]**
 
 ====Notes====
-
-One important use of **[[CL:Functions:make-random-state]]** is to allow the same series of pseudo-random //[[CL:Glossary:number|numbers]]// to be generated many times within a single program.
-
+One important use of **make-random-state** is to allow the same series of pseudo-random //[[CL:Glossary:number|numbers]]// to be generated many times within a single program.

@@ -1,42 +1,45 @@
 ====== Function ASH ======
 
 ====Syntax====
-
-**ash** //integer count// → //shifted-integer//
+  * **ash** //integer count// → //shifted-integer//
 
 ====Arguments and Values====
-
-//integer// - an //[[CL:Glossary:integer]]//.
-
-//count// - an //[[CL:Glossary:integer]]//.
-
-//shifted-integer// - an //[[CL:Glossary:integer]]//.
+  * //integer// - an //[[CL:Glossary:integer]]//.
+  * //count// - an //[[CL:Glossary:integer]]//.
+  * //shifted-integer// - an //[[CL:Glossary:integer]]//.
 
 ====Description====
+**ash** performs the arithmetic shift operation on the binary representation of //integer//, which is treated as if it were binary.
 
-**[[CL:Functions:ash]]** performs the arithmetic shift operation on the binary representation of //integer//, which is treated as if it were binary.
+**ash** shifts //integer// arithmetically left by //count// bit positions if //count// is positive, or right //count// bit positions if //count// is negative. The shifted value of the same sign as //integer// is returned.
 
-**[[CL:Functions:ash]]** shifts //integer// arithmetically left by //count// bit positions if //count// is positive, or right //count// bit positions if //count// is negative. The shifted value of the same sign as //integer// is returned.
+Mathematically speaking, **ash** performs the computation ''floor(integer * 2<sup>//count//</sup>)''.
 
-Mathematically speaking, **[[CL:Functions:ash]]** performs the computation ''floor''(//integer//\centerdot ''2^//count//'').
+Logically, **ash** moves all of the bits in //integer// to the left, adding zero-bits at the right, or moves them to the right, discarding bits.
 
-Logically, **[[CL:Functions:ash]]** moves all of the bits in //integer// to the left, adding zero-bits at the right, or moves them to the right, discarding bits.
+**ash** is defined to behave as if //integer// were represented in two's complement form, regardless of how //[[CL:Glossary:integers]]// are represented internally. 
 
-**[[CL:Functions:ash]]** is defined to behave as if //integer// were represented in two's complement form, regardless of how //[[CL:Glossary:integers]]// are represented internally. ====Examples==== <blockquote> (ash 16 1) → 32 (ash 16 0) → 16 (ash 16 -1) → 8 (ash -100000000000000000000000000000000 -100) → -79 </blockquote>
+====Examples==== 
+<blockquote> 
+(ash 16 1) <r>32 </r>
+(ash 16 0) <r>16 </r>
+(ash 16 -1) <r>8 </r>
+(ash -100000000000000000000000000000000 -100) <r>-79 </r>
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 Should signal an error of type type-error if //integer// is not an //[[CL:Glossary:integer]]//. Should signal an error of type type-error if //count// is not an //[[CL:Glossary:integer]]//. Might signal **[[CL:Types:arithmetic-error]]**.
 
 ====See Also====
-
 None.
 
 ====Notes====
-
-<blockquote> (logbitp //j// (ash //n// //k//)) ≡ (and (>= //j// //k//) (logbitp (- //j// //k//) //n//)) </blockquote>
+<blockquote> 
+([[CL:Functions:logbitp]] //j// (ash //n// //k//)) 
+  ≡ ([[CL:Macros:and]] ([[CL:Macros:not-less|>=]] //j// //k//) 
+         ([[CL:Functions:logbitp]] (- //j// //k//) //n//)) 
+</blockquote>
 

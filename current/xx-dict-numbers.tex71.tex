@@ -1,44 +1,51 @@
 ====== Accessor MASK-FIELD ======
 
 ====Syntax====
-
-**mask-field** //bytespec integer// → //masked-integer// (**setf** (**mask-field** //bytespec place//) //new-masked-integer//)
+  * **mask-field** //bytespec integer// → //masked-integer// (**setf** (**mask-field** //bytespec place//) //new-masked-integer//)
 
 ====Arguments and Values====
-
-//bytespec// - a //[[CL:Glossary:byte specifier]]//.
-
-//integer// - an //[[CL:Glossary:integer]]//.
-
-//masked-integer//, //new-masked-integer// - a non-negative //[[CL:Glossary:integer]]//.
+  * //bytespec// - a //[[CL:Glossary:byte specifier]]//.
+  * //integer// - an //[[CL:Glossary:integer]]//.
+  * //masked-integer//, //new-masked-integer// - a non-negative //[[CL:Glossary:integer]]//.
 
 ====Description====
 
-**[[CL:Functions:mask-field]]** performs a "mask" operation on //integer//. It returns an //[[CL:Glossary:integer]]// that has the same bits as //integer// in the //[[CL:Glossary:byte]]// specified by //bytespec//, but that has zero-bits everywhere else.
+**mask-field** performs a "mask" operation on //integer//. It returns an //[[CL:Glossary:integer]]// that has the same bits as //integer// in the //[[CL:Glossary:byte]]// specified by //bytespec//, but that has zero-bits everywhere else.
 
-**[[CL:Macros:setf]]** may be used with **[[CL:Functions:mask-field]]** to modify a byte within the //[[CL:Glossary:integer]]// that is stored in a given //place//. The effect is to perform a **[[CL:Functions:deposit-field]]** operation and then store the result back into the //place//.
+**[[CL:Macros:setf]]** may be used with **mask-field** to modify a byte within the //[[CL:Glossary:integer]]// that is stored in a given //place//. The effect is to perform a **[[CL:Functions:deposit-field]]** operation and then store the result back into the //place//.
 
 ====Examples====
-
-<blockquote> (mask-field (byte 1 5) -1) → 32 ([[CL:Macros:defparameter]] a 15) → 15 (mask-field (byte 2 0) a) → 3 a → 15 ([[CL:Macros:setf]] (mask-field (byte 2 0) a) 1) → 1 a → 13 </blockquote>
+<blockquote>
+(mask-field ([[CL:Functions:byte]] 1 5) -1) <r>32 </r>
+([[CL:Macros:defparameter]] *a* 15) <r>15 </r>
+(mask-field ([[CL:Functions:byte]] 2 0) *a*) <r>3 </r>
+*a* <r>15 </r>
+([[CL:Macros:setf]] (mask-field (byte 2 0) *a*) 1) <r>1 </r>
+*a* <r>13</r>
+</blockquote>
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Functions:byte]]**, **[[CL:Functions:ldb]]**
+  * **[[CL:Functions:byte|Function BYTE]]**
+  * **[[CL:Functions:ldb|Function LDB]]**
 
 ====Notes====
-
-<blockquote> (ldb //bs// (mask-field //bs// //n//)) ≡ (ldb //bs// //n//) (logbitp //j// (mask-field (byte //s// //p//) //n//)) ≡ (and (>= //j// //p//) (< //j// //s//) (logbitp //j// //n//)) (mask-field //bs// //n//) ≡ (logand //n// (dpb -1 //bs// 0)) </blockquote>
+<blockquote>
+([[CL:Functions:ldb]] //bs// (mask-field //bs// //n//)) 
+  ≡ ([[CL:Functions:ldb]] //bs// //n//)
+([[CL:Functions:logbitp]] //j// (mask-field ([[CL:Functions:byte]] //s// //p//) //n//)) 
+  ≡ ([[CL:Macros:and]] ([[CL:Functions:math-not-less|>=]] //j// //p//) 
+         ([[CL:Functions:math-less|<]] //j// //s//) 
+         ([[CL:Functions:logbitp]] //j// //n//)) 
+(mask-field //bs// //n//) 
+  ≡ ([[CL:Functions:logand]] //n// ([[CL:Functions:dpb]] -1 //bs// 0))
+</blockquote>
 

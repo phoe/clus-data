@@ -1,44 +1,54 @@
 ====== Function INTEGER-LENGTH ======
 
 ====Syntax====
-
-**integer-length** //integer// → //number-of-bits//
+  * **integer-length** //integer// → //number-of-bits//
 
 ====Arguments and Values====
-
-//integer// - an //[[CL:Glossary:integer]]//.
-
-//number-of-bits// - a non-negative //[[CL:Glossary:integer]]//.
+  * //integer// - an //[[CL:Glossary:integer]]//.
+  * //number-of-bits// - a non-negative //[[CL:Glossary:integer]]//.
 
 ====Description====
-
 Returns the number of bits needed to represent //integer// in binary two's-complement format.
 
 ====Examples====
-
-<blockquote> (integer-length 0) → 0 (integer-length 1) → 1 (integer-length 3) → 2 (integer-length 4) → 3 (integer-length 7) → 3 (integer-length -1) → 0 (integer-length -4) → 2 (integer-length -7) → 3 (integer-length -8) → 3 (integer-length (expt 2 9)) → 10 (integer-length (1- (expt 2 9))) → 9 (integer-length (- (expt 2 9))) → 9 (integer-length (- (1+ (expt 2 9)))) → 10 </blockquote>
+<blockquote> 
+(integer-length 0) <r>0 </r>
+(integer-length 1) <r>1 </r>
+(integer-length 3) <r>2 </r>
+(integer-length 4) <r>3 </r>
+(integer-length 7) <r>3 </r>
+(integer-length -1) <r>0</r>
+(integer-length -4) <r>2 </r>
+(integer-length -7) <r>3 </r>
+(integer-length -8) <r>3 </r>
+(integer-length ([[CL:Functions:expt]] 2 9)) <r>10 </r>
+(integer-length ([[CL:Functions:math-one-minus|1-]] ([[CL:Functions:expt]] 2 9))) <r>9 </r>
+(integer-length ([[CL:Functions:math-subtract|-]] ([[CL:Functions:expt]] 2 9))) <r>9 </r>
+(integer-length ([[CL:Functions:math-subtract|-]] ([[CL:Functions:math-one-plus|1+]] ([[CL:Functions:expt]] 2 9)))) <r>10 </r>
+</blockquote>
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 Should signal an error of type type-error if //integer// is not an //[[CL:Glossary:integer]]//.
 
 ====See Also====
-
 None.
 
 ====Notes====
-
 This function could have been defined by:
 
-<blockquote> (defun integer-length (integer) (ceiling (log (if (minusp integer) (- integer) (1+ integer)) 2))) </blockquote>
+<blockquote> 
+([[CL:Macros:defun]] integer-length (integer) 
+  ([[CL:Functions:ceiling]] ([[CL:Functions:log]] ([[CL:Special Operators:if]] ([[CL:Functions:minusp]] integer) 
+                    ([[CL:Functions:math-subtract|-]] integer) 
+                    ([[CL:Functions:math-one-plus|1+]] integer)) 
+                2)))
+</blockquote>
 
-If //integer// is non-negative, then its value can be represented in unsigned binary form in a field whose width in bits is no smaller than **[[CL:Functions:(integer-length //integer//)]]**. Regardless of the sign of //integer//, its value can be represented in signed binary two's-complement form in a field whose width in bits is no smaller than **[[CL:Functions:(+ (integer-length //integer//) 1)]]**.
+If //integer// is non-negative, then its value can be represented in unsigned binary form in a field whose width in bits is no smaller than ''(integer-length //integer//)''. Regardless of the sign of //integer//, its value can be represented in signed binary two's-complement form in a field whose width in bits is no smaller than **[[CL:Functions:(+ (integer-length //integer//) 1)]]**.
 

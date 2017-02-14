@@ -1,57 +1,56 @@
 ====== Function LCM ======
 
 ====Syntax====
-
-**lcm** //''&rest'' integers// → //least-common-multiple//
+  * **lcm** //''&rest'' integers// → //least-common-multiple//
 
 ====Arguments and Values====
-
-//integer// - an //[[CL:Glossary:integer]]//.
-
-//least-common-multiple// - a non-negative //[[CL:Glossary:integer]]//.
+  * //integer// - an //[[CL:Glossary:integer]]//.
+  * //least-common-multiple// - a non-negative //[[CL:Glossary:integer]]//.
 
 ====Description====
+**lcm** returns the least common multiple of the //integers//. If no //integer// is supplied, the //[[CL:Glossary:integer]]// ''1'' is returned. If only one //integer// is supplied, the absolute value of that //integer// is returned.
 
-**[[CL:Functions:lcm]]** returns the least common multiple of the //integers//.
+For two arguments that are not both zero:
 
-If no //integer// is supplied, the //[[CL:Glossary:integer]]// ''1'' is returned.
+<blockquote>
+(lcm a b) ≡ ([[CL:Functions:math-divide|/]] ([[CL:Functions:abs]] ([[CL:Functions:math-multiply|*]] a b)) ([[CL:Functions:gcd]] a b))
+</blockquote>
 
-If only one //integer// is supplied, the absolute value of that //integer// is returned.
+If one or both arguments are zero"
 
-For two arguments that are not both zero,
+<blockquote>
+(lcm a 0) ≡ (lcm 0 a) ≡ 0
+</blockquote>
 
-<blockquote> (lcm a b) ≡ (/ (abs (* a b)) (gcd a b)) </blockquote>
+For three or more arguments:
 
-If one or both arguments are zero,
-
-<blockquote> (lcm a 0) ≡ (lcm 0 a) ≡ 0 </blockquote>
-
-For three or more arguments,
-
-<blockquote> (lcm a b c ... z) ≡ (lcm (lcm a b) c ... z) </blockquote>
+<blockquote>
+(lcm a b c ... z) ≡ (lcm (lcm a b) c ... z)
+</blockquote>
 
 ====Examples====
-
-<blockquote> (lcm 10) → 10 (lcm 25 30) → 150 (lcm -24 18 10) → 360 (lcm 14 35) → 70 (lcm 0 5) → 0 (lcm 1 2 3 4 5 6) → 60 </blockquote>
+<blockquote>
+(lcm 10) <r>10</r>
+(lcm 25 30) <r>150</r>
+(lcm -24 18 10) <r>360</r>
+(lcm 14 35) <r>70</r>
+(lcm 0 5) <r>0</r>
+(lcm 1 2 3 4 5 6) <r>60</r>
+</blockquote>
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 Should signal **[[CL:Types:type-error]]** if any argument is not an //[[CL:Glossary:integer]]//.
 
 ====See Also====
-
-**[[CL:Functions:gcd]]**
+  * **[[CL:Functions:gcd|Function GCD]]**
 
 ====Notes====
-
 None.
 
 \issue{LCM-NO-ARGUMENTS:1}

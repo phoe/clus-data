@@ -1,32 +1,23 @@
 ====== Function LOG ======
 
 ====Syntax====
-
-**log {number** //\opt} base// → //logarithm//
+  * **log** //number ''&optional'' base// → //logarithm//
 
 ====Arguments and Values====
-
-//number// - a non-zero //[[CL:Glossary:number]]//.
-
-//base// - a //[[CL:Glossary:number]]//.
-
-//logarithm// - a //[[CL:Glossary:number]]//.
+  * //number// - a non-zero //[[CL:Glossary:number]]//.
+  * //base// - a //[[CL:Glossary:number]]//.
+  * //logarithm// - a //[[CL:Glossary:number]]//.
 
 ====Description====
+**log** returns the logarithm of //number// in base //base//. If //base// is not supplied its value is ''e'', the base of the natural logarithms.
 
-**[[CL:Functions:log]]** returns the logarithm of //number// in base //base//. If //base// is not supplied its value is ''e'', the base of the natural logarithms.
+**log** may return a //[[CL:Glossary:complex]]// when given a //[[CL:Glossary:real]]// negative //number//.
 
-**[[CL:Functions:log]]** may return a //[[CL:Glossary:complex]]// when given a
+<blockquote>
+(log -1.0) ≡ (complex 0.0 (float pi 0.0))
+</blockquote>
 
-//[[CL:Glossary:real]]//
-
-negative //number//.
-
-<blockquote> (log -1.0) ≡ (complex 0.0 (float pi 0.0)) </blockquote>
-
-If //base// is zero,
-
-**[[CL:Functions:log]]** returns zero.
+If //base// is zero, **log** returns zero.
 
 The result of ''(log 8 2)'' may be either ''3'' or ''3.0'', depending on the implementation. An implementation can use floating-point calculations even if an exact integer result is possible.
 
@@ -34,38 +25,45 @@ The branch cut for the logarithm function of one argument (natural logarithm) li
 
 The mathematical definition of a complex logarithm is as follows, whether or not minus zero is supported by the implementation:
 
-<blockquote> (log ''x'') ≡ (complex (log (abs ''x'')) (phase ''x'')) </blockquote>
+<blockquote>
+(log ''x'') ≡ ([[CL:Functions:complex]] ([[CL:Functions:log]] ([[CL:Functions:abs]] ''x'')) ([[CL:Functions:phase]] ''x''))
+</blockquote>
 
-Therefore the range of the one-argument logarithm function is that strip of the complex plane containing numbers with imaginary parts between
+Therefore the range of the one-argument logarithm function is that strip of the complex plane containing numbers with imaginary parts between ''-π'' (exclusive) and ''π'' (inclusive) if minus zero is not supported, or ''-π'' (inclusive) and~''π'' (inclusive) if minus zero is supported.
 
-''-\pi'' (exclusive) and~''\pi'' (inclusive) if minus zero is not supported, or ''-\pi'' (inclusive) and~''\pi'' (inclusive) if minus zero is supported.
+The two-argument logarithm function is defined as:
 
-The two-argument logarithm function is defined as
-
-<blockquote> (log //base// //number//) ≡ (/ (log //number//) (log //base//)) </blockquote>
+<blockquote>
+(log //base// //number//) ≡ ([[CL:Functions:math-divide|/]] (log //number//) (log //base//))
+</blockquote>
 
 This defines the //[[CL:Glossary:principal]]// //[[CL:Glossary:values]]// precisely. The range of the two-argument logarithm function is the entire complex plane.
 
 ====Examples====
-
-<blockquote> (log 100 10) → 2.0 → 2 (log 100.0 10) → 2.0 (log #c(0 1) #c(0 -1)) → #C(-1.0 0.0) //or// → #C(-1 0) (log 8.0 2) → 3.0 </blockquote>
-
-<blockquote> (log #c(-16 16) #c(2 2)) → 3 or approximately #c(3.0 0.0) or approximately 3.0 (unlikely) </blockquote>
+<blockquote>
+(log 100 10) <r>2.0 
+//or// 2 </r>
+(log 100.0 10) <r>2.0 </r>
+(log #c(0 1) #c(0 -1)) <r>#C(-1.0 0.0) 
+//or// #C(-1 0)</r>
+(log 8.0 2) <r>3.0</r>
+(log #c(-16 16) #c(2 2)) <r>3 
+//or// #c(3.0 0.0) ; approximately
+//or// 3.0 ; approximately, unlikely</r>
+</blockquote>
 
 ====Affected By====
-
 The implementation.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Functions:exp]]**, **[[CL:Functions:expt]]**, {\secref\FloatSubstitutability}
+  * **[[CL:Functions:exp|Function EXP]]**
+  * **[[CL:Functions:expt|Function EXPT]]**
+  * {\secref\FloatSubstitutability}
 
 ====Notes====
-
 None.
 
 \issue{REAL-NUMBER-TYPE:X3J13-MAR-89} \issue{IEEE-ATAN-BRANCH-CUT:SPLIT} \issue{IEEE-ATAN-BRANCH-CUT:SPLIT} \issue{COMPLEX-RATIONAL-RESULT:EXTEND}

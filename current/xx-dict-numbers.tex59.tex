@@ -1,30 +1,22 @@
 ====== Function PARSE-INTEGER ======
 
 ====Syntax====
-
-**{parse-integer} {string** //\key} start end radix junk-allowed// → //integer, pos//
+  * **parse-integer** //string ''&key'' start end radix junk-allowed// → //integer, pos//
 
 ====Arguments and Values====
-
-//string// - a //[[CL:Glossary:string]]//.
-
-//start//, //end// - //[[CL:Glossary:bounding index designators]]// of //string//. \Defaults{//start// and //end//}{''0'' and **[[CL:Constant Variables:nil]]**}
-
-//radix// - a //[[CL:Glossary:radix]]//. The default is ''10''.
-
-//junk-allowed// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
-
-//integer// - an //[[CL:Glossary:integer]]// or //[[CL:Glossary:false]]//.
-
-//pos// - a //[[CL:Glossary:bounding index]]// of //string//.
+  * //string// - a //[[CL:Glossary:string]]//.
+  * //start//, //end// - //[[CL:Glossary:bounding index designators]]// of //string//. The defaults for //start// and //end// are ''0'' and **[[CL:Constant Variables:nil]]**, respectively.
+  * //radix// - a //[[CL:Glossary:radix]]//. The default is ''10''.
+  * //junk-allowed// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+  * //integer// - an //[[CL:Glossary:integer]]// or //[[CL:Glossary:false]]//.
+  * //pos// - a //[[CL:Glossary:bounding index]]// of //string//.
 
 ====Description====
+**parse-integer** parses an //[[CL:Glossary:integer]]// in the specified //radix// from the substring of //string// delimited by //start// and //end//.
 
-**[[CL:Functions:parse-integer]]** parses an //[[CL:Glossary:integer]]// in the specified //radix// from the substring of //string// delimited by //start// and //end//.
+**parse-integer** expects an optional sign (''+'' or ''-'') followed by a a non-empty sequence of digits to be interpreted in the specified //radix//. Optional leading and trailing //[[CL:Glossary:whitespace]]// is ignored.
 
-**[[CL:Functions:parse-integer]]** expects an optional sign (''+'' or ''-'') followed by a a non-empty sequence of digits to be interpreted in the specified //radix//. Optional leading and trailing //[[CL:Glossary:whitespace]]// is ignored.
-
-**[[CL:Functions:parse-integer]]** does not recognize the syntactic radix-specifier prefixes ''#O'', ''#B'', ''#X'', and ''#''n''R'', nor does it recognize a trailing decimal point.
+**parse-integer** does not recognize the syntactic radix-specifier prefixes ''#O'', ''#B'', ''#X'', and ''#''n''R'', nor does it recognize a trailing decimal point.
 
 If //junk-allowed// is //[[CL:Glossary:false]]//, an error of type **[[CL:Types:parse-error]]** is signaled if substring does not consist entirely of the representation of a signed //[[CL:Glossary:integer]]//, possibly surrounded on either side by //[[CL:Glossary:whitespace]]// //[[CL:Glossary:characters]]//.
 
@@ -32,26 +24,26 @@ The first //[[CL:Glossary:value]]// returned is either the //[[CL:Glossary:integ
 
 The second //[[CL:Glossary:value]]// is either the index into the //[[CL:Glossary:string]]// of the delimiter that terminated the parse, or the upper //[[CL:Glossary:bounding index]]// of the substring if the parse terminated at the end of the substring (as is always the case if //junk-allowed// is //[[CL:Glossary:false]]//).
 
-====Examples==== <blockquote> (parse-integer "123") → 123, 3 (parse-integer "123" :start 1 :radix 5) → 13, 3 (parse-integer "no-integer" :junk-allowed t) → NIL, 0 </blockquote>
+====Examples==== 
+<blockquote> 
+(parse-integer "123") <r>123, 3 </r>
+(parse-integer "123" :start 1 :radix 5) <r>13, 3 </r>
+(parse-integer "no-integer" :junk-allowed [[CL:Constant Variables:t]]) <r>NIL, 0 </r>
+</blockquote>
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 If //junk-allowed// is //[[CL:Glossary:false]]//, an error is signaled if substring does not consist entirely of the representation of an //[[CL:Glossary:integer]]//, possibly surrounded on either side by //[[CL:Glossary:whitespace]]// characters.
 
 ====See Also====
-
 None.
 
 ====Notes====
-
 None.
 
 \issue{SUBSEQ-OUT-OF-BOUNDS} \issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
