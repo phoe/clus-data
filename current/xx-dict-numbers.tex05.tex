@@ -1,57 +1,49 @@
 ====== Type SHORT-FLOAT, SINGLE-FLOAT, DOUBLE-FLOAT, LONG-FLOAT ======
 
 ====Supertypes====
-
-**[[CL:Types:short-float]]**: **[[CL:Types:short-float]]**, **[[CL:Types:float]]**,
-
-**[[CL:Types:real]]**, **[[CL:Types:number]]**, **[[CL:Types:t]]**
-
-**[[CL:Types:single-float]]**: **[[CL:Types:single-float]]**, **[[CL:Types:float]]**,
-
-**[[CL:Types:real]]**, **[[CL:Types:number]]**, **[[CL:Types:t]]**
-
-**[[CL:Types:double-float]]**: **[[CL:Types:double-float]]**, **[[CL:Types:float]]**,
-
-**[[CL:Types:real]]**, **[[CL:Types:number]]**, **[[CL:Types:t]]**
-
-**[[CL:Types:long-float]]**: **[[CL:Types:long-float]]**, **[[CL:Types:float]]**,
-
-**[[CL:Types:real]]**, **[[CL:Types:number]]**, **[[CL:Types:t]]**
+  * **short-float**, **[[CL:Types:float]]**, **[[CL:Types:real]]**, **[[CL:Types:number]]**, **[[CL:Types:t]]**
+  * **single-float**, **[[CL:Types:float]]**, **[[CL:Types:real]]**, **[[CL:Types:number]]**, **[[CL:Types:t]]**
+  * **double-float**, **[[CL:Types:float]]**, **[[CL:Types:real]]**, **[[CL:Types:number]]**, **[[CL:Types:t]]**
+  * **long-float**, **[[CL:Types:float]]**, **[[CL:Types:real]]**, **[[CL:Types:number]]**, **[[CL:Types:t]]**
 
 ====Description====
+For the four defined subtypes of **[[CL:Types:float]]**, it is true that intermediate between the type **short-float** and the type **long-float** are the type **single-float** and the type **double-float**. The precise definition of these categories is //[[CL:Glossary:implementation-defined]]//. The precision (measured in "bits", computed as ''p * log<sub>2</sub>b'') and the exponent size (also measured in "bits," computed as ''log<sub>2</sub>(n + 1)'', where ''n'' is the maximum exponent value) is recommended to be at least as great as the values in the below table. Each of the defined subtypes of **[[CL:Types:float]]** might or might not have a minus zero.
 
-For the four defined subtypes of **[[CL:Types:float]]**, it is true that
+^ Format ^ Minimum Precision ^ Minimum Exponent Size ^
+| Short  | 13 bits           | 5 bits                |
+| Single | 24 bits           | 8 bits                |
+| Double | 50 bits           | 8 bits                |
+| Long   | 50 bits           | 8 bits                |
 
-intermediate between the type **[[CL:Types:short-float]]** and the type **[[CL:Types:long-float]]** are the type **[[CL:Types:single-float]]** and the type **[[CL:Types:double-float]]**. The precise definition of these categories is
-
-//[[CL:Glossary:implementation-defined]]//. The precision (measured in "bits", computed as ''p\log<sub>2</sub>b'') and the exponent size (also measured in "bits," computed as ''\log<sub>2</sub>(n+1)'', where ''n'' is the maximum exponent value) is recommended to be at least as great as the values in \thenextfigure. Each of the defined subtypes of **[[CL:Types:float]]** might or might not have a minus zero.
-
-\showthree{Recommended Minimum Floating-Point Precision and Exponent Size}{ \hfil\b{Format}& \b{Minimum Precision}& \b{Minimum Exponent Size}\cr \noalign{\vskip 2pt\hrule\vskip 2pt} Short & 13 bits & 5 bits\cr Single & 24 bits & 8 bits\cr Double & 50 bits & 8 bits\cr Long & 50 bits & 8 bits\cr }
-
-There can be fewer than four internal representations for //[[CL:Glossary:floats]]//. If there are fewer distinct representations, the following rules apply: \beginlist \itemitem{--} If there is only one, it is
-
-the type **[[CL:Types:single-float]]**. In this representation, an //[[CL:Glossary:object]]// is simultaneously of //[[CL:Glossary:type|types]]// **[[CL:Types:single-float]]**, **[[CL:Types:double-float]]**, **[[CL:Types:short-float]]**, and **[[CL:Types:long-float]]**. \itemitem{--} Two internal representations can be arranged in either of the following ways: \beginlist \itemitem{\bull} Two //[[CL:Glossary:type|types]]// are provided: **[[CL:Types:single-float]]** and **[[CL:Types:short-float]]**. An //[[CL:Glossary:object]]// is simultaneously of //[[CL:Glossary:type|types]]// **[[CL:Types:single-float]]**, **[[CL:Types:double-float]]**, and **[[CL:Types:long-float]]**. \itemitem{\bull} Two //[[CL:Glossary:type|types]]// are provided: **[[CL:Types:single-float]]** and **[[CL:Types:double-float]]**. An //[[CL:Glossary:object]]// is simultaneously of //[[CL:Glossary:type|types]]// **[[CL:Types:single-float]]** and **[[CL:Types:short-float]]**, or **[[CL:Types:double-float]]** and **[[CL:Types:long-float]]**. \endlist \itemitem{--} Three internal representations can be arranged in either of the following ways: \beginlist \itemitem{\bull} Three //[[CL:Glossary:type|types]]// are provided: **[[CL:Types:short-float]]**, **[[CL:Types:single-float]]**, and **[[CL:Types:double-float]]**. An //[[CL:Glossary:object]]// can simultaneously be of //[[CL:Glossary:type]]// **[[CL:Types:double-float]]** and **[[CL:Types:long-float]]**. \itemitem{\bull} Three //[[CL:Glossary:type|types]]// are provided: **[[CL:Types:single-float]]**, **[[CL:Types:double-float]]**,and **[[CL:Types:long-float]]**. An //[[CL:Glossary:object]]// can simultaneously be of //[[CL:Glossary:type|types]]// **[[CL:Types:single-float]]** and **[[CL:Types:short-float]]**. \endlist \endlist
+There can be fewer than four internal representations for //[[CL:Glossary:floats]]//. If there are fewer distinct representations, the following rules apply: 
+  * If there is only one, it is the type **single-float**. In this representation, an //[[CL:Glossary:object]]// is simultaneously of //[[CL:Glossary:type|types]]// **single-float**, **double-float**, **short-float**, and **long-float**. 
+  * Two internal representations can be arranged in either of the following ways: 
+    * Two //[[CL:Glossary:type|types]]// are provided: **single-float** and **short-float**. An //[[CL:Glossary:object]]// is simultaneously of //[[CL:Glossary:type|types]]// **single-float**, **double-float**, and **long-float**. 
+    * Two //[[CL:Glossary:type|types]]// are provided: **single-float** and **double-float**. An //[[CL:Glossary:object]]// is simultaneously of //[[CL:Glossary:type|types]]// **single-float** and **short-float**, or **double-float** and **long-float**.
+  * Three internal representations can be arranged in either of the following ways: 
+    * Three //[[CL:Glossary:type|types]]// are provided: **short-float**, **single-float**, and **double-float**. An //[[CL:Glossary:object]]// can simultaneously be of //[[CL:Glossary:type]]// **double-float** and **long-float**. 
+    *  Three //[[CL:Glossary:type|types]]// are provided: **single-float**, **double-float**,and **long-float**. An //[[CL:Glossary:object]]// can simultaneously be of //[[CL:Glossary:type|types]]// **single-float** and **short-float**.
 
 ====Compound Type Specifier Kind====
-
 Abbreviating.
 
 ====Compound Type Specifier Syntax====
-
-//**short-float** //[short-lower-limit [short-upper-limit]]//// //**single-float** //[single-lower-limit [single-upper-limit]]//// //**double-float** //[double-lower-limit [double-upper-limit]]//// //**long-float** //[long-lower-limit [long-upper-limit]]////
+  * **short-float** [//short-lower-limit// [//short-upper-limit//]] 
+  * **single-float** [//single-lower-limit// [//single-upper-limit//]] 
+  * **double-float** [//double-lower-limit// [//double-upper-limit//]] 
+  * **long-float** [//long-lower-limit// [//long-upper-limit//]]
 
 ====Compound Type Specifier Arguments====
 
-//short-lower-limit//, //short-upper-limit// - //[[CL:Glossary:interval designator|interval designators]]// for //[[CL:Glossary:type]]// **[[CL:Types:short-float]]**. \DefaultEach{//lower-limit// and //upper-limit//}{the //[[CL:Glossary:symbol]]// **[[CL:Types:wildcard|*]]**}
+//short-lower-limit//, //short-upper-limit// - //[[CL:Glossary:interval designator|interval designators]]// for //[[CL:Glossary:type]]// **short-float**. The default for each //lower-limit// and //upper-limit// is the //[[CL:Glossary:symbol]]// **[[CL:Types:wildcard|*]]**.
 
-//single-lower-limit//, //single-upper-limit// - //[[CL:Glossary:interval designator|interval designators]]// for //[[CL:Glossary:type]]// **[[CL:Types:single-float]]**. \DefaultEach{//lower-limit// and //upper-limit//}{the //[[CL:Glossary:symbol]]// **[[CL:Types:wildcard|*]]**}
+//single-lower-limit//, //single-upper-limit// - //[[CL:Glossary:interval designator|interval designators]]// for //[[CL:Glossary:type]]// **single-float**. The default for each //lower-limit// and //upper-limit// is the //[[CL:Glossary:symbol]]// **[[CL:Types:wildcard|*]]**.
 
-//double-lower-limit//, //double-upper-limit// - //[[CL:Glossary:interval designator|interval designators]]// for //[[CL:Glossary:type]]// **[[CL:Types:double-float]]**. \DefaultEach{//lower-limit// and //upper-limit//}{the //[[CL:Glossary:symbol]]// **[[CL:Types:wildcard|*]]**}
+//double-lower-limit//, //double-upper-limit// - //[[CL:Glossary:interval designator|interval designators]]// for //[[CL:Glossary:type]]// **double-float**. The default for each //lower-limit// and //upper-limit// is the //[[CL:Glossary:symbol]]// **[[CL:Types:wildcard|*]]**.
 
-//long-lower-limit//, //long-upper-limit// - //[[CL:Glossary:interval designator|interval designators]]// for //[[CL:Glossary:type]]// **[[CL:Types:long-float]]**. \DefaultEach{//lower-limit// and //upper-limit//}{the //[[CL:Glossary:symbol]]// **[[CL:Types:wildcard|*]]**}
+//long-lower-limit//, //long-upper-limit// - //[[CL:Glossary:interval designator|interval designators]]// for //[[CL:Glossary:type]]// **long-float**. The default for each //lower-limit// and //upper-limit// is the //[[CL:Glossary:symbol]]// **[[CL:Types:wildcard|*]]**.
 
 ====Compound Type Specifier Description====
-
 Each of these denotes the set of //[[CL:Glossary:floats]]// of the indicated //[[CL:Glossary:type]]// that are on the interval specified by the //[[CL:Glossary:interval designator|interval designators]]//.
 
 \issue{REAL-NUMBER-TYPE:X3J13-MAR-89} \issue{REAL-NUMBER-TYPE:X3J13-MAR-89} \issue{REAL-NUMBER-TYPE:X3J13-MAR-89} \issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
