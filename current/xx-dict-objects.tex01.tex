@@ -1,46 +1,49 @@
 ====== Standard Generic Function FUNCTION-KEYWORDS ======
 
-
 ====Syntax====
-
-\DefgenWithValues {function-keywords} {method} {keys, allow-other-keys-p}
+  * **function-keywords** //method// → //keys, allow-other-keys-p//
 
 ====Method Signatures====
-
-\Defmeth {function-keywords} {\specparam{method}{standard-method}}
+  * **function-keywords** (//method// **[[CL:Types:standard-method]]**)
 
 ====Arguments and Values====
-
-//method// - a //[[CL:Glossary:method]]//.
-
-//keys// - a //[[CL:Glossary:list]]//.
-
-//allow-other-keys-p// - a //[[CL:Glossary:generalized boolean]]//.
+  * //method// - a //[[CL:Glossary:method]]//.
+  * //keys// - a //[[CL:Glossary:list]]//.
+  * //allow-other-keys-p// - a //[[CL:Glossary:generalized boolean]]//.
 
 ====Description====
-
 Returns the keyword parameter specifiers for a //method//.
 
-Two values are returned: a //[[CL:Glossary:list]]// of the explicitly named keywords and a //[[CL:Glossary:generalized boolean]]// that states whether \keyref{allow-other-keys} had been specified in the //method// definition.
+Two values are returned: a //[[CL:Glossary:list]]// of the explicitly named keywords and a //[[CL:Glossary:generalized boolean]]// that states whether **''&allow-other-keys''** had been specified in the //method// definition.
 
 ====Examples====
+<blockquote> 
+([[CL:Macros:defmethod]] gf1 ((a [[CL:Types:integer]]) &optional (b 2) 
+                            &key (c 3) ((:dee d) 4) e ((eff f))) 
+  ([[CL:Functions:list]] a b c d e f)) <r>#<STANDARD-METHOD GF1 ([[CL:Types:INTEGER]]) 36324653> </r>
+([[CL:Functions:find-method]] #'gf1 '() ([[CL:Functions:list]] ([[CL:Functions:find-class]] '[[CL:Types:integer]]))) <r>#<STANDARD-METHOD GF1 ([[CL:Types:INTEGER]]) 36324653> </r>
+(function-keywords [[CL:Variables:repl-star|*]]) <r>(:C :DEE :E EFF)
+//[[CL:Glossary:false]]//</r>
 
-<blockquote> (defmethod gf1 ((a integer) &optional (b 2) &key (c 3) ((:dee d) 4) e ((eff f))) (list a b c d e f)) → #<STANDARD-METHOD GF1 (INTEGER) 36324653> (find-method #'gf1 '() (list (find-class 'integer))) → #<STANDARD-METHOD GF1 (INTEGER) 36324653> (function-keywords *) → (:C :DEE :E EFF), //[[CL:Glossary:false]]// (defmethod gf2 ((a integer)) (list a b c d e f)) → #<STANDARD-METHOD GF2 (INTEGER) 42701775> (function-keywords (find-method #'gf1 '() (list (find-class 'integer)))) → (), //[[CL:Glossary:false]]// (defmethod gf3 ((a integer) &key b c d &allow-other-keys) (list a b c d e f)) (function-keywords *) → (:B :C :D), //[[CL:Glossary:true]]// </blockquote>
+([[CL:Macros:defmethod]] gf2 ((a [[CL:Types:integer]])) 
+  ([[CL:Functions:list]] a b c d e f)) <r>#<STANDARD-METHOD GF2 ([[CL:Types:INTEGER]]) 42701775> </r>
+(function-keywords ([[CL:Functions:find-method]] #'gf1 '() ([[CL:Functions:list]] ([[CL:Functions:find-class]] '[[CL:Types:integer]])))) <r>()
+//[[CL:Glossary:false]]// </r>
+
+([[CL:Macros:defmethod]] gf3 ((a [[CL:Types:integer]]) &key b c d &allow-other-keys) 
+  ([[CL:Functions:list]] a b c d e f)) <r>#<STANDARD-METHOD GF3 ([[CL:Types:INTEGER]]) 50814231> </r>
+(function-keywords [[CL:Variables:repl-star|*]]) <r>(:B :C :D)
+//[[CL:Glossary:true]]//</r>
+</blockquote>
 
 ====Affected By====
-
 **[[CL:Macros:defmethod]]**
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Macros:defmethod]]**
+  * **[[CL:Macros:defmethod|Macro DEFMETHOD]]**
 
 ====Notes====
-
 None.
-
-
