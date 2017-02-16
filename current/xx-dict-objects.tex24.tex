@@ -1,55 +1,46 @@
 ====== Function MAKE-LOAD-FORM-SAVING-SLOTS ======
 
 ====Syntax====
-
-\DefunWithValuesNewline make-load-form-saving-slots {object ''&key'' slot-names environment} {creation-form, initialization-form}
+  * **make-load-form-saving-slots** //object ''&key'' slot-names environment// → //creation-form, initialization-form//
 
 ====Arguments and Values====
-
-//object// - an //[[CL:Glossary:object]]//.
-
-//slot-names// - a //[[CL:Glossary:list]]//.
-
-//environment// - an //[[CL:Glossary:environment object]]//.
-
-//creation-form// - a //[[CL:Glossary:form]]//.
-
-//initialization-form// - a //[[CL:Glossary:form]]//.
+  * //object// - an //[[CL:Glossary:object]]//.
+  * //slot-names// - a //[[CL:Glossary:list]]//.
+  * //environment// - an //[[CL:Glossary:environment object]]//.
+  * //creation-form// - a //[[CL:Glossary:form]]//.
+  * //initialization-form// - a //[[CL:Glossary:form]]//.
 
 ====Description====
+Returns //[[CL:Glossary:form|forms]]// that, when //[[CL:Glossary:evaluate|evaluated]]//, will construct an //[[CL:Glossary:object]]// equivalent to //object//, without //[[CL:Glossary:executing]]// //[[CL:Glossary:initialization form|initialization forms]]//. The //[[CL:Glossary:slot|slots]]// in the new //[[CL:Glossary:object]]// that correspond to initialized //[[CL:Glossary:slot|slots]]// in //object// are initialized using the values from //object//. Uninitialized //[[CL:Glossary:slot|slots]]// in //object// are not initialized in the new //[[CL:Glossary:object]]//. **make-load-form-saving-slots** works for any //[[CL:Glossary:instance]]// of **[[CL:Types:standard-object]]** or **[[CL:Types:structure-object]]**.
 
-Returns //[[CL:Glossary:forms]]// that, when //[[CL:Glossary:evaluated]]//, will construct an //[[CL:Glossary:object]]// equivalent to //object//, without //[[CL:Glossary:executing]]// //[[CL:Glossary:initialization forms]]//. The //[[CL:Glossary:slots]]// in the new //[[CL:Glossary:object]]// that correspond to initialized //[[CL:Glossary:slots]]// in //object// are initialized using the values from //object//. Uninitialized //[[CL:Glossary:slots]]// in //object// are not initialized in the new //[[CL:Glossary:object]]//. **[[CL:Functions:make-load-form-saving-slots]]** works for any //[[CL:Glossary:instance]]// of **[[CL:Types:standard-object]]** or **[[CL:Types:structure-object]]**.
+//slot-names// is a //[[CL:Glossary:list]]// of the names of the //[[CL:Glossary:slot|slots]]// to preserve. If //slot-names// is not supplied, its value is all of the //[[CL:Glossary:local slot|local slots]]//.
 
-//Slot-names// is a //[[CL:Glossary:list]]// of the names of the //[[CL:Glossary:slots]]// to preserve. If //slot-names// is not supplied, its value is all of the //[[CL:Glossary:local slots]]//.
+**make-load-form-saving-slots** returns two values, thus it can deal with circular structures. Whether the result is useful in an application depends on whether the //object//'s //[[CL:Glossary:type]]// and slot contents fully capture the application's idea of the //object//'s state.
 
-**[[CL:Functions:make-load-form-saving-slots]]** returns two values, thus it can deal with circular structures. Whether the result is useful in an application depends on whether the //object//'s //[[CL:Glossary:type]]// and slot contents fully capture the application's idea of the //object//'s state.
-
-//Environment// is the environment in which the forms will be processed.
+//environment// is the environment in which the forms will be processed.
 
 ====Examples====
-
 None.
 
 ====Side Effects====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 None.
 
 ====See Also====
-
-**[[CL:Functions:make-load-form]]**, **[[CL:Functions:make-instance]]**, **[[CL:Macros:setf]]**, **[[CL:Functions:slot-value]]**, **[[CL:Functions:slot-makunbound]]**
+  * **[[CL:Functions:make-load-form|Function MAKE-LOAD-FORM]]**
+  * **[[CL:Functions:make-instance|Generic Function MAKE-INSTANCE]]**
+  * **[[CL:Macros:setf|Macro SETF]]**
+  * **[[CL:Functions:slot-value|Function SLOT-VALUE]]**
+  * **[[CL:Functions:slot-makunbound|Function SLOT-MAKUNBOUND]]**
 
 ====Notes====
+**make-load-form-saving-slots** can be useful in user-written **[[CL:Functions:make-load-form]]** methods.
 
-**[[CL:Functions:make-load-form-saving-slots]]** can be useful in user-written **[[CL:Functions:make-load-form]]** methods.
-
-When the //[[CL:Glossary:object]]// is an //[[CL:Glossary:instance]]// of **[[CL:Types:standard-object]]**, **[[CL:Functions:make-load-form-saving-slots]]** could return a creation form that //[[CL:Glossary:calls]]// **[[CL:Functions:allocate-instance]]** and an initialization form that contains //[[CL:Glossary:calls]]// to **[[CL:Macros:setf]]** of **[[CL:Functions:slot-value]]** and **[[CL:Functions:slot-makunbound]]**, though other //[[CL:Glossary:functions]]// of similar effect might actually be used.
+When the //[[CL:Glossary:object]]// is an //[[CL:Glossary:instance]]// of **[[CL:Types:standard-object]]**, **make-load-form-saving-slots** could return a creation form that //[[CL:Glossary:call|calls]]// **[[CL:Functions:allocate-instance]]** and an initialization form that contains //[[CL:Glossary:call|calls]]// to **[[CL:Macros:setf]]** of **[[CL:Functions:slot-value]]** and **[[CL:Functions:slot-makunbound]]**, though other //[[CL:Glossary:functions]]// of similar effect might actually be used.
 
 \issue{MAKE-LOAD-FORM-CONFUSION:REWRITE} \issue{LOAD-OBJECTS:MAKE-LOAD-FORM} \issue{MAKE-LOAD-FORM-SAVING-SLOTS:NO-INITFORMS} \issue{MAKE-LOAD-FORM-SAVING-SLOTS:NO-INITFORMS}

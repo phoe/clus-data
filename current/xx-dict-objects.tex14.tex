@@ -1,60 +1,67 @@
 ====== Function SLOT-VALUE ======
 
 ====Syntax====
-
-**{slot-value}** //object slot-name// → //value//
+  * **slot-value** //object slot-name// → //value//
 
 ====Arguments and Values====
-
-//object// - an //[[CL:Glossary:object]]//.
-
-//name// - a //[[CL:Glossary:symbol]]//.
-
-//value// - an //[[CL:Glossary:object]]//.
+  * //object// - an //[[CL:Glossary:object]]//.
+  * //name// - a //[[CL:Glossary:symbol]]//.
+  * //value// - an //[[CL:Glossary:object]]//.
 
 ====Description====
+The //[[CL:Glossary:function]]// **slot-value** returns the //[[CL:Glossary:value]]// of the //[[CL:Glossary:slot]]// named //slot-name// in the //object//. If there is no //[[CL:Glossary:slot]]// named //slot-name//, **[[CL:Functions:slot-missing]]** is called. If the //[[CL:Glossary:slot]]// is unbound, **[[CL:Functions:slot-unbound]]** is called.
 
-The //[[CL:Glossary:function]]// **[[CL:Functions:slot-value]]** returns the //[[CL:Glossary:value]]// of the //[[CL:Glossary:slot]]// named //slot-name// in the //object//. If there is no //[[CL:Glossary:slot]]// named //slot-name//, **[[CL:Functions:slot-missing]]** is called. If the //[[CL:Glossary:slot]]// is unbound, **[[CL:Functions:slot-unbound]]** is called.
-
-
-The macro **[[CL:Macros:setf]]** can be used with **[[CL:Functions:slot-value]]** to change the value of a //[[CL:Glossary:slot]]//.
+The macro **[[CL:Macros:setf]]** can be used with **slot-value** to change the value of a //[[CL:Glossary:slot]]//.
 
 ====Examples====
-
-<blockquote> (defclass foo () ((a :accessor foo-a :initarg :a :initform 1) (b :accessor foo-b :initarg :b) (c :accessor foo-c :initform 3))) → #<STANDARD-CLASS FOO 244020371> ([[CL:Macros:defparameter]] foo1 (make-instance 'foo :a 'one :b 'two)) → #<FOO 36325624> (slot-value foo1 'a) → ONE (slot-value foo1 'b) → TWO (slot-value foo1 'c) → 3 ([[CL:Macros:setf]] (slot-value foo1 'a) 'uno) → UNO (slot-value foo1 'a) → UNO (defmethod foo-method ((x foo)) (slot-value x 'a)) → #<STANDARD-METHOD FOO-METHOD (FOO) 42720573> (foo-method foo1) → UNO </blockquote>
+<blockquote>
+([[CL:Macros:defclass]] foo () 
+  ((a :accessor foo-a :initarg :a :initform 1) 
+   (b :accessor foo-b :initarg :b) 
+   (c :accessor foo-c :initform 3))) <r>#<STANDARD-CLASS FOO 244020371> </r>
+([[CL:Macros:defparameter]] *foo-1* ([[CL:Functions:make-instance]] 'foo :a 'one :b 'two)) <r>#<FOO 36325624> </r>
+([[CL:Functions:slot-value]] *foo-1* 'a) <r>ONE </r>
+([[CL:Functions:slot-value]] *foo-1* 'b) <r>TWO </r>
+([[CL:Functions:slot-value]] *foo-1* 'c) <r>3 </r>
+([[CL:Macros:setf]] (slot-value *foo-1* 'a) 'uno) <r>UNO </r>
+([[CL:Functions:slot-value]] *foo-1* 'a) <r>UNO </r>
+([[CL:Macros:defmethod]] foo-method ((x foo)) 
+  ([[CL:Functions:slot-value]] x 'a)) <r>#<STANDARD-METHOD FOO-METHOD (FOO) 42720573> </r>
+(foo-method *foo-1*) <r>UNO</r>
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 If an attempt is made to read a //[[CL:Glossary:slot]]// and no //[[CL:Glossary:slot]]// of the name //slot-name// exists in the //object//, **[[CL:Functions:slot-missing]]** is called as follows:
 
-<blockquote> (slot-missing (class-of ''instance'') ''instance'' ''slot-name'' 'slot-value) </blockquote>
+<blockquote>
+(slot-missing (class-of //instance//) //instance// //slot-name// 'slot-value)
+</blockquote>
 
+(If **[[CL:Functions:slot-missing]]** is invoked, its //[[CL:Glossary:primary value]]// is returned by **slot-value**.)
 
-(If **[[CL:Functions:slot-missing]]** is invoked, its //[[CL:Glossary:primary value]]// is returned by **[[CL:Functions:slot-value]]**.)
+----
 
 If an attempt is made to write a //[[CL:Glossary:slot]]// and no //[[CL:Glossary:slot]]// of the name //slot-name// exists in the //object//, **[[CL:Functions:slot-missing]]** is called as follows:
 
-<blockquote> (slot-missing (class-of ''instance'') ''instance'' ''slot-name'' 'setf ''new-value'') </blockquote>
+<blockquote>
+(slot-missing (class-of //instance//) //instance// //slot-name// 'setf //new-value//)
+</blockquote>
 
 (If **[[CL:Functions:slot-missing]]** returns in this case, any //[[CL:Glossary:values]]// are ignored.)
 
-The specific behavior depends on //object//'s //[[CL:Glossary:metaclass]]//. An error is never signaled if //object// has //[[CL:Glossary:metaclass]]// **[[CL:Types:standard-class]]**. An error is always signaled if //object// has //[[CL:Glossary:metaclass]]// **[[CL:Types:built-in-class]]**. The consequences are
-
-unspecified if //object// has any other //[[CL:Glossary:metaclass]]//--an error might or might not be signaled in this situation. Note in particular that the behavior for //[[CL:Glossary:conditions]]// and //[[CL:Glossary:structures]]// is not specified.
+The specific behavior depends on //object//'s //[[CL:Glossary:metaclass]]//. An error is never signaled if //object// has //[[CL:Glossary:metaclass]]// **[[CL:Types:standard-class]]**. An error is always signaled if //object// has //[[CL:Glossary:metaclass]]// **[[CL:Types:built-in-class]]**. The consequences are unspecified if //object// has any other //[[CL:Glossary:metaclass]]// - an error might or might not be signaled in this situation. Note in particular that the behavior for //[[CL:Glossary:conditions]]// and //[[CL:Glossary:structures]]// is not specified.
 
 ====See Also====
-
-**[[CL:Functions:slot-missing]]**, **[[CL:Functions:slot-unbound]]**, **[[CL:Macros:with-slots]]**
+  * **[[CL:Functions:slot-missing|Generic Function SLOT-MISSING]]**
+  * **[[CL:Functions:slot-unbound|Generic Function SLOT-UNBOUND]]**
+  * **[[CL:Macros:with-slots|Macro WITH-SLOTS]]**
 
 ====Notes====
+Although no //[[CL:Glossary:implementation]]// is required to do so, implementors are strongly encouraged to implement the //[[CL:Glossary:function]]// **slot-value** using the //[[CL:Glossary:function]]// **[[CL:Functions:slot-value-using-class]]** described in the //[[CL:Glossary:Metaobject Protocol]]//. 
 
-\MentionMetaObjects{slot-value}{slot-value-using-class}
-
-Implementations may optimize **[[CL:Functions:slot-value]]** by compiling it inline.
-
+Implementations may optimize **slot-value** by compiling it inline.
 
 \issue{SLOT-MISSING-VALUES:SPECIFY} \issue{SLOT-MISSING-VALUES:SPECIFY} \issue{SLOT-VALUE-METACLASSES:LESS-MINIMAL}

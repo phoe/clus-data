@@ -1,49 +1,40 @@
 ====== Function SLOT-BOUNDP ======
 
-
 ====Syntax====
-
-**slot-boundp** //instance slot-name// → //generalized-boolean//
+  * **slot-boundp** //instance slot-name// → //generalized-boolean//
 
 ====Arguments and Values====
-
-//instance// - an //[[CL:Glossary:object]]//.
-
-//slot-name// - a //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:slot]]// of //instance//.
-
-//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+  * //instance// - an //[[CL:Glossary:object]]//.
+  * //slot-name// - a //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:slot]]// of //instance//.
+  * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
 
 ====Description====
-
 Returns //[[CL:Glossary:true]]// if the //[[CL:Glossary:slot]]// named //slot-name// in //instance// is bound; otherwise, returns //[[CL:Glossary:false]]//.
 
 ====Examples====
-
 None.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 If no //[[CL:Glossary:slot]]// of the //[[CL:Glossary:name]]// //slot-name// exists in the //instance//, **[[CL:Functions:slot-missing]]** is called as follows:
 
-<blockquote> (slot-missing (class-of ''instance'') ''instance'' ''slot-name'' 'slot-boundp) </blockquote>
+<blockquote>
+([[CL:Functions:slot-missing]] ([[CL:Functions:class-of]] //instance//) //instance// //slot-name// 'slot-boundp)
+</blockquote>
 
-(If **[[CL:Functions:slot-missing]]** is invoked and returns a value, a //[[CL:Glossary:boolean equivalent]]// to its //[[CL:Glossary:primary value]]// is returned by **[[CL:Functions:slot-boundp]]**.)
+(If **[[CL:Functions:slot-missing]]** is invoked and returns a value, a //[[CL:Glossary:boolean equivalent]]// to its //[[CL:Glossary:primary value]]// is returned by **slot-boundp**.)
 
-The specific behavior depends on //instance//'s //[[CL:Glossary:metaclass]]//. An error is never signaled if //instance// has //[[CL:Glossary:metaclass]]// **[[CL:Types:standard-class]]**. An error is always signaled if //instance// has //[[CL:Glossary:metaclass]]// **[[CL:Types:built-in-class]]**. The consequences are undefined if //instance// has any other //[[CL:Glossary:metaclass]]//--an error might or might not be signaled in this situation. Note in particular that the behavior for //[[CL:Glossary:conditions]]// and //[[CL:Glossary:structures]]// is not specified.
-
+The specific behavior depends on //instance//'s //[[CL:Glossary:metaclass]]//. An error is never signaled if //instance// has //[[CL:Glossary:metaclass]]// **[[CL:Types:standard-class]]**. An error is always signaled if //instance// has //[[CL:Glossary:metaclass]]// **[[CL:Types:built-in-class]]**. The consequences are undefined if //instance// has any other //[[CL:Glossary:metaclass]]// - an error might or might not be signaled in this situation. Note in particular that the behavior for //[[CL:Glossary:conditions]]// and //[[CL:Glossary:structures]]// is not specified.
 
 ====See Also====
-
-**[[CL:Functions:slot-makunbound]]**, **[[CL:Functions:slot-missing]]**
+  * **[[CL:Functions:slot-makunbound|Function SLOT-MAKUNBOUND]]**
+  * **[[CL:Functions:slot-missing|Generic Function SLOT-MISSING]]**
 
 ====Notes====
+The //[[CL:Glossary:function]]// **slot-boundp** allows for writing //[[CL:Glossary:after methods]]// on **[[CL:Functions:initialize-instance]]** in order to initialize only those //[[CL:Glossary:slot|slots]]// that have not already been bound.
 
-The //[[CL:Glossary:function]]// **[[CL:Functions:slot-boundp]]** allows for writing //[[CL:Glossary:after methods]]// on **[[CL:Functions:initialize-instance]]** in order to initialize only those //[[CL:Glossary:slots]]// that have not already been bound.
-
-\MentionMetaObjects{slot-boundp}{slot-boundp-using-class}
+Although no //[[CL:Glossary:implementation]]// is required to do so, implementors are strongly encouraged to implement the //[[CL:Glossary:function]]// **slot-boundp** using the //[[CL:Glossary:function]]// **[[CL:Functions:slot-boundp-using-class]]** described in the //[[CL:Glossary:Metaobject Protocol]]//. 
 
 \issue{SLOT-MISSING-VALUES:SPECIFY} \issue{SLOT-VALUE-METACLASSES:LESS-MINIMAL}

@@ -1,15 +1,12 @@
 ====== Standard Generic Function FIND-METHOD ======
 
 ====Syntax====
-
-\DefgenWithValuesNewline find-method {generic-function method-qualifiers specializers ''&optional'' errorp} {method}
+  * **Newline find-method** //generic-function method-qualifiers specializers ''&optional'' errorp// → //method//
 
 ====Method Signatures====
-
-\Defmeth find-method {\vtop{\hbox{//generic-function// **[[CL:Types:standard-generic-function]]**} method-qualifiers specializers ''&optional'' errorp}}
+  * **find-method** //\vtop{\hbox{//generic-function// **[[CL:Types:standard-generic-function]]**// method-qualifiers specializers ''&optional'' errorp}}
 
 ====Arguments and Values====
-
 //generic-function// - a //[[CL:Glossary:generic function]]//.
 
 //method-qualifiers// - a //[[CL:Glossary:list]]//.
@@ -21,7 +18,6 @@
 //method// - a //[[CL:Glossary:method]]// //[[CL:Glossary:object]]//, or **[[CL:Constant Variables:nil]]**.
 
 ====Description====
-
 The //[[CL:Glossary:generic function]]// **[[CL:Functions:find-method]]** takes a //[[CL:Glossary:generic function]]// and returns the //[[CL:Glossary:method]]// //[[CL:Glossary:object]]// that agrees on //[[CL:Glossary:qualifiers]]// and //[[CL:Glossary:parameter specializers]]// with the //method-qualifiers// and //specializers// arguments of **[[CL:Functions:find-method]]**. //Method-qualifiers// contains the method //[[CL:Glossary:qualifiers]]// for the //[[CL:Glossary:method]]//. The order of the method //[[CL:Glossary:qualifiers]]// is significant. For a definition of agreement in this context, see section {\secref\SpecializerQualifierAgreement}.
 
 The //specializers// argument contains the parameter specializers for the //[[CL:Glossary:method]]//. It must correspond in length to the number of required arguments of the //[[CL:Glossary:generic function]]//, or an error is signaled. This means that to obtain the default //[[CL:Glossary:method]]// on a given //generic-function//, a //[[CL:Glossary:list]]// whose elements are \theclass{t} must be given.
@@ -29,26 +25,20 @@ The //specializers// argument contains the parameter specializers for the //[[CL
 If there is no such //[[CL:Glossary:method]]// and //errorp// is //[[CL:Glossary:true]]//, **[[CL:Functions:find-method]]** signals an error. If there is no such //[[CL:Glossary:method]]// and //errorp// is //[[CL:Glossary:false]]//, **[[CL:Functions:find-method]]** returns **[[CL:Constant Variables:nil]]**.
 
 ====Examples====
-
 <blockquote> (defmethod some-operation ((a integer) (b float)) (list a b)) → #<STANDARD-METHOD SOME-OPERATION (INTEGER FLOAT) 26723357> (find-method #'some-operation '() (mapcar #'find-class '(integer float))) → #<STANDARD-METHOD SOME-OPERATION (INTEGER FLOAT) 26723357> (find-method #'some-operation '() (mapcar #'find-class '(integer integer)))
 ▷ Error: No matching method (find-method #'some-operation '() (mapcar #'find-class '(integer integer)) nil) → NIL </blockquote>
 
 ====Affected By====
-
 **[[CL:Functions:add-method]]**, **[[CL:Macros:defclass]]**, **[[CL:Macros:defgeneric]]**, **[[CL:Macros:defmethod]]**
 
 ====Exceptional Situations====
-
 If the //specializers// argument does not correspond in length to the number of required arguments of the //generic-function//, an an error of type **[[CL:Types:error]]** is signaled.
 
 If there is no such //[[CL:Glossary:method]]// and //errorp// is //[[CL:Glossary:true]]//, **[[CL:Functions:find-method]]** signals an error of type **[[CL:Types:error]]**.
 
 ====See Also====
-
 {\secref\SpecializerQualifierAgreement}
 
 ====Notes====
-
 None.
-
 

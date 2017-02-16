@@ -1,55 +1,46 @@
 ====== Macro WITH-SLOTS ======
 
-
 ====Syntax====
-
 \DefmacWithValuesNewline with-slots {\paren{\starparam{slot-entry}} instance-form \starparam{declaration} \starparam{form}} {\starparam{result}}
 
 \auxbnf{slot-entry}{slot-name | \paren{variable-name slot-name}}
 
 ====Arguments and Values====
+//slot-name// - a //[[CL:Glossary:slot]]// //[[CL:Glossary:name]]//; not evaluated.
 
-//slot-name// - a //[[CL:Glossary:slot]]// //[[CL:Glossary:name]]//; \noeval.
-
-//variable-name// - a //[[CL:Glossary:variable name]]//; \noeval.
+//variable-name// - a //[[CL:Glossary:variable name]]//; not evaluated.
 
 //instance-form// - a //[[CL:Glossary:form]]//; evaluted to produce //instance//.
 
 //instance// - an //[[CL:Glossary:object]]//.
 
-//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
+//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; not evaluated.
 
 //forms// - an //[[CL:Glossary:implicit progn]]//.
 
 //results// - the //[[CL:Glossary:values]]// returned by the //forms//.
 
 ====Description====
-
 The macro **[[CL:Macros:with-slots]]** //[[CL:Glossary:establishes]]// a
 
-//[[CL:Glossary:lexical environment]]// for referring to the //[[CL:Glossary:slots]]// in the //instance// named by the given //slot-names// as though they were //[[CL:Glossary:variables]]//. Within such a context the value of the //[[CL:Glossary:slot]]// can be specified by using its slot name, as if it were a lexically bound variable. Both **[[CL:Macros:setf]]** and \specref{setq} can be used to set the value of the //[[CL:Glossary:slot]]//.
+//[[CL:Glossary:lexical environment]]// for referring to the //[[CL:Glossary:slot|slots]]// in the //instance// named by the given //slot-names// as though they were //[[CL:Glossary:variables]]//. Within such a context the value of the //[[CL:Glossary:slot]]// can be specified by using its slot name, as if it were a lexically bound variable. Both **[[CL:Macros:setf]]** and \specref{setq} can be used to set the value of the //[[CL:Glossary:slot]]//.
 
 The macro **[[CL:Macros:with-slots]]** translates an appearance of the slot name as a //[[CL:Glossary:variable]]// into a call to **[[CL:Functions:slot-value]]**.
 
 ====Examples====
-
 <blockquote> (defclass thing () ((x :initarg :x :accessor thing-x) (y :initarg :y :accessor thing-y))) → #<STANDARD-CLASS THING 250020173> (defmethod ([[CL:Macros:setf]] thing-x) :before (new-x (thing thing)) (format t "~&Changing X from ~D to ~D in ~S.~ (thing-x thing) new-x thing)) ([[CL:Macros:defparameter]] thing (make-instance 'thing :x 0 :y 1)) → #<THING 62310540> (with-slots (x y) thing (incf x) (incf y)) → 2 (values (thing-x thing) (thing-y thing)) → 1, 2 ([[CL:Macros:defparameter]] thing1 (make-instance 'thing :x 1 :y 2)) → #<THING 43135676> ([[CL:Macros:defparameter]] thing2 (make-instance 'thing :x 7 :y 8)) → #<THING 43147374> (with-slots ((x1 x) (y1 y)) thing1 (with-slots ((x2 x) (y2 y)) thing2 (list (list x1 (thing-x thing1) y1 (thing-y thing1) x2 (thing-x thing2) y2 (thing-y thing2)) ([[CL:Macros:defparameter]] x1 (+ y1 x2)) (list x1 (thing-x thing1) y1 (thing-y thing1) x2 (thing-x thing2) y2 (thing-y thing2)) ([[CL:Macros:setf]] (thing-x thing2) (list x1)) (list x1 (thing-x thing1) y1 (thing-y thing1) x2 (thing-x thing2) y2 (thing-y thing2)))))
 ▷ Changing X from 7 to (9) in #<THING 43147374>. → ((1 1 2 2 7 7 8 8) 9 (9 9 2 2 7 7 8 8) (9) (9 9 2 2 (9) (9) 8 8)) </blockquote>
 
 ====Affected By====
-
 **[[CL:Macros:defclass]]**
 
 ====Exceptional Situations====
-
 The consequences are undefined if any //slot-name// is not the name of a //[[CL:Glossary:slot]]// in the //instance//.
 
 ====See Also====
-
 **[[CL:Macros:with-accessors]]**, **[[CL:Functions:slot-value]]**, \specref{symbol-macrolet}
 
 ====Notes====
-
 A **[[CL:Macros:with-slots]]** expression of the form:
 
 ''''\openup1\jot\vbox{\settabs\+\cr \+**[[CL:Functions:(with-slots]]** (''{''slot-entry''}\sub 1 \ldots{''slot-entry''}\sub n'') ''instance-form'' ''{''form''}\sub 1 \ldots{''form''}\sub k'')\cr}''''

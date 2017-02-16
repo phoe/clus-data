@@ -1,109 +1,157 @@
 ====== Standard Generic Function MAKE-LOAD-FORM ======
 
-
 ====Syntax====
-
   * **make-load-form** //object ''&optional'' environment// → //creation-form[, initialization-form]//
 
 ====Method Signatures====
-
-\Defmeth make-load-form {//object// **[[CL:Types:standard-object]]** ''&optional'' environment} \Defmeth make-load-form {//object// **[[CL:Types:structure-object]]** ''&optional'' environment} \Defmeth make-load-form {//object// **[[CL:Types:condition]]** ''&optional'' environment} \Defmeth make-load-form {//object// **[[CL:Types:class]]** ''&optional'' environment}
+  * **make-load-form** (//object// **[[CL:Types:standard-object]]**) //''&optional'' environment//
+  * **make-load-form** (//object// **[[CL:Types:structure-object]]**) //''&optional'' environment//
+  * **make-load-form** (//object// **[[CL:Types:condition]]**) //''&optional'' environment//
+  * **make-load-form** )//object// **[[CL:Types:class]]**) //''&optional'' environment//
 
 ====Arguments and Values====
-
-//object// - an //[[CL:Glossary:object]]//.
-
-
-//environment// - an //[[CL:Glossary:environment object]]//.
-
-//creation-form// - a //[[CL:Glossary:form]]//.
-
-//initialization-form// - a //[[CL:Glossary:form]]//.
+  * //object// - an //[[CL:Glossary:object]]//.
+  * //environment// - an //[[CL:Glossary:environment object]]//.
+  * //creation-form// - a //[[CL:Glossary:form]]//.
+  * //initialization-form// - a //[[CL:Glossary:form]]//.
 
 ====Description====
+The //[[CL:Glossary:generic function]]// **make-load-form** creates and returns one or two //[[CL:Glossary:form|forms]]//, a //creation-form// and an //initialization-form//, that enable **[[CL:Functions:load]]** to construct an //[[CL:Glossary:object]]// equivalent to //object//.
 
-\TheGF{make-load-form} creates and returns one or two //[[CL:Glossary:forms]]//, a //creation-form// and an //initialization-form//, that enable **[[CL:Functions:load]]** to construct an //[[CL:Glossary:object]]// equivalent to //object//.
+//Environment// is an //[[CL:Glossary:environment object]]// corresponding to the //[[CL:Glossary:lexical environment]]// in which the //[[CL:Glossary:form|forms]]// will be processed.
 
-//Environment// is an //[[CL:Glossary:environment object]]// corresponding to the //[[CL:Glossary:lexical environment]]// in which the //[[CL:Glossary:forms]]// will be processed.
+The //[[CL:Glossary:file compiler]]// calls **make-load-form** to process certain //[[CL:Glossary:class|classes]]// of //[[CL:Glossary:literal objects]]//; see section {\secref\CallingMakeLoadForm}.
 
-The //[[CL:Glossary:file compiler]]// calls **[[CL:Functions:make-load-form]]** to process certain //[[CL:Glossary:classes]]// of //[[CL:Glossary:literal objects]]//; see section {\secref\CallingMakeLoadForm}.
+//[[CL:Glossary:Conforming programs]]// may call **make-load-form** directly, providing //object// is a //[[CL:Glossary:generalized instance]]// of **[[CL:Types:standard-object]]**, **[[CL:Types:structure-object]]**, or **[[CL:Types:condition]]**.
 
-//[[CL:Glossary:Conforming programs]]// may call **[[CL:Functions:make-load-form]]** directly, providing //object// is a //[[CL:Glossary:generalized instance]]// of
-
-**[[CL:Types:standard-object]]**, **[[CL:Types:structure-object]]**, or **[[CL:Types:condition]]**.
-
-The creation form is a //[[CL:Glossary:form]]// that, when evaluated at **[[CL:Functions:load]]** time, should return an //[[CL:Glossary:object]]// that is equivalent to //object//. The exact meaning of equivalent depends on the //[[CL:Glossary:type]]// of //[[CL:Glossary:object]]// and is up to the programmer who defines a //[[CL:Glossary:method]]// for **[[CL:Functions:make-load-form]]**; see section {\secref\LiteralsInCompiledFiles}.
-
+The creation form is a //[[CL:Glossary:form]]// that, when evaluated at **[[CL:Functions:load]]** time, should return an //[[CL:Glossary:object]]// that is equivalent to //object//. The exact meaning of equivalent depends on the //[[CL:Glossary:type]]// of //[[CL:Glossary:object]]// and is up to the programmer who defines a //[[CL:Glossary:method]]// for **make-load-form**; see section {\secref\LiteralsInCompiledFiles}.
 
 The initialization form is a //[[CL:Glossary:form]]// that, when evaluated at **[[CL:Functions:load]]** time, should perform further initialization of the //[[CL:Glossary:object]]//. The value returned by the initialization form is ignored.
 
-If **[[CL:Functions:make-load-form]]** returns only one value, the initialization form is **[[CL:Constant Variables:nil]]**, which has no effect. If //object// appears as a constant in the initialization form, at **[[CL:Functions:load]]** time it will be replaced by the equivalent //[[CL:Glossary:object]]// constructed by the creation form; this is how the further initialization gains access to the //[[CL:Glossary:object]]//.
-
+If **make-load-form** returns only one value, the initialization form is **[[CL:Constant Variables:nil]]**, which has no effect. If //object// appears as a constant in the initialization form, at **[[CL:Functions:load]]** time it will be replaced by the equivalent //[[CL:Glossary:object]]// constructed by the creation form; this is how the further initialization gains access to the //[[CL:Glossary:object]]//.
 
 Both the //creation-form// and the //initialization-form// may contain references to any //[[CL:Glossary:externalizable object]]//. However, there must not be any circular dependencies in creation forms. An example of a circular dependency is when the creation form for the object ''X'' contains a reference to the object ''Y'', and the creation form for the object ''Y'' contains a reference to the object ''X''.
 
 Initialization forms are not subject to any restriction against circular dependencies, which is the reason that initialization forms exist; see the example of circular data structures below.
 
+The creation form for an //[[CL:Glossary:object]]// is always //[[CL:Glossary:evaluate|evaluated]]// before the initialization form for that //[[CL:Glossary:object]]//. When either the creation form or the initialization form references other //[[CL:Glossary:object|objects]]// that have not been referenced earlier in the //[[CL:Glossary:file]]// being //[[CL:Glossary:compile|compiled]]//, the //[[CL:Glossary:compiler]]// ensures that all of the referenced //[[CL:Glossary:object|objects]]// have been created before //[[CL:Glossary:evaluating]]// the referencing //[[CL:Glossary:form]]//. When the referenced //[[CL:Glossary:object]]// is of a //[[CL:Glossary:type]]// which the //[[CL:Glossary:file compiler]]// processes using **make-load-form**, this involves //[[CL:Glossary:evaluating]]// the creation form returned for it. (This is the reason for the prohibition against circular references among creation forms).
 
-The creation form for an //[[CL:Glossary:object]]// is always //[[CL:Glossary:evaluated]]// before the initialization form for that //[[CL:Glossary:object]]//. When either the creation form or the initialization form references other //[[CL:Glossary:object|objects]]// that have not been referenced earlier in the //[[CL:Glossary:file]]// being //[[CL:Glossary:compiled]]//, the //[[CL:Glossary:compiler]]// ensures that all of the referenced //[[CL:Glossary:object|objects]]// have been created before //[[CL:Glossary:evaluating]]// the referencing //[[CL:Glossary:form]]//. When the referenced //[[CL:Glossary:object]]// is of a //[[CL:Glossary:type]]// which
+Each initialization form is //[[CL:Glossary:evaluate|evaluated]]// as soon as possible after its associated creation form, as determined by data flow. If the initialization form for an //[[CL:Glossary:object]]// does not reference any other //[[CL:Glossary:object|objects]]// not referenced earlier in the //[[CL:Glossary:file]]// and processed by
 
-the //[[CL:Glossary:file compiler]]// processes using **[[CL:Functions:make-load-form]]**, this involves //[[CL:Glossary:evaluating]]// the creation form returned for it. (This is the reason for the prohibition against circular references among creation forms).
+the //[[CL:Glossary:file compiler]]// using **make-load-form**, the initialization form is evaluated immediately after the creation form. If a creation or initialization form ''F'' does contain references to such //[[CL:Glossary:object|objects]]//, the creation forms for those other objects are evaluated before ''F'', and the initialization forms for those other //[[CL:Glossary:object|objects]]// are also evaluated before ''F'' whenever they do not depend on the //[[CL:Glossary:object]]// created or initialized by ''F''. Where these rules do not uniquely determine an order of //[[CL:Glossary:evaluation]]// between two creation/initialization forms, the order of //[[CL:Glossary:evaluation]]// is unspecified.
 
-Each initialization form is //[[CL:Glossary:evaluated]]// as soon as possible after its associated creation form, as determined by data flow. If the initialization form for an //[[CL:Glossary:object]]// does not reference any other //[[CL:Glossary:object|objects]]// not referenced earlier in the //[[CL:Glossary:file]]// and processed by
+While these creation and initialization forms are being evaluated, the //[[CL:Glossary:object|objects]]// are possibly in an uninitialized state, analogous to the state of an //[[CL:Glossary:object]]// between the time it has been created by **[[CL:Functions:allocate-instance]]** and it has been processed fully by **[[CL:Functions:initialize-instance]]**. Programmers writing //[[CL:Glossary:method|methods]]// for **make-load-form** must take care in manipulating //[[CL:Glossary:object|objects]]// not to depend on //[[CL:Glossary:slot|slots]]// that have not yet been initialized.
 
-the //[[CL:Glossary:file compiler]]// using **[[CL:Functions:make-load-form]]**, the initialization form is evaluated immediately after the creation form. If a creation or initialization form ''F'' does contain references to such //[[CL:Glossary:object|objects]]//, the creation forms for those other objects are evaluated before ''F'', and the initialization forms for those other //[[CL:Glossary:object|objects]]// are also evaluated before ''F'' whenever they do not depend on the //[[CL:Glossary:object]]// created or initialized by ''F''. Where these rules do not uniquely determine an order of //[[CL:Glossary:evaluation]]// between two creation/initialization forms, the order of //[[CL:Glossary:evaluation]]// is unspecified.
+It is //[[CL:Glossary:implementation-dependent]]// whether **[[CL:Functions:load]]** calls **[[CL:Functions:eval]]** on the //[[CL:Glossary:form|forms]]// or does some other operation that has an equivalent effect. For example, the //[[CL:Glossary:form|forms]]// might be translated into different but equivalent //[[CL:Glossary:form|forms]]// and then evaluated, they might be compiled and the resulting functions called by **[[CL:Functions:load]]**, or they might be interpreted by a special-purpose function different from **[[CL:Functions:eval]]**. All that is required is that the effect be equivalent to evaluating the //[[CL:Glossary:form|forms]]//.
 
-While these creation and initialization forms are being evaluated, the //[[CL:Glossary:object|objects]]// are possibly in an uninitialized state, analogous to the state of an //[[CL:Glossary:object]]// between the time it has been created by **[[CL:Functions:allocate-instance]]** and it has been processed fully by **[[CL:Functions:initialize-instance]]**. Programmers writing //[[CL:Glossary:methods]]// for **[[CL:Functions:make-load-form]]** must take care in manipulating //[[CL:Glossary:object|objects]]// not to depend on //[[CL:Glossary:slots]]// that have not yet been initialized.
+The //[[CL:Glossary:method]]// //[[CL:Glossary:specialized]]// on **[[CL:Types:class]]** returns a creation //[[CL:Glossary:form]]// using the //[[CL:Glossary:name]]// of the //[[CL:Glossary:class]]// if the //[[CL:Glossary:class]]// has a //[[CL:Glossary:proper name]]// in //environment//, signaling an error of type **[[CL:Types:error]]** if it does not have a //[[CL:Glossary:proper name]]//. //[[CL:Glossary:evaluation|Evaluation]]// of the creation //[[CL:Glossary:form]]// uses the //[[CL:Glossary:name]]// to find the //[[CL:Glossary:class]]// with that //[[CL:Glossary:name]]//, as if by //[[CL:Glossary:calling]]// **[[CL:Functions:find-class]]**. If a //[[CL:Glossary:class]]// with that //[[CL:Glossary:name]]// has not been defined, then a //[[CL:Glossary:class]]// may be computed in an //[[CL:Glossary:implementation-defined]]// manner. If a //[[CL:Glossary:class]]// cannot be returned as the result of //[[CL:Glossary:evaluating]]// the creation //[[CL:Glossary:form]]//, then an error of type **[[CL:Types:error]]** is signaled.
 
-It is //[[CL:Glossary:implementation-dependent]]// whether **[[CL:Functions:load]]** calls **[[CL:Functions:eval]]** on the //[[CL:Glossary:forms]]// or does some other operation that has an equivalent effect. For example, the //[[CL:Glossary:forms]]// might be translated into different but equivalent //[[CL:Glossary:forms]]// and then evaluated, they might be compiled and the resulting functions called by **[[CL:Functions:load]]**, or they might be interpreted by a special-purpose function different from **[[CL:Functions:eval]]**. All that is required is that the effect be equivalent to evaluating the //[[CL:Glossary:forms]]//.
-
-The //[[CL:Glossary:method]]// //[[CL:Glossary:specialized]]// on **[[CL:Types:class]]** returns a creation //[[CL:Glossary:form]]// using the //[[CL:Glossary:name]]// of the //[[CL:Glossary:class]]// if the //[[CL:Glossary:class]]// has a //[[CL:Glossary:proper name]]// in //environment//, signaling an error of type **[[CL:Types:error]]** if it does not have a //[[CL:Glossary:proper name]]//. //[[CL:Glossary:Evaluation]]// of the creation //[[CL:Glossary:form]]// uses the //[[CL:Glossary:name]]// to find the //[[CL:Glossary:class]]// with that //[[CL:Glossary:name]]//, as if by //[[CL:Glossary:calling]]// **[[CL:Functions:find-class]]**. If a //[[CL:Glossary:class]]// with that //[[CL:Glossary:name]]// has not been defined, then a //[[CL:Glossary:class]]// may be computed in an //[[CL:Glossary:implementation-defined]]// manner. If a //[[CL:Glossary:class]]// cannot be returned as the result of //[[CL:Glossary:evaluating]]// the creation //[[CL:Glossary:form]]//, then an error of type **[[CL:Types:error]]** is signaled.
-
-Both //[[CL:Glossary:conforming implementations]]// and //[[CL:Glossary:conforming programs]]// may further //[[CL:Glossary:specialize]]// **[[CL:Functions:make-load-form]]**.
+Both //[[CL:Glossary:conforming implementations]]// and //[[CL:Glossary:conforming programs]]// may further //[[CL:Glossary:specialize]]// **make-load-form**.
 
 ====Examples====
+Note that this first example below only works because ''x'' and ''y'' do not contain information which refers back to the //[[CL:Glossary:object]]// itself. For a more general solution to this problem, see the revised example below. 
+<blockquote>
+([[CL:Macros:defclass]] obj () 
+  ((x :initarg :x :reader obj-x) 
+   (y :initarg :y :reader obj-y) 
+   (dist :accessor obj-dist))) <r>#<STANDARD-CLASS OBJ 250020030> </r>
+([[CL:Macros:defmethod]] shared-initialize :after ((self obj) slot-names &rest keys) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] slot-names keys)) 
+  ([[CL:Macros:unless]] ([[CL:Functions:slot-boundp]] self 'dist) 
+    ([[CL:Macros:setf]] (obj-dist self) ([[CL:Functions:sqrt]] ([[CL:Functions:math-add|+]] ([[CL:Functions:expt]] (obj-x self) 2) ([[CL:Functions:expt]] (obj-y self) 2))))))
+<r>#<STANDARD-METHOD SHARED-INITIALIZE (:AFTER) (OBJ T) 26266714> </r>
+([[CL:Macros:defmethod]] make-load-form ((self obj) &optional environment) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] environment)) 
+  `([[CL:Functions:make-instance]] ',([[CL:Functions:class-of]] self) :x ',(obj-x self) :y ',(obj-y self))) 
+<r>#<STANDARD-METHOD MAKE-LOAD-FORM (OBJ) 26267532> </r>
+([[CL:Macros:defparameter]] *obj1* ([[CL:Functions:make-instance]] 'obj :x 3.0 :y 4.0)) <r>#<OBJ 26274136> </r>
+(obj-dist *obj1*) <r>5.0 </r>
+(make-load-form *obj1*) <r>(MAKE-INSTANCE 'OBJ :X '3.0 :Y '4.0)</r>
+</blockquote>
 
-<blockquote> (defclass obj () ((x :initarg :x :reader obj-x) (y :initarg :y :reader obj-y) (dist :accessor obj-dist))) → #<STANDARD-CLASS OBJ 250020030> (defmethod shared-initialize :after ((self obj) slot-names &rest keys) (declare (ignore slot-names keys)) (unless (slot-boundp self 'dist) ([[CL:Macros:setf]] (obj-dist self) (sqrt (+ (expt (obj-x self) 2) (expt (obj-y self) 2)))))) → #<STANDARD-METHOD SHARED-INITIALIZE (:AFTER) (OBJ T) 26266714> (defmethod make-load-form ((self obj) &optional environment) (declare (ignore environment)) ;; Note that this definition only works because X and Y do not ;; contain information which refers back to the object itself. ;; For a more general solution to this problem, see revised example below. `(make-instance ',(class-of self) :x ',(obj-x self) :y ',(obj-y self))) → #<STANDARD-METHOD MAKE-LOAD-FORM (OBJ) 26267532> ([[CL:Macros:defparameter]] obj1 (make-instance 'obj :x 3.0 :y 4.0)) → #<OBJ 26274136> (obj-dist obj1) → 5.0 (make-load-form obj1) → (MAKE-INSTANCE 'OBJ :X '3.0 :Y '4.0) </blockquote>
+In the above example, an equivalent //[[CL:Glossary:instance]]// of ''obj'' is reconstructed by using the values of two of its //[[CL:Glossary:slot|slots]]//. The value of the third //[[CL:Glossary:slot]]// is derived from those two values.
 
-In the above example, an equivalent //[[CL:Glossary:instance]]// of ''obj'' is reconstructed by using the values of two of its //[[CL:Glossary:slots]]//. The value of the third //[[CL:Glossary:slot]]// is derived from those two values.
+----
 
-\medbreak Another way to write the **[[CL:Functions:make-load-form]]** //[[CL:Glossary:method]]// in that example is to use **[[CL:Functions:make-load-form-saving-slots]]**. The code it generates might yield a slightly different result from the **[[CL:Functions:make-load-form]]** //[[CL:Glossary:method]]// shown above, but the operational effect will be the same. For example:
+Another way to write the **make-load-form** //[[CL:Glossary:method]]// in that example is to use **[[CL:Functions:make-load-form-saving-slots]]**. The code it generates might yield a slightly different result from the **make-load-form** //[[CL:Glossary:method]]// shown above, but the operational effect will be the same. 
 
-\smallbreak <blockquote> ;; Redefine method defined above. (defmethod make-load-form ((self obj) &optional environment) (make-load-form-saving-slots self :slot-names '(x y) :environment environment)) → #<STANDARD-METHOD MAKE-LOAD-FORM (OBJ) 42755655> ;; Try MAKE-LOAD-FORM on object created above. (make-load-form obj1) → (ALLOCATE-INSTANCE '#<STANDARD-CLASS OBJ 250020030>), (PROGN (SETF (SLOT-VALUE '#<OBJ 26274136> 'X) '3.0) (SETF (SLOT-VALUE '#<OBJ 26274136> 'Y) '4.0) (INITIALIZE-INSTANCE '#<OBJ 26274136>)) </blockquote>
+In the below example, we redefine method defined above.
 
-\medbreak In the following example, //[[CL:Glossary:instances]]// of ''my-frob'' are "interned" in some way. An equivalent //[[CL:Glossary:instance]]// is reconstructed by using the value of the name slot as a key for searching existing //[[CL:Glossary:object|objects]]//. In this case the programmer has chosen to create a new //[[CL:Glossary:object]]// if no existing //[[CL:Glossary:object]]// is found; alternatively an error could have been signaled in that case.
+<blockquote>
+([[CL:Macros:defmethod]] make-load-form ((self obj) &optional environment)
+  ([[CL:Functions:make-load-form-saving-slots]] self :slot-names '(x y) :environment environment)) 
+<r>#<STANDARD-METHOD MAKE-LOAD-FORM (OBJ) 42755655></r>
+(make-load-form obj1)
+<r>([[CL:Functions:ALLOCATE-INSTANCE]] '#<[[CL:Types:STANDARD-CLASS]] OBJ 250020030>)
+([[CL:Special Operators:PROGN]] 
+  ([[CL:Macros:SETF]] ([[CL:Functions:SLOT-VALUE]] '#<OBJ 26274136> 'X) '3.0) 
+  ([[CL:Macros:SETF]] ([[CL:Functions:SLOT-VALUE]] '#<OBJ 26274136> 'Y) '4.0)
+  ([[CL:Functions:INITIALIZE-INSTANCE]] '#<OBJ 26274136>)) </r>
+</blockquote>
 
-\smallbreak <blockquote> (defclass my-frob () ((name :initarg :name :reader my-name))) (defmethod make-load-form ((self my-frob) &optional environment) (declare (ignore environment)) `(find-my-frob ',(my-name self) :if-does-not-exist :create)) </blockquote>
+----
 
-\medbreak In the following example, the data structure to be dumped is circular, because each parent has a list of its children and each child has a reference back to its parent. If **[[CL:Functions:make-load-form]]** is called on one //[[CL:Glossary:object]]// in such a structure, the creation form creates an equivalent //[[CL:Glossary:object]]// and fills in the children slot, which forces creation of equivalent //[[CL:Glossary:object|objects]]// for all of its children, grandchildren, etc. At this point none of the parent //[[CL:Glossary:slots]]// have been filled in. The initialization form fills in the parent //[[CL:Glossary:slot]]//, which forces creation of an equivalent //[[CL:Glossary:object]]// for the parent if it was not already created. Thus the entire tree is recreated at **[[CL:Functions:load]]** time. At compile time, **[[CL:Functions:make-load-form]]** is called once for each //[[CL:Glossary:object]]// in the tree. All of the creation forms are evaluated, in //[[CL:Glossary:implementation-dependent]]// order, and then all of the initialization forms are evaluated, also in //[[CL:Glossary:implementation-dependent]]// order.
+In the following example, //[[CL:Glossary:instances]]// of ''my-frob'' are "interned" in some way. An equivalent //[[CL:Glossary:instance]]// is reconstructed by using the value of the name slot as a key for searching existing //[[CL:Glossary:object|objects]]//. In this case the programmer has chosen to create a new //[[CL:Glossary:object]]// if no existing //[[CL:Glossary:object]]// is found; alternatively an error could have been signaled in that case.
 
-\smallbreak <blockquote> (defclass tree-with-parent () ((parent :accessor tree-parent) (children :initarg :children))) (defmethod make-load-form ((x tree-with-parent) &optional environment) (declare (ignore environment)) (values ;; creation form `(make-instance ',(class-of x) :children ',(slot-value x 'children)) ;; initialization form `([[CL:Macros:setf]] (tree-parent ',x) ',(slot-value x 'parent)))) </blockquote>
+<blockquote> 
+(defclass my-frob () 
+  ((name :initarg :name :reader my-name)))
+<r>#<STANDARD-CLASS MY-FROB 250023588> </r>
 
-\medbreak In the following example, the data structure to be dumped has no special properties and an equivalent structure can be reconstructed simply by reconstructing the //[[CL:Glossary:slots]]//' contents.
+(defmethod make-load-form ((self my-frob) &optional environment) 
+  (declare (ignore environment)) 
+  `(find-my-frob ',(my-name self) :if-does-not-exist :create))
+<r>#<STANDARD-METHOD MAKE-LOAD-FORM (MY-FROB) 42518082></r>
+</blockquote>
 
-\smallbreak <blockquote> (defstruct my-struct a b c) (defmethod make-load-form ((s my-struct) &optional environment) (make-load-form-saving-slots s :environment environment)) </blockquote>
+----
+
+In the following example, the data structure to be dumped is circular, because each parent has a list of its children and each child has a reference back to its parent. If **make-load-form** is called on one //[[CL:Glossary:object]]// in such a structure, the creation form creates an equivalent //[[CL:Glossary:object]]// and fills in the children slot, which forces creation of equivalent //[[CL:Glossary:object|objects]]// for all of its children, grandchildren, etc. At this point none of the parent //[[CL:Glossary:slot|slots]]// have been filled in. The initialization form fills in the parent //[[CL:Glossary:slot]]//, which forces creation of an equivalent //[[CL:Glossary:object]]// for the parent if it was not already created. Thus the entire tree is recreated at **[[CL:Functions:load]]** time. At compile time, **make-load-form** is called once for each //[[CL:Glossary:object]]// in the tree. All of the creation forms are evaluated, in //[[CL:Glossary:implementation-dependent]]// order, and then all of the initialization forms are evaluated, also in //[[CL:Glossary:implementation-dependent]]// order.
+
+
+<blockquote> 
+([[CL:Macros:defclass]] tree-with-parent () 
+  ((parent :accessor tree-parent) 
+   (children :initarg :children)))
+<r>#<STANDARD-CLASS TREE-WITH-PARENT 250022183> </r>
+
+([[CL:Macros:defmethod]] make-load-form ((x tree-with-parent) &optional environment) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] environment)) 
+  ([[CL:Functions:values]] 
+     `([[CL:Functions:make-instance]] ',([[CL:Functions:class-of]] x) :children ',([[CL:Functions:slot-value]] x 'children))
+     `([[CL:Macros:setf]] (tree-parent ',x) ',([[CL:Functions:slot-value]] x 'parent))))
+<r>#<STANDARD-METHOD MAKE-LOAD-FORM (TREE-WITH-PARENT) 42019926></r>
+</blockquote>
+
+----
+
+In the following example, the data structure to be dumped has no special properties and an equivalent structure can be reconstructed simply by reconstructing the //[[CL:Glossary:slot|slots]]//' contents.
+
+<blockquote>
+(defstruct my-struct a b c) <r>MY-STRUCT</r>
+(defmethod make-load-form ((s my-struct) &optional environment) 
+  (make-load-form-saving-slots s :environment environment))
+<r>#<STANDARD-METHOD MAKE-LOAD-FORM (MY-STRUCT) 42019519></r>
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
+The //[[CL:Glossary:method|methods]]// //[[CL:Glossary:specialized]]// on **[[CL:Types:standard-object]]**, **[[CL:Types:structure-object]]**, and **[[CL:Types:condition]]** all signal an error of type **[[CL:Types:error]]**.
 
-The //[[CL:Glossary:methods]]// //[[CL:Glossary:specialized]]// on **[[CL:Types:standard-object]]**, **[[CL:Types:structure-object]]**, and **[[CL:Types:condition]]** all signal an error of type **[[CL:Types:error]]**.
-
-
-It is //[[CL:Glossary:implementation-dependent]]// whether //[[CL:Glossary:calling]]// **[[CL:Functions:make-load-form]]** on a //[[CL:Glossary:generalized instance]]// of a //[[CL:Glossary:system class]]// signals an error or returns creation and initialization //[[CL:Glossary:forms]]//.
+It is //[[CL:Glossary:implementation-dependent]]// whether //[[CL:Glossary:calling]]// **make-load-form** on a //[[CL:Glossary:generalized instance]]// of a //[[CL:Glossary:system class]]// signals an error or returns creation and initialization //[[CL:Glossary:form|forms]]//.
 
 ====See Also====
-
-**[[CL:Functions:compile-file]]**, **[[CL:Functions:make-load-form-saving-slots]]**, {\secref\CallingMakeLoadForm} {\secref\Evaluation}, {\secref\Compilation}
+  * **[[CL:Functions:compile-file|Function COMPILE-FILE]]**
+  * **[[CL:Functions:make-load-form-saving-slots|Function MAKE-LOAD-FORM-SAVING-SLOTS]]**
+  * {\secref\CallingMakeLoadForm}
+  * {\secref\Evaluation}
+  * {\secref\Compilation}
 
 ====Notes====
+The //[[CL:Glossary:file compiler]]// calls **make-load-form** in specific circumstances detailed in \secref\CallingMakeLoadForm.
 
-The //[[CL:Glossary:file compiler]]//
-
-calls **[[CL:Functions:make-load-form]]** in specific circumstances detailed in \secref\CallingMakeLoadForm.
-
-Some //[[CL:Glossary:implementations]]// may provide facilities for defining new //[[CL:Glossary:subclasses]]// of //[[CL:Glossary:classes]]// which are specified as //[[CL:Glossary:system classes]]//. (Some likely candidates include **[[CL:Types:generic-function]]**, **[[CL:Types:method]]**, and **[[CL:Types:stream]]**). Such //[[CL:Glossary:implementations]]// should document how the //[[CL:Glossary:file compiler]]// processes //[[CL:Glossary:instances]]// of such //[[CL:Glossary:classes]]// when encountered as //[[CL:Glossary:literal objects]]//, and should document any relevant //[[CL:Glossary:methods]]// for **[[CL:Functions:make-load-form]]**.
+Some //[[CL:Glossary:implementation|implementations]]// may provide facilities for defining new //[[CL:Glossary:subclasses]]// of //[[CL:Glossary:class|classes]]// which are specified as //[[CL:Glossary:system classes]]//. (Some likely candidates include **[[CL:Types:generic-function]]**, **[[CL:Types:method]]**, and **[[CL:Types:stream]]**). Such //[[CL:Glossary:implementation|implementations]]// should document how the //[[CL:Glossary:file compiler]]// processes //[[CL:Glossary:instances]]// of such //[[CL:Glossary:class|classes]]// when encountered as //[[CL:Glossary:literal objects]]//, and should document any relevant //[[CL:Glossary:method|methods]]// for **make-load-form**.
 
 \issue{MAKE-LOAD-FORM-CONFUSION:REWRITE} \issue{LOAD-OBJECTS:MAKE-LOAD-FORM}
