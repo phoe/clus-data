@@ -1,0 +1,100 @@
+====== Macro DEFGENERIC ======
+
+====Syntax====
+  * defgeneric //function-name// //gf-lambda-list// ⟦//option// | //method-description''*''//}⟧ → //new-generic//
+
+<blockquote>
+option ::= (**:argument-precedence-order** {//parameter-name//}''+'') |
+           (**[[CL:Symbols:declare]]** {//gf-declaration//}''+'') |
+           (**:documentation** //gf-documentation//) |
+           (**:method-combination** //method-combination// 
+                                {//method-combination-argument//}''*'') |
+           (**:generic-function-class** //generic-function-class//) |
+           (**:method-class** //method-class//)
+method-description ::= (**:method** {//method-qualifier//}''*'' //specialized-lambda-list//
+                        ⟦{//declaration//''*'' | //documentation//}⟧ {//form//}''*'')
+</blockquote>
+
+====Arguments and Values====
+  * //function-name// - a //[[CL:Glossary:function name]]//.
+  * //generic-function-class// - a //[[CL:Glossary:non-nil]]// //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:class]]//.
+  * //gf-declaration// - an **[[CL:Declarations:optimize]]** //[[CL:Glossary:declaration specifier]]//; other //[[CL:Glossary:declaration specifiers]]// are not permitted.
+  * //gf-documentation// - a //[[CL:Glossary:string]]//; not evaluated.
+  * //gf-lambda-list// - a //[[CL:Glossary:generic function lambda list]]//.
+  * //method-class// - a //[[CL:Glossary:non-nil]]// //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:class]]//.
+  * //method-combination-argument// - an //[[CL:Glossary:object.]]//
+  * //method-combination-name// - a //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:method combination]]// //[[CL:Glossary:type]]//.
+  * //method-qualifiers//, //specialized-lambda-list//, //declarations//, //documentation//, //forms// - as per **[[CL:Macros:defmethod]]**.
+  * //new-generic// - the //[[CL:Glossary:generic function]]// //[[CL:Glossary:object]]//.
+  * //parameter-name// - a //[[CL:Glossary:symbol]]// that names a //[[CL:Glossary:required parameter]]// in the //lambda-list//. (If the **'':argument-precedence-order''** option is specified, each //[[CL:Glossary:required parameter]]// in the //lambda-list// must be used exactly once as a //parameter-name//.)
+
+====Description====
+The macro **defgeneric** is used to define a //[[CL:Glossary:generic function]]// or to specify options and declarations that pertain to a //[[CL:Glossary:generic function]]// as a whole.
+
+If //function-name// is a //[[CL:Glossary:list]]// it must be of the form ''([[CL:Macros:setf]] //symbol//)''. If ''([[CL:Functions:fboundp]] //function-name//)'' is //[[CL:Glossary:false]]//, a new //[[CL:Glossary:generic function]]// is created.
+
+If ''([[CL:Functions:fdefinition]] //function-name//)'' is a //[[CL:Glossary:generic function]]//, that //[[CL:Glossary:generic function]]// is modified. If //function-name// names an //[[CL:Glossary:ordinary function]]//, a //[[CL:Glossary:macro]]//, or a //[[CL:Glossary:special operator]]//, an error is signaled.
+
+The effect of the **defgeneric** macro is as if the following three steps were performed: first, //[[CL:Glossary:method|methods]]// defined by previous **defgeneric** //[[CL:Glossary:form|forms]]// are removed; second, **[[CL:Functions:ensure-generic-function]]** is called; and finally, //[[CL:Glossary:method|methods]]// specified by the current **defgeneric** //[[CL:Glossary:form]]// are added to the //[[CL:Glossary:generic function]]//.
+
+Each //method-description// defines a //[[CL:Glossary:method]]// on the //[[CL:Glossary:generic function]]//. The //[[CL:Glossary:lambda list]]// of each //[[CL:Glossary:method]]// must be congruent with the //[[CL:Glossary:lambda list]]// specified by the //gf-lambda-list// option. If no //[[CL:Glossary:method]]// descriptions are specified and a //[[CL:Glossary:generic function]]// of the same name does not already exist, a //[[CL:Glossary:generic function]]// with no //[[CL:Glossary:method|methods]]// is created.
+
+The //gf-lambda-list// argument of **defgeneric** specifies the shape of //[[CL:Glossary:lambda lists]]// for the //[[CL:Glossary:method|methods]]// on this //[[CL:Glossary:generic function]]//. All //[[CL:Glossary:method|methods]]// on the resulting //[[CL:Glossary:generic function]]// must have //[[CL:Glossary:lambda lists]]// that are congruent with this shape. If a **defgeneric** form is evaluated and some //[[CL:Glossary:method|methods]]// for that //[[CL:Glossary:generic function]]// have //[[CL:Glossary:lambda lists]]// that are not congruent with that given in the **defgeneric** form, an error is signaled. For further details on method congruence, see section {\secref\GFMethodLambdaListCongruency}.
+
+The //[[CL:Glossary:generic function]]// passes to the //[[CL:Glossary:method]]// all the argument values passed to it, and only those; default values are not supported. Note that optional and keyword arguments in method definitions, however, can have default initial value forms and can use supplied-p parameters.
+
+The following options are provided.
+
+Except as otherwise noted, a given option may occur only once.
+
+  * The **'':argument-precedence-order''** option is used to specify the order in which the required arguments in a call to the //[[CL:Glossary:generic function]]// are tested for specificity when selecting a particular //[[CL:Glossary:method]]//. Each required argument, as specified in the //gf-lambda-list// argument, must be included exactly once as a //parameter-name// so that the full and unambiguous precedence order is supplied. If this condition is not met, an error is signaled.
+  * The **[[CL:Symbols:declare]]** option is used to specify declarations that pertain to the //[[CL:Glossary:generic function]]//. An **[[CL:Declarations:optimize]]** //[[CL:Glossary:declaration specifier]]// is allowed. It specifies whether method selection should be optimized for speed or space, but it has no effect on //[[CL:Glossary:method|methods]]//. To control how a //[[CL:Glossary:method]]// is optimized, an **[[CL:Declarations:optimize]]** declaration must be placed directly in the **[[CL:Macros:defmethod]]** //[[CL:Glossary:form]]// or method description. The optimization qualities **speed** and **space** are the only qualities this standard requires, but an implementation can extend the Common Lisp Object System to recognize other qualities. A simple implementation that has only one method selection technique and ignores **[[CL:Declarations:optimize]]** //[[CL:Glossary:declaration specifiers]]// is valid.
+    * The **[[CL:Declarations:special]]**, **[[CL:Declarations:ftype]]**, **[[CL:Declarations:function]]**, **[[CL:Declarations:inline]]**, **[[CL:Declarations:notinline]]**, and **[[CL:Declarations:declaration]]** declarations are not permitted. Individual implementations can extend the **[[CL:Symbols:declare]]** option to support additional declarations. If an implementation notices a //[[CL:Glossary:declaration specifier]]// that it does not support and that has not been proclaimed as a non-standard //[[CL:Glossary:declaration identifier]]// name in a **[[CL:Declarations:declaration]]** //[[CL:Glossary:proclamation]]//, it should issue a warning. 
+    * The **[[CL:Symbols:declare]]** option may be specified more than once. The effect is the same as if the lists of //[[CL:Glossary:declaration specifiers]]// had been appended together into a single list and specified as a single **[[CL:Symbols:declare]]** option.
+  * The **'':documentation''** argument is a //[[CL:Glossary:documentation string]]// to be attached to the //[[CL:Glossary:generic function]]// //[[CL:Glossary:object]]//, and to be attached with kind **[[CL:Types:function]]** to the //function-name//.
+  * The **'':generic-function-class''** option may be used to specify that the //[[CL:Glossary:generic function]]// is to have a different //[[CL:Glossary:class]]// than the default provided by the system (the **[[CL:Types:standard-generic-function]]** //[[CL:Glossary:class]]//). The //class-name// argument is the name of a //[[CL:Glossary:class]]// that can be the //[[CL:Glossary:class]]// of a //[[CL:Glossary:generic function]]//. If //function-name// specifies an existing //[[CL:Glossary:generic function]]// that has a different value for the **'':generic-function-class''** argument and the new generic function //[[CL:Glossary:class]]// is compatible with the old, **[[CL:Functions:change-class]]** is called to change the //[[CL:Glossary:class]]// of the //[[CL:Glossary:generic function]]//; otherwise an error is signaled.
+  * The **'':method-class''** option is used to specify that all //[[CL:Glossary:method|methods]]// on this //[[CL:Glossary:generic function]]// are to have a different //[[CL:Glossary:class]]// from the default provided by the system (the **[[CL:Functions:standard-method]]** //[[CL:Glossary:class]]//). The //class-name// argument is the name of a //[[CL:Glossary:class]]// that is capable of being the //[[CL:Glossary:class]]// of a //[[CL:Glossary:method]]//.
+  * The **'':method-combination''** option is followed by a symbol that names a type of method combination. The arguments (if any) that follow that symbol depend on the type of method combination. Note that the standard method combination type does not support any arguments. However, all types of method combination defined by the short form of **[[CL:Macros:define-method-combination]]** accept an optional argument named //order//, defaulting to **'':most-specific-first''**, where a value of **'':most-specific-last''** reverses the order of the primary //[[CL:Glossary:method|methods]]// without affecting the order of the auxiliary //[[CL:Glossary:method|methods]]//.
+
+----
+
+The //method-description// arguments define //[[CL:Glossary:method|methods]]// that will be associated with the //[[CL:Glossary:generic function]]//. The //method-qualifier// and //specialized-lambda-list// arguments in a method description are the same as for **[[CL:Macros:defmethod]]**.
+
+The //form// arguments specify the method body. The body of the //[[CL:Glossary:method]]// is enclosed in an //[[CL:Glossary:implicit block]]//. If //function-name// is a //[[CL:Glossary:symbol]]//, this block bears the same name as the //[[CL:Glossary:generic function]]//. If //function-name// is a //[[CL:Glossary:list]]// of the form **[[CL:Functions:(setf //symbol//)]]**, the name of the block is //symbol//.
+
+Implementations can extend **defgeneric** to include other options. It is required that an implementation signal an error if it observes an option that is not implemented locally.
+
+**defgeneric** is not required to perform any compile-time side effects. In particular, the //[[CL:Glossary:method|methods]]// are not installed for invocation during compilation. An //[[CL:Glossary:implementation]]// may choose to store information about the //[[CL:Glossary:generic function]]// for the purposes of compile-time error-checking (such as checking the number of arguments on calls, or noting that a definition for the function name has been seen).
+
+====Examples====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+If //function-name// names an //[[CL:Glossary:ordinary function]]//, a //[[CL:Glossary:macro]]//, or a //[[CL:Glossary:special operator]]//, an error of type **[[CL:Types:program-error]]** is signaled.
+
+Each required argument, as specified in the //gf-lambda-list// argument, must be included exactly once as a //parameter-name//, or an error of type **[[CL:Types:program-error]]** is signaled.
+
+The //[[CL:Glossary:lambda list]]// of each //[[CL:Glossary:method]]// specified by a //method-description// must be congruent with the //[[CL:Glossary:lambda list]]// specified by the //gf-lambda-list// option, or an error of type **[[CL:Types:error]]** is signaled.
+
+If a **defgeneric** form is evaluated and some //[[CL:Glossary:method|methods]]// for that //[[CL:Glossary:generic function]]// have //[[CL:Glossary:lambda lists]]// that are not congruent with that given in the **defgeneric** form, an error of type **[[CL:Types:error]]** is signaled.
+
+A given //option// may occur only once, or an error of type **[[CL:Types:program-error]]** is signaled.
+
+If //function-name// specifies an existing //[[CL:Glossary:generic function]]// that has a different value for the **'':generic-function-class''** argument and the new generic function //[[CL:Glossary:class]]// is compatible with the old, **[[CL:Functions:change-class]]** is called to change the //[[CL:Glossary:class]]// of the //[[CL:Glossary:generic function]]//; otherwise an error of type **[[CL:Types:error]]** is signaled.
+
+Implementations can extend **defgeneric** to include other options. It is required that an implementation signal an error of type **[[CL:Types:program-error]]** if it observes an option that is not implemented locally.
+
+====See Also====
+  * **[[CL:Macros:defmethod|Macro DEFMETHOD]]**
+  * **[[CL:Functions:documentation|Generic Function DOCUMENTATION]]**
+  * **[[CL:Functions:ensure-generic-function|Function ENSURE-GENERIC-FUNCTION]]**
+  * **[[CL:Types:generic-function|System Class GENERIC-FUNCTIOn]]**
+  * {\secref\GFMethodLambdaListCongruency}
+
+====Notes====
+None.
+
+\issue{DECLS-AND-DOC} \issue{FUNCTION-NAME:LARGE} \issue{DEFGENERIC-DECLARE:ALLOW-MULTIPLE} \issue{DEFGENERIC-DECLARE:ALLOW-MULTIPLE} \issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY} \issue{GENERIC-FUNCTION-POORLY-DESIGNED:DELETE}

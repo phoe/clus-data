@@ -1,0 +1,132 @@
+====== Macro DEFCLASS ======
+
+====Syntax====
+  * **defclass** //class-name// ({//superclass-name//}''*'') ({//slot-specifier//}''*'') ⟦//class-option//⟧ → //new-class//
+
+<blockquote>
+slot-specifier ::= slot-name | (slot-name ⟦slot-option⟧)
+slot-name ::= __symbol__
+slot-option ::= {**:reader** //reader-function-name//}* |
+                {**:writer** //writer-function-name//}* |
+                {**:accessor** //accessor-function-name//}* |
+                {**:allocation** //allocation-type//} |
+                {**:initarg** //initarg-name//}* |
+                {**:initform** //form//} |
+                {**:type** //type-specifier//} |
+                {**:documentation** __string__}
+function-name ::= {__symbol__ | ([[CL:Macros:setf]] __symbol__)}
+class-option ::= (**:default-initargs** . //initarg-list//) |
+                 (**:documentation** __string__ |
+                 (**:metaclass** //class-name//)
+</blockquote>
+
+====Arguments and Values====
+  * //class-name// - a //[[CL:Glossary:non-nil]]// //[[CL:Glossary:symbol]]//.
+  * //superclass-name//--a //[[CL:Glossary:non-nil]]// //[[CL:Glossary:symbol]]//.
+  * //slot-name//--a //[[CL:Glossary:symbol]]//. The //slot-name// argument is a //[[CL:Glossary:symbol]]// that is syntactically valid for use as a variable name.
+  * //reader-function-name// - a //[[CL:Glossary:non-nil]]// //[[CL:Glossary:symbol]]//. **'':reader''** can be supplied more than once for a given //[[CL:Glossary:slot]]//.
+  * //writer-function-name// - a //[[CL:Glossary:generic function]]// name. **'':writer''** can be supplied more than once for a given //[[CL:Glossary:slot]]//.
+  * //accessor-function-name// - a //[[CL:Glossary:non-nil]]// //[[CL:Glossary:symbol]]//. **'':accessor''** can be supplied more than once for a given //[[CL:Glossary:slot]]//.
+  * //allocation-type// - (member **'':instance''** **'':class''**). **'':allocation''** can be supplied once at most for a given //[[CL:Glossary:slot]]//.
+  * //initarg-name// - a //[[CL:Glossary:symbol]]//. **'':initarg''** can be supplied more than once for a given //[[CL:Glossary:slot]]//.
+  * //form// - a //[[CL:Glossary:form]]//. **'':init-form''** can be supplied once at most for a given //[[CL:Glossary:slot]]//.
+  * //type-specifier// - a //[[CL:Glossary:type specifier]]//. **'':type''** can be supplied once at most for a given //[[CL:Glossary:slot]]//.
+  * //class-option// - refers to the //[[CL:Glossary:class]]// as a whole or to all class //[[CL:Glossary:slot|slots]]//.
+  * //initarg-list// - a //[[CL:Glossary:list]]// of alternating initialization argument //[[CL:Glossary:names]]// and default initial value //[[CL:Glossary:form|forms]]//. **'':default-initargs''** can be supplied at most once.
+  * //class-name// - a //[[CL:Glossary:non-nil]]// //[[CL:Glossary:symbol]]//. **'':metaclass''** can be supplied once at most.
+  * //new-class// - the new //[[CL:Glossary:class]]// //[[CL:Glossary:object]]//.
+
+====Description====
+The macro **defclass** defines a new named //[[CL:Glossary:class]]//. It returns the new //[[CL:Glossary:class]]// //[[CL:Glossary:object]]// as its result.
+
+The syntax of **defclass** provides options for specifying initialization arguments for //[[CL:Glossary:slot|slots]]//, for specifying default initialization values for //[[CL:Glossary:slot|slots]]//, and for requesting that //[[CL:Glossary:method|methods]]// on specified //[[CL:Glossary:generic function|generic functions]]// be automatically generated for reading and writing the values of //[[CL:Glossary:slot|slots]]//. No reader or writer functions are defined by default; their generation must be explicitly requested. However, //[[CL:Glossary:slot|slots]]// can always be //[[CL:Glossary:access|accessed]]// using **[[CL:Functions:slot-value]]**.
+
+Defining a new //[[CL:Glossary:class]]// also causes a //[[CL:Glossary:type]]// of the same name to be defined. The predicate ''(typep //object// //class-name//)'' returns true if the //[[CL:Glossary:class]]// of the given //object// is the //[[CL:Glossary:class]]// named by //class-name// itself or a subclass of the class //class-name//. A //[[CL:Glossary:class]]// //[[CL:Glossary:object]]// can be used as a //[[CL:Glossary:type specifier]]//. Thus ''(typep //object// //class//)'' returns //[[CL:Glossary:true]]// if the //[[CL:Glossary:class]]// of the //object// is //class// itself or a subclass of //class//.
+
+The //class-name// argument specifies the //[[CL:Glossary:proper name]]// of the new //[[CL:Glossary:class]]//.
+
+If a //[[CL:Glossary:class]]// with the same //[[CL:Glossary:proper name]]// already exists and that //[[CL:Glossary:class]]// is an //[[CL:Glossary:instance]]// of **[[CL:Types:standard-class]]**, and if the **defclass** form for the definition of the new //[[CL:Glossary:class]]// specifies a //[[CL:Glossary:class]]// of //[[CL:Glossary:class]]// **[[CL:Types:standard-class]]**,the existing //[[CL:Glossary:class]]// is redefined, and instances of it (and its //[[CL:Glossary:subclass|subclasses]]//) are updated to the new definition at the time that they are next //[[CL:Glossary:access|accessed]]//. For details, see section {\secref\ClassReDef}.
+
+Each //superclass-name// argument specifies a direct //[[CL:Glossary:superclass]]// of the new //[[CL:Glossary:class]]//.
+
+If the //[[CL:Glossary:superclass]]// list is empty, then the //[[CL:Glossary:superclass]]// defaults depending on the //[[CL:Glossary:metaclass]]//, with **[[CL:Types:standard-object]]** being the default for **[[CL:Types:standard-class]]**.
+
+The new //[[CL:Glossary:class]]// will inherit //[[CL:Glossary:slot|slots]]// and //[[CL:Glossary:method|methods]]// from each of its direct //[[CL:Glossary:superclasses]]//, from their direct //[[CL:Glossary:superclasses]]//, and so on. For a discussion of how //[[CL:Glossary:slot|slots]]// and //[[CL:Glossary:method|methods]]// are inherited, see section {\secref\Inheritance}.
+
+The following slot options are available:
+
+  * The **'':reader''** slot option specifies that an //[[CL:Glossary:unqualified method]]// is to be defined on the //[[CL:Glossary:generic function]]// named //reader-function-name// to read the value of the given //[[CL:Glossary:slot]]//.
+
+  * The **'':writer''** slot option specifies that an //[[CL:Glossary:unqualified method]]// is to be defined on the //[[CL:Glossary:generic function]]// named //writer-function-name// to write the value of the //[[CL:Glossary:slot]]//.
+  * The **'':accessor''** slot option specifies that an //[[CL:Glossary:unqualified method]]// is to be defined on the generic function named //reader-function-name// to read the value of the given //[[CL:Glossary:slot]]// and that an //[[CL:Glossary:unqualified method]]// is to be defined on the //[[CL:Glossary:generic function]]// named ''(setf //reader-function-name//)'' to be used with **[[CL:Macros:setf]]** to modify the value of the //[[CL:Glossary:slot]]//.
+  * The **'':allocation''** slot option is used to specify where storage is to be allocated for the given //[[CL:Glossary:slot]]//. Storage for a //[[CL:Glossary:slot]]// can be located in each instance or in the //[[CL:Glossary:class]]// //[[CL:Glossary:object]]// itself. The value of the //allocation-type// argument can be either the keyword **'':instance''** or the keyword **'':class''**. If the **'':allocation''** slot option is not specified, the effect is the same as specifying '':allocation :instance''.
+    * If //allocation-type// is **'':instance''**, a //[[CL:Glossary:local slot]]// of the name //slot-name// is allocated in each instance of the //[[CL:Glossary:class]]//.
+    * If //allocation-type// is **'':class''**, a shared //[[CL:Glossary:slot]]// of the given name is allocated in the //[[CL:Glossary:class]]// //[[CL:Glossary:object]]// created by this **defclass** form. The value of the //[[CL:Glossary:slot]]// is shared by all //[[CL:Glossary:instances]]// of the //[[CL:Glossary:class]]//. If a class ''C<sub>1</sub>'' defines such a //[[CL:Glossary:shared slot]]//, any subclass ''C<sub>2</sub>'' of ''C<sub>1</sub>'' will share this single //[[CL:Glossary:slot]]// unless the **defclass** form for ''C<sub>2</sub>'' specifies a //[[CL:Glossary:slot]]// of the same //[[CL:Glossary:name]]// or there is a superclass of ''C<sub>2</sub>'' that precedes ''C<sub>1</sub>'' in the class precedence list of ''C<sub>2</sub>'' and that defines a //[[CL:Glossary:slot]]// of the same //[[CL:Glossary:name]]//.
+  * The **'':initform''** slot option is used to provide a default initial value form to be used in the initialization of the //[[CL:Glossary:slot]]//. This //[[CL:Glossary:form]]// is evaluated every time it is used to initialize the //[[CL:Glossary:slot]]//. The lexical environment in which this //[[CL:Glossary:form]]// is evaluated is the lexical environment in which the **defclass** form was evaluated. Note that the lexical environment refers both to variables and to functions. For //[[CL:Glossary:local slot|local slots]]//, the dynamic environment is the dynamic environment in which **[[CL:Functions:make-instance]]** is called; for shared //[[CL:Glossary:slot|slots]]//, the dynamic environment is the dynamic environment in which the **defclass** form was evaluated. see section {\secref\ObjectCreationAndInit}.
+    * No implementation is permitted to extend the syntax of **defclass** to allow ''(//slot-name// //form//)'' as an abbreviation for ''(//slot-name// :initform //form//)''. 
+  * The **'':initarg''** slot option declares an initialization argument named //initarg-name// and specifies that this initialization argument initializes the given //[[CL:Glossary:slot]]//. If the initialization argument has a value in the call to **[[CL:Functions:initialize-instance]]**, the value will be stored into the given //[[CL:Glossary:slot]]//, and the slot's **'':initform''** slot option, if any, is not evaluated. If none of the initialization arguments specified for a given //[[CL:Glossary:slot]]// has a value, the //[[CL:Glossary:slot]]// is initialized according to the **'':initform''** slot option, if specified.
+  * The **'':type''** slot option specifies that the contents of the //[[CL:Glossary:slot]]// will always be of the specified data type. It effectively declares the result type of the reader generic function when applied to an //[[CL:Glossary:object]]// of this //[[CL:Glossary:class]]//. The consequences of attempting to store in a //[[CL:Glossary:slot]]// a value that does not satisfy the type of the //[[CL:Glossary:slot]]// are undefined. The **'':type''** slot option is further discussed in \secref\SlotInheritance.
+  * The **'':documentation''** slot option provides a //[[CL:Glossary:documentation string]]// for the //[[CL:Glossary:slot]]//. **'':documentation''** can be supplied once at most for a given //[[CL:Glossary:slot]]//. 
+
+------
+
+Each class option is an option that refers to the //[[CL:Glossary:class]]// as a whole.
+
+The following class options are available:
+
+  * The **'':default-initargs''** class option is followed by a list of alternating initialization argument //[[CL:Glossary:names]]// and default initial value forms. If any of these initialization arguments does not appear in the initialization argument list supplied to **[[CL:Functions:make-instance]]**, the corresponding default initial value form is evaluated, and the initialization argument //[[CL:Glossary:name]]// and the //[[CL:Glossary:form]]//'s value are added to the end of the initialization argument list before the instance is created; see section {\secref\ObjectCreationAndInit}. The default initial value form is evaluated each time it is used. The lexical environment in which this //[[CL:Glossary:form]]// is evaluated is the lexical environment in which the **defclass** form was evaluated. The dynamic environment is the dynamic environment in which **[[CL:Functions:make-instance]]** was called. If an initialization argument //[[CL:Glossary:name]]// appears more than once in a **'':default-initargs''** class option, an error is signaled.
+  * The **'':documentation''** class option causes a //[[CL:Glossary:documentation string]]// to be attached with the //[[CL:Glossary:class]]// //[[CL:Glossary:object]]//, and attached with kind **[[CL:Types:type]]** to the //class-name//. **'':documentation''** can be supplied once at most.
+  * The **'':metaclass''** class option is used to specify that instances of the //[[CL:Glossary:class]]// being defined are to have a different metaclass than the default provided by the system (the **[[CL:Types:standard-class]]** //[[CL:Glossary:class]]//).
+
+----
+
+Note the following rules of **defclass** for //[[CL:Glossary:standard classes]]//:
+
+  * It is not required that the //[[CL:Glossary:superclasses]]// of a //[[CL:Glossary:class]]// be defined before the **defclass** form for that //[[CL:Glossary:class]]// is evaluated.
+  * All the //[[CL:Glossary:superclasses]]// of a //[[CL:Glossary:class]]// must be defined before an //[[CL:Glossary:instance]]// of the //[[CL:Glossary:class]]// can be made.
+  * A //[[CL:Glossary:class]]// must be defined before it can be used as a parameter specializer in a **[[CL:Macros:defmethod]]** form.
+
+The object system can be extended to cover situations where these rules are not obeyed.
+
+Some slot options are inherited by a //[[CL:Glossary:class]]// from its //[[CL:Glossary:superclasses]]//, and some can be shadowed or altered by providing a local slot description. No class options except **'':default-initargs''** are inherited. For a detailed description of how //[[CL:Glossary:slot|slots]]// and slot options are inherited, see section {\secref\SlotInheritance}.
+
+The options to **defclass** can be extended. It is required that all implementations signal an error if they observe a class option or a slot option that is not implemented locally.
+
+It is valid to specify more than one reader, writer, accessor, or initialization argument for a //[[CL:Glossary:slot]]//. No other slot option can appear more than once in a single slot description, or an error is signaled.
+
+If no reader, writer, or accessor is specified for a //[[CL:Glossary:slot]]//, the //[[CL:Glossary:slot]]// can only be //[[CL:Glossary:access|accessed]]// by the function **[[CL:Functions:slot-value]]**.
+
+If a **defclass** //[[CL:Glossary:form]]// appears as a //[[CL:Glossary:top level form]]//, the //[[CL:Glossary:compiler]]// must make the //[[CL:Glossary:class]]// //[[CL:Glossary:name]]// be recognized as a valid //[[CL:Glossary:type]]// //[[CL:Glossary:name]]// in subsequent declarations (as for **[[CL:Macros:deftype]]**) and be recognized as a valid //[[CL:Glossary:class]]// //[[CL:Glossary:name]]// for **[[CL:Macros:defmethod]]** //[[CL:Glossary:parameter specializer|parameter specializers]]// and for use as the **'':metaclass''** option of a subsequent **defclass**. The //[[CL:Glossary:compiler]]// must make
+
+the //[[CL:Glossary:class]]// definition available to be returned by **[[CL:Functions:find-class]]** when its //environment// //[[CL:Glossary:argument]]// is a value received as the //[[CL:Glossary:environment parameter]]// of a //[[CL:Glossary:macro]]//.
+
+====Examples====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+If there are any duplicate slot names, an error of type **[[CL:Types:program-error]]** is signaled.
+
+If an initialization argument //[[CL:Glossary:name]]// appears more than once in **'':default-initargs''** class option, an error of type **[[CL:Types:program-error]]** is signaled.
+
+If any of the following slot options appears more than once in a single slot description, an error of type **[[CL:Types:program-error]]** is signaled: **'':allocation''**, **'':initform''**, **'':type''**, **'':documentation''**.
+
+It is required that all implementations signal an error of type **[[CL:Types:program-error]]** if they observe a class option or a slot option that is not implemented locally.
+
+====See Also====
+  * **[[CL:Functions:documentation|Generic Function DOCUMENTATION]]**
+  * **[[CL:Functions:initialize-instance|Generic Function INITIALIZE-INSTANCE]]**
+  * **[[CL:Functions:make-instance|Generic Function MAKE-INSTANCE]]**
+  * **[[CL:Functions:slot-value|Function SLOT-VALUE]]**
+  * {\secref\Classes}
+  * {\secref\Inheritance}
+  * {\secref\ClassReDef}
+  * {\secref\DeterminingtheCPL}
+  * {\secref\ObjectCreationAndInit}
+
+====Notes====
+None.
+
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX} \issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
