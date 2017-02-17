@@ -1,0 +1,118 @@
+====== Function DELETE-PACKAGE ======
+
+====Syntax====
+  * **delete-package** //package// → //generalized-boolean//
+
+====Arguments and Values====
+  * //package// - a //[[CL:Glossary:package designator]]//.
+  * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+**delete-package** deletes //package// from all package system data structures.
+
+If the operation is successful, **delete-package** returns true, otherwise **[[CL:Constant Variables:nil]]**.
+
+The effect of **delete-package** is that the name and nicknames of //package// cease to be recognized package names. The package //[[CL:Glossary:object]]// is still a //[[CL:Glossary:package]]// (i.e. **[[CL:Functions:packagep]]** is //[[CL:Glossary:true]]// of it) but **[[CL:Functions:package-name]]** returns **[[CL:Constant Variables:nil]]**.
+
+The consequences of deleting the **''common-lisp''** //[[CL:Glossary:package]]// or the **''keyword''** //[[CL:Glossary:package]]// are undefined.
+
+The consequences of invoking any other package operation on //package// once it has been deleted are unspecified. In particular, the consequences of invoking **[[CL:Functions:find-symbol]]**, **[[CL:Functions:intern]]** and other functions that look for a symbol name in a //[[CL:Glossary:package]]// are unspecified if they are called with **[[CL:Variables:*package*]]** bound to the deleted //package// or with the deleted //package// as an argument.
+
+If //package// is a //[[CL:Glossary:package]]// //[[CL:Glossary:object]]// that has already been deleted, **delete-package** immediately returns **[[CL:Constant Variables:nil]]**.
+
+After this operation completes, the //[[CL:Glossary:home package]]// of any //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:home package]]// had previously been //package// is //[[CL:Glossary:implementation-dependent]]//. Except for this, //[[CL:Glossary:symbol|symbols]]// //[[CL:Glossary:accessible]]// in //package// are not modified in any other way; //[[CL:Glossary:symbol|symbols]]// whose //[[CL:Glossary:home package]]// is not //package// remain unchanged.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] *foo-package* ([[CL:Functions:make-package]] "FOO" :use [[CL:Constant Variables:nil]])) <r>*FOO-PACKAGE*</r>
+([[CL:Macros:defparameter]] *foo-symbol* ([[CL:Functions:intern]] "FOO" *foo-package*)) <r>*FOO-SYMBOL*</r>
+([[CL:Functions:export]] *foo-symbol* *foo-package*) <r>[[CL:Constant Variables:T]]</r>
+
+([[CL:Macros:defparameter]] *bar-package* ([[CL:Functions:make-package]] "BAR" :use '("FOO"))) <r>*FOO-PACKAGE*</r>
+([[CL:Macros:defparameter]] *bar-symbol* ([[CL:Functions:intern]] "BAR" *bar-package*)) <r>*BAR-PACKAGE*</r>
+([[CL:Functions:export]] *foo-symbol* *bar-package*) <r>[[CL:Constant Variables:T]]</r>
+([[CL:Functions:export]] *bar-symbol* *bar-package*) <r>[[CL:Constant Variables:T]]</r>
+
+([[CL:Macros:defparameter]] *baz-package* ([[CL:Functions:make-package]] "BAZ" :use '("BAR"))) <r>*BAZ-PACKAGE*</r>
+
+([[CL:Functions:symbol-package]] *foo-symbol*) <r>#<PACKAGE "FOO"> </r>
+([[CL:Functions:symbol-package]] *bar-symbol*) <r>#<PACKAGE "BAR"></r>
+([[CL:Functions:prin1-to-string]] *foo-symbol*) <r>"FOO:FOO" </r>
+([[CL:Functions:prin1-to-string]] *bar-symbol*) <r>"BAR:BAR"</r>
+
+([[CL:Functions:find-symbol]] "FOO" *bar-package*) <r>FOO:FOO
+:EXTERNAL</r>
+([[CL:Functions:find-symbol]] "FOO" *baz-package*) <r>FOO:FOO
+:INHERITED </r>
+([[CL:Functions:find-symbol]] "BAR" *baz-package*) <r>BAR:BAR
+:INHERITED</r>
+
+([[CL:Functions:packagep]] *foo-package*) <r>//[[CL:Glossary:true]]// </r>
+([[CL:Functions:packagep]] *bar-package*) <r>//[[CL:Glossary:true]]// </r>
+([[CL:Functions:packagep]] *baz-package*) <r>//[[CL:Glossary:true]]//</r>
+
+(package-name *foo-package*) <r>"FOO" </r>
+(package-name *bar-package*) <r>"BAR" </r>
+(package-name *baz-package*) <r>"BAZ"</r>
+
+(package-use-list *foo-package*) <r>() </r>
+(package-use-list *bar-package*) <r>(#<PACKAGE "FOO">) </r>
+(package-use-list *baz-package*) <r>(#<PACKAGE "BAR">)</r>
+
+(package-used-by-list *foo-package*) <r>(#<PACKAGE "BAR">) </r>
+(package-used-by-list *bar-package*) <r>(#<PACKAGE "BAZ">) </r>
+(package-used-by-list *baz-package*) <r>()</r>
+
+(delete-package *bar-package*)
+<o>Error: Package BAZ uses package BAR.
+If continued, BAZ will be made to unuse-package BAR,
+and then BAR will be deleted.
+Type :CONTINUE to continue.
+Debug> __:CONTINUE__ </o>
+<r>[[CL:Constant Variables:T]]</r>
+
+(symbol-package *foo-symbol*) <r>#<PACKAGE "FOO"> </r>
+(symbol-package *bar-symbol*) <u>The return value of the above is unspecified.</u>
+
+(prin1-to-string *foo-symbol*) <r>"FOO:FOO" </r>
+(prin1-to-string *bar-symbol*) <u>The return value of the above is unspecified.</u>
+
+(find-symbol "FOO" *bar-package*) <u>The return value of the above is unspecified.</u>
+
+(find-symbol "FOO" *baz-package*) <r>[[CL:Constant Variables:NIL]]
+[[CL:Constant Variables:NIL]] </r>
+(find-symbol "BAR" *baz-package*) <r>[[CL:Constant Variables:NIL]]
+[[CL:Constant Variables:NIL]]</r>
+
+(packagep *foo-package*) <r>//[[CL:Glossary:true]]//</r>
+(packagep *bar-package*) <r>//[[CL:Glossary:true]]//</r>
+(packagep *baz-package*) <r>//[[CL:Glossary:true]]//</r>
+
+(package-name *foo-package*) <r>"FOO" </r>
+(package-name *bar-package*) <r>[[CL:Constant Variables:NIL]] </r>
+(package-name *baz-package*) <r>"BAZ"</r>
+
+(package-use-list *foo-package*) <r>[[CL:Constant Variables:NIL]]</r>
+(package-use-list *bar-package*) <u>The return value of the above is unspecified.</u>
+(package-use-list *baz-package*) <r>[[CL:Constant Variables:NIL]]</r>
+
+(package-used-by-list *foo-package*) <r>[[CL:Constant Variables:NIL]]</r>
+(package-used-by-list *bar-package*) <u>The return value of the above is unspecified.</u>
+(package-used-by-list *baz-package*) <r>[[CL:Constant Variables:NIL]]</r>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+If the //package// //[[CL:Glossary:designator]]// is a //[[CL:Glossary:name]]// that does not currently name a //[[CL:Glossary:package]]//, a //[[CL:Glossary:correctable]]// error of type **[[CL:Types:package-error]]** is signaled. If correction is attempted, no deletion action is attempted; instead, **delete-package** immediately returns **[[CL:Constant Variables:nil]]**.
+
+If //package// is used by other //[[CL:Glossary:package|packages]]//, a //[[CL:Glossary:correctable]]// error of type **[[CL:Types:package-error]]** is signaled. If correction is attempted, **[[CL:Functions:unuse-package]]** is effectively called to remove any dependencies, causing //package//'s //[[CL:Glossary:external symbols]]// to cease being //[[CL:Glossary:accessible]]// to those //[[CL:Glossary:package|packages]]// that use //package//. **delete-package** then deletes //package// just as it would have had there been no //[[CL:Glossary:package|packages]]// that used it.
+
+====See Also====
+  * **[[CL:Functions:unuse-package|Function UNUSE-PACKAGE]]**
+
+====Notes====
+None.
+
+\issue{PACKAGE-DELETION:NEW-FUNCTION} \issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}

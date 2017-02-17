@@ -1,0 +1,43 @@
+====== Function FIND-ALL-SYMBOLS ======
+
+====Syntax====
+  * **find-all-symbols** //string// → //symbols//
+
+====Arguments and Values====
+  * //string// - a //[[CL:Glossary:symbol name designator]]//.
+  * //symbols// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:symbol|symbols]]//.
+
+====Description====
+**find-all-symbols** searches every //[[CL:Glossary:registered package]]// for //[[CL:Glossary:symbol|symbols]]// that have a //[[CL:Glossary:name]]// that is the //[[CL:Glossary:same]]// (under **[[CL:Functions:string=]]**) as //string//. A //[[CL:Glossary:list]]// of all such //[[CL:Glossary:symbol|symbols]]// is returned. Whether or how the //[[CL:Glossary:list]]// is ordered is //[[CL:Glossary:implementation-dependent]]//.
+
+====Examples====
+<blockquote>
+(find-all-symbols 'car)
+<r>(CAR)</r> 
+<r>//or// (CAR VEHICLES:CAR) </r>
+<r>//or// (VEHICLES:CAR CAR) </r>
+(intern "CAR" (make-package 'temp :use nil)) <r>TEMP::CAR
+NIL </r>
+(find-all-symbols 'car) 
+<r>(TEMP::CAR CAR) </r>
+<r>//or// (CAR TEMP::CAR) </r>
+<r>//or// (TEMP::CAR CAR VEHICLES:CAR) </r>
+<r>//or// (CAR TEMP::CAR VEHICLES:CAR)</r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Functions:find-symbol|Function FIND-SYMBOL]]**
+
+====Notes====
+None.
+
+\issue{PACKAGE-DELETION:NEW-FUNCTION}

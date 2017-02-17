@@ -1,0 +1,81 @@
+====== Function FIND-SYMBOL ======
+
+====Syntax====
+* **find-symbol**//string// ''&optional'' //package// → //symbol, status//
+
+====Arguments and Values====
+  * //string// - a //[[CL:Glossary:string]]//.
+  * //package// - a //[[CL:Glossary:package designator]]//. The default is the //[[CL:Glossary:current package]]//.
+  * //symbol// - a //[[CL:Glossary:symbol]]// accessible in the //package//, or **[[CL:Constant Variables:nil]]**.
+  * //status// - one of **'':inherited''**, **'':external''**, **'':internal''**, or **[[CL:Constant Variables:nil]]**.
+
+====Description====
+**find-symbol** locates a //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is //string// in a //[[CL:Glossary:package]]//. If a //[[CL:Glossary:symbol]]// named //string// is found in //package//, directly or by inheritance, the //[[CL:Glossary:symbol]]// found is returned as the first value; the second value is as follows:
+
+===:internal===
+If the //[[CL:Glossary:symbol]]// is //[[CL:Glossary:present]]// in //package// as an //[[CL:Glossary:internal symbol]]//.
+
+===:external===
+If the //[[CL:Glossary:symbol]]// is //[[CL:Glossary:present]]// in //package// as an //[[CL:Glossary:external symbol]]//.
+
+===:inherited===
+If the //[[CL:Glossary:symbol]]// is inherited by //package// through **[[CL:Functions:use-package]]**, but is not //[[CL:Glossary:present]]// in //package//.
+
+------
+
+If no such //[[CL:Glossary:symbol]]// is //[[CL:Glossary:accessible]]// in //package//, both values are **[[CL:Constant Variables:nil]]**.
+
+====Examples====
+<blockquote>
+(find-symbol "NEVER-BEFORE-USED") <r>[[CL:Constant Variables:NIL]]
+[[CL:Constant Variables:NIL]] </r>
+(find-symbol "NEVER-BEFORE-USED") <r>[[CL:Constant Variables:NIL]]
+[[CL:Constant Variables:NIL]] </r>
+([[CL:Functions:intern]] "NEVER-BEFORE-USED") <r>NEVER-BEFORE-USED
+[[CL:Constant Variables:NIL]] </r>
+([[CL:Functions:intern]] "NEVER-BEFORE-USED") <r>NEVER-BEFORE-USED
+:INTERNAL </r>
+(find-symbol "NEVER-BEFORE-USED") <r>NEVER-BEFORE-USED
+:INTERNAL </r>
+(find-symbol "never-before-used") <r>[[CL:Constant Variables:NIL]]
+[[CL:Constant Variables:NIL]] </r>
+(find-symbol "CAR" 'common-lisp-user) <r>CAR
+:INHERITED </r>
+(find-symbol "CAR" 'common-lisp) <r>CAR
+:EXTERNAL </r>
+(find-symbol "NIL" 'common-lisp-user) <r>[[CL:Constant Variables:NIL]]
+:INHERITED </r>
+(find-symbol "NIL" 'common-lisp) <r>[[CL:Constant Variables:NIL]]
+:EXTERNAL </r>
+(find-symbol "NIL" 
+             ([[CL:Special Operators:prog1]] ([[CL:Functions:make-package]] "JUST-TESTING" :use '()) 
+                    ([[CL:Functions:intern]] "NIL" "JUST-TESTING"))) <r>JUST-TESTING::NIL
+:INTERNAL </r>
+([[CL:Functions:export]] 'just-testing::nil 'just-testing) <r>T</r>
+(find-symbol "NIL" 'just-testing) <r>JUST-TESTING:NIL
+:EXTERNAL </r>
+(find-symbol "NIL" "KEYWORD") <r>[[CL:Constant Variables:NIL]]
+[[CL:Constant Variables:NIL]]</r>
+<r>//or// :NIL
+:EXTERNAL </r>
+(find-symbol ([[CL:Functions:symbol-name]] :nil) "KEYWORD") <r>:NIL
+:EXTERNAL </r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+**[[CL:Functions:intern]]**, **[[CL:Functions:import]]**, **[[CL:Functions:export]]**, **[[CL:Functions:use-package]]**, **[[CL:Functions:unintern]]**, **[[CL:Functions:unexport]]**, **[[CL:Functions:unuse-package]]**
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Functions:intern|Function INTERN]]**
+  * **[[CL:Functions:find-all-symbols|Function FIND-ALL-SYMBOLS]]**
+
+====Notes====
+**find-symbol** is operationally equivalent to **[[CL:Functions:intern]]**, except that it never creates a new //[[CL:Glossary:symbol]]//.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}

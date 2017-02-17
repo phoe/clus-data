@@ -1,0 +1,44 @@
+====== Function RENAME-PACKAGE ======
+
+====Syntax====
+  * **rename-package** //package// //new-name// ''&optional'' //new-nicknames// → //package-object//
+
+====Arguments and Values====
+  * //package// - a //[[CL:Glossary:package designator]]//.
+  * //new-name// - a //[[CL:Glossary:package designator]]//.
+  * //new-nicknames// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:package name designator|package name designators]]//. The default is the //[[CL:Glossary:empty list]]//.
+  * //package-object// - the renamed //package// //[[CL:Glossary:object]]//.
+
+====Description====
+Replaces the name and nicknames of //package//.
+
+The old name and all of the old nicknames of //package// are eliminated and are replaced by //new-name// and //new-nicknames//.
+
+The consequences are undefined if //new-name// or any //new-nickname// conflicts with any existing package names.
+
+====Examples====
+<blockquote>
+([[CL:Functions:make-package]] 'temporary :nicknames '("TEMP")) <r>#<PACKAGE "TEMPORARY"></r>
+(rename-package 'temp 'ephemeral) <r>#<PACKAGE "EPHEMERAL"></r>
+([[CL:Functions:package-nicknames]] ([[CL:Functions:find-package]] 'ephemeral)) <r>[[CL:Constant Variables:NIL]]</r>
+([[CL:Functions:find-package]] 'temporary) <r>[[CL:Constant Variables:NIL]]</r>
+(rename-package 'ephemeral 'temporary '(temp fleeting)) <r>#<PACKAGE "TEMPORARY"></r>
+([[CL:Functions:package-nicknames]] ([[CL:Functions:find-package]] 'temp)) <r>("TEMP" "FLEETING")</r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Functions:make-package|Function MAKE-PACKAGE]]**
+
+====Notes====
+None.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE} \issue{RETURN-VALUES-UNSPECIFIED:SPECIFY}
