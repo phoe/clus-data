@@ -1,76 +1,101 @@
 ====== Macro WITH-PACKAGE-ITERATOR ======
 
 ====Syntax====
-\DefmacWithValuesNewline with-package-iterator {\paren{name package-list-form ''&rest'' {symbol-types}} \starparam{declaration} \starparam{form}} {\starparam{result}}
+  * **with-package-iterator** (//name// //package-list-form// ''&rest'' //symbol-types//) //declaration//''*'' //form//''*'' → //result//''*''
 
 ====Arguments and Values====
-//name// - a //[[CL:Glossary:symbol]]//.
-
-//package-list-form// - a //[[CL:Glossary:form]]//; evaluated once to produce a //package-list//.
-
-//package-list// - a //[[CL:Glossary:designator]]// for a list of //[[CL:Glossary:package designators]]//.
-
-//symbol-type// - one of the //[[CL:Glossary:symbol|symbols]]// **'':internal''**, **'':external''**, or **'':inherited''**.
-
-//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
-
-//forms// - an //[[CL:Glossary:implicit progn]]//.
-
-//results// - the //[[CL:Glossary:values]]// of the //forms//.
+  * //name// - a //[[CL:Glossary:symbol]]//.
+  * //package-list-form// - a //[[CL:Glossary:form]]//; evaluated once to produce a //package-list//.
+  * //package-list// - a //[[CL:Glossary:designator]]// for a list of //[[CL:Glossary:package designators]]//.
+  * //symbol-type// - one of the //[[CL:Glossary:symbol|symbols]]// **'':internal''**, **'':external''**, or **'':inherited''**.
+  * //declaration// - a **[[CL:Symbols:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - the //[[CL:Glossary:values]]// of the //forms//.
 
 ====Description====
-Within the lexical scope of the body //forms//, the //name// is defined via \specref{macrolet} such that successive invocations of **[[CL:Functions:(//name//)]]** will return the //[[CL:Glossary:symbol|symbols]]//, one by one, from the //[[CL:Glossary:package|packages]]// in //package-list//.
+Within the lexical scope of the body //forms//, the //name// is defined via **[[CL:Special Operators:macrolet]]** such that successive invocations of ''(//name//)'' will return the //[[CL:Glossary:symbol|symbols]]//, one by one, from the //[[CL:Glossary:package|packages]]// in //package-list//.
 
 It is unspecified whether //[[CL:Glossary:symbol|symbols]]// inherited from multiple //[[CL:Glossary:package|packages]]// are returned more than once. The order of //[[CL:Glossary:symbol|symbols]]// returned does not necessarily reflect the order of //[[CL:Glossary:package|packages]]// in //package-list//. When //package-list// has more than one element, it is unspecified whether duplicate //[[CL:Glossary:symbol|symbols]]// are returned once or more than once.
 
-//Symbol-types// controls which //[[CL:Glossary:symbol|symbols]]// that are //[[CL:Glossary:accessible]]// in a //[[CL:Glossary:package]]// are returned as follows:
+//symbol-types// controls which //[[CL:Glossary:symbol|symbols]]// that are //[[CL:Glossary:accessible]]// in a //[[CL:Glossary:package]]// are returned as follows:
 
-\beginlist \itemitem{**'':internal''**}
-
+===:internal===
 The //[[CL:Glossary:symbol|symbols]]// that are //[[CL:Glossary:present]]// in the //[[CL:Glossary:package]]//, but that are not //[[CL:Glossary:exported]]//.
 
-\itemitem{**'':external''**}
-
+===:external===
 The //[[CL:Glossary:symbol|symbols]]// that are //[[CL:Glossary:present]]// in the //[[CL:Glossary:package]]// and are //[[CL:Glossary:exported]]//.
 
-\itemitem{**'':inherited''**}
-
-The //[[CL:Glossary:symbol|symbols]]// that are //[[CL:Glossary:exported]]// by used //[[CL:Glossary:package|packages]]// and that are not //[[CL:Glossary:shadowed]]//. \endlist
+===:inherited===
+The //[[CL:Glossary:symbol|symbols]]// that are //[[CL:Glossary:exported]]// by used //[[CL:Glossary:package|packages]]// and that are not //[[CL:Glossary:shadowed]]//.
 
 When more than one argument is supplied for //symbol-types//, a //[[CL:Glossary:symbol]]// is returned if its //[[CL:Glossary:accessibility]]// matches any one of the //symbol-types// supplied. Implementations may extend this syntax by recognizing additional symbol accessibility types.
 
-An invocation of **[[CL:Functions:(//name//)]]** returns four values as follows:
+An invocation of ''(//name//)'' returns four values as follows:
 
-\beginlist \itemitem{1.} A flag that indicates whether a //[[CL:Glossary:symbol]]// is returned (true means that a //[[CL:Glossary:symbol]]// is returned). \itemitem{2.} A //[[CL:Glossary:symbol]]// that is //[[CL:Glossary:accessible]]// in one the indicated //[[CL:Glossary:package|packages]]//. \itemitem{3.} The accessibility type for that //[[CL:Glossary:symbol]]//; i.e. one of the symbols **'':internal''**, **'':external''**, or **'':inherited''**. \itemitem{4.} The //[[CL:Glossary:package]]// from which the //[[CL:Glossary:symbol]]// was obtained. The //[[CL:Glossary:package]]// is one of the //[[CL:Glossary:package|packages]]// present or named in //package-list//. \endlist
+  * 1. A flag that indicates whether a //[[CL:Glossary:symbol]]// is returned (true means that a //[[CL:Glossary:symbol]]// is returned). 
+  * 2. A //[[CL:Glossary:symbol]]// that is //[[CL:Glossary:accessible]]// in one the indicated //[[CL:Glossary:package|packages]]//. 
+  * 3. The accessibility type for that //[[CL:Glossary:symbol]]//; i.e. one of the symbols **'':internal''**, **'':external''**, or **'':inherited''**. 
+  * 4. The //[[CL:Glossary:package]]// from which the //[[CL:Glossary:symbol]]// was obtained. The //[[CL:Glossary:package]]// is one of the //[[CL:Glossary:package|packages]]// present or named in //package-list//.
 
 After all //[[CL:Glossary:symbol|symbols]]// have been returned by successive invocations of **[[CL:Functions:(//name//)]]**, then only one value is returned, namely **[[CL:Constant Variables:nil]]**.
 
 The meaning of the second, third, and fourth //[[CL:Glossary:values]]// is that the returned //[[CL:Glossary:symbol]]// is //[[CL:Glossary:accessible]]// in the returned //[[CL:Glossary:package]]// in the way indicated by the second return value as follows:
 
-\beginlist \itemitem{**'':internal''**}
-
+===:internal===
 Means //[[CL:Glossary:present]]// and not //[[CL:Glossary:exported]]//.
 
-\itemitem{**'':external''**}
-
+===:external===
 Means //[[CL:Glossary:present]]// and //[[CL:Glossary:exported]]//.
 
-\itemitem{**'':inherited''**}
+===:inherited===
+Means not //[[CL:Glossary:present]]// (thus not //[[CL:Glossary:shadowed]]//) but inherited from some used //[[CL:Glossary:package]]//.
 
-Means not //[[CL:Glossary:present]]// (thus not //[[CL:Glossary:shadowed]]//) but inherited from some used //[[CL:Glossary:package]]//. \endlist
+It is unspecified what happens if any of the implicit interior state of an iteration is returned outside the dynamic extent of the **with-package-iterator** form such as by returning some //[[CL:Glossary:closure]]// over the invocation //[[CL:Glossary:form]]//.
 
-It is unspecified what happens if any of the implicit interior state of an iteration is returned outside the dynamic extent of the **[[CL:Macros:with-package-iterator]]** form such as by returning some //[[CL:Glossary:closure]]// over the invocation //[[CL:Glossary:form]]//.
-
-Any number of invocations of **[[CL:Macros:with-package-iterator]]** can be nested, and the body of the innermost one can invoke all of the locally //[[CL:Glossary:established]]// //[[CL:Glossary:macros]]//, provided all those //[[CL:Glossary:macros]]// have distinct names.
+Any number of invocations of **with-package-iterator** can be nested, and the body of the innermost one can invoke all of the locally //[[CL:Glossary:established]]// //[[CL:Glossary:macros]]//, provided all those //[[CL:Glossary:macros]]// have distinct names.
 
 ====Examples====
-The following function should return \t\ on any //[[CL:Glossary:package]]//, and signal an error if the usage of **[[CL:Macros:with-package-iterator]]** does not agree with the corresponding usage of **[[CL:Macros:do-symbols]]**.
+The following function should return **[[CL:Constant Variables:t]]** on any //[[CL:Glossary:package]]//, and signal an error if the usage of **with-package-iterator** does not agree with the corresponding usage of **[[CL:Macros:do-symbols]]**.
 
-<blockquote> (defun test-package-iterator (package) (unless (packagep package) ([[CL:Macros:defparameter]] package (find-package package))) (let ((all-entries '()) (generated-entries '())) (do-symbols (x package) (multiple-value-bind (symbol accessibility) (find-symbol (symbol-name x) package) (push (list symbol accessibility) all-entries))) (with-package-iterator (generator-fn package :internal :external :inherited) (loop (multiple-value-bind (more? symbol accessibility pkg) (generator-fn) (unless more? (return)) (let ((l (multiple-value-list (find-symbol (symbol-name symbol) package)))) (unless (equal l (list symbol accessibility)) (error "Symbol ~S not found as ~S in package ~A [~S]" symbol accessibility (package-name package) l)) (push l generated-entries))))) (unless (and (subsetp all-entries generated-entries :test #'equal) (subsetp generated-entries all-entries :test #'equal)) (error "Generated entries and Do-Symbols entries don't correspond")) t)) </blockquote>
+<blockquote> 
+(defun test-package-iterator (package) 
+  (unless (packagep package) 
+    ([[CL:Macros:setf]] package (find-package package)))
+  (let ((all-entries '()) 
+        (generated-entries '()))
+    (do-symbols (x package) 
+      (multiple-value-bind (symbol accessibility) 
+          (find-symbol (symbol-name x) package) 
+        (push (list symbol accessibility) all-entries)))
+    (with-package-iterator 
+        (generator-fn package :internal :external :inherited) 
+      (loop 
+        (multiple-value-bind (more? symbol accessibility pkg) (generator-fn)
+          (unless more? (return)) 
+          (let ((l (multiple-value-list 
+                     (find-symbol (symbol-name symbol) package))))
+            (unless (equal l (list symbol accessibility)) 
+              (error "Symbol ~S not found as ~S in package ~A [~S]"
+                     symbol accessibility (package-name package) l))
+            (push l generated-entries)))))
+    (unless (and (subsetp all-entries generated-entries :test #'equal) 
+                 (subsetp generated-entries all-entries :test #'equal))
+      (error "Generated entries and Do-Symbols entries don't correspond")) 
+    t)) <r>TEST-PACKAGE-ITERATOR</r>
+</blockquote>
 
 The following function prints out every //[[CL:Glossary:present]]// //[[CL:Glossary:symbol]]// (possibly more than once):
 
-<blockquote> (defun print-all-symbols () (with-package-iterator (next-symbol (list-all-packages) :internal :external) (loop (multiple-value-bind (more? symbol) (next-symbol) (if more? (print symbol) (return)))))) </blockquote>
+<blockquote>
+(defun print-all-symbols () 
+  (with-package-iterator 
+      (next-symbol (list-all-packages) :internal :external)
+    (loop 
+      (multiple-value-bind (more? symbol) (next-symbol)
+        (if more? 
+            (print symbol) 
+            (return)))))) <r>PRINT-ALL-SYMBOLS</r>
+</blockquote>
 
 ====Side Effects====
 None.
@@ -79,12 +104,12 @@ None.
 None.
 
 ====Exceptional Situations====
-**[[CL:Macros:with-package-iterator]]** signals an error of type **[[CL:Types:program-error]]** if no //symbol-types// are supplied or if a //symbol-type// is not recognized by the implementation is supplied.
+**with-package-iterator** signals an error of type **[[CL:Types:program-error]]** if no //symbol-types// are supplied or if a //symbol-type// is not recognized by the implementation is supplied.
 
-The consequences are undefined if the local function named //name// //[[CL:Glossary:established]]// by **[[CL:Macros:with-package-iterator]]** is called after it has returned //[[CL:Glossary:false]]// as its //[[CL:Glossary:primary value]]//.
+The consequences are undefined if the local function named //name// //[[CL:Glossary:established]]// by **with-package-iterator** is called after it has returned //[[CL:Glossary:false]]// as its //[[CL:Glossary:primary value]]//.
 
 ====See Also====
-{\secref\TraversalRules}
+  * {\secref\TraversalRules}
 
 ====Notes====
 None.

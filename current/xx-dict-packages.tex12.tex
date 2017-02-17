@@ -1,30 +1,28 @@
 ====== Function MAKE-PACKAGE ======
 
 ====Syntax====
-**make-package {package-name** //\key} nicknames use// → //package//
+  * **make-package** //package-name// ''&key'' //nicknames// //use// → //package//
 
 ====Arguments and Values====
-//package-name// - a //[[CL:Glossary:\packagenamedesignator]]//.
-
-//nicknames// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:\packagenamedesignators]]//. The default is the //[[CL:Glossary:empty list]]//.
-
-//use// -
-
-a //[[CL:Glossary:list]]// of //[[CL:Glossary:package designators]]//.
-
-The default is //[[CL:Glossary:implementation-defined]]//.
-
-//package// - a //[[CL:Glossary:package]]//.
+  * //package-name// - a //[[CL:Glossary:package name designator]]//.
+  * //nicknames// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:package name designator|package name designators]]//. The default is the //[[CL:Glossary:empty list]]//.
+  * //use// - a //[[CL:Glossary:list]]// of //[[CL:Glossary:package designators]]//. The default is //[[CL:Glossary:implementation-defined]]//.
+  * //package// - a //[[CL:Glossary:package]]//.
 
 ====Description====
 Creates a new //[[CL:Glossary:package]]// with the name //package-name//.
 
-//Nicknames// are additional //[[CL:Glossary:names]]// which may be used to refer to the new //[[CL:Glossary:package]]//.
+//nicknames// are additional //[[CL:Glossary:names]]// which may be used to refer to the new //[[CL:Glossary:package]]//.
 
 //use// specifies zero or more //[[CL:Glossary:package|packages]]// the //[[CL:Glossary:external symbols]]// of which are to be inherited by the new //[[CL:Glossary:package]]//. See the //[[CL:Glossary:function]]// **[[CL:Functions:use-package]]**.
 
 ====Examples====
-<blockquote> (make-package 'temporary :nicknames '("TEMP" "temp")) → #<PACKAGE "TEMPORARY"> (make-package "OWNER" :use '("temp")) → #<PACKAGE "OWNER"> (package-used-by-list 'temp) → (#<PACKAGE "OWNER">) (package-use-list 'owner) → (#<PACKAGE "TEMPORARY">) </blockquote>
+<blockquote>
+(make-package 'temporary :nicknames '("TEMP" "temp")) <r>#<PACKAGE "TEMPORARY"></r>
+(make-package "OWNER" :use '("temp")) <r>#<PACKAGE "OWNER"></r>
+([[CL:Functions:package-used-by-list]] 'temp) <r>(#<PACKAGE "OWNER">)</r>
+([[CL:Functions:package-use-list]] 'owner) <r>(#<PACKAGE "TEMPORARY">)</r>
+</blockquote>
 
 ====Side Effects====
 None.
@@ -38,7 +36,8 @@ The consequences are unspecified if //[[CL:Glossary:package|packages]]// denoted
 A //[[CL:Glossary:correctable]]// error is signaled if the //package-name// or any of the //nicknames// is already the //[[CL:Glossary:name]]// or //[[CL:Glossary:nickname]]// of an existing //[[CL:Glossary:package]]//.
 
 ====See Also====
-**[[CL:Macros:defpackage]]**, **[[CL:Functions:use-package]]**
+  * **[[CL:Macros:defpackage|Macro DEFPACKAGE]]**,
+  * **[[CL:Functions:use-package|Function USE-PACKAGE]]**
 
 ====Notes====
 In situations where the //[[CL:Glossary:package|packages]]// to be used contain symbols which would conflict, it is necessary to first create the package with '':use '()'', then to use **[[CL:Functions:shadow]]** or **[[CL:Functions:shadowing-import]]** to address the conflicts, and then after that to use **[[CL:Functions:use-package]]** once the conflicts have been addressed.
