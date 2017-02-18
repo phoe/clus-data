@@ -1,0 +1,61 @@
+====== Function INTERN ======
+
+====Syntax====
+  * **intern** //string// ''&optional'' //package// → //symbol, status//
+
+====Arguments and Values====
+  * //string// - a //[[CL:Glossary:string]]//.
+  * //package// - a //[[CL:Glossary:package designator]]//. The default is the //[[CL:Glossary:current package]]//.
+  * //symbol// - a //[[CL:Glossary:symbol]]//.
+  * //status// - one of **'':inherited''**, **'':external''**, **'':internal''**, or **[[CL:Constant Variables:nil]]**.
+
+====Description====
+**intern** enters a //[[CL:Glossary:symbol]]// named //string// into //package//. If a //[[CL:Glossary:symbol]]// whose name is the same as //string// is already //[[CL:Glossary:accessible]]// in //package//, it is returned. If no such //[[CL:Glossary:symbol]]// is //[[CL:Glossary:accessible]]// in //package//, a new //[[CL:Glossary:symbol]]// with the given name is created and entered into //package// as an //[[CL:Glossary:internal symbol]]//, or as an //[[CL:Glossary:external symbol]]// if the //package// is the **''keyword''** //[[CL:Glossary:package]]//; //package// becomes the //[[CL:Glossary:home package]]// of the created //[[CL:Glossary:symbol]]//.
+
+The first value returned by **intern**, //symbol//, is the //[[CL:Glossary:symbol]]// that was found or created.
+
+The meaning of the //[[CL:Glossary:secondary value]]//, //status//, is as follows: 
+
+===:internal===
+The //[[CL:Glossary:symbol]]// was found and is //[[CL:Glossary:present]]// in //package// as an //[[CL:Glossary:internal symbol]]//.
+
+===:external===
+The //[[CL:Glossary:symbol]]// was found and is //[[CL:Glossary:present]]// as an //[[CL:Glossary:external symbol]]//.
+
+===:inherited===
+The //[[CL:Glossary:symbol]]// was found and is inherited via **[[CL:Functions:use-package]]** (which implies that the //[[CL:Glossary:symbol]]// is internal).
+
+===nil===
+No pre-existing //[[CL:Glossary:symbol]]// was found, so one was created.
+
+It is //[[CL:Glossary:implementation-dependent]]// whether the //[[CL:Glossary:string]]// that becomes the new //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:name]]// is the given //string// or a copy of it. Once a //[[CL:Glossary:string]]// has been given as the //string// //[[CL:Glossary:argument]]// to //[[CL:Glossary:intern]]// in this situation where a new //[[CL:Glossary:symbol]]// is created, the consequences are undefined if a subsequent attempt is made to alter that //[[CL:Glossary:string]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:in-package]] "COMMON-LISP-USER") → #<PACKAGE "COMMON-LISP-USER">
+(intern "Never-Before") → |Never-Before|, [[CL:Constant Variables:NIL]]
+(intern "Never-Before") → |Never-Before|, :INTERNAL
+(intern "NEVER-BEFORE" "KEYWORD") → :NEVER-BEFORE, [[CL:Constant Variables:NIL]]
+(intern "NEVER-BEFORE" "KEYWORD") → :NEVER-BEFORE, :EXTERNAL
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Functions:find-symbol]]**
+  * **[[CL:Functions:read]]**
+  * **[[CL:Types:symbol]]**
+  * **[[CL:Functions:unintern]]**
+  * {\secref\SymbolTokens}
+
+====Notes====
+**intern** does not need to do any name conflict checking because it never creates a new //[[CL:Glossary:symbol]]// if there is already an //[[CL:Glossary:accessible]]// //[[CL:Glossary:symbol]]// with the name given.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE} \issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}

@@ -1,0 +1,137 @@
+====== Macro DEFPACKAGE ======
+
+====Syntax====
+  * **defpackage** //defined-package-name// ⟦//option//⟧ → //package//
+
+<blockquote>
+option ::= (**'':nicknames''** //nickname//''*'')''*'' |
+           (**'':documentation''** __string__) |
+           (**'':use''** __package-name__''*'')''*'' |
+           (**'':shadow''** __symbol-name__''*'')''*'' |
+           (**'':shadowing-import-from''** //package-name// __symbol-name__''*'')''*'' |
+           (**'':import-from''** //package-name// __symbol-name__''*'')''*'' |
+           (**'':export''** __symbol-name__''*'')''*'' |
+           (**'':intern''** __symbol-name__''*'')''*'' |
+           (**'':size''** //[[CL:Glossary:integer]]//)
+</blockquote>
+
+====Arguments and Values====
+  * //defined-package-name// - a //[[CL:Glossary:package name designator]]//.
+  * //package-name// - a //[[CL:Glossary:package designator]]//.
+  * //nickname// - a //[[CL:Glossary:package name designator]]//.
+  * //symbol-name// - a //[[CL:Glossary:symbol name designator]]//.
+  * //package// - the //[[CL:Glossary:package]]// named //package-name//.
+
+====Description====
+**defpackage** creates a //[[CL:Glossary:package]]// as specified and returns the //[[CL:Glossary:package]]//.
+
+If //defined-package-name// already refers to an existing //[[CL:Glossary:package]]//, the name-to-package mapping for that name is not changed. If the new definition is at variance with the current state of that //[[CL:Glossary:package]]//, the consequences are undefined; an implementation might choose to modify the existing //[[CL:Glossary:package]]// to reflect the new definition. If //defined-package-name// is a //[[CL:Glossary:symbol]]//, its //[[CL:Glossary:name]]// is used.
+
+The standard ''options'' are described below.
+
+===:nicknames===
+The arguments to **'':nicknames''** set the //[[CL:Glossary:package]]//'s nicknames to the supplied names.
+
+===:documentation===
+The argument to **'':documentation''** specifies a //[[CL:Glossary:documentation string]]//; it is attached as a //[[CL:Glossary:documentation string]]// to the //[[CL:Glossary:package]]//. At most one **'':documentation''** option can appear in a single **defpackage** //[[CL:Glossary:form]]//.
+
+===:use===
+The arguments to **'':use''** set the //[[CL:Glossary:package|packages]]// that the //[[CL:Glossary:package]]// named by //package-name// will inherit from. If **'':use''** is not supplied, it defaults to the same //[[CL:Glossary:implementation-dependent]]// value as the **'':use''** //[[CL:Glossary:keyword argument]]// to **[[CL:Functions:make-package]]**.
+
+===:shadow===
+The arguments to **'':shadow''**, //symbol-names//, name //[[CL:Glossary:symbol|symbols]]// that are to be created in the //[[CL:Glossary:package]]// being defined. These //[[CL:Glossary:symbol|symbols]]// are added to the list of shadowing //[[CL:Glossary:symbol|symbols]]// effectively as if by **[[CL:Functions:shadow]]**.
+
+===:shadowing-import-from'===
+The //[[CL:Glossary:symbol|symbols]]// named by the argument //symbol-names// are found (involving a lookup as if by **[[CL:Functions:find-symbol]]**) in the specified //package-name//. The resulting //[[CL:Glossary:symbol|symbols]]// are //[[CL:Glossary:import|imported]]// into the //[[CL:Glossary:package]]// being defined, and placed on the shadowing symbols list as if by **[[CL:Functions:shadowing-import]]**. In no case are //[[CL:Glossary:symbol|symbols]]// created in any //[[CL:Glossary:package]]// other than the one being defined.
+
+===:import-from===
+The //[[CL:Glossary:symbol|symbols]]// named by the argument //symbol-names// are found in the //[[CL:Glossary:package]]// named by //package-name// and they are //[[CL:Glossary:import|imported]]// into the //[[CL:Glossary:package]]// being defined. In no case are //[[CL:Glossary:symbol|symbols]]// created in any //[[CL:Glossary:package]]// other than the one being defined.
+
+===:export===
+The //[[CL:Glossary:symbol|symbols]]// named by the argument //symbol-names// are found or created in the //[[CL:Glossary:package]]// being defined and //[[CL:Glossary:exported]]//. The **'':export''** option interacts with the **'':use''** option, since inherited //[[CL:Glossary:symbol|symbols]]// can be used rather than new ones created. The **'':export''** option interacts with the **'':import-from''** and **'':shadowing-import-from''** options, since //[[CL:Glossary:import|imported]]// symbols can be used rather than new ones created. If an argument to the **'':export''** option is //[[CL:Glossary:accessible]]// as an (inherited) //[[CL:Glossary:internal symbol]]// via **[[CL:Functions:use-package]]**, that the //[[CL:Glossary:symbol]]// named by //symbol-name// is first //[[CL:Glossary:import|imported]]// into the //[[CL:Glossary:package]]// being defined, and is then //[[CL:Glossary:exported]]// from that //[[CL:Glossary:package]]//.
+
+===:intern===
+The //[[CL:Glossary:symbol|symbols]]// named by the argument //symbol-names// are found or created in the //[[CL:Glossary:package]]// being defined. The **'':intern''** option interacts with the **'':use''** option, since inherited //[[CL:Glossary:symbol|symbols]]// can be used rather than new ones created.
+
+===:size===
+
+The argument to the **'':size''** option declares the approximate number of //[[CL:Glossary:symbol|symbols]]// expected in the //[[CL:Glossary:package]]//. This is an efficiency hint only and might be ignored by an implementation.
+
+-------
+
+The order in which the options appear in a **defpackage** form is irrelevant. The order in which they are executed is as follows: 
+
+  * 1. **'':shadow''** and **'':shadowing-import-from''**. 
+  * 2. **'':use''**. 
+  * 3. **'':import-from''** and **'':intern''**. 
+  * 4. **'':export''**. 
+
+Shadows are established first, since they might be necessary to block spurious name conflicts when the **'':use''** option is processed. The **'':use''** option is executed next so that **'':intern''** and **'':export''** options can refer to normally inherited //[[CL:Glossary:symbol|symbols]]//. The **'':export''** option is executed last so that it can refer to //[[CL:Glossary:symbol|symbols]]// created by any of the other options; in particular, //[[CL:Glossary:shadowing symbols]]// and //[[CL:Glossary:import|imported]]// //[[CL:Glossary:symbol|symbols]]// can be made external.
+
+If a **defpackage** //[[CL:Glossary:form]]// appears as a //[[CL:Glossary:top level form]]//, all of the actions normally performed by this //[[CL:Glossary:macro]]// at load time must also be performed at compile time.
+
+====Examples====
+<blockquote>
+(defpackage "MY-PACKAGE" 
+  (:nicknames "MYPKG" "MY-PKG")
+  (:use "COMMON-LISP")
+  (:shadow "CAR" "CDR")
+  (:shadowing-import-from "VENDOR-COMMON-LISP" "CONS")
+  (:import-from "VENDOR-COMMON-LISP" "GC")
+  (:export "EQ" "CONS" "FROBOLA")) <r>#<PACKAGE "MY-PACKAGE"></r>
+
+(defpackage my-package-2
+  (:nicknames mypkg :my-pkg) ; remember Common Lisp conventions for case 
+  (:use common-lisp) ; conversion on symbols 
+  (:shadow CAR :cdr #:cons) 
+  (:export "CONS")) <r>#<PACKAGE "MY-PACKAGE-2"></r>
+</blockquote>
+
+In the above example, the symbol ''cons'' exported from package ''my-package-2'' is the //[[CL:Glossary:shadow|shadowed]]// one, not the one refering to the //[[CL:Glossary:function]]// **[[CL:Functions:cons]]**.
+
+====Affected By====
+Existing //[[CL:Glossary:package|packages]]//.
+
+====Exceptional Situations====
+If one of the supplied **'':nicknames''** already refers to an existing //[[CL:Glossary:package]]//, an error of type **[[CL:Types:package-error]]** is signaled.
+
+An error of type **[[CL:Types:program-error]]** should be signaled if **'':size''** or **'':documentation''** appears more than once.
+
+Since //[[CL:Glossary:implementations]]// might allow extended ''options'' an error of type **[[CL:Types:program-error]]** should be signaled if an ''option'' is present that is not actually supported in the host //[[CL:Glossary:implementation]]//.
+
+The collection of //symbol-name// arguments given to the options **'':shadow''**, **'':intern''**, **'':import-from''**, and **'':shadowing-import-from''** must all be disjoint; additionally, the //symbol-name// arguments given to **'':export''** and **'':intern''** must be disjoint. Disjoint in this context is defined as no two of the //symbol-names// being **[[CL:Functions:string=]]** with each other. If either condition is violated, an error of type **[[CL:Types:program-error]]** should be signaled.
+
+For the **'':shadowing-import-from''** and **'':import-from''** options, a //[[CL:Glossary:correctable]]// //[[CL:Glossary:error]]// of type **[[CL:Types:package-error]]** is signaled if no //[[CL:Glossary:symbol]]// is //[[CL:Glossary:accessible]]// in the //[[CL:Glossary:package]]// named by //package-name// for one of the argument //symbol-names//.
+
+Name conflict errors are handled by the underlying calls to **[[CL:Functions:make-package]]**, **[[CL:Functions:use-package]]**, **[[CL:Functions:import]]**, and **[[CL:Functions:export]]**. See section {\secref\PackageConcepts}.
+
+====See Also====
+  * **[[CL:Functions:documentation|Generic Function DOCUMENTATION]]**
+  * {\secref\PackageConcepts}
+  * {\secref\Compilation}
+
+====Notes====
+The **'':intern''** option is useful if an **'':import-from''** or a **'':shadowing-import-from''** option in a subsequent call to **defpackage** (for some other //[[CL:Glossary:package]]//) expects to find these //[[CL:Glossary:symbol|symbols]]// //[[CL:Glossary:accessible]]// but not necessarily external.
+
+It is recommended that the entire //[[CL:Glossary:package]]// definition is put in a single place, and that all the //[[CL:Glossary:package]]// definitions of a program are in a single file. This file can be //[[CL:Glossary:loaded]]// before //[[CL:Glossary:loading]]// or compiling anything else that depends on those //[[CL:Glossary:package|packages]]//. Such a file can be read in the **''common-lisp-user''** //[[CL:Glossary:package]]//, avoiding any initial state issues.
+
+**defpackage** cannot be used to create two "mutually recursive" packages, such as:
+
+<blockquote>
+(defpackage my-package 
+  (:use common-lisp your-package) ; Requires your-package to exist first.
+  (:export "MY-FUN"))
+
+(defpackage your-package 
+  (:use common-lisp) 
+  (:import-from my-package "MY-FUN") ; Requires my-package to exist first.
+  (:export "MY-FUN"))
+</blockquote>
+
+However, nothing prevents the user from using the //[[CL:Glossary:package]]//-affecting functions such as **[[CL:Functions:use-package]]**, **[[CL:Functions:import]]**, and **[[CL:Functions:export]]** to establish such links after a more standard use of **defpackage**.
+
+The macroexpansion of **defpackage** could usefully canonicalize the names into //[[CL:Glossary:strings]]//, so that even if a source file has random //[[CL:Glossary:symbol|symbols]]// in the **defpackage** form, the compiled file would only contain //[[CL:Glossary:strings]]//.
+
+Frequently additional //[[CL:Glossary:implementation-dependent]]// options take the form of a //[[CL:Glossary:keyword]]// standing by itself as an abbreviation for a list **[[CL:Functions:(keyword T)]]**; this syntax should be properly reported as an unrecognized option in implementations that do not support it.
+
+\issue{DEFPACKAGE:ADDITION} \issue{DOCUMENTATION-FUNCTION-BUGS:FIX} \issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE} \issue{DOCUMENTATION-FUNCTION-BUGS:FIX} \issue{MAKE-PACKAGE-USE-DEFAULT:IMPLEMENTATION-DEPENDENT} \issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}

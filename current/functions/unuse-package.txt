@@ -1,0 +1,46 @@
+====== Function UNUSE-PACKAGE ======
+
+====Syntax====
+  * **unuse-package** //packages-to-unuse// ''&optional'' //package// → **[[CL:Constant Variables:t]]**
+
+====Arguments and Values====
+  * //packages-to-unuse// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:list]]// of //[[CL:Glossary:package designators]]//.
+  * //package// - a //[[CL:Glossary:package designator]]//. The default is the //[[CL:Glossary:current package]]//.
+
+====Description====
+**unuse-package** causes //package// to cease inheriting all the //[[CL:Glossary:external symbols]]// of //packages-to-unuse//; **unuse-package** undoes the effects of **[[CL:Functions:use-package]]**. The //packages-to-unuse// are removed from the //[[CL:Glossary:use list]]// of //package//.
+
+Any //[[CL:Glossary:symbol|symbols]]// that have been //[[CL:Glossary:import|imported]]// into //package// continue to be //[[CL:Glossary:present]]// in //package//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:in-package]] "COMMON-LISP-USER") <r>#<PACKAGE "COMMON-LISP-USER"></r>
+([[CL:Functions:export]] (intern "SHOES" ([[CL:Functions:make-package]] 'temp)) 'temp) <r>[[CL:Constant Variables:T]]</r>
+(f[[CL:Functions:ind-symbol]] "SHOES") <r>[[CL:Constant Variables:NIL]]
+[[CL:Constant Variables:NIL]] </r>
+([[CL:Functions:use-package]] 'temp) <r>[[CL:Constant Variables:T]]</r>
+([[CL:Functions:find-symbol]] "SHOES") <r>SHOES
+:INHERITED</r>
+([[CL:Functions:find]] ([[CL:Functions:find-package]] 'temp) ([[CL:Functions:package-use-list]] 'common-lisp-user)) <r>#<PACKAGE "TEMP"></r>
+(unuse-package 'temp) <r>[[CL:Constant Variables:T]]</r>
+([[CL:Functions:find-symbol]] "SHOES") <r>[[CL:Constant Variables:NIL]]
+[[CL:Constant Variables:NIL]]</r>
+</blockquote>
+
+====Side Effects====
+The //[[CL:Glossary:use list]]// of //package// is modified.
+
+====Affected By==== 
+Current state of the package system. 
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Functions:use-package|Function USE-PACKAGE]]**
+  * **[[CL:Functions:package-use-list|Function PACKAGE-USE-LIST]]**
+
+====Notes====
+None.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}

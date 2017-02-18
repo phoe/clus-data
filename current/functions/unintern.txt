@@ -1,0 +1,44 @@
+====== Function UNINTERN ======
+
+====Syntax====
+  * **unintern**  //symbol ''&optional'' //package// → //generalized-boolean//
+
+====Arguments and Values====
+  * //symbol// - a //[[CL:Glossary:symbol]]//.
+  * //package// - a //[[CL:Glossary:package designator]]//. The default is the //[[CL:Glossary:current package]]//.
+  * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description==== 
+**unintern** removes //symbol// from //package//.
+
+If //symbol// is //[[CL:Glossary:present]]// in //package//, it is removed from //package// and also from //package//'s //[[CL:Glossary:shadowing symbols list]]// if it is present there. If //package// is the //[[CL:Glossary:home package]]// for //symbol//, //symbol// is made to have no //[[CL:Glossary:home package]]//. //Symbol// may continue to be //[[CL:Glossary:accessible]]// in //package// by inheritance.
+
+Use of **unintern** can result in a //[[CL:Glossary:symbol]]// that has no recorded //[[CL:Glossary:home package]]//, but that in fact is //[[CL:Glossary:accessible]]// in some //[[CL:Glossary:package]]//. Common Lisp does not check for this pathological case, and such //[[CL:Glossary:symbol|symbols]]// are always printed preceded by ''#:''.
+
+**unintern** returns //[[CL:Glossary:true]]// if it removes //symbol//, and **[[CL:Constant Variables:nil]]** otherwise.
+
+====Examples====
+<blockquote>
+([[CL:Macros:in-package]] "COMMON-LISP-USER") → #<PACKAGE "COMMON-LISP-USER">
+([[CL:Macros:defparameter]] *temps-unpack* ([[CL:Functions:intern]] "UNPACK" ([[CL:Functions:make-package]] 'temp))) → TEMP::UNPACK
+(unintern *temps-unpack* 'temp) → [[CL:Constant Variables:T]]
+([[CL:Functions:find-symbol]] "UNPACK" 'temp) → [[CL:Constant Variables:NIL]], [[CL:Constant Variables:NIL]] 
+*temps-unpack* → #:UNPACK
+</blockquote>
+
+====Side Effects====
+**unintern** changes the state of the package system in such a way that the consistency rules do not hold across the change.
+
+====Affected By====
+Current state of the package system.
+
+====Exceptional Situations====
+Giving a shadowing symbol to **unintern** can uncover a name conflict that had previously been resolved by the shadowing. If package A uses packages B and C, A contains a shadowing symbol ''x'', and B and C each contain external symbols named ''x'', then removing the shadowing symbol ''x'' from A will reveal a name conflict between ''b:x'' and ''c:x'' if those two //[[CL:Glossary:symbol|symbols]]// are distinct. In this case **unintern** will signal an error.
+
+====See Also====
+  * {\secref\PackageConcepts}
+
+====Notes====
+None.
+
+\issue{PACKAGE-FUNCTION-CONSISTENCY:MORE-PERMISSIVE}

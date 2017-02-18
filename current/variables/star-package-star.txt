@@ -1,0 +1,41 @@
+====== Variable *PACKAGE* ======
+
+====Value Type====
+a //[[CL:Glossary:package]]// //[[CL:Glossary:object]]//.
+
+====Initial Value====
+the **''common-lisp-user''** //[[CL:Glossary:package]]//.
+
+====Description====
+Whatever //[[CL:Glossary:package]]// //[[CL:Glossary:object]]// is currently the value of **<nowiki>*package*</nowiki>** is referred to as the //[[CL:Glossary:current package]]//.
+
+====Examples====
+<blockquote>
+([[CL:Macros:in-package]] "COMMON-LISP-USER") <r>#<PACKAGE "COMMON-LISP-USER"></r>
+*package* <r>#<PACKAGE "COMMON-LISP-USER"></r>
+([[CL:Functions:make-package]] "SAMPLE-PACKAGE" :use '("COMMON-LISP")) <r>#<PACKAGE "SAMPLE-PACKAGE"></r>
+([[CL:Macros:defvar]] *some-symbol*) <r>*SOME-SYMBOL*</r>
+([[CL:Functions:list]] ([[CL:Functions:symbol-package]] 
+        ([[CL:Special Operators:let]] ((*package* ([[CL:Functions:find-package]] 'sample-package)))
+          ([[CL:Macros:setf]] *some-symbol* ([[CL:Functions:read-from-string]] "just-testing"))
+          *some-symbol*)) 
+      *package*) <r>(#<PACKAGE "SAMPLE-PACKAGE"> #<PACKAGE "COMMON-LISP-USER">)</r>
+([[CL:Functions:list]] ([[CL:Functions:symbol-package]] ([[CL:Functions:read-from-string]] "just-testing")) 
+      *package*) <r>(#<PACKAGE "COMMON-LISP-USER"> #<PACKAGE "COMMON-LISP-USER">)</r>
+([[CL:Functions:eq]] 'foo ([[CL:Functions:intern]] "FOO")) <r>//[[CL:Glossary:true]]//</r>
+([[CL:Functions:eq]] 'foo ([[CL:Special Operators:let]] ((*package* ([[CL:Functions:find-package]] 'sample-package))) 
+           ([[CL:Functions:intern]] "FOO"))) <r>//[[CL:Glossary:false]]//</r>
+</blockquote>
+
+====Affected By====
+**[[CL:Functions:load]]**, **[[CL:Functions:compile-file]]**, **[[CL:Functions:in-package]]**
+
+====See Also====
+  * **[[CL:Functions:compile-file|Function COMPILE-FILE]]**,
+  * **[[CL:Macros:in-package|Macro IN-PACKAGE]]**,
+  * **[[CL:Functions:load|Function LOAD]]**,
+  * **[[CL:Types:package|System Class PACKAGE]]**
+
+====Notes====
+None.
+
