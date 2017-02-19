@@ -1,0 +1,39 @@
+====== Function LOAD-LOGICAL-PATHNAME-TRANSLATIONS ======
+
+====Syntax====
+  * **load-logical-pathname-translations** //host// → //just-loaded//
+
+====Arguments and Values====
+  * //host// - a //[[CL:Glossary:string]]//.
+  * //just-loaded// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+Searches for and loads the definition of a //[[CL:Glossary:logical host]]// named //host//, if it is not already defined. The specific nature of the search is //[[CL:Glossary:implementation-defined]]//.
+
+If the //host// is already defined, no attempt to find or load a definition is attempted, and //[[CL:Glossary:false]]// is returned. If the //host// is not already defined, but a definition is successfully found and loaded, //[[CL:Glossary:true]]// is returned. Otherwise, an error is signaled.
+
+====Examples====
+<blockquote>
+(translate-logical-pathname "hacks:weather;barometer.lisp.newest")
+<e>Error: The logical host HACKS is not defined.</e>
+(load-logical-pathname-translations "HACKS")
+<o>;; Loading SYS:SITE;HACKS.TRANSLATIONS
+;; Loading done. </o>
+<r>//[[CL:Glossary:true]]// </r>
+(translate-logical-pathname "hacks:weather;barometer.lisp.newest") <r>#P"HELIUM:[SHARED.HACKS.WEATHER]BAROMETER.LSP;0" </r>
+(load-logical-pathname-translations "HACKS") <r>//[[CL:Glossary:false]]//</r>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+If no definition is found, an error of type **[[CL:Types:error]]** is signaled.
+
+====See Also====
+  * **[[CL:Types:logical-pathname|System Class LOGICAL-PATHNAME]]**
+
+====Notes====
+//[[CL:Glossary:Logical pathname]]// definitions will be created not just by //[[CL:Glossary:implementor|implementors]]// but also by //[[CL:Glossary:programmers]]//. As such, it is important that the search strategy be documented. For example, an //[[CL:Glossary:implementation]]// might define that the definition of a //host// is to be found in a file called ''/host/.translations'' in some specifically named directory.
+
+\issue{PATHNAME-LOGICAL:ADD}

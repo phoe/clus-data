@@ -1,0 +1,60 @@
+====== Function PATHNAME ======
+
+====Syntax====
+  * **pathname** //pathspec// → //pathname//
+
+====Arguments and Values====
+  * //pathspec// - a //[[CL:Glossary:pathname designator]]//.
+  * //pathname// - a //[[CL:Glossary:pathname]]//.
+
+====Description====
+Returns the //[[CL:Glossary:pathname]]// denoted by //pathspec//.
+
+If the //pathspec// //[[CL:Glossary:designator]]// is a //[[CL:Glossary:stream]]//, the //[[CL:Glossary:stream]]// can be either open or closed; in both cases, the **pathname** returned corresponds to the //[[CL:Glossary:filename]]// used to open the //[[CL:Glossary:file]]//. **pathname** returns the same //[[CL:Glossary:pathname]]// for a //[[CL:Glossary:file stream]]// after it is closed as it did when it was open.
+
+If the //pathspec// //[[CL:Glossary:designator]]// is a //[[CL:Glossary:file stream]]// created by opening a //[[CL:Glossary:logical pathname]]//, a //[[CL:Glossary:logical pathname]]// is returned.
+
+====Examples====
+There is a great degree of variability permitted here. The next several examples are intended to illustrate just a few of the many possibilities. Whether the name is canonicalized to a particular //[[CL:Glossary:case]]// (either upper or lower) depends on both the //[[CL:Glossary:file system]]// and the //[[CL:Glossary:implementation]]// since two different //[[CL:Glossary:implementation|implementations]]// using the same //[[CL:Glossary:file system]]// might differ on many issues. How information is stored internally (and possibly presented in ''#S'' notation) might vary, possibly requiring //[[CL:Glossary:accessors]]// such as **[[CL:Functions:pathname-name]]** to perform case conversion upon //[[CL:Glossary:access]]//. The format of a //[[CL:Glossary:namestring]]// is dependent both on the //[[CL:Glossary:file system]]// and the //[[CL:Glossary:implementation]]// since, for example, one //[[CL:Glossary:implementation]]// might include the host name in a //[[CL:Glossary:namestring]]//, and another might not. ''#S'' notation would generally only be used in a situation where no appropriate //[[CL:Glossary:namestring]]// could be constructed for use with ''#P''.
+
+<blockquote> 
+([[CL:Macros:defparameter]] *pathname-1* (pathname "test")) <r>*PATHNAME-1*</r>
+*pathname-1* 
+<r>#P"CHOCOLATE:TEST" ; with case canonicalization (e.g., VMS) </r>
+<r>//or// #P"VANILLA:test" ; without case canonicalization (e.g., Unix) </r>
+<r>//or// #P"test" </r>
+<r>//or// #S(PATHNAME :HOST "STRAWBERRY" :NAME "TEST") </r>
+<r>//or// #S(PATHNAME :HOST "BELGIAN-CHOCOLATE" :NAME "test") </r>
+
+([[CL:Macros:defparameter]] *pathname-2* (pathname "test")) <r>*PATHNAME-2*</r>
+*pathname-2* 
+<r>#P"CHOCOLATE:TEST" </r>
+<r>//or// #P"VANILLA:test" </r>
+<r>//or// #P"test" </r>
+<r>//or// #S(PATHNAME :HOST "STRAWBERRY" :NAME "TEST") </r>
+<r>//or// #S(PATHNAME :HOST "BELGIAN-CHOCOLATE" :NAME "test") </r>
+(pathnamep *pathname-1*) <r>//[[CL:Glossary:true]]// </r>
+(eq *pathname-1* (pathname *pathname-1*)) <r>//[[CL:Glossary:true]]// </r>
+(eq *pathname-1* *pathname-2*) 
+<r>//[[CL:Glossary:true]]// </r>
+<r>//or// //[[CL:Glossary:false]]// </r>
+(with-open-file (stream "test" :direction :output) 
+  (pathname stream)) <r>#P"ORANGE-CHOCOLATE:>Gus>test.lisp.newest"</r>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Types:pathname|System Class PATHNAME]]**
+  * **[[CL:Types:logical-pathname|System Class LOGICAL-PATHNAME]]**
+  * {\secref\FileSystemConcepts},
+  * {\secref\PathnamesAsFilenames}
+
+====Notes====
+None.
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-STREAM} \issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY} \issue{PATHNAME-LOGICAL:ADD} \issue{PATHNAME-LOGICAL:ADD}

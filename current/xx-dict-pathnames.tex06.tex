@@ -1,39 +1,24 @@
-\begincom{pathname-host, pathname-device, pathname-directory, pathname-name, pathname-type, pathname-version}\ftype{Function}
+====== Function PATHNAME-HOST, PATHNAME-DEVICE, PATHNAME-DIRECTORY, PATHNAME-NAME, PATHNAME-TYPE, PATHNAME-VERSION ======
 
 ====Syntax====
-
-**pathname-host {pathname** //\key} case// → //host//
-
-**pathname-device {pathname** //\key} case// → //device//
-
-**pathname-directory {pathname** //\key} case// → //directory//
-
-**pathname-name {pathname** //\key} case// → //name//
-
-**pathname-type {pathname** //\key} case// → //type//
-
-**pathname-version** //pathname// → //version//
+  * **pathname-host** //pathname// ''&key'' //case// → //host//
+  * **pathname-device** //pathname// ''&key'' //case// → //device//
+  * **pathname-directory** //pathname// ''&key'' //case// → //directory//
+  * **pathname-name** //pathname// ''&key'' //case// → //name//
+  * **pathname-type** //pathname// ''&key'' //case// → //type//
+  * **pathname-version** //pathname// → //version//
 
 ====Arguments and Values====
-
-//pathname// - a //[[CL:Glossary:pathname designator]]//.
-
-//case// - one of **'':local''** or **'':common''**. The default is **'':local''**.
-
-//host// - a //[[CL:Glossary:valid pathname host]]//.
-
-//device// - a //[[CL:Glossary:valid pathname device]]//.
-
-//directory// - a //[[CL:Glossary:valid pathname directory]]//.
-
-//name// - a //[[CL:Glossary:valid pathname name]]//.
-
-//type// - a //[[CL:Glossary:valid pathname type]]//.
-
-//version// - a //[[CL:Glossary:valid pathname version]]//.
+  * //pathname// - a //[[CL:Glossary:pathname designator]]//.
+  * //case// - one of **'':local''** or **'':common''**. The default is **'':local''**.
+  * //host// - a //[[CL:Glossary:valid pathname host]]//.
+  * //device// - a //[[CL:Glossary:valid pathname device]]//.
+  * //directory// - a //[[CL:Glossary:valid pathname directory]]//.
+  * //name// - a //[[CL:Glossary:valid pathname name]]//.
+  * //type// - a //[[CL:Glossary:valid pathname type]]//.
+  * //version// - a //[[CL:Glossary:valid pathname version]]//.
 
 ====Description====
-
 These functions return the components of //pathname//.
 
 If the //pathname// //[[CL:Glossary:designator]]// is a //[[CL:Glossary:pathname]]//, it represents the name used to open the file. This may be, but is not required to be, the actual name of the file.
@@ -41,33 +26,68 @@ If the //pathname// //[[CL:Glossary:designator]]// is a //[[CL:Glossary:pathname
 If //case// is supplied, it is treated as described in \secref\PathnameComponentCase.
 
 ====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] *q* 
+  ([[CL:Functions:make-pathname]] :host "KATHY" 
+                 :directory "CHAPMAN" 
+                 :name "LOGIN" 
+                 :type "COM")) <r>*Q*</r>
+*q* <r>#P"KATHY::[CHAPMAN]LOGIN.COM" </r>
+(pathname-host *q*) <r>"KATHY" </r>
+(pathname-name *q*) <r>"LOGIN" </r>
+(pathname-type *q*) <r>"COM"</r>
+</blockquote>
 
-<blockquote> ([[CL:Macros:defparameter]] q (make-pathname :host "KATHY" :directory "CHAPMAN" :name "LOGIN" :type "COM")) → #P"KATHY::[CHAPMAN]LOGIN.COM" (pathname-host q) → "KATHY" (pathname-name q) → "LOGIN" (pathname-type q) → "COM"
+Because //[[CL:Glossary:namestring|namestrings]]// are used, the results shown in the remaining examples are not necessarily the only possible results. Mappings from //[[CL:Glossary:namestring]]// representation to //[[CL:Glossary:pathname]]// representation are dependent both on the //[[CL:Glossary:file system]]// involved and on the //[[CL:Glossary:implementation]]// (since there may be several //[[CL:Glossary:implementation|implementations]]// which can manipulate the the same //[[CL:Glossary:file system]]//, and those //[[CL:Glossary:implementation|implementations]]// are not constrained to agree on all details). Consult the documentation for each //[[CL:Glossary:implementation]]// for specific information on how //[[CL:Glossary:namestring|namestrings]]// are treated that //[[CL:Glossary:implementation]]//.
 
-;; Because namestrings are used, the results shown in the remaining ;; examples are not necessarily the only possible results. Mappings ;; from namestring representation to pathname representation are ;; dependent both on the file system involved and on the implementation ;; (since there may be several implementations which can manipulate the ;; the same file system, and those implementations are not constrained ;; to agree on all details). Consult the documentation for each ;; implementation for specific information on how namestrings are treated ;; that implementation.
+===VMS===
+;; VMS 
+(pathname-directory 
+  ([[CL:Functions:parse-namestring]] "[FOO.*.BAR]BAZ.LSP")) <r>(:ABSOLUTE "FOO" "BAR") </r>
+(pathname-directory 
+  ([[CL:Functions:parse-namestring]] "[FOO.*.BAR]BAZ.LSP") :case :common) <r>(:ABSOLUTE "FOO" "BAR")</r>
 
-;; VMS (pathname-directory (parse-namestring "[FOO.*.BAR]BAZ.LSP")) → (:ABSOLUTE "FOO" "BAR") (pathname-directory (parse-namestring "[FOO.*.BAR]BAZ.LSP") :case :common) → (:ABSOLUTE "FOO" "BAR")
+;; Unix 
+(pathname-directory "foo.l") <r>NIL </r>
+(pathname-device "foo.l") <r>:UNSPECIFIC </r>
+(pathname-name "foo.l") <r>"foo" </r>
+(pathname-name "foo.l" :case :local) <r>"foo" </r>
+(pathname-name "foo.l" :case :common) <r>"FOO" </r>
+(pathname-type "foo.l") <r>"l" </r>
+(pathname-type "foo.l" :case :local) <r>"l" </r>
+(pathname-type "foo.l" :case :common) <r>"L" </r>
+(pathname-type "foo") <r>:UNSPECIFIC </r>
+(pathname-type "foo" :case :common) <r>:UNSPECIFIC </r>
+(pathname-type "foo.") <r>"" </r>
+(pathname-type "foo." :case :common) <r>"" </r>
+(pathname-directory ([[CL:Functions:parse-namestring]] "/foo/bar/baz.lisp") :case :local) <r>(:ABSOLUTE "foo" "bar") </r>
+(pathname-directory ([[CL:Functions:parse-namestring]] "/foo/bar/baz.lisp") :case :common) <r>(:ABSOLUTE "FOO" "BAR") </r>
+(pathname-directory ([[CL:Functions:parse-namestring]] "../baz.lisp")) <r>(:RELATIVE :UP) </r>
+(pathname-directory ([[CL:Functions:parse-namestring]] "/foo/BAR/../Mum/baz")) <r>(:ABSOLUTE "foo" "BAR" :UP "Mum") </r>
+(pathname-directory ([[CL:Functions:parse-namestring]] "/foo/BAR/../Mum/baz") :case :common) <r>(:ABSOLUTE "FOO" "bar" :UP "Mum") </r>
+(pathname-directory ([[CL:Functions:parse-namestring]] "/foo/*/bar/baz.l")) <r>(:ABSOLUTE "foo" :WILD "bar") </r>
+(pathname-directory ([[CL:Functions:parse-namestring]] "/foo/*/bar/baz.l") :case :common) <r>(:ABSOLUTE "FOO" :WILD "BAR")</r>
 
-;; Unix (pathname-directory "foo.l") → NIL (pathname-device "foo.l") → :UNSPECIFIC (pathname-name "foo.l") → "foo" (pathname-name "foo.l" :case :local) → "foo" (pathname-name "foo.l" :case :common) → "FOO" (pathname-type "foo.l") → "l" (pathname-type "foo.l" :case :local) → "l" (pathname-type "foo.l" :case :common) → "L" (pathname-type "foo") → :UNSPECIFIC (pathname-type "foo" :case :common) → :UNSPECIFIC (pathname-type "foo.") → "" (pathname-type "foo." :case :common) → "" (pathname-directory (parse-namestring "/foo/bar/baz.lisp") :case :local) → (:ABSOLUTE "foo" "bar") (pathname-directory (parse-namestring "/foo/bar/baz.lisp") :case :local) → (:ABSOLUTE "FOO" "BAR") (pathname-directory (parse-namestring "../baz.lisp")) → (:RELATIVE :UP) (PATHNAME-DIRECTORY (PARSE-NAMESTRING "/foo/BAR/../Mum/baz")) → (:ABSOLUTE "foo" "BAR" :UP "Mum") (PATHNAME-DIRECTORY (PARSE-NAMESTRING "/foo/BAR/../Mum/baz") :case :common) → (:ABSOLUTE "FOO" "bar" :UP "Mum") (PATHNAME-DIRECTORY (PARSE-NAMESTRING "/foo/*/bar/baz.l")) → (:ABSOLUTE "foo" :WILD "bar") (PATHNAME-DIRECTORY (PARSE-NAMESTRING "/foo/*/bar/baz.l") :case :common) → (:ABSOLUTE "FOO" :WILD "BAR")
-
-;; Symbolics LMFS (pathname-directory (parse-namestring ">foo>**>bar>baz.lisp")) → (:ABSOLUTE "foo" :WILD-INFERIORS "bar") (pathname-directory (parse-namestring ">foo>*>bar>baz.lisp")) → (:ABSOLUTE "foo" :WILD "bar") (pathname-directory (parse-namestring ">foo>*>bar>baz.lisp") :case :common) → (:ABSOLUTE "FOO" :WILD "BAR") (pathname-device (parse-namestring ">foo>baz.lisp")) → :UNSPECIFIC </blockquote>
+;; Symbolics LMFS 
+(pathname-directory ([[CL:Functions:parse-namestring]] ">foo>**>bar>baz.lisp")) <r>(:ABSOLUTE "foo" :WILD-INFERIORS "bar") </r>
+(pathname-directory ([[CL:Functions:parse-namestring]] ">foo>*>bar>baz.lisp")) <r>(:ABSOLUTE "foo" :WILD "bar") </r>
+(pathname-directory ([[CL:Functions:parse-namestring]] ">foo>*>bar>baz.lisp") :case :common) <r>(:ABSOLUTE "FOO" :WILD "BAR") </r>
+(pathname-device ([[CL:Functions:parse-namestring]] ">foo>baz.lisp")) <r>:UNSPECIFIC</r>
+</blockquote>
 
 ====Affected By====
-
 The //[[CL:Glossary:implementation]]// and the host //[[CL:Glossary:file system]]//.
 
 ====Exceptional Situations====
-
 Should signal an error of type **[[CL:Types:type-error]]** if its first argument is not a //[[CL:Glossary:pathname]]//.
 
 ====See Also====
-
-**[[CL:Types:pathname]]**, **[[CL:Types:logical-pathname]]**,{\secref\FileSystemConcepts},
-
-{\secref\PathnamesAsFilenames}
+  * **[[CL:Types:pathname|System Class PATHNAME]]**
+  * **[[CL:Types:logical-pathname|System Class LOGICAL-PATHNAME]]**
+  * {\secref\FileSystemConcepts}
+  * {\secref\PathnamesAsFilenames}
 
 ====Notes====
-
 None.
 
 \issue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION} \issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT} \issue{PATHNAME-WILD:NEW-FUNCTIONS} \issue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION} \issue{PATHNAME-LOGICAL:ADD} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT} \issue{PATHNAME-STREAM} \issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT} \issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
