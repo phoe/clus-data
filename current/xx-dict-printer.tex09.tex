@@ -1,0 +1,48 @@
+====== Local Macro PPRINT-POP ======
+
+====Syntax====
+**pprint-pop** //\noargs// → //object//
+
+====Arguments and Values====
+//object// - an //[[CL:Glossary:element]]// of the //[[CL:Glossary:list]]// being printed in the //[[CL:Glossary:lexically current logical block]]//, or **[[CL:Constant Variables:nil]]**.
+
+====Description====
+Pops one //[[CL:Glossary:element]]// from the //[[CL:Glossary:list]]// being printed in the //[[CL:Glossary:lexically current logical block]]//, obeying **[[CL:Variables:*print-length*]]** and **[[CL:Variables:*print-circle*]]** as described below.
+
+Each time **[[CL:Macros:pprint-pop]]** is called, it pops the next value off the //[[CL:Glossary:list]]// passed to the //[[CL:Glossary:lexically current logical block]]// and returns it. However, before doing this, it performs three tests:
+
+\beginlist \item{\bull} If the remaining `list' is not a //[[CL:Glossary:list]]//, "". ''''\idxterm{dot} is printed followed by the remaining `list.' (This makes it easier to write printing functions that are robust in the face of malformed arguments.)
+
+\item{\bull} If **[[CL:Variables:*print-length*]]** is //[[CL:Glossary:non-nil]]//, and **[[CL:Macros:pprint-pop]]** has already been called **[[CL:Variables:*print-length*]]** times within the immediately containing logical block, ""...''''\idxtext{Dot Dot Dot}\idxcode{...} is printed. (This makes it easy to write printing functions that properly handle **[[CL:Variables:*print-length*]]**.)
+
+\item{\bull} If **[[CL:Variables:*print-circle*]]** is //[[CL:Glossary:non-nil]]//, and the remaining list is a circular (or shared) reference, then "". '''' is printed followed by an appropriate "''#"n''#''''\idxtext{Sharpsign Sharpsign (reader macro)} marker. (This catches instances of //[[CL:Glossary:cdr]]// circularity and sharing in lists.) \endlist
+
+If either of the three conditions above occurs, the indicated output is printed on the //[[CL:Glossary:pretty printing stream]]// created by the immediately containing **[[CL:Macros:pprint-logical-block]]** and the execution of the immediately containing **[[CL:Macros:pprint-logical-block]]** is terminated except for the printing of the suffix.
+
+If **[[CL:Macros:pprint-logical-block]]** is given a `list' argument of **[[CL:Constant Variables:nil]]**---because it is not processing a list---**[[CL:Macros:pprint-pop]]** can still be used to obtain support for **[[CL:Variables:*print-length*]]**. In this situation, the first and third tests above are disabled and **[[CL:Macros:pprint-pop]]** always returns **[[CL:Constant Variables:nil]]**. see section {\secref\PrettyPrinterExamples}---specifically, the **[[CL:Functions:pprint-vector]]** example.
+
+Whether or not **[[CL:Macros:pprint-pop]]** is //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]// is //[[CL:Glossary:implementation-dependent]]//; however, the restrictions on redefinition and //[[CL:Glossary:shadowing]]// of **[[CL:Macros:pprint-pop]]** are the same as for //[[CL:Glossary:symbols]]// in \thepackage{common-lisp} which are //[[CL:Glossary:fbound]]// in the //[[CL:Glossary:global environment]]//. The consequences of attempting to use **[[CL:Macros:pprint-pop]]** outside of **[[CL:Macros:pprint-logical-block]]** are undefined.
+
+====Examples====
+None.
+
+====Side Effects====
+Might cause output
+
+to the //[[CL:Glossary:pretty printing stream]]// associated with the lexically current logical block.
+
+====Affected By====
+**[[CL:Variables:*print-length*]]**, **[[CL:Variables:*print-circle*]]**.
+
+====Exceptional Situations====
+An error is signaled (either at macro expansion time or at run time) if a usage of **[[CL:Macros:pprint-pop]]** occurs where there is no lexically containing **[[CL:Macros:pprint-logical-block]]** //[[CL:Glossary:form]]//.
+
+The consequences are undefined if **[[CL:Macros:pprint-pop]]** is executed outside of the //[[CL:Glossary:dynamic extent]]// of this **[[CL:Macros:pprint-logical-block]]**.
+
+====See Also====
+**[[CL:Macros:pprint-exit-if-list-exhausted]]**, **[[CL:Macros:pprint-logical-block]]**.
+
+====Notes====
+It is frequently a good idea to call **[[CL:Macros:pprint-exit-if-list-exhausted]]** before calling **[[CL:Macros:pprint-pop]]**.
+
+\issue{PRETTY-PRINT-INTERFACE} \issue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}

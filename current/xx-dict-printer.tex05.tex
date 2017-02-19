@@ -1,0 +1,67 @@
+====== Function PPRINT-FILL, PPRINT-LINEAR, PPRINT-TABULAR ======
+
+====Syntax====
+**pprint-fill**    //stream// //object// ''&optional'' //colon-p// //at-sign-p// → **[[CL:Constant Variables:nil]]**
+**pprint-linear**  //stream// //object// ''&optional'' //colon-p// //at-sign-p// → **[[CL:Constant Variables:nil]]**
+**pprint-tabular** //stream// //object// ''&optional'' //colon-p// //at-sign-p// //tabsize// → **[[CL:Constant Variables:nil]]**
+
+====Arguments and Values====
+  * //stream// - an //[[CL:Glossary:output]]// //[[CL:Glossary:stream designator]]//.
+  * //object// - an //[[CL:Glossary:object]]//.
+  * //colon-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:true]]//.
+  * //at-sign-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:implementation-dependent]]//.
+  * //tabsize// - a non-negative //[[CL:Glossary:integer]]//. The default is ''16''.
+
+====Description====
+The functions **pprint-fill**, **pprint-linear**, and **pprint-tabular** specify particular ways of //[[CL:Glossary:pretty printing]]// a //[[CL:Glossary:list]]// to //stream//. Each function prints parentheses around the output if and only if //colon-p// is //[[CL:Glossary:true]]//. Each function ignores its //at-sign-p// argument. (Both arguments are included even though only one is needed so that these functions can be used via ''~/.../'' and as **[[CL:Functions:set-pprint-dispatch]]** functions, as well as directly.) Each function handles abbreviation and the detection of circularity and sharing correctly, and uses **[[CL:Functions:write]]** to print //object// when it is a //[[CL:Glossary:non-list]]//.
+
+If //object// is a //[[CL:Glossary:list]]// and if the //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-pretty-star|*print-pretty*]]** is //[[CL:Glossary:false]]//, each of these functions prints //object// using a minimum of //[[CL:Glossary:whitespace]]//, as described in \secref\PrintingListsAndConses. Otherwise (if //object// is a //[[CL:Glossary:list]]// and if the //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-pretty-star|*print-pretty*]]** is //[[CL:Glossary:true]]//):
+
+  * The //[[CL:Glossary:function]]// **pprint-linear** prints a //[[CL:Glossary:list]]// either all on one line, or with each //[[CL:Glossary:element]]// on a separate line.
+  * The //[[CL:Glossary:function]]// **pprint-fill** prints a //[[CL:Glossary:list]]// with as many //[[CL:Glossary:element|elements]]// as possible on each line.
+  * The //[[CL:Glossary:function]]// **pprint-tabular** is the same as **pprint-fill** except that it prints the //[[CL:Glossary:element|elements]]// so that they line up in columns. The //tabsize// specifies the column spacing in //[[CL:Glossary:em|ems]]//, which is the total spacing from the leading edge of one column to the leading edge of the next.
+
+====Examples====
+Evaluating the following with a line length of ''25'' produces the output shown.
+
+<blockquote>
+([[CL:Special Operators:progn]] 
+  ([[CL:Functions:princ]] "Roads ") 
+  (pprint-tabular *standard-output* '(elm main maple center) nil nil 8))
+<o>Roads ELM     MAIN
+      MAPLE   CENTER</o>
+</blockquote>
+
+====Side Effects====
+Performs output to the indicated //[[CL:Glossary:stream]]//.
+
+====Affected By====
+The cursor position on the indicated //[[CL:Glossary:stream]]//, if it can be determined.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+None.
+
+====Notes====
+The //[[CL:Glossary:function]]// **pprint-tabular** could be defined as follows:
+
+<blockquote>
+([[CL:Macros:defun]] pprint-tabular (s list &optional (colon-p [[CL:Constant Variables:t]]) at-sign-p (tabsize [[CL:Constant Variables:nil]]))
+  ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] at-sign-p)) 
+  ([[CL:Macros:when]] ([[CL:Functions:null]] tabsize) 
+    ([[CL:Macros:setf]] tabsize 16)) 
+  ([[CL:Macros:pprint-logical-block]] (s list :prefix ([[CL:Special Operators:if]] colon-p "(" "") 
+                                :suffix ([[CL:Special Operators:if]] colon-p ")" ""))
+    ([[CL:Macros:pprint-exit-if-list-exhausted]]) 
+    ([[CL:Macros:loop]] ([[CL:Functions:write]] ([[CL:Macros:pprint-pop]]) :stream s) 
+          ([[CL:Macros:pprint-exit-if-list-exhausted]]) 
+          ([[CL:Functions:write-char]] #\Space s) 
+          ([[CL:Functions:pprint-tab]] :section-relative 0 tabsize s) 
+          ([[CL:Functions:pprint-newline]] :fill s))))
+</blockquote>
+
+Note that it would have been inconvenient to specify this function using **[[CL:Functions:format]]**, because of the need to pass its //tabsize// argument through to a ''~:T'' **[[CL:Functions:format]]** directive nested within an iteration over a list.
+
+\issue{PRETTY-PRINT-INTERFACE} \issue{GENERALIZE-PRETTY-PRINTER:UNIFY}

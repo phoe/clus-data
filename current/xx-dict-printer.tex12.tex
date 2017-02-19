@@ -1,0 +1,43 @@
+====== Macro PRINT-UNREADABLE-OBJECT ======
+
+====Syntax====
+\DefmacWithValues print-unreadable-object {\paren{object stream ''&key'' type identity} \starparam{form}} {**[[CL:Constant Variables:nil]]**}
+
+====Arguments and Values====
+//object// - an //[[CL:Glossary:object]]//; \eval.
+
+//stream// -
+
+a //[[CL:Glossary:stream designator]]//; \eval.
+
+//type// - a //[[CL:Glossary:generalized boolean]]//; \eval.
+
+//identity// - a //[[CL:Glossary:generalized boolean]]//; \eval.
+
+//forms// - an //[[CL:Glossary:implicit progn]]//.
+
+====Description====
+Outputs a printed representation of //object// on //stream//, beginning with ""#<'''' and ending with "">''''. Everything output to //stream// by the body //forms// is enclosed in the the angle brackets. If //type// is //[[CL:Glossary:true]]//, the output from //forms// is preceded by a brief description of the //object//'s //[[CL:Glossary:type]]// and a space character. If //identity// is //[[CL:Glossary:true]]//, the output from //forms// is followed by a space character and a representation of the //object//'s identity, typically a storage address.
+
+If either //type// or //identity// is not supplied, its value is //[[CL:Glossary:false]]//. It is valid to omit the body //forms//. If //type// and //identity// are both true and there are no body //forms//, only one space character separates the type and the identity.
+
+====Examples====
+;; Note that in this example, the precise form of the output ;; is //[[CL:Glossary:implementation-dependent]]//.
+
+<blockquote> (defmethod print-object ((obj airplane) stream) (print-unreadable-object (obj stream :type t :identity t) (princ (tail-number obj) stream)))
+
+(prin1-to-string my-airplane) → "#<Airplane NW0773 36000123135>" //or// → "#<FAA:AIRPLANE NW0773 17>" </blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+If **[[CL:Variables:*print-readably*]]** is //[[CL:Glossary:true]]//, **[[CL:Functions:print-unreadable-object]]** signals an error of type **[[CL:Types:print-not-readable]]** without printing anything.
+
+====See Also====
+None.
+
+====Notes====
+None.
+
+\issue{DATA-IO:ADD-SUPPORT}

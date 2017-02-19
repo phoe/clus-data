@@ -1,0 +1,47 @@
+====== Macro FORMATTER ======
+
+====Syntax====
+  * **formatter** //control-string// → //function//
+
+====Arguments and Values====
+  * //control-string// - a //[[CL:Glossary:format string]]//; not evaluated.
+  * //function// - a //[[CL:Glossary:function]]//.
+
+====Description====
+Returns a //[[CL:Glossary:function]]// which has behavior equivalent to:
+
+<blockquote>
+#'([[CL:Symbols:lambda]] ([[CL:Variables:star-standard-output-star|*standard-output*]] &rest arguments) 
+    ([[CL:Functions:apply]] #'[[CL:Functions:format]] [[CL:Constant Variables:t]] //control-string// arguments) 
+    //arguments-tail//)
+    </blockquote>
+
+where //arguments-tail// is either the tail of //arguments// which has as its //[[CL:Glossary:car]]// the argument that would be processed next if there were more format directives in the //control-string//, or else **[[CL:Constant Variables:nil]]** if no more //arguments// follow the most recently processed argument.
+
+====Examples====
+<blockquote>
+([[CL:Functions:funcall]] (formatter "~&~A~A") [[CL:Variables:star-standard-output-star|*standard-output*]] 'a 'b 'c)
+<o>AB </o>
+<r>(C)</r>
+
+([[CL:Functions:format]] [[CL:Constant Variables:t]] (formatter "~&~A~A") 'a 'b 'c)
+<o>AB </o>
+<r>[[CL:Constant Variables:NIL]] </r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Might signal an error (at macro expansion time or at run time) if the argument is not a valid //[[CL:Glossary:format string]]//.
+
+====See Also====
+  * **[[CL:Functions:format|Function FORMATTER]]**
+
+====Notes====
+None.
+
+\issue{PRETTY-PRINT-INTERFACE}
