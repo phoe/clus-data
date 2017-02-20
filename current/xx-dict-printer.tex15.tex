@@ -1,58 +1,69 @@
 ====== Function WRITE-TO-STRING, PRIN1-TO-STRING, PRINC-TO-STRING ======
 
 ====Syntax====
-\DefunWithValuesNewline write-to-string {object ''&key'' \writekeys{}} {string}
-
-**prin1-to-string** //object// → //string//
-
-**princ-to-string** //object// → //string//
+  * **write-to-string** //object// ''&key'' //array// //base// //case// //circle// //escape// //gensym// //length// //level// //lines// //miser-width// //pprint-dispatch// //pretty// //radix// //readably// //right-margin// → ////string//
+  * **prin1-to-string** //object// → //string//
+  * **princ-to-string** //object// → //string//
 
 ====Arguments and Values====
-//object// - an //[[CL:Glossary:object]]//.
-
-\writekeydescriptions{}
-
-//string// - a //[[CL:Glossary:string]]//.
+  * //object// - an //[[CL:Glossary:object]]//.
+  * //array// - a //[[CL:Glossary:generalized boolean]]//.
+  * //base// - a //[[CL:Glossary:radix]]//.
+  * //case// - a //[[CL:Glossary:symbol]]// of //[[CL:Glossary:type]]// ''(member :upcase :downcase :capitalize)''.
+  * //circle// - a //[[CL:Glossary:generalized boolean]]//.
+  * //escape// - a //[[CL:Glossary:generalized boolean]]//.
+  * //gensym// - a //[[CL:Glossary:generalized boolean]]//.
+  * //length// - a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**.
+  * //level// - a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**.
+  * //lines// - a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**.
+  * //miser-width// - a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**.
+  * //pprint-dispatch// - a //[[CL:Glossary:pprint dispatch table]]//.
+  * //pretty// - a //[[CL:Glossary:generalized boolean]]//.
+  * //radix// - a //[[CL:Glossary:generalized boolean]]//.
+  * //readably// - a //[[CL:Glossary:generalized boolean]]//.
+  * //right-margin// - a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**.
+  * //string// - a //[[CL:Glossary:string]]//.
 
 ====Description====
-**[[CL:Functions:write-to-string]]**, **[[CL:Functions:prin1-to-string]]**, and **[[CL:Functions:princ-to-string]]** are used to create a //[[CL:Glossary:string]]// consisting of the printed representation of //object//.
+**write-to-string**, **prin1-to-string**, and **princ-to-string** are used to create a //[[CL:Glossary:string]]// consisting of the printed representation of //object//.
 
-//Object// is effectively printed as if by **[[CL:Functions:write]]**, **[[CL:Functions:prin1]]**, or **[[CL:Functions:princ]]**, respectively, and the //[[CL:Glossary:characters]]// that would be output are made into a //[[CL:Glossary:string]]//.
+//object// is effectively printed as if by **[[CL:Functions:write]]**, **[[CL:Functions:prin1]]**, or **[[CL:Functions:princ]]**, respectively, and the //[[CL:Glossary:characters]]// that would be output are made into a //[[CL:Glossary:string]]//.
 
-**[[CL:Functions:write-to-string]]** is the general output function. It has the ability to specify all the parameters applicable to the printing of //object//.
+**write-to-string** is the general output function. It has the ability to specify all the parameters applicable to the printing of //object//.
 
-**[[CL:Functions:prin1-to-string]]** acts like **[[CL:Functions:write-to-string]]** with '':escape t'', that is, escape characters are written where appropriate.
+**prin1-to-string** acts like **write-to-string** with '':escape [[CL:Constant Variables:t]]'', that is, escape characters are written where appropriate.
 
-**[[CL:Functions:princ-to-string]]** acts like **[[CL:Functions:write-to-string]]** with
+**princ-to-string** acts like **write-to-string** with '':escape [[CL:Constant Variables:nil]] :readably [[CL:Constant Variables:nil]]''. Thus no //[[CL:Glossary:escape]]// //[[CL:Glossary:characters]]// are written.
 
-'':escape nil :readably nil''.
+All other keywords that would be specified to **write-to-string** are default values when **prin1-to-string** or **princ-to-string** is invoked.
 
-Thus no //[[CL:Glossary:escape]]// //[[CL:Glossary:characters]]// are written.
-
-All other keywords that would be specified to **[[CL:Functions:write-to-string]]** are default values when **[[CL:Functions:prin1-to-string]]** or **[[CL:Functions:princ-to-string]]** is invoked.
-
-The meanings and defaults for the keyword arguments to **[[CL:Functions:write-to-string]]** are the same as those for **[[CL:Functions:write]]**.
+The meanings and defaults for the keyword arguments to **write-to-string** are the same as those for **[[CL:Functions:write]]**.
 
 ====Examples====
-<blockquote> (prin1-to-string "abc") → "\\"abc\\"" (princ-to-string "abc") → "abc" </blockquote>
+<blockquote>
+(prin1-to-string "abc") → "\"abc\""
+(princ-to-string "abc") → "abc"
+</blockquote>
 
 ====Side Effects====
 None.
 
 ====Affected By====
-**[[CL:Variables:*print-escape*]]**, **[[CL:Variables:*print-radix*]]**, **[[CL:Variables:*print-base*]]**, **[[CL:Variables:*print-circle*]]**, **[[CL:Variables:*print-pretty*]]**, **[[CL:Variables:*print-level*]]**, **[[CL:Variables:*print-length*]]**, **[[CL:Variables:*print-case*]]**, **[[CL:Variables:*print-gensym*]]**, **[[CL:Variables:*print-array*]]**, **[[CL:Variables:*read-default-float-format*]]**.
+**[[CL:Variables:star-print-escape-star|*print-escape*]]**, **[[CL:Variables:star-print-radix-star|*print-radix*]]**, **[[CL:Variables:star-print-base-star|*print-base*]]**, **[[CL:Variables:star-print-circle-star|*print-circle*]]**, **[[CL:Variables:star-print-pretty-star|*print-pretty*]]**, **[[CL:Variables:star-print-level-star|*print-level*]]**, **[[CL:Variables:star-print-length-star|*print-length*]]**, **[[CL:Variables:star-print-case-star|*print-case*]]**, **[[CL:Variables:star-print-gensym-star|*print-gensym*]]**, **[[CL:Variables:star-print-array-star|*print-array*]]**, **[[CL:Variables:star-read-default-float-format-star|*read-default-float-format*]]**.
 
 ====Exceptional Situations====
 None.
 
 ====See Also====
-**[[CL:Functions:write]]**
+  * **[[CL:Functions:write|Function WRITE]]**
 
 ====Notes====
-<blockquote> (write-to-string //object// \star{{//key// //argument//}}) ≡ (with-output-to-string (#1=#:string-stream) (write object :stream #1# \star{{//key// //argument//}}))
-
-(princ-to-string //object//) ≡ (with-output-to-string (string-stream) (princ //object// string-stream))
-
-(prin1-to-string //object//) ≡ (with-output-to-string (string-stream) (prin1 //object// string-stream)) </blockquote>
+<blockquote> 
+(write-to-string //object// {//key// //argument//}''*'') 
+  ≡ (with-output-to-string (#1=#:string-stream) (write //object// :stream #1# {//key// //argument//}''*''))
+(princ-to-string //object//) 
+  ≡ (with-output-to-string (string-stream) (princ //object// string-stream))
+(prin1-to-string //object//) 
+  ≡ (with-output-to-string (string-stream) (prin1 //object// string-stream)) </blockquote>
 
 \issue{PRINC-READABLY:X3J13-DEC-91}

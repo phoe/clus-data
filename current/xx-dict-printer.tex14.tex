@@ -1,58 +1,95 @@
 ====== Function WRITE, PRIN1, PRINT, PPRINT, PRINC ======
 
 ====Syntax====
-\DefunWithValuesNewline write {//object// ''&key'' \writekeys{stream}} {object}
-
-**prin1 {object** //\opt} output-stream// → //object// **princ {object** //\opt} output-stream// → //object// **print {object** //\opt} output-stream// → //object// **pprint {object** //\opt} output-stream// → //\novalues//
+  *  write //object// ''&key'' //array// //base// //case// //circle// //escape// //gensym// //length// //level// //lines// //miser-width// //pprint-dispatch// //pretty// //radix// //readably// //right-margin// //stream// → //object//
+  * **prin1** //object// ''&optional'' //output-stream// → //object// 
+  * **princ** //object// ''&optional'' //output-stream// → //object// 
+  * **print** //object// ''&optional'' //output-stream// → //object// 
+  * **pprint** //object// ''&optional'' //output-stream// → //<no values>//
 
 ====Arguments and Values====
-//object// - an //[[CL:Glossary:object]]//.
-
-//output-stream// - an //[[CL:Glossary:output]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard output]]//.
-
-\writekeydescriptions{//stream// - an //[[CL:Glossary:output]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard output]]//.}
+  * //object// - an //[[CL:Glossary:object]]//.
+  * //output-stream// - an //[[CL:Glossary:output]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard output]]//.
+  * //array// - a //[[CL:Glossary:generalized boolean]]//.
+  * //base// - a //[[CL:Glossary:radix]]//.
+  * //case// - a //[[CL:Glossary:symbol]]// of //[[CL:Glossary:type]]// ''(member :upcase :downcase :capitalize)''.
+  * //circle// - a //[[CL:Glossary:generalized boolean]]//.
+  * //escape// - a //[[CL:Glossary:generalized boolean]]//.
+  * //gensym// - a //[[CL:Glossary:generalized boolean]]//.
+  * //length// - a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**.
+  * //level// - a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**.
+  * //lines// - a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**.
+  * //miser-width// - a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**.
+  * //pprint-dispatch// - a //[[CL:Glossary:pprint dispatch table]]//.
+  * //pretty// - a //[[CL:Glossary:generalized boolean]]//.
+  * //radix// - a //[[CL:Glossary:generalized boolean]]//.
+  * //readably// - a //[[CL:Glossary:generalized boolean]]//.
+  * //right-margin// - a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**.
+  * //stream// - an //[[CL:Glossary:output]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard output]]//.
 
 ====Description====
-**[[CL:Functions:write]]**, **[[CL:Functions:prin1]]**, **[[CL:Functions:princ]]**, **[[CL:Functions:print]]**, and **[[CL:Functions:pprint]]** write the printed representation of //object// to //output-stream//.
+**write**, **prin1**, **princ**, **print**, and **pprint** write the printed representation of //object// to //output-stream//.
 
-**[[CL:Functions:write]]** is the general entry point to the //[[CL:Glossary:Lisp printer]]//. For each explicitly supplied //[[CL:Glossary:keyword parameter]]// named in \thenextfigure, the corresponding //[[CL:Glossary:printer control variable]]// is dynamically bound to its //[[CL:Glossary:value]]// while printing goes on; for each //[[CL:Glossary:keyword parameter]]// in \thenextfigure\ that is not explicitly supplied, the value of the corresponding //[[CL:Glossary:printer control variable]]// is the same as it was at the time **[[CL:Functions:write]]** was invoked. Once the appropriate //[[CL:Glossary:bindings]]// are //[[CL:Glossary:established]]//, the //[[CL:Glossary:object]]// is output by the //[[CL:Glossary:Lisp printer]]//.
+**write** is the general entry point to the //[[CL:Glossary:Lisp printer]]//. For each explicitly supplied //[[CL:Glossary:keyword parameter]]// named in the below table, the corresponding //[[CL:Glossary:printer control variable]]// is dynamically bound to its //[[CL:Glossary:value]]// while printing goes on; for each //[[CL:Glossary:keyword parameter]]// in the below table that is not explicitly supplied, the value of the corresponding //[[CL:Glossary:printer control variable]]// is the same as it was at the time **write** was invoked. Once the appropriate //[[CL:Glossary:binding|bindings]]// are //[[CL:Glossary:established]]//, the //[[CL:Glossary:object]]// is output by the //[[CL:Glossary:Lisp printer]]//.
 
-\tablefigtwo{Argument correspondences for the WRITE function.}{Parameter}{Corresponding Dynamic Variable}{ //array// & **[[CL:Variables:*print-array*]]** \cr //base// & **[[CL:Variables:*print-base*]]** \cr //case// & **[[CL:Variables:*print-case*]]** \cr //circle// & **[[CL:Variables:*print-circle*]]** \cr //escape// & **[[CL:Variables:*print-escape*]]** \cr //gensym// & **[[CL:Variables:*print-gensym*]]** \cr //length// & **[[CL:Variables:*print-length*]]** \cr //level// & **[[CL:Variables:*print-level*]]** \cr //lines// & **[[CL:Variables:*print-lines*]]** \cr //miser-width// & **[[CL:Variables:*print-miser-width*]]** \cr //pprint-dispatch// & **[[CL:Variables:*print-pprint-dispatch*]]** \cr //pretty// & **[[CL:Variables:*print-pretty*]]** \cr //radix// & **[[CL:Variables:*print-radix*]]** \cr //readably// & **[[CL:Variables:*print-readably*]]** \cr //right-margin// & **[[CL:Variables:*print-right-margin*]]** \cr }
+^ Parameter           ^ Corresponding Dynamic Variable                                               ^
+| //array//           | **[[CL:Variables:star-print-array-star|*print-array*]]**                     |
+| //base//            | **[[CL:Variables:star-print-base-star|*print-base*]]**                       |
+| //case//            | **[[CL:Variables:star-print-case-star|*print-case*]]**                       |
+| //circle//          | **[[CL:Variables:star-print-circle-star|*print-circle*]]**                   |
+| //escape//          | **[[CL:Variables:star-print-escape-star|*print-escape*]]**                   |
+| //gensym//          | **[[CL:Variables:star-print-gensym-star|*print-gensym*]]**                   |
+| //length//          | **[[CL:Variables:star-print-length-star|*print-length*]]**                   |
+| //level//           | **[[CL:Variables:star-print-level-star|*print-level*]]**                     |
+| //lines//           | **[[CL:Variables:star-print-lines-star|*print-lines*]]**                     |
+| //miser-width//     | **[[CL:Variables:star-print-miser-width-star|*print-miser-width*]]**         |
+| //pprint-dispatch// | **[[CL:Variables:star-print-pprint-dispatch-star|*print-pprint-dispatch*]]** |
+| //pretty//          | **[[CL:Variables:star-print-pretty-star|*print-pretty*]]**                   |
+| //radix//           | **[[CL:Variables:star-print-radix-star|*print-radix*]]**                     |
+| //readably//        | **[[CL:Variables:star-print-readably-star|*print-readably*]]**               |
+| //right-margin//    | **[[CL:Variables:star-print-right-margin-star|*print-right-margin*]]**       |
 
-**[[CL:Functions:prin1]]**, **[[CL:Functions:princ]]**, **[[CL:Functions:print]]**, and **[[CL:Functions:pprint]]** implicitly //[[CL:Glossary:bind]]// certain print parameters to particular values. The remaining parameter values are taken from **[[CL:Variables:*print-array*]]**, **[[CL:Variables:*print-base*]]**, **[[CL:Variables:*print-case*]]**, **[[CL:Variables:*print-circle*]]**, **[[CL:Variables:*print-escape*]]**, **[[CL:Variables:*print-gensym*]]**, **[[CL:Variables:*print-length*]]**, **[[CL:Variables:*print-level*]]**, **[[CL:Variables:*print-lines*]]**, **[[CL:Variables:*print-miser-width*]]**, **[[CL:Variables:*print-pprint-dispatch*]]**, **[[CL:Variables:*print-pretty*]]**, **[[CL:Variables:*print-radix*]]**, and **[[CL:Variables:*print-right-margin*]]**.
+**prin1**, **princ**, **print**, and **pprint** implicitly //[[CL:Glossary:bind]]// certain print parameters to particular values. The remaining parameter values are taken from **[[CL:Variables:star-print-array-star|*print-array*]]**, **[[CL:Variables:star-print-base-star|*print-base*]]**, **[[CL:Variables:star-print-case-star|*print-case*]]**, **[[CL:Variables:star-print-circle-star|*print-circle*]]**, **[[CL:Variables:star-print-escape-star|*print-escape*]]**, **[[CL:Variables:star-print-gensym-star|*print-gensym*]]**, **[[CL:Variables:star-print-length-star|*print-length*]]**, **[[CL:Variables:star-print-level-star|*print-level*]]**, **[[CL:Variables:star-print-lines-star|*print-lines*]]**, **[[CL:Variables:star-print-miser-width-star|*print-miser-width*]]**, **[[CL:Variables:star-print-pprint-dispatch-star|*print-pprint-dispatch*]]**, **[[CL:Variables:star-print-pretty-star|*print-pretty*]]**, **[[CL:Variables:star-print-radix-star|*print-radix*]]**, and **[[CL:Variables:star-print-right-margin-star|*print-right-margin*]]**.
 
-**[[CL:Functions:prin1]]** produces output suitable for input to **[[CL:Functions:read]]**. It binds **[[CL:Variables:*print-escape*]]** to //[[CL:Glossary:true]]//.
+**prin1** produces output suitable for input to **[[CL:Functions:read]]**. It binds **[[CL:Variables:star-print-escape-star|*print-escape*]]** to //[[CL:Glossary:true]]//.
 
-**[[CL:Functions:princ]]** is just like **[[CL:Functions:prin1]]** except that the output has no //[[CL:Glossary:escape]]// //[[CL:Glossary:characters]]//. It binds **[[CL:Variables:*print-escape*]]** to //[[CL:Glossary:false]]//
+**princ** is just like **prin1** except that the output has no //[[CL:Glossary:escape]]// //[[CL:Glossary:characters]]//. It binds **[[CL:Variables:star-print-escape-star|*print-escape*]]** to //[[CL:Glossary:false]]// and **[[CL:Variables:star-print-readably-star|*print-readably*]]** to //[[CL:Glossary:false]]//.
 
-and **[[CL:Variables:*print-readably*]]** to //[[CL:Glossary:false]]//.
+The general rule is that output from **princ** is intended to look good to people, while output from **prin1** is intended to be acceptable to **[[CL:Functions:read]]**.
 
-The general rule is that output from **[[CL:Functions:princ]]** is intended to look good to people, while output from **[[CL:Functions:prin1]]** is intended to be acceptable to **[[CL:Functions:read]]**.
+**print** is just like **prin1** except that the printed representation of //object// is preceded by a newline and followed by a space.
 
-**[[CL:Functions:print]]** is just like **[[CL:Functions:prin1]]** except that the printed representation of //object// is preceded by a newline and followed by a space.
+**pprint** is just like **print** except that the trailing space is omitted and //object// is printed with the **[[CL:Variables:star-print-pretty-star|*print-pretty*]]** flag //[[CL:Glossary:non-nil]]// to produce pretty output.
 
-**[[CL:Functions:pprint]]** is just like **[[CL:Functions:print]]** except that the trailing space is omitted and //object// is printed with the **[[CL:Variables:*print-pretty*]]** flag //[[CL:Glossary:non-nil]]// to produce pretty output.
-
-//Output-stream// specifies the //[[CL:Glossary:stream]]// to which output is to be sent.
+//output-stream// specifies the //[[CL:Glossary:stream]]// to which output is to be sent.
 
 ====Affected By====
-**[[CL:Variables:*standard-output*]]**, **[[CL:Variables:*terminal-io*]]**, **[[CL:Variables:*print-escape*]]**, **[[CL:Variables:*print-radix*]]**, **[[CL:Variables:*print-base*]]**, **[[CL:Variables:*print-circle*]]**, **[[CL:Variables:*print-pretty*]]**, **[[CL:Variables:*print-level*]]**, **[[CL:Variables:*print-length*]]**, **[[CL:Variables:*print-case*]]**, **[[CL:Variables:*print-gensym*]]**, **[[CL:Variables:*print-array*]]**, **[[CL:Variables:*read-default-float-format*]]**.
+**[[CL:Variables:star-standard-output-star|*standard-output*]]**, **[[CL:Variables:star-terminal-io-star|*terminal-io*]]**, **[[CL:Variables:star-print-escape-star|*print-escape*]]**, **[[CL:Variables:star-print-radix-star|*print-radix*]]**, **[[CL:Variables:star-print-base-star|*print-base*]]**, **[[CL:Variables:star-print-circle-star|*print-circle*]]**, **[[CL:Variables:star-print-pretty-star|*print-pretty*]]**, **[[CL:Variables:star-print-level-star|*print-level*]]**, **[[CL:Variables:star-print-length-star|*print-length*]]**, **[[CL:Variables:star-print-case-star|*print-case*]]**, **[[CL:Variables:star-print-gensym-star|*print-gensym*]]**, **[[CL:Variables:star-print-array-star|*print-array*]]**, **[[CL:Variables:star-read-default-float-format-star|*read-default-float-format*]]**.
 
 ====Exceptional Situations====
 None.
 
 ====See Also====
-**[[CL:Functions:readtable-case]]**, {\secref\FORMATPrinterOps}
+  * **[[CL:Functions:readtable-case|Function READTABLE-CASE]]**
+  * {\secref\FORMATPrinterOps}
 
 ====Notes====
-\Thefunctions{prin1} and **[[CL:Functions:print]]** do not bind **[[CL:Variables:*print-readably*]]**.
+The //[[CL:Glossary:function|functions]]// **prin1** and **print** do not bind **[[CL:Variables:star-print-readably-star|*print-readably*]]**.
 
-<blockquote> (prin1 object output-stream) ≡ (write object :stream output-stream :escape t) </blockquote>
+<blockquote> 
+(prin1 object output-stream) 
+  ≡ (write object :stream output-stream :escape [[CL:Constant Variables:t]])
 
-<blockquote> (princ object output-stream) ≡ (write object stream output-stream :escape nil :readably nil) </blockquote>
+(princ object output-stream) 
+  ≡ (write object stream output-stream :escape nil :readably nil)
 
-<blockquote> (print object output-stream) ≡ (progn (terpri output-stream) (write object :stream output-stream :escape t) (write-char #\\space output-stream)) </blockquote>
+(print object output-stream) 
+  ≡ ([[CL:Special Operators:progn]] ([[CL:Functions:terpri]] output-stream) 
+           (write object :stream output-stream :escape [[CL:Constant Variables:t]]) 
+           ([[CL:Functions:write-char]] #\Space output-stream))
 
-<blockquote> (pprint object output-stream) ≡ (write object :stream output-stream :escape t :pretty t) </blockquote>
+(pprint object output-stream) 
+  ≡ (write object :stream output-stream :escape [[CL:Constant Variables:t]] :pretty [[CL:Constant Variables:t]])
+</blockquote>
 
 \issue{PRETTY-PRINT-INTERFACE} \issue{PRINC-READABLY:X3J13-DEC-91} \issue{PRINC-READABLY:X3J13-DEC-91}

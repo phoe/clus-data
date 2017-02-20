@@ -7,19 +7,19 @@ a //[[CL:Glossary:generalized boolean]]//.
 //[[CL:Glossary:false]]//.
 
 ====Description====
-If **[[CL:Variables:*print-readably*]]** is //[[CL:Glossary:true]]//, some special rules for printing //[[CL:Glossary:object|objects]]// go into effect. Specifically, printing any //[[CL:Glossary:object]]// ''O\sub 1'' produces a printed representation that, when seen by the //[[CL:Glossary:Lisp reader]]//
+If **[[CL:Variables:star-print-readably-star|*print-readably*]]** is //[[CL:Glossary:true]]//, some special rules for printing //[[CL:Glossary:object|objects]]// go into effect. Specifically, printing any //[[CL:Glossary:object]]// ''O\sub 1'' produces a printed representation that, when seen by the //[[CL:Glossary:Lisp reader]]//
 
-while the //[[CL:Glossary:standard readtable]]// is in effect, will produce an //[[CL:Glossary:object]]// ''O\sub 2'' that is //[[CL:Glossary:similar]]// to ''O\sub 1''. The printed representation produced might or might not be the same as the printed representation produced when **[[CL:Variables:*print-readably*]]** is //[[CL:Glossary:false]]//.
+while the //[[CL:Glossary:standard readtable]]// is in effect, will produce an //[[CL:Glossary:object]]// ''O\sub 2'' that is //[[CL:Glossary:similar]]// to ''O\sub 1''. The printed representation produced might or might not be the same as the printed representation produced when **[[CL:Variables:star-print-readably-star|*print-readably*]]** is //[[CL:Glossary:false]]//.
 
 If printing an //[[CL:Glossary:object]]// //[[CL:Glossary:readably]]// is not possible, an error of type **[[CL:Types:print-not-readable]]** is signaled rather than using a syntax (//e.g.// the ""#<'''' syntax) that would not be readable by the same //[[CL:Glossary:implementation]]//. If the //[[CL:Glossary:value]]// of some other //[[CL:Glossary:printer control variable]]// is such that these requirements would be violated, the //[[CL:Glossary:value]]// of that other //[[CL:Glossary:variable]]// is ignored.
 
-Specifically, if **[[CL:Variables:*print-readably*]]** is //[[CL:Glossary:true]]//, printing proceeds as if **[[CL:Variables:*print-escape*]]**, **[[CL:Variables:*print-array*]]**, and **[[CL:Variables:*print-gensym*]]** were also //[[CL:Glossary:true]]//, and as if **[[CL:Variables:*print-length*]]**, **[[CL:Variables:*print-level*]]**, and **[[CL:Variables:*print-lines*]]** were //[[CL:Glossary:false]]//.
+Specifically, if **[[CL:Variables:star-print-readably-star|*print-readably*]]** is //[[CL:Glossary:true]]//, printing proceeds as if **[[CL:Variables:star-print-escape-star|*print-escape*]]**, **[[CL:Variables:star-print-array-star|*print-array*]]**, and **[[CL:Variables:star-print-gensym-star|*print-gensym*]]** were also //[[CL:Glossary:true]]//, and as if **[[CL:Variables:star-print-length-star|*print-length*]]**, **[[CL:Variables:star-print-level-star|*print-level*]]**, and **[[CL:Variables:star-print-lines-star|*print-lines*]]** were //[[CL:Glossary:false]]//.
 
-If **[[CL:Variables:*print-readably*]]** is //[[CL:Glossary:false]]//, the normal rules for printing and the normal interpretations of other //[[CL:Glossary:printer control variables]]// are in effect.
+If **[[CL:Variables:star-print-readably-star|*print-readably*]]** is //[[CL:Glossary:false]]//, the normal rules for printing and the normal interpretations of other //[[CL:Glossary:printer control variables]]// are in effect.
 
-Individual //[[CL:Glossary:methods]]// for **[[CL:Functions:print-object]]**, including user-defined //[[CL:Glossary:methods]]//, are responsible for implementing these requirements.
+Individual //[[CL:Glossary:method|methods]]// for **[[CL:Functions:print-object]]**, including user-defined //[[CL:Glossary:method|methods]]//, are responsible for implementing these requirements.
 
-If **[[CL:Variables:*read-eval*]]** is //[[CL:Glossary:false]]// and **[[CL:Variables:*print-readably*]]** is //[[CL:Glossary:true]]//, any such method that would output a reference to the ""#.'''' //[[CL:Glossary:reader macro]]// will either output something else or will signal an error (as described above).
+If **[[CL:Variables:star-read-eval-star|*read-eval*]]** is //[[CL:Glossary:false]]// and **[[CL:Variables:star-print-readably-star|*print-readably*]]** is //[[CL:Glossary:true]]//, any such method that would output a reference to the ""#.'''' //[[CL:Glossary:reader macro]]// will either output something else or will signal an error (as described above).
 
 ====Examples====
 <blockquote> (let ((x (list "a" '\\a (gensym) '((a (b (c))) d e f g))) (*print-escape* nil) (*print-gensym* nil) (*print-level* 3) (*print-length* 3)) (write x) (let ((*print-readably* t)) (terpri) (write x) :done))
