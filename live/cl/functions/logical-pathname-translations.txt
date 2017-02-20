@@ -1,0 +1,172 @@
+====== Accessor LOGICAL-PATHNAME-TRANSLATIONS ======
+
+====Syntax====
+  * **logical-pathname-translations** //host// → //translations// 
+  (**setf** (**logical-pathname-translations** //host//) //new-translations//)
+
+====Arguments and Values====
+  * //host//--a //[[CL:Glossary:logical host designator]]//.
+  * //translations//, //new-translations// - a //[[CL:Glossary:list]]//.
+
+====Description====
+Returns the host's //[[CL:Glossary:list]]// of translations. Each translation is a //[[CL:Glossary:list]]// of at least two elements: ''from-wildcard'' and ''to-wildcard''. Any additional elements are //[[CL:Glossary:implementation-defined]]//. ''From-wildcard'' is a //[[CL:Glossary:logical pathname]]// whose host is //host//. ''To-wildcard'' is a //[[CL:Glossary:pathname]]//.
+
+''(setf (logical-pathname-translations //host//) //translations//)'' sets a //[[CL:Glossary:logical pathname]]// host's //[[CL:Glossary:list]]// of //translations//. If //host// is a //[[CL:Glossary:string]]// that has not been previously used as a //[[CL:Glossary:logical pathname]]// host, a new //[[CL:Glossary:logical pathname]]// host is defined; otherwise an existing host's translations are replaced. //[[CL:Glossary:logical pathname]]// host names are compared with **[[CL:Functions:string-equal]]**.
+
+When setting the translations list, each ''from-wildcard'' can be a //[[CL:Glossary:logical pathname]]// whose host is //host// or a //[[CL:Glossary:logical pathname]]// namestring parseable by ''(parse-namestring //[[CL:Glossary:string]]// ''host'')'', where ''host'' represents the appropriate //[[CL:Glossary:object]]// as defined by **[[CL:Functions:parse-namestring]]**. Each ''to-wildcard'' can be anything coercible to a //[[CL:Glossary:pathname]]// by ''(pathname ''to-wildcard'')''. If ''to-wildcard'' coerces to a //[[CL:Glossary:logical pathname]]//, **[[CL:Functions:translate-logical-pathname]]** will perform repeated translation steps when it uses it.
+
+//host// is either the host component of a //[[CL:Glossary:logical pathname]]// or a //[[CL:Glossary:string]]// that has been defined as a //[[CL:Glossary:logical pathname]]// host name by **[[CL:Macros:setf]]** of **[[CL:Functions:logical-pathname-translations]]**.
+
+====Examples====
+The //[[CL:Glossary:top-level]]// calls to **[[CL:Macros:setf]]** in following examples have their //[[CL:Glossary:return value|return values]]// omitted for readability.
+
+A very simple example of setting up a //[[CL:Glossary:logical pathname]]// host. No translations are necessary to get around //[[CL:Glossary:file system]]// restrictions, so all that is necessary is to specify the root of the physical directory tree that contains the logical //[[CL:Glossary:file system]]//. The //[[CL:Glossary:namestring]]// syntax on the right-hand side is //[[CL:Glossary:implementation-dependent]]//.
+
+<blockquote> 
+([[CL:Macros:setf]] (logical-pathname-translations "foo") 
+      '(("**;*.*.*" "MY-LISPM:>library>foo>**>")))
+</blockquote> 
+
+Sample use of that //[[CL:Glossary:logical pathname]]//. The //[[CL:Glossary:return value ]]// is //[[CL:Glossary:implementation-dependent]]//. 
+
+<blockquote> 
+([[CL:Functions:translate-logical-pathname]] "foo:bar;baz;mum.quux.3")
+<r>#P"MY-LISPM:>library>foo>bar>baz>mum.quux.3"</r>
+</blockquote>
+
+----
+
+A more complex example, dividing the files among two file servers and several different directories. This Unix doesn't support **'':wild-inferiors''** in the directory, so each directory level must be translated individually. No file name or type translations are required except for ''.MAIL'' to ''.MBX''. The namestring syntax on the right-hand side is implementation-dependent. 
+
+<blockquote> 
+([[CL:Macros:setf]] (logical-pathname-translations "prog") 
+      '(("RELEASED;*.*.*"                   "MY-UNIX:/sys/bin/my-prog/") 
+        ("RELEASED;*;*.*.*"                 "MY-UNIX:/sys/bin/my-prog/*/") 
+        ("EXPERIMENTAL;*.*.*"               "MY-UNIX:/usr/Joe/development/prog/") 
+        ("EXPERIMENTAL;DOCUMENTATION;*.*.*" "MY-VAX:SYS$DISK:[JOE.DOC]") 
+        ("EXPERIMENTAL;*;*.*.*"             "MY-UNIX:/usr/Joe/development/prog/*/") 
+        ("MAIL;**;*.MAIL"                   "MY-VAX:SYS$DISK:[JOE.MAIL.PROG...]*.MBX")))
+</blockquote> 
+
+Sample use of that //[[CL:Glossary:logical pathname]]//. The return value is //[[CL:Glossary:implementation-dependent]]//. 
+
+<blockquote> 
+([[CL:Functions:translate-logical-pathname]] "prog:mail;save;ideas.mail.3") 
+<r>#P"MY-VAX:SYS$DISK:[JOE.MAIL.PROG.SAVE]IDEAS.MBX.3"</r>
+</blockquote>
+
+----
+
+Example translations for a //[[CL:Glossary:program]]// that uses three files: ''main.lisp'', ''auxiliary.lisp'', and ''documentation.lisp''. These translations might be supplied by a software supplier as examples.
+
+For Unix with long file names:
+
+<blockquote> 
+([[CL:Macros:setf]] (logical-pathname-translations "prog") 
+      '(("CODE;*.*.*" "/lib/prog/")))
+</blockquote> 
+
+Sample use of that //[[CL:Glossary:logical pathname]]//. The return value is //[[CL:Glossary:implementation-dependent]]//. 
+
+<blockquote> 
+([[CL:Functions:translate-logical-pathname]] "prog:code;documentation.lisp") 
+<r>#P"/lib/prog/documentation.lisp"</r>
+</blockquote>
+
+----
+
+For Unix with 14-character file names, using ''.lisp'' as the type.
+
+<blockquote> 
+([[CL:Macros:setf]] (logical-pathname-translations "prog") 
+      '(("CODE;DOCUMENTATION.*.*" "/lib/prog/docum.*")
+        ("CODE;*.*.*" "/lib/prog/")))
+</blockquote> 
+
+Sample use of that //[[CL:Glossary:logical pathname]]//. The return value is //[[CL:Glossary:implementation-dependent]]//. 
+
+<blockquote> 
+([[CL:Functions:translate-logical-pathname]] "prog:code;documentation.lisp") 
+<r>#P"/lib/prog/docum.lisp"</r>
+</blockquote>
+
+----
+
+For Unix with 14-character file names, using ''.l'' as the type. The second translation shortens the compiled file type to ''.b''.
+
+<blockquote> 
+([[CL:Macros:setf]] (logical-pathname-translations "prog") 
+      `(("**;*.LISP.*" ,(logical-pathname "PROG:**;*.L.*")) 
+        (,([[CL:Functions:compile-file-pathname]] ([[CL:Functions:logical-pathname]] "PROG:**;*.LISP.*")) 
+         ,([[CL:Functions:logical-pathname]] "PROG:**;*.B.*"))
+        ("CODE;DOCUMENTATION.*.*" "/lib/prog/documentatio.*") 
+        ("CODE;*.*.*" "/lib/prog/")))
+</blockquote> 
+
+Sample use of that //[[CL:Glossary:logical pathname]]//. The return value is //[[CL:Glossary:implementation-dependent]]//. 
+ 
+<blockquote> 
+([[CL:Functions:translate-logical-pathname]] "prog:code;documentation.lisp") 
+<r>#P"/lib/prog/documentatio.l"</r>
+</blockquote> 
+
+----
+
+For a Cray with 6 character names and no directories, types, or versions. 
+
+<blockquote> 
+([[CL:Macros:setf]] (logical-pathname-translations "prog") 
+      ([[CL:Special Operators:let]] ((l '(("MAIN" "PGMN") 
+                 ("AUXILIARY" "PGAUX")
+                 ("DOCUMENTATION" "PGDOC")))
+            (logpath ([[CL:Functions:logical-pathname]] "prog:code;")) 
+            (phypath ([[CL:Functions:pathname]] "XXX")))
+        ([[CL:Functions:append]] 
+          ;; Translations for source files 
+          ([[CL:Functions:mapcar]] #'([[CL:Symbols:lambda]] (x) 
+                      (let ((log ([[CL:Functions:first]] x)) 
+                            (phy ([[CL:Functions:second]] x)))
+                        ([[CL:Functions:list]] ([[CL:Functions:make-pathname]] :name log 
+                                             :type "LISP" 
+                                             :version :wild 
+                                             :defaults logpath) 
+                              ([[CL:Functions:make-pathname]] :name phy 
+                                             :defaults phypath))))
+                  l)
+          ;; Translations for compiled files 
+          ([[CL:Functions:mapcar]] #'([[CL:Symbols:lambda]] (x) 
+                      ([[CL:Special Operators:let*]] ((log ([[CL:Functions:first]] x)) 
+                             (phy ([[CL:Functions:second]] x)) 
+                             (com ([[CL:Functions:compile-file-pathname]]
+                                    ([[CL:Functions:make-pathname]] :name log 
+                                                   :type "LISP" 
+                                                   :version :wild 
+                                                   :defaults logpath))))
+                        ([[CL:Macros:setf]] phy 
+                              ([[CL:Functions:concatenate]] '[[CL:Types:string]] phy "B"))
+                        ([[CL:Functions:list]] com ([[CL:Functions:make-pathname]] :name phy 
+                                                 :defaults phypath))))
+                  l))))
+</blockquote> 
+
+Sample use of that //[[CL:Glossary:logical pathname]]//. The return value is //[[CL:Glossary:implementation-dependent]]//. 
+
+<blockquote> 
+(translate-logical-pathname "prog:code;documentation.lisp") 
+<r>#P"PGDOC"</r>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+If //host// is incorrectly supplied, an error of type **[[CL:Types:type-error]]** is signaled.
+
+====See Also====
+  * **[[CL:Types:logical-pathname|System Class LOGICAL-PATHNAME]]**
+  * {\secref\PathnamesAsFilenames}
+
+====Notes====
+Implementations can define additional //[[CL:Glossary:functions]]// that operate on //[[CL:Glossary:logical pathname]]// hosts, for example to specify additional translation rules or options.
+
+\issue{PATHNAME-LOGICAL:ADD} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
