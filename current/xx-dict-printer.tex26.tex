@@ -9,37 +9,56 @@ a //[[CL:Glossary:generalized boolean]]//.
 ====Description====
 Controls whether the //[[CL:Glossary:Lisp printer]]// calls the //[[CL:Glossary:pretty printer]]//.
 
-If it is //[[CL:Glossary:false]]//, the //[[CL:Glossary:pretty printer]]// is not used and
-
-a minimum
-
-of //[[CL:Glossary:whitespace]]// is output when printing an expression.
+If it is //[[CL:Glossary:false]]//, the //[[CL:Glossary:pretty printer]]// is not used and a minimum of //[[CL:Glossary:whitespace]]// is output when printing an expression.
 
 If it is //[[CL:Glossary:true]]//, the //[[CL:Glossary:pretty printer]]// is used, and the //[[CL:Glossary:Lisp printer]]// will endeavor to insert extra //[[CL:Glossary:whitespace]]// where appropriate to make //[[CL:Glossary:expressions]]// more readable.
 
-**[[CL:Variables:*print-pretty*]]** has an effect even when the //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-escape-star|*print-escape*]]** is //[[CL:Glossary:false]]//.
+**<nowiki>*print-pretty*</nowiki>** has an effect even when the //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-escape-star|*print-escape*]]** is //[[CL:Glossary:false]]//.
 
 ====Examples====
-<blockquote> ([[CL:Macros:defparameter]] *print-pretty* 'nil) → NIL (progn (write '(let ((a 1) (b 2) (c 3)) (+ a b c))) nil)
-▷ (LET ((A 1) (B 2) (C 3)) (+ A B C)) → NIL (let ((*print-pretty* t)) (progn (write '(let ((a 1) (b 2) (c 3)) (+ a b c))) nil))
-▷ (LET ((A 1)
-▷ (B 2)
-▷ (C 3))
-▷ (+ A B C)) → NIL ;; Note that the first two expressions printed by this next form ;; differ from the second two only in whether escape characters are printed. ;; In all four cases, extra whitespace is inserted by the pretty printer. (flet ((test (x) (let ((*print-pretty* t)) (print x) (format t "~ (terpri) (princ x) (princ " ") (format t "~ (test '#'(lambda () (list "a" #\b 'c #'d))))
-▷ #'(LAMBDA ()
-▷ (LIST "a" #\b 'C #'D))
-▷ #'(LAMBDA ()
-▷ (LIST "a" #\b 'C #'D))
-▷ #'(LAMBDA ()
-▷ (LIST a b 'C #'D))
-▷ #'(LAMBDA ()
-▷ (LIST a b 'C #'D)) → NIL </blockquote>
+<blockquote>
+([[CL:Macros:setf]] *print-pretty* '[[CL:Constant Variables:nil]]) 
+<r>[[CL:Constant Variables:NIL]] </r>
+([[CL:Special Operators:progn]] 
+  ([[CL:Functions:write]] '([[CL:Special Operators:let]] ((a 1) (b 2) (c 3)) ([[CL:Functions:math-add|+]] a b c))) 
+  [[CL:Constant Variables:nil]])
+<o>(LET ((A 1) (B 2) (C 3)) ([[CL:Functions:math-add|+]] A B C))</o>
+<r>[[CL:Constant Variables:NIL]] </r>
+([[CL:Special Operators:let]] ((*print-pretty* t)) 
+  ([[CL:Special Operators:progn]] 
+    ([[CL:Functions:write]] '([[CL:Special Operators:let]] ((a 1) (b 2) (c 3)) ([[CL:Functions:math-add|+]] a b c))) 
+    [[CL:Constant Variables:nil]]))
+<o>([[CL:Special Operators:LET]] ((A 1)
+      (B 2)
+      (C 3))
+  ([[CL:Functions:math-add|+]] A B C))</o>
+<r>[[CL:Constant Variables:NIL]] </r>
+</blockquote>
+Note that the first two expressions printed by this next example differ from the second two only in whether //[[CL:Glossary:escape]]// //[[CL:Glossary:character|characters]]// are printed. In all four cases, extra whitespace is inserted by the //[[CL:Glossary:pretty printer]]//. 
+<blockquote>
+([[CL:Special Operators:flet]] ((test (x) 
+         ([[CL:Special Operators:let]] ((*print-pretty* [[CL:Constant Variables:t]])) 
+           ([[CL:Functions:print]] x) 
+           ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~%~S " x)
+           ([[CL:Functions:terpri]]) ([[CL:Functions:princ]] x) ([[CL:Functions:princ]] " ")
+           ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~%~A " x))))
+  (test '#'([[CL:Symbols:lambda]] () ([[CL:Functions:list]] "a" #\b 'c #'d))))
+<o>#'([[CL:Symbols:LAMBDA]] ()
+    ([[CL:Functions:LIST]] "a" #\b 'C #'D))
+#'([[CL:Symbols:LAMBDA]] ()
+    ([[CL:Functions:LIST]] "a" #\b 'C #'D))
+#'([[CL:Symbols:LAMBDA]] ()
+    ([[CL:Functions:LIST]] a b 'C #'D))
+#'([[CL:Symbols:LAMBDA]] ()
+    ([[CL:Functions:LIST]] a b 'C #'D)) </o>
+<r>NIL</r>
+</blockquote>
 
 ====Affected By====
 None.
 
 ====See Also====
-**[[CL:Functions:write]]**
+  * **[[CL:Functions:write|Function WRITE]]**
 
 ====Notes====
 None.

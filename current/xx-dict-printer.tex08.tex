@@ -1,67 +1,52 @@
 ====== Function PPRINT-NEWLINE ======
 
 ====Syntax====
-
-**pprint-newline {kind** //\opt} stream// → //**[[CL:Constant Variables:nil]]**//
+  * **pprint-newline** //kind// ''&optional'' //stream// → **[[CL:Constant Variables:nil]]**
 
 ====Arguments and Values====
-
-//kind// - one of **'':linear''**, **'':fill''**, **'':miser''**, or **'':mandatory''**.
-
-//stream// - a //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard output]]//.
+  * //kind// - one of **'':linear''**, **'':fill''**, **'':miser''**, or **'':mandatory''**.
+  * //stream// - a //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard output]]//.
 
 ====Description====
-
-If //stream// is a //[[CL:Glossary:pretty printing stream]]// and \thevalueof{*print-pretty*} is //[[CL:Glossary:true]]//, a line break is inserted in the output when the appropriate condition below is satisfied; otherwise, **[[CL:Functions:pprint-newline]]** has no effect.
+If //stream// is a //[[CL:Glossary:pretty printing stream]]// and the //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-pretty-star|*print-pretty*]]** is //[[CL:Glossary:true]]//, a line break is inserted in the output when the appropriate condition below is satisfied; otherwise, **[[CL:Functions:pprint-newline]]** has no effect.
 
 //Kind// specifies the style of conditional newline. This //[[CL:Glossary:parameter]]// is treated as follows:
 
-\beginlist
+===:linear===
+This specifies a "linear-style" //[[CL:Glossary:conditional newline]]//. A line break is inserted if and only if the immediately containing //[[CL:Glossary:section]]// cannot be printed on one line. The effect of this is that line breaks are either inserted at every linear-style conditional newline in a logical block or at none of them.
 
-\item{**'':linear''**}
+===:miser===
+This specifies a "miser-style" //[[CL:Glossary:conditional newline]]//. A line break is inserted if and only if the immediately containing //[[CL:Glossary:section]]// cannot be printed on one line and miser style is in effect in the immediately containing logical block. The effect of this is that miser-style conditional newlines act like linear-style conditional newlines, but only when miser style is in effect. Miser style is in effect for a logical block if and only if the starting position of the logical block is less than or equal to **[[CL:Variables:star-print-miser-width-star|*print-miser-width*]]** //[[CL:Glossary:em|ems]]// from the right margin.
 
-This specifies a "linear-style" //[[CL:Glossary:conditional newline]]//.\idxtext{linear-style conditional newline} A line break is inserted if and only if the immediately containing //[[CL:Glossary:section]]// cannot be printed on one line. The effect of this is that line breaks are either inserted at every linear-style conditional newline in a logical block or at none of them.
+===:fill===
+This specifies a "fill-style" //[[CL:Glossary:conditional newline]]//. A line break is inserted if and only if either (a) the following //[[CL:Glossary:section]]// cannot be printed on the end of the current line, (b) the preceding //[[CL:Glossary:section]]// was not printed on a single line, or (c) the immediately containing //[[CL:Glossary:section]]// cannot be printed on one line and miser style is in effect in the immediately containing logical block. If a logical block is broken up into a number of subsections by fill-style conditional newlines, the basic effect is that the logical block is printed with as many subsections as possible on each line. However, if miser style is in effect, fill-style conditional newlines act like linear-style conditional newlines.
 
-\item{**'':miser''**}
+===:mandatory===
+This specifies a "mandatory-style" //[[CL:Glossary:conditional newline]]//. A line break is always inserted. This implies that none of the containing //[[CL:Glossary:sections]]// can be printed on a single line and will therefore trigger the insertion of line breaks at linear-style conditional newlines in these //[[CL:Glossary:sections]]//.
 
-This specifies a "miser-style" //[[CL:Glossary:conditional newline]]//.\idxtext{miser-style conditional newline} A line break is inserted if and only if the immediately containing //[[CL:Glossary:section]]// cannot be printed on one line and miser style is in effect in the immediately containing logical block. The effect of this is that miser-style conditional newlines act like linear-style conditional newlines, but only when miser style is in effect. Miser style is in effect for a logical block if and only if the starting position of the logical block is less than or equal to **[[CL:Variables:*print-miser-width*]]** //[[CL:Glossary:ems]]// from the right margin.
-
-\item{**'':fill''**}
-
-This specifies a "fill-style" //[[CL:Glossary:conditional newline]]//.\idxtext{fill-style conditional newline} A line break is inserted if and only if either (a) the following //[[CL:Glossary:section]]// cannot be printed on the end of the current line, (b) the preceding //[[CL:Glossary:section]]// was not printed on a single line, or (c) the immediately containing //[[CL:Glossary:section]]// cannot be printed on one line and miser style is in effect in the immediately containing logical block. If a logical block is broken up into a number of subsections by fill-style conditional newlines, the basic effect is that the logical block is printed with as many subsections as possible on each line. However, if miser style is in effect, fill-style conditional newlines act like linear-style conditional newlines.
-
-\item{**'':mandatory''**}
-
-This specifies a "mandatory-style" //[[CL:Glossary:conditional newline]]//.\idxtext{mandatory-style conditional newline} A line break is always inserted. This implies that none of the containing //[[CL:Glossary:sections]]// can be printed on a single line and will therefore trigger the insertion of line breaks at linear-style conditional newlines in these //[[CL:Glossary:sections]]//.
-
-\endlist
+-----
 
 When a line break is inserted by any type of conditional newline, any blanks that immediately precede the conditional newline are omitted from the output and indentation is introduced at the beginning of the next line. By default, the indentation causes the following line to begin in the same horizontal position as the first character in the immediately containing logical block. (The indentation can be changed via **[[CL:Functions:pprint-indent]]**.)
 
-There are a variety of ways unconditional newlines can be introduced into the output (i.e. via **[[CL:Functions:terpri]]** or by printing a string containing a newline character). As with mandatory conditional newlines, this prevents any of the containing //[[CL:Glossary:sections]]// from being printed on one line. In general, when an unconditional newline is encountered, it is printed out without suppression of the preceding blanks and without any indentation following it. However, if a per-line prefix has been specified (see **[[CL:Macros:pprint-logical-block]]**), this prefix will always be printed no matter how a newline originates.
+There are a variety of ways unconditional newlines can be introduced into the output (i.e. via **[[CL:Functions:terpri]]** or by printing a string containing a newline character). As with mandatory conditional newlines, this prevents any of the containing //[[CL:Glossary:section|sections]]// from being printed on one line. In general, when an unconditional newline is encountered, it is printed out without suppression of the preceding blanks and without any indentation following it. However, if a per-line prefix has been specified (see **[[CL:Macros:pprint-logical-block]]**), this prefix will always be printed no matter how a newline originates.
 
 ====Examples====
-
-see section {\secref\PrettyPrinterExamples}.
+See section {\secref\PrettyPrinterExamples}.
 
 ====Side Effects====
-
 Output to //stream//.
 
 ====Affected By====
-
-**[[CL:Variables:*print-pretty*]]**, **[[CL:Variables:*print-miser*]]**. The presence of containing logical blocks. The placement of newlines and conditional newlines.
+**[[CL:Variables:star-print-pretty-star|*print-pretty*]]**, **[[CL:Variables:star-print-miser-star|*print-miser*]]**. The presence of containing logical blocks. The placement of newlines and conditional newlines.
 
 ====Exceptional Situations====
-
 An error of type **[[CL:Types:type-error]]** is signaled if //kind// is not one of **'':linear''**, **'':fill''**, **'':miser''**, or **'':mandatory''**.
 
 ====See Also====
-
-{\secref\TildeUnderscore}, {\secref\PrettyPrinterExamples}
+  * {\secref\TildeUnderscore}
+  * {\secref\PrettyPrinterExamples}
 
 ====Notes====
-
 None.
 
 \issue{PRETTY-PRINT-INTERFACE} \issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
