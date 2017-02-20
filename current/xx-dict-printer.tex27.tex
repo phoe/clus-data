@@ -7,43 +7,80 @@ a //[[CL:Glossary:generalized boolean]]//.
 //[[CL:Glossary:false]]//.
 
 ====Description====
-If **[[CL:Variables:star-print-readably-star|*print-readably*]]** is //[[CL:Glossary:true]]//, some special rules for printing //[[CL:Glossary:object|objects]]// go into effect. Specifically, printing any //[[CL:Glossary:object]]// ''O\sub 1'' produces a printed representation that, when seen by the //[[CL:Glossary:Lisp reader]]//
+If **<nowiki>*print-readably*</nowiki>** is //[[CL:Glossary:true]]//, some special rules for printing //[[CL:Glossary:object|objects]]// go into effect. Specifically, printing any //[[CL:Glossary:object]]// ''O<sub>1</sub>'' produces a printed representation that, when seen by the //[[CL:Glossary:Lisp reader]]// while the //[[CL:Glossary:standard readtable]]// is in effect, will produce an //[[CL:Glossary:object]]// ''O<sub>2</sub>'' that is //[[CL:Glossary:similar]]// to ''O<sub>1</sub>''. The printed representation produced might or might not be the same as the printed representation produced when **<nowiki>*print-readably*</nowiki>** is //[[CL:Glossary:false]]//.
 
-while the //[[CL:Glossary:standard readtable]]// is in effect, will produce an //[[CL:Glossary:object]]// ''O\sub 2'' that is //[[CL:Glossary:similar]]// to ''O\sub 1''. The printed representation produced might or might not be the same as the printed representation produced when **[[CL:Variables:star-print-readably-star|*print-readably*]]** is //[[CL:Glossary:false]]//.
+If printing an //[[CL:Glossary:object]]// //[[CL:Glossary:readably]]// is not possible, an error of type **[[CL:Types:print-not-readable]]** is signaled rather than using a syntax (//e.g.// the ''#<'' syntax) that would not be readable by the same //[[CL:Glossary:implementation]]//. If the //[[CL:Glossary:value]]// of some other //[[CL:Glossary:printer control variable]]// is such that these requirements would be violated, the //[[CL:Glossary:value]]// of that other //[[CL:Glossary:variable]]// is ignored.
 
-If printing an //[[CL:Glossary:object]]// //[[CL:Glossary:readably]]// is not possible, an error of type **[[CL:Types:print-not-readable]]** is signaled rather than using a syntax (//e.g.// the ""#<'''' syntax) that would not be readable by the same //[[CL:Glossary:implementation]]//. If the //[[CL:Glossary:value]]// of some other //[[CL:Glossary:printer control variable]]// is such that these requirements would be violated, the //[[CL:Glossary:value]]// of that other //[[CL:Glossary:variable]]// is ignored.
+Specifically, if **<nowiki>*print-readably*</nowiki>** is //[[CL:Glossary:true]]//, printing proceeds as if **[[CL:Variables:star-print-escape-star|*print-escape*]]**, **[[CL:Variables:star-print-array-star|*print-array*]]**, and **[[CL:Variables:star-print-gensym-star|*print-gensym*]]** were also //[[CL:Glossary:true]]//, and as if **[[CL:Variables:star-print-length-star|*print-length*]]**, **[[CL:Variables:star-print-level-star|*print-level*]]**, and **[[CL:Variables:star-print-lines-star|*print-lines*]]** were //[[CL:Glossary:false]]//.
 
-Specifically, if **[[CL:Variables:star-print-readably-star|*print-readably*]]** is //[[CL:Glossary:true]]//, printing proceeds as if **[[CL:Variables:star-print-escape-star|*print-escape*]]**, **[[CL:Variables:star-print-array-star|*print-array*]]**, and **[[CL:Variables:star-print-gensym-star|*print-gensym*]]** were also //[[CL:Glossary:true]]//, and as if **[[CL:Variables:star-print-length-star|*print-length*]]**, **[[CL:Variables:star-print-level-star|*print-level*]]**, and **[[CL:Variables:star-print-lines-star|*print-lines*]]** were //[[CL:Glossary:false]]//.
-
-If **[[CL:Variables:star-print-readably-star|*print-readably*]]** is //[[CL:Glossary:false]]//, the normal rules for printing and the normal interpretations of other //[[CL:Glossary:printer control variables]]// are in effect.
+If **<nowiki>*print-readably*</nowiki>** is //[[CL:Glossary:false]]//, the normal rules for printing and the normal interpretations of other //[[CL:Glossary:printer control variables]]// are in effect.
 
 Individual //[[CL:Glossary:method|methods]]// for **[[CL:Functions:print-object]]**, including user-defined //[[CL:Glossary:method|methods]]//, are responsible for implementing these requirements.
 
-If **[[CL:Variables:star-read-eval-star|*read-eval*]]** is //[[CL:Glossary:false]]// and **[[CL:Variables:star-print-readably-star|*print-readably*]]** is //[[CL:Glossary:true]]//, any such method that would output a reference to the ""#.'''' //[[CL:Glossary:reader macro]]// will either output something else or will signal an error (as described above).
+If **[[CL:Variables:star-read-eval-star|*read-eval*]]** is //[[CL:Glossary:false]]// and **<nowiki>*print-readably*</nowiki>** is //[[CL:Glossary:true]]//, any such method that would output a reference to the ''#.'' //[[CL:Glossary:reader macro]]// will either output something else or will signal an error (as described above).
 
 ====Examples====
-<blockquote> (let ((x (list "a" '\\a (gensym) '((a (b (c))) d e f g))) (*print-escape* nil) (*print-gensym* nil) (*print-level* 3) (*print-length* 3)) (write x) (let ((*print-readably* t)) (terpri) (write x) :done))
-▷ (a a G4581 ((A #) D E ...))
-▷ ("a" |a| #:G4581 ((A (B (C))) D E F G)) → :DONE
+<blockquote> 
+([[CL:Special Operators:let]] ((x ([[CL:Functions:list]] "a" '\a ([[CL:Functions:gensym]]) '((a (b (c))) d e f g))) 
+      ([[CL:Variables:star-print-escape-star|*print-escape*]] nil) 
+      ([[CL:Variables:star-print-gensym-star|*print-gensym*]] nil)
+      ([[CL:Variables:star-print-level-star|*print-level*]] 3) 
+      ([[CL:Variables:star-print-length-star|*print-length*]] 3))
+  ([[CL:Functions:write]] x) 
+  ([[CL:Special Operators:let]] ((*print-readably* t)) 
+    ([[CL:Functions:terpri]]) 
+    ([[CL:Functions:write]] x) 
+    :done))
+<o>(a a G4581 ((A #) D E ...))
+("a" |a| #:G4581 ((A (B (C))) D E F G))</o> 
+<r>:DONE</r>
+</blockquote>
 
-;; This is setup code is shared between the examples ;; of three hypothetical implementations which follow. ([[CL:Macros:defparameter]] table (make-hash-table)) → #<HASH-TABLE EQL 0/120 32005763> ([[CL:Macros:setf]] (gethash table 1) 'one) → ONE ([[CL:Macros:setf]] (gethash table 2) 'two) → TWO
+------
 
-;; Implementation A (let ((*print-readably* t)) (print table)) Error: Can't print #<HASH-TABLE EQL 0/120 32005763> readably.
+This setup code is shared between the examples of three hypothetical implementations which follow. 
 
-;; Implementation B ;; No standardized #S notation for hash tables is defined, ;; but there might be an implementation-defined notation. (let ((*print-readably* t)) (print table))
-▷ #S(HASH-TABLE :TEST EQL :SIZE 120 :CONTENTS (1 ONE 2 TWO)) → #<HASH-TABLE EQL 0/120 32005763>
+<blockquote>
+([[CL:Macros:defparameter]] *table* ([[CL:Functions:make-hash-table]])) <r>#<HASH-TABLE EQL 0/120 32005763> </r>
+([[CL:Macros:setf]] ([[CL:Functions:gethash]] *table* 1) 'one) <r>ONE</r>
+([[CL:Macros:setf]] ([[CL:Functions:gethash]] *table* 2) 'two) <r>TWO</r>
+</blockquote>
 
-;; Implementation C ;; Note that #. notation can only be used if *READ-EVAL* is true. ;; If *READ-EVAL* were false, this same implementation might have to ;; signal an error unless it had yet another printing strategy to fall ;; back on. (let ((*print-readably* t)) (print table))
-▷ #.(LET ((HASH-TABLE (MAKE-HASH-TABLE)))
-▷ (SETF (GETHASH 1 HASH-TABLE) ONE)
-▷ (SETF (GETHASH 2 HASH-TABLE) TWO)
-▷ HASH-TABLE) → #<HASH-TABLE EQL 0/120 32005763> </blockquote>
+==Implementation A==
+If an //[[CL:Glossary:implementation]]// cannot print the hash table readably, it will //[[CL:Glossary:signal]]// an //[[CL:Glossary:error]]//.
+<blockquote>
+([[CL:Special Operators:let]] ((*print-readably* t))
+  ([[CL:Functions:print]] table))
+<e>Error: Can't print #<HASH-TABLE EQL 0/120 32005763> readably.</e>
+</blockquote>
+
+==Implementation B==
+No standardized ''#S'' notation for //[[CL:Glossary:hash table|hash tables]]// is defined, but there might be an //[[CL:Glossary:implementation-defined]]// notation.
+<blockquote>
+([[CL:Special Operators:let]] ((*print-readably* t))
+  ([[CL:Functions:print]] table))
+<o>#S(HASH-TABLE :TEST EQL :SIZE 120 :CONTENTS (1 ONE 2 TWO)) </o>
+<r>#<HASH-TABLE EQL 0/120 32005763></r>
+</blockquote>
+
+==Implementation C==
+Note that ''#.'' notation can only be used if **[[CL:Variables:star-read-eval-star|*read-eval*]]** is true. If **[[CL:Variables:star-read-eval-star|*read-eval*]]** were false, this same //[[CL:Glossary:implementation]]// might have to //[[CL:Glossary:signal]]// an //[[CL:Glossary:error]]// unless it had yet another printing strategy to fall back on. 
+<blockquote>
+([[CL:Special Operators:let]] ((*print-readably* t))
+  ([[CL:Functions:print]] table))
+<o>#.([[CL:Special Operators:LET]] ((HASH-TABLE ([[CL:Functions:MAKE-HASH-TABLE]])))
+    ([[CL:Macros:SETF]] ([[CL:Functions:GETHASH]] 1 HASH-TABLE) ONE)
+    ([[CL:Macros:SETF]] ([[CL:Functions:GETHASH]] 2 HASH-TABLE) TWO)
+    HASH-TABLE) </o>
+<r>#<HASH-TABLE EQL 0/120 32005763></r>
+</blockquote>
 
 ====Affected By====
 None.
 
 ====See Also====
-**[[CL:Functions:write]]**, **[[CL:Macros:print-unreadable-object]]**
+  * **[[CL:Functions:write|Function WRITE]]**
+  * **[[CL:Macros:print-unreadable-object|Macro PRINT-UNREADABLE-OBJECT]]**
 
 ====Notes====
 The rules for "//[[CL:Glossary:similarity]]//" imply that ''#A'' or ''#('' syntax cannot be used for //[[CL:Glossary:array|arrays]]// of //[[CL:Glossary:element type]]// other than **[[CL:Types:t]]**. An implementation will have to use another syntax or signal an error of type **[[CL:Types:print-not-readable]]**.

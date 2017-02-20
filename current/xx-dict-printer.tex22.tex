@@ -7,46 +7,64 @@ a non-negative //[[CL:Glossary:integer]]//, or **[[CL:Constant Variables:nil]]**
 **[[CL:Constant Variables:nil]]**.
 
 ====Description====
-**[[CL:Variables:star-print-level-star|*print-level*]]** controls how many levels deep a nested //[[CL:Glossary:object]]// will print. If it is //[[CL:Glossary:false]]//, then no control is exercised. Otherwise, it is an //[[CL:Glossary:integer]]// indicating the maximum level to be printed. An //[[CL:Glossary:object]]// to be printed is at level ''0''; its components (as of a //[[CL:Glossary:list]]// or //[[CL:Glossary:vector]]//) are at level ''1''; and so on. If an //[[CL:Glossary:object]]// to be recursively printed has components and is at a level equal to or greater than the //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-level-star|*print-level*]]**, then the //[[CL:Glossary:object]]// is printed as ""#''''.
+**<nowiki>*print-level*</nowiki>** controls how many levels deep a nested //[[CL:Glossary:object]]// will print. If it is //[[CL:Glossary:false]]//, then no control is exercised. Otherwise, it is an //[[CL:Glossary:integer]]// indicating the maximum level to be printed. An //[[CL:Glossary:object]]// to be printed is at level ''0''; its components (as of a //[[CL:Glossary:list]]// or //[[CL:Glossary:vector]]//) are at level ''1''; and so on. If an //[[CL:Glossary:object]]// to be recursively printed has components and is at a level equal to or greater than the //[[CL:Glossary:value]]// of **<nowiki>*print-level*</nowiki>**, then the //[[CL:Glossary:object]]// is printed as ""#''''.
 
-**[[CL:Variables:star-print-length-star|*print-length*]]** controls how many elements at a given level are printed. If it is //[[CL:Glossary:false]]//, there is no limit to the number of components printed. Otherwise, it is an //[[CL:Glossary:integer]]// indicating the maximum number of //[[CL:Glossary:element|elements]]// of an //[[CL:Glossary:object]]// to be printed. If exceeded, the printer will print ""...'''' in place of the other //[[CL:Glossary:element|elements]]//. In the case of a //[[CL:Glossary:dotted list]]//, if the //[[CL:Glossary:list]]// contains exactly as many //[[CL:Glossary:element|elements]]// as the //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-length-star|*print-length*]]**, the terminating //[[CL:Glossary:atom]]// is printed rather than printing ""...''''
+**<nowiki>*print-length*</nowiki>** controls how many elements at a given level are printed. If it is //[[CL:Glossary:false]]//, there is no limit to the number of components printed. Otherwise, it is an //[[CL:Glossary:integer]]// indicating the maximum number of //[[CL:Glossary:element|elements]]// of an //[[CL:Glossary:object]]// to be printed. If exceeded, the printer will print ''...'' in place of the other //[[CL:Glossary:element|elements]]//. In the case of a //[[CL:Glossary:dotted list]]//, if the //[[CL:Glossary:list]]// contains exactly as many //[[CL:Glossary:element|elements]]// as the //[[CL:Glossary:value]]// of **<nowiki>*print-length*</nowiki>**, the terminating //[[CL:Glossary:atom]]// is printed rather than printing ''...''
 
-**[[CL:Variables:star-print-level-star|*print-level*]]** and **[[CL:Variables:star-print-length-star|*print-length*]]** affect the printing of an any //[[CL:Glossary:object]]// printed with a list-like syntax. They do not affect the printing of //[[CL:Glossary:symbols]]//, //[[CL:Glossary:strings]]//, and //[[CL:Glossary:bit vectors]]//.
+**<nowiki>*print-level*</nowiki>** and **<nowiki>*print-length*</nowiki>** affect the printing of an any //[[CL:Glossary:object]]// printed with a list-like syntax. They do not affect the printing of //[[CL:Glossary:symbols]]//, //[[CL:Glossary:strings]]//, and //[[CL:Glossary:bit vectors]]//.
 
 ====Examples====
-\medbreak <blockquote> ([[CL:Macros:defparameter]] a '(1 (2 (3 (4 (5 (6))))))) → (1 (2 (3 (4 (5 (6)))))) (dotimes (i 8) (let ((*print-level* i)) (format t "~&~D -- ~S~
-▷ 0 -- #
-▷ 1 -- (1 #)
-▷ 2 -- (1 (2 #))
-▷ 3 -- (1 (2 (3 #)))
-▷ 4 -- (1 (2 (3 (4 #))))
-▷ 5 -- (1 (2 (3 (4 (5 #)))))
-▷ 6 -- (1 (2 (3 (4 (5 (6))))))
-▷ 7 -- (1 (2 (3 (4 (5 (6)))))) → NIL \medbreak ([[CL:Macros:defparameter]] a '(1 2 3 4 5 6)) → (1 2 3 4 5 6) (dotimes (i 7) (let ((*print-length* i)) (format t "~&~D -- ~S~
-▷ 0 -- (...)
-▷ 1 -- (1 ...)
-▷ 2 -- (1 2 ...)
-▷ 3 -- (1 2 3 ...)
-▷ 4 -- (1 2 3 4 ...)
-▷ 5 -- (1 2 3 4 5 6)
-▷ 6 -- (1 2 3 4 5 6) → NIL \medbreak (dolist (level-length '((0 1) (1 1) (1 2) (1 3) (1 4) (2 1) (2 2) (2 3) (3 2) (3 3) (3 4))) (let ((*print-level* (first level-length)) (*print-length* (second level-length))) (format t "~&~D ~D -- ~S~ *print-level* *print-length* '(if (member x y) (+ (car x) 3) '(foo . #(a b c d "Baz"))))))
-▷ 0 1 -- #
-▷ 1 1 -- (IF ...)
-▷ 1 2 -- (IF # ...)
-▷ 1 3 -- (IF # # ...)
-▷ 1 4 -- (IF # # #)
-▷ 2 1 -- (IF ...)
-▷ 2 2 -- (IF (MEMBER X ...) ...)
-▷ 2 3 -- (IF (MEMBER X Y) (+ # 3) ...)
-▷ 3 2 -- (IF (MEMBER X ...) ...)
-▷ 3 3 -- (IF (MEMBER X Y) (+ (CAR X) 3) ...)
-▷ 3 4 -- (IF (MEMBER X Y) (+ (CAR X) 3) '(FOO . #(A B C D ...))) → NIL </blockquote>
+<blockquote> 
+([[CL:Special Operators:let]] ((a '(1 (2 (3 (4 (5 (6))))))))
+  ([[CL:Macros:dotimes]] (i 8) 
+    ([[CL:Special Operators:let]] ((*print-level* i)) 
+      ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~D -- ~S~%" i a))))
+<o>0 -- #
+1 -- (1 #)
+2 -- (1 (2 #))
+3 -- (1 (2 (3 #)))
+4 -- (1 (2 (3 (4 #))))
+5 -- (1 (2 (3 (4 (5 #)))))
+6 -- (1 (2 (3 (4 (5 (6))))))
+7 -- (1 (2 (3 (4 (5 (6)))))) </o>
+<r>NIL </r>
+([[CL:Special Operators:let]] ((a '(1 2 3 4 5 6)))
+  ([[CL:Macros:dotimes]] (i 7) 
+    ([[CL:Special Operators:let]] ((*print-length* i)) 
+      ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~D -- ~S~%" i a))))
+<o>0 -- (...)
+1 -- (1 ...)
+2 -- (1 2 ...)
+3 -- (1 2 3 ...)
+4 -- (1 2 3 4 ...)
+5 -- (1 2 3 4 5 6)
+6 -- (1 2 3 4 5 6) </o>
+<r>NIL </r>
+([[CL:Macros:dolist]] (level-length '((0 1) (1 1) (1 2) (1 3) (1 4) (2 1) (2 2) (2 3) (3 2) (3 3) (3 4))) 
+  ([[CL:Special Operators:let]] ((*print-level* ([[CL:Functions:first]] level-length)) 
+        (*print-length* ([[CL:Functions:second]] level-length)))
+    ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~D ~D -- ~S~%"
+            *print-level* *print-length* 
+            '([[CL:Special Operators:if]] ([[CL:Functions:member]] x y) ([[CL:Functions:math-add|+]] ([[CL:Functions:car]] x) 3) '(foo . #(a b c d "Baz"))))))
+<o>0 1 -- #
+1 1 -- ([[CL:Special Operators:IF]] ...)
+1 2 -- ([[CL:Special Operators:IF]] # ...)
+1 3 -- ([[CL:Special Operators:IF]] # # ...)
+1 4 -- ([[CL:Special Operators:IF]] # # #)
+2 1 -- ([[CL:Special Operators:IF]] ...)
+2 2 -- ([[CL:Special Operators:IF]] ([[CL:Functions:MEMBER]] X ...) ...)
+2 3 -- ([[CL:Special Operators:IF]] ([[CL:Functions:MEMBER]] X Y) ([[CL:Functions:math-add|+]] # 3) ...)
+3 2 -- ([[CL:Special Operators:IF]] ([[CL:Functions:MEMBER]] X ...) ...)
+3 3 -- ([[CL:Special Operators:IF]] ([[CL:Functions:MEMBER]] X Y) ([[CL:Functions:math-add|+]] ([[CL:Functions:CAR]] X) 3) ...)
+3 4 -- ([[CL:Special Operators:IF]] ([[CL:Functions:MEMBER]] X Y) ([[CL:Functions:math-add|+]] ([[CL:Functions:CAR]] X) 3) '(FOO . #(A B C D ...))) </o>
+<r>NIL </r>
+</blockquote>
 
 ====Affected By====
 None.
 
 ====See Also====
-**[[CL:Functions:write]]**
+  * **[[CL:Functions:write|Function WRITE]]**
 
 ====Notes====
 None.

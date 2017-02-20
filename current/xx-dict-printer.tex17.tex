@@ -1,39 +1,70 @@
 ====== Variable *PRINT-BASE*, *PRINT-RADIX* ======
 
 ====Value Type====
-**[[CL:Variables:star-print-base-star|*print-base*]]**---a //[[CL:Glossary:radix]]//. **[[CL:Variables:star-print-radix-star|*print-radix*]]**---a //[[CL:Glossary:generalized boolean]]//.
+  * **<nowiki>*print-base*</nowiki>** - a //[[CL:Glossary:radix]]//. 
+  * **<nowiki>*print-radix*</nowiki>** - a //[[CL:Glossary:generalized boolean]]//.
 
 ====Initial Value====
-The initial //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-base-star|*print-base*]]** is ''10''.
+The initial //[[CL:Glossary:value]]// of **<nowiki>*print-base*</nowiki>** is ''10''.
 
-The initial //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-radix-star|*print-radix*]]** is //[[CL:Glossary:false]]//.
+The initial //[[CL:Glossary:value]]// of **<nowiki>*print-radix*</nowiki>** is //[[CL:Glossary:false]]//.
 
 ====Description====
-**[[CL:Variables:star-print-base-star|*print-base*]]** and **[[CL:Variables:star-print-radix-star|*print-radix*]]** control the printing of //[[CL:Glossary:rationals]]//. The //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-base-star|*print-base*]]** is called the //[[CL:Glossary:current output base]]//.
+**<nowiki>*print-base*</nowiki>** and **<nowiki>*print-radix*</nowiki>** control the printing of //[[CL:Glossary:rationals]]//. The //[[CL:Glossary:value]]// of **<nowiki>*print-base*</nowiki>** is called the //[[CL:Glossary:current output base]]//.
 
-The //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-base-star|*print-base*]]** is the //[[CL:Glossary:radix]]// in which the printer will print //[[CL:Glossary:rationals]]//. For radices above ''10'', letters of the alphabet are used to represent digits above ''9''.
+The //[[CL:Glossary:value]]// of **<nowiki>*print-base*</nowiki>** is the //[[CL:Glossary:radix]]// in which the printer will print //[[CL:Glossary:rationals]]//. For radices above ''10'', letters of the alphabet are used to represent digits above ''9''.
 
-If the //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-radix-star|*print-radix*]]** is //[[CL:Glossary:true]]//, the printer will print a radix specifier to indicate the //[[CL:Glossary:radix]]// in which it is printing a //[[CL:Glossary:rational]]// number. The radix specifier is always printed using lowercase letters. If **[[CL:Variables:star-print-base-star|*print-base*]]** is ''2'', ''8'', or ''16'', then the radix specifier used is ''#b'', ''#o'', or ''#x'', respectively. For //[[CL:Glossary:integers]]//, base ten is indicated by a trailing decimal point instead of a leading radix specifier; for //[[CL:Glossary:ratios]]//, ''#10r'' is used.
+If the //[[CL:Glossary:value]]// of **<nowiki>*print-radix*</nowiki>** is //[[CL:Glossary:true]]//, the printer will print a radix specifier to indicate the //[[CL:Glossary:radix]]// in which it is printing a //[[CL:Glossary:rational]]// number. The radix specifier is always printed using lowercase letters. If **<nowiki>*print-base*</nowiki>** is ''2'', ''8'', or ''16'', then the radix specifier used is ''#b'', ''#o'', or ''#x'', respectively. For //[[CL:Glossary:integers]]//, base ten is indicated by a trailing decimal point instead of a leading radix specifier; for //[[CL:Glossary:ratios]]//, ''#10r'' is used.
 
 ====Examples====
-<blockquote> (let ((*print-base* 24.) (*print-radix* t)) (print 23.))
-▷ #24rN → 23 ([[CL:Macros:defparameter]] *print-base* 10) → 10 ([[CL:Macros:defparameter]] *print-radix* nil) → NIL (dotimes (i 35) (let ((*print-base* (+ i 2))) ;print the decimal number 40 (write 40) ;in each base from 2 to 36 (if (zerop (mod i 10)) (terpri) (format t " "))))
-▷ 101000
-▷ 1111 220 130 104 55 50 44 40 37 34
-▷ 31 2C 2A 28 26 24 22 20 1J 1I
-▷ 1H 1G 1F 1E 1D 1C 1B 1A 19 18
-▷ 17 16 15 14 → NIL (dolist (pb '(2 3 8 10 16)) (let ((*print-radix* t) ;print the integer 10 and (*print-base* pb)) ;the ratio 1/10 in bases 2, (format t "~&~S ~S~
-▷ #b1010 #b1/1010
-▷ #3r101 #3r1/101
-▷ #o12 #o1/12
-▷ 10. #10r1/10
-▷ #xA #x1/A → NIL </blockquote>
+<blockquote> 
+([[CL:Special Operators:let]] ((*print-base* 24.) 
+      (*print-radix* t))
+  ([[CL:Functions:print]] 23.))
+<o>#24rN </o>
+<r>23 </r>
+</blockquote> 
+
+The below example prints the decimal number ''40'' in each base from ''2'' to ''36''.
+
+<blockquote> 
+([[CL:Macros:setf]] *print-base* 10) <r>10 </r>
+([[CL:Macros:setf]] *print-radix* [[CL:Constant Variables:nil]]) <r>[[CL:Constant Variables:NIL]] </r>
+([[CL:Macros:dotimes]] (i 35) 
+  ([[CL:Special Operators:let]] ((*print-base* ([[CL:Functions:math-add|+]] i 2)))
+    ([[CL:Functions:write]] 40)
+    ([[CL:Special Operators:if]] ([[CL:Functions:zerop]] ([[CL:Functions:mod]] i 10)) 
+        ([[CL:Functions:terpri]]) 
+        ([[CL:Functions:format]] [[CL:Constant Variables:t]] " "))))
+<o>101000 1111 220 130 104 55 50 44 40 37 34
+31 2C 2A 28 26 24 22 20 1J 1I
+1H 1G 1F 1E 1D 1C 1B 1A 19 18
+17 16 15 14 </o>
+<r>[[CL:Constant Variables:NIL]] </r>
+</blockquote> 
+
+The below example prints the integer 10 and the ratio 1/10 in bases 2, 3, 8, 10, 16.
+
+<blockquote> 
+([[CL:Macros:dolist]] (pb '(2 3 8 10 16)) 
+  ([[CL:Special Operators:let]] ((*print-radix* [[CL:Constant Variables:t]])
+        (*print-base* pb))
+    ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&~S ~S~%" 10 1/10)))
+<o>#b1010 #b1/1010
+#3r101 #3r1/101
+#o12 #o1/12
+10. #10r1/10
+#xA #x1/A </o>
+<r>[[CL:Constant Variables:NIL]] </r>
+</blockquote>
 
 ====Affected By====
 Might be //[[CL:Glossary:bound]]// by **[[CL:Functions:format]]**, and **[[CL:Functions:write]]**, **[[CL:Functions:write-to-string]]**.
 
 ====See Also====
-**[[CL:Functions:format]]**, **[[CL:Functions:write]]**, **[[CL:Functions:write-to-string]]**
+  * **[[CL:Functions:format|Function FORMAT]]**
+  * **[[CL:Functions:write|Function WRITE]]**
+  * **[[CL:Functions:write-to-string|Function WRITE-TO-STRING]]**
 
 ====Notes====
 None.

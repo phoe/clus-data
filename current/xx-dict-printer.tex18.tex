@@ -12,19 +12,30 @@ The //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-case-star|*print-ca
 **[[CL:Variables:star-print-case-star|*print-case*]]** has an effect at all times when the //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-escape-star|*print-escape*]]** is //[[CL:Glossary:false]]//. **[[CL:Variables:star-print-case-star|*print-case*]]** also has an effect when the //[[CL:Glossary:value]]// of **[[CL:Variables:star-print-escape-star|*print-escape*]]** is //[[CL:Glossary:true]]// unless inside an escape context (i.e. unless between //[[CL:Glossary:vertical-bars]]// or after a //[[CL:Glossary:slash]]//).
 
 ====Examples====
-<blockquote> (defun test-print-case () (dolist (*print-case* '(:upcase :downcase :capitalize)) (format t "~&~S ~S~ → TEST-PC ;; Although the choice of which characters to escape is specified by ;; *PRINT-CASE*, the choice of how to escape those characters ;; (i.e., whether single escapes or multiple escapes are used) ;; is implementation-dependent. The examples here show two of the ;; many valid ways in which escaping might appear. (test-print-case) ;Implementation A
-▷ THIS-AND-THAT |And-something-elSE|
-▷ this-and-that a\\n\\d-\\s\\o\\m\\e\\t\\h\\i\\n\\g-\\e\\lse
-▷ This-And-That A\\n\\d-\\s\\o\\m\\e\\t\\h\\i\\n\\g-\\e\\lse → NIL (test-print-case) ;Implementation B
-▷ THIS-AND-THAT |And-something-elSE|
-▷ this-and-that a|nd-something-el|se
-▷ This-And-That A|nd-something-el|se → NIL </blockquote>
+Although the choice of which //[[CL:Glossary:character|characters]]// to //[[CL:Glossary:escape]]// is specified by **<nowiki>*print-case*</nowiki>**, the choice of how to //[[CL:Glossary:escape]]// those //[[CL:Glossary:character|haracters]]// (i.e., whether single escapes or multiple escapes are used) is //[[CL:Glossary:implementation-dependent]]//. The examples here show two of the many valid ways in which escaping might appear. 
+
+<blockquote> 
+(defun test-print-case ()
+  (dolist (*print-case* '(:upcase :downcase :capitalize)) 
+    (format t "~&~S ~S~%" 'this-and-that '|And-something-elSE|)))
+    → TEST-PC 
+(test-print-case) 
+<o>; Implementation A
+THIS-AND-THAT |And-something-elSE|
+this-and-that a\\n\\d-\\s\\o\\m\\e\\t\\h\\i\\n\\g-\\e\\lse
+This-And-That A\\n\\d-\\s\\o\\m\\e\\t\\h\\i\\n\\g-\\e\\lse </o>
+<o>; Implementation B
+THIS-AND-THAT |And-something-elSE|
+this-and-that a|nd-something-el|se
+This-And-That A|nd-something-el|se </o>
+<r>NIL</r> 
+</blockquote>
 
 ====Affected By====
 None.
 
 ====See Also====
-**[[CL:Functions:write]]**
+  * **[[CL:Functions:write|Function WRITE]]**
 
 ====Notes====
 **[[CL:Functions:read]]** normally converts lowercase characters appearing in //[[CL:Glossary:symbols]]// to corresponding uppercase characters, so that internally print names normally contain only uppercase characters.
