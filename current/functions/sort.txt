@@ -1,0 +1,93 @@
+====== Function SORT, STABLE-SORT ======
+
+====Syntax====
+  * **sort** //sequence// //predicate// ''&key'' //key// → //sorted-sequence// 
+  * **stable-sort** //sequence// //predicate// ''&key'' //key// → //sorted-sequence// 
+
+====Arguments and Values====
+  * //sequence// - a //[[CL:Glossary:proper sequence]]//.
+  * //predicate// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]//, or **[[CL:Constant Variables:nil]]**.
+  * //sorted-sequence// - a //[[CL:Glossary:sequence]]//.
+
+====Description====
+**sort** and **stable-sort** destructively sort //sequences// according to the order determined by the //predicate// function.
+
+If //sequence// is a //[[CL:Glossary:vector]]//, the result is a //[[CL:Glossary:vector]]// that has the same //[[CL:Glossary:actual array element type]]// as //sequence//.
+
+If //sequence// is a //[[CL:Glossary:list]]//, the result is a //[[CL:Glossary:list]]//.
+
+**sort** determines the relationship between two elements by giving keys extracted from the elements to the //predicate//. The first argument to the //predicate// function is the part of one element of //sequence// extracted by the //key// function (if supplied); the second argument is the part of another element of //sequence// extracted by the //key// function (if supplied). //predicate// should return //[[CL:Glossary:true]]// if and only if the first argument is strictly less than the second (in some appropriate sense). If the first argument is greater than or equal to the second (in the appropriate sense), then the //predicate// should return //[[CL:Glossary:false]]//.
+
+The argument to the //key// function is the //sequence// element. The return value of the //key// function becomes an argument to //predicate//. If //key// is not supplied or **[[CL:Constant Variables:nil]]**, the //sequence// element itself is used. There is no guarantee on the number of times the //key// will be called.
+
+If the //key// and //predicate// always return, then the sorting operation will always terminate, producing a //[[CL:Glossary:sequence]]// containing the same //[[CL:Glossary:element|elements]]// as //sequence// (that is, the result is a permutation of //sequence//). This is guaranteed even if the //predicate// does not really consistently represent a total order (in which case the //[[CL:Glossary:element|elements]]// will be scrambled in some unpredictable way, but no //[[CL:Glossary:element]]// will be lost). If the //key// consistently returns meaningful keys, and the //predicate// does reflect some total ordering criterion on those keys, then the //[[CL:Glossary:element|elements]]// of the //sorted-sequence// will be properly sorted according to that ordering.
+
+The sorting operation performed by **sort** is not guaranteed stable. Elements considered equal by the //predicate// might or might not stay in their original order. The //predicate// is assumed to consider two elements //x// and //y// to be equal if ''([[CL:Functions:funcall]] //predicate// //x// //y//)'' and ''([[CL:Functions:funcall]] //predicate// //y// //x//)'' are both //[[CL:Glossary:false]]//. **stable-sort** guarantees stability.
+
+The sorting operation can be destructive in all cases. In the case of a //[[CL:Glossary:vector]]// argument, this is accomplished by permuting the elements in place. In the case of a //[[CL:Glossary:list]]//, the //[[CL:Glossary:list]]// is destructively reordered in the same manner as for **[[CL:Functions:nreverse]]**.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:defparameter]] *tester* ([[CL:Functions:copy-seq]] "lkjashd")) <r>*TESTER*</r>
+(sort *tester* #'[[CL:Functions:char-lessp]]) <r>"adhjkls" </r>
+([[CL:Macros:setf]] *tester* ([[CL:Functions:list]] '(1 2 3) '(4 5 6) '(7 8 9))) <r>((1 2 3) (4 5 6) (7 8 9)) </r>
+(sort *tester* #'[[CL:Functions:math-greater|>]] :key #'[[CL:Functions:car]]) <r>((7 8 9) (4 5 6) (1 2 3)) </r>
+([[CL:Macros:setf]] *tester* ([[CL:Functions:list]] 1 2 3 4 5 6 7 8 9 0)) <r>(1 2 3 4 5 6 7 8 9 0) </r>
+(stable-sort *tester* #'([[CL:Symbols:lambda]] (x y) ([[CL:Macros:and]] ([[CL:Functions:oddp]] x) ([[CL:Functions:evenp]] y)))) <r>(1 3 5 7 9 2 4 6 8 0) </r>
+
+
+([[CL:Macros:defparameter]] *committee-data* 
+  (vector (list (list "JonL" "White") "Iteration") 
+                (list (list "Dick" "Waters") "Iteration") 
+                (list (list "Dick" "Gabriel") "Objects") 
+                (list (list "Kent" "Pitman") "Conditions") 
+                (list (list "Gregor" "Kiczales") "Objects") 
+                (list (list "David" "Moon") "Objects") 
+                (list (list "Kathy" "Chapman") "Editorial") 
+                (list (list "Larry" "Masinter") "Cleanup") 
+                (list (list "Sandra" "Loosemore") "Compiler"))) <r>*COMMITTEE-DATA*</r>
+(sort *committee-data* #'[[CL:Functions:string-lessp]] :key #'[[CL:Functions:cadar]]) 
+<r>#((("Kathy" "Chapman") "Editorial") 
+  (("Dick" "Gabriel") "Objects") 
+  (("Gregor" "Kiczales") "Objects") 
+  (("Sandra" "Loosemore") "Compiler") 
+  (("Larry" "Masinter") "Cleanup") 
+  (("David" "Moon") "Objects") 
+  (("Kent" "Pitman") "Conditions") 
+  (("Dick" "Waters") "Iteration") 
+  (("JonL" "White") "Iteration"))</r> 
+([[CL:Macros:setf]] *committee-data* 
+  (stable-sort *committee-data* #'[[CL:Functions:string-lessp]] :key #'[[CL:Functions:cadr]])) 
+<r>#((("Larry" "Masinter") "Cleanup") 
+  (("Sandra" "Loosemore") "Compiler")
+  (("Kent" "Pitman") "Conditions") 
+  (("Kathy" "Chapman") "Editorial") 
+  (("Dick" "Waters") "Iteration") 
+  (("JonL" "White") "Iteration") 
+  (("Dick" "Gabriel") "Objects") 
+  (("Gregor" "Kiczales") "Objects") 
+  (("David" "Moon") "Objects"))
+</r>
+</blockquote>
+Note that individual alphabetical order within ''*committees-data*'' is preserved. 
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if //sequence// is not a //[[CL:Glossary:proper sequence]]//.
+
+====See Also====
+  * **[[CL:Functions:merge|Function MERGE]]**
+  * {\secref\ConstantModification}
+  * {\secref\TraversalRules}
+  * {\secref\DestructiveOperations}
+
+====Notes====
+If //sequence// is a //[[CL:Glossary:vector]]//, the result might or might not be simple, and might or might not be //[[CL:Glossary:identical]]// to //sequence//.
+
+\issue{CONSTANT-MODIFICATION:DISALLOW} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}

@@ -1,0 +1,53 @@
+====== Function FIND, FIND-IF, FIND-IF-NOT ======
+
+====Syntax====
+  * **find** //item// //sequence// ''&key'' //from-end// //test// //test-not// //start// //end// //key//// → //element// 
+  * **find-if** //predicate// //sequence// ''&key'' //from-end// //start// //end// //key// → //element// 
+  * **find-if-not** //predicate// //sequence// ''&key'' //from-end// //start// //end// //key// → //element// 
+
+====Arguments and Values====
+  * //item// - an //[[CL:Glossary:object]]//.
+  * //sequence// - a //[[CL:Glossary:proper sequence]]//.
+  * //predicate// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //from-end// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+  * //test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //start//, //end// - //[[CL:Glossary:bounding index designator|bounding index designators]]// of //sequence//. The defaults for //start// and //end// are ''0'' and **[[CL:Constant Variables:nil]]**, respectively.
+  * //key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument, or **[[CL:Constant Variables:nil]]**.
+  * //element// - an //[[CL:Glossary:element]]// of the //sequence//, or **[[CL:Constant Variables:nil]]**.
+
+====Description====
+**find**, **find-if**, and **find-if-not** each search for an //[[CL:Glossary:element]]// of the //sequence// //[[CL:Glossary:bounded]]// by //start// and //[[CL:Glossary:end]]// that //[[CL:Glossary:satisfies the predicate]]// //predicate// or that //[[CL:Glossary:satisfy the test|satisfies the test]]// //test// or //test-not//, as appropriate.
+
+
+If //from-end// is //[[CL:Glossary:true]]//, then the result is the rightmost //[[CL:Glossary:element]]// that //[[CL:Glossary:satisfy the test|satisfies the test]]//.
+
+If the //sequence// contains an //[[CL:Glossary:element]]// that //[[CL:Glossary:satisfy the test|satisfies the test]]//, then the leftmost or rightmost //sequence// element, depending on //from-end//, is returned; otherwise **[[CL:Constant Variables:nil]]** is returned.
+
+====Examples====
+<blockquote>
+(find #\d "here are some letters that can be looked at" :test #'[[CL:Functions:char-greater|char>]]) <r>#\Space</r>
+(find-if #'[[CL:Functions:oddp]] '(1 2 3 4 5) :end 3 :from-end [[CL:Constant Variables:t]]) <r>3 </r>
+(find-if-not #'[[CL:Functions:complexp]] '#(3.5 2 #C(1.0 0.0) #C(0.0 1.0)) :start 2) <r>[[CL:Constant Variables:NIL]] </r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if //sequence// is not a //[[CL:Glossary:proper sequence]]//.
+
+====See Also====
+  * **[[CL:Functions:position|Function POSITION]]**
+  * {\secref\TestFunctionRules}
+  * {\secref\TraversalRules}
+
+====Notes====
+The **'':test-not''** //[[CL:Glossary:argument]]// is deprecated.
+
+The //[[CL:Glossary:function]]// **find-if-not** is deprecated.
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL} \issue{SUBSEQ-OUT-OF-BOUNDS} \issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{TEST-NOT-IF-NOT:FLUSH-ALL}

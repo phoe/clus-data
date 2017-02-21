@@ -1,0 +1,47 @@
+====== Function CONCATENATE ======
+
+====Syntax====
+  * **concatenate** //result-type// ''&rest'' //sequences// → //result-sequence//
+
+====Arguments and Values====
+  * //result-type// - a **[[CL:Types:sequence]]** //[[CL:Glossary:type specifier]]//.
+  * //sequences// - a //[[CL:Glossary:sequence]]//.
+  * //result-sequence// - a //[[CL:Glossary:proper sequence]]// of //[[CL:Glossary:type]]// //result-type//.
+
+====Description====
+**concatenate** returns a //[[CL:Glossary:sequence]]// that contains all the individual elements of all the //sequences// in the order that they are supplied. The //[[CL:Glossary:sequence]]// is of type //result-type//, which must be a subtype of **[[CL:Types:sequence]]**.
+
+All of the //sequences// are copied from; the result does not share any structure with any of the //sequences//.
+
+Therefore, if only one //sequence// is provided and it is of type //result-type//, **concatenate** is required to copy //sequence// rather than simply returning it.
+
+It is an error if any element of the //sequences// cannot be an element of the //result-sequence//. 
+
+If the //result-type// is a //[[CL:Glossary:subtype]]// of **[[CL:Types:list]]**,the result will be a //[[CL:Glossary:list]]//.
+
+If the //result-type// is a //[[CL:Glossary:subtype]]// of **[[CL:Types:vector]]**,then if the implementation can determine the element type specified for the //result-type//, the element type of the resulting array is the result of //[[CL:Glossary:upgrade|upgrading]]// that element type; or, if the implementation can determine that the element type is unspecified (or ''*''), the element type of the resulting array is **[[CL:Types:t]]**; otherwise, an error is signaled.
+
+====Examples====
+<blockquote>
+(concatenate '[[CL:Types:string]] "all" " " "together" " " "now") <r>"all together now"</r>
+(concatenate '[[CL:Types:list]] "ABC" '(d e f) #(1 2 3) #*1011) <r>(#\\A #\\B #\\C D E F 1 2 3 1 0 1 1)</r>
+(concatenate '[[CL:Types:list]]) <r>[[CL:Constant Variables:NIL]]</r>
+(concatenate '([[CL:Types:vector]] [[CL:Types:wildcard|*]] 2) "a" "bc")
+<e>Error: The length requested (3) does not match the type restriction in (VECTOR * 2).</e>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+An error is signaled if the //result-type// is neither a //[[CL:Glossary:recognizable subtype]]// of **[[CL:Types:list]]**, nor a //[[CL:Glossary:recognizable subtype]]// of **[[CL:Types:vector]]**.
+
+An error of type **[[CL:Types:type-error]]** should be signaled if //result-type// specifies the number of elements and the sum of //sequences// is different from that number.
+
+====See Also====
+  * **[[CL:Functions:append|Function APPEND]]**
+
+====Notes====
+None.
+
+\issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH} \issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR} \issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR} \issue{SEQUENCE-TYPE-LENGTH:MUST-MATCH} \issue{CONCATENATE-SEQUENCE:SIGNAL-ERROR}

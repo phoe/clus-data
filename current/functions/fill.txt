@@ -1,0 +1,45 @@
+====== Function FILL ======
+
+====Syntax====
+  * **fill** //sequence// //item// ''&key'' //start// //end// → //sequence//
+
+====Arguments and Values====
+  * //sequence// - a //[[CL:Glossary:proper sequence]]//.
+  * //item// - a //[[CL:Glossary:sequence]]//.
+  * //start//, //end// - //[[CL:Glossary:bounding index designator|bounding index designators]]// of //sequence//. The defaults for //start// and //end// are ''0'' and **[[CL:Constant Variables:nil]]**, respectively.
+
+====Description====
+Replaces the //[[CL:Glossary:element|elements]]// of //sequence// //[[CL:Glossary:bounded]]// by //start// and //end// with //item//.
+
+====Examples====
+<blockquote>
+(fill ([[CL:Functions:list]] 0 1 2 3 4 5) '(444)) <r>((444) (444) (444) (444) (444) (444))</r>
+(fill ([[CL:Functions:copy-seq]] "01234") #\e :start 3) <r>"012ee" </r>
+([[CL:Macros:defvar]] *x* ([[CL:Functions:vector]] 'a 'b 'c 'd 'e)) <r>*X*</r>
+*x* <r>#(A B C D E) </r>
+(fill *x* 'z :start 1 :end 3) <r>#(A Z Z D E) </r>
+*x* <r>#(A Z Z D E) </r>
+(fill *x* 'p) <r>#(P P P P P) </r>
+*x* <r>#(P P P P P) </r>
+</blockquote>
+
+====Side Effects====
+//sequence// is destructively modified.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if //sequence// is not a //[[CL:Glossary:proper sequence]]//. Should signal an error of type type-error if //start// is not a non-negative //[[CL:Glossary:integer]]//. Should signal an error of type type-error if //end// is not a non-negative //[[CL:Glossary:integer]]// or **[[CL:Constant Variables:nil]]**.
+
+====See Also====
+  * **[[CL:Functions:replace|Function REPLACE]]**
+  * **[[CL:Functions:nsubstitute|Function NSUBSTITUTE]]**
+
+====Notes====
+<blockquote>
+(fill //sequence// //item//) 
+  ≡ ([[CL:Functions:nsubstitute-if]] //item// ([[CL:Functions:constantly]] [[CL:Constant Variables:t]]) //sequence//)
+</blockquote>
+
+\issue{SUBSEQ-OUT-OF-BOUNDS} \issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}

@@ -1,0 +1,49 @@
+====== Function COUNT, COUNT-IF, COUNT-IF-NOT ======
+
+====Syntax====
+  * **count** //item// //sequence// ''&key'' //from-end// //start// //end// //key// //test// //test-not// → //n// 
+  * **count-if** //predicate// //sequence// ''&key'' //from-end// //start// //end// //key// → //n//  
+  * **count-if-not** //predicate// //sequence// ''&key'' //from-end// //start// //end// //key// → //n//  
+
+====Arguments and Values====
+  * //item// - an //[[CL:Glossary:object]]//.
+  * //sequence// - a //[[CL:Glossary:proper sequence]]//.
+  * //predicate// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //from-end// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+  * //test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //start//, //end// - //[[CL:Glossary:bounding index designator|bounding index designators]]// of //sequence//. The defaults for //start// and //end// are ''0'' and **[[CL:Constant Variables:nil]]**, respectively.
+  * //key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument, or **[[CL:Constant Variables:nil]]**.
+  * //n// - a non-negative //[[CL:Glossary:integer]]// less than or equal to the //[[CL:Glossary:length]]// of //sequence//.
+
+====Description====
+**count**, **count-if**, and **count-if-not** count and return the number of //[[CL:Glossary:element|elements]]// in the //sequence// //[[CL:Glossary:bounded]]// by //start// and //end// that //[[CL:Glossary:satisfy the test]]//.
+
+The //from-end// has no direct effect on the result. However, if //from-end// is //[[CL:Glossary:true]]//, the //[[CL:Glossary:element|elements]]// of //sequence// will be supplied as //[[CL:Glossary:argument|arguments]]// to the //test//, //test-not//, and //key// in reverse order, which may change the side-effects, if any, of those functions.
+
+====Examples====
+<blockquote>
+(count #\a "how many A's are there in here?") <r>2 </r>
+(count-if-not #'[[CL:Functions:oddp]] '((1) (2) (3) (4)) :key #'[[CL:Functions:car]]) <r>2 </r>
+(count-if #'[[CL:Functions:upper-case-p]] "The Crying of Lot 49" :start 4) <r>2 </r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if //sequence// is not a //[[CL:Glossary:proper sequence]]//.
+
+====See Also====
+  * {\secref\TestFunctionRules}
+  * {\secref\TraversalRules}
+
+====Notes====
+The **'':test-not''** //[[CL:Glossary:argument]]// is deprecated.
+
+The //[[CL:Glossary:function]]// **count-if-not** is deprecated.
+
+\issue{TEST-NOT-IF-NOT:FLUSH-ALL} \issue{SUBSEQ-OUT-OF-BOUNDS} \issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{TEST-NOT-IF-NOT:FLUSH-ALL}

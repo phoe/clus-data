@@ -1,0 +1,136 @@
+====== Function REMOVE, REMOVE-IF, REMOVE-IF-NOT, DELETE, DELETE-IF, DELETE-IF-NOT ======
+
+====Syntax====
+  * **remove** //item// //sequence// ''&key'' //from-end// //test// //test-not// //start// //end// //count// //key// → //result-sequence//
+  * **remove-if** //test// //sequence// ''&key'' //from-end// //start// //end// //count// //key// → //result-sequence//
+  * **remove-if-not** //test// //sequence// ''&key'' //from-end// //start// //end// //count// //key// → //result-sequence//
+  * **delete** //item// //sequence// ''&key'' //from-end// //test// //test-not// //start// //end// //count// //key// → //result-sequence//
+  * **delete-if** //test// //sequence// ''&key'' //from-end// //start// //end// //count// //key// → //result-sequence//
+  * **delete-if-not** //test// //sequence// ''&key'' //from-end// //start// //end// //count// //key// → //result-sequence//
+
+====Arguments and Values====
+  * //item// - an //[[CL:Glossary:object]]//.
+  * //sequence// - a //[[CL:Glossary:proper sequence]]//.
+  * //test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one //[[CL:Glossary:argument]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //from-end// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+  * //test// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //test-not// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of two //[[CL:Glossary:argument|arguments]]// that returns a //[[CL:Glossary:generalized boolean]]//.
+  * //start//, //end// - //[[CL:Glossary:bounding index designator|bounding index designators]]// of //sequence//. The defaults for //start// and //end// are ''0'' and **[[CL:Constant Variables:nil]]**, respectively.
+  * //count// - an //[[CL:Glossary:integer]]// or **[[CL:Constant Variables:nil]]**. The default is **[[CL:Constant Variables:nil]]**.
+  * //key// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of one argument, or **[[CL:Constant Variables:nil]]**.
+  * //result-sequence// - a //[[CL:Glossary:sequence]]//.
+
+====Description====
+**remove**, **remove-if**, and **remove-if-not** return a //sequence// from which the elements that //[[CL:Glossary:satisfy the test]]// have been removed.
+
+**delete**, **delete-if**, and **delete-if-not** are like **remove**, **remove-if**, and **remove-if-not** respectively, but they may modify //sequence//.
+
+If //sequence// is a //[[CL:Glossary:vector]]//, the result is a //[[CL:Glossary:vector]]// that has the same //[[CL:Glossary:actual array element type]]// as //sequence//.
+
+If //sequence// is a //[[CL:Glossary:list]]//, the result is a //[[CL:Glossary:list]]//.
+
+Supplying a //from-end// of //[[CL:Glossary:true]]// matters only when the //count// is provided; in that case only the rightmost //count// elements //[[CL:Glossary:satisfy the test|satisfying the test]]// are deleted.
+
+//count//, if supplied, limits the number of elements removed or deleted; if more than //count// elements //[[CL:Glossary:satisfy the test]]//, then of these elements only the leftmost or rightmost, depending on //from-end//, are deleted or removed, as many as specified by //count//.
+
+If //count// is supplied and negative, the behavior is as if zero had been supplied instead.
+
+If //count// is **[[CL:Constant Variables:nil]]**, all matching items are affected.
+
+For all these functions, elements not removed or deleted occur in the same order in the result as they did in //sequence//.
+
+**remove**, **remove-if**, **remove-if-not** return a //[[CL:Glossary:sequence]]// of the same //[[CL:Glossary:type]]// as //sequence// that has the same elements except that those in the subsequence //[[CL:Glossary:bounded]]// by //start// and //end// and //[[CL:Glossary:satisfy the test|satisfying the test]]// have been removed. This is a non-destructive operation. If any elements need to be removed, the result will be a copy. The result of **remove** may share with //sequence//; the result may be //[[CL:Glossary:identical]]// to the input //sequence// if no elements need to be removed.
+
+**delete**, **delete-if**, and **delete-if-not** return a //[[CL:Glossary:sequence]]// of the same //[[CL:Glossary:type]]// as //sequence// that has the same elements except that those in the subsequence //[[CL:Glossary:bounded]]// by //start// and //end// and //[[CL:Glossary:satisfy the test|satisfying the test]]// have been deleted. //Sequence// may be destroyed and used to construct the result; however, the result might or might not be //[[CL:Glossary:identical]]// to //sequence//.
+
+**delete**, when //sequence// is a //[[CL:Glossary:list]]//, is permitted to **[[CL:Macros:setf]]** any part, **[[CL:Functions:car]]** or **[[CL:Functions:cdr]]**, of the top-level list structure in that //sequence//. When //sequence// is a //[[CL:Glossary:vector]]//, **delete** is permitted to change the dimensions of the //[[CL:Glossary:vector]]// and to slide its elements into new positions without permuting them to produce the resulting //[[CL:Glossary:vector]]//.
+
+**delete-if** is constrained to behave exactly as follows:
+
+<blockquote> 
+;;; TODO clarify this in the notes
+(delete [[CL:Constant Variables:nil]] //sequence// 
+        :test #'([[CL:Symbols:lambda]] (ignored //item//)
+                 ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] ignored))
+                 ([[CL:Functions:funcall]] //test// //item//)) 
+        ...) 
+</blockquote>
+
+
+====Examples==== 
+<blockquote> 
+(remove 4 '(1 3 4 5 9)) <r>(1 3 5 9) </r>
+(remove 4 '(1 2 4 1 3 4 5)) <r>(1 2 1 3 5) </r>
+(remove 4 '(1 2 4 1 3 4 5) :count 1) <r>(1 2 1 3 4 5) </r>
+(remove 4 '(1 2 4 1 3 4 5) :count 1 :from-end [[CL:Constant Variables:t]]) <r>(1 2 4 1 3 5) </r>
+(remove 3 '(1 2 4 1 3 4 5) :test #'>) <r>(4 3 4 5) </r>
+
+([[CL:Macros:defparameter]] *list* '(list of four elements)) <r>*LST*</r>
+*list* <r>(LIST OF FOUR ELEMENTS) </r>
+([[CL:Macros:defparameter]] *list2* ([[CL:Functions:copy-seq]] *list*)) <r>*LST2*</r>
+*list2* <r>(LIST OF FOUR ELEMENTS) </r>
+(delete 'four *list*) <r>(LIST OF ELEMENTS)</r>
+*list*  <r>(LIST OF ELEMENTS)</r>
+([[CL:Functions:equal]] *list* *list2*) <r>//[[CL:Glossary:false]]// </r>
+(remove-if #'[[CL:Functions:oddp]] '(1 2 4 1 3 4 5)) <r>(2 4 4) </r>
+(remove-if #'[[CL:Functions:evenp]] '(1 2 4 1 3 4 5) :count 1 :from-end [[CL:Constant Variables:t]]) <r>(1 2 4 1 3 5) </r>
+(remove-if-not #'[[CL:Functions:evenp]] '(1 2 3 4 5 6 7 8 9) :count 2 :from-end [[CL:Constant Variables:t]]) <r>(1 2 3 4 5 6 8)</r>
+</blockquote>
+
+-----
+
+<blockquote>
+([[CL:Special Operators:let]] ((tester ([[CL:Functions:list]] 1 2 4 1 3 4 5)))
+  (delete 4 tester)) <r>(1 2 1 3 5)</r>
+([[CL:Special Operators:let]] ((tester ([[CL:Functions:list]] 1 2 4 1 3 4 5)))
+  (delete 4 tester :count 1)) <r>(1 2 1 3 4 5) </r>
+([[CL:Special Operators:let]] ((tester ([[CL:Functions:list]] 1 2 4 1 3 4 5)))
+  (delete 4 tester :count 1 :from-end [[CL:Constant Variables:t]])) <r>(1 2 4 1 3 5) </r>
+([[CL:Special Operators:let]] ((tester ([[CL:Functions:list]] 1 2 4 1 3 4 5)))
+  (delete 3 tester :test #'>)) <r>(4 3 4 5) </r>
+([[CL:Special Operators:let]] ((tester ([[CL:Functions:list]] 1 2 4 1 3 4 5)))
+  (delete-if #'[[CL:Functions:oddp]] tester)) <r>(2 4 4) </r>
+([[CL:Special Operators:let]] ((tester ([[CL:Functions:list]] 1 2 4 1 3 4 5)))
+  (delete-if #'[[CL:Functions:evenp]] tester :count 1 :from-end [[CL:Constant Variables:t]])) <r>(1 2 4 1 3 5) </r>
+([[CL:Special Operators:let]] ((tester ([[CL:Functions:list]] 1 2 4 1 3 4 5)))
+  (delete-if #'[[CL:Functions:evenp]] tester)) <r>(1 3 5) </r>
+([[CL:Special Operators:let]] ((tester ([[CL:Functions:list]] 1 2 4 1 3 4 5)))
+  (delete-if #'[[CL:Functions:evenp]] tester)
+  tester) 
+<r>//[[CL:Glossary:implementation-dependent]]//</r>
+</blockquote>
+
+------
+
+<blockquote> 
+([[CL:Macros:defparameter]] *foo* ([[CL:Functions:list]] 'a 'b 'c)) <r>*FOO*</r>
+([[CL:Macros:defparameter]] *bar* ([[CL:Functions:cdr]] foo)) <r>*BAR*</r>
+*foo* <r>(A B C) </r>
+*bar* <r>(B C) </r>
+([[CL:Macros:setf]] *foo* (delete 'b foo)) <r>(A C) </r>
+
+*bar* <u>This has unspecified behaviour.</u>
+([[CL:Functions:eq]] ([[CL:Functions:cdr]] *foo*) ([[CL:Functions:car]] *bar*)) <u>This has unspecified behaviour.</u>
+</blockquote>
+
+====Side Effects====
+For **delete**, **delete-if**, and **delete-if-not**, //sequence// may be destroyed and used to construct the result.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if //sequence// is not a //[[CL:Glossary:proper sequence]]//.
+
+====See Also====
+  * {\secref\ConstantModification}
+  * {\secref\TraversalRules}
+
+====Notes====
+If //sequence// is a //[[CL:Glossary:vector]]//, the result might or might not be simple, and might or might not be //[[CL:Glossary:identical]]// to //sequence//.
+
+The **'':test-not''** //[[CL:Glossary:argument]]// is deprecated.
+
+The functions **delete-if-not** and **remove-if-not** are deprecated.
+
+\issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89} \issue{REMF-DESTRUCTION-UNSPECIFIED:X3J13-MAR-89} \issue{CONSTANT-MODIFICATION:DISALLOW} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{TEST-NOT-IF-NOT:FLUSH-ALL} \issue{TEST-NOT-IF-NOT:FLUSH-ALL} \issue{SUBSEQ-OUT-OF-BOUNDS} \issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL} \issue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER} \issue{RANGE-OF-COUNT-KEYWORD:NIL-OR-INTEGER}

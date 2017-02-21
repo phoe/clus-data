@@ -1,0 +1,59 @@
+====== Function MAP-INTO ======
+
+====Syntax====
+  * **map-into** //result-sequence// //function// ''&rest'' //sequences// → //result-sequence//
+
+====Arguments and Values====
+  * //result-sequence// - a //[[CL:Glossary:proper sequence]]//.
+  * //function// - a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:function]]// of as many //[[CL:Glossary:argument|arguments]]// as there are //sequences//.
+  * //sequence// - a //[[CL:Glossary:proper sequence]]//.
+
+====Description====
+Destructively modifies //result-sequence// to contain the results of applying //function// to each element in the argument //sequences// in turn.
+
+//result-sequence// and each element of //sequences// can each be either a //[[CL:Glossary:list]]// or a //[[CL:Glossary:vector]]//.
+
+If //result-sequence// and each element of //sequences// are not all the same length, the iteration terminates when the shortest //[[CL:Glossary:sequence]]// (of any of the //sequences// or the //result-sequence//) is exhausted. If //result-sequence// is a //[[CL:Glossary:vector]]// with a //[[CL:Glossary:fill pointer]]//, the //[[CL:Glossary:fill pointer]]// is ignored when deciding how many iterations to perform, and afterwards the //[[CL:Glossary:fill pointer]]// is set to the number of times //function// was applied. If //result-sequence// is longer than the shortest element of //sequences//, extra elements at the end of //result-sequence// are left unchanged. If //result-sequence// is **[[CL:Constant Variables:nil]]**, **map-into** immediately returns **[[CL:Constant Variables:nil]]**, since **[[CL:Constant Variables:nil]]** is a //[[CL:Glossary:sequence]]// of length zero.
+
+If //function// has side effects, it can count on being called first on all of the elements with index 0, then on all of those numbered 1, and so on.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:defparameter]] *a* (list 1 2 3 4)) <r>*A*</r>
+([[CL:Macros:defparameter]] *b* (list 10 10 10 10)) <r>*B*</r>
+(map-into *a* #'[[CL:Functions:math-add|+]] *a* *b*) <r>(11 12 13 14) </r>
+*a* <r>(11 12 13 14) </r>
+*b* <r>(10 10 10 10) </r>
+([[CL:Macros:defparameter]] *k* '(one two three)) <r>(ONE TWO THREE) </r>
+(map-into *a* #'[[CL:Functions:cons]] *k* *a*) <r>((ONE . 11) (TWO . 12) (THREE . 13) 14)</r>
+(map-into *a* #'[[CL:Functions:gensym]]) <r>(#:G9090 #:G9091 #:G9092 #:G9093)</r>
+*a* <r>(#:G9090 #:G9091 #:G9092 #:G9093) </r>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should be prepared to signal an error of type type-error if //result-sequence// is not a //[[CL:Glossary:proper sequence]]//. Should be prepared to signal an error of type type-error if //sequence// is not a //[[CL:Glossary:proper sequence]]//.
+
+====See Also====
+None.
+
+====Notes====
+**map-into** differs from **[[CL:Functions:map]]** in that it modifies an existing //[[CL:Glossary:sequence]]// rather than creating a new one. In addition, **map-into** can be called with only two arguments, while **[[CL:Functions:map]]** requires at least three arguments.
+
+**map-into** could be defined by:
+
+<blockquote> 
+([[CL:Macros:defun]] map-into (result-sequence function &rest sequences) 
+  ([[CL:Macros:loop]] for index below ([[CL:Functions:apply]] #'[[CL:Functions:min]] ([[CL:Functions:length]] result-sequence) 
+                                     ([[CL:Functions:mapcar]] #'[[CL:Functions:length]] sequences))
+        do ([[CL:Macros:setf]] ([[CL:Functions:elt]] result-sequence index) 
+                 ([[CL:Functions:apply]] function ([[CL:Functions:mapcar]] #'([[CL:Symbols:lambda]] (seq) ([[CL:Functions:elt]] seq index))
+                                         sequences)))) 
+  result-sequence)
+</blockquote>
+
+
+
+\issue{MAP-INTO:ADD-FUNCTION}
