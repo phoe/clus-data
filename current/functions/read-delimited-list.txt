@@ -1,0 +1,75 @@
+====== Function READ-DELIMITED-LIST ======
+
+====Syntax====
+  * **read-delimited-list** //char// ''&optional'' //input-stream// //recursive-p// → //list//
+
+====Arguments and Values====
+  * //char// - a //[[CL:Glossary:character]]//.
+  * //input-stream// - an //[[CL:Glossary:input]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard input]]//.
+  * //recursive-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+  * //list// - a //[[CL:Glossary:list]]// of the //[[CL:Glossary:object|objects]]// read.
+
+====Description====
+**read-delimited-list** reads //[[CL:Glossary:object|objects]]// from //input-stream// until the next character after an //[[CL:Glossary:object]]//'s representation (ignoring //[[CL:Glossary:whitespace]]// characters and comments) is //char//.
+
+**read-delimited-list** looks ahead at each step for the next non-//[[CL:Glossary:whitespace]]// //[[CL:Glossary:character]]// and peeks at it as if with **[[CL:Functions:peek-char]]**. If it is //char//, then the //[[CL:Glossary:character]]// is consumed and the //[[CL:Glossary:list]]// of //[[CL:Glossary:object|objects]]// is returned. If it is a //[[CL:Glossary:constituent]]// or //[[CL:Glossary:escape]]// //[[CL:Glossary:character]]//, then **[[CL:Functions:read]]** is used to read an //[[CL:Glossary:object]]//, which is added to the end of the //[[CL:Glossary:list]]//. If it is a //[[CL:Glossary:macro character]]//, its //[[CL:Glossary:reader macro function]]// is called; if the function returns a //[[CL:Glossary:value]]//, that //[[CL:Glossary:value]]// is added to the //[[CL:Glossary:list]]//. The peek-ahead process is then repeated.
+
+If //recursive-p// is //[[CL:Glossary:true]]//, this call is expected to be embedded in a higher-level call to **[[CL:Functions:read]]** or a similar function.
+
+It is an error to reach end-of-file during the operation of **read-delimited-list**.
+
+The consequences are undefined if //char// has a //[[CL:Glossary:syntax type]]// of //[[CL:Glossary:whitespace]]// in the //[[CL:Glossary:current readtable]]//.
+
+====Examples==== 
+<blockquote> (read-delimited-list #\])
+<o>__1 2 3 4 5 6 ]__</o>
+<r>(1 2 3 4 5 6)</r>
+</blockquote>
+
+Suppose you wanted ''#{a b c ... z}'' to read as a list of all pairs of the elements ''a'', ''b'', ''c'', ..., ''z'', for example.
+
+<blockquote> #{p q z a} reads as ((p q) (p z) (p a) (q z) (q a) (z a)) </blockquote>
+
+This can be done by specifying a macro-character definition for ''#{'' that does two things: reads in all the items up to the ''}'', and constructs the pairs. **read-delimited-list** performs the first task.
+
+<blockquote>
+([[CL:Macros:defun]] |#{-reader| (stream char arg) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] char arg)) 
+  ([[CL:Functions:mapcon]] #'([[CL:Symbols:lambda]] (x) 
+              ([[CL:Functions:mapcar]] #'([[CL:Symbols:lambda]] (y) ([[CL:Functions:list]] ([[CL:Functions:car]] x) y)) ([[CL:Functions:cdr]] x))) 
+    (read-delimited-list #\} stream [[CL:Constant Variables:t]]))) <r>|#{-reader|</r>
+
+([[CL:Functions:set-dispatch-macro-character]] #\# #\{ #'|#{-reader|) <r>[[CL:Constant Variables:T]] </r>
+([[CL:Functions:set-macro-character]] #\} ([[CL:Functions:get-macro-character]] #\) [[CL:Constant Variables:nil]])) <r>[[CL:Constant Variables:T]]</r>
+</blockquote>
+Note that //[[CL:Glossary:true]]// is supplied for the //recursive-p// argument.
+
+It is necessary here to give a definition to the character ''}'' as well to prevent it from being a constituent. If the line
+
+<blockquote>
+(set-macro-character #\} (get-macro-character #\) [[CL:Constant Variables:nil]]))
+</blockquote> 
+ 
+shown above were not included, then the ''}'' in
+
+<blockquote>
+#{p q z a}
+</blockquote> 
+would be considered a constituent character, part of the symbol named ''a}''. This could be corrected by putting a space before the ''}'', but it is better to call **[[CL:Functions:set-macro-character]]**.
+
+Giving ''}'' the same definition as the standard definition of the character '')'' has the twin benefit of making it terminate tokens for use with **read-delimited-list** and also making it invalid for use in any other context. Attempting to read a stray ''}'' will signal an error.
+
+====Affected By====
+**[[CL:Variables:*standard-input*]]**, **[[CL:Variables:*readtable*]]**, **[[CL:Variables:*terminal-io*]]**.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Functions:read|Function READ]]**
+  * **[[CL:Functions:peek-char|Function PEEK-CHAR]]**
+  * **[[CL:Functions:read-char|Function READ-CHAR]]**
+  * **[[CL:Functions:unread-char|Function UNREAD-CHAR]]**.
+
+====Notes====
+**read-delimited-list** is intended for use in implementing //[[CL:Glossary:reader macros]]//. Usually it is desirable for //char// to be a //[[CL:Glossary:terminating]]// //[[CL:Glossary:macro character]]// so that it can be used to delimit tokens; however, **read-delimited-list** makes no attempt to alter the syntax specified for //char// by the current readtable. The caller must make any necessary changes to the readtable syntax explicitly.

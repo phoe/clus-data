@@ -1,0 +1,38 @@
+====== Variable *READ-BASE* ======
+
+====Value Type====
+a //[[CL:Glossary:radix]]//.
+
+====Initial Value====
+''10''.
+
+====Description====
+Controls the interpretation of tokens by **[[CL:Functions:read]]** as being //[[CL:Glossary:integers]]// or //[[CL:Glossary:ratio|ratios]]//.
+
+The value of **<nowiki>*read-base*</nowiki>**, called the //[[CL:Glossary:current input base]]//, is the radix in which //[[CL:Glossary:integers]]// and //[[CL:Glossary:ratio|ratios]]// are to be read by the //[[CL:Glossary:Lisp reader]]//. The parsing of other numeric //[[CL:Glossary:type|type]]// (//e.g.// //[[CL:Glossary:float|floats]]//) is not affected by this option.
+
+The effect of **<nowiki>*read-base*</nowiki>** on the reading of any particular //[[CL:Glossary:rational]]// number can be locally overridden by explicit use of the ''#O'', ''#X'', ''#B'', or ''#nR'' syntax or by a trailing decimal point.
+
+====Examples====
+<blockquote>
+([[CL:Macros:dotimes]] (i 6) 
+  ([[CL:Special Operators:let]] ((*read-base* ([[CL:Functions:math-add|+]] 10. i))) 
+    ([[CL:Special Operators:let]] ((object ([[CL:Functions:read-from-string]] "(\\DAD DAD |BEE| BEE 123. 123)"))) 
+      ([[CL:Functions:print]] ([[CL:Functions:list]] *read-base* object)))))
+<o>(10 (DAD DAD BEE BEE 123 123))
+(11 (DAD DAD BEE BEE 123 146))
+(12 (DAD DAD BEE BEE 123 171))
+(13 (DAD DAD BEE BEE 123 198))
+(14 (DAD 2701 BEE BEE 123 227))
+(15 (DAD 3088 BEE 2699 123 258)) </o>
+<r>NIL </r>
+</blockquote>
+
+====Affected By====
+None.
+
+====See Also====
+None.
+
+====Notes====
+Altering the input radix can be useful when reading data files in special formats.

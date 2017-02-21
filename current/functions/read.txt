@@ -1,0 +1,98 @@
+====== Function READ, READ-PRESERVING-WHITESPACE ======
+
+====Syntax====
+  * **read** ''&optional'' //input-stream// //eof-error-p// //eof-value// //recursive-p// → //object//
+  * //read-preserving-whitespace// ''&optional'' //input-stream// //eof-error-p// //eof-value// //recursive-p// → //object//
+
+====Arguments and Values====
+  * //input-stream// - an //[[CL:Glossary:input]]// //[[CL:Glossary:stream designator]]//.
+  * //eof-error-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:true]]//.
+  * //eof-value// - an //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**.
+  * //recursive-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+  * //object// - an //[[CL:Glossary:object]]// (parsed by the //[[CL:Glossary:Lisp reader]]//) or the //eof-value//.
+
+====Description====
+**read** parses the printed representation of an //[[CL:Glossary:object]]// from //input-stream// and builds such an //[[CL:Glossary:object]]//.
+
+**read-preserving-whitespace** is like **read** but preserves any //[[CL:Glossary:whitespace]]// //[[CL:Glossary:character]]// that delimits the printed representation of the //[[CL:Glossary:object]]//.
+
+**read-preserving-whitespace** is exactly like **read** when the //recursive-p// //[[CL:Glossary:argument]]// to **read-preserving-whitespace** is //[[CL:Glossary:true]]//.
+
+When **[[CL:Variables:star-read-suppress-star|*read-suppress*]]** is //[[CL:Glossary:false]]//, **read** throws away the delimiting //[[CL:Glossary:character]]// required by certain printed representations if it is a //[[CL:Glossary:whitespace]]// //[[CL:Glossary:character]]//; but **read** preserves the character (using **[[CL:Functions:unread-char]]**) if it is syntactically meaningful, because it could be the start of the next expression.
+
+If a file ends in a //[[CL:Glossary:symbol]]// or a //[[CL:Glossary:number]]// immediately followed by an //[[CL:Glossary:end of file]]//, **read** reads the //[[CL:Glossary:symbol]]// or //[[CL:Glossary:number]]// successfully; when called again, it sees the //[[CL:Glossary:end of file]]// and only then acts according to //eof-error-p//. If a file contains ignorable text at the end, such as blank lines and comments, **read** does not consider it to end in the middle of an //[[CL:Glossary:object]]//.
+
+If //recursive-p// is //[[CL:Glossary:true]]//, the call to **read** is expected to be made from within some function that itself has been called from **read** or from a similar input function, rather than from the top level.
+
+Both functions return the //[[CL:Glossary:object]]// read from //input-stream//. //Eof-value// is returned if //eof-error-p// is //[[CL:Glossary:false]]// and end of file is reached before the beginning of an //[[CL:Glossary:object]]//.
+
+====Examples====
+<blockquote> 
+([[CL:Functions:read]])
+<o>__'a__</o>
+<r>"A</r>
+([[CL:Macros:with-input-from-string]] (is " ") 
+  (read is [[CL:Constant Variables:nil]] 'the-end)) <r>THE-END </r>
+;;; TODO the following example is broken, fix it
+([[CL:Macros:defun]] skip-then-read-char (s c n)
+  ([[CL:Special Operators:if]] ([[CL:Functions:char-equal|char=]] c #\{) 
+      (read s t [[CL:Constant Variables:nil]] t) (read-preserving-whitespace s)) 
+      ([[CL:Constant Variables:read-char-no-hang]] s)) <r>SKIP-THEN-READ-CHAR </r>
+([[CL:Special Operators:let]] (([[CL:Variables:star-readtable-star|*readtable*]] ([[CL:Functions:copy-readtable]] [[CL:Constant Variables:nil]]))) 
+  ([[CL:Functions:set-dispatch-macro-character]] #\# #\{ #'skip-then-read-char) 
+  ([[CL:Functions:set-dispatch-macro-character]] #\# #\} #'skip-then-read-char) 
+  ([[CL:Macros:with-input-from-string]] (is "#{123 x #}123 y") 
+    ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~S ~S" (read is) (read is)))) <r>#\\x, #\\Space, [[CL:Constant Variables:NIL]]</r>
+</blockquote>
+
+As an example, consider this //[[CL:Glossary:reader macro]]// definition:
+
+<blockquote> 
+([[CL:Macros:defun]] slash-reader (stream char) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] char)) 
+  `(path . ,([[CL:Macros:loop]] for dir = (read-preserving-whitespace stream [[CL:Constant Variables:t]] [[CL:Constant Variables:nil]] [[CL:Constant Variables:t]]) 
+                  then ([[CL:Special Operators:progn]] ([[CL:Functions:read-char]] stream [[CL:Constant Variables:t]] [[CL:Constant Variables:nil]] [[CL:Constant Variables:t]]) 
+                              (read-preserving-whitespace stream [[CL:Constant Variables:t]] [[CL:Constant Variables:nil]] [[CL:Constant Variables:t]])) 
+                  collect dir 
+                  while ([[CL:Functions:eql]] ([[CL:Functions:peek-char]] [[CL:Constant Variables:nil]] stream [[CL:Constant Variables:nil]] [[CL:Constant Variables:nil]] [[CL:Constant Variables:t]]) #\\/)))) 
+<r>SLASH-READER</r>
+([[CL:Functions:set-macro-character]] #\/ #'slash-reader) 
+<r>**[[CL:Constant Variables:t|T]]**</r>
+</blockquote>
+
+Consider now calling **read** on this expression:
+
+<blockquote> (zyedh /usr/games/zork /usr/games/boggle) </blockquote> 
+
+The ''/'' macro reads objects separated by more ''/'' characters; thus ''/usr/games/zork'' is intended to read as ''(path usr games zork)''. The entire example expression should therefore be read as
+
+<blockquote> (zyedh (path usr games zork) (path usr games boggle)) </blockquote> 
+
+However, if **read** had been used instead of **read-preserving-whitespace**, then after the reading of the symbol ''zork'', the following space would be discarded; the next call to **[[CL:Functions:peek-char]]** would see the following ''/'', and the loop would continue, producing this interpretation:
+
+<blockquote> (zyedh (path usr games zork usr games boggle)) </blockquote> 
+
+There are times when //[[CL:Glossary:whitespace]]// should be discarded. If a command interpreter takes single-character commands, but occasionally reads an //[[CL:Glossary:object]]// then if the //[[CL:Glossary:whitespace]]// after a //[[CL:Glossary:symbol]]// is not discarded it might be interpreted as a command some time later after the //[[CL:Glossary:symbol]]// had been read.
+
+====Affected By====
+**[[CL:Variables:*standard-input*]]**, **[[CL:Variables:*terminal-io*]]**, **[[CL:Variables:*readtable*]]**, **[[CL:Variables:*read-default-float-format*]]**, **[[CL:Variables:*read-base*]]**, **[[CL:Variables:*read-suppress*]]**, **[[CL:Variables:*package*]]**, **[[CL:Variables:*read-eval*]]**.
+
+====Exceptional Situations====
+**read** signals an error of type **[[CL:Types:end-of-file]]**, regardless of //eof-error-p//, if the file ends in the middle of an //[[CL:Glossary:object]]// representation. For example, if a file does not contain enough right parentheses to balance the left parentheses in it, **read** signals an error. This is detected when **read** or **read-preserving-whitespace** is called with //recursive-p// and //eof-error-p// //[[CL:Glossary:non-nil]]//, and end-of-file is reached before the beginning of an //[[CL:Glossary:object]]//.
+
+If //eof-error-p// is //[[CL:Glossary:true]]//, an error of type **[[CL:Types:end-of-file]]** is signaled at the end of file.
+
+====See Also====
+  * **[[CL:Functions:peek-char|Function PEEK-CHAR]]**
+  * **[[CL:Functions:read-char|Function READ-CHAR]]**
+  * **[[CL:Functions:unread-char|Function UNREAD-CHAR]]**
+  * **[[CL:Functions:read-from-string|Function READ-FROM-STRING]]**
+  * **[[CL:Functions:read-delimited-list|Function READ-DELIMITED-LIST]]**
+  * **[[CL:Functions:parse-integer|Function PARSE-INTEGER]]**
+  * {\chapref\Syntax}
+  * {\chapref\ReaderConcepts}
+
+====Notes====
+None.
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}

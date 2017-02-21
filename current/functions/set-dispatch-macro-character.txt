@@ -1,0 +1,69 @@
+====== Function SET-DISPATCH-MACRO-CHARACTER, GET-DISPATCH-MACRO-CHARACTER ======
+
+====Syntax====
+  * **get-dispatch-macro-character** //disp-char// //sub-char// ''&optional'' //readtable// → //function//
+
+  * **set-dispatch-macro-character** //disp-char// //sub-char// //new-function// ''&optional'' //readtable// → **[[CL:Constant Variables:t]]**
+
+====Arguments and Values====
+  * //disp-char// - a //[[CL:Glossary:character]]//.
+  * //sub-char// - a //[[CL:Glossary:character]]//.
+  * //readtable// - a //[[CL:Glossary:readtable designator]]//. The default is the //[[CL:Glossary:current readtable]]//.
+  * //function// - a //[[CL:Glossary:function designator]]// or **[[CL:Constant Variables:nil]]**.
+  * //new-function// - a //[[CL:Glossary:function designator]]//.
+
+====Description====
+**set-dispatch-macro-character** causes //new-function// to be called when //disp-char// followed by //sub-char// is read.
+
+If //sub-char// is a lowercase letter, it is converted to its uppercase equivalent. It is an error if //sub-char// is one of the ten decimal digits.
+
+**set-dispatch-macro-character** installs a //new-function// to be called when a particular //[[CL:Glossary:dispatching macro character]]// pair is read. //New-function// is installed as the dispatch function to be called when //readtable// is in use and when //disp-char// is followed by //sub-char//.
+
+For more information about how the //new-function// is invoked, see section {\secref\MacroChars}.
+
+**get-dispatch-macro-character** retrieves the dispatch function associated with //disp-char// and //sub-char// in //readtable//.
+
+**get-dispatch-macro-character** returns the macro-character function for //sub-char// under //disp-char//, or **[[CL:Constant Variables:nil]]** if there is no function associated with //sub-char//. If //sub-char// is a decimal digit, **get-dispatch-macro-character** returns **[[CL:Constant Variables:nil]]**.
+
+====Examples====
+<blockquote> 
+(get-dispatch-macro-character #\# #\{) <r>[[CL:Constant Variables:NIL]] </r>
+(set-dispatch-macro-character #\# #\{ ;dispatch on #{ 
+  #'([[CL:Symbols:lambda]] (s c n) 
+      ([[CL:Special Operators:let]] ((list ([[CL:Functions:read]] s [[CL:Constant Variables:nil]] ([[CL:Functions:values]]) [[CL:Constant Variables:t]]))) ;list is object after #n{ 
+        ([[CL:Macros:when]] ([[CL:Functions:consp]] list) ;return nth element of list 
+          ([[CL:Macros:unless]] ([[CL:Macros:and]] n ([[CL:Functions:math-less|<]] 0 n ([[CL:Functions:length]] list))) 
+            ([[CL:Macros:setf]] n 0))
+          ([[CL:Macros:setf]] list ([[CL:Functions:nth]] n list)))
+        list))) <r>[[CL:Constant Variables:T]] </r>
+#{(1 2 3 4) <r>1 </r>
+#3{(0 1 2 3) <r>3 </r>
+#{123 <r>123</r>
+</blockquote>
+
+If it is desired that ''#$//foo//'' was read as if it were ''(dollars //foo//)''.
+
+<blockquote>
+([[CL:Macros:defun]] |#$-reader| (stream subchar arg) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:ignore]] subchar arg)) 
+  ([[CL:Functions:list]] 'dollars ([[CL:Functions:read]] stream [[CL:Constant Variables:t]] [[CL:Constant Variables:nil]] [[CL:Constant Variables:t]]))) <r>|#''-reader| </r>
+(set-dispatch-macro-character #\# #\$ #'|#$-reader|) <r>[[CL:Constant Variables:T]] </r>
+</blockquote>
+
+====Affected By====
+**[[CL:Variables:*readtable*]]**.
+
+====Side Effects====
+The //readtable// is modified.
+
+====Exceptional Situations====
+For either function, an error is signaled if //disp-char// is not a //[[CL:Glossary:dispatching macro character]]// in //readtable//.
+
+====See Also====
+  * **[[CL:Variables:star-readtable-star|Variable *READTABLE*]]**
+  * {\secref\MacroChars}
+
+====Notes====
+It is necessary to use **[[CL:Functions:make-dispatch-macro-character]]** to set up the dispatch character before specifying its sub-characters.
+
+\issue{GET-MACRO-CHARACTER-READTABLE:NIL-STANDARD}

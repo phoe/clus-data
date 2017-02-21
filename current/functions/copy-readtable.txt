@@ -1,0 +1,62 @@
+====== Function COPY-READTABLE ======
+
+====Syntax====
+  * **copy-readtable** ''&optional'' //from-readtable// //to-readtable// → //readtable//
+
+====Arguments and Values====
+  * //from-readtable// - a //[[CL:Glossary:readtable designator]]//. The default is the //[[CL:Glossary:current readtable]]//.
+  * //to-readtable// - a //[[CL:Glossary:readtable]]// or **[[CL:Constant Variables:nil]]**. The default is **[[CL:Constant Variables:nil]]**.
+  * //readtable// - the //to-readtable// if it is //[[CL:Glossary:non-nil]]//, or else a //[[CL:Glossary:fresh]]// //[[CL:Glossary:readtable]]//.
+
+====Description====
+**copy-readtable** copies //from-readtable//.
+
+If //to-readtable// is **[[CL:Constant Variables:nil]]**, a new //[[CL:Glossary:readtable]]// is created and returned. Otherwise the //[[CL:Glossary:readtable]]// specified by //to-readtable// is modified and returned.
+
+**copy-readtable** copies the setting of **[[CL:Functions:readtable-case]]**.
+
+====Examples====
+<blockquote>
+([[CL:Macros:defparameter]] zvar 123) <r>ZVAR </r>
+([[CL:Macros:defparameter]] *backup-table* (copy-readtable)) <r>*BACKUP-TABLE*</r>
+([[CL:Functions:set-syntax-from-char]] #\z #\' *backup-table*) <r>[[CL:Constant Variables:T]] </r>
+zvar <r>123 </r>
+(copy-readtable *backup-table* [[CL:Variables:star-readtable-star|*readtable*]]) <r>#<READTABLE 614000277> </r>
+zvar <r>VAR </r>
+([[CL:Macros:setf]] [[CL:Variables:star-readtable-star|*readtable*]] (copy-readtable)) <r>#<READTABLE 46210223> </r>
+zvar <r>VAR </r>
+([[CL:Macros:setf]] [[CL:Variables:star-readtable-star|*readtable*]] (copy-readtable [[CL:Constant Variables:nil]])) <r>#<READTABLE 46302670> </r>
+zvar <r>123 </r>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Types:readtable|System Class READTABLE]]**
+  * **[[CL:Variables:star-readtable-star|Variable *READTABLE*]]**
+
+====Notes====
+<blockquote> 
+([[CL:Macros:setf]] [[CL:Variables:star-readtable-star|*readtable*]] (copy-readtable [[CL:Constant Variables:nil]])) 
+</blockquote> 
+
+restores the input syntax to standard Common Lisp syntax, even if the //[[CL:Glossary:initial readtable]]// has been clobbered (assuming it is not so badly clobbered that you cannot type in the above expression).
+
+On the other hand,
+
+<blockquote> 
+([[CL:Macros:setf]] [[CL:Variables:star-readtable-star|*readtable*]] (copy-readtable)) 
+</blockquote> 
+
+replaces the current //[[CL:Glossary:readtable]]// with a copy of itself. This is useful if you want to save a copy of a readtable for later use, protected from alteration in the meantime. It is also useful if you want to locally bind the readtable to a copy of itself, as in:
+
+<blockquote> 
+(let (([[CL:Variables:star-readtable-star|*readtable*]] (copy-readtable))) 
+  ...) 
+</blockquote>
+
+\issue{READ-CASE-SENSITIVITY:READTABLE-KEYWORDS}
