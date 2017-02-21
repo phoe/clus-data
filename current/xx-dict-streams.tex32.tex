@@ -30,15 +30,38 @@ The consequences are undefined if an attempt is made to //[[CL:Glossary:assign]]
 
 ====Examples====
 <blockquote>
-([[CL:Macros:defparameter]] p (merge-pathnames "test")) → #<PATHNAME :HOST NIL :DEVICE ''device-name'' :DIRECTORY ''directory-name'' :NAME "test" :TYPE NIL :VERSION :NEWEST> 
-(with-open-file (s p :direction :output :if-exists :supersede) (format s "Here are a couple~ (with-open-file (s p) (do ((l (read-line s) (read-line s nil 'eof))) ((eq l 'eof) "Reached end of file.") (format t "~&*** ~A~
-▷ *** Here are a couple
-▷ *** of test data lines → "Reached end of file." </blockquote>
+(setf *p* (merge-pathnames "test"))
+<r><r>#<PATHNAME :HOST [[CL:Constant Variables:NIL]] :DEVICE device-name :DIRECTORY directory-name
+           :NAME "test" :TYPE [[CL:Constant Variables:NIL]] :VERSION :NEWEST></r></r>
+(with-open-file (s *p* :direction :output :if-exists :supersede)
+   ([[CL:Functions:format]] s "Here are a couple~%of test data lines~%")) 
+<r>[[CL:Constant Variables:NIL]]</r>
+(with-open-file (s *p*)
+   ([[CL:Macros:do]] ((l ([[CL:Functions:read-line]] s) ([[CL:Functions:read-line]] s [[CL:Constant Variables:nil]] 'eof)))
+       (([[CL:Functions:eq]] l 'eof) "Reached end of file.")
+    ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~&*** ~A~%" l)))
+<o>*** Here are a couple
+*** of test data lines</o>
+<r>"Reached end of file."</r>
+</blockquote>
 
-<blockquote> ;; Normally one would not do this intentionally because it is ;; not perspicuous, but beware when using :IF-DOES-NOT-EXIST NIL ;; that this doesn't happen to you accidentally... (with-open-file (foo "no-such-file" :if-does-not-exist nil) (read foo))
-▷ \IN{hello?} → HELLO? ;This value was read from the terminal, not a file!
+Normally one would not do this intentionally because it is not perspicuous, but beware when using '':if-does-not-exist [[CL:Constant Variables:nil]]'' that this doesn't happen to you accidentally...
 
-;; Here's another bug to avoid... (with-open-file (foo "no-such-file" :direction :output :if-does-not-exist nil) (format foo "Hello")) → "Hello" ;FORMAT got an argument of NIL! </blockquote>
+<blockquote>
+(with-open-file (foo "no-such-file" :if-does-not-exist [[CL:Constant Variables:nil]])
+  ([[CL:Functions:read]] foo))
+<o>__hello?__</o>
+<r>HELLO? ; This value was read from the terminal, not a file!</r>
+</blockquote>
+
+Here's another bug to avoid...
+
+<blockquote>
+(with-open-file (foo "no-such-file" :direction :output 
+                                    :if-does-not-exist [[CL:Constant Variables:nil]])
+  ([[CL:Functions:format]] foo "Hello"))
+<r>"Hello" ; FORMAT got an argument of [[CL:Constant Variables:NIL]]!</r>
+</blockquote>
 
 ====Side Effects====
 Creates a //[[CL:Glossary:stream]]// to the //[[CL:Glossary:file]]// named by //filename// (upon entry), and closes the //[[CL:Glossary:stream]]// (upon exit). In some //[[CL:Glossary:implementation|implementations]]//, the //[[CL:Glossary:file]]// might be locked in some way while it is open. If the //[[CL:Glossary:stream]]// is an //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]//, a //[[CL:Glossary:file]]// might be created.
@@ -50,7 +73,11 @@ The host computer's file system.
 See the //[[CL:Glossary:function]]// **[[CL:Functions:open]]**.
 
 ====See Also====
-**[[CL:Functions:open]]**, **[[CL:Functions:close]]**, **[[CL:Types:pathname]]**, **[[CL:Types:logical-pathname]]**, {\secref\PathnamesAsFilenames}
+  * **[[CL:Functions:open|Function OPEN]]**
+  * **[[CL:Functions:close|Function CLOSE]]**
+  * **[[CL:Types:pathname|System Class PATHNAME]]**
+  * **[[CL:Types:logical-pathname|System Class LOGICAL-PATHNAME]]**
+  * {\secref\PathnamesAsFilenames}
 
 ====Notes====
 None.
