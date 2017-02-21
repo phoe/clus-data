@@ -1,19 +1,16 @@
 \begincom{*debug-io*, *error-output*, *query-io*, *standard-input*, *standard-output*, *trace-output*}\ftype{Variable}
 
 ====Value Type====
+For **[[CL:Variables:star-standard-input-star|*standard-input*]]**: an //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//
 
-For **[[CL:Variables:*standard-input*]]**: an //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//
+For **[[CL:Variables:star-error-output-star|*error-output*]]**, **[[CL:Variables:star-standard-output-star|*standard-output*]]**, and **[[CL:Variables:star-trace-output-star|*trace-output*]]**: an //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]//.
 
-For **[[CL:Variables:*error-output*]]**, **[[CL:Variables:*standard-output*]]**, and **[[CL:Variables:*trace-output*]]**: an //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]//.
-
-For **[[CL:Variables:*debug-io*]]**, **[[CL:Variables:*query-io*]]**: a //[[CL:Glossary:bidirectional]]// //[[CL:Glossary:stream]]//.
+For **[[CL:Variables:star-debug-io-star|*debug-io*]]**, **[[CL:Variables:star-query-io-star|*query-io*]]**: a //[[CL:Glossary:bidirectional]]// //[[CL:Glossary:stream]]//.
 
 ====Initial Value====
-
-//[[CL:Glossary:implementation-dependent]]//, but it must be an //[[CL:Glossary:open]]// //[[CL:Glossary:stream]]// that is not a //[[CL:Glossary:generalized synonym stream]]// to an //[[CL:Glossary:I/O customization variables]]// but that might be a //[[CL:Glossary:generalized synonym stream]]// to the value of some //[[CL:Glossary:I/O customization variable]]//. The initial value might also be a //[[CL:Glossary:generalized synonym stream]]// to either the //[[CL:Glossary:symbol]]// **[[CL:Variables:*terminal-io*]]** or to the //[[CL:Glossary:stream]]// that is its //[[CL:Glossary:value]]//.
+//[[CL:Glossary:implementation-dependent]]//, but it must be an //[[CL:Glossary:open]]// //[[CL:Glossary:stream]]// that is not a //[[CL:Glossary:generalized synonym stream]]// to an //[[CL:Glossary:I/O customization variables]]// but that might be a //[[CL:Glossary:generalized synonym stream]]// to the value of some //[[CL:Glossary:I/O customization variable]]//. The initial value might also be a //[[CL:Glossary:generalized synonym stream]]// to either the //[[CL:Glossary:symbol]]// **[[CL:Variables:star-terminal-io-star|*terminal-io*]]** or to the //[[CL:Glossary:stream]]// that is its //[[CL:Glossary:value]]//.
 
 ====Description====
-
 These //[[CL:Glossary:variables]]// are collectively called the //[[CL:Glossary:standardized]]// //[[CL:Glossary:I/O customization variables]]//. They can be //[[CL:Glossary:bound]]// or //[[CL:Glossary:assigned]]// in order to change the default destinations for input and/or output used by various //[[CL:Glossary:standardized]]// //[[CL:Glossary:operators]]// and facilities.
 
 \Thevalueof{*debug-io*}, called //[[CL:Glossary:debug I/O]]//, is a //[[CL:Glossary:stream]]// to be used for interactive debugging purposes.
@@ -30,18 +27,15 @@ These //[[CL:Glossary:variables]]// are collectively called the //[[CL:Glossary:
 \Thevalueof{*trace-output*}, called //[[CL:Glossary:trace output]]//, is the //[[CL:Glossary:stream]]// on which traced functions (see **[[CL:Macros:trace]]**) and \themacro{time} print their output.
 
 ====Examples====
-
 <blockquote> (with-output-to-string (*error-output*) (warn "this string is sent to *error-output*")) → "Warning: this string is sent to *error-output* " ;The exact format of this string is //[[CL:Glossary:implementation-dependent]]//. \medbreak (with-input-from-string (*standard-input* "1001") (+ 990 (read))) → 1991 \medbreak (progn ([[CL:Macros:defparameter]] out (with-output-to-string (*standard-output*) (print "print and format t send things to") (format t "*standard-output* now going to a string"))) :done) → :DONE out → " \\"print and format t send things to\\" *standard-output* now going to a string" \medbreak (defun fact (n) (if (< n 2) 1 (* n (fact (- n 1))))) → FACT (trace fact) → (FACT) ;; Of course, the format of traced output is implementation-dependent. (with-output-to-string (*trace-output*) (fact 3)) → " 1 Enter FACT 3 | 2 Enter FACT 2 | 3 Enter FACT 1 | 3 Exit FACT 1 | 2 Exit FACT 2 1 Exit FACT 6" </blockquote>
 
 ====See Also====
-
-**[[CL:Variables:*terminal-io*]]**, **[[CL:Types:synonym-stream]]**, **[[CL:Macros:time]]**, **[[CL:Macros:trace]]**, {\chapref\Conditions}, {\chapref\Reader}, {\chapref\Printer}
+**[[CL:Variables:star-terminal-io-star|*terminal-io*]]**, **[[CL:Types:synonym-stream]]**, **[[CL:Macros:time]]**, **[[CL:Macros:trace]]**, {\chapref\Conditions}, {\chapref\Reader}, {\chapref\Printer}
 
 ====Notes====
-
 The intent of the constraints on the initial //[[CL:Glossary:value]]// of the //[[CL:Glossary:I/O customization variables]]// is to ensure that it is always safe to //[[CL:Glossary:bind]]// or //[[CL:Glossary:assign]]// such a //[[CL:Glossary:variable]]// to the //[[CL:Glossary:value]]// of another //[[CL:Glossary:I/O customization variable]]//, without unduly restricting //[[CL:Glossary:implementation]]// flexibility.
 
-It is common for an //[[CL:Glossary:implementation]]// to make the initial //[[CL:Glossary:values]]// of **[[CL:Variables:*debug-io*]]** and **[[CL:Variables:*query-io*]]** be the //[[CL:Glossary:same]]// //[[CL:Glossary:stream]]//, and to make the initial //[[CL:Glossary:values]]// of **[[CL:Variables:*error-output*]]** and **[[CL:Variables:*standard-output*]]** be the //[[CL:Glossary:same]]// //[[CL:Glossary:stream]]//.
+It is common for an //[[CL:Glossary:implementation]]// to make the initial //[[CL:Glossary:values]]// of **[[CL:Variables:star-debug-io-star|*debug-io*]]** and **[[CL:Variables:star-query-io-star|*query-io*]]** be the //[[CL:Glossary:same]]// //[[CL:Glossary:stream]]//, and to make the initial //[[CL:Glossary:values]]// of **[[CL:Variables:star-error-output-star|*error-output*]]** and **[[CL:Variables:star-standard-output-star|*standard-output*]]** be the //[[CL:Glossary:same]]// //[[CL:Glossary:stream]]//.
 
 The functions **[[CL:Functions:y-or-n-p]]** and **[[CL:Functions:yes-or-no-p]]** use //[[CL:Glossary:query I/O]]// for their input and output.
 
@@ -49,6 +43,6 @@ In the normal //[[CL:Glossary:Lisp read-eval-print loop]]//, input is read from 
 
 In the normal //[[CL:Glossary:Lisp read-eval-print loop]]//, output is sent to //[[CL:Glossary:standard output]]//. Many output functions, including **[[CL:Functions:print]]** and **[[CL:Functions:write-char]]**, take a //[[CL:Glossary:stream]]// argument that defaults to //[[CL:Glossary:standard output]]//.
 
-A program that wants, for example, to divert output to a file should do so by //[[CL:Glossary:binding]]// **[[CL:Variables:*standard-output*]]**; that way error messages sent to **[[CL:Variables:*error-output*]]** can still get to the user by going through **[[CL:Variables:*terminal-io*]]** (if **[[CL:Variables:*error-output*]]** is bound to **[[CL:Variables:*terminal-io*]]**), which is usually what is desired.
+A program that wants, for example, to divert output to a file should do so by //[[CL:Glossary:binding]]// **[[CL:Variables:star-standard-output-star|*standard-output*]]**; that way error messages sent to **[[CL:Variables:star-error-output-star|*error-output*]]** can still get to the user by going through **[[CL:Variables:star-terminal-io-star|*terminal-io*]]** (if **[[CL:Variables:star-error-output-star|*error-output*]]** is bound to **[[CL:Variables:star-terminal-io-star|*terminal-io*]]**), which is usually what is desired.
 
 \issue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS} \issue{STANDARD-INPUT-INITIAL-BINDING:DEFINED-CONTRACTS}

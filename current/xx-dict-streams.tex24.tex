@@ -1,48 +1,47 @@
 ====== Function READ-SEQUENCE ======
 
 ====Syntax====
+**read-sequence** //sequence// //stream// ''&key'' //start// //end// → //position//
 
-**{read-sequence} {sequence stream** //\key} start end// → //position//
-
-//sequence// - a //[[CL:Glossary:sequence]]//.
-
-//stream// - an //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//.
-
-//start//, //end// - //[[CL:Glossary:bounding index designators]]// of //sequence//. \Defaults{//start// and //end//}{''0'' and **[[CL:Constant Variables:nil]]**}
-
-//position// - an //[[CL:Glossary:integer]]// greater than or equal to zero, and less than or equal to the //[[CL:Glossary:length]]// of the //sequence//.
+====Arguments and Values====
+  * //sequence// - a //[[CL:Glossary:sequence]]//.
+  * //stream// - an //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//.
+  * //start//, //end// - //[[CL:Glossary:bounding index designator|bounding index designators]]// of //sequence//. The defaults for //start// and //end// are ''0'' and **[[CL:Constant Variables:nil]]**, respectively.
+  * //position// - an //[[CL:Glossary:integer]]// greater than or equal to zero, and less than or equal to the //[[CL:Glossary:length]]// of the //sequence//.
 
 ====Description====
-
 Destructively modifies //sequence// by replacing the //[[CL:Glossary:element|elements]]// of //sequence// //[[CL:Glossary:bounded]]// by //start// and //end// with //[[CL:Glossary:element|elements]]// read from //stream//.
 
-//Sequence// is destructively modified by copying successive //[[CL:Glossary:element|elements]]// into it from //stream//. If the //[[CL:Glossary:end of file]]// for //stream// is reached before copying all //[[CL:Glossary:element|elements]]// of the subsequence, then the extra //[[CL:Glossary:element|elements]]// near the end of //sequence// are not updated.
+//sequence// is destructively modified by copying successive //[[CL:Glossary:element|elements]]// into it from //stream//. If the //[[CL:Glossary:end of file]]// for //stream// is reached before copying all //[[CL:Glossary:element|elements]]// of the subsequence, then the extra //[[CL:Glossary:element|elements]]// near the end of //sequence// are not updated.
 
-//Position// is the index of the first //[[CL:Glossary:element]]// of //sequence// that was not updated, which might be less than //end// because the //[[CL:Glossary:end of file]]// was reached.
+//position// is the index of the first //[[CL:Glossary:element]]// of //sequence// that was not updated, which might be less than //end// because the //[[CL:Glossary:end of file]]// was reached.
 
 ====Examples====
-
-<blockquote> (defvar *data* (make-array 15 :initial-element nil)) (values (read-sequence *data* (make-string-input-stream "test string")) *data*) → 11, #(#\\t #\\e #\\s #\\t #\\Space #\\s #\\t #\\r #\\i #\\n #\\g NIL NIL NIL NIL) </blockquote>
+<blockquote>
+([[CL:Macros:defvar]] *data* ([[CL:Functions:make-array]] 15 :initial-element [[CL:Constant Variables:nil]])) <r>*DATA*</r>
+([[CL:Functions:values]] (read-sequence *data* 
+                       ([[CL:Functions:make-string-input-stream]] "test string"))
+        *data*)
+<r>11
+#(#\t #\e #\s #\t #\Space #\s #\t #\r #\i #\n #\g [[CL:Constant Variables:NIL]] [[CL:Constant Variables:NIL]] [[CL:Constant Variables:NIL]] [[CL:Constant Variables:NIL]]) </r>
+</blockquote>
 
 ====Side Effects====
-
 Modifies //stream// and //sequence//.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 Should be prepared to signal an error of type type-error if //sequence// is not a //[[CL:Glossary:proper sequence]]//. Should signal an error of type type-error if //start// is not a non-negative //[[CL:Glossary:integer]]//. Should signal an error of type type-error if //end// is not a non-negative //[[CL:Glossary:integer]]// or **[[CL:Constant Variables:nil]]**.
 
 Might signal an error of type **[[CL:Types:type-error]]** if an //[[CL:Glossary:element]]// read from the //stream// is not a member of the //[[CL:Glossary:element type]]// of the //sequence//.
 
 ====See Also====
-
-{\secref\ConstantModification}, **[[CL:Functions:write-sequence]]**, **[[CL:Functions:read-line]]**
+  * {\secref\ConstantModification},
+  * **[[CL:Functions:write-sequence|Function WRITE-SEQUENCE]]**,
+  * **[[CL:Functions:read-line|Function READ-LINE]]**
 
 ====Notes====
-
-**[[CL:Functions:read-sequence]]** is identical in effect to iterating over the indicated subsequence and reading one //[[CL:Glossary:element]]// at a time from //stream// and storing it into //sequence//, but may be more efficient than the equivalent loop. An efficient implementation is more likely to exist for the case where the //sequence// is a //[[CL:Glossary:vector]]// with the same //[[CL:Glossary:element type]]// as the //stream//.
+**read-sequence** is identical in effect to iterating over the indicated subsequence and reading one //[[CL:Glossary:element]]// at a time from //stream// and storing it into //sequence//, but may be more efficient than the equivalent loop. An efficient implementation is more likely to exist for the case where the //sequence// is a //[[CL:Glossary:vector]]// with the same //[[CL:Glossary:element type]]// as the //stream//.
 

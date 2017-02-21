@@ -1,56 +1,51 @@
 ====== Function READ-BYTE ======
 
 ====Syntax====
-
-**{read-byte} {stream** //\opt} eof-error-p eof-value// → //byte//
+  * **read-byte** //stream// ''&optional'' //eof-error-p// //eof-value// → //byte//
 
 ====Arguments and Values====
-
-//stream// - a //[[CL:Glossary:binary]]// //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//.
-
-//eof-error-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:true]]//.
-
-//eof-value// - an //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**.
-
-//byte// - an //[[CL:Glossary:integer]]//,
-
-or the //eof-value//.
+  * //stream// - a //[[CL:Glossary:binary]]// //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//.
+  * //eof-error-p// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:true]]//.
+  * //eof-value// - an //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**.
+  * //byte// - an //[[CL:Glossary:integer]]//, or the //eof-value//.
 
 ====Description====
-
-**[[CL:Functions:read-byte]]** reads and returns one byte from //stream//.
+**read-byte** reads and returns one byte from //stream//.
 
 If an //[[CL:Glossary:end of file]]// occurs and //eof-error-p// is //[[CL:Glossary:false]]//, the //eof-value// is returned.
 
-====Examples==== <blockquote> (with-open-file (s "temp-bytes" :direction :output :element-type 'unsigned-byte) (write-byte 101 s)) → 101 (with-open-file (s "temp-bytes" :element-type 'unsigned-byte) (format t "~S ~S" (read-byte s) (read-byte s nil 'eof)))
-▷ 101 EOF → NIL </blockquote>
+====Examples==== 
+<blockquote> 
+([[CL:Macros:with-open-file]] (s "temp-bytes" :direction :output 
+                                :element-type '[[CL:Types:unsigned-byte]]) 
+  ([[CL:Functions:write-byte]] 101 s)) <r>101</r>
+([[CL:Macros:with-open-file]] (s "temp-bytes" :element-type '[[CL:Types:unsigned-byte]]) 
+  ([[CL:Functions:format]] [[CL:Constant Variables:t]] "~S ~S" 
+          (read-byte s)
+          (read-byte s [[CL:Constant Variables:nil]] 'eof)))
+<o>101 EOF</o>
+<r>[[CL:Constant Variables:NIL]]</r>
+</blockquote>
 
 ====Side Effects====
-
 Modifies //stream//.
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 Should signal an error of type type-error if //stream// is not a //[[CL:Glossary:stream]]//.
 
 Should signal an error of type **[[CL:Types:error]]** if //stream// is not a //[[CL:Glossary:binary]]// //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//.
 
-If there are no //[[CL:Glossary:bytes]]// remaining in the //stream// and //eof-error-p// is //[[CL:Glossary:true]]//, an error of type **[[CL:Types:end-of-file]]** is signaled.
+If there are no //[[CL:Glossary:byte|bytes]]// remaining in the //stream// and //eof-error-p// is //[[CL:Glossary:true]]//, an error of type **[[CL:Types:end-of-file]]** is signaled.
 
 ====See Also====
-
-**[[CL:Functions:read-char]]**,
-
-**[[CL:Functions:read-sequence]]**,
-
-**[[CL:Functions:write-byte]]**
+  * **[[CL:Functions:read-char|Function READ-CHAR]]**
+  * **[[CL:Functions:read-sequence|Function READ-SEQUENCE]]**
+  * **[[CL:Functions:write-byte|Function WRITE-BYTE]]**
 
 ====Notes====
-
 None.
 
 \issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY} \issue{READ-AND-WRITE-BYTES:NEW-FUNCTIONS}

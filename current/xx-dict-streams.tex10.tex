@@ -1,37 +1,37 @@
 ====== Function INTERACTIVE-STREAM-P ======
 
 ====Syntax====
-
-**interactive-stream-p** //stream// → //generalized-boolean//
+  * **interactive-stream-p** //stream// → //generalized-boolean//
 
 ====Arguments and Values====
-
-//stream// - a //[[CL:Glossary:stream]]//.
-
-//generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+  * //stream// - a //[[CL:Glossary:stream]]//.
+  * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
 
 ====Description====
-
-\Predicate{stream}{an //[[CL:Glossary:interactive stream]]//}
+Returns //[[CL:Glossary:true]]// if //stream// is an //[[CL:Glossary:interactive stream]]//; otherwise, returns //[[CL:Glossary:false]]//.
 
 ====Examples====
-
-<blockquote> (when (> measured limit) (let ((error (round (* (- measured limit) 100) limit))) (unless (if (interactive-stream-p *query-io*) (yes-or-no-p "The frammis is out of tolerance by ~D Is it safe to proceed? " error) (< error 15)) ;15 (error "The frammis is out of tolerance by ~D </blockquote>
+<blockquote>
+;;; TODO make this runnable
+([[CL:Macros:when]] ([[CL:Functions:math-greater|>]] measured limit) 
+  ([[CL:Special Operators:let]] ((error ([[CL:Functions:round]] ([[CL:Functions:math-multiply|*]] ([[CL:Functions:math-subtract|-]] measured limit) 100) limit)))
+    ([[CL:Special Operators:unless]] ([[CL:Special Operators:if]] (interactive-stream-p *query-io*) 
+                ([[CL:Functions:yes-or-no-p]] "The frammis is out of tolerance by ~D%.~@
+                              Is it safe to proceed? " error)
+                ([[CL:Functions:math-less|<]] error 15)) ; 15% is acceptable
+      (<e>error</e> "The frammis is out of tolerance by ~D%." error)))
+</blockquote>
 
 ====Affected By====
-
 None.
 
 ====Exceptional Situations====
-
 Should signal an error of type type-error if //stream// is not a //[[CL:Glossary:stream]]//.
 
 ====See Also====
-
-{\secref\StreamConcepts}
+  * {\secref\StreamConcepts}
 
 ====Notes====
-
 None.
 
 \issue{STREAM-CAPABILITIES:INTERACTIVE-STREAM-P}

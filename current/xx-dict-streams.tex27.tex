@@ -1,52 +1,73 @@
 ====== Function FILE-POSITION ======
 
 ====Syntax====
-
-**file-position** //stream// → //position// **file-position** //stream position-spec// → //success-p//
+  * **file-position** //stream// → //position// 
+  * **file-position** //stream position-spec// → //success-p//
 
 ====Arguments and Values====
-
-//stream// - a //[[CL:Glossary:stream]]//.
-
-//position-spec// - a //[[CL:Glossary:file position designator]]//.
-
-//position// - a //[[CL:Glossary:file position]]// or **[[CL:Constant Variables:nil]]**.
-
-//success-p// - a //[[CL:Glossary:generalized boolean]]//.
+  * //stream// - a //[[CL:Glossary:stream]]//.
+  * //position-spec// - a //[[CL:Glossary:file position designator]]//.
+  * //position// - a //[[CL:Glossary:file position]]// or **[[CL:Constant Variables:nil]]**.
+  * //success-p// - a //[[CL:Glossary:generalized boolean]]//.
 
 ====Description====
-
 Returns or changes the current position within a //stream//.
 
-When //position-spec// is not supplied, **[[CL:Functions:file-position]]** returns the current //[[CL:Glossary:file position]]// in the //stream//, or **[[CL:Constant Variables:nil]]** if this cannot be determined.
+When //position-spec// is not supplied, **file-position** returns the current //[[CL:Glossary:file position]]// in the //stream//, or **[[CL:Constant Variables:nil]]** if this cannot be determined.
 
-When //position-spec// is supplied, the //[[CL:Glossary:file position]]// in //stream// is set to that //[[CL:Glossary:file position]]// (if possible). **[[CL:Functions:file-position]]** returns //[[CL:Glossary:true]]// if the repositioning is performed successfully, or //[[CL:Glossary:false]]// if it is not.
+When //position-spec// is supplied, the //[[CL:Glossary:file position]]// in //stream// is set to that //[[CL:Glossary:file position]]// (if possible). **file-position** returns //[[CL:Glossary:true]]// if the repositioning is performed successfully, or //[[CL:Glossary:false]]// if it is not.
 
-An //[[CL:Glossary:integer]]// returned by **[[CL:Functions:file-position]]** of one argument should be acceptable as //position-spec// for use with the same file.
+An //[[CL:Glossary:integer]]// returned by **file-position** of one argument should be acceptable as //position-spec// for use with the same file.
 
-For a character file, performing a single **[[CL:Functions:read-char]]** or **[[CL:Functions:write-char]]** operation may cause the file position to be increased by more than 1 because of character-set translations (such as translating between the \clisp\ ''#\\Newline'' character and an external ASCII carriage-return/line-feed sequence) and other aspects of the implementation. For a binary file, every **[[CL:Functions:read-byte]]** or **[[CL:Functions:write-byte]]** operation increases the file position by 1.
+For a character file, performing a single **[[CL:Functions:read-char]]** or **[[CL:Functions:write-char]]** operation may cause the file position to be increased by more than 1 because of character-set translations (such as translating between the Common Lisp ''#\Newline'' character and an external ASCII carriage-return/line-feed sequence) and other aspects of the implementation. For a binary file, every **[[CL:Functions:read-byte]]** or **[[CL:Functions:write-byte]]** operation increases the file position by 1.
 
 ====Examples====
-
-<blockquote> (defun tester () (let ((noticed '()) file-written) (flet ((notice (x) (push x noticed) x)) (with-open-file (s "test.bin" :element-type '(unsigned-byte 8) :direction :output :if-exists :error) (notice (file-position s)) ;1 (write-byte 5 s) (write-byte 6 s) (let ((p (file-position s))) (notice p) ;2 (notice (when p (file-position s (1- p))))) ;3 (write-byte 7 s) (notice (file-position s)) ;4 ([[CL:Macros:defparameter]] file-written (truename s))) (with-open-file (s file-written :element-type '(unsigned-byte 8) :direction :input) (notice (file-position s)) ;5 (let ((length (file-length s))) (notice length) ;6 (when length (dotimes (i length) (notice (read-byte s)))))) ;7,... (nreverse noticed)))) → tester (tester) → (0 2 T 2 0 2 5 7) //or// → (0 2 NIL 3 0 3 5 6 7) //or// → (NIL NIL NIL NIL NIL NIL) </blockquote>
+<blockquote>
+;;; TODO figure out the hell does this example do
+([[CL:Macros:defun]] tester () 
+  ([[CL:Special Operators:let]] ((noticed '()) file-written) 
+    ([[CL:Special Operators:flet]] ((notice (x) ([[CL:Macros:push]] x noticed) x)) 
+      ([[CL:Macros:with-open-file]] (s "test.bin" :element-type '([[CL:Types:unsigned-byte]] 8) 
+                                    :direction :output 
+                                    :if-exists :error)
+        (notice (file-position s)) ;1 
+        ([[CL:Functions:write-byte]] 5 s) 
+        ([[CL:Functions:write-byte]] 6 s) 
+        ([[CL:Special Operators:let]] ((p (file-position s))) 
+          (notice p) ;2 
+          (notice ([[CL:Macros:when]] p 
+                    (file-position s ([[CL:Functions:math-one-minus|1-]] p))))) ;3 
+        (write-byte 7 s) 
+        (notice (file-position s)) ;4 
+        ([[CL:Macros:setf]] file-written ([[CL:Functions:truename]] s)))
+      ([[CL:Macros:with-open-file]] (s file-written :element-type '([[CL:Types:unsigned-byte]] 8) 
+                                      :direction :input)
+        (notice (file-position s)) ;5 
+        ([[CL:Special Operators:let]] ((length ([[CL:Functions:file-length]] s)))
+          (notice length) ;6 
+          ([[CL:Macros:when]] length 
+            ([[CL:Macros:dotimes]] (i length) (notice ([[CL:Functions:read-byte]] s)))))) ;7,... 
+      (nreverse noticed)))) <r>TESTER </r>
+(tester) 
+<r>(0 2 [[CL:Constant Variables:T]] 2 0 2 5 7) </r>
+<r>//or// (0 2 [[CL:Constant Variables:NIL]] 3 0 3 5 6 7) </r>
+<r>//or// ([[CL:Constant Variables:NIL]] [[CL:Constant Variables:NIL]] [[CL:Constant Variables:NIL]] [[CL:Constant Variables:NIL]] [[CL:Constant Variables:NIL]] [[CL:Constant Variables:NIL]])</r>
+</blockquote>
 
 ====Side Effects====
-
 When the //position-spec// argument is supplied, the //[[CL:Glossary:file position]]// in the //stream// might be moved.
 
 ====Affected By====
-
-The value returned by **[[CL:Functions:file-position]]** increases monotonically as input or output operations are performed.
+The value returned by **file-position** increases monotonically as input or output operations are performed.
 
 ====Exceptional Situations====
-
 If //position-spec// is supplied, but is too large or otherwise inappropriate, an error is signaled.
 
 ====See Also====
-
-**[[CL:Functions:file-length]]**, **[[CL:Functions:file-string-length]]**, **[[CL:Functions:open]]**
+  * **[[CL:Functions:file-length|Function FILE-LENGTH]]**
+  * **[[CL:Functions:file-string-length|Function FILE-STRING-LENGTH]]**
+  * **[[CL:Functions:open|Function OPEN]]**
 
 ====Notes====
-
-Implementations that have character files represented as a sequence of records of bounded size might choose to encode the file position as, for example, \metavar{record-number}*\metavar{max-record-size}+\metavar{character-within-record}. This is a valid encoding because it increases monotonically as each character is read or written, though not necessarily by 1 at each step. An //[[CL:Glossary:integer]]// might then be considered "inappropriate" as //position-spec// to **[[CL:Functions:file-position]]** if, when decoded into record number and character number, it turned out that the supplied record was too short for the specified character number.
+Implementations that have character files represented as a sequence of records of bounded size might choose to encode the file position as, for example, ''//<record-number>// * //<max-record-size>// + //<character-within-record>''. This is a valid encoding because it increases monotonically as each character is read or written, though not necessarily by 1 at each step. An //[[CL:Glossary:integer]]// might then be considered "inappropriate" as //position-spec// to **file-position** if, when decoded into record number and character number, it turned out that the supplied record was too short for the specified character number.
 
