@@ -1,146 +1,75 @@
 ====== Function OPEN ======
 
 ====Syntax====
-\DefunWithValuesNewline open {filespec ''&key'' direction element-type if-exists if-does-not-exist external-format} {stream}
+  * **open** //filespec// ''&key'' //direction// //element-type// //if-exists// //if-does-not-exist// //external-format// → //stream//
 
 ====Arguments and Values====
-//filespec// - a //[[CL:Glossary:pathname designator]]//.
-
-//direction// - one of **'':input''**, **'':output''**, **'':io''**, or **'':probe''**. The default is **'':input''**.
-
-//element-type// - a //[[CL:Glossary:type specifier]]// for //[[CL:Glossary:recognizable subtype]]// of **[[CL:Types:character]]**; or a //[[CL:Glossary:type specifier]]// for a //[[CL:Glossary:finite]]// //[[CL:Glossary:recognizable subtype]]// of //[[CL:Glossary:integer]]//; or one of the //[[CL:Glossary:symbols]]// \misc{signed-byte}, \misc{unsigned-byte}, or **'':default''**. The default is **[[CL:Types:character]]**.
-
-//if-exists// - one of **'':error''**, **'':new-version''**, **'':rename''**, **'':rename-and-delete''**, **'':overwrite''**, **'':append''**, **'':supersede''**, or **[[CL:Constant Variables:nil]]**. The default is **'':new-version''** if the version component of //filespec// is **'':newest''**, or **'':error''** otherwise.
-
-//if-does-not-exist// - one of **'':error''**, **'':create''**, or **[[CL:Constant Variables:nil]]**. The default is **'':error''** if //direction// is **'':input''** or //if-exists// is **'':overwrite''** or **'':append''**; **'':create''** if //direction// is **'':output''** or **'':io''**, and //if-exists// is neither **'':overwrite''** nor **'':append''**; or **[[CL:Constant Variables:nil]]** when //direction// is **'':probe''**.
-
-//external-format// - an //[[CL:Glossary:external file format designator]]//. The default is **'':default''**.
-
-//stream// - a //[[CL:Glossary:file stream]]// or **[[CL:Constant Variables:nil]]**.
+  * //filespec// - a //[[CL:Glossary:pathname designator]]//.
+  * //direction// - one of **'':input''**, **'':output''**, **'':io''**, or **'':probe''**. The default is **'':input''**.
+  * //element-type// - a //[[CL:Glossary:type specifier]]// for //[[CL:Glossary:recognizable subtype]]// of **[[CL:Types:character]]**; or a //[[CL:Glossary:type specifier]]// for a //[[CL:Glossary:finite]]// //[[CL:Glossary:recognizable subtype]]// of //[[CL:Glossary:integer]]//; or one of the //[[CL:Glossary:symbols]]// **[[CL:Types:signed-byte]]**, **[[CL:Types:unsigned-byte]]**, or **'':default''**. The default is **[[CL:Types:character]]**.
+  * //if-exists// - one of **'':error''**, **'':new-version''**, **'':rename''**, **'':rename-and-delete''**, **'':overwrite''**, **'':append''**, **'':supersede''**, or **[[CL:Constant Variables:nil]]**. The default is **'':new-version''** if the version component of //filespec// is **'':newest''**, or **'':error''** otherwise.
+  * //if-does-not-exist// - one of **'':error''**, **'':create''**, or **[[CL:Constant Variables:nil]]**. The default is **'':error''** if //direction// is **'':input''** or //if-exists// is **'':overwrite''** or **'':append''**; **'':create''** if //direction// is **'':output''** or **'':io''**, and //if-exists// is neither **'':overwrite''** nor **'':append''**; or **[[CL:Constant Variables:nil]]** when //direction// is **'':probe''**.
+  * //external-format// - an //[[CL:Glossary:external file format designator]]//. The default is **'':default''**.
+  * //stream// - a //[[CL:Glossary:file stream]]// or **[[CL:Constant Variables:nil]]**.
 
 ====Description====
-**[[CL:Functions:open]]** creates, opens, and returns a //[[CL:Glossary:file stream]]// that is connected to the file specified by //filespec//. //Filespec// is the name of the file to be opened.
+**open** creates, opens, and returns a //[[CL:Glossary:file stream]]// that is connected to the file specified by //filespec//. //Filespec// is the name of the file to be opened.
 
 If the //filespec// //[[CL:Glossary:designator]]// is a //[[CL:Glossary:stream]]//, that //[[CL:Glossary:stream]]// is not closed first or otherwise affected.
 
-The keyword arguments to **[[CL:Functions:open]]** specify the characteristics of the //[[CL:Glossary:file stream]]// that is returned, and how to handle errors.
+The keyword arguments to **open** specify the characteristics of the //[[CL:Glossary:file stream]]// that is returned, and how to handle errors.
 
-If //direction// is **'':input''**
+If //direction// is **'':input''** or **'':probe''**, or if //if-exists// is not **'':new-version''** and the version component of the //filespec// is **'':newest''**, then the file opened is that file already existing in the file system that has a version greater than that of any other file in the file system whose other pathname components are the same as those of //filespec//.
 
-or **'':probe''**, or if //if-exists// is not **'':new-version''** and the version component of the //filespec// is **'':newest''**, then the file opened is that file already existing in the file system that has a version greater than that of any other file in the file system whose other pathname components are the same as those of //filespec//.
+An implementation is required to recognize all of the **open** keyword options and to do something reasonable in the context of the host operating system. For example, if a file system does not support distinct file versions and does not distinguish the notions of deletion and expunging, **'':new-version''** might be treated the same as **'':rename''** or **'':supersede''**, and **'':rename-and-delete''** might be treated the same as **'':supersede''**.
 
-An implementation is required to recognize all of the **[[CL:Functions:open]]** keyword options and to do something reasonable in the context of the host operating system. For example, if a file system does not support distinct file versions and does not distinguish the notions of deletion and expunging, **'':new-version''** might be treated the same as **'':rename''** or **'':supersede''**, and **'':rename-and-delete''** might be treated the same as **'':supersede''**.
-
-\beginlist
-
-\itemitem{**'':direction''**}
+===:direction===
 
 These are the possible values for //direction//, and how they affect the nature of the //[[CL:Glossary:stream]]// that is created:
 
-\beginlist
+  * **'':input''**: Causes the creation of an //[[CL:Glossary:input]]// //[[CL:Glossary:file stream]]//.
+  * **'':output''**: Causes the creation of an //[[CL:Glossary:output]]// //[[CL:Glossary:file stream]]//.
+  * **'':io''**: Causes the creation of a //[[CL:Glossary:bidirectional]]// //[[CL:Glossary:file stream]]//.
+  * **'':probe''**: Causes the creation of a "no-directional" //[[CL:Glossary:file stream]]//; in effect, the //[[CL:Glossary:file stream]]// is created and then closed prior to being returned by **open**.
 
-\itemitem{**'':input''**}
-
-Causes the creation of an //[[CL:Glossary:input]]// //[[CL:Glossary:file stream]]//.
-
-\itemitem{**'':output''**}
-
-Causes the creation of an //[[CL:Glossary:output]]// //[[CL:Glossary:file stream]]//.
-
-\itemitem{**'':io''**}
-
-Causes the creation of a //[[CL:Glossary:bidirectional]]// //[[CL:Glossary:file stream]]//.
-
-\itemitem{**'':probe''**}
-
-Causes the creation of a "no-directional" //[[CL:Glossary:file stream]]//; in effect, the //[[CL:Glossary:file stream]]// is created and then closed prior to being returned by **[[CL:Functions:open]]**.
-
-\endlist
-
-\itemitem{**'':element-type''**}
-
+===:element-type===
 The //element-type// specifies the unit of transaction for the //[[CL:Glossary:file stream]]//.
 
 If it is **'':default''**, the unit is determined by //[[CL:Glossary:file system]]//, possibly based on the //[[CL:Glossary:file]]//.
 
-\itemitem{**'':if-exists''**}
+===:if-exists===
+//if-exists// specifies the action to be taken if //direction// is **'':output''** or **'':io''** and a file of the name //filespec// already exists. If //direction// is **'':input''**, not supplied, or **'':probe''**, //if-exists// is ignored. These are the results of **open** as modified by //if-exists//:
 
-//if-exists// specifies the action to be taken if //direction// is **'':output''** or **'':io''** and a file of the name //filespec// already exists. If //direction// is **'':input''**, not supplied, or **'':probe''**, //if-exists// is ignored. These are the results of **[[CL:Functions:open]]** as modified by //if-exists//:
+  * **'':error''**: An error of type **[[CL:Types:file-error]]** is signaled.
+  * **'':new-version''**: A new file is created with a larger version number.
+  * **'':rename''**: The existing file is renamed to some other name and then a new file is created.
+  * **'':rename-and-delete''**: The existing file is renamed to some other name, then it is deleted but not expunged, and then a new file is created.
+  * **'':overwrite''**: Output operations on the //[[CL:Glossary:stream]]// destructively modify the existing file. If //direction// is **'':io''** the file is opened in a bidirectional mode that allows both reading and writing. The file pointer is initially positioned at the beginning of the file; however, the file is not truncated back to length zero when it is opened.
+  * **'':append''**: Output operations on the //[[CL:Glossary:stream]]// destructively modify the existing file. The file pointer is initially positioned at the end of the file. If //direction// is **'':io''**, the file is opened in a bidirectional mode that allows both reading and writing.
+  * **'':supersede''**: The existing file is superseded; that is, a new file with the same name as the old one is created. If possible, the implementation should not destroy the old file until the new //[[CL:Glossary:stream]]// is closed.
+  * **[[CL:Constant Variables:nil]]**: No file or //[[CL:Glossary:stream]]// is created; instead, **[[CL:Constant Variables:nil]]** is returned to indicate failure.
 
-\beginlist
+===:if-does-not-exist===
+//if-does-not-exist// specifies the action to be taken if a file of name //filespec// does not already exist. These are the results of **open** as modified by //if-does-not-exist//:
 
-\itemitem{**'':error''**}
+  * **'':error''**: An error of type **[[CL:Types:file-error]]** is signaled.
+  * **'':create''**: An empty file is created. Processing continues as if the file had already existed but no processing as directed by //if-exists// is performed.
+  * **[[CL:Constant Variables:nil]]**: No file or //[[CL:Glossary:stream]]// is created; instead, **[[CL:Constant Variables:nil]]** is returned to indicate failure.
 
-An error of type **[[CL:Types:file-error]]** is signaled.
-
-\itemitem{**'':new-version''**}
-
-A new file is created with a larger version number.
-
-\itemitem{**'':rename''**}
-
-The existing file is renamed to some other name and then a new file is created.
-
-\itemitem{**'':rename-and-delete''**}
-
-The existing file is renamed to some other name, then it is deleted but not expunged, and then a new file is created.
-
-\itemitem{**'':overwrite''**}
-
-Output operations on the //[[CL:Glossary:stream]]// destructively modify the existing file. If //direction// is **'':io''** the file is opened in a bidirectional mode that allows both reading and writing. The file pointer is initially positioned at the beginning of the file; however, the file is not truncated back to length zero when it is opened.
-
-\itemitem{**'':append''**}
-
-Output operations on the //[[CL:Glossary:stream]]// destructively modify the existing file. The file pointer is initially positioned at the end of the file.
-
-If //direction// is **'':io''**, the file is opened in a bidirectional mode that allows both reading and writing.
-
-\itemitem{**'':supersede''**}
-
-The existing file is superseded; that is, a new file with the same name as the old one is created. If possible, the implementation should not destroy the old file until the new //[[CL:Glossary:stream]]// is closed.
-
-\itemitem{**[[CL:Constant Variables:nil]]**}
-
-No file or //[[CL:Glossary:stream]]// is created; instead, **[[CL:Constant Variables:nil]]** is returned to indicate failure.
-
-\endlist
-
-\itemitem{**'':if-does-not-exist''**}
-
-//if-does-not-exist// specifies the action to be taken if a file of name //filespec// does not already exist. These are the results of **[[CL:Functions:open]]** as modified by //if-does-not-exist//:
-
-\beginlist
-
-\itemitem{**'':error''**}
-
-An error of type **[[CL:Types:file-error]]** is signaled.
-
-\itemitem{**'':create''**}
-
-An empty file is created. Processing continues as if the file had already existed but no processing as directed by //if-exists// is performed.
-
-\itemitem{**[[CL:Constant Variables:nil]]**}
-
-No file or //[[CL:Glossary:stream]]// is created; instead, **[[CL:Constant Variables:nil]]** is returned to indicate failure.
-
-\endlist
-
-\itemitem{**'':external-format''**}
-
+===:external-format===
 This option selects an //[[CL:Glossary:external file format]]// for the //[[CL:Glossary:file]]//:
 
-The only //[[CL:Glossary:standardized]]// value for this option is **'':default''**, although //[[CL:Glossary:implementations]]// are permitted to define additional //[[CL:Glossary:external file formats]]// and //[[CL:Glossary:implementation-dependent]]// values returned by **[[CL:Functions:stream-external-format]]** can also be used by //[[CL:Glossary:conforming programs]]//.
+The only //[[CL:Glossary:standardized]]// value for this option is **'':default''**, although //[[CL:Glossary:implementation|implementations]]// are permitted to define additional //[[CL:Glossary:external file formats]]// and //[[CL:Glossary:implementation-dependent]]// values returned by **[[CL:Functions:stream-external-format]]** can also be used by //[[CL:Glossary:conforming program|conforming programs]]//.
 
-
-The //external-format// is meaningful for any kind of //[[CL:Glossary:file stream]]// whose //[[CL:Glossary:element type]]// is a //[[CL:Glossary:subtype]]// of //[[CL:Glossary:character]]//. This option is ignored for //[[CL:Glossary:streams]]// for which it is not meaningful; however, //[[CL:Glossary:implementations]]// may define other //[[CL:Glossary:element types]]// for which it is meaningful.
+The //external-format// is meaningful for any kind of //[[CL:Glossary:file stream]]// whose //[[CL:Glossary:element type]]// is a //[[CL:Glossary:subtype]]// of //[[CL:Glossary:character]]//. This option is ignored for //[[CL:Glossary:streams]]// for which it is not meaningful; however, //[[CL:Glossary:implementation|implementations]]// may define other //[[CL:Glossary:element types]]// for which it is meaningful.
 
 The consequences are unspecified if a //[[CL:Glossary:character]]// is written that cannot be represented by the given //[[CL:Glossary:external file format]]//.
 
-\endlist
+-------
 
 When a file is opened, a //[[CL:Glossary:file stream]]// is constructed to serve as the file system's ambassador to the Lisp environment; operations on the //[[CL:Glossary:file stream]]// are reflected by operations on the file in the file system.
 
-A file can be deleted, renamed, or destructively modified by **[[CL:Functions:open]]**.
+A file can be deleted, renamed, or destructively modified by **open**.
 
 For information about opening relative pathnames, see section {\secref\MergingPathnames}.
 
@@ -171,7 +100,7 @@ With regard to the **'':element-type''** option, if a //[[CL:Glossary:type]]// i
 {\secref\PathnamesAsFilenames}
 
 ====Notes====
-**[[CL:Functions:open]]** does not automatically close the file when an abnormal exit occurs.
+**open** does not automatically close the file when an abnormal exit occurs.
 
 When //element-type// is a //[[CL:Glossary:subtype]]// of **[[CL:Types:character]]**, **[[CL:Functions:read-char]]** and/or **[[CL:Functions:write-char]]** can be used on the resulting //[[CL:Glossary:file stream]]//.
 
