@@ -74,7 +74,22 @@ A file can be deleted, renamed, or destructively modified by **open**.
 For information about opening relative pathnames, see section {\secref\MergingPathnames}.
 
 ====Examples====
-<blockquote> (open ''filespec'' :direction :probe) → #<Closed Probe File Stream...> ([[CL:Macros:defparameter]] q (merge-pathnames (user-homedir-pathname) "test")) → #<PATHNAME :HOST NIL :DEVICE ''device-name'' :DIRECTORY ''directory-name'' :NAME "test" :TYPE NIL :VERSION :NEWEST> (open ''filespec'' :if-does-not-exist :create) → #<Input File Stream...> ([[CL:Macros:defparameter]] s (open ''filespec'' :direction :probe)) → #<Closed Probe File Stream...> (truename s) → #<PATHNAME :HOST NIL :DEVICE ''device-name'' :DIRECTORY ''directory-name'' :NAME ''filespec'' :TYPE ''extension'' :VERSION 1> (open s :direction :output :if-exists nil) → NIL </blockquote>
+<blockquote>
+;;; TODO these examples are more or less useless
+
+(open //filespec// :direction :probe) <r>#<Closed Probe File Stream...> </r>
+([[CL:Macros:defparameter]] *q* ([[CL:Functions:merge-pathnames]] ([[CL:Functions:user-homedir-pathname]]) "test")) <r>*Q*</r>
+*q*
+<r>#<PATHNAME :HOST [[CL:Constant Variables:NIL]] :DEVICE //device-name// :DIRECTORY //directory-name// 
+           :NAME "test" :TYPE [[CL:Constant Variables:NIL]] :VERSION :NEWEST></r>
+(open //filespec// :if-does-not-exist :create) <r>#<Input File Stream...> </r>
+([[CL:Macros:defparameter]] *s* (open //filespec// :direction :probe)) <r>*S*</r>
+*s* <r>#<Closed Probe File Stream...> </r>
+([[CL:Functions:truename]] *s*) 
+#<PATHNAME :HOST [[CL:Constant Variables:NIL]] :DEVICE //device-name// :DIRECTORY //directory-name// 
+           :NAME //filespec// :TYPE //extension// :VERSION 1>
+(open s :direction :output :if-exists [[CL:Constant Variables:nil]]) <r>[[CL:Constant Variables:NIL]]</r>
+</blockquote>
 
 ====Affected By====
 The nature and state of the host computer's //[[CL:Glossary:file system]]//.
@@ -95,9 +110,12 @@ The various //[[CL:Glossary:file systems]]// in existence today have widely diff
 With regard to the **'':element-type''** option, if a //[[CL:Glossary:type]]// is requested that is not supported by the //[[CL:Glossary:file system]]//, a substitution of types such as that which goes on in //[[CL:Glossary:upgrade|upgrading]]// is permissible. As a minimum requirement, it should be the case that opening an //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]// to a //[[CL:Glossary:file]]// in a given //[[CL:Glossary:element type]]// and later opening an //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]// to the same //[[CL:Glossary:file]]// in the same //[[CL:Glossary:element type]]// should work compatibly.
 
 ====See Also====
-**[[CL:Functions:with-open-file]]**, **[[CL:Functions:close]]**, **[[CL:Types:pathname]]**, **[[CL:Types:logical-pathname]]**,{\secref\MergingPathnames},
-
-{\secref\PathnamesAsFilenames}
+  * **[[CL:Macros:with-open-file|Macro WITH-OPEN-FILE]]**
+  * **[[CL:Functions:close|Function CLOSE]]**
+  * **[[CL:Types:pathname|System Class PATHNAME]]**
+  * **[[CL:Types:logical-pathname|System Class LOGICAL-PATHNAME]]**
+  * {\secref\MergingPathnames}
+  * {\secref\PathnamesAsFilenames}
 
 ====Notes====
 **open** does not automatically close the file when an abnormal exit occurs.
