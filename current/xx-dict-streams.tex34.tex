@@ -1,30 +1,31 @@
 ====== Macro WITH-OPEN-STREAM ======
 
 ====Syntax====
-\DefmacWithValuesNewline with-open-stream {\paren{var stream} \starparam{declaration} \starparam{form}} {\starparam{result}}
+  * **with-open-stream** (//var// //stream//) //declaration//''*'' //form//''*'' → //result//''*''
 
 ====Arguments and Values====
-//var// - a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
-
-//stream// - a //[[CL:Glossary:form]]//; evaluated to produce a //[[CL:Glossary:stream]]//.
-
-//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
-
-//forms// - an //[[CL:Glossary:implicit progn]]//.
-
-//results// - the //[[CL:Glossary:values]]// returned by the //forms//.
+  * //var// - a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
+  * //stream// - a //[[CL:Glossary:form]]//; evaluated to produce a //[[CL:Glossary:stream]]//.
+  * //declaration// - a **[[CL:Symbols:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - the //[[CL:Glossary:values]]// returned by the //forms//.
 
 ====Description====
-**[[CL:Macros:with-open-stream]]** performs a series of operations on //stream//, returns a value, and then closes the //stream//.
+**with-open-stream** performs a series of operations on //stream//, returns a value, and then closes the //stream//.
 
-//Var// is bound to the value of //stream//, and then //forms// are executed as an //[[CL:Glossary:implicit progn]]//. //stream// is automatically closed on exit from **[[CL:Macros:with-open-stream]]**, no matter whether the exit is normal or abnormal.
+//var// is bound to the value of //stream//, and then //forms// are executed as an //[[CL:Glossary:implicit progn]]//. //stream// is automatically closed on exit from **with-open-stream**, no matter whether the exit is normal or abnormal.
 
 The //stream// has //[[CL:Glossary:dynamic extent]]//; its //[[CL:Glossary:extent]]// ends when the //[[CL:Glossary:form]]// is exited.
 
 The consequences are undefined if an attempt is made to //[[CL:Glossary:assign]]// the the //[[CL:Glossary:variable]]// //var// with the //forms//.
 
 ====Examples====
-<blockquote> (with-open-stream (s (make-string-input-stream "1 2 3 4")) (+ (read s) (read s) (read s))) → 6 </blockquote>
+<blockquote> 
+(with-open-stream (s ([[CL:Functions:make-string-input-stream]] "1 2 3 4")) 
+  ([[CL:Functions:math-add|+]] ([[CL:Functions:read]] s) 
+     ([[CL:Functions:read]] s) 
+     ([[CL:Functions:read]] s))) <r>6 </r>
+</blockquote>
 
 ====Side Effects====
 The //stream// is closed (upon exit).
@@ -36,7 +37,7 @@ None.
 None.
 
 ====See Also====
-**[[CL:Functions:close]]**
+  * **[[CL:Functions:close|Function CLOSE]]**
 
 ====Notes====
 None.

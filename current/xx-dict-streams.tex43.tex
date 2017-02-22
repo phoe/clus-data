@@ -1,20 +1,26 @@
 ====== Function MAKE-TWO-WAY-STREAM ======
 
 ====Syntax====
-**make-two-way-stream** //input-stream output-stream// → //two-way-stream//
+  * **make-two-way-stream** //input-stream output-stream// → //two-way-stream//
 
 ====Arguments and Values====
-//input-stream// - a //[[CL:Glossary:stream]]//.
-
-//output-stream// - a //[[CL:Glossary:stream]]//.
-
-//two-way-stream// - a //[[CL:Glossary:two-way stream]]//.
+  * //input-stream// - a //[[CL:Glossary:stream]]//.
+  * //output-stream// - a //[[CL:Glossary:stream]]//.
+  * //two-way-stream// - a //[[CL:Glossary:two-way stream]]//.
 
 ====Description====
 Returns a //[[CL:Glossary:two-way stream]]// that gets its input from //input-stream// and sends its output to //output-stream//.
 
 ====Examples====
-<blockquote> (with-output-to-string (out) (with-input-from-string (in "input...") (let ((two (make-two-way-stream in out))) (format two "output...") ([[CL:Macros:defparameter]] what-is-read (read two))))) → "output..." what-is-read → INPUT... </blockquote>
+<blockquote>
+([[CL:Macros:defvar]] *what-is-read*) <r>*WHAT-IS-READ*</r>
+([[CL:Macros:with-output-to-string]] (out) 
+  ([[CL:Macros:with-input-from-string]] (in "input") 
+    ([[CL:Special Operators:let]] ((two (make-two-way-stream in out))) 
+      ([[CL:Functions:format]] two "output") 
+      ([[CL:Macros:setf]] *what-is-read* ([[CL:Functions:read]] two))))) <r>"output" </r>
+*what-is-read* <r>INPUT </r>
+</blockquote>
 
 ====Side Effects====
 None.

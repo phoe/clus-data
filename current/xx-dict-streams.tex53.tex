@@ -1,29 +1,19 @@
 ====== Macro WITH-OUTPUT-TO-STRING ======
 
 ====Syntax====
-\DefmacWithValuesNewline with-output-to-string {\paren{var ''&optional'' string-form ''&key'' element-type} \starparam{declaration} \starparam{form}} {\starparam{result}}
+  * **with-output-to-string** (//var// ''&optional'' //string-form// ''&key'' //element-type//) //declaration//''*'' //form//''*'' → //result//''*''
 
 ====Arguments and Values====
 //var// - a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
-
 //string-form// - a //[[CL:Glossary:form]]// or **[[CL:Constant Variables:nil]]**; if //[[CL:Glossary:non-nil]]//, evaluated to produce //string//.
-
 //string// - a //[[CL:Glossary:string]]// that has a //[[CL:Glossary:fill pointer]]//.
-
-//element-type// - a //[[CL:Glossary:type specifier]]//; \eval.
-
-The default is **[[CL:Types:character]]**.
-
-//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
-
+//element-type// - a //[[CL:Glossary:type specifier]]//; evaluated. The default is **[[CL:Types:character]]**.
+//declaration// - a **dec[[CL:Symbols:declare]]lare** //[[CL:Glossary:expression]]//; not evaluated.
 //forms// - an //[[CL:Glossary:implicit progn]]//.
-
 //results// - If a //string-form// is not supplied or **[[CL:Constant Variables:nil]]**, a //[[CL:Glossary:string]]//; otherwise, the //[[CL:Glossary:values]]// returned by the //forms//.
 
 ====Description====
-**[[CL:Macros:with-output-to-string]]** creates a
-
-character //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]//, performs a series of operations that may send results to this //[[CL:Glossary:stream]]//, and then closes the //[[CL:Glossary:stream]]//.
+**with-output-to-string** creates acharacter //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]//, performs a series of operations that may send results to this //[[CL:Glossary:stream]]//, and then closes the //[[CL:Glossary:stream]]//.
 
 The //element-type// names the //[[CL:Glossary:type]]// of the elements of the //[[CL:Glossary:stream]]//; a //[[CL:Glossary:stream]]// is constructed of the most specialized //[[CL:Glossary:type]]// that can accommodate elements of the given //[[CL:Glossary:type]]//.
 
@@ -31,22 +21,29 @@ The body is executed as an //[[CL:Glossary:implicit progn]]// with //var// bound
 
 If //string// is supplied, //element-type// is ignored, and the output is incrementally appended to //string// as if by use of **[[CL:Functions:vector-push-extend]]**.
 
-The //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]// is automatically closed on exit from **[[CL:Macros:with-output-from-string]]**, no matter whether the exit is normal or abnormal.
+The //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]// is automatically closed on exit from **with-output-to-string**, no matter whether the exit is normal or abnormal.
 
 The //[[CL:Glossary:output]]// //[[CL:Glossary:string stream]]// to which the //[[CL:Glossary:variable]]// //var// is //[[CL:Glossary:bound]]// has //[[CL:Glossary:dynamic extent]]//; its //[[CL:Glossary:extent]]// ends when the //[[CL:Glossary:form]]// is exited.
 
-If no //string// is provided, then **[[CL:Macros:with-output-from-string]]**
-
-produces a //[[CL:Glossary:stream]]// that accepts characters and returns a //[[CL:Glossary:string]]// of the indicated //element-type//.
-
-If //string// is provided, **[[CL:Macros:with-output-to-string]]** returns the results of evaluating the last //form//.
+If no //string// is provided, then **with-output-to-string** produces a //[[CL:Glossary:stream]]// that accepts characters and returns a //[[CL:Glossary:string]]// of the indicated //element-type//. If //string// is provided, **with-output-to-string** returns the results of evaluating the last //form//.
 
 The consequences are undefined if an attempt is made to //[[CL:Glossary:assign]]// the //[[CL:Glossary:variable]]// //var//.
 
-====Examples==== <blockquote> ([[CL:Macros:defparameter]] fstr (make-array '(0) :element-type 'base-char :fill-pointer 0 :adjustable t)) → "" (with-output-to-string (s fstr) (format s "here's some output") (input-stream-p s)) → //[[CL:Glossary:false]]// fstr → "here's some output" </blockquote>
+====Examples==== 
+<blockquote> 
+([[CL:Macros:defparameter]] *fstr* 
+  (make-array '(0) :element-type '[[CL:Types:base-char]] 
+                   :fill-pointer 0 
+                   :adjustable [[CL:Constant Variables:t]])) <r>*FSTR*</r>
+*fstr* <r>"" </r>
+(with-output-to-string (s *fstr*) 
+  ([[CL:Functions:format]] s "here's some output") 
+  ([[CL:Functions:input-stream-p]] s)) <r>//[[CL:Glossary:false]]// </r>
+*fstr* <r>"here's some output" </r>
+</blockquote>
 
 ====Side Effects====
-The //string// is modified.
+If //string-form// was //[[CL:Glossary:non-nil]]//, then the //string// is modified.
 
 ====Affected By====
 None.
@@ -55,11 +52,16 @@ None.
 The consequences are undefined if destructive modifications are performed directly on the //string// during the //[[CL:Glossary:dynamic extent]]// of the call.
 
 ====See Also====
-**[[CL:Functions:make-string-output-stream]]**, **[[CL:Functions:vector-push-extend]]**,
-
-{\secref\TraversalRules}
+  * **[[CL:Functions:make-string-output-stream]]**
+  * **[[CL:Functions:vector-push-extend]]**
+  * {\secref\TraversalRules}
 
 ====Notes====
 None.
+
+====Editor Notes====
+If no //string// is provided, the specification doesn't explicitly mention that **with-output-to-string** will return a //[[CL:Glossary:fresh]]// //[[CL:Glossary:string]]//.
+
+While the //[[CL:Glossary:implementation|implementations]]// seem to always produce //[[CL:Glossary:fresh]]// //[[CL:Glossary:string|strings]]//, this behaviour is theoretically //[[CL:Glossary:unspecified]]// and //[[CL:Glossary:implementation-defined]]//.
 
 \issue{CHARACTER-PROPOSAL:2-3-6} \issue{STREAM-ACCESS:ADD-TYPES-ACCESSORS} \issue{CHARACTER-PROPOSAL:2-3-6} \issue{WITH-OUTPUT-TO-STRING-APPEND-STYLE:VECTOR-PUSH-EXTEND} \issue{WITH-OPEN-FILE-STREAM-EXTENT:DYNAMIC-EXTENT} \issue{CHARACTER-PROPOSAL:2-5-6} \issue{WITH-OPEN-FILE-SETQ:EXPLICITLY-VAGUE} \issue{STRING-OUTPUT-STREAM-BASHING:UNDEFINED} \issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE} \issue{DECLS-AND-DOC} \issue{CHARACTER-PROPOSAL:2-5-6}

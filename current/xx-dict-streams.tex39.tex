@@ -1,18 +1,26 @@
 ====== Function MAKE-SYNONYM-STREAM ======
 
 ====Syntax====
-**make-synonym-stream** //symbol// → //synonym-stream//
+  * **make-synonym-stream** //symbol// → //synonym-stream//
 
 ====Arguments and Values====
-//symbol// - a //[[CL:Glossary:symbol]]// that names a //[[CL:Glossary:dynamic variable]]//.
-
-//synonym-stream// - a //[[CL:Glossary:synonym stream]]//.
+  * //symbol// - a //[[CL:Glossary:symbol]]// that names a //[[CL:Glossary:dynamic variable]]//.
+  * //synonym-stream// - a //[[CL:Glossary:synonym stream]]//.
 
 ====Description====
 Returns a //[[CL:Glossary:synonym stream]]// whose //[[CL:Glossary:synonym stream symbol]]// is //symbol//.
 
 ====Examples====
-<blockquote> ([[CL:Macros:defparameter]] a-stream (make-string-input-stream "a-stream") b-stream (make-string-input-stream "b-stream")) → #<String Input Stream> ([[CL:Macros:defparameter]] s-stream (make-synonym-stream 'c-stream)) → #<SYNONYM-STREAM for C-STREAM> ([[CL:Macros:defparameter]] c-stream a-stream) → #<String Input Stream> (read s-stream) → A-STREAM ([[CL:Macros:defparameter]] c-stream b-stream) → #<String Input Stream> (read s-stream) → B-STREAM </blockquote>
+<blockquote> 
+([[CL:Macros:defparameter]] *a-stream* ([[CL:Functions:make-string-input-stream]] "*a-stream*")) <r>*A-STREAM* </r>
+([[CL:Macros:defparameter]] *b-stream* ([[CL:Functions:make-string-input-stream]] "*b-stream*")) <r>*B-STREAM*</r>
+([[CL:Macros:defparameter]] *s-stream* (make-synonym-stream '*c-stream*)) <r>*S-STREAM*</r>
+*s-stream* <r>#<SYNONYM-STREAM for *C-STREAM*> </r>
+([[CL:Macros:setf]] *c-stream* *a-stream*) <r>#<String Input Stream> </r>
+([[CL:Functions:read]] *s-stream*) <r>*A-STREAM*</r>
+([[CL:Macros:setf]] *c-stream* *b-stream*) <r>#<String Input Stream> </r>
+([[CL:Functions:read]] *s-stream*) <r>*B-STREAM*</r>
+</blockquote>
 
 ====Side Effects====
 None.
@@ -24,7 +32,7 @@ None.
 Should signal **[[CL:Types:type-error]]** if its argument is not a //[[CL:Glossary:symbol]]//.
 
 ====See Also====
-{\secref\StreamConcepts}
+  * {\secref\StreamConcepts}
 
 ====Notes====
 None.

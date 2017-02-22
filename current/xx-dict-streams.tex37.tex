@@ -1,28 +1,43 @@
 ====== Function FINISH-OUTPUT, FORCE-OUTPUT, CLEAR-OUTPUT ======
 
 ====Syntax====
-**{finish-output}** //''&optional'' output-stream// → //**[[CL:Constant Variables:nil]]**// **{force-output} ** //''&optional'' output-stream// → //**[[CL:Constant Variables:nil]]**// **{clear-output} ** //''&optional'' output-stream// → //**[[CL:Constant Variables:nil]]**//
+  * **finish-output** ''&optional'' //output-stream// → **[[CL:Constant Variables:nil]]** 
+  * **force-output** ''&optional'' //output-stream// → **[[CL:Constant Variables:nil]]** 
+  * **clear-output** ''&optional'' //output-stream// → **[[CL:Constant Variables:nil]]**
 
 ====Arguments and Values====
-//output-stream// - an //[[CL:Glossary:output]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard output]]//.
+  * //output-stream// - an //[[CL:Glossary:output]]// //[[CL:Glossary:stream designator]]//. The default is //[[CL:Glossary:standard output]]//.
 
 ====Description====
-**[[CL:Functions:finish-output]]**, **[[CL:Functions:force-output]]**, and **[[CL:Functions:clear-output]]** exercise control over the internal handling of buffered stream output.
+**finish-output**, **force-output**, and **clear-output** exercise control over the internal handling of buffered stream output.
 
-**[[CL:Functions:finish-output]]** attempts to ensure that any buffered output sent to //output-stream// has reached its destination, and then returns.
+**finish-output** attempts to ensure that any buffered output sent to //output-stream// has reached its destination, and then returns.
 
-**[[CL:Functions:force-output]]** initiates the emptying of any internal buffers but does not wait for completion or acknowledgment to return.
+**force-output** initiates the emptying of any internal buffers but does not wait for completion or acknowledgment to return.
 
-**[[CL:Functions:clear-output]]** attempts to abort any outstanding output operation in progress in order to allow as little output as possible to continue to the destination.
+**clear-output** attempts to abort any outstanding output operation in progress in order to allow as little output as possible to continue to the destination.
 
 If any of these operations does not make sense for //output-stream//, then it does nothing.
 
-The precise actions of these //[[CL:Glossary:functions]]// are //[[CL:Glossary:implementation-dependent]]//.
+The precise actions of these //[[CL:Glossary:function|functions]]// are //[[CL:Glossary:implementation-dependent]]//.
 
-====Examples==== <blockquote> ;; Implementation A (progn (princ "am i seen?") (clear-output)) → NIL
+====Examples====
+Implementation A:
 
-;; Implementation B (progn (princ "am i seen?") (clear-output))
-▷ am i seen? → NIL </blockquote>
+<blockquote> 
+([[CL:Special Operators:progn]] ([[CL:Functions:princ]] "am i seen?") 
+       (clear-output)) 
+<r>[[CL:Constant Variables:NIL]] </r>
+</blockquote>
+
+Implementation B:
+
+<blockquote> 
+([[CL:Special Operators:progn]] ([[CL:Functions:princ]] "am i seen?") 
+       (clear-output))
+<o>am i seen?</o>
+<r>[[CL:Constant Variables:NIL]] </r>
+</blockquote>
 
 ====Side Effects====
 None.
@@ -34,7 +49,7 @@ None.
 Should signal an error of type type-error if //output-stream// is not a //[[CL:Glossary:stream designator]]//.
 
 ====See Also====
-**[[CL:Functions:clear-input]]**
+  * **[[CL:Functions:clear-input|Function CLEAR-INPUT]]**
 
 ====Notes====
 None.

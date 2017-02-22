@@ -1,46 +1,49 @@
 ====== Macro WITH-INPUT-FROM-STRING ======
 
 ====Syntax====
-\DefmacWithValuesNewline with-input-from-string {\paren{var string ''&key'' index start end} \starparam{declaration} \starparam{form}} {\starparam{result}}
+  * //with-input-from-string// (//var// //string// ''&key'' //index// //start// //end//) //declaration//''*'' //form//''*'' → //result//''*''
 
 ====Arguments and Values====
-//var// - a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
-
-//string// - a //[[CL:Glossary:form]]//; evaluated to produce a //[[CL:Glossary:string]]//.
-
-//index// - a //[[CL:Glossary:place]]//.
-
-//start//, //end// - //[[CL:Glossary:bounding index designator|bounding index designators]]// of //string//. \Defaults{//start// and //end//}{''0'' and **[[CL:Constant Variables:nil]]**}
-
-//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
-
-//forms// - an //[[CL:Glossary:implicit progn]]//.
-
-//result// - the //[[CL:Glossary:values]]// returned by the //forms//.
+  * //var// - a //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
+  * //string// - a //[[CL:Glossary:form]]//; evaluated to produce a //[[CL:Glossary:string]]//.
+  * //index// - a //[[CL:Glossary:place]]//.
+  * //start//, //end// - //[[CL:Glossary:bounding index designator|bounding index designators]]// of //string//. The defaults for //start// and //end// are ''0'' and **[[CL:Constant Variables:nil]]**, respectively.
+  * //declaration// - a **[[CL:Symbols:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //result// - the //[[CL:Glossary:values]]// returned by the //forms//.
 
 ====Description====
-Creates an
+Creates an //[[CL:Glossary:input]]// //[[CL:Glossary:string stream]]//, provides an opportunity to perform operations on the //[[CL:Glossary:stream]]// (returning zero or more //[[CL:Glossary:values]]//), and then closes the //[[CL:Glossary:string stream]]//.
 
-//[[CL:Glossary:input]]// //[[CL:Glossary:string stream]]//,
-
-provides an opportunity to perform operations on the //[[CL:Glossary:stream]]// (returning zero or more //[[CL:Glossary:values]]//), and then closes the //[[CL:Glossary:string stream]]//.
-
-//String// is evaluated first, and //var// is bound to a character //[[CL:Glossary:input]]// //[[CL:Glossary:string stream]]// that supplies //[[CL:Glossary:characters]]// from the subsequence of the resulting //[[CL:Glossary:string]]// //[[CL:Glossary:bounded]]// by //start// and //end//. The body is executed as an //[[CL:Glossary:implicit progn]]//.
+//string// is evaluated first, and //var// is bound to a character //[[CL:Glossary:input]]// //[[CL:Glossary:string stream]]// that supplies //[[CL:Glossary:character|characters]]// from the subsequence of the resulting //[[CL:Glossary:string]]// //[[CL:Glossary:bounded]]// by //start// and //end//. The body is executed as an //[[CL:Glossary:implicit progn]]//.
 
 The //[[CL:Glossary:input]]// //[[CL:Glossary:string stream]]// is automatically closed on exit from **[[CL:Macros:with-input-from-string]]**, no matter whether the exit is normal or abnormal.
 
 The //[[CL:Glossary:input]]// //[[CL:Glossary:string stream]]// to which the //[[CL:Glossary:variable]]// //var// is //[[CL:Glossary:bound]]// has //[[CL:Glossary:dynamic extent]]//; its //[[CL:Glossary:extent]]// ends when the //[[CL:Glossary:form]]// is exited.
 
-The //index// is a pointer within the //string// to be advanced. If **[[CL:Macros:with-input-from-string]]** is exited normally, then //index// will have
-
-as its //[[CL:Glossary:value]]// the index into the //string// indicating the first character not read which is **[[CL:Functions:(length //string//)]]** if all characters were used. The place specified by //index// is not updated as reading progresses, but only at the end of the operation.
+The //index// is a pointer within the //string// to be advanced. If **[[CL:Macros:with-input-from-string]]** is exited normally, then //index// will have as its //[[CL:Glossary:value]]// the index into the //string// indicating the first character not read which is ''([[CL:Functions:length]] //string//)'' if all characters were used. The place specified by //index// is not updated as reading progresses, but only at the end of the operation.
 
 //start// and //index// may both specify the same variable, which is a pointer within the //string// to be advanced, perhaps repeatedly by some containing loop.
 
 The consequences are undefined if an attempt is made to //[[CL:Glossary:assign]]// the //[[CL:Glossary:variable]]// //var//.
 
 ====Examples====
-<blockquote> (with-input-from-string (s "XXX1 2 3 4xxx" :index ind :start 3 :end 10) (+ (read s) (read s) (read s))) → 6 ind → 9 (with-input-from-string (s "Animal Crackers" :index j :start 6) (read s)) → CRACKERS </blockquote> The variable ''j'' is set to ''15''.
+<blockquote>
+([[CL:Macros:defvar]] *ind*) *IND*
+(with-input-from-string (s "XXX1 2 3 4xxx" :index *ind* :start 3 :end 10) 
+  ([[CL:Functions:math-add|+]] ([[CL:Functions:read]] s) 
+     ([[CL:Functions:read]] s) 
+     ([[CL:Functions:read]] s))) → 6
+*ind* → 9 
+</blockquote>
+
+At the end of the below scenario, the variable ''*j*'' is set to ''15''.
+
+<blockquote>
+([[CL:Macros:defvar]] *j*) *J*
+(with-input-from-string (s "Animal Crackers" :index *j* :start 6) 
+  ([[CL:Functions:read]] s)) → CRACKERS 
+</blockquote> 
 
 ====Side Effects====
 The //[[CL:Glossary:value]]// of the //[[CL:Glossary:place]]// named by //index//, if any, is modified.
@@ -52,9 +55,8 @@ None.
 None.
 
 ====See Also====
-**[[CL:Functions:make-string-input-stream]]**,
-
-{\secref\TraversalRules}
+  * **[[CL:Functions:make-string-input-stream|Function MAKE-STRING-INPUT-STREAM]]**
+  * {\secref\TraversalRules}
 
 ====Notes====
 None.
