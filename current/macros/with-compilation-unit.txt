@@ -1,0 +1,54 @@
+====== Macro WITH-COMPILATION-UNIT ======
+
+====Syntax====
+  * **with-compilation-unit** (⟦//option//⟧) //form//''*'' → //result//''*''
+
+<blockquote>
+option ::= **'':override''** //override//
+</blockquote>
+
+====Arguments and Values====
+  * //override// - a //[[CL:Glossary:generalized boolean]]//; evaluated. The default is **[[CL:Constant Variables:nil]]**.
+  * //forms// - an //[[CL:Glossary:implicit progn]]//.
+  * //results// - the //[[CL:Glossary:values]]// returned by the //[[CL:Glossary:form|forms]]//.
+
+====Description====
+Executes //forms// from left to right. Within the //[[CL:Glossary:dynamic environment]]// of **with-compilation-unit**, actions deferred by the compiler until the end of compilation will be deferred until the end of the outermost call to **with-compilation-unit**.
+
+The set of //[[CL:Glossary:options]]// permitted may be extended by the implementation, but the only //[[CL:Glossary:standardized]]// keyword is **'':override''**.
+
+If nested dynamically only the outer call to **with-compilation-unit** has any effect unless the value associated with **'':override''** is //[[CL:Glossary:true]]//, in which case warnings are deferred only to the end of the innermost call for which //override// is //[[CL:Glossary:true]]//.
+
+The function **[[CL:Functions:compile-file]]** provides the effect of ''(with-compilation-unit (:override [[CL:Constant Variables:nil]]) ...)''' around its //[[CL:Glossary:code]]//.
+
+Any //[[CL:Glossary:implementation-dependent]]// extensions can only be provided as the result of an explicit programmer request by use of an //[[CL:Glossary:implementation-dependent]]// keyword. //[[CL:Glossary:Implementations]]// are forbidden from attaching additional meaning to a use of this macro which involves either no keywords or just the keyword **'':override''**.
+
+====Examples====
+If an //[[CL:Glossary:implementation]]// would normally defer certain kinds of warnings, such as warnings about undefined functions, to the end of a compilation unit (such as a //[[CL:Glossary:file]]//), the following example shows how to cause those warnings to be deferred to the end of the compilation of several files.
+
+<blockquote> 
+([[CL:Macros:defun]] compile-files (&rest files) 
+  (with-compilation-unit () 
+    ([[CL:Functions:mapcar]] #'([[CL:Symbols:lambda]] (file) ([[CL:Functions:compile-file]] file)) 
+            files))) <r>COMPILE-FILES</r>
+
+(compile-files "A" "B" "C") 
+<r>//[[CL:Glossary:implementation-dependent]]//</r>
+</blockquote>
+
+Note however that if the implementation does not normally defer any warnings, use of //[[CL:Glossary:with-compilation-unit]]// might not have any effect.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Functions:compile|Function COMPILE]]**
+  * **[[CL:Functions:compile-file|Function COMPILE-FILE]]**
+
+====Notes====
+None.
+
+\issue{WITH-COMPILATION-UNIT:NEW-MACRO}

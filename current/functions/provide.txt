@@ -1,0 +1,66 @@
+====== Function PROVIDE, REQUIRE ======
+
+====Syntax====
+  * **provide** //module-name// → //[[CL:Glossary:implementation-dependent]]//
+  * **require** //module-name// ''&optional'' //pathname-list// → ////[[CL:Glossary:implementation-dependent]]////
+
+====Arguments and Values====
+  * //module-name// - a //[[CL:Glossary:symbol name designator]]//.
+  * //pathname-list// - **[[CL:Constant Variables:nil]]**, or a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:non-empty]]// //[[CL:Glossary:list]]// of //[[CL:Glossary:pathname designators]]//. The default is **[[CL:Constant Variables:nil]]**.
+
+====Description====
+**provide** adds the //module-name// to the //[[CL:Glossary:list]]// held by **[[CL:Variables:star-modules-star|*modules*]]**, if such a name is not already present.
+
+**require** tests for the presence of the //module-name// in the //[[CL:Glossary:list]]// held by **[[CL:Variables:star-modules-star|*modules*]]**. If it is present, **require** immediately returns.
+
+Otherwise, an attempt is made to load an appropriate set of //[[CL:Glossary:files]]// as follows: The //pathname-list// argument, if //[[CL:Glossary:non-nil]]//, specifies a list of //[[CL:Glossary:pathnames]]// to be loaded in order, from left to right. If the //pathname-list// is **[[CL:Constant Variables:nil]]**, an //[[CL:Glossary:implementation-dependent]]// mechanism will be invoked in an attempt to load the module named //module-name//; if no such module can be loaded, an error of type **[[CL:Types:error]]** is signaled.
+
+Both functions use **[[CL:Functions:string-equal=]]** to test for the presence of a //module-name//.
+
+====Examples====
+This illustrates a //[[CL:Glossary:non-portable]]// use of **require**, because it depends on the //[[CL:Glossary:implementation-dependent]]// file-loading mechanism.
+<blockquote> 
+(require "CALCULUS")
+</blockquote> 
+
+This use of **require** is //[[CL:Glossary:non-portable]]// because of the literal physical //[[CL:Glossary:pathname]]//.
+
+<blockquote> 
+(require "CALCULUS" "/usr/lib/lisp/calculus")
+</blockquote> 
+
+One form of portable usage involves supplying a //[[CL:Glossary:logical pathname]]//, with appropriate //[[CL:Glossary:translations]]// defined elsewhere.
+
+<blockquote> 
+(require "CALCULUS" "lib:calculus")
+</blockquote> 
+
+Another form of //[[CL:Glossary:portable]]// usage involves using a //[[CL:Glossary:variable]]// or table lookup //[[CL:Glossary:function]]// to determine the //[[CL:Glossary:pathname]]//, which again must be initialized elsewhere.
+
+<blockquote> 
+(require "CALCULUS" *calculus-module-pathname*) 
+</blockquote>
+
+====Side Effects====
+**provide** modifies **[[CL:Variables:star-modules-star|*modules*]]**.
+
+====Affected By====
+The specific action taken by **require** is affected by calls to **provide** (or, in general, any changes to the value of **<nowiki>*modules*</nowiki>**).
+
+====Exceptional Situations====
+Should signal an error of type type-error if //module-name// is not a //[[CL:Glossary:symbol name designator]]//.
+
+If **require** fails to perform the requested operation due to a problem while interacting with the //[[CL:Glossary:file system]]//, an error of type **[[CL:Types:file-error]]** is signaled.
+
+An error of type **[[CL:Types:file-error]]** might be signaled if any //[[CL:Glossary:pathname]]// in //pathname-list// is a //[[CL:Glossary:designator]]// for a //[[CL:Glossary:wild]]// //[[CL:Glossary:pathname]]//.
+
+====See Also====
+  * **[[CL:Variables:star-modules-star|Variable *MODULES*]]**
+  * {\secref\PathnamesAsFilenames}
+
+====Notes====
+The functions **provide** and **require** are deprecated.
+
+If a module consists of a single //[[CL:Glossary:package]]//, it is customary for the package and module names to be the same.
+
+\issue{REQUIRE-PATHNAME-DEFAULTS-AGAIN:X3J13-DEC-91} \issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT} \issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT} \issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT} \issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
