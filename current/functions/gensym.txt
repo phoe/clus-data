@@ -1,0 +1,50 @@
+====== Function GENSYM ======
+
+====Syntax====
+  * **gensym** ''&optional'' //x// → //new-symbol//
+
+====Arguments and Values====
+  * //x// - a //[[CL:Glossary:string]]// or a non-negative //[[CL:Glossary:integer]]//. Complicated defaulting behaviour; see below.
+  * //new-symbol// - a //[[CL:Glossary:fresh]]//, //[[CL:Glossary:uninterned]]// //[[CL:Glossary:symbol]]//.
+
+====Description====
+Creates and returns a //[[CL:Glossary:fresh]]//, //[[CL:Glossary:uninterned]]// //[[CL:Glossary:symbol]]//, as if by calling **[[CL:Functions:make-symbol]]**. (The only difference between **[[CL:Functions:gensym]]** and **[[CL:Functions:make-symbol]]** is in how the //new-symbol//'s //[[CL:Glossary:name]]// is determined.)
+
+The //[[CL:Glossary:name]]// of the //new-symbol// is the concatenation of a prefix, which defaults to ''"G"'', and a suffix, which is the decimal representation of a number that defaults to the //[[CL:Glossary:value]]// of **[[CL:Variables:star-gensym-counter-star|*gensym-counter*]]**.
+
+If //x// is supplied, and is a //[[CL:Glossary:string]]//, then that //[[CL:Glossary:string]]// is used as a prefix instead of ''"G"'' for this call to **[[CL:Functions:gensym]]** only.
+
+If //x// is supplied, and is an //[[CL:Glossary:integer]]//, then that //[[CL:Glossary:integer]]//, instead of the //[[CL:Glossary:value]]// of **[[CL:Variables:star-gensym-counter-star|*gensym-counter*]]**, is used as the suffix for this call to **[[CL:Functions:gensym]]** only.
+
+If and only if no explicit suffix is supplied, **[[CL:Variables:star-gensym-counter-star|*gensym-counter*]]** is incremented after it is used.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:defparameter]] *sym1* (gensym)) <r>#:G3142 </r>
+(symbol-package *sym1*) <r>[[CL:Constant Variables:NIL]] </r>
+([[CL:Macros:defparameter]] *sym2* (gensym 100)) <r>#:G100 </r>
+([[CL:Macros:defparameter]] *sym3* (gensym 100)) <r>#:G100 </r>
+(eq *sym2* *sym3*) <r>//[[CL:Glossary:false]]// </r>
+(find-symbol "G100") <r>[[CL:Constant Variables:NIL]]
+[[CL:Constant Variables:NIL]] </r>
+(gensym "T") <r>#:T3143 </r>
+(gensym) <r>#:G3144 </r>
+</blockquote>
+
+====Side Effects====
+Might increment **[[CL:Variables:star-gensym-counter-star|*gensym-counter*]]**.
+
+====Affected By====
+**[[CL:Variables:star-gensym-counter-star|*gensym-counter*]]**
+
+====Exceptional Situations====
+Should signal an error of type type-error if //x// is not a //[[CL:Glossary:string]]// or a non-negative //[[CL:Glossary:integer]]//.
+
+====See Also====
+  * **[[CL:Functions:gentemp|Function GENTEMP]]**
+  * **[[CL:Variables:star-gensym-counter-star|Variable *GENSYM-COUNTER*]]**
+
+====Notes====
+The ability to pass a numeric argument to **[[CL:Functions:gensym]]** has been deprecated; explicitly //[[CL:Glossary:binding]]// **[[CL:Variables:star-gensym-counter-star|*gensym-counter*]]** is now stylistically preferred. (The somewhat baroque conventions for the optional argument are historical in nature, and supported primarily for compatibility with older dialects of Lisp. In modern code, it is recommended that the only kind of argument used be a string prefix. In general, though, to obtain more flexible control of the //new-symbol//'s //[[CL:Glossary:name]]//, consider using **[[CL:Functions:make-symbol]]** instead.)
+
+\issue{GENSYM-NAME-STICKINESS:LIKE-TEFLON}

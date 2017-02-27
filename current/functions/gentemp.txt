@@ -1,0 +1,51 @@
+====== Function GENTEMP ======
+
+====Syntax====
+  * **gentemp** ''&optional'' //prefix// //package// → //new-symbol//
+
+====Arguments and Values====
+  * //prefix// - a //[[CL:Glossary:string]]//. The default is ''"T"''.
+  * //package// - a //[[CL:Glossary:package designator]]//. The default is the //[[CL:Glossary:current package]]//.
+  * //new-symbol// - a //[[CL:Glossary:fresh]]//, //[[CL:Glossary:interned]]// //[[CL:Glossary:symbol]]//.
+
+====Description====
+**gentemp** creates and returns a //[[CL:Glossary:fresh]]// //[[CL:Glossary:symbol]]//, //[[CL:Glossary:interned]]// in the indicated //package//.
+
+The //[[CL:Glossary:symbol]]// is guaranteed to be one that was not previously //[[CL:Glossary:accessible]]// in //package//. It is neither //[[CL:Glossary:bound]]// nor //[[CL:Glossary:fbound]]//, and has a //[[CL:Glossary:null]]// //[[CL:Glossary:property list]]//.
+
+The //[[CL:Glossary:name]]// of the //new-symbol// is the concatenation of the //prefix// and a suffix, which is taken from an internal counter used only by **gentemp**. (If a //[[CL:Glossary:symbol]]// by that name is already //[[CL:Glossary:accessible]]// in //package//, the counter is incremented as many times as is necessary to produce a //[[CL:Glossary:name]]// that is not already the //[[CL:Glossary:name]]// of a //[[CL:Glossary:symbol]]// //[[CL:Glossary:accessible]]// in //package//.)
+
+====Examples====
+<blockquote> 
+(gentemp) <r>T1298 </r>
+(gentemp "FOO") <r>FOO1299 </r>
+([[CL:Functions:find-symbol]] "FOO1300") <r>[[CL:Constant Variables:NIL]], [[CL:Constant Variables:NIL]] </r>
+(gentemp "FOO") <r>FOO1300 </r>
+([[CL:Functions:find-symbol]] "FOO1300") <r>FOO1300, :INTERNAL </r>
+([[CL:Functions:intern]] "FOO1301") <r>FOO1301, :INTERNAL </r>
+(gentemp "FOO") <r>FOO1302 </r>
+(gentemp) <r>T1303 </r>
+</blockquote>
+
+====Side Effects====
+Its internal counter is incremented one or more times.
+
+//[[CL:Glossary:intern|Interns]]// the //new-symbol// in //package//.
+
+====Affected By====
+The current state of its internal counter, and the current state of the //package//.
+
+====Exceptional Situations====
+Should signal an error of type type-error if //prefix// is not a //[[CL:Glossary:string]]//. Should signal an error of type type-error if //package// is not a //[[CL:Glossary:package designator]]//.
+
+====See Also====
+  * **[[CL:Functions:gensym|Function GENSYM]]**
+
+====Notes====
+The function **gentemp** is deprecated.
+
+If //package// is the //[[CL:Glossary:package]]// ''**keyword**'', the result is an //[[CL:Glossary:external symbol]]// of //package//. Otherwise, the result is an //[[CL:Glossary:internal symbol]]// of //package//.
+
+The **gentemp** internal counter is independent of **[[CL:Variables:star-gensym-counter-star|*gensym-counter*]]**, the counter used by **[[CL:Functions:gensym]]**. There is no provision for accessing the **gentemp** internal counter.
+
+Just because **gentemp** creates a //[[CL:Glossary:symbol]]// which did not previously exist does not mean that such a //[[CL:Glossary:symbol]]// might not be seen in the future (//e.g.// in a data file - perhaps even created by the same program in another session). As such, this symbol is not truly unique in the same sense as a //[[CL:Glossary:gensym]]// would be. In particular, programs which do automatic code generation should be careful not to attach global attributes to such generated //[[CL:Glossary:symbol|symbols]]// (//e.g.// **[[CL:Declarations:special]]** //[[CL:Glossary:declaration|declarations]]//) and then write them into a file because such global attributes might, in a different session, end up applying to other //[[CL:Glossary:symbol|symbols]]// that were automatically generated on another day for some other purpose.

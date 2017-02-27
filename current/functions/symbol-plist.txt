@@ -1,0 +1,40 @@
+====== Accessor SYMBOL-PLIST ======
+
+====Syntax====
+  * **symbol-plist** //symbol// → //plist// 
+  * (**setf** (**symbol-plist** //symbol//) //new-plist//)
+
+====Arguments and Values====
+  * //symbol// - a //[[CL:Glossary:symbol]]//.
+  * //plist//, //new-plist// - a //[[CL:Glossary:property list]]//.
+
+====Description====
+//[[CL:Glossary:access|Accesses]]// the //[[CL:Glossary:property list]]// of //symbol//.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:defparameter]] *my-symbol* ([[CL:Functions:gensym]])) <r>#:G9723 </r>
+(symbol-plist *my-symbol*) <r>() </r>
+([[CL:Macros:setf]] ([[CL:Functions:get]] *my-symbol* 'prop1) 'val1) <r>VAL1 </r>
+(symbol-plist *my-symbol*) <r>(PROP1 VAL1) </r>
+([[CL:Macros:setf]] ([[CL:Functions:get]] *my-symbol* 'prop2) 'val2) <r>VAL2 </r>
+(symbol-plist *my-symbol*) <r>(PROP2 VAL2 PROP1 VAL1) </r>
+([[CL:Macros:setf]] (symbol-plist *my-symbol*) ([[CL:Functions:list]] 'prop3 'val3)) <r>(PROP3 VAL3) </r>
+(symbol-plist *my-symbol*) <r>(PROP3 VAL3) </r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should signal an error of type type-error if //symbol// is not a //[[CL:Glossary:symbol]]//.
+
+====See Also====
+  * **[[CL:Functions:get|Function GET]]**
+  * **[[CL:Functions:remprop|Function GETPROP]]**
+
+====Notes====
+The use of **[[CL:Macros:setf]]** should be avoided, since a //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:property list]]// is a global resource that can contain information established and depended upon by unrelated programs in the same //[[CL:Glossary:Lisp image]]//.

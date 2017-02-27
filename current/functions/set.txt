@@ -1,0 +1,83 @@
+====== Function SET ======
+
+====Syntax====
+  * **set** //symbol value// → //value//
+
+====Arguments and Values====
+  * //symbol// - a //[[CL:Glossary:symbol]]//.
+  * //value// - an //[[CL:Glossary:object]]//.
+
+====Description====
+**set** changes the contents of the //[[CL:Glossary:value cell]]// of //[[CL:Glossary:symbol]]// to the given //[[CL:Glossary:value]]//.
+
+<blockquote> 
+(set //symbol// //value//) 
+  ≡ ([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] //symbol//) //value//) 
+</blockquote>
+
+====Examples====
+<blockquote> 
+([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] 'n) 1) <r>1 </r>
+(set 'n 2) <r>2 </r>
+([[CL:Functions:symbol-value]] 'n) <r>2 </r>
+([[CL:Special Operators:let]] ((n 3)) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:special]] n)) 
+  ([[CL:Macros:setf]] n ([[CL:Functions:math-add|+]] n 1)) 
+  ([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] 'n) ([[CL:Functions:math-multiply|*]] n 10)) 
+  (set 'n ([[CL:Functions:math-add|+]] ([[CL:Functions:symbol-value]] 'n) n))
+  n) <r>80 </r>
+n <r>2 </r>
+([[CL:Special Operators:let]] ((n 3)) 
+  ([[CL:Macros:defparameter]] n ([[CL:Functions:math-one-plus|1+]] n)) 
+  ([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] 'n) ([[CL:Functions:math-multiply|*]] n 10)) 
+  (set 'n ([[CL:Functions:math-add|+]] ([[CL:Functions:symbol-value]] 'n) n)) 
+  n) <r>4 </r>
+n <r>44</r>
+([[CL:Macros:defvar]] *n* 2) <r>*N*</r> 
+([[CL:Special Operators:let]] ((*n* 3)) 
+  ([[CL:Macros:defparameter]] *n* ([[CL:Functions:math-one-plus|1+]] *n*)) 
+  ([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] '*n*) ([[CL:Functions:math-multiply|*]] *n* 10)) 
+  (set '*n* ([[CL:Functions:math-add|+]] ([[CL:Functions:symbol-value]] '*n*) *n*)) 
+  *n*) <r>80</r>
+*n* <r>2 </r>
+</blockquote>
+
+-----
+
+<blockquote>
+([[CL:Macros:defvar]] *even-count* 0) <r>*EVEN-COUNT* </r>
+([[CL:Macros:defvar]] *odd-count* 0) <r>*ODD-COUNT* </r>
+([[CL:Macros:defun]] tally-list (list) 
+  ([[CL:Macros:dolist]] (element list) 
+    (set ([[CL:Special Operators:if]] ([[CL:Functions:evenp]] element) 
+             '*even-count* 
+             '*odd-count*) 
+         ([[CL:Functions:math-add|+]] element ([[CL:Special Operators:if]] ([[CL:Functions:evenp]] element) 
+                        *even-count* 
+                        *odd-count*))))) 
+<r>TALLY-LIST</r> 
+(tally-list '(1 9 4 3 2 7)) <r>[[CL:Constant Variables:NIL]] </r>
+*even-count* <r>6 </r>
+*odd-count* <r>20 </r>
+</blockquote>
+
+====Side Effects====
+The //[[CL:Glossary:value]]// of //symbol// is changed.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Special Operators:setq|Special Operator SETQ]]**
+  * **[[CL:Special Operators:progv|Special Operator PROGV]]**
+  * **[[CL:Functions:symbol-value|Function SYMBOL-VALUE]]**
+
+====Notes====
+The function **set** is deprecated.
+
+**set** cannot change the value of a //[[CL:Glossary:lexical variable]]//.
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}

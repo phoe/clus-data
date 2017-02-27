@@ -1,0 +1,59 @@
+====== Function SYMBOL-PACKAGE ======
+
+====Syntax====
+  * **symbol-package** //symbol// → //contents//
+
+====Arguments and Values====
+  * //symbol// - a //[[CL:Glossary:symbol]]//.
+  * //contents// - a //[[CL:Glossary:package]]// //[[CL:Glossary:object]]// or **[[CL:Constant Variables:nil]]**.
+
+====Description====
+Returns the //[[CL:Glossary:home package]]// of //symbol//.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:in-package]] "CL-USER") <r>#<PACKAGE "COMMON-LISP-USER"> </r>
+(symbol-package '[[CL:Functions:car]]) <r>#<PACKAGE "COMMON-LISP"> </r>
+(symbol-package 'bus) <r>#<PACKAGE "COMMON-LISP-USER"> </r>
+(symbol-package :optional) <r>#<PACKAGE "KEYWORD"> </r>
+(symbol-package ([[CL:Functions:gensym]])) <r>[[CL:Constant Variables:NIL]] ; gensyms are uninterned, so have no home package</r>
+([[CL:Functions:make-package]] 'pk1) <r>#<PACKAGE "PK1"> </r>
+([[CL:Functions:intern]] "SAMPLE1" "PK1") <r>PK1::SAMPLE1
+[[CL:Constant Variables:NIL]] </r>
+([[CL:Functions:export]] ([[CL:Functions:find-symbol]] "SAMPLE1" "PK1") "PK1") <r>[[CL:Constant Variables:T]] </r>
+([[CL:Functions:make-package]] 'pk2 :use '(pk1)) <r>#<PACKAGE "PK2"> </r>
+([[CL:Functions:find-symbol]] "SAMPLE1" "PK2") <r>PK1:SAMPLE1
+:INHERITED </r>
+(symbol-package 'pk1::sample1) <r>#<PACKAGE "PK1"> </r>
+(symbol-package 'pk2::sample1) <r>#<PACKAGE "PK1"> </r>
+(symbol-package 'pk1::sample2) <r>#<PACKAGE "PK1"> </r>
+(symbol-package 'pk2::sample2) <r>#<PACKAGE "PK2"> </r>
+</blockquote>
+
+The next several forms create a scenario in which a //[[CL:Glossary:symbol]]// is not really //[[CL:Glossary:uninterned]]//, but is "apparently uninterned", and so **symbol-package** still returns **[[CL:Constant Variables:nil]]**. 
+
+<blockquote>
+;;; TODO separate this example from the above one
+([[CL:Macros:defparameter]] *my-symbol* 'pk1::sample3) <r>*MY-SYMBOL*</r>
+*my-symbol* → PK1::SAMPLE3 
+([[CL:Functions:import]] *my-symbol* 'pk2) → [[CL:Constant Variables:T]] 
+([[CL:Functions:unintern]] *my-symbol* 'pk1) → [[CL:Constant Variables:T]] 
+(symbol-package *my-symbol*) → [[CL:Constant Variables:NIL]] 
+([[CL:Functions:eq]] *my-symbol* 'pk2::sample3) → [[CL:Constant Variables:T]] 
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+**[[CL:Functions:import]]**, **[[CL:Functions:intern]]**, **[[CL:Functions:unintern]]**
+
+====Exceptional Situations====
+Should signal an error of type type-error if //symbol// is not a //[[CL:Glossary:symbol]]//.
+
+====See Also====
+  * *[[CL:Functions:intern|Function INTERN]]**
+
+====Notes====
+None.
+

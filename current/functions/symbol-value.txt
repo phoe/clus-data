@@ -1,0 +1,70 @@
+====== Accessor SYMBOL-VALUE ======
+
+====Syntax====
+  * **symbol-value** //symbol// → //value// 
+  * (**setf** (**symbol-value** //symbol//) //new-value//)
+
+====Arguments and Values====
+  * //symbol// - a //[[CL:Glossary:symbol]]// that must have a //[[CL:Glossary:value]]//.
+  * //value//, //new-value// - an //[[CL:Glossary:object]]//.
+
+====Description====
+//[[CL:Glossary:access|Accesses]]// the //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:value cell]]//.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:setf]] (symbol-value 'a) 1) <r>1 </r>
+(symbol-value 'a) <r>1 </r>
+;;; SYMBOL-VALUE cannot see lexical variables. 
+([[CL:Special Operators:let]] ((a 2)) (symbol-value 'a)) <r>1 </r>
+([[CL:Special Operators:let]] ((a 2)) 
+  ([[CL:Macros:setf]] a 3) 
+  (symbol-value 'a)) <r>1</r>
+;; SYMBOL-VALUE can see dynamic variables. 
+([[CL:Special Operators:let]] ((a 2)) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:special]] a)) 
+  (symbol-value 'a)) <r>2 </r>
+([[CL:Special Operators:let]] ((a 2)) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:special]] a)) 
+  ([[CL:Macros:setf]] a 3) 
+  (symbol-value 'a)) <r>3 </r>
+([[CL:Special Operators:let]] ((a 2)) 
+  ([[CL:Macros:setf]] (symbol-value 'a) 3) 
+  a) <r>2 </r>
+a <r>3 </r>
+(symbol-value 'a) <r>3 </r>
+([[CL:Special Operators:let]] ((a 4)) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:special]] a)) 
+  ([[CL:Special Operators:let]] ((b (symbol-value 'a))) 
+    ([[CL:Macros:setf]] (symbol-value 'a) 5) 
+    ([[CL:Functions:values]] a b))) <r>5
+4 </r>
+a <r>3 </r>
+(symbol-value :any-keyword) <r>:ANY-KEYWORD </r>
+(symbol-value '[[CL:Constant Variables:nil]]) <r>[[CL:Constant Variables:NIL]] </r>
+(symbol-value '()) <r>[[CL:Constant Variables:NIL]] </r>
+;; The precision of this next one is //[[CL:Glossary:implementation-dependent]]//. 
+(symbol-value '[[CL:Constant Variables:pi]]) <r>3.141592653589793d0 </r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+**[[CL:Functions:makunbound]]**, **[[CL:Functions:set]]**, **[[CL:Special Operators:setq]]**
+
+====Exceptional Situations====
+Should signal an error of type type-error if //symbol// is not a //[[CL:Glossary:symbol]]//.
+
+Should signal **[[CL:Types:unbound-variable]]** if //symbol// is //[[CL:Glossary:unbound]]// and an attempt is made to //[[CL:Glossary:read]]// its //[[CL:Glossary:value]]//. (No such error is signaled on an attempt to //[[CL:Glossary:write]]// its //[[CL:Glossary:value]]//.)
+
+====See Also====
+  * **[[CL:Functions:boundp|Function BOUNDP]]**
+  * **[[CL:Functions:makunbound|Function MAKUNBOUND]]**
+  * **[[CL:Functions:set|Function SET]]**
+  * **[[CL:Special Operators:setq|Special Operator SETQ]]**
+
+====Notes====
+**symbol-value** can be used to get the value of a //[[CL:Glossary:constant variable]]//.
+
+**symbol-value** cannot //[[CL:Glossary:access]]// the value of a //[[CL:Glossary:lexical variable]]//.

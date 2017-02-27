@@ -1,0 +1,40 @@
+====== Function MAKE-SYMBOL ======
+
+====Syntax====
+  * **make-symbol** //name// → //new-symbol//
+
+====Arguments and Values====
+  * //name// - a //[[CL:Glossary:string]]//.
+  * //new-symbol// - a //[[CL:Glossary:fresh]]//, //[[CL:Glossary:uninterned]]// //[[CL:Glossary:symbol]]//.
+
+====Description====
+**make-symbol** creates and returns a //[[CL:Glossary:fresh]]//, //[[CL:Glossary:uninterned]]// //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is the given //name//. The //new-symbol// is neither //[[CL:Glossary:bound]]// nor //[[CL:Glossary:fbound]]// and has a //[[CL:Glossary:null]]// //[[CL:Glossary:property list]]//.
+
+It is //[[CL:Glossary:implementation-dependent]]// whether the //[[CL:Glossary:string]]// that becomes the //new-symbol//'s //[[CL:Glossary:name]]// is the given //name// or a copy of it. Once a //[[CL:Glossary:string]]// has been given as the //name// //[[CL:Glossary:argument]]// to //[[CL:Glossary:make-symbol]]//, the consequences are undefined if a subsequent attempt is made to alter that //[[CL:Glossary:string]]//.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:defparameter]] *temp-string* "temp") <r>"temp" </r>
+([[CL:Macros:defparameter]] *temp-symbol* ([[CL:Functions:make-symbol]] *temp-string*)) <r>#:|temp| </r>
+([[CL:Functions:symbol-name]] *temp-symbol*) <r>"temp" </r>
+([[CL:Functions:eq]] ([[CL:Functions:symbol-name]] *temp-symbol*) temp-string) <r>//[[CL:Glossary:implementation-dependent]]// </r>
+([[CL:Functions:find-symbol]] "temp") <r>[[CL:Constant Variables:NIL]]
+[[CL:Constant Variables:NIL]] </r>
+([[CL:Functions:eq]] ([[CL:Functions:make-symbol]] *temp-string*) (make-symbol *temp-string*)) <r>//[[CL:Glossary:false]]// </r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should signal an error of type type-error if //name// is not a //[[CL:Glossary:string]]//.
+
+====See Also====
+  * **[[CL:Functions:copy-symbol|Function COPY-SYMBOL]]**
+
+====Notes====
+No attempt is made by **make-symbol** to convert the case of the //[[CL:Glossary:name]]// to uppercase. The only case conversion which ever occurs for //[[CL:Glossary:symbol|symbols]]// is done by the //[[CL:Glossary:Lisp reader]]//. The program interface to //[[CL:Glossary:symbol]]// creation retains case, and the program interface to interning symbols is case-sensitive.
+

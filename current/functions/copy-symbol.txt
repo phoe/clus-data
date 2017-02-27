@@ -1,0 +1,58 @@
+====== Function COPY-SYMBOL ======
+
+====Syntax====
+  * **copy-symbol** //symbol// ''&optional'' //copy-properties// → //new-symbol//
+
+====Arguments and Values====
+  * //symbol// - a //[[CL:Glossary:symbol]]//.
+  * //copy-properties// - a //[[CL:Glossary:generalized boolean]]//. The default is //[[CL:Glossary:false]]//.
+  * //new-symbol// - a //[[CL:Glossary:fresh]]//, //[[CL:Glossary:uninterned]]// //[[CL:Glossary:symbol]]//.
+
+====Description====
+**copy-symbol** returns a //[[CL:Glossary:fresh]]//, //[[CL:Glossary:uninterned]]// //[[CL:Glossary:symbol]]//, the //[[CL:Glossary:name]]// of which is **[[CL:Functions:string-equal|string=]]** to and possibly the //[[CL:Glossary:same]]// as the //[[CL:Glossary:name]]// of the given //symbol//.
+
+If //copy-properties// is //[[CL:Glossary:false]]//, the //new-symbol// is neither //[[CL:Glossary:bound]]// nor //[[CL:Glossary:fbound]]// and has a //[[CL:Glossary:null]]// //[[CL:Glossary:property list]]//. If //copy-properties// is //[[CL:Glossary:true]]//, then the initial //[[CL:Glossary:value]]// of //new-symbol// is the //[[CL:Glossary:value]]// of //symbol//, the initial //[[CL:Glossary:function]]// definition of //new-symbol// is the //[[CL:Glossary:functional value]]// of //symbol//, and the //[[CL:Glossary:property list]]// of //new-symbol// is a //[[CL:Glossary:copy]]// of the //[[CL:Glossary:property list]]// of //symbol//.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:defparameter]] *fred* 'fred-smith) <r>FRED-SMITH </r>
+([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] *fred*) 3) <r>3 </r>
+([[CL:Macros:defparameter]] *fred-clone-1a* (copy-symbol *fred* nil)) <r>#:FRED-SMITH </r>
+([[CL:Macros:defparameter]] *fred-clone-1b* (copy-symbol *fred* nil)) <r>#:FRED-SMITH </r>
+([[CL:Macros:defparameter]] *fred-clone-2a* (copy-symbol *fred* t)) <r>#:FRED-SMITH </r>
+([[CL:Macros:defparameter]] *fred-clone-2b* (copy-symbol *fred* t)) <r>#:FRED-SMITH </r>
+([[CL:Functions:eq]] *fred* *fred-clone-1a*) <r>//[[CL:Glossary:false]]// </r>
+([[CL:Functions:eq]] *fred-clone-1a* *fred-clone-1b*) <r>//[[CL:Glossary:false]]// </r>
+([[CL:Functions:eq]] *fred-clone-2a* *fred-clone-2b*) <r>//[[CL:Glossary:false]]// </r>
+([[CL:Functions:eq]] *fred-clone-1a* *fred-clone-2a*) <r>//[[CL:Glossary:false]]// </r>
+([[CL:Functions:symbol-value]] *fred*) <r>3 </r>
+([[CL:Functions:boundp]] *fred-clone-1a*) <r>//[[CL:Glossary:false]]// </r>
+([[CL:Functions:symbol-value]] *fred-clone-2a*) <r>3 </r>
+([[CL:Macros:setf]] ([[CL:Functions:symbol-value]] *fred-clone-2a*) 4) <r>4 </r>
+([[CL:Functions:symbol-value]] *fred*) <r>3 </r>
+([[CL:Functions:symbol-value]] *fred-clone-2a*) <r>4 </r>
+([[CL:Functions:symbol-value]] *fred-clone-2b*) <r>3 </r>
+([[CL:Functions:boundp]] *fred-clone-1a*) <r>//[[CL:Glossary:false]]// </r>
+([[CL:Macros:setf]] ([[CL:Functions:symbol-function]] *fred*) 
+      #'([[CL:Symbols:lambda]] (x) x)) <r>#<FUNCTION anonymous> </r>
+([[CL:Functions:fboundp]] *fred*) <r>//[[CL:Glossary:true]]// </r>
+([[CL:Functions:fboundp]] *fred-clone-1a*) <r>//[[CL:Glossary:false]]// </r>
+([[CL:Functions:fboundp]] *fred-clone-2a*) <r>//[[CL:Glossary:false]]// </r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should signal an error of type type-error if //symbol// is not a //[[CL:Glossary:symbol]]//.
+
+====See Also====
+  * **[[CL:Functions:make-symbol|Function MAKE-SYMBOL]]**
+
+====Notes====
+Implementors are encouraged not to copy the //[[CL:Glossary:string]]// which is the //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:name]]// unnecessarily. Unless there is a good reason to do so, the normal implementation strategy is for the //new-symbol//'s //[[CL:Glossary:name]]// to be //[[CL:Glossary:identical]]// to the given //symbol//'s //[[CL:Glossary:name]]//.
+
+\issue{COPY-SYMBOL-PRINT-NAME:EQUAL} \issue{COPY-SYMBOL-COPY-PLIST:COPY-LIST}

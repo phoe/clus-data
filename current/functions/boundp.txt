@@ -1,0 +1,41 @@
+====== Function BOUNDP ======
+
+====Syntax====
+  * **boundp** //symbol// → //generalized-boolean//
+
+====Arguments and Values====
+  * //symbol// - a //[[CL:Glossary:symbol]]//.
+  * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+Returns //[[CL:Glossary:true]]// if //symbol// is //[[CL:Glossary:bound]]//; otherwise, returns //[[CL:Glossary:false]]//.
+
+====E*x*amples====
+<blockquote>
+;;; TODO condemn toplevel SETQ
+([[CL:Macros:setq]] *x* 1) <r>1</r>
+(boundp '*x*) <r>//[[CL:Glossary:true]]// </r>
+([[CL:Functions:makunbound]] '*x*) <r>*X* </r>
+(boundp '*x*) <r>//[[CL:Glossary:false]]// </r>
+([[CL:Special Operators:let]] ((*x* 2)) 
+  (boundp '*x*)) <r>//[[CL:Glossary:false]]// </r>
+([[CL:Special Operators:let]] ((*x* 2)) 
+  ([[CL:Symbols:declare]] ([[CL:Declarations:special]] *x*)) 
+  (boundp '*x*)) <r>//[[CL:Glossary:true]]//</r>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should signal an error of type type-error if //symbol// is not a //[[CL:Glossary:symbol]]//.
+
+====See Also====
+  * **[[CL:Functions:set|Function SET]]**
+  * **[[CL:Special Operators:setq|Special Operator SETQ]]**
+  * **[[CL:Functions:symbol-value|Function SYMBOL-VALUE]]**
+  * **[[CL:Functions:makunbound|Function MAKUNBOUND]]**
+
+====Notes====
+The //[[CL:Glossary:function]]// **[[CL:Functions:bound]]** determines only whether a //[[CL:Glossary:symbol]]// has a value in the //[[CL:Glossary:global environment]]//; any //[[CL:Glossary:lexical binding|lexical bindings]]// are ignored.
+

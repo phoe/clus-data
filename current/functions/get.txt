@@ -1,0 +1,85 @@
+====== Accessor GET ======
+
+====Syntax====
+  * **get** //symbol// //indicator// ''&optional'' //default// → //value// 
+  * (**setf** (**get** //symbol// //indicator// ''&optional'' //default//) //new-value//)
+
+====Arguments and Values====
+  * //symbol// - a //[[CL:Glossary:symbol]]//.
+  * //indicator// - an //[[CL:Glossary:object]]//.
+  * //default// - an //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**.
+  * //value// - if the indicated property exists, the //[[CL:Glossary:object]]// that is its //[[CL:Glossary:value]]//; otherwise, the specified //default//.
+  * //new-value// - an //[[CL:Glossary:object]]//.
+
+====Description====
+**get** finds a //[[CL:Glossary:property]]// on the //[[CL:Glossary:property list]]// of //symbol// whose //[[CL:Glossary:property indicator]]// is //[[CL:Glossary:identical]]// to //indicator//, and returns its corresponding //[[CL:Glossary:property value]]//.
+
+If there are multiple //[[CL:Glossary:properties]]// with that //[[CL:Glossary:property indicator]]//, **get** uses the first such //[[CL:Glossary:property]]//.
+
+If there is no //[[CL:Glossary:property]]// with that //[[CL:Glossary:property indicator]]//, //default// is returned.
+
+**[[CL:Macros:setf]]** of **get** may be used to associate a new //[[CL:Glossary:object]]// with an existing indicator already on the //symbol//'s //[[CL:Glossary:property list]]//, or to create a new assocation if none exists.
+
+If there are multiple //[[CL:Glossary:properties]]// with that //[[CL:Glossary:property indicator]]//, **[[CL:Macros:setf]]** of **get** associates the //new-value// with the first such //[[CL:Glossary:property]]//.
+
+When a **get** //[[CL:Glossary:form]]// is used as a **[[CL:Macros:setf]]** //place//, any //default// which is supplied is evaluated according to normal left-to-right evaluation rules, but its //[[CL:Glossary:value]]// is ignored.
+
+====Examples====
+<blockquote> 
+([[CL:Macros:defun]] make-person (first-name last-name) 
+  ([[CL:Special Operators:let]] (([[CL:Functions:person]] (gensym "PERSON"))) 
+    ([[CL:Macros:setf]] (get person 'first-name) first-name
+                        (get person 'last-name) last-name) 
+    person)) <r>MAKE-PERSON </r>
+([[CL:Macros:defvar]] *john* 
+  (make-person "John" "Dow")) <r>*JOHN* </r>
+*john* <r>#:PERSON4603 </r>
+([[CL:Macros:defvar]] *sally* 
+  (make-person "Sally" "Jones")) <r>*SALLY* </r>
+(get *john* 'first-name) <r>"John" </r>
+(get *sally* 'last-name) <r>"Jones" </r>
+([[CL:Macros:defun]] marry (man woman married-name) 
+  ([[CL:Macros:setf]] (get man 'wife) woman
+                      (get woman 'husband) man
+                      (get man 'last-name) married-name
+                      (get woman 'last-name) married-name) 
+  married-name) <r>MARRY </r>
+(marry *john* *sally* "Dow-Jones") <r>"Dow-Jones" </r>
+(get *john* 'last-name) <r>"Dow-Jones" </r>
+(get (get *john* 'wife) 'first-name) <r>"Sally" </r>
+([[CL:Functions:symbol-plist]] *john*) <r>(WIFE #:PERSON4604 LAST-NAME "Dow-Jones" FIRST-NAME "John") </r>
+([[CL:Macros:defun]] age (person &optional (default 'thirty-something)) 
+  (get person 'age default)) <r>AGE </r>
+([[CL:Macros:defun]] ([[CL:Macros:setf]] age) (new-value person &optional (default 'thirty-something))
+  ([[CL:Macros:setf]] (get person 'age default) new-value)) <r>(SETF AGE)</r>
+(age *john*) <r>THIRTY-SOMETHING </r>
+(age *john* 20) <r>20 </r>
+([[CL:Macros:setf]] (age *john*) 25) <r>25 </r>
+(age *john*) <r>25 </r>
+(age *john* 20) <r>25 </r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+Should signal an error of type type-error if //symbol// is not a //[[CL:Glossary:symbol]]//.
+
+====See Also====
+  * **[[CL:Functions:getf|Function GETF]]**
+  * **[[CL:Functions:symbol-plist|Function SYMBOL-PLIST]]**
+  * **[[CL:Functions:remprop|Function REMPROP]]**
+
+====Notes====
+<blockquote> 
+(get x y) ≡ ([[CL:Functions:getf]] ([[CL:Functions:symbol-plist]] x) y) 
+</blockquote>
+
+//[[CL:Glossary:number|Numbers]]// and //[[CL:Glossary:character|characters]]// are not recommended for use as //indicators// in portable code since **get** tests with **[[CL:Functions:eq]]** rather than **[[CL:Functions:eql]]**, and consequently the effect of using such //indicators// is //[[CL:Glossary:implementation-dependent]]//.
+
+There is no way using **get** to distinguish an absent property from one whose value is //default//. However, see **[[CL:Functions:get-properties]]**.
+
+\issue{PLIST-DUPLICATES:ALLOW} \issue{PLIST-DUPLICATES:ALLOW} \issue{SETF-GET-DEFAULT:EVALUATED-BUT-IGNORED}

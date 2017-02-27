@@ -1,0 +1,70 @@
+====== Accessor SYMBOL-FUNCTION ======
+
+====Syntax====
+  * **symbol-function** //symbol// → //contents// 
+  * (**setf** (**symbol-function** //symbol//) //new-contents//)
+
+====Arguments and Values====
+  * //symbol// - a //[[CL:Glossary:symbol]]//.
+  * //contents// - if the //symbol// is globally defined as a //[[CL:Glossary:macro]]// or a //[[CL:Glossary:special operator]]//, an //[[CL:Glossary:object]]// of //[[CL:Glossary:implementation-dependent]]// nature and identity is returned. If the //symbol// is not globally defined as either a //[[CL:Glossary:macro]]// or a //[[CL:Glossary:special operator]]//, and if the //symbol// is //[[CL:Glossary:fbound]]//, a //[[CL:Glossary:function]]// //[[CL:Glossary:object]]// is returned.
+  * //new-contents// - a //[[CL:Glossary:function]]//.
+
+====Description====
+//[[CL:Glossary:access|Accesses]]// the //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:function cell]]//.
+
+====Examples====
+<blockquote> 
+(symbol-function '[[CL:Functions:car]]) <r>#<FUNCTION [[CL:Functions:CAR]]> </r>
+(symbol-function 'twice) 
+<e>Error: The function FOO is not defined.</e>
+([[CL:Macros:defun]] twice (n) ([[CL:Functions:math-multiply|*]] n 2)) <r>TWICE </r>
+(symbol-function 'twice) <r>#<FUNCTION TWICE> </r>
+([[CL:Functions:list]] (twice 3) 
+      ([[CL:Functions:funcall]] ([[CL:Special Operators:function]] twice) 3) 
+      ([[CL:Functions:funcall]] (symbol-function 'twice) 3)) <r>(6 6 6) </r>
+([[CL:Special Operators:flet]] ((twice (x) ([[CL:Functions:list]] x x))) 
+  ([[CL:Functions:list]] (twice 3) 
+        ([[CL:Functions:funcall]] ([[CL:Special Operators:function]] twice) 3) 
+        ([[CL:Functions:funcall]] (symbol-function 'twice) 3))) <r>((3 3) (3 3) 6) </r>
+([[CL:Macros:setf]] (symbol-function 'twice) #'([[CL:Symbols:lambda]] (x) ([[CL:Functions:list]] x x))) <r>#<FUNCTION anonymous> </r>
+([[CL:Functions:list]] (twice 3) 
+      ([[CL:Functions:funcall]] ([[CL:Special Operators:function]] twice) 3) 
+      ([[CL:Functions:funcall]] (symbol-function 'twice) 3)) <r>((3 3) (3 3) (3 3)) </r>
+([[CL:Functions:fboundp]] '[[CL:Macros:defun]]) <r>//[[CL:Glossary:true]]// </r>
+(symbol-function '[[CL:Macros:defun]]) <r>//[[CL:Glossary:implementation-dependent]]// </r>
+([[CL:Functions:functionp]] (symbol-function '[[CL:Macros:defun]])) <r>//[[CL:Glossary:implementation-dependent]]// </r>
+([[CL:Macros:defun]] symbol-function-or-nil (symbol) 
+  ([[CL:Special Operators:if]] ([[CL:Macros:and]] ([[CL:Functions:fboundp]] symbol)
+           ([[CL:Functions:not]] ([[CL:Functions:macro-function]] symbol)) 
+           ([[CL:Functions:not]] ([[CL:Functions:special-operator-p]] symbol))) 
+      (symbol-function symbol) 
+      [[CL:Constant Variables:nil]])) <r>SYMBOL-FUNCTION-OR-NIL </r>
+(symbol-function-or-nil '[[CL:Functions:car]]) <r>#<FUNCTION [[CL:Functions:CAR]]> </r>
+(symbol-function-or-nil '[[CL:Macros:defun]]) <r>[[CL:Constant Variables:NIL]] </r>
+</blockquote>
+
+====Side Effects====
+None.
+
+====Affected By====
+**[[CL:Macros:defun]]**
+
+====Exceptional Situations====
+Should signal an error of type type-error if //symbol// is not a //[[CL:Glossary:symbol]]//.
+
+Should signal **[[CL:Types:undefined-function]]** if //symbol// is not //[[CL:Glossary:fbound]]// and an attempt is made to //[[CL:Glossary:read]]// its definition. (No such error is signaled on an attempt to //[[CL:Glossary:write]]// its definition.)
+
+====See Also====
+  * **[[CL:Functions:fboundp|Function FBOUNDP]]**
+  * **[[CL:Functions:fmakunbound|Function FMAKUNBOUND]]**
+  * **[[CL:Functions:macro-function|Function MACRO-FUNCTION]]**
+  * **[[CL:Functions:special-operator-p|Function SPECIAL-OPERATOR-P]]**
+
+====Notes====
+**symbol-function** cannot //[[CL:Glossary:access]]// the value of a lexical function name produced by **[[CL:Special Operators:flet]]** or **[[CL:Special Operators:labels]]**; it can //[[CL:Glossary:access]]// only the global function value.
+
+**[[CL:Macros:setf]]** may be used with **symbol-function** to replace a global function definition when the //[[CL:Glossary:symbol]]//'s function definition does not represent a //[[CL:Glossary:special operator]]//.
+
+<blockquote> (symbol-function //symbol//) ≡ (fdefinition //symbol//) </blockquote> However, **[[CL:Functions:fdefinition]]** accepts arguments other than just //[[CL:Glossary:symbol|symbols]]//.
+
+\issue{FUNCTION-TYPE:X3J13-MARCH-88} \issue{FUNCTION-TYPE:X3J13-MARCH-88} \issue{FUNCTION-TYPE:X3J13-MARCH-88} \issue{SPECIAL-FORM-P-MISNOMER:RENAME}
