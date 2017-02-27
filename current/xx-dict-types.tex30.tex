@@ -1,26 +1,36 @@
 ====== Function TYPE-ERROR-DATUM, TYPE-ERROR-EXPECTED-TYPE ======
 
 ====Syntax====
-**type-error-datum** //condition// → //datum// **type-error-expected-type** //condition// → //expected-type//
+  * **type-error-datum** //condition// → //datum// 
+  * **type-error-expected-type** //condition// → //expected-type//
 
 ====Arguments and Values====
-//condition// - a //[[CL:Glossary:condition]]// of type **[[CL:Types:type-error]]**.
-
-//datum// - an //[[CL:Glossary:object]]//.
-
-//expected-type// - a //[[CL:Glossary:type specifier]]//.
+  * //condition// - a //[[CL:Glossary:condition]]// of type **[[CL:Types:type-error]]**.
+  * //datum// - an //[[CL:Glossary:object]]//.
+  * //expected-type// - a //[[CL:Glossary:type specifier]]//.
 
 ====Description====
-**[[CL:Functions:type-error-datum]]** returns the offending datum in the //[[CL:Glossary:situation]]// represented by the //condition//.
+**type-error-datum** returns the offending datum in the //[[CL:Glossary:situation]]// represented by the //condition//.
 
-**[[CL:Functions:type-error-expected-type]]** returns the expected type of the offending datum in the //[[CL:Glossary:situation]]// represented by the //condition//.
+**type-error-expected-type** returns the expected type of the offending datum in the //[[CL:Glossary:situation]]// represented by the //condition//.
 
 ====Examples====
-<blockquote> (defun fix-digits (condition) (check-type condition type-error) (let* ((digits '(zero one two three four five six seven eight nine)) (val (position (type-error-datum condition) digits))) (if (and val (subtypep 'fixnum (type-error-expected-type condition))) (store-value 7))))
+<blockquote>
+;;; TODO fix this so this doesn't always store 7 but val instead
+([[CL:Macros:defun]] fix-digits (condition) 
+  ([[CL:Macros:check-type]] condition [[CL:Types:type-error]]) 
+  ([[CL:Special Operators:let*]] ((digits '(zero one two three four five six seven eight nine)) 
+         (val ([[CL:Functions:position]] (type-error-datum condition) digits)))
+    ([[CL:Special Operators:if]] ([[CL:Macros:and]] val ([[CL:Functions:subtypep]] 'fixnum (type-error-expected-type condition))) 
+        ([[CL:Functions:store-value]] 7)))) <r>FIX-DIGITS</r>
 
-(defun foo (x) (handler-bind ((type-error #'fix-digits)) (check-type x number) (+ x 3)))
+([[CL:Macros:defun]] foo (x) 
+  ([[CL:Macros:handler-bind]] (([[CL:Types:type-error]] #'fix-digits)) 
+    ([[CL:Macros:check-type]] x [[CL:Types:number]]) 
+    ([[CL:Functions:math-add|+]] x 3))) <r>FOO</r>
 
-(foo 'seven) → 10 </blockquote>
+(foo 'seven) <r>10 </r>
+</blockquote>
 
 ====Side Effects====
 None.
@@ -32,7 +42,8 @@ None.
 None.
 
 ====See Also====
-**[[CL:Types:type-error]]**,{\secref\Conditions}
+  * **[[CL:Types:type-error|Condition Type TYPE-ERROR]]**
+  * {\secref\Conditions}
 
 ====Notes====
 None.
