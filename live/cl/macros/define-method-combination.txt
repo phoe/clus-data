@@ -31,12 +31,12 @@ long-form-option ::= **'':description''** //description// |
   * //required-p// - a //[[CL:Glossary:generalized boolean]]//.
 
 ====Description====
-The macro **define-method-combination** is used to define new types of method combination.
+The macro **define-method-combination** is used to define new types of //[[CL:Glossary:method combination]]//.
 
 There are two forms of **define-method-combination**. The short form is a simple facility for the cases that are expected to be most commonly needed. The long form is more powerful but more verbose. It resembles **[[CL:Macros:defmacro]]** in that the body is an expression, usually using backquote, that computes a //[[CL:Glossary:form]]//. Thus arbitrary control structures can be implemented. The long form also allows arbitrary processing of method //[[CL:Glossary:qualifier|qualifiers]]//.
 
 ===Short Form===
-The short form syntax of **define-method-combination** is recognized when the second //[[CL:Glossary:subform]]// is a //[[CL:Glossary:non-nil]]// symbol or is not present. When the short form is used, //name// is defined as a type of method combination that produces a Lisp form ''(//operator// //method-call// //method-call// ...)''. The //operator// is a //[[CL:Glossary:symbol]]// that can be the //[[CL:Glossary:name]]// of a //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]//, or //[[CL:Glossary:special operator]]//. The //operator// can be supplied by a keyword option; it defaults to //name//.
+The short form syntax of **define-method-combination** is recognized when the second //[[CL:Glossary:subform]]// is a //[[CL:Glossary:non-nil]]// symbol or is not present. When the short form is used, //name// is defined as a type of //[[CL:Glossary:method combination]]// that produces a Lisp form ''(//operator// //method-call// //method-call// ...)''. The //operator// is a //[[CL:Glossary:symbol]]// that can be the //[[CL:Glossary:name]]// of a //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]//, or //[[CL:Glossary:special operator]]//. The //operator// can be supplied by a keyword option; it defaults to //name//.
 
 Keyword options for the short form are the following:
 
@@ -46,22 +46,22 @@ Keyword options for the short form are the following:
 
 -----
 
-These types of method combination require exactly one //[[CL:Glossary:qualifier]]// per method. An error is signaled if there are applicable methods with no //[[CL:Glossary:qualifier|qualifiers]]// or with //[[CL:Glossary:qualifier|qualifiers]]// that are not supported by the method combination type.
+These types of //[[CL:Glossary:method combination]]// require exactly one //[[CL:Glossary:qualifier]]// per method. An error is signaled if there are applicable methods with no //[[CL:Glossary:qualifier|qualifiers]]// or with //[[CL:Glossary:qualifier|qualifiers]]// that are not supported by the //[[CL:Glossary:method combination]]// type.
 
-A method combination procedure defined in this way recognizes two roles for methods. A method whose one //[[CL:Glossary:qualifier]]// is the symbol naming this type of method combination is defined to be a primary method. At least one primary method must be applicable or an error is signaled. A method with **'':around''** as its one //[[CL:Glossary:qualifier]]// is an auxiliary method that behaves the same as an //[[CL:Glossary:around method]]// in standard method combination. The //[[CL:Glossary:function]]// **[[CL:Functions:call-next-method]]** can only be used in //[[CL:Glossary:around method|around methods]]//; it cannot be used in primary methods defined by the short form of the **define-method-combination** macro.
+A //[[CL:Glossary:method combination]]// procedure defined in this way recognizes two roles for methods. A method whose one //[[CL:Glossary:qualifier]]// is the symbol naming this type of //[[CL:Glossary:method combination]]// is defined to be a primary method. At least one primary method must be applicable or an error is signaled. A method with **'':around''** as its one //[[CL:Glossary:qualifier]]// is an auxiliary method that behaves the same as an //[[CL:Glossary:around method]]// in standard //[[CL:Glossary:method combination]]//. The //[[CL:Glossary:function]]// **[[CL:Functions:call-next-method]]** can only be used in //[[CL:Glossary:around method|around methods]]//; it cannot be used in primary methods defined by the short form of the **define-method-combination** macro.
 
-A method combination procedure defined in this way accepts an optional argument named //order//, which defaults to **'':most-specific-first''**. A value of **'':most-specific-last''** reverses the order of the primary methods without affecting the order of the auxiliary methods.
+A //[[CL:Glossary:method combination]]// procedure defined in this way accepts an optional argument named //order//, which defaults to **'':most-specific-first''**. A value of **'':most-specific-last''** reverses the order of the primary methods without affecting the order of the auxiliary methods.
 
 The short form automatically includes error checking and support for //[[CL:Glossary:around method|around methods]]//.
 
-For a discussion of built-in method combination types, see section {\secref\BuiltInMethCombTypes}.
+For a discussion of built-in //[[CL:Glossary:method combination]]// types, see section {\secref\BuiltInMethCombTypes}.
 
 ===Long Form===
 The long form syntax of **define-method-combination** is recognized when the second //[[CL:Glossary:subform]]// is a list.
 
-The //lambda-list// receives any arguments provided after the //[[CL:Glossary:name]]// of the method combination type in the **'':method-combination''** option to **[[CL:Macros:defgeneric]]**.
+The //lambda-list// receives any arguments provided after the //[[CL:Glossary:name]]// of the //[[CL:Glossary:method combination]]// type in the **'':method-combination''** option to **[[CL:Macros:defgeneric]]**.
 
-A list of method group specifiers follows. Each specifier selects a subset of the applicable methods to play a particular role, either by matching their //[[CL:Glossary:qualifier|qualifiers]]// against some patterns or by testing their //[[CL:Glossary:qualifier|qualifiers]]// with a //predicate//. These method group specifiers define all method //[[CL:Glossary:qualifier|qualifiers]]// that can be used with this type of method combination.
+A list of method group specifiers follows. Each specifier selects a subset of the applicable methods to play a particular role, either by matching their //[[CL:Glossary:qualifier|qualifiers]]// against some patterns or by testing their //[[CL:Glossary:qualifier|qualifiers]]// with a //predicate//. These method group specifiers define all method //[[CL:Glossary:qualifier|qualifiers]]// that can be used with this type of //[[CL:Glossary:method combination]]//.
 
 The //[[CL:Glossary:car]]// of each //method-group-specifier// is a //[[CL:Glossary:symbol]]// which //[[CL:Glossary:names]]// a //[[CL:Glossary:variable]]//. During the execution of the //[[CL:Glossary:form|forms]]// in the body of **define-method-combination**, this //[[CL:Glossary:variable]]// is bound to a list of the //[[CL:Glossary:method|methods]]// in the method group. The //[[CL:Glossary:method|methods]]// in this list occur in the order specified by the **'':order''** option.
 
@@ -87,7 +87,7 @@ The body //forms// compute and return the //[[CL:Glossary:form]]// that specifie
 
 When an effective method has no effect other than to call a single method, some implementations employ an optimization that uses the single method directly as the effective method, thus avoiding the need to create a new effective method. This optimization is active when the effective method form consists entirely of an invocation of the **[[CL:Functions:call-method]]** macro whose first //[[CL:Glossary:subform]]// is a method object and whose second //[[CL:Glossary:subform]]// is **[[CL:Constant Variables:nil]]** or unsupplied. Each **define-method-combination** body is responsible for stripping off redundant invocations of **[[CL:Special Operators:progn]]**, **[[CL:Macros:and]]**, **[[CL:Macros:multiple-value-prog1]]**, and the like, if this optimization is desired.
 
-The list **[[CL:Functions:(:arguments . //lambda-list//)]]** can appear before any declarations or //[[CL:Glossary:documentation string]]//. This form is useful when the method combination type performs some specific behavior as part of the combined method and that behavior needs access to the arguments to the //[[CL:Glossary:generic function]]//. Each parameter variable defined by //lambda-list// is bound to a //[[CL:Glossary:form]]// that can be inserted into the effective method. When this //[[CL:Glossary:form]]// is evaluated during execution of the effective method, its value is the corresponding argument to the //[[CL:Glossary:generic function]]//; the consequences of using such a //[[CL:Glossary:form]]// as the //place// in a **[[CL:Macros:setf]]** //[[CL:Glossary:form]]// are undefined.
+The list **[[CL:Functions:(:arguments . //lambda-list//)]]** can appear before any declarations or //[[CL:Glossary:documentation string]]//. This form is useful when the //[[CL:Glossary:method combination]]// type performs some specific behavior as part of the combined method and that behavior needs access to the arguments to the //[[CL:Glossary:generic function]]//. Each parameter variable defined by //lambda-list// is bound to a //[[CL:Glossary:form]]// that can be inserted into the effective method. When this //[[CL:Glossary:form]]// is evaluated during execution of the effective method, its value is the corresponding argument to the //[[CL:Glossary:generic function]]//; the consequences of using such a //[[CL:Glossary:form]]// as the //place// in a **[[CL:Macros:setf]]** //[[CL:Glossary:form]]// are undefined.
 
 Argument correspondence is computed by dividing the **'':arguments''** //lambda-list// and the //[[CL:Glossary:generic function]]// //lambda-list// into three sections: the //[[CL:Glossary:required parameter|required parameters]]//, the //[[CL:Glossary:optional parameter|optional parameters]]//, and the //[[CL:Glossary:keyword]]// and //[[CL:Glossary:rest parameters]]//. The //[[CL:Glossary:argument|arguments]]// supplied to the //[[CL:Glossary:generic function]]// for a particular //[[CL:Glossary:call]]// are also divided into three sections; the required //[[CL:Glossary:argument|arguments]]// section contains as many //[[CL:Glossary:argument|arguments]]// as the //[[CL:Glossary:generic function]]// has //[[CL:Glossary:required parameter|required parameters]]//, the optional //[[CL:Glossary:argument|arguments]]// section contains as many arguments as the //[[CL:Glossary:generic function]]// has //[[CL:Glossary:optional parameter|optional parameters]]//, and the keyword/rest //[[CL:Glossary:argument|arguments]]// section contains the remaining arguments. Each //[[CL:Glossary:parameter]]// in the required and optional sections of the **'':arguments''** //lambda-list// accesses the argument at the same position in the corresponding section of the //[[CL:Glossary:argument|arguments]]//. If the section of the **'':arguments''** //lambda-list// is shorter, extra //[[CL:Glossary:argument|arguments]]// are ignored. If the section of the **'':arguments''** //lambda-list// is longer, excess //[[CL:Glossary:required parameter|required parameters]]// are bound to forms that evaluate to **[[CL:Constant Variables:nil]]** and excess //[[CL:Glossary:optional parameter|optional parameters]]// are //[[CL:Glossary:bound]]// to their initforms. The //[[CL:Glossary:keyword parameters]]// and //[[CL:Glossary:rest parameters]]// in the **'':arguments''** //lambda-list// access the keyword/rest section of the //[[CL:Glossary:argument|arguments]]//. If the **'':arguments''** //lambda-list// contains **''&key''**, it behaves as if it also contained **''&allow-other-keys''**.
 
@@ -108,7 +108,7 @@ Note that two methods with identical specializers, but with different //[[CL:Glo
 If a **define-method-combination** //[[CL:Glossary:form]]// appears as a //[[CL:Glossary:top level form]]//, the //[[CL:Glossary:compiler]]// must make the //[[CL:Glossary:method combination]]// //[[CL:Glossary:name]]// be recognized as a valid //[[CL:Glossary:method combination]]// //[[CL:Glossary:name]]// in subsequent **[[CL:Macros:defgeneric]]** //[[CL:Glossary:form|forms]]//. However, the //[[CL:Glossary:method combination]]// is executed no earlier than when the **define-method-combination** //[[CL:Glossary:form]]// is executed, and possibly as late as the time that //[[CL:Glossary:generic function|generic functions]]// that use the //[[CL:Glossary:method combination]]// are executed.
 
 ====Examples====
-Most examples of the long form of **define-method-combination** also illustrate the use of the related //[[CL:Glossary:functions]]// that are provided as part of the declarative method combination facility.
+Most examples of the long form of **define-method-combination** also illustrate the use of the related //[[CL:Glossary:functions]]// that are provided as part of the declarative //[[CL:Glossary:method combination]]// facility.
 
 <blockquote>
 ;;; TODO: Lock on package COMMON-LISP violated when defining AND
@@ -143,7 +143,7 @@ The equivalent of this example in the long form is:
 </blockquote>
 
 ===Examples of the long form of define-method-combination===
-The default method combination technique.
+The default //[[CL:Glossary:method combination]]// technique.
 
 <blockquote>
 (define-method-combination standard ()
@@ -270,9 +270,9 @@ None.
 The //[[CL:Glossary:compiler]]// is not required to perform any compile-time side-effects.
 
 ====Exceptional Situations====
-Method combination types defined with the short form require exactly one //[[CL:Glossary:qualifier]]// per method. An error of type **[[CL:Types:error]]** is signaled if there are applicable methods with no //[[CL:Glossary:qualifier|qualifiers]]// or with //[[CL:Glossary:qualifier|qualifiers]]// that are not supported by the method combination type. At least one primary method must be applicable or an error of type **[[CL:Types:error]]** is signaled.
+Method combination types defined with the short form require exactly one //[[CL:Glossary:qualifier]]// per method. An error of type **[[CL:Types:error]]** is signaled if there are applicable methods with no //[[CL:Glossary:qualifier|qualifiers]]// or with //[[CL:Glossary:qualifier|qualifiers]]// that are not supported by the //[[CL:Glossary:method combination]]// type. At least one primary method must be applicable or an error of type **[[CL:Types:error]]** is signaled.
 
-If an applicable method does not fall into any method group, the system signals an error of type **[[CL:Types:error]]** indicating that the method is invalid for the kind of method combination in use.
+If an applicable method does not fall into any method group, the system signals an error of type **[[CL:Types:error]]** indicating that the method is invalid for the kind of //[[CL:Glossary:method combination]]// in use.
 
 If the value of the **'':required''** option is //[[CL:Glossary:true]]// and the method group is empty (that is, no applicable methods match the //[[CL:Glossary:qualifier]]// patterns or satisfy the predicate), an error of type **[[CL:Types:error]]** is signaled.
 
@@ -291,6 +291,6 @@ If the **'':order''** option evaluates to a value other than **'':most-specific-
   * {\secref\DocVsDecls}
 
 ====Notes====
-The **'':method-combination''** option of **[[CL:Macros:defgeneric]]** is used to specify that a //[[CL:Glossary:generic function]]// should use a particular method combination type. The first argument to the **'':method-combination''** option is the //[[CL:Glossary:name]]// of a method combination type and the remaining arguments are options for that type.
+The **'':method-combination''** option of **[[CL:Macros:defgeneric]]** is used to specify that a //[[CL:Glossary:generic function]]// should use a particular //[[CL:Glossary:method combination]]// type. The first argument to the **'':method-combination''** option is the //[[CL:Glossary:name]]// of a //[[CL:Glossary:method combination]]// type and the remaining arguments are options for that type.
 
 \issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY} \issue{DECLS-AND-DOC} \issue{METHOD-COMBINATION-ARGUMENTS:CLARIFY} \issue{DOCUMENTATION-FUNCTION-BUGS:FIX} \issue{DEFINE-METHOD-COMBINATION:CLARIFY}

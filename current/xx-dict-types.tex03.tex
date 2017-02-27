@@ -1,0 +1,98 @@
+====== System Class FUNCTION ======
+
+====Class Precedence List==== 
+**function**, **[[CL:Types:t]]**
+
+====Description====
+A //[[CL:Glossary:function]]// is an //[[CL:Glossary:object]]// that represents code to be executed when an appropriate number of arguments is supplied.
+
+A //[[CL:Glossary:function]]// is produced by the [[CL:Special Operators:function]] //[[CL:Glossary:special form]]//, the function **[[CL:Functions:coerce]]**, or the function **[[CL:Functions:compile]]**. A //[[CL:Glossary:function]]// can be directly invoked by using it as the first argument to **[[CL:Functions:funcall]]**, **[[CL:Functions:apply]]**, or **[[CL:Special Operators:multiple-value-call]]**.
+
+====Compound Type Specifier Kind====
+Specializing.
+
+====Compound Type Specifier Syntax====
+**function** [//arg-typespec// [//value-typespec//]]
+
+<blockquote>
+arg-typespec ::= (//typespec//''*''
+                  [''&optional'' //typespec//''*'']
+                  [''&rest'' //typespec//]
+                  [''&key'' (//keyword// //typespec//)''*''])
+</blockquote>
+
+====Compound Type Specifier Arguments====
+  * //typespec// - a //[[CL:Glossary:type specifier]]//.
+  * //value-typespec// - a //[[CL:Glossary:type specifier]]//.
+
+====Compound Type Specifier Description====
+The list form of the **[[CL:Types:function]]** //[[CL:Glossary:type-specifier]]// can be used only for declaration and not for discrimination. Every element of this //[[CL:Glossary:type]]// is
+
+a //[[CL:Glossary:function]]// that accepts arguments of the types specified by the //argj-types// and returns values that are members of the //[[CL:Glossary:types]]// specified by //value-type//. The ''&optional'', ''&rest'', ''&key'', and ''&allow-other-keys'' markers can appear in the list of argument types.
+
+The //[[CL:Glossary:type specifier]]// provided with ''&rest'' is the //[[CL:Glossary:type]]// of each actual argument, not the //[[CL:Glossary:type]]// of the corresponding variable.
+
+The ''&key'' parameters should be supplied as lists of the form **[[CL:Functions:(//keyword// //type//)]]**. The //keyword// must be a valid keyword-name symbol as must be supplied in the actual arguments of a call.
+
+This is usually a //[[CL:Glossary:symbol]]// in the //[[CL:Glossary:package]]// **''keyword''** but can be any //[[CL:Glossary:symbol]]//.
+
+When ''&key'' is given in a **[[CL:Declarations:function]]** //[[CL:Glossary:type specifier]]// //[[CL:Glossary:lambda list]]//, the //[[CL:Glossary:keyword parameters]]// given are exhaustive unless ''&allow-other-keys'' is also present. ''&allow-other-keys'' is an indication that other keyword arguments might actually be supplied and, if supplied, can be used. For example, the //[[CL:Glossary:type]]// of the function **[[CL:Functions:make-list]]** could be declared as follows:
+
+<blockquote> 
+(function (([[CL:Types:integer]] 0) &key (:initial-element [[CL:Constant Variables:t]])) [[CL:Types:list]]) 
+</blockquote>
+
+The //value-type// can be a **[[CL:Declarations:values]]** //[[CL:Glossary:type specifier]]// in order to indicate the //[[CL:Glossary:types]]// of //[[CL:Glossary:multiple values]]//.
+
+Consider a declaration of the following form:
+
+<blockquote> 
+([[CL:Declarations:ftype]] ([[CL:Types:function]] (//arg0-type// //arg1-type// ...) //val-type//) //f//)) 
+</blockquote>
+
+Any //[[CL:Glossary:form]]// ''(//f// //arg0// //arg1// ...)'' within the scope of that declaration is equivalent to the following:
+
+<blockquote> 
+([[CL:Special Operators:the]] //val-type// (//f// ([[CL:Special Operators:the]] //arg0-type// //arg0//) ([[CL:Special Operators:the]] //arg1-type// //arg1//) ...)) 
+</blockquote>
+
+That is, the consequences are undefined if any of the arguments are not of the specified //[[CL:Glossary:types]]// or the result is not of the specified //[[CL:Glossary:type]]//. In particular, if any argument is not of the correct //[[CL:Glossary:type]]//, the result is not guaranteed to be of the specified //[[CL:Glossary:type]]//.
+
+Thus, an **[[CL:Declarations:ftype]]** declaration for a //[[CL:Glossary:function]]// describes //[[CL:Glossary:calls]]// to the //[[CL:Glossary:function]]//, not the actual definition of the //[[CL:Glossary:function]]//.
+
+Consider a declaration of the following form:
+
+<blockquote> 
+([[CL:Declarations:type]] ([[CL:Types:function]] (//arg0-type// //arg1-type// ...) //val-type//) //fn-valued-variable//) 
+</blockquote>
+
+This declaration has the interpretation that, within the scope of the declaration, the consequences are unspecified if the value of //fn-valued-variable// is called with arguments not of the specified //[[CL:Glossary:types]]//; the value resulting from a valid call will be of type //val-type//.
+
+As with variable type declarations, nested declarations imply intersections of //[[CL:Glossary:types]]//, as follows: 
+
+----
+
+Consider the following two declarations of **[[CL:Declarations:ftype]]**:
+
+<blockquote> 
+([[CL:Declarations:ftype]] ([[CL:Types:function]] (//arg0-type1// //arg1-type1// ...) //val-type1//) //f//))
+([[CL:Declarations:ftype]] ([[CL:Types:function]] (//arg0-type2// //arg1-type2// ...) //val-type2//) //f//))
+</blockquote>
+
+If both these declarations are in effect, then within the shared scope of the declarations, calls to **[[CL:Functions:f]]** can be treated as if **[[CL:Functions:f]]** were declared as follows:
+
+<blockquote> 
+([[CL:Declarations:ftype]] ([[CL:Types:function]] (([[CL:Types:and]] //arg0-type1// //arg0-type2//) 
+                  ([[CL:Types:and]] //arg1-type1// //arg1-type2//) 
+                  ...)
+                 ([[CL:Types:and]] //val-type1// //val-type2//))
+       //f//)) 
+</blockquote>
+
+It is permitted to ignore one or all of the **[[CL:Declarations:ftype]]** declarations in force.
+
+-----
+
+If two (or more) type declarations are in effect for a variable, and they are both **[[CL:Functions:function]]** declarations, the declarations combine similarly.
+
+\issue{FUNCTION-TYPE-REST-LIST-ELEMENT:USE-ACTUAL-ARGUMENT-TYPE} \issue{FUNCTION-TYPE-KEY-NAME:SPECIFY-KEYWORD} \issue{KEYWORD-ARGUMENT-NAME-PACKAGE:ANY} \issue{FUNCTION-TYPE-ARGUMENT-TYPE-SEMANTICS:RESTRICTIVE} \issue{FUNCTION-TYPE:X3J13-MARCH-88} \issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91} \issue{FUNCTION-TYPE-KEY-NAME:SPECIFY-KEYWORD}
