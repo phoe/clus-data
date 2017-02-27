@@ -343,55 +343,64 @@ For structures defined with a **'':type''** option, **[[CL:Functions:type-of]]**
 
 Consider the ''binop'' example shown above, modified only to include the **'':named''** option:
 
-<blockquote> (defstruct (binop (:type list) :named) (operator '? :type symbol) operand-1 operand-2) → BINOP </blockquote> As before, this defines a constructor function ''make-binop'' and three selector functions ''binop-operator'', ''binop-operand-1'', and ''binop-operand-2''. It also defines a predicate ''binop-p''. The effect of ''make-binop'' is now to construct a list of length four:
+<blockquote> 
+(defstruct (binop (:type [[CL:Types:list]]) 
+                  :named) 
+  (operator '? :type symbol) 
+  operand-1 
+  operand-2) <r>BINOP </r>
+</blockquote> 
 
-<blockquote> (make-binop :operator '+ :operand-1 'x :operand-2 5) → (BINOP + X 5) (make-binop :operand-2 4 :operator '*) → (BINOP * NIL 4) </blockquote> The structure has the same layout as before except that the structure name ''binop'' is included as the first list element. The selector functions ''binop-operator'', ''binop-operand-1'', and ''binop-operand-2'' are essentially equivalent to **[[CL:Functions:cadr]]**, **[[CL:Functions:caddr]]**, and **[[CL:Functions:cadddr]]**, respectively. The predicate ''binop-p'' is more or less equivalent to this definition:
+As before, this defines a constructor function ''make-binop'' and three selector functions ''binop-operator'', ''binop-operand-1'', and ''binop-operand-2''. It also defines a predicate ''binop-p''. The effect of ''make-binop'' is now to construct a list of length four:
 
-<blockquote> (defun binop-p (x) (and (consp x) (eq (car x) 'binop))) → BINOP-P </blockquote> The name ''binop'' is still not a valid //[[CL:Glossary:type specifier]]// recognizable to **[[CL:Functions:typep]]**, but at least there is a way of distinguishing ''binop'' structures from other similarly defined structures.
+<blockquote> 
+(make-binop :operator '[[CL:Functions:math-add|+]]
+            :operand-1 'x 
+            :operand-2 5) <r>(BINOP [[CL:Functions:math-add|+]] X 5) </r>
+(make-binop :operand-2 4 
+            :operator '[[CL:Functions:math-multiply|*]]) <r>(BINOP [[CL:Functions:math-multiply|*]] [[CL:Constant Variables:NIL]] 4)</r>
+</blockquote> 
 
-\itemitem{**'':predicate''**}
+The structure has the same layout as before except that the structure name ''binop'' is included as the first list element. The selector functions ''binop-operator'', ''binop-operand-1'', and ''binop-operand-2'' are essentially equivalent to **[[CL:Functions:cadr]]**, **[[CL:Functions:caddr]]**, and **[[CL:Functions:cadddr]]**, respectively. The predicate ''binop-p'' is more or less equivalent to this definition:
 
+<blockquote> 
+([[CL:Macros:defun]] binop-p (x) 
+  ([[CL:Macros:and]] ([[CL:Functions:consp]] x) 
+       ([[CL:Functions:eq]] ([[CL:Functions:car]] x) 'binop))) <r>BINOP-P </r>
+</blockquote> 
+
+The name ''binop'' is still not a valid //[[CL:Glossary:type specifier]]// recognizable to **[[CL:Functions:typep]]**, but at least there is a way of distinguishing ''binop'' structures from other similarly defined structures.
+
+===:predicate===
 This option takes one argument, which specifies the name of the type predicate. If the argument is not supplied or if the option itself is not supplied, the name of the predicate is made by concatenating the name of the structure to the string ''"-P"'', interning the name in whatever //[[CL:Glossary:package]]// is current at the time **defstruct** is expanded. If the argument is provided and is **[[CL:Constant Variables:nil]]**, no predicate is defined. A predicate can be defined only if the structure is named; if **'':type''** is supplied and **'':named''** is not supplied, then **'':predicate''** must either be unsupplied or have the value **[[CL:Constant Variables:nil]]**.
 
-\itemitem{**'':print-function''**, **'':print-object''**}
-
-The **'':print-function''** and **'':print-object''**
-
-options specify that a **[[CL:Functions:print-object]]** //[[CL:Glossary:method]]// for //[[CL:Glossary:structures]]// of type //structure-name// should be generated. These options are not synonyms, but do perform a similar service; the choice of which option (**'':print-function''** or **'':print-object''**) is used affects how the function named //printer-name// is called. Only one of these options may be used, and
-
-these options may be used only if **'':type''** is not supplied.
+===:print-function, :print-object===
+The **'':print-function''** and **'':print-object''** options specify that a **[[CL:Functions:print-object]]** //[[CL:Glossary:method]]// for //[[CL:Glossary:structures]]// of type //structure-name// should be generated. These options are not synonyms, but do perform a similar service; the choice of which option (**'':print-function''** or **'':print-object''**) is used affects how the function named //printer-name// is called. Only one of these options may be used, and these options may be used only if **'':type''** is not supplied.
 
 If the **'':print-function''** option is used, then when a structure of type //structure-name// is to be printed, the designated printer function is called on three //[[CL:Glossary:arguments]]//:
-
-\beginlist
-
-\itemitem{--} the structure to be printed (a //[[CL:Glossary:generalized instance]]// of //structure-name//).
-
-\itemitem{--} a //[[CL:Glossary:stream]]// to print to.
-
-\itemitem{--} an //[[CL:Glossary:integer]]// indicating the current depth. The magnitude of this integer may vary between //[[CL:Glossary:implementations]]//; however, it can reliably be compared against **[[CL:Variables:*print-level*]]** to determine whether depth abbreviation is appropriate.
-
-\endlist
+  * the structure to be printed (a //[[CL:Glossary:generalized instance]]// of //structure-name//).
+  * a //[[CL:Glossary:stream]]// to print to.
+  * an //[[CL:Glossary:integer]]// indicating the current depth. The magnitude of this integer may vary between //[[CL:Glossary:implementations]]//; however, it can reliably be compared against **[[CL:Variables:*print-level*]]** to determine whether depth abbreviation is appropriate.
 
 Specifying ''(:print-function //printer-name//)'' is approximately equivalent to specifying:
 
-<blockquote> (defmethod print-object ((object //structure-name//) stream) (funcall (function //printer-name//) object stream \metaparam{current-print-depth})) </blockquote>
+<blockquote> 
+(defmethod print-object ((object //structure-name//) stream) 
+  (funcall (function //printer-name//) object stream //<current-print-depth>//))
+</blockquote>
 
-where the \metaparam{current-print-depth} represents the printer's belief of how deep it is currently printing. It is //[[CL:Glossary:implementation-dependent]]// whether \metaparam{current-print-depth} is always 0 and //*print-level*//, if //[[CL:Glossary:non-nil]]//, is re-bound to successively smaller values as printing descends recursively, or whether //current-print-depth// varies in value as printing descends recursively and //*print-level*// remains constant during the same traversal.
+where the ''//<current-print-depth>//'' represents the printer's belief of how deep it is currently printing. It is //[[CL:Glossary:implementation-dependent]]// whether ''//<current-print-depth>//'' is always 0 and //*print-level*//, if //[[CL:Glossary:non-nil]]//, is re-bound to successively smaller values as printing descends recursively, or whether //current-print-depth// varies in value as printing descends recursively and //*print-level*// remains constant during the same traversal.
 
 If the **'':print-object''** option is used, then when a structure of type //structure-name// is to be printed, the designated printer function is called on two arguments:
-
-\beginlist
-
-\itemitem{--} the structure to be printed.
-
-\itemitem{--} the stream to print to.
-
-\endlist
+  * the structure to be printed.
+  * the stream to print to.
 
 Specifying ''(:print-object //printer-name//)'' is equivalent to specifying:
 
-<blockquote> (defmethod print-object ((object //structure-name//) stream) (funcall (function //printer-name//) object stream)) </blockquote>
+<blockquote> 
+(defmethod print-object ((object //structure-name//) stream) 
+  (funcall (function //printer-name//) object stream)) 
+</blockquote>
 
 If no **'':type''** option is supplied, and if either a **'':print-function''** or a **'':print-object''** option is supplied, and if no //printer-name// is supplied, then a **[[CL:Functions:print-object]]** //[[CL:Glossary:method]]// //[[CL:Glossary:specialized]]// for //structure-name// is generated that calls a function that implements the default printing behavior for structures using ''#S'' notation; see section {\secref\PrintingStructures}.
 
@@ -399,51 +408,47 @@ If neither a **'':print-function''** nor a **'':print-object''** option is suppl
 
 When **[[CL:Variables:*print-circle*]]** is //[[CL:Glossary:true]]//, a user-defined print function can print //[[CL:Glossary:object|objects]]// to the supplied //[[CL:Glossary:stream]]// using **[[CL:Functions:write]]**, **[[CL:Functions:prin1]]**, **[[CL:Functions:princ]]**, or **[[CL:Functions:format]]** and expect circularities to be detected and printed using the ''#''n''#'' syntax. This applies to //[[CL:Glossary:methods]]// on **[[CL:Functions:print-object]]** in addition to **'':print-function''** options. If a user-defined print function prints to a //[[CL:Glossary:stream]]// other than the one that was supplied, then circularity detection starts over for that //[[CL:Glossary:stream]]//. \Seevar{*print-circle*}.
 
-
-
-\itemitem{**'':type''**}
-
+===:type===
 **'':type''** explicitly specifies the representation to be used for the structure. Its argument must be one of these //[[CL:Glossary:types]]//:
 
-\beginlist
-
-\itemitem{**[[CL:Types:vector]]**}
-
-This produces the same result as specifying **[[CL:Functions:(vector t)]]**. The structure is represented as a general //[[CL:Glossary:vector]]//, storing components as vector elements. The first component is vector element 1 if the structure is **'':named''**, and element 0 otherwise.
-
-\reviewer{Barmar: Do any implementations create non-simple vectors?}
-
-\itemitem{''(vector //element-type//)''}
-
-The structure is represented as a (possibly specialized) //[[CL:Glossary:vector]]//, storing components as vector elements. Every component must be of a //[[CL:Glossary:type]]// that can be stored in a //[[CL:Glossary:vector]]// of the //[[CL:Glossary:type]]// specified. The first component is vector element 1 if the structure is **'':named''**, and element 0 otherwise. The structure can be **'':named''** only if the type **[[CL:Types:symbol]]** is a //[[CL:Glossary:subtype]]// of the supplied //element-type//.
-
-\itemitem{**[[CL:Types:list]]**}
-
-The structure is represented as a //[[CL:Glossary:list]]//. The first component is the //[[CL:Glossary:cadr]]// if the structure is **'':named''**, and the //[[CL:Glossary:car]]// if it is not **'':named''**. \endlist
+  * **[[CL:Types:vector]]**: This produces the same result as specifying **[[CL:Functions:(vector t)]]**. The structure is represented as a general //[[CL:Glossary:vector]]//, storing components as vector elements. The first component is vector element 1 if the structure is **'':named''**, and element 0 otherwise.
+  * ''([[CL:Types:vector]] //element-type//)'': The structure is represented as a (possibly specialized) //[[CL:Glossary:vector]]//, storing components as vector elements. Every component must be of a //[[CL:Glossary:type]]// that can be stored in a //[[CL:Glossary:vector]]// of the //[[CL:Glossary:type]]// specified. The first component is vector element 1 if the structure is **'':named''**, and element 0 otherwise. The structure can be **'':named''** only if the type **[[CL:Types:symbol]]** is a //[[CL:Glossary:subtype]]// of the supplied //element-type//.
+  * **[[CL:Types:list]]**: The structure is represented as a //[[CL:Glossary:list]]//. The first component is the //[[CL:Glossary:cadr]]// if the structure is **'':named''**, and the //[[CL:Glossary:car]]// if it is not **'':named''**. 
 
 Specifying this option has the effect of forcing a specific representation and of forcing the components to be stored in the order specified in **defstruct** in corresponding successive elements of the specified representation. It also prevents the structure name from becoming a valid //[[CL:Glossary:type specifier]]// recognizable by **[[CL:Functions:typep]]**.
 
 For example:
 
-<blockquote> (defstruct (quux (:type list) :named) x y) </blockquote>
+<blockquote> 
+(defstruct (quux (:type list) :named)
+  x 
+  y) 
+</blockquote>
 
 should make a constructor that builds a //[[CL:Glossary:list]]// exactly like the one that **[[CL:Functions:list]]** produces, with **[[CL:Functions:quux]]** as its //[[CL:Glossary:car]]//.
 
 If this type is defined:
 
-<blockquote> (deftype quux () '(satisfies quux-p)) </blockquote> then this form
+<blockquote> 
+([[CL:Macros:deftype]] quux () 
+  '(satisfies quux-p)) 
+</blockquote> 
 
-<blockquote> (typep (make-quux) 'quux) </blockquote> should return precisely what this one does
+then this form:
 
-<blockquote> (typep (list 'quux nil nil) 'quux) </blockquote>
+<blockquote> 
+([[CL:Functions:typep]] (make-quux) 'quux) 
+</blockquote> 
 
-If **'':type''** is not supplied,
+should return precisely what this one does:
 
-the structure is represented as an //[[CL:Glossary:object]]// of type **[[CL:Types:structure-object]]**.
+<blockquote> 
+([[CL:Functions:typep]] ([[CL:Functions:list]] 'quux [[CL:Constant Variables:nil]] [[CL:Constant Variables:nil]]) 'quux) 
+</blockquote>
+
+If **'':type''** is not supplied, the structure is represented as an //[[CL:Glossary:object]]// of type **[[CL:Types:structure-object]]**.
 
 **defstruct** without a **'':type''** option defines a //[[CL:Glossary:class]]// with the structure name as its name. The //[[CL:Glossary:metaclass]]// of structure //[[CL:Glossary:instances]]// is **[[CL:Types:structure-class]]**.
-
-\endlist
 
 ------
 
@@ -476,25 +481,127 @@ An example of a structure definition follows:
 
 <blockquote> (defstruct ship x-position y-position x-velocity y-velocity mass) </blockquote> This declares that every ''ship'' is an //[[CL:Glossary:object]]// with five named components. The evaluation of this form does the following:
 
-\beginlist \itemitem{1.} It defines ''ship-x-position'' to be a function of one argument, a ship, that returns the ''x-position'' of the ship; ''ship-y-position'' and the other components are given similar function definitions. These functions are called the //[[CL:Glossary:access]]// functions, as they are used to //[[CL:Glossary:access]]// elements of the structure.
-
-\itemitem{2.} ''ship'' becomes the name of a //[[CL:Glossary:type]]// of which instances of ships are elements. ''ship'' becomes acceptable to **[[CL:Functions:typep]]**, for example; ''(typep x 'ship)'' is //[[CL:Glossary:true]]// if ''x'' is a ship and false if ''x'' is any //[[CL:Glossary:object]]// other than a ship.
-
-\itemitem{3.} A function named ''ship-p'' of one argument is defined; it is a predicate that is //[[CL:Glossary:true]]// if its argument is a ship and is //[[CL:Glossary:false]]// otherwise.
-
-\itemitem{4.} A function called ''make-ship'' is defined that, when invoked, creates a data structure with five components, suitable for use with the //[[CL:Glossary:access]]// functions. Thus executing
-
-<blockquote> ([[CL:Macros:defparameter]] ship2 (make-ship)) </blockquote> sets ''ship2'' to a newly created ''ship'' //[[CL:Glossary:object]]//. One can supply the initial values of any desired component in the call to ''make-ship'' by using keyword arguments in this way:
-
-<blockquote> ([[CL:Macros:defparameter]] ship2 (make-ship :mass *default-ship-mass* :x-position 0 :y-position 0)) </blockquote> This constructs a new ship and initializes three of its components. This function is called the "constructor function" because it constructs a new structure.
-
-\itemitem{5.} A function called ''copy-ship'' of one argument is defined that, when given a ''ship'' //[[CL:Glossary:object]]//, creates a new ''ship'' //[[CL:Glossary:object]]// that is a copy of the given one. This function is called the "copier function." \endlist
-
+  * 1. It defines ''ship-x-position'' to be a function of one argument, a ship, that returns the ''x-position'' of the ship; ''ship-y-position'' and the other components are given similar function definitions. These functions are called the //[[CL:Glossary:access]]// functions, as they are used to //[[CL:Glossary:access]]// elements of the structure.
+  * 2.''ship'' becomes the name of a //[[CL:Glossary:type]]// of which instances of ships are elements. ''ship'' becomes acceptable to **[[CL:Functions:typep]]**, for example; ''([[CL:Functions:typep]] x 'ship)'' is //[[CL:Glossary:true]]// if ''x'' is a ship and false if ''x'' is any //[[CL:Glossary:object]]// other than a ship.
+  * 3. A function named ''ship-p'' of one argument is defined; it is a predicate that is //[[CL:Glossary:true]]// if its argument is a ship and is //[[CL:Glossary:false]]// otherwise.
+  * 4. A function called ''make-ship'' is defined that, when invoked, creates a data structure with five components, suitable for use with the //[[CL:Glossary:access]]// functions. Thus executing ''([[CL:Macros:defparameter]] ship2 (make-ship))'' sets ''ship2'' to a newly created ''ship'' //[[CL:Glossary:object]]//. One can supply the initial values of any desired component in the call to ''make-ship'' by using keyword arguments in this way: ''([[CL:Macros:defparameter]] ship2 (make-ship :mass *default-ship-mass* :x-position 0 :y-position 0))'' This constructs a new ship and initializes three of its components. This function is called the "constructor function" because it constructs a new structure.
+  * 5. A function called ''copy-ship'' of one argument is defined that, when given a ''ship'' //[[CL:Glossary:object]]//, creates a new ''ship'' //[[CL:Glossary:object]]// that is a copy of the given one. This function is called the "copier function."
+  
 **[[CL:Macros:setf]]** can be used to alter the components of a ''ship'':
 
-<blockquote> ([[CL:Macros:setf]] (ship-x-position ship2) 100) </blockquote> This alters the ''x-position'' of ''ship2'' to be ''100''. This works because **defstruct** behaves as if it generates an appropriate **[[CL:Macros:defsetf]]** for each //[[CL:Glossary:access]]// function.
+<blockquote> 
+([[CL:Macros:setf]] (ship-x-position ship2) 100) 
+</blockquote> 
 
-<blockquote> ;;; ;;; Example 1 ;;; define town structure type ;;; area, watertowers, firetrucks, population, elevation are its components ;;; (defstruct town area watertowers (firetrucks 1 :type fixnum) ;an initialized slot population (elevation 5128 :read-only t)) ;a slot that can't be changed → TOWN ;create a town instance ([[CL:Macros:defparameter]] town1 (make-town :area 0 :watertowers 0)) → #S(TOWN...) ;town's predicate recognizes the new instance (town-p town1) → //[[CL:Glossary:true]]// ;new town's area is as specified by make-town (town-area town1) → 0 ;new town's elevation has initial value (town-elevation town1) → 5128 ;setf recognizes reader function ([[CL:Macros:setf]] (town-population town1) 99) → 99 (town-population town1) → 99 ;copier function makes a copy of town1 ([[CL:Macros:defparameter]] town2 (copy-town town1)) → #S(TOWN...) (= (town-population town1) (town-population town2)) → //[[CL:Glossary:true]]// ;since elevation is a read-only slot, its value can be set only ;when the structure is created ([[CL:Macros:defparameter]] town3 (make-town :area 0 :watertowers 3 :elevation 1200)) → #S(TOWN...) ;;; ;;; Example 2 ;;; define clown structure type ;;; this structure uses a nonstandard prefix ;;; (defstruct (clown (:conc-name bozo-)) (nose-color 'red) frizzy-hair-p polkadots) → CLOWN ([[CL:Macros:defparameter]] funny-clown (make-clown)) → #S(CLOWN) ;use non-default reader name (bozo-nose-color funny-clown) → RED (defstruct (klown (:constructor make-up-klown) ;similar def using other (:copier clone-klown) ;customizing keywords (:predicate is-a-bozo-p)) nose-color frizzy-hair-p polkadots) → klown ;custom constructor now exists (fboundp 'make-up-klown) → //[[CL:Glossary:true]]// ;;; ;;; Example 3 ;;; define a vehicle structure type ;;; then define a truck structure type that includes ;;; the vehicle structure ;;; (defstruct vehicle name year (diesel t :read-only t)) → VEHICLE (defstruct (truck (:include vehicle (year 79))) load-limit (axles 6)) → TRUCK ([[CL:Macros:defparameter]] x (make-truck :name 'mac :diesel t :load-limit 17)) → #S(TRUCK...) ;vehicle readers work on trucks (vehicle-name x) → MAC ;default taken from :include clause (vehicle-year x) → 79 (defstruct (pickup (:include truck)) ;pickup type includes truck camper long-bed four-wheel-drive) → PICKUP ([[CL:Macros:defparameter]] x (make-pickup :name 'king :long-bed t)) → #S(PICKUP...) ;:include default inherited (pickup-year x) → 79 ;;; ;;; Example 4 ;;; use of BOA constructors ;;; (defstruct (dfs-boa ;BOA constructors (:constructor make-dfs-boa (a b c)) (:constructor create-dfs-boa (a &optional b (c 'cc) &rest d &aux e (f 'ff)))) a b c d e f) → DFS-BOA ;a, b, and c set by position, and the rest are uninitialized ([[CL:Macros:defparameter]] x (make-dfs-boa 1 2 3)) → #(DFS-BOA...) (dfs-boa-a x) → 1 ;a and b set, c and f defaulted ([[CL:Macros:defparameter]] x (create-dfs-boa 1 2)) → #(DFS-BOA...) (dfs-boa-b x) → 2 (eq (dfs-boa-c x) 'cc) → //[[CL:Glossary:true]]// ;a, b, and c set, and the rest are collected into d ([[CL:Macros:defparameter]] x (create-dfs-boa 1 2 3 4 5 6)) → #(DFS-BOA...) (dfs-boa-d x) → (4 5 6) </blockquote>
+This alters the ''x-position'' of ''ship2'' to be ''100''. This works because **defstruct** behaves as if it generates an appropriate **[[CL:Macros:defsetf]]** for each //[[CL:Glossary:access]]// function.
+
+Example 1:
+
+<blockquote>
+;;; define town structure type 
+;;; area, watertowers, firetrucks, population, elevation are its components
+(defstruct town 
+  area 
+  watertowers 
+  (firetrucks 1 :type fixnum) ;an initialized slot population 
+  (elevation 5128 :read-only t)) ;a slot that can't be changed 
+<r>TOWN </r>
+;;; create a town instance 
+([[CL:Macros:defparameter]] *town1* (make-town :area 0 :watertowers 0)) <r>*TOWN1*</r>
+*town1* <r>#S(TOWN...) </r>
+;;; town's predicate recognizes the new instance 
+(town-p *town1*) <r>//[[CL:Glossary:true]]// </r>
+;;; new town's area is as specified by make-town 
+(town-area *town1*) <r>0 </r>
+;;; new town's elevation has initial value 
+(town-elevation *town1*) <r>5128 </r>
+;;; setf recognizes reader function 
+([[CL:Macros:setf]] (town-population *town1*) 99) <r>99 </r>
+(town-population *town1*) <r>99 </r>
+;;; copier function makes a copy of *town1* 
+([[CL:Macros:defparameter]] *town2* (copy-town *town1*)) <r>*TOWN2*</r>
+(= (town-population *town1*) (town-population *town2*)) <r>//[[CL:Glossary:true]]//</r>
+;;; since elevation is a read-only slot, its value can be set only 
+;;; when the structure is created 
+([[CL:Macros:defparameter]] *town3* (make-town :area 0 :watertowers 3 :elevation 1200)) <r>*TOWN3*</r>
+</blockquote>
+
+Example 2:
+
+<blockquote>
+;;; define clown structure type 
+;;; this structure uses a nonstandard prefix 
+(defstruct (clown (:conc-name bozo-)) 
+  (nose-color 'red) 
+  frizzy-hair-p 
+  polkadots) <r>CLOWN </r>
+([[CL:Macros:defparameter]] *funny-clown* (make-clown)) *FUNNY-CLOWN*
+*funny-clown* <r>#S(CLOWN) </r>
+;;; use non-default reader name 
+(bozo-nose-color *funny-clown*) <r>RED </r>
+(defstruct (klown (:constructor make-up-klown) ;similar def using other
+                  (:copier clone-klown) ;customizing keywords 
+                  (:predicate is-a-bozo-p))
+  nose-color 
+  frizzy-hair-p 
+  polkadots) <r>klown </r>
+;;; custom constructor now exists 
+([[CL:Functions:fboundp]] 'make-up-klown) <r>//[[CL:Glossary:true]]// </r>
+</blockquote>
+
+Example 3:
+
+<blockquote>
+;;; define a vehicle structure type 
+;;; then define a truck structure type that includes 
+;;; the vehicle structure 
+(defstruct vehicle 
+  name 
+  year 
+  (diesel t :read-only t)) <r>VEHICLE</r>
+(defstruct (truck (:include vehicle (year 79))) 
+  load-limit 
+  (axles 6)) <r>TRUCK</r>
+([[CL:Macros:defparameter]] *x* 
+  (make-truck :name 'mac 
+              :diesel t 
+              :load-limit 17)) <r>*X*</r>
+*x* <r>#S(TRUCK...)</r>
+;;; vehicle readers work on trucks 
+(vehicle-name *x*) <r>MAC </r>
+;;; default taken from :include clause 
+(vehicle-year *x*) <r>79 </r>
+(defstruct (pickup (:include truck)) ;pickup type includes truck 
+  camper 
+  long-bed 
+  four-wheel-drive) <r>PICKUP</r>
+([[CL:Macros:defparameter]] *y* 
+  (make-pickup :name 'king 
+               :long-bed t)) <r>*Y*</r>
+*y* <r>#S(PICKUP...)</r>
+;;; :include default inherited 
+(pickup-year *y*) <r>79 </r>
+</blockquote>
+
+Example 4:
+
+<blockquote>
+;;; use of BOA constructors 
+(defstruct (dfs-boa ;BOA constructors 
+                    (:constructor make-dfs-boa (a b c)) 
+                    (:constructor create-dfs-boa 
+                      (a &optional b (c 'cc) &rest d &aux e (f 'ff)))) 
+  a b c d e f) <r>DFS-BOA </r>
+;;; a, b, and c set by position, and the rest are uninitialized 
+([[CL:Macros:defparameter]] *x* (make-dfs-boa 1 2 3)) <r>*X*</r>
+(dfs-boa-a *x*) <r>1 ;a and b set, c and f defaulted </r>
+([[CL:Macros:defparameter]] *y* (create-dfs-boa 1 2)) <r>*Y*</r>
+(dfs-boa-b *y*) <r>2 </r>
+([[CL:Functions:eq]] (dfs-boa-c *y*) 'cc) <r>//[[CL:Glossary:true]]// </r>
+;;; a, b, and c set, and the rest are collected into d 
+([[CL:Macros:defparameter]] *z* (create-dfs-boa 1 2 3 4 5 6)) <r>*Z*</r>
+(dfs-boa-d *z*) <r>(4 5 6) </r>
+</blockquote>
 
 ====Affected By====
 None.
