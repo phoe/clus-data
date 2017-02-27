@@ -1,52 +1,45 @@
 ====== Macro DEFTYPE ======
 
 ====Syntax====
-\DefmacWithValues deftype {name lambda-list {\DeclsAndDoc} \starparam{form}} {name}
+  * **deftype** //name// //lambda-list// <nowiki>[[</nowiki>//declaration//''*'' | //documentation//<nowiki>]]</nowiki> //form//''*'' → //name//
 
 ====Arguments and Values====
 //name// - a //[[CL:Glossary:symbol]]//.
-
 //lambda-list// - a //[[CL:Glossary:deftype lambda list]]//.
-
-//declaration// - a \misc{declare} //[[CL:Glossary:expression]]//; \noeval.
-
-//documentation// - a //[[CL:Glossary:string]]//; \noeval.
-
+//declaration// - a **[[CL:Symbols:declare]]** //[[CL:Glossary:expression]]//; not evaluated.
+//documentation// - a //[[CL:Glossary:string]]//; not evaluated.
 //form// - a //[[CL:Glossary:form]]//.
 
 ====Description====
-**[[CL:Functions:deftype]]** defines a //[[CL:Glossary:derived type specifier]]// named //name//.
+**deftype** defines a //[[CL:Glossary:derived type specifier]]// named //name//.
 
-The meaning of the new //[[CL:Glossary:type specifier]]// is given in terms of
+The meaning of the new //[[CL:Glossary:type specifier]]// is given in terms of a function which expands the //[[CL:Glossary:type specifier]]// into another //[[CL:Glossary:type specifier]]//, which itself will be expanded if it contains references to another //[[CL:Glossary:derived type specifier]]//.
 
-a function which expands the //[[CL:Glossary:type specifier]]// into another //[[CL:Glossary:type specifier]]//, which itself will be expanded if it contains references to another //[[CL:Glossary:derived type specifier]]//.
+The newly defined //[[CL:Glossary:type specifier]]// may be referenced as a list of the form ''(//name// //arg<sub>1</sub>// //arg<sub>2</sub>// ...)''. The number of arguments must be appropriate to the //lambda-list//. If the new //[[CL:Glossary:type specifier]]// takes no arguments, or if all of its arguments are optional, the //[[CL:Glossary:type specifier]]// may be used as an //[[CL:Glossary:atomic type specifier]]//.
 
-The newly defined //[[CL:Glossary:type specifier]]// may be referenced as a list of the form {\tt (//name// \param{arg''<sub>1</sub>''} \param{arg''<sub>2</sub>''} ...)\/}. The number of arguments must be appropriate to the //lambda-list//. If the new //[[CL:Glossary:type specifier]]// takes no arguments, or if all of its arguments are optional, the //[[CL:Glossary:type specifier]]// may be used as an //[[CL:Glossary:atomic type specifier]]//.
+The //[[CL:Glossary:argument]]// //[[CL:Glossary:expressions]]// to the //[[CL:Glossary:type specifier]]//, ''arg<sub>1</sub> ... arg<sub>n</sub>'', are not //[[CL:Glossary:evaluated]]//. Instead, these //[[CL:Glossary:literal objects]]// become the //[[CL:Glossary:object|objects]]// to which corresponding //[[CL:Glossary:parameters]]// become //[[CL:Glossary:bound]]//.
 
-The //[[CL:Glossary:argument]]// //[[CL:Glossary:expressions]]// to the //[[CL:Glossary:type specifier]]//, \param{arg''<sub>1</sub>''} ''\ldots'' \param{arg''<sub>n</sub>''}, are not //[[CL:Glossary:evaluated]]//. Instead, these //[[CL:Glossary:literal objects]]// become the //[[CL:Glossary:object|objects]]// to which corresponding //[[CL:Glossary:parameters]]// become //[[CL:Glossary:bound]]//.
+The body of the **deftype** //[[CL:Glossary:form]]// (but not the //lambda-list//) is implicitly enclosed in a //[[CL:Glossary:block]]// named //name//, and is evaluated as an //[[CL:Glossary:implicit progn]]//, returning a new //[[CL:Glossary:type specifier]]//.
 
-The body of the **[[CL:Functions:deftype]]** //[[CL:Glossary:form]]//
-
-(but not the //lambda-list//)
-
-is
-
-implicitly enclosed in a //[[CL:Glossary:block]]// named //name//,
-
-and is evaluated as an //[[CL:Glossary:implicit progn]]//, returning a new //[[CL:Glossary:type specifier]]//.
-
-The //[[CL:Glossary:lexical environment]]// of the body is the one which was current at the time the **[[CL:Macros:deftype]]** form was evaluated, augmented by the //[[CL:Glossary:variables]]// in the //lambda-list//.
+The //[[CL:Glossary:lexical environment]]// of the body is the one which was current at the time the **deftype** form was evaluated, augmented by the //[[CL:Glossary:variables]]// in the //lambda-list//.
 
 Recursive expansion of the //[[CL:Glossary:type specifier]]// returned as the expansion must terminate, including the expansion of //[[CL:Glossary:type specifiers]]// which are nested within the expansion.
 
 The consequences are undefined if the result of fully expanding a //[[CL:Glossary:type specifier]]// contains any circular structure, except within the //[[CL:Glossary:object|objects]]// referred to by **[[CL:Types:member]]** and **[[CL:Types:eql]]** //[[CL:Glossary:type specifiers]]//.
 
-//Documentation// is attached to //name// as a //[[CL:Glossary:documentation string]]// of kind \misc{type}.
+//documentation// is attached to //name// as a //[[CL:Glossary:documentation string]]// of kind **[[CL:Types:type]]**.
 
-If a **[[CL:Macros:deftype]]** //[[CL:Glossary:form]]// appears as a //[[CL:Glossary:top level form]]//, the //[[CL:Glossary:compiler]]// must ensure that the //name// is recognized in subsequent //[[CL:Glossary:type]]// declarations. The //[[CL:Glossary:programmer]]// must ensure that the body of a **[[CL:Macros:deftype]]** form can be //[[CL:Glossary:evaluated]]// at compile time if the //name// is referenced in subsequent //[[CL:Glossary:type]]// declarations. If the expansion of a //[[CL:Glossary:type specifier]]// is not defined fully at compile time (perhaps because it expands into an unknown //[[CL:Glossary:type specifier]]// or a \declref{satisfies} of a named //[[CL:Glossary:function]]// that isn't defined in the compile-time environment), an //[[CL:Glossary:implementation]]// may ignore any references to this //[[CL:Glossary:type]]// in declarations and/or signal a warning.
+If a **deftype** //[[CL:Glossary:form]]// appears as a //[[CL:Glossary:top level form]]//, the //[[CL:Glossary:compiler]]// must ensure that the //name// is recognized in subsequent //[[CL:Glossary:type]]// declarations. The //[[CL:Glossary:programmer]]// must ensure that the body of a **deftype** form can be //[[CL:Glossary:evaluated]]// at compile time if the //name// is referenced in subsequent //[[CL:Glossary:type]]// declarations. If the expansion of a //[[CL:Glossary:type specifier]]// is not defined fully at compile time (perhaps because it expands into an unknown //[[CL:Glossary:type specifier]]// or a **[[CL:Declarations:satisfies]]** of a named //[[CL:Glossary:function]]// that isn't defined in the compile-time environment), an //[[CL:Glossary:implementation]]// may ignore any references to this //[[CL:Glossary:type]]// in declarations and/or signal a warning.
 
 ====Examples====
-<blockquote> (defun equidimensional (a) (or (< (array-rank a) 2) (apply #'= (array-dimensions a)))) → EQUIDIMENSIONAL (deftype square-matrix (&optional type size) `(and (array ,type (,size ,size)) (satisfies equidimensional))) → SQUARE-MATRIX </blockquote>
+<blockquote>
+([[CL:Macros:defun]] equidimensional (a) 
+  ([[CL:Macros:or]] ([[CL:Functions:math-less|<]] ([[CL:Functions:array-rank]] a) 2)
+      ([[CL:Functions:apply]] #'[[CL:Functions:math-equal|=]] ([[CL:Functions:array-dimensions]] a)))) <r>EQUIDIMENSIONAL </r>
+(deftype square-matrix (&optional type size) 
+  `([[CL:Types:and]] ([[CL:Types:array]] ,type (,size ,size)) 
+        ([[CL:Types:satisfies]] equidimensional))) <r>SQUARE-MATRIX</r>
+</blockquote>
 
 ====Side Effects====
 None.
@@ -58,7 +51,11 @@ None.
 None.
 
 ====See Also====
-\misc{declare}, **[[CL:Macros:defmacro]]**, **[[CL:Functions:documentation]]**, {\secref\TypeSpecifiers}, {\secref\DocVsDecls}
+  * **[[CL:Symbols:declare|Symbol DECLARE]]**
+  * **[[CL:Macros:defmacro|Macro DEFMACRO]]**
+  * **[[CL:Functions:documentation|Generic Function DOCUMENTATION]]**
+  * {\secref\TypeSpecifiers}
+  * {\secref\DocVsDecls}
 
 ====Notes====
 None.
