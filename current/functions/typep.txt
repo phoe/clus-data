@@ -1,0 +1,64 @@
+====== Function TYPEP ======
+
+====Syntax====
+  * **typep** //object// //type-specifier// ''&optional'' //environment// → //generalized-boolean//
+
+====Arguments and Values====
+  * //object// - an //[[CL:Glossary:object]]//.
+  * //type-specifier// - any //[[CL:Glossary:type specifier]]// that is neither **[[CL:Types:values]]** nor a //[[CL:Glossary:type specifier]]// list whose first element is either **[[CL:Types:function]]** or **[[CL:Types:values]]**.
+  * //environment// - an //[[CL:Glossary:environment]]// //[[CL:Glossary:object]]//. The default is **[[CL:Constant Variables:nil]]**, denoting the //[[CL:Glossary:null lexical environment]]// and the and current //[[CL:Glossary:global environment]]//.
+  * //generalized-boolean// - a //[[CL:Glossary:generalized boolean]]//.
+
+====Description====
+Returns //[[CL:Glossary:true]]// if //object// is of the //[[CL:Glossary:type]]// specified by //type-specifier//; otherwise, returns //[[CL:Glossary:false]]//.
+
+A //type-specifier// of the form ''([[CL:Types:satisfies]] //fn//)'' is handled by applying the function //fn// to //object//.
+
+''(typep //object// '([[CL:Types:array]] //type-specifier//))'', where //type-specifier// is not ''*'', returns //[[CL:Glossary:true]]// if and only if //object// is an //[[CL:Glossary:array]]// that could be the result of supplying //type-specifier// as the **'':element-type''** argument to **[[CL:Functions:make-array]]**. ''([[CL:Types:array]] *)'' refers to all //[[CL:Glossary:array|arrays]]// regardless of element type, while ''([[CL:Types:array]] //type-specifier//)'' refers only to those //[[CL:Glossary:array|arrays]]// that can result from giving //type-specifier// as the **'':element-type''** argument to **[[CL:Functions:make-array]]**. A similar interpretation applies to ''([[CL:Types:simple-array]] //type-specifier//)'' and ''([[CL:Types:vector]] //type-specifier//)''. see section {\secref\ArrayUpgrading}.
+
+''(typep //object// '([[CL:Types:complex]] //type-specifier//))'' returns //[[CL:Glossary:true]]// for all //[[CL:Glossary:complex]]// numbers that can result from giving //[[CL:Glossary:numbers]]// of type //type-specifier// to the function **[[CL:Functions:complex]]**, plus all other //[[CL:Glossary:complex]]// numbers of the same specialized representation. Both the real and the imaginary parts of any such //[[CL:Glossary:complex]]// number must satisfy ''(typep //realpart// '//type-specifier//)'' and ''(typep //imagpart// '//type-specifier//)''; see the //[[CL:Glossary:function]]// **[[CL:Functions:upgraded-complex-part-type]]**.
+
+====Examples====
+<blockquote> 
+(typep 12 '[[CL:Types:integer]]) <r>//[[CL:Glossary:true]]// </r>
+(typep ([[CL:Functions:math-one-plus|1+]] [[CL:Constant Variables:most-positive-fixnum]]) '[[CL:Types:fixnum]]) <r>//[[CL:Glossary:false]]// </r>
+(typep [[CL:Constant Variables:nil]] [[CL:Types:t]]) <r>//[[CL:Glossary:true]]// </r>
+(typep [[CL:Constant Variables:nil]] [[CL:Types:nil]]) <r>//[[CL:Glossary:false]]// </r>
+(typep 1 '([[CL:Types:mod]] 2)) <r>//[[CL:Glossary:true]]// </r>
+(typep #c(1 1) '([[CL:Types:complex]] ([[CL:Types:eql]] 1))) <r>//[[CL:Glossary:true]]// </r>
+</blockquote> 
+
+To understand this next example, you might need to refer to \secref\RuleOfCanonRepForComplexRationals.
+
+<blockquote> 
+(typep #c(0 0) '([[CL:Types:complex]] ([[CL:Types:eql]] 0))) <r>//[[CL:Glossary:false]]// </r>
+</blockquote>
+
+Let ''A<sub>x</sub>'' and ''A<sub>y</sub>'' be two //[[CL:Glossary:type specifier|type specifiers]]// that denote different //[[CL:Glossary:types]]//, but for which ''([[CL:Functions:upgraded-array-element-type]] 'A<sub>x</sub>)'' and ''([[CL:Functions:upgraded-array-element-type]] 'A<sub>y</sub>)'' denote the same //[[CL:Glossary:type]]//. Notice that:
+
+<blockquote> 
+(typep ([[CL:Functions:make-array]] 0 :element-type '//A<sub>x</sub>//) '([[CL:Types:array]] //A<sub>x</sub>//)) <r>//[[CL:Glossary:true]]// </r>
+(typep ([[CL:Functions:make-array]] 0 :element-type '//A<sub>y</sub>//) '([[CL:Types:array]] //A<sub>y</sub>//)) <r>//[[CL:Glossary:true]]// </r>
+(typep ([[CL:Functions:make-array]] 0 :element-type '//A<sub>x</sub>//) '([[CL:Types:array]] //A<sub>y</sub>//)) <r>//[[CL:Glossary:true]]//</r>
+(typep ([[CL:Functions:make-array]] 0 :element-type '//A<sub>y</sub>//) '([[CL:Types:array]] //A<sub>x</sub>//)) <r>//[[CL:Glossary:true]]//</r>
+</blockquote>
+
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+An error of type **[[CL:Types:error]]** is signaled if //type-specifier// is **[[CL:Types:values]]**, or a //[[CL:Glossary:type specifier]]// list whose first element is either **[[CL:Types:function]]** or **[[CL:Types:values]]**.
+
+The consequences are undefined if the //type-specifier// is not a //[[CL:Glossary:type specifier]]//.
+
+====See Also====
+  * **[[CL:Functions:type-of|Function TYPE-OF]]**
+  * **[[CL:Functions:upgraded-array-element-type|Function UPGRADED-ARRAY-ELEMENT-TYPE]]**
+  * **[[CL:Functions:upgraded-complex-part-type|Function UPGRADED-COMPLEX-PART-TYPE]]**
+  * {\secref\TypeSpecifiers}
+
+====Notes====
+//[[CL:Glossary:implementation|Implementations]]// are encouraged to recognize and optimize the case of ''(typep //x// ([[CL:Special Operators:the]] [[CL:Types:class]] //y//))'', since it does not involve any need for expansion of **[[CL:Macros:deftype]]** information at runtime.
+
+\issue{SUBTYPEP-ENVIRONMENT:ADD-ARG} \issue{FUNCTION-TYPE} \issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING} \issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}

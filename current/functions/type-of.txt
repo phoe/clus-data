@@ -1,0 +1,72 @@
+====== Function TYPE-OF ======
+
+====Syntax====
+  * **type-of** //object// → //typespec//
+
+====Arguments and Values====
+  * //object// - an //[[CL:Glossary:object]]//.
+  * //typespec// - a //[[CL:Glossary:type specifier]]//.
+
+====Description====
+Returns a //[[CL:Glossary:type specifier]]//, //typespec//, for a //[[CL:Glossary:type]]// that has the //object// as an //[[CL:Glossary:element]]//. The //typespec// satisfies the following:
+
+  * 1. For any //object// that is an //[[CL:Glossary:element]]// of some //[[CL:Glossary:built-in type]]//:
+    * a. the //[[CL:Glossary:type]]// returned is a //[[CL:Glossary:recognizable subtype]]// of that //[[CL:Glossary:built-in type]]//.
+    * b. the //[[CL:Glossary:type]]// returned does not involve **[[CL:Types:and]]**, **[[CL:Types:eql]]**, **[[CL:Types:member]]**, **[[CL:Types:not]]**, **[[CL:Types:or]]**, **[[CL:Types:satisfies]]**, or **[[CL:Types:values]]**. 
+  * 2. For all //objects//, ''([[CL:Functions:typep]] //object// (type-of //object//))'' returns //[[CL:Glossary:true]]//. Implicit in this is that //[[CL:Glossary:type specifiers]]// which are not valid for use with **[[CL:Functions:typep]]**, such as the //[[CL:Glossary:list]]// form of the **[[CL:Functions:function]]** //[[CL:Glossary:type specifier]]//, are never returned by **[[CL:Functions:type-of]]**.
+  * 3. The //[[CL:Glossary:type]]// returned by **[[CL:Functions:type-of]]** is always a //[[CL:Glossary:recognizable subtype]]// of the //[[CL:Glossary:class]]// returned by **[[CL:Functions:class-of]]**. That is:
+
+<blockquote> 
+([[CL:Functions:subtypep]] (type-of //object//) ([[CL:Functions:class-of]] //object//)) 
+<r>//[[CL:Glossary:true]]//
+//[[CL:Glossary:true]]//</r>
+</blockquote>
+
+  * 4. For //objects// of metaclass **[[CL:Types:structure-class]]** or **[[CL:Types:standard-class]]**, and for //[[CL:Glossary:conditions]]//, **[[CL:Functions:type-of]]** returns the //[[CL:Glossary:proper name]]// of the //[[CL:Glossary:class]]// returned by **[[CL:Functions:class-of]]** if it has a //[[CL:Glossary:proper name]]//, and otherwise returns the //[[CL:Glossary:class]]// itself. In particular, for //objects// created by the constructor function of a structure defined with **[[CL:Macros:defstruct]]** without a **'':type''** option, **[[CL:Functions:type-of]]** returns the structure name; and for //objects// created by **[[CL:Functions:make-condition]]**, the //typespec// is the //[[CL:Glossary:name]]// of the //[[CL:Glossary:condition]]// //[[CL:Glossary:type]]//.
+  * 5. For each of the //[[CL:Glossary:types]]// **[[CL:Types:short-float]]**, **[[CL:Types:single-float]]**, **[[CL:Types:double-float]]**, or **[[CL:Types:long-float]]** of which the //object// is an //[[CL:Glossary:element]]//, the //typespec// is a //[[CL:Glossary:recognizable subtype]]// of that //[[CL:Glossary:type]]//.
+
+====Examples====
+<blockquote> 
+(type-of 'a) <r>[[CL:Types:SYMBOL]] </r>
+(type-of '(1 . 2)) <r>[[CL:Types:CONS]] </r>
+<r>//or// ([[CL:Types:CONS]] [[CL:Types:FIXNUM]] [[CL:Types:FIXNUM]]) </r>
+(type-of #c(0 1)) <r>[[CL:Types:COMPLEX]] </r>
+<r>//or// ([[CL:Types:COMPLEX]] [[CL:Types:INTEGER]]) </r>
+([[CL:Macros:defstruct]] temp-struct x y z) <r>TEMP-STRUCT </r>
+(type-of (make-temp-struct)) <r>TEMP-STRUCT </r>
+(type-of "abc") <r>[[CL:Types:STRING]] </r>
+<r>//or// ([[CL:Types:STRING]] 3) </r>
+([[CL:Functions:subtypep]] (type-of "abc") '[[CL:Types:string]]) <r>//[[CL:Glossary:true]]//
+//[[CL:Glossary:true]]// </r>
+(type-of ([[CL:Functions:expt]] 2 40)) <r>[[CL:Types:BIGNUM]] </r>
+<r>//or// [[CL:Types:INTEGER]] </r>
+<r>//or// ([[CL:Types:INTEGER]] 1099511627776 1099511627776) </r>
+<r>//or// SYSTEM::TWO-WORD-BIGNUM </r>
+<r>//or// [[CL:Types:FIXNUM]] </r>
+([[CL:Functions:subtypep]] (type-of 112312) '[[CL:Types:integer]]) <r>//[[CL:Glossary:true]]//
+//[[CL:Glossary:true]]// </r>
+([[CL:Macros:defvar]] *foo* 
+  ([[CL:Functions:make-array]] 5 :element-type t)) <r>*FOO* </r>
+([[CL:Functions:class-name]] ([[CL:Functions:class-of]] *foo*)) <r>[[CL:Types:VECTOR]] </r>
+(type-of *foo*) <r>[[CL:Types:VECTOR]] </r>
+<r>//or// ([[CL:Types:VECTOR]] [[CL:Types:T]] 5) </r>
+</blockquote>
+
+====Affected By====
+None.
+
+====Exceptional Situations====
+None.
+
+====See Also====
+  * **[[CL:Functions:array-element-type|Function ARRAY-ELEMENT-TYPE]]**
+  * **[[CL:Functions:class-of|Function CLASS-OF]]**
+  * **[[CL:Macros:defstruct|Macro DEFSTRUCT]]**
+  * **[[CL:Macros:typecase|Macro TYPECASE]]**
+  * **[[CL:Functions:typep|Function TYPEP]]**
+  * {\secref\Types}
+
+====Notes====
+Implementors are encouraged to arrange for **[[CL:Functions:type-of]]** to return a portable value.
+
+\issue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS} \issue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS} \issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND} \issue{TYPE-OF-AND-PREDEFINED-CLASSES:TYPE-OF-HANDLES-FLOATS} \issue{TYPE-OF-UNDERCONSTRAINED:ADD-CONSTRAINTS}
