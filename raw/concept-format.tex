@@ -1,0 +1,1922 @@
+% -*- Mode: TeX -*-
+%% Formatted Output
+
+\issue{PRETTY-PRINT-INTERFACE}
+\editornote{KMP: This is transplanted from FORMAT and will need a bit of work before
+ it looks good standing alone. Bear with me.}
+
+%% 22.3.1 21
+\funref{format} is useful for producing nicely formatted text, producing
+good-looking messages, and so on.  \funref{format} can generate and return
+a \term{string} or output to \param{destination}.
+
+The \param{control-string} argument to \funref{format} is actually a \term{format control}.
+% It can be any function at all that does the right things with its
+% arguments.  --sjl 16 Mar 92
+%That is, it can be either a \term{format string} or a \term{function} that was returned
+That is, it can be either a \term{format string} or a \term{function},
+for example a \term{function} returned
+by the \macref{formatter} \term{macro}.
+
+If it is a \term{function}, the \term{function} is called with the appropriate
+output stream as its first argument and the data arguments to \funref{format}
+as its remaining arguments.  The function should perform whatever output is 
+necessary and return the unused tail of the arguments (if any).
+
+The compilation process performed by \macref{formatter} produces a \term{function}
+that would do with its \term{arguments} as the \funref{format} interpreter
+would do with those \term{arguments}.
+
+The remainder of this section describes what happens if the \param{control-string}
+is a \term{format string}.  
+\endissue{PRETTY-PRINT-INTERFACE}
+
+
+% Removed redundant text --sjl 16 Mar 92
+%%% 22.3.2 6
+%\funref{format} produces formatted output by outputting the characters
+%of \param{control-string} and observing that a \term{tilde}
+%introduces a directive.  The character after the tilde, possibly preceded 
+%by prefix parameters and modifiers, specifies what kind of formatting 
+%is desired.  
+
+\param{Control-string} is composed of simple text (\term{characters}) 
+and embedded directives.
+
+%% 22.3.3 7
+\funref{format} writes the simple text as is;
+each embedded directive specifies further text output 
+that is to appear at the corresponding point within the simple text.  
+Most directives use one or more elements of \param{args} to
+create their output.
+
+%% 22.3.3 9
+A directive consists of a \term{tilde},
+optional prefix parameters
+separated by commas, optional \term{colon} and \term{at-sign} modifiers,
+and a single character indicating what kind of directive this is.
+\issue{FORMAT-ATSIGN-COLON}
+There is no required ordering between the \term{at-sign} and \term{colon} modifier.
+\endissue{FORMAT-ATSIGN-COLON}
+The \term{case} of the directive character is ignored.
+Prefix parameters are notated as signed (sign is optional) decimal numbers,
+or as a \term{single-quote} followed by a character.
+For example, \f{~5,'0d} can be used
+to print an \term{integer} 
+in decimal radix in five columns with leading zeros,
+or \f{~5,'*d} to get leading asterisks.
+
+%% 22.3.2 10
+In place of a prefix parameter to a directive, \f{V} (or \f{v}) can be used. 
+In this case, \funref{format} takes an argument from \param{args} as a parameter to
+the directive.  The argument should be an \term{integer} or \term{character}.
+If the \param{arg} used by a \f{V} parameter is \nil,
+the effect is as if the parameter had been omitted.
+\f{\#} can be used in place of a prefix parameter; it
+represents the number of \param{args} remaining to be processed.
+When used within a recursive format, in the context of \f{~?} or \f{~\{},
+the \f{\#} prefix parameter represents the number of \term{format arguments}
+remaining within the recursive call.
+
+Examples of \term{format strings}:
+
+\showtwo{Examples of format control strings}{
+\f{"~S"}       & ;This is an S directive with no parameters or modifiers.       \cr
+\f{"~3,-4:@s"} & ;This is an S directive with two parameters, \f{3} and \f{-4}, \cr
+ 	       & ; and both the \term{colon} and \term{at-sign} flags.          \cr
+\f{"~,+4S"}    & ;Here the first prefix parameter is omitted and takes          \cr
+ 	       & ; on its default value, while the second parameter is \f{4}.   \cr
+}
+
+\funref{format} sends the output to \param{destination}.
+If \param{destination} is \nil,
+\funref{format} creates and returns a \term{string} 
+containing the output from \param{control-string}.
+If \param{destination} is \term{non-nil}, 
+it must be a \term{string} with a \term{fill pointer}, 
+a \term{stream}, or the symbol \t.
+If \param{destination} is a \term{string} with a \term{fill pointer}, 
+the output is added to the end of the \term{string}. 
+If \param{destination} is a \term{stream}, 
+the output is sent to that \term{stream}. 
+If \param{destination} is \t,
+the output is sent to \term{standard output}.
+
+%% 22.3.2 8 
+%%(left out)
+
+
+%% 22.3.2 15
+In the description of the directives that follows,
+the term \j{arg} in general
+refers to the next item of the set of \param{args} to be processed.
+The word or phrase at the beginning of each description is a mnemonic
+for the directive.
+\issue{FORMAT-PRETTY-PRINT:YES}
+\funref{format} directives do not bind any of the printer control
+variables (\varref{*print-...*}) except as specified in the following
+descriptions.
+   Implementations may specify the binding of new, implementation-specific 
+printer control variables for each \funref{format} directive, but they
+    may neither bind any standard printer control variables not
+    specified in description of a \funref{format} 
+directive nor fail to bind
+    any standard printer control variables as specified in the
+    description.
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+% This section needs a lot of work on fonts.  Maybe all the syntax parts
+% of the format directives should use \param instead of \i.  Or change the
+% \i{foo} to \i{foo\/} to fix kerning problems.
+%
+% I decided to make a \j{...} which is \i{...\/} instead.
+% It's not pretty but it's fast and I'm out of time. -kmp 30-Aug-93.
+
+\beginsubsection{FORMAT Basic Output}
+
+\beginsubsubsection{Tilde C: Character}
+\idxtext{C (format directive)}\idxtext{Tilde C (format directive)}
+
+
+%% 22.3.2 38   
+               
+The next \j{arg} should be a \term{character}; 
+it is printed
+according to the modifier flags.
+
+
+%% 22.3.2 39
+\issue{FORMAT-OP-C}
+\f{~C} prints the \term{character} 
+as if by using \funref{write-char} if it is a \term{simple character}.
+\term{Characters} that are not \term{simple}
+are not necessarily printed as if by \funref{write-char},
+but are displayed in an \term{implementation-defined}, abbreviated format.
+For example,
+
+\code
+ (format nil "~C" #\\A) \EV "A"
+ (format nil "~C" #\\Space) \EV " "
+\endcode
+\endissue{FORMAT-OP-C}
+
+%% 22.3.2 40
+\f{~:C} is the same as \f{~C} for \term{printing} \term{characters},
+but other \term{characters} are ``spelled out.''  The intent is that this
+is a ``pretty'' format for printing characters.
+For \term{simple} \term{characters} that are not \term{printing},
+what is spelled out is the \term{name} of the \term{character} (see \funref{char-name}).
+For \term{characters} that are not \term{simple} and not \term{printing},
+what is spelled out is \term{implementation-defined}.
+For example, 
+
+\code
+ (format nil "~:C" #\\A) \EV "A"
+ (format nil "~:C" #\\Space) \EV "Space"
+;; This next example assumes an implementation-defined "Control" attribute.
+ (format nil "~:C" #\\Control-Space)
+\EV "Control-Space"
+\OV "c-Space"
+\endcode
+
+%% 22.3.2 41  
+\f{~:@C} prints what \f{~:C} would, and then
+if the \term{character} requires unusual shift keys on the keyboard to type it,
+this fact is mentioned.  For example,
+
+\begingroup
+\def\Partial{$\partial$}
+\code
+ (format nil "~:@C" #\\Control-Partial) \EV "Control-{\Partial} (Top-F)"  
+\endcode
+\endgroup
+
+This is the format used for telling the user about a key he is expected to type,
+in prompts, for instance.  The precise output may depend not only
+on the implementation, but on the particular I/O devices in use.
+                           
+%% 22.3.2 42 
+\f{~@C} 
+prints the \term{character} in a way that the \term{Lisp reader} can understand,
+using \f{\#\\} syntax.
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\f{~@C}  binds \varref{*print-escape*} to \t.
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde C: Character}
+
+\beginsubsubsection{Tilde Percent: Newline}
+\idxtext{Percent (format directive)}\idxtext{Tilde Percent (format directive)}
+
+%% 22.3.2 96
+
+This outputs a \f{\#\\Newline} character, thereby terminating the current
+output line and beginning a new one.
+\f{~\j{n}\%} outputs \j{n} newlines.
+No \j{arg} is used.  
+
+\endsubsubsection%{Tilde Percent: Newline}
+
+\beginsubsubsection{Tilde Ampersand: Fresh-Line}
+\idxtext{Ampersand (format directive)}\idxtext{Tilde Ampersand (format directive)}
+
+%% 22.3.2 97
+
+Unless it can be determined that the output stream
+is already at the beginning of a line,
+this outputs a newline.
+\f{~\j{n}\&} calls \funref{fresh-line}
+and then outputs \j{n}\minussign 1 newlines.
+\f{~0\&} does nothing.
+
+\endsubsubsection%{Tilde Ampersand: Fresh-Line}
+
+\beginsubsubsection{Tilde Vertical-Bar: Page}
+\idxtext{Vertical-Bar (format directive)}\idxtext{Tilde Vertical-Bar (format directive)}
+
+%% 22.3.2 98
+
+This outputs a page separator character, if possible.
+\f{~\j{n}|} does this \j{n} times.
+
+\endsubsubsection%{Tilde Vertical-Bar: Page}
+
+%% 22.3.2 99
+
+\beginsubsubsection{Tilde Tilde: Tilde}
+\idxtext{Tilde (format directive)}\idxtext{Tilde Tilde (format directive)}
+
+This outputs a \term{tilde}.  \f{~\j{n}~} outputs \j{n} tildes.
+
+\endsubsubsection%{Tilde Tilde: Tilde}
+
+\endsubsection%{FORMAT Basic Output}
+
+\beginsubsection{FORMAT Radix Control}
+
+\beginsubsubsection{Tilde R: Radix}
+\idxtext{R (format directive)}\idxtext{Tilde R (format directive)}
+
+%% 22.3.2 29
+
+\f{~\j{n}R} prints \j{arg} in radix \j{n}.
+The modifier flags and any remaining parameters are used as for
+the \f{~D} directive.
+\f{~D} is the same as \f{~10R}.  
+The full form is 
+\f{~\j{radix},\j{mincol},\j{padchar},\j{commachar},\j{comma-interval}R}.
+
+%% 22.3.2 30
+If no prefix parameters are given to \f{~R}, then a different
+interpretation is given.  The argument should be an \term{integer}.
+For example, if \j{arg} is 4:
+
+%% 22.3.2 31
+\beginlist
+\itemitem{\bull}
+\f{~R} prints \j{arg} as a cardinal English number: \f{four}.
+
+%% 22.3.2 32
+\itemitem{\bull}
+\f{~:R} prints \j{arg} as an ordinal English number: \f{fourth}.
+
+%% 22.3.2 33
+\itemitem{\bull}   
+\f{~@R} prints \j{arg} as a Roman numeral: \f{IV}.
+
+%% 22.3.2 34
+\itemitem{\bull}      
+\f{~:@R} prints \j{arg} as an old Roman numeral: \f{IIII}.
+\endlist
+
+\issue{FORMAT-COMMA-INTERVAL}
+For example:
+
+\code
+ (format nil "~,,' ,4:B" 13) \EV "1101"
+ (format nil "~,,' ,4:B" 17) \EV "1 0001"
+ (format nil "~19,0,' ,4:B" 3333) \EV "0000 1101 0000 0101"
+ (format nil "~3,,,' ,2:R" 17) \EV "1 22"
+ (format nil "~,,'|,2:D" #xFFFF) \EV  "6|55|35"
+\endcode
+\endissue{FORMAT-COMMA-INTERVAL}
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+If and only if the first parameter, \j{n}, is supplied,
+\f{~R} binds
+     \varref{*print-escape*} to \term{false},
+     \varref{*print-radix*} to \term{false}, 
+     \varref{*print-base*} to \j{n},
+\issue{PRINC-READABLY:X3J13-DEC-91}
+ and \varref{*print-readably*} to \term{false}.
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+
+If and only if no parameters are supplied,
+\f{~R} binds \varref{*print-base*} to \f{10}.
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde R: Radix}
+
+\beginsubsubsection{Tilde D: Decimal}
+\idxtext{D (format directive)}\idxtext{Tilde D (format directive)}
+
+%% 22.3.2 20
+
+An \j{arg}, which should be an \term{integer}, 
+is printed in decimal radix.
+\f{~D} will never put a decimal point after the number.
+
+%% 22.3.2 21
+\f{~\j{mincol}D} uses 
+a column width of \j{mincol}; spaces are inserted on
+the left if the number requires fewer than \j{mincol} columns for its digits
+and sign.  If the number doesn't fit in \j{mincol} columns, additional columns
+are used as needed.
+
+%% 22.3.2 22
+\f{~\j{mincol},\j{padchar}D} uses \j{padchar} as the pad character
+instead of space.
+
+%% 22.3.2 23
+If \j{arg} is not an \term{integer}, it is printed in \f{~A} format and decimal base.
+
+%% 22.3.2 24
+The \f{@} modifier causes the number's sign to be printed always; the default
+is to print it only if the number is negative.
+\issue{FORMAT-COMMA-INTERVAL}
+The \f{:} modifier causes commas to be printed between groups of digits;
+\j{commachar} may be used to change the character used as the comma.
+\j{comma-interval} 
+must be an \term{integer} and defaults to 3.  When the \f{:} 
+modifier is given to any of
+these directives, the \j{commachar} 
+is printed between groups of \j{comma-interval}
+digits.
+\endissue{FORMAT-COMMA-INTERVAL}
+
+Thus the most general form of \f{~D} is
+\f{~\j{mincol},\j{padchar},\j{commachar},\j{comma-interval}D}.
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\f{~D} binds
+     \varref{*print-escape*} to \term{false},
+     \varref{*print-radix*} to \term{false},
+     \varref{*print-base*} to \f{10},
+\issue{PRINC-READABLY:X3J13-DEC-91}
+ and \varref{*print-readably*} to \term{false}.
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde D: Decimal}
+
+\beginsubsubsection{Tilde B: Binary}
+\idxtext{B (format directive)}\idxtext{Tilde B (format directive)}
+
+%% 22.3.2 25
+
+This is just like \f{~D} but prints in binary radix (radix 2)
+instead of decimal.  The full form is therefore
+\f{~\j{mincol},\j{padchar},\j{commachar},\j{comma-interval}B}.
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\f{~B} binds
+     \varref{*print-escape*} to \term{false},
+     \varref{*print-radix*} to \term{false},
+     \varref{*print-base*} to \f{2},
+\issue{PRINC-READABLY:X3J13-DEC-91}
+ and \varref{*print-readably*} to \term{false}.
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde B: Binary}
+
+\beginsubsubsection{Tilde O: Octal}
+\idxtext{O (format directive)}\idxtext{Tilde O (format directive)}
+
+%% 22.3.2 26
+
+This is just like \f{~D} but prints in octal radix (radix 8)
+instead of decimal.  The full form is therefore
+\f{~\j{mincol},\j{padchar},\j{commachar},\j{comma-interval}O}.
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\f{~O} binds
+     \varref{*print-escape*} to \term{false},
+     \varref{*print-radix*} to \term{false},
+     \varref{*print-base*} to \f{8},
+\issue{PRINC-READABLY:X3J13-DEC-91}
+ and \varref{*print-readably*} to \term{false}.
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde O: Octal}
+
+\beginsubsubsection{Tilde X: Hexadecimal}
+\idxtext{X (format directive)}\idxtext{Tilde X (format directive)}
+
+%% 22.3.2 27
+
+This is just like \f{~D} but prints in hexadecimal radix
+(radix 16) instead of decimal.  The full form is therefore
+\f{~\j{mincol},\j{padchar},\j{commachar},\j{comma-interval}X}.
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\f{~X} binds
+     \varref{*print-escape*} to \term{false},
+     \varref{*print-radix*} to \term{false},
+     \varref{*print-base*} to \f{16},
+\issue{PRINC-READABLY:X3J13-DEC-91}
+ and \varref{*print-readably*} to \term{false}.
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde X: Hexadecimal}
+
+\endsubsection%{FORMAT Radix Control}
+
+\beginsubsection{FORMAT Floating-Point Printers}
+
+\beginsubsubsection{Tilde F: Fixed-Format Floating-Point}
+\idxtext{F (format directive)}\idxtext{Tilde F (format directive)}
+
+%% 22.3.2 43
+
+The next \j{arg} is printed as a \term{float}.
+
+%% 22.3.2 44
+The full form is \f{~\j{w},\j{d},\j{k},\j{overflowchar},\j{padchar}F}.
+The parameter \j{w}
+is the width of the field to be printed; \j{d} is the number
+of digits to print after the decimal point; \j{k} is a scale factor
+that defaults to zero.
+
+%% 22.3.2 45
+Exactly \j{w} characters will
+be output.  First, leading copies of the character \j{padchar}
+(which defaults to a space) are printed, if necessary, to pad the
+field on the left.
+If the \j{arg} is negative, then a minus sign is printed;
+if the \j{arg} is not negative, then a plus sign is printed
+if and only if the \f{@}
+modifier was supplied.  Then a sequence
+of digits, containing a single embedded decimal point, is printed;
+this represents the magnitude of the value of \j{arg} times $10^\j{k}$,
+rounded to \j{d} fractional digits.                         
+When rounding up and rounding down would produce printed values
+equidistant from the scaled value of \j{arg}, then the implementation
+is free to use either one.  For example, printing the argument
+\f{6.375} using the format \f{~4,2F} may correctly produce
+either \f{6.37} or \f{6.38}.
+Leading zeros are not permitted, except that a single
+zero digit is output before the decimal point if the printed value
+is less than one, and this single zero digit is not output
+at all if \j{w}=\j{d}+1.
+
+%% 22.3.2 46
+If it is impossible to print the value in the required format in a field
+of width \j{w}, then one of two actions is taken.  If the
+parameter \j{overflowchar} is supplied, then \j{w} copies of that
+parameter are printed instead of the scaled value of \j{arg}.
+If the \j{overflowchar} parameter is omitted, then the scaled value
+is printed using more than \j{w} characters, as many more as may be
+needed.
+
+%% 22.3.2 47
+If the \j{w} parameter is omitted, then the field is of variable width.
+In effect, a value is chosen
+for \j{w} in such a way that no leading pad characters need to be printed
+and exactly \j{d} characters will follow the decimal point.
+For example, the directive \f{~,2F} will print exactly
+two digits after the decimal point and as many as necessary before the
+decimal point.
+
+%% 22.3.2 48
+If the parameter \j{d} is omitted, then there is no constraint
+on the number of digits to appear after the decimal point.
+A value is chosen for \j{d} in such a way that as many digits
+as possible may be printed subject to the width constraint
+imposed by the parameter \j{w} and the constraint that no trailing
+zero digits may appear in the fraction, except that if the
+fraction to be printed is zero, then a single zero digit should
+appear after the decimal point if permitted by the width constraint.
+
+%% 22.3.2 49
+If both \j{w} and \j{d} are omitted, then the effect is to print
+the value using ordinary free-format output; \funref{prin1} uses this format
+for any number whose magnitude is either zero or between
+$10^{-3}$ (inclusive) and $10^7$ (exclusive).
+
+%% 22.3.2 50
+If \j{w} is omitted, then if the magnitude of \j{arg} is so large (or, if
+\j{d} is also omitted, so small) that more than 100 digits would have to
+be printed, then an implementation is free, at its discretion, to print
+the number using exponential notation instead, as if by the directive
+\f{~E} (with all parameters to \f{~E} defaulted, not
+taking their values from the \f{~F} directive).
+
+%% 22.3.2 51
+If \j{arg} is a \term{rational} 
+number, then it is coerced to be a \term{single float}
+and then printed.  Alternatively, an implementation is permitted to
+process a \term{rational} 
+number by any other method that has essentially the
+same behavior but avoids loss of precision or overflow
+because of the coercion.  If \j{w} and \j{d} are
+not supplied and the number has no exact decimal representation,
+for example \f{1/3}, some precision cutoff must be chosen
+by the implementation since only a finite number of digits may be printed.
+
+%% 22.3.2 52
+If \j{arg} is a \term{complex} number or some non-numeric
+\term{object}, 
+then it is printed using the format directive \f{~\j{w}D},
+thereby printing it in decimal radix and a minimum field width of \j{w}.
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\f{~F} binds
+    \varref{*print-escape*} to \term{false}
+\issue{PRINC-READABLY:X3J13-DEC-91}
+ and \varref{*print-readably*} to \term{false}.
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde F: Fixed-Format Floating-Point}
+
+\beginsubsubsection{Tilde E: Exponential Floating-Point}
+\idxtext{E (format directive)}\idxtext{Tilde E (format directive)}
+
+%% 22.3.2 62
+
+The next \j{arg} is printed as a \term{float} in exponential notation.
+
+%% 22.3.2 63
+The full form is
+\f{~\j{w},\j{d},\j{e},\j{k},\j{overflowchar},\j{padchar},\j{exponentchar}E}.
+The parameter \j{w}
+is the width of the field to be printed; \j{d} is the number
+of digits to print after the decimal point; \j{e} is the number
+of digits to use when printing the exponent;
+\j{k} is a scale factor that defaults to one (not zero).
+
+%% 22.3.2 64
+Exactly \j{w} characters will
+be output.  First, leading copies of the character \j{padchar}
+(which defaults to a space) are printed, if necessary, to pad the
+field on the left.
+If the \j{arg} is negative, then a minus sign is printed;
+if the \j{arg} is not negative, then a plus sign is printed
+if and only if the \f{@}
+modifier was supplied.  Then a sequence
+of digits containing a single embedded decimal point is printed.
+The form of this sequence of digits depends on the scale factor \j{k}.
+If \j{k} is zero, then \j{d} digits are printed after the decimal
+point, and a single zero digit appears before the decimal point if
+the total field width will permit it.  If \j{k} is positive,
+then it must be strictly less than \j{d}+2;  \j{k} significant digits
+are printed before the decimal point, and \j{d}\minussign \j{k}+1
+digits are printed after the decimal point.  If \j{k} is negative,
+then it must be strictly greater than \minussign \j{d};
+a single zero digit appears before the decimal point if
+the total field width will permit it, and after the decimal point
+are printed first
+\minussign \j{k} zeros and then \j{d}+\j{k} significant digits.
+The printed fraction must be properly rounded.         
+When rounding up and rounding down would produce printed values
+equidistant from the scaled value of \j{arg}, then the implementation
+is free to use either one.  For example, printing the argument
+\f{637.5} using the format \f{~8,2E} may correctly produce
+either \f{6.37E+2} or \f{6.38E+2}.
+
+%% 22.3.2 65
+Following the digit sequence, the exponent is printed.
+First the character parameter \j{exponentchar} is printed; if this
+parameter is omitted, then the \term{exponent marker} that
+\funref{prin1} would use is printed, as determined from the
+type of the \term{float} and the current value of
+\varref{*read-default-float-format*}.
+Next, either a plus sign or a minus sign
+is printed, followed by \j{e} digits representing the power of
+ten by which the printed fraction must be multiplied
+to properly represent the rounded value of \j{arg}.
+
+%% 22.3.2 66
+If it is impossible to print the value in the required format in a field
+of width \j{w}, possibly because \j{k} is too large or too small
+or because the exponent cannot be printed in \j{e} character positions,
+then one of two actions is taken.  If the
+parameter \j{overflowchar} is supplied, then \j{w} copies of that
+parameter are printed instead of the scaled value of \j{arg}.
+If the \j{overflowchar} parameter is omitted, then the scaled value
+is printed using more than \j{w} characters, as many more as may be
+needed; if the problem is that \j{d} is too small for the supplied \j{k}
+or that \j{e} is too small, then a larger value is used for \j{d} or \j{e}
+as may be needed.
+
+%% 22.3.2 67
+If the \j{w} parameter is omitted, then the field is of variable width.
+In effect a value is chosen
+for \j{w} in such a way that no leading pad characters need to be printed.
+
+%% 22.3.2 68
+If the parameter \j{d} is omitted, then there is no constraint
+on the number of digits to appear.
+A value is chosen for \j{d} in such a way that as many digits
+as possible may be printed subject to the width constraint
+imposed by the parameter \j{w}, the constraint of the scale factor \j{k},
+and the constraint that no trailing
+zero digits may appear in the fraction, except that if the
+fraction to be printed is zero then a single zero digit should
+appear after the decimal point.
+
+%% 22.3.2 69
+If the parameter \j{e} is omitted, then the exponent is printed
+using the smallest number of digits necessary to represent its value.
+
+%% 22.3.2 70
+If all of \j{w}, \j{d}, and \j{e} are omitted, then the effect is to print
+the value using ordinary free-format exponential-notation output;
+\funref{prin1} uses 
+\issue{FORMAT-E-EXPONENT-SIGN:FORCE-SIGN}
+a similar
+\endissue{FORMAT-E-EXPONENT-SIGN:FORCE-SIGN}
+format for any non-zero number whose magnitude
+is less than $10^{-3}$ or greater than or equal to $10^7$.
+\issue{FORMAT-E-EXPONENT-SIGN:FORCE-SIGN}
+The only difference is that the \f{~E} 
+directive always prints a plus or minus sign in front of the
+    exponent, while \funref{prin1} omits the plus sign if the exponent is
+    non-negative.
+\endissue{FORMAT-E-EXPONENT-SIGN:FORCE-SIGN}
+
+%% 22.3.2 71       
+If \j{arg} is a \term{rational} 
+number, then it is coerced to be a \term{single float}
+and then printed.  Alternatively, an implementation is permitted to
+process a \term{rational} 
+number by any other method that has essentially the
+same behavior but avoids loss of precision or overflow
+because of the coercion.  If \j{w} and \j{d} are
+unsupplied and the number has no exact decimal representation,
+for example \f{1/3}, some precision cutoff must be chosen
+by the implementation since only a finite number of digits may be printed.
+
+%% 22.3.2 72
+If \j{arg} is a \term{complex} number or some non-numeric
+\term{object}, 
+then it is printed using the format directive \f{~\j{w}D},
+thereby printing it in decimal radix and a minimum field width of \j{w}.
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\f{~E} binds
+     \varref{*print-escape*} to \term{false}
+\issue{PRINC-READABLY:X3J13-DEC-91}
+ and \varref{*print-readably*} to \term{false}.
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde E: Exponential Floating-Point}
+
+\beginsubsubsection{Tilde G: General Floating-Point}
+\idxtext{G (format directive)}\idxtext{Tilde G (format directive)}
+
+%% 22.3.2 82
+
+The next \j{arg} is printed as a \term{float} 
+in either fixed-format or exponential notation as appropriate.
+
+%% 22.3.2 83
+The full form is \f{~\j{w},\j{d},\j{e},\j{k},\j{overflowchar},\j{padchar},\j{exponentchar}G}.
+The format in which to print \j{arg} depends on the magnitude (absolute
+value) of the \j{arg}.  Let \j{n} be an integer such that
+$10^{\j{n}-1}$ $\le$ |\j{arg}| < $10^\j{n}$.
+Let \j{ee} equal \j{e}+2, or 4 if \j{e} is omitted.
+Let \j{ww} equal \j{w}\minussign \j{ee},
+or \nil\ if \j{w} is omitted.  If \j{d} is omitted, first let \j{q}
+be the number of digits needed to print \j{arg} with no loss
+of information and without leading or trailing zeros;
+then let \j{d} equal \f{(max \j{q} (min \j{n} 7))}.
+Let \j{dd} equal \j{d}\minussign \j{n}.
+
+%% 22.3.2 84
+If 0 $\le$ \j{dd} $\le$ \j{d}, then \j{arg} is printed
+as if by the format directives
+                                                                         
+%!!! ",," ??? -kmp 12-May-91
+\f{~\j{ww},\j{dd},,\j{overflowchar},\j{padchar}F~\j{ee}@T}
+
+Note that the scale factor \j{k} is not passed to the \f{~F}
+directive.  For all other values of \j{dd}, \j{arg} is printed as if
+by the format directive
+
+\f{~\j{w},\j{d},\j{e},\j{k},\j{overflowchar},\j{padchar},\j{exponentchar}E}
+
+%% 22.3.2 85               
+In either case, an \f{@}
+modifier is supplied to the \f{~F}
+or \f{~E} directive if and only if one was supplied to the
+\f{~G} directive.
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\f{~G} binds
+     \varref{*print-escape*} to \term{false}
+\issue{PRINC-READABLY:X3J13-DEC-91}
+ and \varref{*print-readably*} to \term{false}.
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde G: General Floating-Point}
+
+\beginsubsubsection{Tilde Dollarsign: Monetary Floating-Point}
+\idxtext{Dollarsign (format directive)}\idxtext{Tilde Dollarsign (format directive)}
+
+%% 22.3.2 90
+
+The next \j{arg} is printed as a \term{float} in fixed-format notation.  
+
+%% 22.3.2 91
+The full form is \f{~\j{d},\j{n},\j{w},\j{padchar}\$}.
+The parameter \j{d} is the number
+of digits to print after the decimal point (default value 2);
+\j{n} is the minimum number of digits to print before the decimal
+point (default value 1);
+\j{w} is the minimum total width of the field to be printed (default
+value 0).
+
+%% 22.3.2 92
+First padding and the sign are output.
+If the \j{arg} is negative, then a minus sign is printed;
+if the \j{arg} is not negative, then a plus sign is printed
+if and only if the \f{@} modifier was supplied.  
+If the \f{:} modifier is used, the sign appears before any padding,
+and otherwise after the padding.
+If \j{w} is supplied and the number of other characters to be output
+is less than \j{w}, then copies of \j{padchar} (which defaults
+to a space) are output to
+make the total field width equal \j{w}.
+Then \j{n} digits are printed for the integer part of \j{arg},
+with leading zeros if necessary; then a decimal point;
+then \j{d} digits of fraction, properly rounded.
+
+%% 22.3.2 93
+If the magnitude of \j{arg} is so large that more than \j{m} digits would
+have to be printed, where \j{m} is the larger of \j{w} and 100, then an
+implementation is free, at its discretion, to print the number using
+exponential notation instead, as if by the directive
+\f{~\j{w},\j{q},,,,\j{padchar}E}, where \j{w} and \j{padchar} are
+present or omitted according to whether they were present or omitted in
+the \f{~\$} directive, and where \j{q}=\j{d}+\j{n}\minussign 1,
+where \j{d} and \j{n} are the (possibly default) values given to the
+\f{~\$} directive.
+
+%% 22.3.2 94
+If \j{arg} is a \term{rational} 
+number, then it is coerced to be a \term{single float}
+and then printed.  Alternatively, an implementation is permitted to
+process a \term{rational} number by any 
+other method that has essentially the
+same behavior but avoids loss of precision or overflow
+because of the coercion.
+
+%% 22.3.2 95
+If \j{arg} is a \term{complex} number or some non-numeric
+\term{object},
+then it is printed using the format directive \f{~\j{w}D},
+thereby printing it in decimal radix and a minimum field width of \j{w}.
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\f{~\$} binds \varref{*print-escape*} to \term{false}
+\issue{PRINC-READABLY:X3J13-DEC-91}
+ and \varref{*print-readably*} to \term{false}.
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde Dollarsign: Monetary Floating-Point}
+
+\endsubsection%{FORMAT Floating-Point Printers}
+
+\beginsubsection{FORMAT Printer Operations}
+\DefineSection{FORMATPrinterOps}
+
+\beginsubsubsection{Tilde A: Aesthetic}
+\idxtext{A (format directive)}\idxtext{Tilde A (format directive)}
+
+%% A originally stood for ASCII. This seems like a bad mnemonic in a portable standard.
+%% Replaced it with "Aesthetic". -kmp 30-Aug-93
+
+%% 22.3.2 16
+
+An \j{arg}, any \term{object}, 
+is printed without escape characters
+(as by \funref{princ}).  If \j{arg} is a \term{string}, 
+its \term{characters}
+will be output verbatim.
+If \j{arg} is \nil\ it will be printed as \nil;
+the \term{colon} modifier (\f{~:A}) will cause an \j{arg} of \nil\ to be printed as \empty,
+but if \j{arg} is a composite structure, such as a \term{list} or \term{vector},
+any contained occurrences of \nil\ will still be printed as \nil.
+
+%% 22.3.2 17
+\f{~\j{mincol}A} inserts spaces on the right, if necessary, to make the
+width at least \j{mincol} columns.  The \f{@}
+modifier causes the spaces
+to be inserted on the left rather than the right.
+
+%% 22.3.2 18
+\f{~\j{mincol},\j{colinc},\j{minpad},\j{padchar}A} 
+is the full form of \f{~A},
+which allows control of the padding.
+The \term{string} is padded on the right (or on the left if the
+\f{@} modifier is used) with at least \j{minpad} copies
+of \j{padchar}; padding characters are then inserted \j{colinc} characters
+at a time until the total width is at least \j{mincol}.
+The defaults are \f{0} for \j{mincol} and \j{minpad}, \f{1} for \j{colinc},
+and the space character for \j{padchar}.
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\f{~A} binds \varref{*print-escape*} to \term{false},
+\issue{PRINC-READABLY:X3J13-DEC-91}
+and \varref{*print-readably*} to \term{false}.
+\endissue{PRINC-READABLY:X3J13-DEC-91}
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde A: Aesthetic}
+
+\beginsubsubsection{Tilde S: Standard}
+\idxtext{S (format directive)}\idxtext{Tilde S (format directive)}
+
+%% S originally stood for S-expression, a term which no longer has any meaning.
+%% Replaced it with "Standard", since this is the standard lisp representation.
+%% -kmp 30-Aug-93
+
+%% 22.3.2 19
+
+This is just like \f{~A}, but \j{arg} is printed with escape
+characters (as by \funref{prin1} rather than \f{princ}).  The output is
+therefore suitable for input to \funref{read}.  \f{~S} accepts
+all the arguments and modifiers that \f{~A} does.
+
+\issue{FORMAT-PRETTY-PRINT:YES}
+\f{~S} binds \varref{*print-escape*} to \t.
+\endissue{FORMAT-PRETTY-PRINT:YES}
+
+\endsubsubsection%{Tilde S: Standard}
+
+\issue{PRETTY-PRINT-INTERFACE}
+\beginsubsubsection{Tilde W: Write}
+\idxtext{W (format directive)}\idxtext{Tilde W (format directive)}
+
+An argument, any \term{object}, is printed obeying every printer control
+variable (as by \funref{write}).  In addition, \f{~W} interacts correctly with depth
+abbreviation, by not resetting the depth counter to zero.  \f{~W} does not
+accept parameters.  If given the \term{colon} modifier, \f{~W} binds \varref{*print-pretty*}
+to \term{true}.  If given the \term{at-sign} modifier, \f{~W} binds \varref{*print-level*}
+and \varref{*print-length*} to \nil.
+ 
+\f{~W} provides automatic support for the detection of circularity and
+sharing.  If \thevalueof{*print-circle*} is not \nil\ and \f{~W} is applied
+to an argument that is a circular (or shared) reference, an appropriate 
+\f{\#\param{n}\#} marker is inserted in the output instead of printing the argument.
+ 
+\endsubsubsection%{Tilde W: Write}
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endsubsection%{FORMAT Printer Operations}
+
+\beginsubsection{FORMAT Pretty Printer Operations}
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+The following constructs provide access to the \term{pretty printer}:
+
+\beginsubsubsection{Tilde Underscore: Conditional Newline}
+\DefineSection{TildeUnderscore}
+\idxtext{Underscore (format directive)}\idxtext{Tilde Underscore (format directive)}
+
+Without any modifiers, \f{~_} is the same as \f{(pprint-newline :linear)}.
+\f{~@_}  is the same as \f{(pprint-newline :miser)}.
+\f{~:_}  is the same as \f{(pprint-newline :fill)}.
+\f{~:@_} is the same as \f{(pprint-newline :mandatory)}.
+
+\endsubsubsection%{Tilde Underscore: Conditional Newline}
+
+\beginsubsubsection{Tilde Less-Than-Sign: Logical Block}
+\DefineSection{TildeLessThanLogicalBlock}
+\idxtext{Less-Than-Sign (format directive)}\idxtext{Tilde Less-Than-Sign (format directive)}
+
+\f{~<...~:>}
+
+If \f{~:>} is used to terminate a \f{~<...~>},
+the directive is equivalent to a call to \macref{pprint-logical-block}.
+The argument corresponding to the \f{~<...~:>} directive is treated in
+the same way as the \term{list} argument to \funref{pprint-logical-block},
+thereby providing automatic support for non-\term{list} arguments and
+the detection of circularity, sharing, and depth abbreviation.  
+The portion of the \param{control-string} nested within the \f{~<...~:>}
+specifies the \kwd{prefix} (or \kwd{per-line-prefix}), \kwd{suffix},
+and body of the \macref{pprint-logical-block}.
+ 
+The \param{control-string} portion enclosed by \f{~<...~:>} can be divided
+into segments \f{~<\param{prefix}~;\param{body}~;\param{suffix}~:>}
+by \f{~;} directives.  If the first section is terminated by \f{~@;}, 
+it specifies a per-line prefix rather than a simple prefix.  
+The \param{prefix} and \param{suffix} cannot contain format directives.  
+An error is signaled if either the prefix or suffix fails to be a
+constant string or if the enclosed portion is divided into more than three segments.
+ 
+If the enclosed portion is divided into only two segments, the \param{suffix}
+defaults to the null string.  If the enclosed portion consists of only
+a single segment, both the \param{prefix} and the \param{suffix} default to 
+the null string.  If the \term{colon} modifier is used (\ie \f{~:<...~:>}),
+the \param{prefix} and \param{suffix} default to \f{"("} and \f{")"}
+(respectively) instead of the null string.
+ 
+The body segment can be any arbitrary \term{format string}.
+This \term{format string} is applied to the elements of the list
+corresponding to the \f{~<...~:>} directive as a whole.
+Elements are extracted from this list using \macref{pprint-pop},
+thereby providing automatic support for malformed lists, and the detection
+of circularity, sharing, and length abbreviation.
+Within the body segment, \f{~{\hat}} acts like \macref{pprint-exit-if-list-exhausted}.
+ 
+\f{~<...~:>} supports a feature not supported by \macref{pprint-logical-block}.
+If \f{~:@>} is used to terminate the directive (\ie \f{~<...~:@>}), 
+then a fill-style conditional newline is automatically inserted after each
+group of blanks immediately contained in the body (except for blanks
+after a ~\NewlineChar\ directive).  This makes it easy to achieve the
+equivalent of paragraph filling.
+ 
+If the \term{at-sign} modifier is used with \f{~<...~:>}, the entire remaining argument
+list is passed to the directive as its argument.  All of the remaining
+arguments are always consumed by \f{~@<...~:>}, even if they are not all used
+by the \term{format string} nested in the directive.  Other than the difference in
+its argument, \f{~@<...~:>} is exactly the same as \f{~<...~:>} except that
+circularity detection is not applied if \f{~@<...~:>} is encountered at top
+level in a \term{format string}.  This ensures that circularity detection is
+applied only to data lists, not to \term{format argument} \term{lists}.
+
+\f{" . \#\param{n}\#"} is printed if circularity or sharing has to be indicated
+for its argument as a whole.
+ 
+To a considerable extent, the basic form of the directive \f{~<...~>} is
+incompatible with the dynamic control of the arrangement of output by
+\f{~W}, \f{~_}, \f{~<...~:>}, \f{~I}, and \f{~:T}.  As a result, an error 
+is signaled if any of these directives is nested within \f{~<...~>}.  
+Beyond this, an error is also signaled if the \f{~<...~:;...~>} form of
+\f{~<...~>} is used in the same \term{format string} with 
+\f{~W}, \f{~_}, \f{~<...~:>}, \f{~I}, or \f{~:T}.
+ 
+See also \secref\TildeLessThanJustification.
+
+\endsubsubsection%{Tilde Less-Than-Sign: Logical Block}
+
+\beginsubsubsection{Tilde I: Indent}
+\DefineSection{TildeI}
+\idxtext{I (format directive)}\idxtext{Tilde I (format directive)}
+ 
+\f{~\param{n}I}  is the same as \f{(pprint-indent :block n)}.
+
+\f{~\param{n}:I} is the same as \f{(pprint-indent :current n)}.
+In both cases, \param{n} defaults to zero, if it is omitted.
+ 
+\endsubsubsection%{Tilde I: Indent}
+
+\beginsubsubsection{Tilde Slash: Call Function}
+\idxtext{Slash (format directive)}\idxtext{Tilde Slash (format directive)}
+
+\f{~/\param{name}/}
+
+User defined functions can be called from within a format
+string by using the directive \f{~/\param{name}/}.
+The \term{colon} modifier, the \term{at-sign} modifier, and arbitrarily many parameters 
+can be specified with the \f{~/\param{name}/} directive.
+\param{name} can be any arbitrary string that does not contain a "/".
+All of the characters in \param{name} are treated as if they were upper case.
+If \param{name} contains a single \term{colon} (\f{:}) or double \term{colon} (\f{::}),
+then everything up to but not including the first \f{":"} or \f{"::"}
+is taken to be a \term{string} that names a \term{package}.
+Everything after the first \f{":"} or \f{"::"} (if any) is taken to be a 
+\term{string} that names a \f{symbol}.  The function corresponding to a 
+\f{~/name/} directive is obtained by looking up the \term{symbol}
+that has the indicated name in the indicated \term{package}.
+If \param{name} does not contain a \f{":"} or \f{"::"},
+%then the whole \param{name} string is looked up in \thepackage{user}.
+then the whole \param{name} string is looked up in \thepackage{common-lisp-user}. 
+
+When a \f{~/name/} directive is encountered,
+the indicated function is called with four or more arguments.
+The first four arguments are:
+     the output stream,
+     the \term{format argument} corresponding to the directive,
+     a \term{generalized boolean} that is \term{true} if the \term{colon} modifier was used,
+ and a \term{generalized boolean} that is \term{true} if the \term{at-sign} modifier was used.
+The remaining arguments consist of any parameters specified with the directive.
+The function should print the argument appropriately.
+Any values returned by the function are ignored.
+ 
+The three \term{functions} 
+      \funref{pprint-linear},
+      \funref{pprint-fill},
+  and \funref{pprint-tabular}
+are specifically designed so that they can be called by \f{~/.../}
+(\ie \f{~/pprint-linear/}, \f{~/pprint-fill/}, and \f{~/pprint-tabular/}).
+In particular they take \term{colon} and \term{at-sign} arguments.
+
+\endissue{PRETTY-PRINT-INTERFACE}
+
+\endsubsubsection%{Tilde Slash: Call Function}
+
+\endsubsection%{FORMAT Pretty Printer Operations}
+
+\beginsubsection{FORMAT Layout Control}
+
+\beginsubsubsection{Tilde T: Tabulate}
+\idxtext{T (format directive)}\idxtext{Tilde T (format directive)}
+
+%% 22.3.2 102       
+
+This spaces over to a given column.
+\f{~\j{colnum},\j{colinc}T} will output
+sufficient spaces to move the cursor to column \j{colnum}.  If the cursor
+is already at or beyond column \j{colnum}, it will output spaces to move it to
+column \j{colnum}+\j{k}*\j{colinc} for the smallest positive integer
+\j{k} possible, unless \j{colinc} is zero, in which case no spaces
+are output if the cursor is already at or beyond column \j{colnum}.
+\j{colnum} and \j{colinc} default to \f{1}.
+
+%% 22.3.2 103
+If for some reason the current absolute column position cannot be determined
+by direct inquiry,
+\funref{format} 
+may be able to deduce the current column position by noting         
+that certain directives (such as \f{~\%}, or \f{~\&},
+or \f{~A} 
+with the argument being a string containing a newline) cause
+the column position to be reset to zero, and counting the number of characters
+emitted since that point.  If that fails, \funref{format} 
+may attempt a
+similar deduction on the riskier assumption that the destination was
+at column zero when \funref{format} 
+was invoked.  If even this heuristic fails
+or is implementationally inconvenient, at worst
+the \f{~T} operation will simply output two spaces.
+
+%% 22.3.2 104              
+\f{~@T} performs relative tabulation.
+\f{~\j{colrel},\j{colinc}@T} outputs \j{colrel} spaces
+and then outputs the smallest non-negative
+number of additional spaces necessary to move the cursor
+to a column that is a multiple                                       
+of \j{colinc}.  For example, the directive 
+\f{~3,8@T} outputs
+three spaces and then moves the cursor to a ``standard multiple-of-eight
+tab stop'' if not at one already.
+If the current output column cannot be determined, however,
+then \j{colinc} is ignored, and exactly \j{colrel} spaces are output.
+
+If the \term{colon} modifier is used with the \f{~T} directive,
+the tabbing computation is done relative to the horizontal position where the
+section immediately containing the directive begins, rather than with
+respect to a horizontal position of zero.  The numerical parameters are
+both interpreted as being in units of \term{ems} and both default to \f{1}.
+\f{~\param{n},\param{m}:T} is the same as 
+  \f{(pprint-tab :section \param{n} \param{m})}.
+\f{~\param{n},\param{m}:@T} is the same as
+  \f{(pprint-tab :section-relative \param{n} \param{m})}.
+
+\endsubsubsection%{Tilde T: Tab}
+
+\beginsubsubsection{Tilde Less-Than-Sign: Justification}
+\DefineSection{TildeLessThanJustification}
+\idxtext{Less-Than-Sign (format directive)}\idxtext{Tilde Less-Than-Sign (format directive)}
+
+%% 22.3.2 136                           
+\f{~\j{mincol},\j{colinc},\j{minpad},\j{padchar}<\j{str}~>}
+
+This justifies the text produced by processing \j{str}
+within a field at least \j{mincol} columns wide.  \j{str}
+may be divided up into segments with \f{~;}, in which case the
+spacing is evenly divided between the text segments.
+
+%% 22.3.2 137
+With no modifiers, the leftmost text segment is left justified in the
+field, and the rightmost text segment is right justified.  If there is
+only one text element, as a special case, it is right justified.
+The \f{:} modifier causes                                            
+spacing to be introduced before the first text segment;  the 
+\f{@} modifier causes spacing to be added after the last.
+The \j{minpad} parameter (default \f{0}) is the minimum number of
+padding characters to be output between each segment.
+The padding character is supplied by \j{padchar},
+which defaults to the space character.
+If the total width needed to satisfy these constraints is greater
+than \j{mincol}, then the width used is \j{mincol}+\j{k}*\j{colinc}
+for the smallest possible non-negative integer value \j{k}.
+\j{colinc} defaults to \f{1}, and \j{mincol} defaults to \f{0}.
+
+%% 22.3.2 139
+Note that \j{str} may include \funref{format} directives.
+All the clauses in \j{str} are processed in order;
+it is the resulting pieces of text that are justified.
+
+%% 22.3.2 140      
+The \f{~\hat } directive may be used to terminate processing of the
+clauses prematurely, in which case only the completely processed clauses
+are justified.
+
+%% 22.3.2 141                           
+If the first clause of a \f{~<} 
+is terminated with \f{~:;} instead of
+\f{~;}, then it is used in a special way.  All of the clauses are
+processed (subject to \f{~\hat }, of course), but the 
+first one is not used
+in performing the spacing and padding.  When the padded result has been
+determined, then if it will fit on the current line of output, it is
+output, and the text for the first clause is discarded.  If, however, the
+padded text will not fit on the current line, then the text segment for
+the first clause is output before the padded text.  The first clause
+ought to contain a newline (such as a \f{~\%} directive).  The first
+clause is always processed, and so any arguments it refers to will be
+used; the decision is whether to use the resulting segment of text, not
+whether to process the first clause.  If the \f{~:;} has a prefix
+parameter \j{n}, then the padded text must fit on the current line with
+\j{n} character positions to spare to avoid outputting the first clause's
+text.  For example, the control string
+
+\code
+ "~%;; ~\lbr\ ~<~%;; ~1:; ~S~>~\hat\ ,~\rbr\ .~%"
+\endcode
+
+can be used to print a list of items separated by commas without
+breaking items over line boundaries, beginning each line with
+\f{;; }.  The prefix parameter 
+\f{1} in \f{~1:;} accounts for the width of the
+comma that will follow the justified item if it is not the last
+element in the list, or the period 
+if it is.  If \f{~:;} has a second
+prefix parameter, then it is used as the width of the line,
+thus overriding the natural line width of the output stream.  To make
+the preceding example use a line width of 50, one would write
+     
+\code
+ "~%;; ~\lbr\ ~<~%;; ~1,50:; ~S~>~\hat\ ,~\rbr \ .~%"
+\endcode
+%% 22.3.2 142
+If the second argument is not supplied, then \funref{format} uses the
+line width of the \param{destination} output stream.
+If this cannot be determined (for example, when producing a 
+\term{string} result), then \funref{format} uses \f{72} as the line length.
+
+See also \secref\TildeLessThanLogicalBlock.
+
+\endsubsubsection%{Tilde Less-Than-Sign: Justification}
+
+\beginsubsubsection{Tilde Greater-Than-Sign: End of Justification}
+\idxtext{Greater-Than-Sign (format directive)}\idxtext{Tilde Greater-Than-Sign (format directive)}
+
+%% 22.3.2 143       
+
+\f{~>} terminates a \f{~<}.
+The consequences of using it elsewhere are undefined.
+
+\endsubsubsection%{Tilde Greater-Than-Sign: End of Justification}
+
+\endsubsection%{FORMAT Layout Control}
+
+\beginsubsection{FORMAT Control-Flow Operations}
+
+\beginsubsubsection{Tilde Asterisk: Go-To}
+\idxtext{Asterisk (format directive)}\idxtext{Tilde Asterisk (format directive)}
+
+%% 22.3.2 105       
+                                                
+The next \j{arg} is ignored.
+\f{~\j{n}*} ignores the next \j{n} arguments.
+
+%% 22.3.2 106   
+\f{~:*} backs up in the list of
+arguments so that the argument last processed will be processed again.
+\f{~\j{n}:*} backs up \j{n} arguments.
+
+%% 22.3.2 107                        
+When within a \f{~\{} construct
+(see below), the ignoring (in either direction) is relative to the list
+of arguments being processed by the iteration.
+
+%% 22.3.2 108       
+\f{~\j{n}@*} 
+goes to the \j{n}th \j{arg}, where 0 means the first one;
+\j{n} defaults to 0, so \f{~@*} goes back to the first \j{arg}.      
+Directives after a \f{~\j{n}@*}
+will take arguments in sequence beginning with the one gone to.
+When within a \f{~\{} construct, the ``goto''
+is relative to the list of arguments being processed by the iteration.
+
+\endsubsubsection%{Tilde Asterisk: Go-To}
+
+\beginsubsubsection{Tilde Left-Bracket: Conditional Expression}
+\idxtext{Left-Bracket (format directive)}\idxtext{Tilde Left-Bracket (format directive)}
+
+%% 22.3.2 121                                                 
+\f{~[\j{str0}~;\j{str1}~;\j{...}~;\j{strn}~]}
+
+This is a set of control strings, called \j{clauses}, one of which is
+chosen and used.  The clauses are separated by \f{~;}
+and the construct is terminated by \f{~]}.  For example,
+
+\f{"~[Siamese~;Manx~;Persian~] Cat"}
+                              
+The \j{arg}th
+clause is selected, where the first clause is number 0.
+If a prefix parameter is given (as \f{~\j{n}[}),
+then the parameter is used instead of an argument.    
+If \j{arg} is out of range then no clause is selected
+and no error is signaled.
+After the selected alternative has been processed, the control string
+continues after the \f{~]}.
+
+%% 22.3.2 122
+\f{~[\j{str0}~;\j{str1}~;\j{...}~;\j{strn}~:;\j{default}~]}
+has a default case.
+If the \j{last} \f{~;} used to separate clauses
+is \f{~:;} instead, then the last clause is an else clause
+that is performed if no other clause is selected.
+For example:
+
+\f{"~[Siamese~;Manx~;Persian~:;Alley~] Cat"}
+
+%!!! Deja vu. Is this repeated somewhere??? -kmp 11-Jun-91
+%% 22.3.2 123
+\f{~:[\param{alternative}~;\param{consequent}~]} 
+selects the \param{alternative} control string if \j{arg} is \term{false},
+and selects the \param{consequent} control string otherwise.
+                                                             
+%% 22.3.2 124
+\f{~@[\param{consequent}~]} 
+tests the argument.  If it is \term{true},           
+then the argument is not used up by the \f{~[} command
+but remains as the next one to be processed,
+and the one clause \param{consequent} is processed.
+If the \j{arg} is \term{false}, then the argument is used up,
+and the clause is not processed.
+The clause therefore should normally use exactly one argument,
+and may expect it to be \term{non-nil}.
+For example:
+
+\code
+ (setq *print-level* nil *print-length* 5)
+ (format nil
+        "~@[ print level = ~D~]~@[ print length = ~D~]"
+        *print-level* *print-length*)
+\EV  " print length = 5"
+\endcode
+
+Note also that
+
+\code
+ (format \param{stream} "...~@[\param{str}~]..." ...)
+\EQ (format \param{stream} "...~:[~;~:*\param{str}~]..." ...)
+\endcode
+
+%% 22.3.2 125
+The combination of \f{~[} and \f{\#} is useful, for
+example, for dealing with English conventions for printing lists:
+                         
+\code
+ (setq foo "Items:~#[ none~; ~S~; ~S and ~S~
+           ~:;~@\{~#[~; and~] ~S~\hat\ ,~\}~].")
+ (format nil foo) \EV  "Items: none."
+ (format nil foo 'foo) \EV  "Items: FOO."
+ (format nil foo 'foo 'bar) \EV  "Items: FOO and BAR."
+ (format nil foo 'foo 'bar 'baz) \EV  "Items: FOO, BAR, and BAZ."
+ (format nil foo 'foo 'bar 'baz 'quux) \EV  "Items: FOO, BAR, BAZ, and QUUX."
+\endcode
+
+\endsubsubsection%{Tilde Left-Bracket: Conditional Expression}
+
+\beginsubsubsection{Tilde Right-Bracket: End of Conditional Expression}
+\idxtext{Right-Bracket (format directive)}\idxtext{Tilde Right-Bracket (format directive)}
+
+%% 22.3.2 127
+
+\f{~]} terminates a \f{~[}.
+The consequences of using it elsewhere are undefined.
+
+\endsubsubsection%{Tilde Right-Bracket: End of Conditional Expression}
+
+\beginsubsubsection{Tilde Left-Brace: Iteration}
+\idxtext{Left-Brace (format directive)}\idxtext{Tilde Left-Brace (format directive)}
+
+%% 22.3.2 128                                  
+\f{~\{\j{str}~\}}
+
+This is an iteration construct.  The argument should be a \term{list},
+which is used as a set of arguments 
+as if for a recursive call to \funref{format}.
+The \term{string} \j{str} is used repeatedly as the control string.
+Each iteration can absorb as many elements of the \term{list} as it likes
+as arguments;
+if \j{str} uses up two arguments by itself, then two elements of the
+\term{list} will get used up each time around the loop.
+If before any iteration step the \term{list} 
+is empty, then the iteration is terminated.
+Also, if a prefix parameter \j{n} is given, then there will be at most \j{n}
+repetitions of processing of \j{str}.  
+Finally, the \f{~\hat } directive can be
+used to terminate the iteration prematurely.
+
+%% 22.3.2 129
+For example:
+                                                                       
+\code
+ (format nil "The winners are:~\{ ~S~\}." 
+         '(fred harry jill)) 
+\EV "The winners are: FRED HARRY JILL."                           
+ (format nil "Pairs:~\{ <~S,~S>~\}." 
+         '(a 1 b 2 c 3))
+\EV "Pairs: <A,1> <B,2> <C,3>."
+\endcode
+
+%% 22.3.2 130                                   
+\f{~:\lbr \j{str}~\rbr  } is similar, 
+but the argument should be a \term{list} of sublists.
+At each repetition step, one sublist 
+is used as the set of arguments for
+processing \j{str}; on the next repetition, a new sublist 
+is used, whether
+or not all of the last sublist had been processed.  
+For example:
+
+                                                                               
+
+\code
+ (format nil "Pairs:~:\lbr <~S,~S>~\rbr\ ." 
+                 '((a 1) (b 2) (c 3)))
+\EV "Pairs: <A,1> <B,2> <C,3>."
+\endcode
+
+%% 22.3.2 131              
+\f{~@\lbr \j{str}~\rbr }
+is similar to \f{~\lbr \j{str}~\rbr  }, but instead of
+using one argument that is a list, all the remaining arguments
+are used as the list of arguments for the iteration.
+Example:
+                                    
+\code
+ (format nil "Pairs:~@\lbr <~S,~S>~\rbr\ ." 'a 1 'b 2 'c 3)
+\EV "Pairs: <A,1> <B,2> <C,3>."
+\endcode
+If the iteration is terminated before all the remaining arguments are
+consumed, then any arguments not processed by the iteration remain to be
+processed by any directives following the iteration construct.
+
+%% 22.3.2 132                                   
+\f{~:@\lbr \j{str}~\rbr  } 
+combines the features                              
+of \f{~:\lbr \j{str}~\rbr  }
+and \f{~@\lbr \j{str}~\rbr  }.
+All the remaining arguments
+are used, and each one must be a \term{list}.
+On each iteration, the next argument is 
+used as a \term{list} of arguments to \j{str}.
+Example:
+                                     
+\code
+ (format nil "Pairs:~:@\lbr <~S,~S>~\rbr\ ." 
+              '(a 1) '(b 2) '(c 3)) 
+\EV "Pairs: <A,1> <B,2> <C,3>."
+\endcode
+%% 22.3.2 133                                             
+Terminating the repetition construct with \f{~:\rbr } 
+instead of \f{~\rbr  }
+forces \j{str} to be processed at least once, even if the initial
+list of arguments is null. However, this will not override an explicit
+prefix parameter of zero.
+
+%% 22.3.2 134
+If \j{str} is empty, then an argument is used as \j{str}.  
+It must be a \term{format control}
+and precede any arguments processed by the iteration.  As an example,
+the following are equivalent:
+
+\code
+    (apply #'format stream string arguments)
+ \EQ (format stream "~1\{~:\}" string arguments)
+\endcode
+
+This will use \f{string} as a formatting string.  
+The \f{~1\lbr } says it will                 
+be processed at most once, and the \f{~:\rbr } 
+says it will be processed at least once.
+Therefore it is processed exactly once, using \f{arguments} as the arguments.
+This case may be handled more clearly by the \f{~?} directive,
+but this general feature of \f{~\lbr  }
+is more powerful than \f{~?}.
+
+\endsubsubsection%{Tilde Left-Brace: Iteration}
+
+\beginsubsubsection{Tilde Right-Brace: End of Iteration}
+\idxtext{Right-Brace (format directive)}\idxtext{Tilde Right-Brace (format directive)}
+
+%% 22.3.2 135               
+                               
+\f{~\}} terminates a \f{~\{}.
+The consequences of using it elsewhere are undefined.
+
+\endsubsubsection%{Tilde Right-Brace: End of Iteration}
+
+\beginsubsubsection{Tilde Question-Mark: Recursive Processing}
+\idxtext{Question-Mark (format directive)}\idxtext{Tilde Question-Mark (format directive)}
+
+%% Was "Indirection", now "Recursive Processing". -kmp 30-Aug-93
+
+%% 22.3.2 109       
+
+The next \j{arg} must be a \term{format control}, and the one after it a \term{list};
+both are consumed by the \f{~?} directive.
+The two are processed as a \param{control-string}, with the elements of the \term{list} 
+as the arguments.  Once the recursive processing
+has been finished, the processing of the control
+string containing the \f{~?} directive is resumed.
+Example:
+
+\code
+ (format nil "~? ~D" "<~A ~D>" '("Foo" 5) 7) \EV "<Foo 5> 7"
+ (format nil "~? ~D" "<~A ~D>" '("Foo" 5 14) 7) \EV "<Foo 5> 7"
+\endcode
+Note that in the second example three arguments are supplied
+to the \term{format string} \f{"<~A ~D>"}, but only two are processed
+and the third is therefore ignored.
+
+%% 22.3.2 110    
+With the \f{@}
+modifier, only one \j{arg} is directly consumed.
+The \j{arg} must be a \term{string}; 
+it is processed as part of the control
+string as if it had appeared in place of the \f{~@?} construct,
+and any directives in the recursively processed control string may      
+consume arguments of the control string containing the \f{~@?}
+directive.
+Example:
+
+\code
+ (format nil "~@? ~D" "<~A ~D>" "Foo" 5 7) \EV "<Foo 5> 7"
+ (format nil "~@? ~D" "<~A ~D>" "Foo" 5 14 7) \EV "<Foo 5> 14"
+\endcode
+
+\endsubsubsection%{Tilde Question-Mark: Recursive Processing}
+
+\endsubsection%{FORMAT Control-Flow Operations}
+
+\beginsubsection{FORMAT Miscellaneous Operations}
+
+\beginsubsubsection{Tilde Left-Paren: Case Conversion}
+\idxtext{Left-Paren (format directive)}\idxtext{Tilde Left-Paren (format directive)}
+
+%% 22.3.2 115             
+\f{~(\j{str}~)}
+
+The contained control string \j{str} is processed, and what it produces
+is subject to case conversion.
+
+%% 22.3.2 116
+With no flags, every \term{uppercase} \term{character}
+is converted to the corresponding \term{lowercase} \term{character}.
+
+%% 22.3.2 117   
+\f{~:(} capitalizes all words, as if by \funref{string-capitalize}.
+                        
+%% 22.3.2 118    
+\f{~@(} 
+capitalizes just the first word and forces the rest to lower
+case.
+
+%% 22.3.2 119               
+\f{~:@(} converts every lowercase character
+to the corresponding uppercase character.
+
+%% 22.3.2 120                    
+In this example \f{~@(} is used to cause the first word
+produced by \f{~@R} to be capitalized:
+
+\code
+ (format nil "~@R ~(~@R~)" 14 14) 
+\EV "XIV xiv"
+ (defun f (n) (format nil "~@(~R~) error~:P detected." n)) \EV F
+ (f 0) \EV "Zero errors detected."
+ (f 1) \EV "One error detected."
+ (f 23) \EV "Twenty-three errors detected."
+\endcode
+
+%% This next is from Pitman #36 (first public review):
+When case conversions appear nested, the outer conversion dominates,
+as illustrated in the following example:
+
+\code
+ (format nil "~@(how is ~:(BOB SMITH~)?~)")
+ \EV "How is bob smith?"
+ \NV "How is Bob Smith?"
+\endcode
+
+\endsubsubsection%{Tilde Left-Paren: Case Conversion}
+
+\beginsubsubsection{Tilde Right-Paren: End of Case Conversion}
+\idxtext{Right-Paren (format directive)}\idxtext{Tilde Right-Paren (format directive)}
+
+%% 22.3.2 127
+
+\f{~)} terminates a \f{~(}.
+The consequences of using it elsewhere are undefined.
+
+\endsubsubsection%{Tilde Right-Paren: End of Case Conversion}
+
+\beginsubsubsection{Tilde P: Plural}
+\idxtext{P (format directive)}\idxtext{Tilde P (format directive)}
+
+%% 22.3.2 35
+
+If \j{arg} is not \funref{eql} 
+to the integer \f{1}, a lowercase \f{s} is
+printed; if \j{arg} is \funref{eql} to \f{1}, nothing is printed.  
+If \j{arg} is a floating-point \f{1.0}, the \f{s} is
+printed.
+
+%% 22.3.2 36
+\f{~:P} does the same thing, 
+after doing a \f{~:*} to back up one argument;
+that is, it prints a lowercase \f{s} if the previous argument was not
+\f{1}.  
+
+%% 22.3.2 37 
+\f{~@P} 
+prints \f{y} if the argument is \f{1}, or \f{ies} if it is
+not.  \f{~:@P} does the same thing, but backs up first.
+
+\code
+ (format nil "~D tr~:@P/~D win~:P" 7 1) \EV "7 tries/1 win"
+ (format nil "~D tr~:@P/~D win~:P" 1 0) \EV "1 try/0 wins"
+ (format nil "~D tr~:@P/~D win~:P" 1 3) \EV "1 try/3 wins"
+\endcode
+
+\endsubsubsection%{Tilde P: Plural}
+
+\endsubsection%{FORMAT Miscellaneous Operations}
+
+\beginsubsection{FORMAT Miscellaneous Pseudo-Operations}
+
+\beginsubsubsection{Tilde Semicolon: Clause Separator}
+\idxtext{Semicolon (format directive)}\idxtext{Tilde Semicolon (format directive)}
+
+%% 22.3.2 126
+
+This separates clauses in \f{~[} and \f{~<} constructs.
+The consequences of using it elsewhere are undefined.
+
+\endsubsubsection%{Tilde Semicolon: Clause Separator}
+
+\beginsubsubsection{Tilde Circumflex: Escape Upward}
+\idxtext{Circumflex (format directive)}\idxtext{Tilde Circumflex (format directive)}
+
+%% 22.3.2 144         
+{\f{~\hat }}
+
+This is an escape construct.  If there are no more arguments remaining to
+be processed, then the immediately           
+enclosing \f{~\lbr  } or \f{~<} construct
+is terminated.  If there is no such enclosing construct, then the entire
+formatting operation is terminated.  
+In the \f{~<} case, the formatting
+is performed, but no more segments are processed before doing the
+justification.     
+\f{~\hat } may appear anywhere in a \f{~\lbr  }
+construct.
+
+\code
+ (setq donestr "Done.~{\hat} ~D warning~:P.~{\hat} ~D error~:P.")
+\EV "Done.~{\hat} ~D warning~:P.~{\hat} ~D error~:P."
+ (format nil donestr) \EV "Done."
+ (format nil donestr 3) \EV "Done. 3 warnings."
+ (format nil donestr 1 5) \EV "Done. 1 warning. 5 errors."
+\endcode
+                                
+%% 22.3.2 145
+If a prefix parameter is given, then termination occurs if the parameter
+is zero.  (Hence \f{~{\hat}} is equivalent to 
+\f{~\#{\hat}}.)  If two
+parameters are given, termination occurs if they are equal.
+\reviewer{Barmar: Which equality predicate?}  If three
+parameters are given, termination occurs if the first is less than or
+equal to the second and the second is less than or equal to the third.
+Of course, this is useless if all the prefix parameters are constants; at
+least one of them should be a \f{\#} or a \f{V} parameter.
+
+%% 22.3.2 146                                              
+If \f{~{\hat}} is used within a \f{~:\lbr  } 
+construct, then it terminates
+the current iteration step because in the standard case it tests for
+remaining arguments of the current step only; the next iteration step
+commences immediately.  \f{~:{\hat}} is used to terminate
+the iteration process.
+\issue{FORMAT-COLON-UPARROW-SCOPE}
+\f{~:{\hat}} 
+may be used only if the command it would terminate is 
+\f{~:\lbr  } or \f{~:@\lbr  }.
+The entire iteration process is terminated if and only if the sublist that is
+supplying the arguments for the current iteration step is the last sublist in
+the case of \f{~:\lbr }, 
+or the last \funref{format}        
+argument in the case of \f{~:@\lbr  }. 
+\f{~:{\hat}} is not
+equivalent to \f{~\#:{\hat}}; 
+the latter terminates the entire iteration if and only if no
+arguments remain for the current iteration step.
+For example:
+
+\code
+ (format nil "~:\lbr\ ~@?~:\hat\ ...~\rbr\ " '(("a") ("b"))) \EV "a...b"
+\endcode
+\endissue{FORMAT-COLON-UPARROW-SCOPE}
+
+%% 22.3.2 147     
+If \f{~{\hat}} appears within a control string being processed
+under the control of a \f{~?} directive, but not within
+any \f{~\lbr  } or \f{~<} construct within that string,
+then the string being
+processed will be terminated, thereby ending processing
+of the \f{~?} directive.  Processing then
+continues within the string   
+containing the \f{~?} directive at the point following that directive.
+
+%% 22.3.2 148     
+If \f{~{\hat}}                                          
+appears within a \f{~[} or \f{~(} construct,
+then all the commands up to the \f{~{\hat}} are properly selected
+or case-converted,                   
+the \f{~[} or \f{~(} processing is terminated,
+and the outward search continues         
+for a \f{~\lbr  } or \f{~<} construct
+to be terminated.  For example:
+                            
+\code
+ (setq tellstr "~@(~@[~R~]~{\hat} ~A!~)")
+\EV "~@(~@[~R~]~{\hat} ~A!~)"
+ (format nil tellstr 23) \EV "Twenty-three!"
+ (format nil tellstr nil "losers") \EV " Losers!"
+ (format nil tellstr 23 "losers") \EV "Twenty-three losers!"
+\endcode
+
+%% 22.3.2 149                                     
+Following are examples of the use of \f{~{\hat}} 
+within a \f{~<} construct.
+
+\code
+ (format nil "~15<~S~;~{\hat}~S~;~{\hat}~S~>" 'foo)
+\EV  "            FOO"
+ (format nil "~15<~S~;~{\hat}~S~;~{\hat}~S~>" 'foo 'bar)
+\EV  "FOO         BAR"
+ (format nil "~15<~S~;~{\hat}~S~;~{\hat}~S~>" 'foo 'bar 'baz)
+\EV  "FOO   BAR   BAZ"
+\endcode
+
+\endsubsubsection%{Tilde Circumflex: Escape Upward}
+
+\beginsubsubsection{Tilde Newline: Ignored Newline}
+\idxtext{Newline (format directive)}\idxtext{Tilde Newline (format directive)}
+
+%% 22.3.2 100
+
+\term{Tilde} immediately followed by a \term{newline} ignores the \term{newline}
+and any following non-newline \term{whitespace}\meaning{1} characters.
+With a \f{:},
+ the \term{newline} is ignored, 
+ but any following \term{whitespace}\meaning{1} is left in place.
+With an \f{@},
+ the \term{newline} is left in place,
+ but any following \term{whitespace}\meaning{1} is ignored.
+For example:
+
+%% 22.3.2 101
+\code
+ (defun type-clash-error (fn nargs argnum right-type wrong-type)
+   (format *error-output*
+           "~&~S requires its ~:[~:R~;~*~]~ 
+           argument to be of type ~S,~%but it was called ~
+           with an argument of type ~S.~%"
+           fn (eql nargs 1) argnum right-type wrong-type))
+ (type-clash-error 'aref nil 2 'integer 'vector)  prints:
+AREF requires its second argument to be of type INTEGER,
+but it was called with an argument of type VECTOR.
+NIL
+ (type-clash-error 'car 1 1 'list 'short-float)  prints:
+CAR requires its argument to be of type LIST,
+but it was called with an argument of type SHORT-FLOAT.
+NIL
+\endcode
+Note that in this example newlines appear in the output only as specified
+by the \f{~\&} and \f{~\%} directives; the 
+actual newline characters
+in the control string are suppressed because each is preceded by a tilde.
+                                                                     
+\endsubsubsection%{Tilde Newline: Ignored Newline}
+
+\endsubsection%{FORMAT Miscellaneous Pseudo-Operations}
+
+\beginsubsection{Additional Information about FORMAT Operations}
+
+\beginsubsubsection{Nesting of FORMAT Operations}
+
+%% 22.3.2 112
+%% this paragraph was left out
+%% 22.3.2 113
+The case-conversion, conditional, iteration, and justification
+constructs can contain other formatting constructs by bracketing them.
+These constructs must nest properly with respect to each other.
+For example, it is not legitimate to put the start of a case-conversion
+construct in each arm of a conditional and the
+end of the case-conversion construct outside the conditional:
+
+\code
+ (format nil "~:[abc~:@(def~;ghi~
+:@(jkl~]mno~)" x) ;Invalid!
+\endcode
+This notation is invalid because the \f{~[...~;...~]}
+and \f{~(...~)} constructs are not properly nested.
+                                   
+%% 22.3.2 114                                           
+The processing indirection caused by the \f{~?} directive
+is also a kind of nesting for the purposes of this rule of proper nesting.
+It is not permitted to
+start a bracketing construct within a string processed
+under control of a \f{~?}                                      
+directive and end the construct at some point after the \f{~?} construct
+in the string containing that construct, or vice versa.
+For example, this situation is invalid:
+                                                                               
+\code
+ (format nil "~@?ghi~)" "abc~@(def") ;Invalid!
+\endcode
+This notation
+is invalid because the \f{~?}
+and \f{~(...~)} constructs are not properly nested.
+
+\endsubsubsection%{Nesting of FORMAT Operations}
+
+\beginsubsubsection{Missing and Additional FORMAT Arguments}
+
+%% 22.3.3 3
+The consequences are undefined if no \param{arg} remains for a directive 
+requiring an argument.  However, it is permissible for one or more \param{args} 
+to remain unprocessed by a directive; such \param{args} are ignored.
+ 
+\endsubsubsection%{Missing and Additional FORMAT Arguments}
+
+\beginsubsubsection{Additional FORMAT Parameters}
+
+%% 22.3.3 11
+The consequences are undefined if a format directive is given more parameters 
+than it is described here as accepting.
+
+\endsubsubsection%{Additional FORMAT Parameters}
+
+\beginsubsubsection{Undefined FORMAT Modifier Combinations}
+
+%% 22.3.3 11
+The consequences are undefined if \term{colon} or \term{at-sign} modifiers
+are given to a directive in a combination not specifically described
+here as being meaningful.
+
+\endsubsubsection%{Undefined FORMAT Modifier Combinations}
+
+\endsubsection%{Additional Information about FORMAT Operations}
+
+\beginsubsection{Examples of FORMAT}
+
+%% 22.3.2 12
+%% 22.3.2 13
+%% 22.3.2 14                                                                 
+\code
+ (format nil "foo") \EV "foo"
+ (setq x 5) \EV 5
+ (format nil "The answer is ~D." x) \EV "The answer is 5."
+ (format nil "The answer is ~3D." x) \EV "The answer is   5."
+ (format nil "The answer is ~3,'0D." x) \EV "The answer is 005."
+ (format nil "The answer is ~:D." (expt 47 x))
+\EV "The answer is 229,345,007."
+ (setq y "elephant") \EV "elephant"
+ (format nil "Look at the ~A!" y) \EV "Look at the elephant!"
+ (setq n 3) \EV 3
+ (format nil "~D item~:P found." n) \EV "3 items found."
+ (format nil "~R dog~:[s are~; is~] here." n (= n 1))
+\EV "three dogs are here."
+ (format nil "~R dog~:*~[s are~; is~:;s are~] here." n)
+\EV "three dogs are here."
+ (format nil "Here ~[are~;is~:;are~] ~:*~R pupp~:@P." n)
+\EV "Here are three puppies."
+\endcode
+%% 22.3.2 53
+\code
+ (defun foo (x)
+   (format nil "~6,2F|~6,2,1,'*F|~6,2,,'?F|~6F|~,2F|~F"
+           x x x x x x)) \EV FOO
+ (foo 3.14159)  \EV "  3.14| 31.42|  3.14|3.1416|3.14|3.14159"
+ (foo -3.14159) \EV " -3.14|-31.42| -3.14|-3.142|-3.14|-3.14159"
+ (foo 100.0)    \EV "100.00|******|100.00| 100.0|100.00|100.0"
+ (foo 1234.0)   \EV "1234.00|******|??????|1234.0|1234.00|1234.0"
+ (foo 0.006)    \EV "  0.01|  0.06|  0.01| 0.006|0.01|0.006"
+\endcode
+%% 22.3.2 73
+\code
+ (defun foo (x)  
+    (format nil
+           "~9,2,1,,'*E|~10,3,2,2,'?,,'\$E|~
+            ~9,3,2,-2,'%@E|~9,2E"
+           x x x x))
+ (foo 3.14159)  \EV "  3.14E+0| 31.42\$-01|+.003E+03|  3.14E+0"
+ (foo -3.14159) \EV " -3.14E+0|-31.42\$-01|-.003E+03| -3.14E+0"
+ (foo 1100.0)   \EV "  1.10E+3| 11.00\$+02|+.001E+06|  1.10E+3"
+ (foo 1100.0L0) \EV "  1.10L+3| 11.00\$+02|+.001L+06|  1.10L+3"
+ (foo 1.1E13)   \EV "*********| 11.00\$+12|+.001E+16| 1.10E+13"
+ (foo 1.1L120)  \EV "*********|??????????|%%%%%%%%%|1.10L+120"
+ (foo 1.1L1200) \EV "*********|??????????|%%%%%%%%%|1.10L+1200"
+\endcode
+As an example of the effects of varying the scale factor, the code
+
+\code
+ (dotimes (k 13)
+   (format t "~%Scale factor ~2D: |~13,6,2,VE|"
+           (- k 5) (- k 5) 3.14159))
+\endcode
+produces the following output:
+
+\code
+Scale factor -5: | 0.000003E+06|
+Scale factor -4: | 0.000031E+05|
+Scale factor -3: | 0.000314E+04|
+Scale factor -2: | 0.003142E+03|
+Scale factor -1: | 0.031416E+02|
+Scale factor  0: | 0.314159E+01|
+Scale factor  1: | 3.141590E+00|
+Scale factor  2: | 31.41590E-01|
+Scale factor  3: | 314.1590E-02|
+Scale factor  4: | 3141.590E-03|
+Scale factor  5: | 31415.90E-04|
+Scale factor  6: | 314159.0E-05|
+Scale factor  7: | 3141590.E-06|
+\endcode
+
+%% 22.3.2 86
+\code
+ (defun foo (x)
+   (format nil "~9,2,1,,'*G|~9,3,2,3,'?,,'\$G|~9,3,2,0,'%G|~9,2G"
+          x x x x))                                     
+ (foo 0.0314159) \EV "  3.14E-2|314.2\$-04|0.314E-01|  3.14E-2"
+ (foo 0.314159)  \EV "  0.31   |0.314    |0.314    | 0.31    "
+ (foo 3.14159)   \EV "   3.1   | 3.14    | 3.14    |  3.1    "
+ (foo 31.4159)   \EV "   31.   | 31.4    | 31.4    |  31.    "
+ (foo 314.159)   \EV "  3.14E+2| 314.    | 314.    |  3.14E+2"
+ (foo 3141.59)   \EV "  3.14E+3|314.2\$+01|0.314E+04|  3.14E+3"
+ (foo 3141.59L0) \EV "  3.14L+3|314.2\$+01|0.314L+04|  3.14L+3"
+ (foo 3.14E12)   \EV "*********|314.0\$+10|0.314E+13| 3.14E+12"
+ (foo 3.14L120)  \EV "*********|?????????|%%%%%%%%%|3.14L+120"
+ (foo 3.14L1200) \EV "*********|?????????|%%%%%%%%%|3.14L+1200"
+\endcode
+
+%% 22.3.2 138   
+\code
+ (format nil "~10<foo~;bar~>")   \EV "foo    bar"
+ (format nil "~10:<foo~;bar~>")  \EV "  foo  bar"
+ (format nil "~10<foobar~>")     \EV "    foobar"
+ (format nil "~10:<foobar~>")    \EV "    foobar"
+ (format nil "~10:@<foo~;bar~>") \EV "  foo bar "
+ (format nil "~10@<foobar~>")    \EV "foobar    "
+ (format nil "~10:@<foobar~>")   \EV "  foobar  "
+\endcode
+
+\issue{PATHNAME-PRINT-READ:SHARPSIGN-P}
+\code
+  (FORMAT NIL "Written to ~A." #P"foo.bin")
+  \EV "Written to foo.bin."
+\endcode
+\endissue{PATHNAME-PRINT-READ:SHARPSIGN-P}
+
+\endsubsection%{Examples of FORMAT}
+
+\beginsubsection{Notes about FORMAT}
+
+%% 22.3.2 5
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+Formatted output is performed not only by \funref{format},
+but by certain other functions that accept a \term{format control}
+the way \funref{format} does.  For example, error-signaling functions
+such as \funref{cerror} accept \term{format controls}.
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+Note that the meaning of \nil\ and \t\ as destinations to \funref{format} 
+are different than those of \nil\ and \t\ as \term{stream designators}.
+
+The \f{~{\hat}} should appear only at the beginning of a \f{~<} clause,
+because it aborts the entire clause in which it appears (as well as
+all following clauses).                                     
+
+\endsubsection%{Notes about FORMAT}

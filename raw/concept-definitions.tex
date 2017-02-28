@@ -1,0 +1,1401 @@
+%-*- Mode: TeX -*-
+
+%%Definitions
+This section contains notational conventions and definitions of terms
+used in this manual.
+
+\beginsubSection{Notational Conventions}\idxtext{notation}
+
+The following notational conventions are used throughout this document.
+
+%========================================
+\beginsubsubsection{Font Key}\idxtext{font key}
+
+Fonts are used in this document to convey information.
+
+\beginlist
+
+\itemitem{\term{name}} 
+
+Denotes a formal term whose meaning is defined in the Glossary.
+When this font is used, the Glossary definition takes precedence 
+over normal English usage.
+
+Sometimes a glossary term appears subscripted, 
+as in ``\term{whitespace}\meaning{2}.''  
+Such a notation selects one particular Glossary definition out of several,
+in this case the second.
+The subscript notation for Glossary terms is generally used where the
+context might be insufficient to disambiguate among the available definitions.
+
+\itemitem{\newterm{name}} 
+
+Denotes the introduction of a formal term locally to the current text.
+There is still a corresponding glossary entry, and is formally equivalent
+to a use of ``\term{name},'' but the hope is that making such uses 
+conspicuous will save the reader a trip to the glossary in some cases.
+
+\itemitem{\misc{name}}
+                           
+Denotes a symbol in \thepackage{common-lisp}.
+For information about \term{case} conventions,
+\seesection\CaseInSymbols.
+
+\itemitem{\f{name}} 
+
+Denotes a sample \term{name} or piece of \term{code} that a programmer
+might write in \clisp.
+
+This font is also used for certain \term{standardized} names that are not
+names of \term{external symbols} of \thepackage{common-lisp}, 
+such as \term{keywords}\meaning{1},
+        \term{package} \term{names},
+    and \term{loop keywords}.
+
+\itemitem{\param{name}} 
+
+Denotes the name of a \term{parameter} or \term{value}.
+
+In some situations the notation ``\metaparam{name}'' (\ie the same font,
+but with surrounding ``angle brackets'') is used instead in order to
+provide better visual separation from surrounding characters.  These
+``angle brackets'' are metasyntactic, and never actually appear in program
+input or output.
+
+\endlist
+
+\endsubsubsection%{Font Key}
+%========================================
+\beginsubsubsection{Modified BNF Syntax}\idxtext{bnf key}
+\DefineSection{ModifiedBNF}
+
+This specification uses an extended Backus Normal Form (BNF) to
+describe the syntax of \clisp\ \term{macro forms} and \term{special forms}.
+This section discusses the syntax of BNF expressions.
+
+\beginsubsubsubsection{Splicing in Modified BNF Syntax}
+
+The primary extension used is the following:
+
+$$\hbox{\interleave{$O$}}$$
+
+An expression of this form appears whenever a list of elements is
+to be spliced into a larger structure and the elements can appear in
+any order. The symbol $O$ represents a description of the syntax of
+some number of syntactic elements to be spliced; that description must
+be of the form
+
+$$O\sub 1\ \vert\ \ldots\ \vert\ O\sub l$$
+
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+\noindent where each $O\sub i$ can be of the form $S$ or of
+the form \star{$S$} or of the form \one{$S$}.
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+The expression \interleave{$O$} means that a list of the form
+
+$$(O\sub{i\sub 1}\ldots O\sub{i\sub j})\quad 1\leq j$$
+
+\noindent is spliced into the enclosing expression,
+such that if $n \neq m$ and $1\leq n,m\leq j$,
+then either $O\sub{i\sub n}\neq O\sub{i\sub m}$
+         or $O\sub{i\sub n} = O\sub{i\sub m} = Q\sub{k}$, 
+where for some $1\leq k \leq n$, $O\sub{k}$ is of the form \star{$Q\sub{k}$}.
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+%Added to accomodate new LOOP BNF. -kmp 1-May-93
+Furthermore, for each $O\sub{i\sub n}$ that is of the form \one{$Q\sub{k}$},
+that element is required to appear somewhere in the list to be spliced.
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+
+For example, the expression
+
+\f{(x \interleave{A | \star{B} | C} y)}
+
+\noindent means that at most one {\tt A}, any number of {\tt B}'s, and
+at most one {\tt C} can occur in any order.
+It is a description of any of these:
+
+\code
+ (x y)
+ (x B A C y)
+ (x A B B B B B C y)
+ (x C B A B B B y)
+\endcode
+
+\noindent but not any of these:
+
+\code
+ (x B B A A C C y)
+ (x C B C y)
+\endcode
+
+\noindent In the first case, both {\tt A} and {\tt C} appear too often,
+and in the second case {\tt C} appears too often.
+
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+% I added this notation to make the LOOP bvl easier to specify. -kmp 29-Apr-93
+
+The notation \plus{\interleave{$O\sub1$ | $O\sub2$ | $\ldots$}} 
+adds the additional restriction that at least one item from among the possible
+choices must be used.  For example:
+
+\f{(x \plus{\interleave{A | \star{B} | C}} y)}
+
+\noindent means that at most one {\tt A}, any number of {\tt B}'s, and
+at most one {\tt C} can occur in any order, but that in any case at least
+one of these options must be selected.
+It is a description of any of these:
+
+\code
+ (x B y)
+ (x B A C y)
+ (x A B B B B B C y)
+ (x C B A B B B y)
+\endcode
+
+\noindent but not any of these:
+
+\code
+ (x y)
+ (x B B A A C C y)
+ (x C B C y)
+\endcode
+
+\noindent In the first case, no item was used;
+in the second case, both {\tt A} and {\tt C} appear too often;
+and in the third case {\tt C} appears too often.
+
+Also, the expression:
+
+\f{(x \interleave{\one{A} | \one{B} | C} y)}
+
+\noindent can generate exactly these and no others:
+
+\code
+ (x A B C y)
+ (x A C B y)
+ (x A B y)
+ (x B A C y)
+ (x B C A y)
+ (x B A y)
+ (x C A B y)
+ (x C B A y)
+\endcode
+
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+
+\endsubsubsubsection%{Splicing in Modified BNF Syntax}
+
+\beginsubsubsubsection{Indirection in Modified BNF Syntax}
+
+An indirection extension is introduced in order to make this
+new syntax more readable:
+
+$$\hbox{\down{O}}$$
+
+\noindent If \param{O} is a non-terminal symbol, the right-hand side
+of its definition is substituted for the entire expression 
+\down{O}.  For example, the following BNF is equivalent to
+the BNF in the previous example:
+
+\f{(x \interleave{\down{O}} y)}
+\Vskip 1pc!
+\auxbnf{O}{\f{A} | \star{\f{B}} | \f{C}}
+\Vskip 1pc!
+
+\endsubsubsubsection%{Indirection in Modified BNF Syntax}
+
+\beginsubsubsubsection{Additional Uses for Indirect Definitions in Modified BNF Syntax}
+
+In some cases, an auxiliary definition in the BNF might appear to be unused
+within the BNF, but might still be useful elsewhere.  For example, consider the
+following definitions:
+
+\DefmacWithValues case
+		  {keyform  \stardown{normal-clause} \brac{\down{otherwise-clause}}}
+		  {\starparam{result}}
+\DefmacWithValues ccase
+		  {keyplace \stardown{normal-clause}}
+		  {\starparam{result}}
+\DefmacWithValues ecase
+		  {keyform  \stardown{normal-clause}}
+		  {\starparam{result}}
+
+\auxbnf{normal-clause}{\paren{keys \starparam{form}}}
+\auxbnf{otherwise-clause}{\paren{\curly{otherwise | t} \starparam{form}}}
+\auxbnf{clause}{normal-clause | otherwise-clause}
+\Vskip 1pc!
+
+Here the term ``\param{clause}'' might appear to be ``dead'' in that it
+is not used in the BNF.  However, the purpose of the BNF is not just to guide parsing,
+but also to define useful terms for reference in the descriptive text which follows.
+As such, the term ``\param{clause}'' might appear in text that follows,
+as shorthand for ``\param{normal-clause} or \param{otherwise-clause}.''
+
+\endsubsubsubsection%{Additional Uses for Indirect Definitions in Modified BNF Syntax}
+
+\endsubsubsection%{Modified BNF Syntax}
+%========================================
+\beginsubsubsection{Special Symbols}
+
+The special symbols described here are used as a notational convenience
+within this document, and are part of neither the \clisp\ language nor
+its environment.
+
+\beginlist
+\itemitem{\EV}
+
+This indicates evaluation.
+For example:
+
+\code
+ (+ 4 5) \EV 9 
+\endcode
+This means that the result of
+evaluating the \term{form} \f{(+ 4 5)} is \f{9}.
+                                                                 
+%!!! Are the first two of these notations still used?  Maybe remove...
+If a \term{form} returns \term{multiple values}, those values might
+be shown separated by spaces, line breaks, or commas.
+For example:
+
+\code
+ (truncate 7 5)
+\EV 1 2
+ (truncate 7 5) 
+\EV 1
+   2
+ (truncate 7 5)
+\EV 1, 2
+\endcode
+
+Each of the above three examples is equivalent, and specifies
+that \f{(truncate 7 5)} returns two values, which are \f{1} and \f{2}.
+
+Some \term{conforming implementations} actually type an arrow (or some
+other indicator) before showing return values, while others do not.
+
+\itemitem{\OV}
+
+The notation ``{\OV}'' is used to denote one of several possible
+alternate results.  The example
+
+\code
+ (char-name #\\a)
+\EV NIL
+\OV "LOWERCASE-a"
+\OV "Small-A"
+\OV "LA01"
+\endcode
+
+indicates that \nil, \f{"LOWERCASE-a"}, \f{"Small-A"}, \f{"LA01"} are
+among the possible results of \f{(char-name \#\\a)}---each with equal preference.
+Unless explicitly specified otherwise, it should not be assumed that the set of possible 
+results shown is exhaustive.
+Formally, the above example is equivalent to
+
+\code
+ (char-name #\\a) \EV \term{implementation-dependent}
+\endcode
+
+but it is intended to provide additional information to illustrate some
+of the ways in which it is permitted for implementations to diverge.
+
+\itemitem{\NV}
+
+The notation ``{\NV}'' is used to denote a result which is not possible.
+This might be used, for example, in order to emphasize a situation where
+some anticipated misconception might lead the reader to falsely believe
+that the result might be possible.  For example,
+
+\code
+ (function-lambda-expression 
+    (funcall #'(lambda (x) #'(lambda () x)) nil))
+\EV NIL, \term{true}, NIL
+\OV (LAMBDA () X), \term{true}, NIL
+\NV NIL, \term{false}, NIL
+\NV (LAMBDA () X), \term{false}, NIL
+\endcode
+
+%% 1.2.3 3
+\itemitem{\EQ} 
+
+This indicates code equivalence. For example:
+
+\code
+ (gcd x (gcd y z)) \EQ (gcd (gcd x y) z)
+\endcode
+This means that the results and observable side-effects of evaluating
+the \term{form}
+\hbox{\f{(gcd x (gcd y z))} } are always the same as the results
+and observable side-effects of
+\hbox{\f{(gcd (gcd x y) z)} } for any 
+\f{x}, \f{y}, and \f{z}.
+                      
+%!!! Need to expand on the definition of observable side-effects.
+
+\itemitem{{\OUT}}
+
+\clisp\ specifies input and output with respect to a non-interactive stream model.
+The specific details of how interactive input and output are mapped onto that
+non-interactive model are \term{implementation-defined}.
+
+For example, \term{conforming implementations} are permitted to differ in issues 
+of how interactive input is terminated.  For example, \thefunction{read}
+terminates when the final delimiter is typed on a non-interactive stream.
+In some \term{implementations}, an interactive call to \funref{read} returns
+as soon as the final delimiter is typed, even if that delimiter is not a \term{newline}.
+In other \term{implementations}, a final \term{newline} is always required.
+In still other \term{implementations}, there might be a command which ``activates''
+a buffer full of input without the command itself being visible on the program's
+input stream.
+
+In the examples in this document, the notation ``{\OUT}'' precedes 
+lines where interactive input and output occurs.  Within such a scenario,
+``\IN{this notation}'' notates user input.
+
+For example, the notation
+
+\code
+ (+ 1 (print (+ (sqrt (read)) (sqrt (read)))))
+\OUT \IN{9 16 }
+\OUT 7
+\EV 8
+\endcode
+
+shows an interaction in which
+  ``\f{(+ 1 (print (+ (sqrt (read)) (sqrt (read)))))}''
+    is a \term{form} to be \term{evaluated},
+  ``\f{9 16 }'' is interactive input,
+  ``\f{7}'' is interactive output, and 
+  ``\f{8}'' is the \term{value} \term{yielded} from the \term{evaluation}.
+
+The use of this notation is intended to disguise small differences 
+in interactive input and output behavior between \term{implementations}.
+
+Sometimes, the non-interactive stream model calls for a \term{newline}.
+How that \term{newline} character is interactively entered is an 
+\term{implementation-defined} detail of the user interface, but in that
+case, either the notation ``\NewlineChar'' or ``\CRLF'' might be used.
+
+\code
+ (progn (format t "~&Who? ") (read-line))
+\OUT Who? \IN{Fred, Mary, and Sally\CRLF}
+\EV "Fred, Mary, and Sally", \term{false}
+\endcode
+
+\endlist
+
+\endsubsubsection%{Special Symbols}
+%========================================
+\beginsubsubsection{Objects with Multiple Notations}
+
+Some \term{objects} in \clisp\ can be notated in more than one way.
+In such situations, the choice of which notation to use is technically arbitrary,
+but conventions may exist which convey a ``point of view'' or ``sense of intent.''
+
+%----------------------------------------
+\beginsubsubsubsection{Case in Symbols}\idxtext{case in symbol names}
+\DefineSection{CaseInSymbols}
+
+While \term{case} is significant in the process of \term{interning} a \term{symbol},
+the \term{Lisp reader}, by default, attempts to canonicalize the case of a
+\term{symbol} prior to interning; \seesection\ReadtableCaseReadEffect.
+As such, case in \term{symbols} is not, by default, significant.
+Throughout this document, except as explicitly noted otherwise,
+the case in which a \term{symbol} appears is not significant; 
+that is, \f{HELLO}, \f{Hello}, \f{hElLo}, and \f{hello} are
+all equivalent ways to denote a symbol whose name is \f{"HELLO"}.
+
+The characters \term{backslash} and \term{vertical-bar} are used to explicitly
+quote the \term{case} and other parsing-related 
+%was "attributes" but now that attributes has formaly meaning, 
+%not sure if it's too limiting here, so use a general term. -kmp 26-Jan-92
+aspects
+of characters.  As such,
+the notations \f{|hello|} and \f{\\h\\e\\l\\l\\o} are equivalent ways
+to refer to a symbol whose name is \f{"hello"}, and which is \term{distinct} from
+any symbol whose name is \f{"HELLO"}.
+
+The \term{symbols} that correspond to \clisp\ \term{defined names}
+have \term{uppercase} names even though their names generally appear
+in \term{lowercase} in this document.
+
+\endsubsubsubsection%{Case in Symbols}
+%----------------------------------------
+\beginsubsubsubsection{Numbers}
+
+%% 1.2.1 1
+Although \clisp\ provides a variety of ways for programs to manipulate the
+input and output radix for rational numbers, all numbers in this document
+are in decimal notation unless explicitly noted otherwise.
+
+\endsubsubsubsection%{Numbers}
+%----------------------------------------
+\beginsubsubsubsection{Use of the Dot Character}
+
+%% 1.2.5 9
+The dot appearing by itself in an \term{expression} such as
+
+\f{(\param{item1} \param{item2} {\dot} \param{tail})}
+
+means that \param{tail} represents a \term{list} of \term{objects} 
+at the end of a list.  For example,
+
+\f{(A B C {\dot} (D E F))}
+
+is notationally equivalent to:
+
+\f{(A B C D E F)}
+
+Although \term{dot} is a valid constituent character in a symbol, no 
+\term{standardized} \term{symbols} contain the character \term{dot},
+so a period that follows a reference to a \term{symbol} at the end of
+a sentence in this document should always be interpreted as a period
+and never as part of the \term{symbol}'s \term{name}.
+For example, within this document, a sentence such as
+ ``This sample sentence refers to the symbol \funref{car}.'' 
+% confusion about fonts below made more consistent w/previous section
+% on symbol names  --sjl 13 Mar 1992
+%refers to a function named ``\funref{car}'' with three letters in its name,
+%and never to a four-letter symbol ``\funref{car.}''
+refers to a symbol whose name is \f{"CAR"} (with three letters),
+and never to a four-letter symbol \f{"CAR."}
+
+\endsubsubsubsection%{Use of the Dot Character}
+%----------------------------------------
+\beginsubsubsubsection{NIL}\idxterm{nil}\idxterm{()}\idxref{nil}
+
+\nil\ has a variety of meanings.
+It is a \term{symbol} in \thepackage{common-lisp} with the \term{name} \f{"NIL"},
+it is \term{boolean} (and \term{generalized boolean}) \term{false},
+it is the \term{empty list},
+and it is the \term{name} of the \term{empty type} (a \term{subtype} of all \term{types}).
+
+Within \clisp, \nil\ can be notated interchangeably as either \f{NIL} or \f{()}.
+By convention, the choice of notation offers a hint as to which of its many
+roles it is playing.
+
+\showthree{Notations for NIL}{
+\hfil\b{For Evaluation?}&\hfil\b{Notation}\hfil&\b{Typically Implied Role}\cr
+\noalign{\vskip 2pt\hrule\vskip 2pt}
+Yes&\f{nil}&use as a \term{boolean}.\cr
+Yes&\f{'nil}&use as a \term{symbol}.\cr
+Yes&\f{'()}&use as an \term{empty list}\cr
+No&\f{nil}&use as a \term{symbol} or \term{boolean}.\cr
+No&\f{()}&use as an \term{empty list}.\cr
+}
+
+Within this document only, \nil\ is also sometimes notated as \term{false} to
+emphasize its role as a \term{boolean}.
+
+For example:
+
+\code
+ (print ())                          ;avoided
+ (defun three nil 3)                 ;avoided 
+ '(nil nil)                          ;list of two symbols
+ '(() ())                            ;list of empty lists
+ (defun three () 3)                  ;Emphasize empty parameter list.
+ (append '() '()) \EV ()              ;Emphasize use of empty lists
+ (not nil) \EV \term{true}                   ;Emphasize use as Boolean false
+ (get 'nil 'color)                   ;Emphasize use as a symbol
+\endcode
+
+A \term{function} is sometimes said to ``be \term{false}'' or ``be \term{true}''
+in some circumstance.
+Since no \term{function} object can be the same as \nil\ 
+and all \term{function} \term{objects} represent \term{true} when viewed as \term{booleans},
+it would be meaningless to say that the \term{function} was literally \term{false} 
+and uninteresting to say that it was literally \term{true}.
+Instead, these phrases are just traditional alternative ways of saying that the
+\term{function} ``returns \term{false}'' or ``returns \term{true},'' respectively.
+
+\endsubsubsubsection%{NIL}
+
+\endsubsubsection%{Objects with Multiple Notations}
+
+%========================================
+\beginsubsubsection{Designators}
+\DefineSection{Designators}
+
+A \newterm{designator} is an \term{object} that denotes another \term{object}.
+
+%!!! RPG: Not clear.  Rewrite.
+Where a \term{parameter} of an \term{operator} is described as a \term{designator},
+the description of the \term{operator} is written in a way that assumes that
+the value of the \term{parameter} is the denoted \term{object};
+that is, that the \term{parameter} is already of the denoted \term{type}.
+(The specific nature of the \term{object} denoted by
+   a ``\metavar{type} \term{designator}''
+or a ``\term{designator} for a \metavar{type}'' 
+can be found in the Glossary entry for ``\metavar{type} \term{designator}.'')
+
+For example, ``\nil'' and ``\thevalueof{*standard-output*}'' are operationally
+indistinguishable as \term{stream designators}.  Similarly, 
+the \term{symbol} \f{foo} and the \term{string} \f{"FOO"} 
+are operationally indistinguishable as \term{string designators}.  
+
+Except as otherwise noted, in a situation where the denoted \term{object} 
+might be used multiple times, it is \term{implementation-dependent}
+whether the \term{object} is coerced only once or whether the coercion occurs
+each time the \term{object} must be used.
+
+For example, \funref{mapcar} receives a \term{function designator} as an argument,
+and its description is written as if this were simply a function.  In fact, it
+is \term{implementation-dependent} whether the \term{function designator} is 
+coerced right away or whether it is carried around internally in the form that
+it was given as an \term{argument} and re-coerced each time it is needed.  In most
+cases, \term{conforming programs} cannot detect the distinction, but there are some 
+pathological situations (particularly those involving self-redefining or 
+mutually-redefining functions) which do conform and which can detect this difference.
+The following program is a \term{conforming program}, but might or might not have
+portably correct results, depending on whether its correctness depends on one or
+the other of the results:
+
+\code
+ (defun add-some (x) 
+   (defun add-some (x) (+ x 2))
+   (+ x 1)) \EV ADD-SOME
+ (mapcar 'add-some '(1 2 3 4))
+\EV (2 3 4 5)
+\OV (2 4 5 6)
+\endcode
+
+In a few rare situations, there may be a need in a dictionary entry
+to refer to the \term{object} that was the original \term{designator}
+for a \term{parameter}.
+Since naming the \term{parameter} would refer to the denoted \term{object},
+the phrase ``the \metavar{parameter-name} \term{designator}'' 
+can be used to refer to the \term{designator} which was the \term{argument}
+from which the \term{value} of \metavar{parameter-name} was computed.
+
+\endsubsubsection%{Designators}
+%========================================
+\beginsubsubsection{Nonsense Words}\idxcode{foo}\idxcode{bar}\idxcode{baz}\idxcode{quux}
+
+When a word having no pre-attached semantics is required (\eg in an
+example), it is common in the Lisp community to use one of the words
+``foo,'' ``bar,'' ``baz,'' and ``quux.''  For example, in
+
+\code
+ (defun foo (x) (+ x 1))
+\endcode
+the use of the name \f{foo} is just a shorthand way of saying 
+``please substitute your favorite name here.''
+
+These nonsense words have gained such prevalance of usage, that it is
+commonplace for newcomers to the community to begin to wonder if there
+is an attached semantics which they are overlooking---there is not.
+
+\endsubsubsection%{Nonsense Words}
+
+\endsubSection%{Notational Conventions}
+
+%!!! Barmar thinks \secref\InterpretingDictionaryEntries
+%    should move to someplace around here.
+
+\beginsubSection{Error Terminology}\idxtext{error terminology}
+\DefineSection{ErrorTerms}
+
+Situations in which errors might, should, or must be signaled are described
+in the standard.  The wording used to describe such situations is intended
+to have precise meaning. The following list is a glossary of those meanings.
+
+\beginlist
+\itemitem{\b{Safe code}}\idxterm{safe}
+
+This is \term{code} processed with the \declref{safety} optimization 
+at its highest setting (\f{3}).  \declref{safety} is a lexical property
+of code.  The phrase ``the function \f{F} should signal an error'' 
+means that if \f{F} is invoked from code processed with the highest
+\declref{safety} optimization, an error is signaled.
+It is \term{implementation-dependent} whether \f{F} or the calling 
+code signals the error.
+
+\itemitem{\b{Unsafe code}}\idxterm{unsafe}
+
+This is code processed with lower safety levels.
+		        
+Unsafe code might do error checking.  Implementations are permitted to
+treat all code as safe code all the time.
+                        
+%% 1.2.4 6
+%% 1.2.4 9
+%% 1.2.4 10
+\itemitem{\b{An error is signaled}}%
+\idxterm{signal}\idxtext{is signaled}\idxtext{must signal}
+
+This means that an error is signaled in both safe and unsafe code.
+\term{Conforming code} may rely on the fact that the error is signaled
+in both safe and unsafe code.  Every implementation is required to
+detect the error in both safe and unsafe code. For example, ``an error
+is signaled if \funref{unexport} is given a \term{symbol}
+not \term{accessible} in the \term{current package}.''
+
+If an explicit error type is not specified, the default is \typeref{error}.
+
+\itemitem{\b{An error should be signaled}}%
+\idxterm{signal}\idxtext{should signal}
+
+This means that an error is signaled in safe code, and an error
+might be signaled in unsafe code.  \term{Conforming code} may rely on the
+fact that the error is signaled in safe code.  Every
+implementation is required to detect the error at least in safe code.
+When the error is not signaled, the ``consequences are undefined''
+(see below).  For example, ``\funref{+} should signal an error \oftype{type-error}
+if any argument is not \oftype{number}.''
+
+\itemitem{\b{Should be prepared to signal an error}}%
+\idxterm{signal}\idxtext{prepared to signal}
+
+This is similar to ``should be signaled'' except that it does not
+imply that `extra effort' has to be taken on the part of an \term{operator}
+to discover an erroneous situation if the normal action of that \term{operator}
+can be performed successfully with only `lazy' checking.
+An \term{implementation} is always permitted to signal an error,
+but even in \term{safe} \term{code}, it is only required to signal the error
+when failing to signal it might lead to incorrect results.
+In \term{unsafe} \term{code}, the consequences are undefined.
+
+For example, defining that 
+ ``\funref{find} should be prepared to signal an error \oftype{type-error}
+   if its second \term{argument} is not a \term{proper list}''
+does not imply that an error is always signaled.  The \term{form}
+
+\code
+ (find 'a '(a b . c))
+\endcode
+
+must either signal an error \oftype{type-error} in \term{safe} \term{code},
+else return \f{A}.
+In \term{unsafe} \term{code}, the consequences are undefined.
+By contrast,
+
+\code
+ (find 'd '(a b . c))
+\endcode
+
+must signal an error \oftype{type-error} in \term{safe} \term{code}.
+In \term{unsafe} \term{code}, the consequences are undefined.
+Also,
+
+\code
+ (find 'd '#1=(a b . #1#))
+\endcode
+
+in \term{safe code}
+   might return \nil\ (as an \term{implementation-defined} extension),
+   might never return,
+or might signal an error \oftype{type-error}.
+In \term{unsafe} \term{code}, the consequences are undefined.
+
+Typically, the ``should be prepared to signal'' terminology is used in
+type checking situations where there are efficiency considerations that
+make it impractical to detect errors that are not relevant to the
+correct operation of the \term{operator}.
+
+\itemitem{\b{The consequences are unspecified}}%
+\idxtext{consequences}\idxtext{unspecified consequences}
+
+This means that the consequences are unpredictable but harmless.
+Implementations are permitted to specify the consequences of this
+situation. No \term{conforming code} may depend on the results or effects of
+this situation, and all \term{conforming code} is required to treat the
+results and effects of this situation as unpredictable but harmless.
+For example, ``if the second argument to \funref{shared-initialize}
+specifies a name that does not correspond to any \term{slots}
+\term{accessible} in the \term{object}, the results are unspecified.''
+
+%% 1.2.4 4
+\itemitem{\b{The consequences are undefined}}%
+\idxtext{consequences}\idxtext{undefined consequences}
+
+This means that the consequences are unpredictable. The consequences
+may range from harmless to fatal.  No \term{conforming code} may depend on
+the results or effects. \term{Conforming code} must treat the consequences as
+unpredictable.  In places where the words ``must,'' ``must not,'' or
+``may not'' are used, then ``the consequences are undefined'' if the
+stated requirement is not met and no specific consequence is
+explicitly stated.  An implementation is permitted to signal an error
+in this case.
+
+For example: ``Once a name has been declared by \macref{defconstant}
+to be constant, any further assignment or binding of that
+variable has undefined consequences.''
+                                               
+\itemitem{\b{An error might be signaled}}%
+\idxterm{signal}\idxtext{might signal}
+
+This means that the situation has undefined consequences;
+however, if an error is signaled, it is of the specified \term{type}.
+For example, ``\funref{open} might signal an error \oftype{file-error}.''
+                           
+\itemitem{\b{The return values are unspecified}}%
+\idxtext{unspecified values}
+
+This means that only the number and nature of the return values of a
+\term{form} are not specified.  However, the issue of whether or not
+any side-effects or transfer of control occurs is still well-specified.
+
+A program can be well-specified even if it uses a function whose
+returns values are unspecified.  For example, even if the return
+values of some function \f{F} are unspecified, an expression such as
+\f{(length (list (F)))} is still well-specified because it does not
+rely on any particular aspect of the value or values returned by \f{F}.
+
+\itemitem{\b{Implementations may be extended to cover this situation}}%
+\idxtext{extensions}
+
+This means that the \term{situation} has undefined consequences;
+however, a \term{conforming implementation} is free to treat
+the situation in a more specific way.  
+For example, an \term{implementation} might define 
+    that      an error is signaled,
+ or that      an error should be signaled,
+ or even that a certain well-defined non-error behavior occurs.
+
+%% 1.2.4 5
+No \term{conforming code} may depend on the consequences of such a \term{situation};
+all \term{conforming code} must treat the consequences of the situation
+as undefined. \term{Implementations} are required to document how the
+situation is treated.
+
+For example, ``implementations may be extended to define other type
+specifiers to have a corresponding \term{class}.''
+
+\itemitem{\b{Implementations are free to extend the syntax}}%
+\idxtext{extensions}
+
+This means that in this situation implementations are permitted to
+define unambiguous extensions to the syntax of the \term{form} being
+described.  No \term{conforming code} may depend on this extension.
+Implementations are required to document each such extension. All
+\term{conforming code} is required to treat the syntax as meaningless. The
+standard might disallow certain extensions while allowing others. For
+example, ``no implementation is free to extend the syntax of
+\macref{defclass}.''
+                          
+\issue{ERROR-TERMINOLOGY-WARNING:MIGHT}
+\itemitem{\b{A warning might be issued}}%
+\idxtext{warning}
+         
+This means that \term{implementations} are encouraged to issue a warning
+if the context is appropriate (\eg when compiling).  However, a
+\term{conforming implementation} is not required to issue a warning.
+\endissue{ERROR-TERMINOLOGY-WARNING:MIGHT}
+
+% This means that a warning might be issued, as described in \funref{warn},
+% in both safe and unsafe code when the situation is detected.
+% \term{Conforming code} can rely on the fact that a warning will be issued in
+% both safe and unsafe code when the situation is detected.  Every
+% implementation is required to detect this situation in both safe and
+% unsafe code when the situation is detected. The presence of a warning
+% will in no way alter the value returned by the \term{form} that
+% caused the situation to occur. For example, ``a warning is issued if a
+% declaration specifier is not one of those defined in the description
+% of \misc{declare} and has not been declared in a \declref{declaration}
+% declaration.''
+%                        
+% \itemitem{\b{A warning should be issued}}
+% 
+% This means that a warning might be issued. \term{Conforming code} must not
+% rely on the fact that a warning will be issued. If the situation is
+% detected, a warning might be issued.  The presence of a warning will
+% in no way alter the value returned by the \term{form} that caused the
+% situation to occur. For example, ``a warning should be issued if a
+% variable declared \declref{ignore} is ever referenced or is also declared
+% \declref{special}, or if a variable is lexical, never referenced, and not
+% declared \declref{ignore}.''
+
+\endlist
+
+\endsubSection%{Error Terminology}
+
+\beginsubsection{Sections Not Formally Part Of This Standard}
+\DefineSection{RemovableText}
+
+%% A lot of this seems to be just rationale.  Does it really need to
+%% be included here?  --sjl 13 Mar 92
+
+Front matter and back matter, such as the ``Table of Contents,'' 
+``Index,'' ``Figures,'' ``Credits,'' and ``Appendix'' are not considered formally 
+part of this standard, so that we retain the flexibility needed to update
+these sections even at the last minute without fear of needing a formal 
+vote to change those parts of the document.  These items are quite short 
+and very useful, however, and it is not recommended that they be removed 
+even in an abridged version of this document.
+
+Within the concept sections, subsections whose names begin with 
+the words ``Note'' or ``Notes'' or ``Example'' or ``Examples'' 
+are provided for illustration purposes only, and are not considered
+part of the standard.
+
+An attempt has been made to place these sections last in their parent section,
+so that they could be removed without disturbing the contiguous numbering of the 
+surrounding sections in order to produce a document of smaller size.
+
+Likewise, the ``Examples'' and ``Notes'' sections in a dictionary entry
+are not considered part of the standard and could be removed if necessary.
+
+Nevertheless, the examples provide important clarifications and consistency 
+checks for the rest of the material, and such abridging is not recommended
+unless absolutely unavoidable.
+
+\endsubsection%{Sections Not Formally Part Of This Standard}
+
+\beginsubSection{Interpreting Dictionary Entries}
+\DefineSection{InterpretingDictionaryEntries}
+
+The dictionary entry for each \term{defined name} is partitioned into
+sections.  Except as explicitly indicated otherwise below, each section
+is introduced by a label identifying that section.  The omission of a
+section implies that the section is either not applicable, or would
+provide no interesting information.
+
+This section defines the significance of each potential section in a
+dictionary entry.
+
+\beginsubsubsection{The ``Affected By'' Section of a Dictionary Entry}
+
+For an \term{operator}, anything that can affect the side effects of
+or \term{values} returned by the \term{operator}.
+
+For a \term{variable}, anything that can affect the \term{value} of the \term{variable}
+including \term{functions} that bind or assign it.
+
+\endsubsubsection%{The ``Affected By'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Arguments'' Section of a Dictionary Entry}
+
+This information describes the syntax information of entries such as those for
+\term{declarations} and special \term{expressions} which are never \term{evaluated}
+as \term{forms}, and so do not return \term{values}.
+
+\endsubsubsection%{The ``Arguments'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Arguments and Values'' Section of a Dictionary Entry}
+
+An English language description of what \term{arguments} the \term{operator} accepts
+and what \term{values} it returns, including information about defaults for \term{parameters}
+corresponding to omittable \term{arguments}
+(such as \term{optional parameters} and \term{keyword parameters}).
+For \term{special operators} and \term{macros},
+their \term{arguments} are not \term{evaluated} unless it is explicitly stated in their
+descriptions that they are \term{evaluated}.
+
+%% I added the first part of this sentence as editorial discretion 
+%% since I believe we strongly feel that this is not specified otherwise,
+%% but we want to avoid an unexpected conflict in case it is. -kmp 9-May-94
+Except as explicitly specified otherwise,
+%% Added per X3J13 at May 4-5, 1994 meeting.  -kmp 9-May-94
+the consequences are undefined if these type restrictions are violated.
+
+\endsubsubsection%{The ``Arguments and Values'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Binding Types Affected'' Section of a Dictionary Entry}
+
+This information alerts the reader to the kinds of \term{bindings} that might 
+potentially be affected by a declaration.  Whether in fact any particular such
+\term{binding} is actually affected is dependent on additional factors as well.
+See the ``Description'' section of the declaration in question for details.
+
+\endsubsubsection%{The ``Binding Types Affected'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Class Precedence List'' Section of a Dictionary Entry}
+
+This appears in the dictionary entry for a \term{class},
+and contains an ordered list of the \term{classes} defined 
+by \clisp\ that must be in the \term{class precedence list} of this \term{class}.
+
+It is permissible for other (\term{implementation-defined}) \term{classes}
+to appear in the \term{implementation}'s \term{class precedence list} for the \term{class}.
+
+It is permissible for 
+  either \typeref{standard-object}
+      or \typeref{structure-object}
+to appear in the \term{implementation}'s \term{class precedence list};
+for details, \seesection\TypeRelationships.
+
+Except as explicitly indicated otherwise somewhere in this specification,
+no additional \term{standardized} \term{classes} may appear in 
+the \term{implementation}'s \term{class precedence list}.
+
+By definition of the relationship between \term{classes} and \term{types},
+the \term{classes} listed in this section are also \term{supertypes} of 
+the \term{type} denoted by the \term{class}.
+
+\endsubsubsection%{The ``Class Precedence List'' Section of a Dictionary Entry}
+
+\beginsubsubsection{Dictionary Entries for Type Specifiers}
+\DefineSection{TypeSpecEntries}
+
+The \term{atomic type specifiers} are those \term{defined names} 
+listed in \figref\StandardizedAtomicTypeSpecs.
+Such dictionary entries are of kind 
+``Class,'' ``Condition Type,'' ``System Class,'' or ``Type.''
+A description of how to interpret 
+a \term{symbol} naming one of these \term{types} or \term{classes} 
+as an \term{atomic type specifier}
+is found in the ``Description'' section of such dictionary entries.
+
+The \term{compound type specifiers} are those \term{defined names} 
+listed in \figref\StandardizedCompoundTypeSpecNames.
+Such dictionary entries are of kind ``Class,'' ``System Class,''
+``Type,'' or ``Type Specifier.''
+A description of how to interpret as a \term{compound type specifier}
+a \term{list} whose \term{car} is such a \term{symbol}
+is found in the 
+     ``Compound Type Specifier Kind,''
+     ``Compound Type Specifier Syntax,''
+     ``Compound Type Specifier Arguments,''
+ and ``Compound Type Specifier Description''
+sections of such dictionary entries.
+
+\beginsubsubsubsection{The ``Compound Type Specifier Kind'' Section of a Dictionary Entry}
+
+An ``abbreviating'' \term{type specifier} is one that describes a \term{subtype}
+for which it is in principle possible to enumerate the \term{elements},
+but for which in practice it is impractical to do so.
+
+A ``specializing'' \term{type specifier} is one that describes a \term{subtype}
+by restricting the \term{type} of one or more components of the \term{type},
+such as \term{element type} or \term{complex part type}.
+
+A ``predicating'' \term{type specifier} is one that describes a \term{subtype}
+containing only those \term{objects} that satisfy a given \term{predicate}.
+
+A ``combining'' \term{type specifier} is one that describes a \term{subtype}
+in a compositional way, using combining operations (such as ``and,'' ``or,'' and
+``not'') on other \term{types}.
+
+\endsubsubsubsection%{The ``Compound Type Specifier Kind'' Section of a Dictionary Entry}
+
+\beginsubsubsubsection{The ``Compound Type Specifier Syntax'' Section of a Dictionary Entry}
+
+This information about a \term{type} describes the syntax of a 
+\term{compound type specifier} for that \term{type}.
+
+Whether or not the \term{type} is acceptable as an \term{atomic type specifier}
+is not represented here; \seesection\TypeSpecEntries.
+
+\endsubsubsubsection%{The ``Compound Type Specifier Syntax'' Section of a Dictionary Entry}
+
+\beginsubsubsubsection{The ``Compound Type Specifier Arguments'' Section of a Dictionary Entry}
+
+This information describes \term{type} information for the structures defined in
+the ``Compound Type Specifier Syntax'' section.
+
+\endsubsubsubsection%{The ``Compound Type Specifier Arguments'' Section of a Dictionary Entry}
+
+\beginsubsubsubsection{The ``Compound Type Specifier Description'' Section of a Dictionary Entry}
+
+This information describes the meaning of the structures defined in
+the ``Compound Type Specifier Syntax'' section.
+
+\endsubsubsubsection%{The ``Compound Type Specifier Description'' Section of a Dictionary Entry}
+
+\endsubsubsection%{Dictionary Entries for Type Specifiers}
+
+\beginsubsubsection{The ``Constant Value'' Section of a Dictionary Entry}
+
+This information describes the unchanging \term{type} and \term{value} of 
+a \term{constant variable}.
+
+\endsubsubsection%{The ``Constant Value'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Description'' Section of a Dictionary Entry}
+
+A summary of the \term{operator} and all intended aspects of the \term{operator}, 
+but does not necessarily include all the fields referenced below it 
+(``Side Effects,'' ``Exceptional Situations,'' \etc.)
+
+\endsubsubsection%{The ``Description'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Examples'' Section of a Dictionary Entry}
+
+Examples of use of the \term{operator}.
+These examples are not considered part of the standard;
+\seesection\RemovableText.
+
+\endsubsubsection%{The ``Examples'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Exceptional Situations'' Section of a Dictionary Entry}
+
+  Three kinds of information may appear here:
+\beginlist
+\item{\bull}
+Situations that are detected by the \term{function} and formally signaled.
+\item{\bull}
+Situations that are handled by the \term{function}.
+\item{\bull}
+Situations that may be detected by the \term{function}.
+\endlist
+This field does not include conditions that could
+be signaled by \term{functions} passed to and called by this \term{operator}
+as arguments or through dynamic variables, nor by executing subforms of this
+operator if it is a \term{macro} or \term{special operator}.
+
+\endsubsubsection%{The ``Exceptional Situations'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Initial Value'' Section of a Dictionary Entry}
+
+This information describes the initial \term{value} of a \term{dynamic variable}.
+Since this variable might change, see \term{type} restrictions in the ``Value Type'' section.
+
+\endsubsubsection%{The ``Initial Value'' Section of a Dictionary Entry}
+
+\issue{DOCUMENTATION-FUNCTION-TANGLED:REQUIRE-ARGUMENT}
+\beginsubsubsection{The ``Argument Precedence Order'' Section of a Dictionary Entry}
+
+%% Added italic font for "argument precedence order" per Boyer/Kaufmann/Moore #3.
+%% -kmp 9-May-94
+This information describes the \term{argument precedence order}.
+If it is omitted, the \term{argument precedence order} is the default (left to right).
+
+\endsubsubsection%{The ``Argument Precedence Order'' Section of a Dictionary Entry}
+\endissue{DOCUMENTATION-FUNCTION-TANGLED:REQUIRE-ARGUMENT}
+
+\beginsubsubsection{The ``Method Signature'' Section of a Dictionary Entry}
+
+The description of a \term{generic function} includes descriptions of the
+\term{methods} that are defined on that \term{generic function} by the standard.  
+A method signature is used to describe the \term{parameters} and 
+\term{parameter specializers} for each \term{method}. 
+\term{Methods} defined for the \term{generic function} must be of the form described
+by the \term{method} \term{signature}. 
+
+\Defmeth {F} {\paren{\param{x} \param{class}}
+	      \paren{\param{y} t}
+	      {\opt} \param{z} {\key} \param{k}}
+
+\noindent This \term{signature} indicates that this method on the \term{generic function}
+\b{F} has two \term{required parameters}:
+     \param{x}, which must be a \term{generalized instance} of the \term{class} \param{class};
+ and \param{y}, which can  be any \term{object} 
+       (\ie a \term{generalized instance} of the \term{class} \typeref{t}).
+In addition, there is an \term{optional parameter} \param{z} and a
+\term{keyword parameter} \param{k}.  This \term{signature} also indicates that this
+method on \f{F} is a \term{primary method} and has no \term{qualifiers}.
+
+For each \term{parameter}, the \term{argument} supplied must be in the
+intersection of the \term{type} specified in the description of the
+corresponding \term{generic function} and the \term{type} given in 
+the \term{signature} of some \term{method} (including not only those 
+\term{methods} defined in this specification, but also
+\term{implementation-defined} or user-defined \term{methods} in situations
+where the definition of such \term{methods} is permitted).
+
+\endsubsubsection%{The ``Method Signature'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Name'' Section of a Dictionary Entry}
+
+This section introduces the dictionary entry.  It is not explicitly labeled.
+It appears preceded and followed by a horizontal bar.
+
+In large print at left, the \term{defined name} appears; if more than one
+\term{defined name} is to be described by the entry, all such \term{names} 
+are shown separated by commas.
+
+In somewhat smaller italic print at right is an indication of what kind
+of dictionary entry this is.  Possible values are:
+
+% This list believed correct as of 23-Oct-91 -kmp
+\beginlist
+
+\itemitem{\i{Accessor}}
+
+This is an \term{accessor} \term{function}.
+
+\itemitem{\i{Class}}
+
+This is a \term{class}.
+
+\itemitem{\i{Condition Type}}
+
+This is a \subtypeof{condition}.
+% We don't need to constrain how implementations define condition types.
+% --sjl 13 Mar 92
+%\term{Condition types} are defined with
+%\macref{define-condition}, not \macref{defclass}.
+
+\itemitem{\i{Constant Variable}}
+
+This is a \term{constant variable}.
+
+\itemitem{\i{Declaration}}
+
+This is a \term{declaration identifier}.
+
+\itemitem{\i{Function}}
+
+This is a \term{function}.
+
+\itemitem{\i{Local Function}}
+
+This is a \term{function} that is defined only lexically within the scope of some
+other \term{macro form}.
+
+\itemitem{\i{Local Macro}}
+
+This is a \term{macro} that is defined only lexically within the scope of some
+other \term{macro form}.
+
+\itemitem{\i{Macro}}
+
+This is a \term{macro}.
+
+\itemitem{\i{Restart}}
+
+This is a \term{restart}.
+
+\itemitem{\i{Special Operator}}
+
+This is a \term{special operator}.
+
+\itemitem{\i{Standard Generic Function}}
+
+This is a \term{standard generic function}.
+
+\itemitem{\i{Symbol}}
+
+This is a \term{symbol} that is specially recognized in some particular situation,
+such as the syntax of a \term{macro}.
+
+\itemitem{\i{System Class}}
+
+This is like \term{class}, but it identifies a \term{class} that is potentially
+a \term{built-in class}.  (No \term{class} is actually required to be a
+\term{built-in class}.)
+
+\itemitem{\i{Type}}
+
+This is an \term{atomic type specifier},
+and depending on information for each particular entry,
+may subject to form other \term{type specifiers}.
+
+\itemitem{\i{Type Specifier}}
+
+This is a \term{defined name} that is not an \term{atomic type specifier},
+but that can be used in constructing valid \term{type specifiers}.
+
+\itemitem{\i{Variable}}
+
+This is a \term{dynamic variable}.
+
+\endlist
+
+\endsubsubsection%{The ``Name'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Notes'' Section of a Dictionary Entry}
+
+Information not found elsewhere in this description
+which pertains to this \term{operator}.
+Among other things, this might include 
+ cross reference information,
+ code equivalences, 
+ stylistic hints,
+ implementation hints,
+ typical uses.
+This information is not considered part of the standard;
+any \term{conforming implementation} or \term{conforming program}
+is permitted to ignore the presence of this information.
+
+\endsubsubsection%{The ``Notes'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Pronunciation'' Section of a Dictionary Entry}
+
+This offers a suggested pronunciation for \term{defined names} 
+so that people not in verbal communication with the original designers
+can figure out how to pronounce words that are not in normal English usage.
+This information is advisory only, and is not considered part of the standard.
+% Added for Ida, who wondered why these didn't occur for every entry.
+For brevity, it is only provided for entries with names that are specific to
+\clisp\ and would not be found in {\WebstersDictionary}.
+
+\endsubsubsection%{The ``Pronunciation'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``See Also'' Section of a Dictionary Entry}
+
+List of references to other parts of this standard
+that offer information relevant to this \term{operator}. 
+This list is not part of the standard.
+         
+\endsubsubsection%{The ``See Also'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Side Effects'' Section of a Dictionary Entry}
+
+Anything that is changed as a result of the
+evaluation of the \term{form} containing this \term{operator}.
+
+\endsubsubsection%{The ``Side Effects'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Supertypes'' Section of a Dictionary Entry}
+
+This appears in the dictionary entry for a \term{type},
+and contains a list of the \term{standardized} \term{types} 
+that must be \term{supertypes} of this \term{type}.
+
+%!!! Is this needed? Mail sent to `barmar' and `barrett' with subject "supertypes"
+%    asking for opinions. -kmp 10-Feb-92
+In \term{implementations} where there is a corresponding \term{class},
+the order of the \term{classes} in the \term{class precedence list} 
+is consistent with the order presented in this section.
+
+\endsubsubsection%{The ``Supertypes'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Syntax'' Section of a Dictionary Entry}
+
+This section describes how to use the \term{defined name} in code.
+The ``Syntax'' description for a \term{generic function} 
+describes the \term{lambda list} of the \term{generic function} itself, 
+while the ``Method Signatures'' describe the \term{lambda lists} 
+of the defined \term{methods}.
+The ``Syntax'' description for 
+     an \term{ordinary function},
+     a \term{macro},
+  or a \term{special operator}
+describes its \term{parameters}.
+
+For example, an \term{operator} description might say:
+
+\Defun {F} {x y {\opt} z {\key} k}
+
+\noindent This description indicates that the function \b{F} 
+has two required parameters, \param{x} and \param{y}.  In addition,
+there is an optional parameter \param{z} and a keyword parameter \param{k}.
+
+For \term{macros} and \term{special operators}, syntax is given 
+in modified BNF notation; \seesection\ModifiedBNF.
+For \term{functions} a \term{lambda list} is given.
+%Added per Barmar:
+In both cases, however, the outermost parentheses are omitted,
+and default value information is omitted.
+
+\beginsubsubsubsection{Special ``Syntax'' Notations for Overloaded Operators}
+%RPG: Nice idea.
+
+If two descriptions exist for the same operation but with different numbers of
+arguments, then the extra arguments are to be treated as optional.  For example,
+this pair of lines:
+
+\DefunWithValues file-position {stream} {position}
+\DefunWithValues file-position {stream position-spec} {success-p}
+
+\noindent is operationally equivalent to this line:
+
+\DefunWithValues file-position {stream {\opt} position-spec} {result}
+
+\noindent and differs only in that it provides on opportunity to introduce different
+names for \term{parameter} and \term{values} for each case.
+The separated (multi-line) notation is used when an \term{operator} is overloaded in
+such a way that the \term{parameters} are used in different ways
+depending on how many \term{arguments} are supplied (\eg for \thefunction{/})
+or the return values are different in the two cases (\eg for \thefunction{file-position}).
+
+\endsubsubsubsection%{Special ``Syntax'' Notations for Overloaded Operators}
+
+\beginsubsubsubsection{Naming Conventions for Rest Parameters}
+
+Within this specification, 
+if the name of a \term{rest parameter} is chosen to be a plural noun,
+use of that name in \param{parameter} font refers
+to the \term{list} to which the \term{rest parameter} is bound.
+Use of the singular form of that name in \param{parameter} font refers 
+to an \term{element} of that \term{list}.
+
+For example, given a syntax description such as:
+
+\Defun {F} {{\rest} \param{arguments}}
+
+\noindent it is appropriate to refer either to the \term{rest parameter} named
+\param{arguments} by name, or to one of its elements by speaking of ``an \param{argument},''
+``some \param{argument},'' ``each \param{argument}'' \etc.
+
+\endsubsubsubsection%{Naming Conventions for Rest Parameters}
+
+\beginsubsubsubsection{Requiring Non-Null Rest Parameters in the ``Syntax'' Section}
+
+In some cases it is useful to refer to all arguments equally as a single
+aggregation using a \term{rest parameter} while at the same time
+requiring at least one argument.  A variety of imperative and
+declarative means are available in \term{code} for expressing such a
+restriction, however they generally do not manifest themselves in a
+\term{lambda list}.  For descriptive purposes within this specification,
+
+\Defun {F} {{\rest} \plus{arguments}}
+
+\noindent means the same as
+
+\Defun {F} {{\rest} arguments}
+
+\noindent but introduces the additional requirement that there be 
+at least one \param{argument}.
+
+\endsubsubsubsection%{Requiring Non-Null Rest Parameters in the ``Syntax'' Section}
+
+\beginsubsubsubsection{Return values in the ``Syntax'' Section}
+
+An evaluation arrow ``{\EV}'' precedes a list of \term{values} to be returned.
+For example:
+
+\DefunWithValues {F} {a b c} {x}
+
+\noindent indicates that \f{F} is an operator that has three \term{required parameters}
+(\ie \param{a}, \param{b}, and \param{c}) and that returns one \term{value} (\ie \param{x}).
+If more than one \term{value} is returned by an operator, the \term{names} of the
+\term{values} are separated by commas, as in:
+
+\DefunWithValues {F} {a b c} {x, y, z}
+
+\beginsubsubsubsubsection{No Arguments or Values in the ``Syntax'' Section}
+
+If no \term{arguments} are permitted, or no \term{values} are returned, 
+a special notation is used to make this more visually apparent.  For example,
+
+\DefunWithValues {F} {\noargs} {\novalues}
+
+indicates that \f{F} is an operator that accepts no \term{arguments} and returns
+no \term{values}.
+
+\endsubsubsubsubsection%{No Arguments or Values in the ``Syntax'' Section}
+
+\beginsubsubsubsubsection{Unconditional Transfer of Control in the ``Syntax'' Section}
+
+Some \term{operators} perform an unconditional transfer of control, and
+so never have any return values.  Such \term{operators} are notated using
+a notation such as the following:
+
+\DefunNoReturn F {a b c}
+
+\endsubsubsubsubsection%{Unconditional Transfer of Control in the ``Syntax'' Section}
+
+\endsubsubsubsection%{Return values in the ``Syntax'' Section}
+
+\endsubsubsection%{The ``Syntax'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Valid Context'' Section of a Dictionary Entry}
+
+This information is used by dictionary entries such as ``Declarations''
+in order to restrict the context in which the declaration may appear.
+
+A given ``Declaration'' might appear in 
+     a \term{declaration} (\ie a \misc{declare} \term{expression}),
+     a \term{proclamation} (\ie a \macref{declaim} or \funref{proclaim} \term{form}),
+  or both.
+
+\endsubsubsection%{The ``Valid Context'' Section of a Dictionary Entry}
+
+\beginsubsubsection{The ``Value Type'' Section of a Dictionary Entry}
+
+This information describes any \term{type} restrictions on a \term{dynamic variable}.
+
+%% I added the first part of this sentence as editorial discretion 
+%% since I believe we strongly feel that this is not specified otherwise,
+%% but we want to avoid an unexpected conflict in case it is. -kmp 9-May-94
+Except as explicitly specified otherwise,
+%% Added per X3J13 at May 4-5, 1994 meeting.  -kmp 9-May-94
+the consequences are undefined if this type restriction is violated.
+
+\endsubsubsection%{The ``Value Type'' Section of a Dictionary Entry}
+
+\endsubSection%{Interpreting Dictionary Entries}

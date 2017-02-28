@@ -1,0 +1,1286 @@
+% -*- Mode: TeX -*-
+
+A \newterm{lambda list} is a \term{list} that
+specifies a set of \term{parameters} (sometimes called \term{lambda variables})
+and a protocol for receiving \term{values} for those \term{parameters}.
+
+% \term{Lambda list keywords} do not belong to \thepackage{keyword};
+% a \term{lambda list keyword} is a \term{symbol} 
+% whose name begins with an \term{ampersand}.
+
+There are several kinds of \term{lambda lists}.
+
+\tablefigtwo{What Kind of Lambda Lists to Use}{Context}{Kind of Lambda List}{
+ \macref{defun} \term{form}                        & \term{ordinary lambda list}         \cr
+ \macref{defmacro} \term{form}                     & \term{macro lambda list}            \cr
+ \term{lambda expression}                          & \term{ordinary lambda list}         \cr
+ \specref{flet} local \term{function} definition   & \term{ordinary lambda list}         \cr
+ \specref{labels} local \term{function} definition & \term{ordinary lambda list}         \cr
+ \specref{handler-case} \param{clause} specification
+						   & \term{ordinary lambda list}         \cr
+ \specref{restart-case} \param{clause} specification
+						   & \term{ordinary lambda list}         \cr
+ \macref{macrolet} local \term{macro} definition   & \term{macro lambda list}            \cr
+ \macref{define-method-combination}		   & \term{ordinary lambda list}	 \cr
+ \macref{define-method-combination} \kwd{arguments} option &
+%Moon thought :arguments for DEFINE-METHOD-COMBINATION took an ordinary lambda list,
+%but Barrett (comment #3, first public review) observes that &whole is permissible.
+%Time to make a new kind of list.
+       \term{define-method-combination arguments lambda list}         \cr
+ \macref{defstruct} \kwd{constructor} option       & \term{boa lambda list}              \cr
+ \macref{defgeneric} \term{form}                   & \term{generic function lambda list} \cr
+ \macref{defgeneric} \term{method} clause          & \term{specialized lambda list}      \cr
+ \macref{defmethod} \term{form}                    & \term{specialized lambda list}      \cr
+ \macref{defsetf} \term{form}                      & \term{defsetf lambda list}          \cr
+ \macref{define-setf-expander} \term{form}	   & \term{macro lambda list}	         \cr
+ \macref{deftype} \term{form}			   & \term{deftype lambda list}		 \cr
+ \macref{destructuring-bind} \term{form}	   & \term{destructuring lambda list}    \cr
+%\specref{generic-flet} \term{form}                & \term{generic function lambda list} \cr
+%\specref{generic-flet} \term{method} clause       & \term{specialized lambda list}      \cr
+%\specref{generic-labels} \term{form}              & \term{generic function lambda list} \cr
+%\specref{generic-labels} \term{method} clause     & \term{specialized lambda list}      \cr
+%\specref{generic-function} \term{form}		   & \term{generic function lambda list} \cr
+%\specref{generic-function} \term{method} clause   & \term{specialized lambda list}      \cr
+% Added define-modify-macro and define-compiler-macro --sjl 5 Mar 92
+ \macref{define-compiler-macro} \term{form}       & \term{macro lambda list}             \cr
+ \macref{define-modify-macro} \term{form}         & \term{define-modify-macro lambda list} \cr
+}
+
+\Thenextfigure\ lists some \term{defined names} that are applicable
+to \term{lambda lists}.
+
+\displaythree{Defined names applicable to lambda lists}{
+lambda-list-keywords&lambda-parameters-limit&\cr
+}
+
+
+\beginsubSection{Ordinary Lambda Lists}
+\DefineSection{OrdinaryLambdaLists}
+
+An \newterm{ordinary lambda list} is used to describe how a set of
+\term{arguments} is received by an \term{ordinary} \term{function}.  
+The \term{defined names} in \thenextfigure\ are those which use
+\term{ordinary lambda lists}:
+
+%!!! This table is just a seed and probably incomplete. -kmp 2-Aug-91
+%Added RESTART-CASE and HANDLER-CASE per Moon #9 (first public review). -kmp 6-May-93
+\displaythree{Standardized Operators that use Ordinary Lambda Lists}{
+define-method-combination&handler-case&restart-case\cr
+defun&labels&\cr
+flet&lambda&\cr
+}
+
+An \term{ordinary lambda list} can contain the \term{lambda list keywords} shown
+in \thenextfigure.
+
+\showthree{Lambda List Keywords used by Ordinary Lambda Lists}{
+\keyref{allow-other-keys}&\keyref{key}&\keyref{rest}\cr
+\keyref{aux}&\keyref{optional}&\cr
+}
+
+Each \term{element} of a \term{lambda list} is either a parameter specifier
+or a \term{lambda list keyword}.
+%%5.2.2 26
+Implementations are free to provide additional \term{lambda list keywords}.
+For a list of all \term{lambda list keywords}
+used by the implementation, see \conref{lambda-list-keywords}.
+
+The syntax for \term{ordinary lambda lists} is as follows: 
+
+\Vskip 1pc!
+\auxbnf{lambda-list}{\lparen\starparam{var}\CR
+		     \ \ttbrac{{\opt} \star{\VarValueSuppliedP}}\CR
+		     \ \ttbrac{{\rest} \param{var}}\CR
+		     \ \f{[}\Vtop{\hbox{{\key} \star{\KeyVarValueSuppliedP}}
+				  \vskip 4pt
+				  \hbox{\brac{\allowotherkeys}\f{]}}}\CR
+		     \ \ttbrac{{\aux} \star{\VarValue}}\rparen\CR}
+
+%% 5.2.2 3
+A \param{var} or \param{supplied-p-parameter} must be a \term{symbol}
+that is not the name of a \term{constant variable}.
+
+An \param{init-form} can be any \term{form}.
+%% 5.2.2 22
+Whenever any \param{init-form} is evaluated for any parameter
+specifier, that \term{form} may refer to any parameter variable to
+the left of the specifier in which the \param{init-form} appears,
+including any \param{supplied-p-parameter} variables, and may rely 
+on the fact that no other parameter variable has yet been bound
+(including its own parameter variable).
+
+A \param{keyword-name} can be any \term{symbol}, 
+but by convention is normally a \term{keyword}\meaning{1};
+all \term{standardized} \term{functions} follow that convention.
+
+%% 5.2.2 4
+An \term{ordinary lambda list} has five parts, any or all of which may be empty.
+For information about the treatment of argument mismatches,
+\seesection\FuncallErrorChecking.
+
+%% 5.2.2 9
+%% 5.2.2 11
+
+\beginsubsubsection{Specifiers for the required parameters}
+     
+These are all the parameter specifiers up to 
+the first \term{lambda list keyword};
+if there are no \term{lambda list keywords}, 
+then all the specifiers are for required parameters.
+Each required parameter is specified by a parameter variable \param{var}.
+\param{var} is bound as a lexical variable unless it is declared \declref{special}.
+
+%!!! Moon: There has been a cleanup that says when an error is signaled.
+If there are \f{n} required parameters (\f{n} may be zero), 
+there must be at least \f{n} passed arguments, and the 
+required parameters are bound to the first \f{n} passed arguments;
+\seesection\FuncallErrorChecking.
+The other parameters are then processed using any remaining arguments.
+
+\endsubsubsection%{Specifiers for the required parameters}
+
+
+%% 5.2.2 12
+\beginsubsubsection{Specifiers for optional parameters}
+\idxkeyref{optional}
+
+If \keyref{optional} is present,
+the optional parameter specifiers are those following 
+\keyref{optional} 
+up to the next \term{lambda list keyword} or the end of the list.
+If optional parameters are specified, then each one is processed as
+follows.  If any unprocessed arguments remain, then the parameter variable
+\param{var} is bound to the next remaining argument, just as for a required
+parameter.  If no arguments remain, however, then \param{init-form} 
+is evaluated, and the parameter variable
+is bound to the resulting value 
+(or to \nil\ if no \param{init-form} appears
+in the parameter specifier).
+If another variable name \param{supplied-p-parameter} 
+appears in the specifier, it is bound
+to \term{true} if an argument had been available, and to \term{false} if no
+argument remained (and therefore \param{init-form} had to be evaluated).
+\param{Supplied-p-parameter}
+is bound not to an argument but to a value indicating whether or not
+an argument had been supplied for the corresponding \param{var}.
+
+\endsubsubsection%{Specifiers for optional parameters}
+
+%% 5.2.2 13
+\beginsubsubsection{A specifier for a rest parameter}
+\idxkeyref{rest}
+
+\keyref{rest}, if present, must be followed by a single \term{rest parameter}
+specifier, which in turn must be followed by another 
+\term{lambda list keyword} or the end of the \term{lambda list}.  After all
+optional parameter specifiers have been processed, then there may or
+may not be a \term{rest parameter}.  If there is a \term{rest parameter}, it is
+bound to a \term{list} of all as-yet-unprocessed arguments.  If
+no unprocessed arguments remain, the \term{rest parameter} is bound to the
+\term{empty list}.  If there is no \term{rest parameter} and there are no 
+\term{keyword parameters}, then an error 
+%% Per Barrett #10 -- the actual type is more specific, and specified elsewhere. -kmp 7-May-93
+%\oftype{error}
+should be signaled if
+any unprocessed arguments remain; \seesection\FuncallErrorChecking.
+The value of a \term{rest parameter}
+is permitted, but not required, to share structure with the
+last argument to \funref{apply}.
+
+\endsubsubsection%{A specifier for a rest parameter}
+\idxkeyref{key}
+\idxkeyref{allow-other-keys}
+
+%% 5.2.2 14
+\beginsubsubsection{Specifiers for keyword parameters}
+                       
+\issue{PLIST-DUPLICATES:ALLOW}
+%!!! I didn't integrate item 5 of PLIST-DUPLICATES because it seemed dangerous
+%    to change this section for very little apparent gain.  There was no technical
+%    change implied by that item. -kmp 14-Jul-93
+If \keyref{key} 
+is present, all specifiers up to the next \term{lambda list keyword}
+or the end of the \term{list} are keyword parameter specifiers.
+When keyword parameters are processed,
+the same arguments are processed that
+would be made into a \term{list} for a \term{rest parameter}.
+It is permitted to specify both \keyref{rest} and \keyref{key}.
+In this case the remaining arguments are used for both purposes;
+that is, all remaining arguments are made into a \term{list} for the
+\term{rest parameter}, and are also processed for the \keyref{key} parameters.
+\issue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
+If \keyref{key} is specified, there must remain
+an even number of arguments; \seesection\OddNumberOfKeyArgs.
+\endissue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
+These arguments are considered as pairs,
+the first argument in each pair being interpreted as a name
+and the second as the corresponding value.
+The first \term{object} of each pair must be a \term{symbol};
+\seesection\InvalidKeyArgs.
+The keyword parameter specifiers may optionally be followed by the
+\term{lambda list keyword} \keyref{allow-other-keys}.
+
+%% 5.2.2 16
+In each keyword parameter specifier must be a name \param{var} for
+the parameter variable.
+\issue{KEYWORD-ARGUMENT-NAME-PACKAGE:ANY}
+If the \param{var} appears alone or in a \f{(\param{var} \param{init-form})}
+combination, the keyword name used when matching \term{arguments} to \term{parameters}
+is a \term{symbol} in \thepackage{keyword} whose \term{name} is the
+\term{same} (under \funref{string=}) as \param{var}'s.
+If the notation \f{((\param{keyword-name} \param{var}) \param{init-form})} is used,
+then the keyword name used to match \term{arguments} to \term{parameters} is
+\param{keyword-name}, which may be a \term{symbol} in any \term{package}.
+(Of course, if it is not a \term{symbol} in \thepackage{keyword},
+it does not necessarily self-evaluate, so care must be taken when calling the function
+to make sure that normal evaluation still yields the keyword name.)
+\endissue{KEYWORD-ARGUMENT-NAME-PACKAGE:ANY}
+Thus
+
+\code
+ (defun foo (&key radix (type 'integer)) ...)
+\endcode
+means exactly the same as
+
+\code
+ (defun foo (&key ((:radix radix)) ((:type type) 'integer)) ...)
+\endcode
+
+The keyword parameter specifiers are, like all parameter specifiers,
+effectively processed from left to right.  For each keyword parameter
+specifier, if there is an argument pair whose name matches that
+specifier's name (that is, the names are \funref{eq}), then the
+parameter variable for that specifier is bound to the second item (the
+value) of that argument pair.  If more than one such argument pair
+matches, the leftmost argument pair is used.  If no such argument pair
+exists, then the \param{init-form} for that specifier is evaluated and
+the parameter variable is bound to that value (or to \nil\ if no
+\param{init-form} was specified).  \param{supplied-p-parameter} is
+treated as for \keyref{optional} parameters: it is bound to \term{true} if there
+was a matching argument pair, and to \term{false} otherwise.
+
+%% 5.2.2 17
+Unless keyword argument checking is suppressed,
+an argument pair must a name matched by a parameter specifier;
+\seesection\UnrecognizedKeyArgs.
+
+%% 5.2.2 20
+% This makes no sense any more because the text referred to has been
+% rephrased and moved into its own section below.  -- sjl 3 Mar 92
+% If either condition obtains,
+If keyword argument checking is suppressed, 
+then it is permitted for an argument pair
+to match no parameter specifier, and the argument pair is ignored, but
+such an argument pair is accessible through the \term{rest parameter} if
+one was supplied.  The purpose of these mechanisms is to allow sharing
+of argument lists among several \term{lambda expressions} and to
+allow either the caller or the called \term{lambda expression} to
+specify that such sharing may be taking place.
+
+\issue{ALLOW-OTHER-KEYS-NIL:PERMIT}
+Note that if \keyref{key} is present, a keyword argument of \kwd{allow-other-keys}
+is always permitted---regardless of whether the associated value is \term{true}
+or \term{false}.  However, if the value is \term{false}, other non-matching
+keywords are not tolerated (unless \keyref{allow-other-keys} was used).
+
+Furthermore, if the receiving argument list specifies a regular argument which
+would be flagged by \kwd{allow-other-keys}, then \kwd{allow-other-keys} has both
+its special-cased meaning (identifying whether additional keywords are permitted)
+and its normal meaning (data flow into the function in question).
+\endissue{ALLOW-OTHER-KEYS-NIL:PERMIT}
+\endissue{PLIST-DUPLICATES:ALLOW}
+
+\beginsubsubsubsection{Suppressing Keyword Argument Checking}
+\DefineSection{SuppressingKeyArgChecks}
+
+If \keyref{allow-other-keys} was specified in the \term{lambda list} of a \term{function},
+\term{keyword}\meaning{2} \term{argument} checking is suppressed in calls
+to that \term{function}.
+
+If \thekeyarg{allow-other-keys} is \term{true} in a call to a \term{function},
+\term{keyword}\meaning{2} \term{argument} checking is suppressed 
+%% Clarified per Moon #10 (first public review). -kmp 6-May-93
+%in calls to that \term{function}.
+in that call.
+
+\Thekeyarg{allow-other-keys} is permissible in all situations involving
+\term{keyword}\meaning{2} \term{arguments}, even when its associated \term{value}
+is \term{false}.
+
+\beginsubsubsubsubsection{Examples of Suppressing Keyword Argument Checking}
+
+\code
+;;; The caller can supply :ALLOW-OTHER-KEYS T to suppress checking.
+ ((lambda (&key x) x) :x 1 :y 2 :allow-other-keys t) \EV 1
+;;; The callee can use &ALLOW-OTHER-KEYS to suppress checking.
+ ((lambda (&key x &allow-other-keys) x) :x 1 :y 2) \EV 1
+;;; :ALLOW-OTHER-KEYS NIL is always permitted.
+ ((lambda (&key) t) :allow-other-keys nil) \EV T
+;;; As with other keyword arguments, only the left-most pair
+;;; named :ALLOW-OTHER-KEYS has any effect.
+ ((lambda (&key x) x) 
+  :x 1 :y 2 :allow-other-keys t :allow-other-keys nil)
+\EV 1
+;;; Only the left-most pair named :ALLOW-OTHER-KEYS has any effect,
+;;; so in safe code this signals a PROGRAM-ERROR (and might enter the
+;;; debugger).  In unsafe code, the consequences are undefined.
+ ((lambda (&key x) x)                   ;This call is not valid
+  :x 1 :y 2 :allow-other-keys nil :allow-other-keys t)
+\endcode
+
+\endsubsubsubsubsection%{Examples of Suppressing Keyword Argument Checking}
+
+\endsubsubsubsection%{Suppressing Keyword Argument Checking}
+
+\endsubsubsection%{Specifiers for keyword parameters}
+
+%% 5.2.2 21
+\beginsubsubsection{Specifiers for \keyref{aux} variables}
+\idxkeyref{aux}
+
+These are not really parameters.  If the \term{lambda list keyword}
+\keyref{aux} is present, all specifiers after it are auxiliary variable
+specifiers.  After all parameter specifiers have been processed, the
+auxiliary variable specifiers (those following {\aux}) are processed
+from left to right.  For each one, \param{init-form} is evaluated and
+\param{var} is bound to that value (or to \nil\ if no \param{init-form}
+was specified).  \keyref{aux} variable processing is analogous to
+\specref{let*} processing.
+
+\code
+ (lambda (x y &aux (a (car x)) (b 2) c) (list x y a b c))
+    \EQ (lambda (x y) (let* ((a (car x)) (b 2) c) (list x y a b c)))
+\endcode
+
+\endsubsubsection%{Specifiers for \keyref{aux} variables}
+
+\beginsubsubsection{Examples of Ordinary Lambda Lists}
+
+Here are some examples involving \term{optional parameters} and \term{rest parameters}:
+
+\code
+ ((lambda (a b) (+ a (* b 3))) 4 5) \EV 19
+ ((lambda (a &optional (b 2)) (+ a (* b 3))) 4 5) \EV 19
+ ((lambda (a &optional (b 2)) (+ a (* b 3))) 4) \EV 10
+ ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x)))
+\EV (2 NIL 3 NIL NIL)
+ ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x)) 6)
+\EV (6 T 3 NIL NIL)
+ ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x)) 6 3)
+\EV (6 T 3 T NIL)
+ ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x)) 6 3 8)
+\EV (6 T 3 T (8))
+ ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x))
+  6 3 8 9 10 11)
+\EV (6 t 3 t (8 9 10 11))
+\endcode
+
+Here are some examples involving \term{keyword parameters}:
+
+\code
+ ((lambda (a b &key c d) (list a b c d)) 1 2) \EV (1 2 NIL NIL)
+ ((lambda (a b &key c d) (list a b c d)) 1 2 :c 6) \EV (1 2 6 NIL)
+ ((lambda (a b &key c d) (list a b c d)) 1 2 :d 8) \EV (1 2 NIL 8)
+ ((lambda (a b &key c d) (list a b c d)) 1 2 :c 6 :d 8) \EV (1 2 6 8)
+ ((lambda (a b &key c d) (list a b c d)) 1 2 :d 8 :c 6) \EV (1 2 6 8)
+ ((lambda (a b &key c d) (list a b c d)) :a 1 :d 8 :c 6) \EV (:a 1 6 8)
+ ((lambda (a b &key c d) (list a b c d)) :a :b :c :d) \EV (:a :b :d NIL)
+ ((lambda (a b &key ((:sea c)) d) (list a b c d)) 1 2 :sea 6) \EV (1 2 6 NIL)
+ ((lambda (a b &key ((c c)) d) (list a b c d)) 1 2 'c 6) \EV (1 2 6 NIL)
+\endcode
+
+Here are some examples involving \term{optional parameters}, \term{rest parameters},
+and \term{keyword parameters} together:
+
+\code
+ ((lambda (a &optional (b 3) &rest x &key c (d a))
+    (list a b c d x)) 1)   
+\EV (1 3 NIL 1 ()) 
+ ((lambda (a &optional (b 3) &rest x &key c (d a))
+    (list a b c d x)) 1 2)
+\EV (1 2 NIL 1 ())
+ ((lambda (a &optional (b 3) &rest x &key c (d a))
+    (list a b c d x)) :c 7)
+\EV (:c 7 NIL :c ())
+ ((lambda (a &optional (b 3) &rest x &key c (d a))
+    (list a b c d x)) 1 6 :c 7)
+\EV (1 6 7 1 (:c 7))
+ ((lambda (a &optional (b 3) &rest x &key c (d a))
+    (list a b c d x)) 1 6 :d 8)
+\EV (1 6 NIL 8 (:d 8))
+ ((lambda (a &optional (b 3) &rest x &key c (d a))
+    (list a b c d x)) 1 6 :d 8 :c 9 :d 10)
+\EV (1 6 9 8 (:d 8 :c 9 :d 10))
+\endcode
+
+%% 5.2.2 28
+As an example of the use of \keyref{allow-other-keys} and
+\kwd{allow-other-keys}, consider a \term{function} that takes two named
+arguments of its own and also accepts additional named arguments to be
+passed to \funref{make-array}:
+
+\code
+ (defun array-of-strings (str dims &rest named-pairs
+                          &key (start 0) end &allow-other-keys)
+   (apply #'make-array dims
+          :initial-element (subseq str start end)
+          :allow-other-keys t
+          named-pairs))
+\endcode
+
+This \term{function} takes a \term{string} and dimensioning
+information and returns an \term{array} of the specified
+dimensions, each of whose elements is the specified 
+\term{string}.  However, \kwd{start} and \kwd{end} named
+arguments may be used to specify that a substring of the given
+\term{string} should be used.  In addition, the presence of
+\keyref{allow-other-keys} in the \term{lambda list} indicates that the
+caller may supply additional named arguments; the \term{rest parameter}
+provides access to them.  These additional named arguments are passed
+to \funref{make-array}.  The \term{function} \funref{make-array}
+normally does not allow the named arguments \kwd{start} 
+and \kwd{end} to be used, and an error should be
+signaled if such named arguments are supplied to \funref{make-array}.
+However, the presence in the call to \funref{make-array} 
+of the named argument \kwd{allow-other-keys} with
+a \term{true} value causes any extraneous named arguments, including
+\kwd{start} and \kwd{end}, to be acceptable and ignored.
+
+\endsubsubsection%{Examples of Ordinary Lambda Lists}
+
+\endsubSection%{Ordinary Lambda Lists}
+
+\beginsubSection{Generic Function Lambda Lists}
+\DefineSection{GFLambdaLists}
+
+A \newterm{generic function lambda list} is used to describe the overall shape of
+the argument list to be accepted by a \term{generic function}.
+Individual \term{method} \term{signatures} might contribute additional 
+\term{keyword parameters} to the \term{lambda list} of the \term{effective method}.
+
+%% Might as well not use a table while there's only one. -kmp 15-Feb-92
+A \term{generic function lambda list} is used by \macref{defgeneric}.
+% \Thenextfigure\ lists the \term{operators} that use \term{generic function lambda lists}.
+% 
+% %!!! This table is just a seed and might be incomplete. -kmp 2-Aug-91
+% \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+% \displaythree{Standardized Operators that use Generic Function Lambda Lists}{
+% defgeneric&&\cr
+% % defgeneric&generic-function&\cr
+% % generic-flet&generic-labels&\cr
+% }
+% \endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+
+A \term{generic function lambda list} has the following syntax:
+
+\Vskip 1pc!
+\auxbnf{lambda-list}{\lparen\starparam{var}\CR
+		     \ \ttbrac{{\opt} \star{\JustVar}}\CR
+		     \ \ttbrac{{\rest} \param{var}}\CR
+		     \ \f{[}\Vtop{\hbox{{\key} \star{\JustKey}}
+				  \vskip 4pt
+				  \hbox{\brac{\allowotherkeys}\f{]}\rparen}}\CR}
+
+A \term{generic function lambda list} can contain the \term{lambda list keywords} shown
+in \thenextfigure.
+
+\showthree{Lambda List Keywords used by Generic Function Lambda Lists}{
+\keyref{allow-other-keys}&\keyref{optional}&\cr
+\keyref{key}&\keyref{rest}&\cr
+}
+
+A \term{generic function lambda list} differs from an \term{ordinary lambda list} 
+in the following ways:
+ 
+\beginlist
+\itemitem{\bf Required arguments}
+
+% %Per Barmar. -kmp 28-Dec-90
+% %At least one
+%% Per Moon. -kmp 16-Feb-92
+Zero or more \term{required parameters} must be specified.
+
+\itemitem{\bf Optional and keyword arguments}
+ 
+\term{Optional parameters} and \term{keyword parameters} may not have 
+default initial value forms nor use supplied-p parameters.
+
+\itemitem{\bf Use of \keyref{aux}}
+
+The use of \keyref{aux} is not allowed. 
+\endlist
+
+\endsubSection%{Generic Function Lambda Lists}
+
+\goodbreak
+\beginsubSection{Specialized Lambda Lists}
+\DefineSection{SpecializedLambdaLists}
+
+A \newterm{specialized lambda list} is used to \term{specialize} a \term{method}
+for a particular \term{signature} and to describe how \term{arguments} matching
+that \term{signature} are received by the \term{method}.  
+The \term{defined names} in \thenextfigure\ use \term{specialized lambda lists}
+in some way; see the dictionary entry for each for information about how.
+
+%!!! This table is just a seed and probably incomplete. -kmp 2-Aug-91
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\displaythree{Standardized Operators that use Specialized Lambda Lists}{
+defmethod&defgeneric&\cr
+}
+% GENERIC-FUNCTION, GENERIC-FLET, and GENERIC-LABELS removed.
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+
+A \term{specialized lambda list} can contain the \term{lambda list keywords} shown
+in \thenextfigure.
+
+\showthree{Lambda List Keywords used by Specialized Lambda Lists}{
+\keyref{allow-other-keys}&\keyref{key}&\keyref{rest}\cr
+\keyref{aux}&\keyref{optional}&\cr
+}
+
+A \term{specialized lambda list} is syntactically the same as an \term{ordinary lambda list}
+except that each \term{required parameter} may optionally be associated with a \term{class}
+or \term{object} for which that \term{parameter} is \term{specialized}.
+
+\Vskip 1pc!
+\auxbnf{lambda-list}{\lparen\star{\SpecializedVar}\CR
+		     \xparen\ttbrac{{\opt} \star{\VarValueSuppliedP}}\CR
+		     \xparen\ttbrac{{\rest} \param{var}}\CR
+		     \xparen\ttbrac{{\key} \star{\KeyVarValueSuppliedP} \brac{\allowotherkeys}}\CR
+		     \xparen\ttbrac{{\aux} \star{\VarValue}}\rparen\CR}
+
+%!!! Need to write more.
+
+\endsubSection%{Specialized Lambda Lists}
+
+\beginsubSection{Macro Lambda Lists}
+\DefineSection{MacroLambdaLists}
+
+A \newterm{macro lambda list} is used in describing \term{macros} 
+defined by the \term{operators} in \thenextfigure.
+
+%!!! This table is just a seed and probably incomplete. -kmp 2-Aug-91
+% I added define-compiler-macro --sjl 5 Mar 92
+\displaythree{Operators that use Macro Lambda Lists}{
+define-compiler-macro&defmacro&macrolet\cr
+define-setf-expander& &\cr
+}
+
+With the additional restriction that
+an \term{environment parameter} may appear only once
+(at any of the positions indicated),
+a \term{macro lambda list} has the following syntax:
+
+%% Some changes here per X3J13. -kmp 05-Oct-93
+\Vskip 1pc!
+{\def\TVar{\curly{\param{var} | \down{pattern}}}\def\starTVar{\star{\TVar}}
+\auxbnf{reqvars}{\starTVar}
+\auxbnf{optvars}{\ttbrac{{\opt} \star{\VarValueSuppliedP}}}
+\auxbnf{restvar}{\ttbrac{\curly{{\rest} | {\body}} \param{\TVar}}}
+\auxbnf{keyvars}{\lbrac{\key} \star{\KeyVarValueSuppliedP}\CR
+		 \xbrac\brac{\allowotherkeys}\rbrac}
+{\let\TVar=\GTVar\let\starTVar=\GstarTVar%
+\auxbnf{auxvars}{\ttbrac{{\aux} \star{\VarValue}}}}
+\auxbnf{envvar}{\ttbrac{{\environment} \param{var}}}
+%Per X3J13 (05-Oct-93), prohibit destructuring of whole variable. -kmp
+\auxbnf{wholevar}{\ttbrac{{\whole} \param{var}}}
+\auxbnf{lambda-list}%
+{\lparen\down{wholevar} \down{envvar}
+ \xparen\down{reqvars}  \down{envvar}
+ \xparen\down{optvars}  \down{envvar}\CR
+ \xparen\down{restvar}  \down{envvar}
+ \xparen\down{keyvars}  \down{envvar}
+ \xparen\down{auxvars}  \down{envvar}\rparen\ |\CR
+ \lparen\down{wholevar} \down{envvar}
+ \xparen\down{reqvars}  \down{envvar}
+ \xparen\down{optvars}  \down{envvar} \f{.}
+%Per x3j13, "\down{restvar}" => "var"
+ \xparen\param{var}\rparen}
+\auxbnf{pattern}%
+{\paren{\down{wholevar}
+        \down{reqvars}
+        \down{optvars}
+        \down{restvar}
+        \down{keyvars}
+        \down{auxvars}} |\CR
+ \paren{\down{wholevar} \down{reqvars} \down{optvars} \f{.}
+%Per x3j13, "\down{restvar}" => "var"
+        \param{var}}}
+}
+\Vskip 1pc!
+
+A \term{macro lambda list} can contain
+the \term{lambda list keywords} shown in \thenextfigure.
+
+\showthree{Lambda List Keywords used by Macro Lambda Lists}{
+\keyref{allow-other-keys}&\keyref{environment}&\keyref{rest}\cr
+\keyref{aux}&\keyref{key}&\keyref{whole}\cr
+\keyref{body}&\keyref{optional}&\cr
+}
+
+\term{Optional parameters} (introduced by \keyref{optional}) and
+\term{keyword parameters} (introduced by \keyref{key})
+can be supplied in a \term{macro lambda list},
+just as in an \term{ordinary lambda list}.
+Both may contain default initialization forms and \term{supplied-p parameters}.
+ 
+%% 8.1.0 10
+\keyref{body}\idxkeyref{body}
+is identical in function to \keyref{rest},
+but it can be used to inform certain output-formatting 
+and editing functions that the remainder of the \term{form} is
+treated as a body, and should be indented accordingly.
+Only one of \keyref{body} or \keyref{rest} can be used at any particular level; 
+\seesection\DestructuringByLambdaLists.
+\issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
+\keyref{body} can appear at any level of a 
+\term{macro lambda list}; 
+for details, \seesection\DestructuringByLambdaLists.
+\endissue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
+ 
+%% 8.1.0 11
+\keyref{whole}\idxkeyref{whole}
+is followed by a single variable that is bound to the
+entire macro-call form; this is the value that the \term{macro function}
+receives as its first argument.
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+%\keyref{whole} and the following variable should appear first in the \term{lambda list},
+If \keyref{whole} and a following variable appear,
+they must appear first in \param{lambda-list},
+\endissue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+before any other parameter or \term{lambda list keyword}.
+\issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
+\keyref{whole} can appear at any level of a \term{macro lambda list}. 
+At inner levels, the \keyref{whole} variable is bound to
+		the corresponding part of the argument, 
+as with \keyref{rest}, but unlike \keyref{rest}, other arguments are also allowed.
+The use of \keyref{whole} does not affect the pattern of arguments
+     specified.
+%% Per moon
+%by \macref{defmacro}.
+\endissue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
+
+%% 8.1.0 12
+\keyref{environment}\idxkeyref{environment}
+is followed by a single variable that is bound
+to an \term{environment} representing the \term{lexical environment} in which the
+% I have clarified the bit about compilation environments below, so this
+% is no longer necessary.  --sjl 5 Mar 92
+% macro call is to be interpreted---this is either the \term{lexical environment}
+% or the compilation \term{environment}.
+macro call is to be interpreted.
+This \term{environment} 
+%%sandra's suggested deletion
+%might not be the
+%complete \term{lexical environment}; it 
+should be used with
+\issue{MACRO-FUNCTION-ENVIRONMENT:YES}
+\funref{macro-function},
+\endissue{MACRO-FUNCTION-ENVIRONMENT:YES}
+\issue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG}
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\funref{get-setf-expansion},
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\endissue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG}
+\issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
+% \funref{variable-information}, 
+% \funref{function-information}, \funref{declaration-information},
+% \funref{augment-environment}, \funref{parse-macro}, \funref{enclose}
+\endissue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
+\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+\funref{compiler-macro-function}, 
+%\funref{compiler-macroexpand}, \funref{compiler-macroexpand-1},
+\endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+and
+\funref{macroexpand} 
+% !!! Sandra:
+%   This isn't correct.  Environments should also be used with things like
+%   SUBTYPEP and CONSTANTP, and not "only" to make local macro definitions
+%   available.
+% I have reworded this; see replacement text below.  --sjl 5 Mar 92
+% for the sake of any local macro definitions
+% that the \specref{macrolet} \term{form} might have
+% established within that  \term{environment}.  
+(for example) in computing the expansion of the macro, to ensure that any
+\term{lexical bindings} or definitions established in the 
+\term{compilation environment} are taken into account.
+\issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
+\keyref{environment} can only appear at the top level of a
+	\term{macro lambda list}, and can only
+appear once, but can appear anywhere in that list;
+\endissue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
+\issue{&ENVIRONMENT-BINDING-ORDER:FIRST}
+the \keyref{environment} \term{parameter} is \term{bound} along with \keyref{whole}
+before any other \term{variables} in the \term{lambda list}, regardless of where
+\keyref{environment} appears in the \term{lambda list}.
+\endissue{&ENVIRONMENT-BINDING-ORDER:FIRST}
+\issue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC}
+The \term{object} that is bound to the
+\term{environment parameter} has \term{dynamic extent}.
+%% Moon: Redundant.
+% the consequences are undefined if 
+% the \term{object} that is bound to the
+% \term{environment parameter} is referred to outside the \term{dynamic extent} 
+% of the macro call.
+\endissue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC}
+ 
+%% 8.1.0 24
+Destructuring allows a \term{macro lambda list} to express
+the structure of a macro call syntax.
+If no \term{lambda list keywords} appear,
+then the \term{macro lambda list} is a \term{tree}
+containing parameter names at the leaves.
+%The following wording revised to be more explicit. -kmp 2-Aug-91
+The pattern and the \term{macro form} must have compatible \term{tree structure}; 
+that is, their \term{tree structure} must be equivalent,
+or it must differ only in that some \term{leaves} of the pattern
+match \term{non-atomic} \term{objects} of the \term{macro form}.
+\issue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
+For information about error detection in this \term{situation},
+\seesection\DestructuringMismatch.
+\endissue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
+
+% I thought it was important to mention that macro lambda lists can be
+% dotted before talking about the restriction about dotted macro forms
+% below.  This paragraph was formerly in its own subsection at the very
+% end.  --sjl 5 Mar 92
+
+\DefineSection{ExtraDestructureInfo}
+%% 8.1.0 15
+%Destructuring specifies that \macref{defmacro} allows any \term{lambda list}
+%% For Moon:
+A destructuring \term{lambda list}
+(whether at top level or embedded) 
+%to
+can
+be dotted, ending
+in a parameter name.  This situation is treated exactly as if the
+parameter name that ends the \term{list} had appeared preceded by \keyref{rest}.
+
+
+%!!! Barmar suggests changing "subexpression" to "subform" here.
+%    He writes:  The point is that the automatic destructuring can only handle
+%     dotted lists when &rest or .var are used, or when the dotted list is a subform
+%     that matches a variable in the lambda list.
+\issue{DOTTED-MACRO-FORMS:ALLOW}
+It is permissible for a \term{macro} \term{form} (or a \term{subexpression} of a
+\term{macro} \term{form})
+to be a \term{dotted list} 
+only  when \f{(... \&rest var)} or \f{(... . var)} is used to match
+ it. It is the responsibility of the \term{macro} to recognize and deal
+ with such situations.
+\editornote{KMP: Apparently the dotted-macro-forms cleanup doesn't allow for
+		 the macro to `manually' notice dotted forms and fix them as well.
+		 It shouldn't be required that this be done only by \&REST or 
+		 a dotted pattern; it should only matter that ultimately the 
+		 non-macro result of a full-macro expansion not contain dots.
+		 Anyway, I plan to address this editorially unless someone
+		 raises an objection.}%!!! 16-Jan-91
+\endissue{DOTTED-MACRO-FORMS:ALLOW}
+
+\beginsubsubsection{Destructuring by Lambda Lists}
+\DefineSection{DestructuringByLambdaLists}
+
+%% 8.1.0 14
+% minor rewording to use new terminology -- sjl 5 Mar 92
+Anywhere in a \term{macro lambda list} where a parameter
+name can appear, and where \term{ordinary lambda list} syntax
+(as described in \secref\OrdinaryLambdaLists) does not 
+otherwise allow a \term{list}, a \term{destructuring lambda list} 
+can appear in place
+of the parameter name.  When this is done, then the argument 
+that would match the parameter is treated as a (possibly dotted) \term{list},
+to be used as an argument list for satisfying the
+parameters in the embedded \term{lambda list}.
+This is known as destructuring.
+ 
+%%% Moon's destructuring wording
+
+%Note that data-directed destructuring
+%is what Common Lisp has, and you would not want to include the parts
+%about program-directed destructuring, which Common Lisp has not adopted.
+%Lambda-list-directed destructuring is what defmacro and destructuring-bind
+%do in Common Lisp.
+
+Destructuring is the process of decomposing a compound \term{object} into
+its component parts, using an abbreviated, declarative syntax, rather
+than writing it out by hand using the primitive component-accessing
+functions.  Each component part is bound to a variable.
+% I don't believe the following two sentences are relevant to the
+% current state of Common Lisp.  --sjl 5 Mar 92
+% The variables
+% can either be \term{assigned} or \term{bound}.  As an extension, some 
+% component parts can be ignored and not assigned to a variable.
+ 
+%% KAB wanted this flushed. -kmp 9-Feb-92
+% Destructuring is most often used to take apart \term{trees}.
+% However it also makes sense to destructure \term{vectors}
+% and \macref{defstruct}-defined structures.  
+% Note that in the latter case an \term{object} is being destructured
+% whose components are identified by name,
+% rather than by position as in the case of 
+% \term{trees} and \term{vectors}.  
+%%Barmar wanted this flushed since it isn't valid. I concur. -kmp 28-Dec-90
+% In fact
+% the idea of destructuring can sensibly be extended to compound objects
+% that are not primitive \term{objects} of Lisp, 
+% but have conceptual components.
+% Thus a \term{rational} number can be destructured into its numerator and
+% denominator, a \term{two-way stream} 
+% into its input and output components, a
+% byte specifier into its position and size, or
+% the multiple values of a \term{function} into the individual values.  The
+% important point is that the conceptual operation of extracting several
+% components of a compound \term{object} is common to all of these applications.
+ 
+%Destructuring of \term{trees} 
+%is especially important in programs such as macros
+%and compilers that manipulate Lisp code, because Lisp code is represented
+%as trees.
+ 
+A destructuring operation requires an \term{object} to be decomposed, 
+a pattern that specifies what components are to be extracted, and the names
+of the variables whose values are to be the components.
+%% KMP: I removed this because I couldn't figure out what the non-SETQ case was.
+%%      Seems like it was probably referring to DESETQ, which isn't in the language.
+% In the non-\specref{setq} case,
+% a destructuring operation requires a body that
+% constitutes the scope of the variables to be bound.
+ 
+\beginsubsubsubsection{Data-directed Destructuring by Lambda Lists}
+
+In data-directed destructuring,
+the pattern is a sample \term{object} of the \term{type} to be decomposed.
+Wherever a component is to be extracted, 
+a \term{symbol} appears in the pattern; 
+this \term{symbol} is the name of the variable whose value will be that component.
+%% This is just rationale, not description. -kmp 2-Aug-91
+% Data-directed destructuring 
+% only works well
+% for \term{trees} and \term{vectors}.  
+% The components to be extracted must be
+% identified by position rather than by name.  Data-directed destructuring
+% cannot be extended to \term{objects} such as 
+% \term{rationals} whose components
+% are not allowed to be \term{symbols}, 
+% and cannot be extended to conceptual
+% \term{objects} such as multiple values, where it is impossible to create a
+% sample \term{object}.
+ 
+\beginsubsubsubsubsection{Examples of Data-directed Destructuring by Lambda Lists}
+
+An example pattern is
+ 
+{\tt 	(a b c)}
+ 
+which destructures a list of three elements.  The variable \f{a} is assigned
+to the first element, \f{b} to the second, etc.  A more complex example
+is
+
+{\tt 	((first . rest) . more)}
+ 
+The important features of data-directed destructuring are its syntactic
+simplicity and the ability to extend it to lambda-list-directed destructuring.
+
+\endsubsubsubsubsection%{Examples of Data-directed Destructuring by Lambda Lists}
+
+\endsubsubsubsection%{Data-directed Destructuring by Lambda Lists}
+
+\beginsubsubsubsection{Lambda-list-directed Destructuring by Lambda Lists}
+
+An extension of data-directed destructuring of \term{trees} is
+lambda-list-directed destructuring.  This derives from the analogy
+between the three-element destructuring pattern
+ 
+{\tt 	(first second third)}
+ 
+and the three-argument \term{lambda list}
+ 
+{\tt	(first second third)}
+ 
+%The \term{lambda list} of a function can be thought of as destructuring the
+%list of arguments to which the function was \term{applied}.
+%In most Lisp
+%implementations this list is only conceptual most of the time, for the
+%sake of efficiency.
+
+Lambda-list-directed destructuring is identical to data-directed destructuring
+if no \term{lambda list keywords} appear in the pattern.  
+Any list in the pattern (whether a sub-list or the whole pattern itself)
+that contains a \term{lambda list keyword} is interpreted specially.
+Elements of the list to the left of the first
+\term{lambda list keyword} are treated as destructuring patterns, as usual, but the
+remaining elements of the list are treated like a function's 
+\term{lambda list}
+except that where a variable would normally be required, an arbitrary
+destructuring pattern is allowed.  Note that in case of ambiguity,
+\term{lambda list} syntax is preferred over destructuring syntax.  Thus, after
+\keyref{optional} a list of elements is a list of a destructuring pattern
+and a default value form.
+ 
+The detailed behavior of each \term{lambda list keyword} in a 
+lambda-list-directed destructuring
+pattern is as follows:
+
+\beginlist
+\itemitem{\keyref{optional}}
+
+Each following element is a variable or a list of a destructuring
+pattern, a default value form, and a supplied-p variable.  The default value and
+the supplied-p variable can be omitted.  
+If the list being destructured ends
+early, so that it does not have an element to match against this destructuring
+(sub)-pattern, the default form is evaluated and destructured instead.  The
+supplied-p variable receives the value 
+\nil\ if the default form is used, \t\ otherwise.
+ 
+\itemitem{\keyref{rest}, \keyref{body}}
+
+The next element is a destructuring pattern that matches the
+rest of the list.  \keyref{body} is identical to \keyref{rest} but declares that what
+is being matched is a list of forms that constitutes the body of \term{form}.
+This next element must be the last unless a \term{lambda list keyword} follows it.
+ 
+\itemitem{\keyref{aux}} 
+
+The remaining elements are not destructuring patterns at all, but are
+auxiliary variable bindings.  
+%This does not make a whole lot of sense when
+%the destructuring is being used to \specref{setq} rather than to bind variables.
+ 
+\itemitem{\keyref{whole}}
+
+The next element is a destructuring pattern that matches the entire
+form in a macro, or the entire \term{subexpression} at inner levels.
+\issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
+%% Take out next sentences due to DEFMACRO-LAMBDA-LIST
+%\keyref{whole} only makes sense in \macref{defmacro} and only at top level.
+%This next element must be the last unless a \term{lambda list keyword} 
+%follows it.
+\endissue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
+ 
+\itemitem{\keyref{key}}
+
+Each following element is one of
+\beginlist
+
+\itemitem{}
+ a \term{variable},
+
+\itemitem{or}
+ a list of a variable,
+           an optional initialization form,
+       and an optional supplied-p variable.
+
+\itemitem{or}
+ a list of a list of a keyword and a destructuring pattern,
+           an optional initialization form,
+       and an optional supplied-p variable.
+\endlist
+The rest of the list being destructured
+is taken to be alternating keywords and values and is taken apart appropriately.
+ 
+\itemitem{\keyref{allow-other-keys}}
+
+Stands by itself.
+\endlist 
+%{--- The above has some terminology problems.  The distinction between the
+%list which is a sub-list of the pattern and the corresponding sub-list of
+%the object being destructured is muddled in places.}
+ 
+\endsubsubsubsection%{Lambda-list-directed Destructuring by Lambda Lists}
+
+% \beginsubsubsubsection{Additional Information about Destructuring by Lambda Lists}
+% \DefineSection{ExtraDestructureInfo}
+
+% I moved the text about dotted lambda lists to earlier in this section.
+% -- sjl 5 Mar 92
+
+
+% \endsubsubsubsection%{Additional Information about Destructuring by Lambda Lists}
+
+\endsubsubsection%{Destructuring by Lambda Lists}
+
+\endsubSection%{Macro Lambda Lists}
+
+
+% This entire section is new.  --sjl 5 Mar 92
+\beginsubsection{Destructuring Lambda Lists}
+\DefineSection{DestructuringLambdaLists}
+
+A \newterm{destructuring lambda list} is used by \macref{destructuring-bind}.
+
+\term{Destructuring lambda lists} are closely related to 
+\term{macro lambda lists}; \seesection\MacroLambdaLists.
+A \term{destructuring lambda list} can contain all of the
+\term{lambda list keywords} listed for \term{macro lambda lists}
+except for \keyref{environment}, and supports destructuring in the
+same way.  Inner \term{lambda lists} nested within a \term{macro lambda list}
+have the syntax of \term{destructuring lambda lists}.
+
+A \term{destructuring lambda list} has the following syntax:
+
+\Vskip 1pc!
+{\def\TVar{\curly{\param{var} | \down{lambda-list}}}\def\starTVar{\star{\TVar}}
+\auxbnf{reqvars}{\starTVar}
+\auxbnf{optvars}{\ttbrac{{\opt} \star{\VarValueSuppliedP}}}
+\auxbnf{restvar}{\ttbrac{\curly{{\rest} | {\body}} \param{\TVar}}}
+\auxbnf{keyvars}{\lbrac{\key} \star{\KeyVarValueSuppliedP}\CR
+		 \xbrac\brac{\allowotherkeys}\rbrac}
+{\let\TVar=\GTVar\let\starTVar=\GstarTVar%
+\auxbnf{auxvars}{\ttbrac{{\aux} \star{\VarValue}}}}
+\auxbnf{envvar}{\ttbrac{{\environment} \param{var}}}
+%Per X3J13 (05-Oct-93), prohibit destructuring of whole variable. -kmp
+\auxbnf{wholevar}{\ttbrac{{\whole} \param{var}}}
+\auxbnf{lambda-list}%
+{\paren{\down{wholevar}
+        \down{reqvars}
+        \down{optvars}
+        \down{restvar}
+        \down{keyvars}
+        \down{auxvars}} |\CR
+ \paren{\down{wholevar} \down{reqvars} \down{optvars} \f{.}
+%Per x3j13, "\down{restvar}" => "var"
+	 \param{var}}}
+}
+\Vskip 1pc!
+
+\endsubsection%{Destructuring Lambda Lists}
+
+
+
+\beginsubsection{Boa Lambda Lists}
+\DefineSection{BoaLambdaLists}
+
+A \newterm{boa lambda list} is a \term{lambda list} that is syntactically 
+like an \term{ordinary lambda list}, but that is processed in
+``\b{b}y \b{o}rder of \b{a}rgument'' style.
+
+A \term{boa lambda list} is used only in a \macref{defstruct} \term{form},
+when explicitly specifying the \term{lambda list} 
+of a constructor \term{function} (sometimes called a ``boa constructor'').
+
+%% 19.6.0 2
+The \keyref{optional}, \keyref{rest}, \keyref{aux},
+\issue{DEFSTRUCT-CONSTRUCTOR-KEY-MIXTURE:ALLOW-KEY}
+\keyref{key}, and \keyref{allow-other-keys}
+\endissue{DEFSTRUCT-CONSTRUCTOR-KEY-MIXTURE:ALLOW-KEY}
+\term{lambda list keywords} are recognized in a \term{boa lambda list}.
+The way these \term{lambda list keywords} differ from their
+use in an \term{ordinary lambda list} follows.
+
+Consider this example, which describes how \macref{destruct} processes
+its \kwd{constructor} option.
+
+\code
+ (:constructor create-foo
+         (a &optional b (c 'sea) &rest d &aux e (f 'eff)))
+\endcode
+
+This defines \f{create-foo} to be a constructor of one or more arguments.
+The first argument is used to initialize the \f{a} slot.  The second
+argument is used to initialize the \f{b} slot.  If there isn't any
+second argument, then the default value given in the body of the
+\macref{defstruct} (if given) is used instead.  
+The third argument is used to
+initialize the \f{c} slot.  If there isn't any third argument, then the
+symbol \f{sea} is used instead.  Any arguments following the third
+argument are collected into a \term{list} 
+and used to initialize the \f{d}
+slot.  If there are three or fewer arguments, then \nil\ is placed in
+the \f{d} slot.  The \f{e} slot is not initialized; 
+its initial value is \term{implementation-defined}.
+Finally, the \f{f} slot is initialized to contain the symbol \f{eff}.
+\issue{DEFSTRUCT-CONSTRUCTOR-KEY-MIXTURE:ALLOW-KEY}
+\keyref{key} and \keyref{allow-other-keys} arguments default
+in a manner similar to that of \keyref{optional} arguments: if no default
+is supplied in the \term{lambda list} then the default value 
+given in the body of the \macref{defstruct} (if given) is used instead.
+%% Removed per Moon as redundant.
+% then the slot initform is used;
+% otherwise the slot is not initialized, its initial value is
+% undefined.                                
+For example:
+
+\code
+ (defstruct (foo (:constructor CREATE-FOO (a &optional b (c 'sea)
+                                             &key (d 2)
+                                             &aux e (f 'eff))))
+   (a 1) (b 2) (c 3) (d 4) (e 5) (f 6))
+ 
+ (create-foo 10) \EV #S(FOO A 10 B 2 C SEA D 2 E \term{implemention-dependent} F EFF)
+ (create-foo 10 'bee 'see :d 'dee) 
+\EV #S(FOO A 10 B BEE C SEE D DEE E \term{implemention-dependent} F EFF)
+\endcode
+
+If keyword arguments of the form 
+\f{((\i{key} \i{var}) \brac{\i{default} \brac{\i{svar}}})}
+are specified, the \term{slot} \term{name} is matched with \i{var} 
+(not \i{key}).
+
+%% 19.6.0 3
+The actions taken in the \f{b} and \f{e} cases were carefully
+chosen to allow the user to specify all possible behaviors. 
+The \keyref{aux} variables can be used to completely override the default
+initializations given in the body.
+
+\issue{BOA-AUX-INITIALIZATION:ERROR-ON-READ}
+If no default value is supplied for an \term{aux variable} variable,
+the consequences are undefined if an attempt is later made to read
+the corresponding \term{slot}'s value before a value is explicitly assigned.
+If such a \term{slot} has a \kwd{type} option specified,
+this suppressed initialization does not imply a type mismatch situation;
+the declared type is only required to apply when the \term{slot} is finally assigned.
+\endissue{BOA-AUX-INITIALIZATION:ERROR-ON-READ}
+
+%% 19.6.0 4
+With this definition, the following can be written:
+
+\code
+ (create-foo 1 2)
+\endcode
+instead of
+
+\code
+ (make-foo :a 1 :b 2)
+\endcode
+and \f{create-foo} provides defaulting different
+from that of \f{make-foo}.
+
+Additional arguments that do not correspond to slot names but
+are merely present to supply values used in subsequent initialization 
+computations are allowed.
+For example, in the definition
+
+\code
+ (defstruct (frob (:constructor create-frob
+                  (a &key (b 3 have-b) (c-token 'c) 
+                          (c (list c-token (if have-b 7 2))))))
+         a b c)
+\endcode
+ 
+the {\tt c-token} argument is used merely to supply a value used in the 
+initialization of the {\tt c} slot. The \term{supplied-p parameters} 
+associated with \term{optional parameters} and \term{keyword parameters}
+might also be used this way.
+ 
+\endissue{DEFSTRUCT-CONSTRUCTOR-KEY-MIXTURE:ALLOW-KEY}
+
+\endsubsection%{Boa Lambda Lists}
+
+\beginsubSection{Defsetf Lambda Lists}
+\DefineSection{DefsetfLambdaLists}
+
+A \newterm{defsetf lambda list} is used by \macref{defsetf}.
+
+A \term{defsetf lambda list} has the following syntax:
+
+%I added &allow-other-keys here because it seemed stupid for that to be missing
+%if &key was possible.
+\Vskip 1pc!
+\auxbnf{lambda-list}{\lparen\starparam{var}\CR
+		     \xparen\ttbrac{{\opt} \star{\VarValueSuppliedP}}\CR
+		     \xparen\ttbrac{{\rest} \param{var}}\CR
+		     \xparen\f{[}\Vtop{\hbox{{\key} \star{\KeyVarValueSuppliedP}}
+				  \vskip 4pt
+				  \hbox{\brac{\allowotherkeys}\f{]}}}\CR
+		     \xparen\ttbrac{{\environment} \param{var}}}
+
+A \term{defsetf lambda list} can contain the \term{lambda list keywords} shown
+in \thenextfigure.
+
+%I also added &environment, per discussion with Sandra and Quinquevirate.
+\showthree{Lambda List Keywords used by Defsetf Lambda Lists}{
+\keyref{allow-other-keys}&\keyref{key}&\keyref{rest}\cr
+\keyref{environment}&\keyref{optional}&\cr
+}
+
+A \term{defsetf lambda list} differs from an \term{ordinary lambda list} 
+only in that it does not permit the use of \keyref{aux}, 
+and that it permits use of \keyref{environment}, 
+     which introduces an \term{environment parameter}.
+
+\endsubSection%{Defsetf Lambda Lists}
+
+\beginsubSection{Deftype Lambda Lists}
+\DefineSection{DeftypeLambdaLists}
+
+A \newterm{deftype lambda list} is used by \macref{deftype}.
+
+A \term{deftype lambda list} has the same syntax as a \term{macro lambda list},
+and can therefore contain the \term{lambda list keywords} as a \term{macro lambda list}.
+
+\issue{DEFTYPE-DESTRUCTURING:YES}
+\issue{DEFTYPE-KEY:ALLOW}
+A \term{deftype lambda list} differs from a \term{macro lambda list} 
+only in that if no \param{init-form} is supplied for an \term{optional parameter}
+or \term{keyword parameter} in the \param{lambda-list}, the default \term{value} 
+for that \term{parameter} is the \term{symbol} \misc{*} (rather than \nil).
+\endissue{DEFTYPE-KEY:ALLOW}
+\endissue{DEFTYPE-DESTRUCTURING:YES}
+
+\endsubSection%{Deftype Lambda Lists}
+
+
+% This entire section is new.  Some info paraphrased from the
+% old dictionary entry for define-modify-macro.  --sjl 5 Mar 92
+\beginsubsection{Define-modify-macro Lambda Lists}
+\DefineSection{DefineModifyMacroLambdaLists}
+
+A \newterm{define-modify-macro lambda list} is used by 
+\macref{define-modify-macro}.
+
+A \term{define-modify-macro lambda list} can contain the 
+\term{lambda list keywords} shown in \thenextfigure.
+
+\showtwo{Lambda List Keywords used by Define-modify-macro Lambda Lists}{
+\keyref{optional}&\keyref{rest}\cr
+}
+
+\term{Define-modify-macro lambda lists} are similar to 
+\term{ordinary lambda lists}, but do not support keyword arguments.
+\macref{define-modify-macro} has no need match keyword arguments, and
+a \term{rest parameter} is sufficient.  \term{Aux variables} are also
+not supported, since \macref{define-modify-macro} has no body \term{forms}
+which could refer to such \term{bindings}.  \Seemac{define-modify-macro}.
+
+\endsubsection%{Define-modify-macro Lambda Lists}
+
+% This entire section is new, per Barrett #3 (first public review).
+\beginsubsection{Define-method-combination Arguments Lambda Lists}
+\DefineSection{DefMethCombArgsLambdaLists}
+
+A \newterm{define-method-combination arguments lambda list} is used by 
+the \kwd{arguments} option to \macref{define-method-combination}.
+
+A \term{define-method-combination arguments lambda list} can contain the 
+\term{lambda list keywords} shown in \thenextfigure.
+
+\showthree{Lambda List Keywords used by Define-method-combination arguments Lambda Lists}{
+\keyref{allow-other-keys}&\keyref{key}&\keyref{rest}\cr
+\keyref{aux}&\keyref{optional}&\keyref{whole}\cr
+}
+
+\term{Define-method-combination arguments lambda lists} are similar to 
+\term{ordinary lambda lists}, but also permit the use of \keyref{whole}.
+
+\endsubsection%{Define-Modify-Macro Arguments Lambda Lists}
+
+\beginsubsection{Syntactic Interaction of Documentation Strings and Declarations}
+\DefineSection{DocVsDecls}
+
+%% 8.1.0 8
+
+In a number of situations, a \term{documentation string} can appear amidst a
+series of \misc{declare} \term{expressions} prior to a series of \term{forms}.
+
+In that case, if a \term{string} $S$ appears where a \term{documentation string} is
+permissible and is not followed by 
+  either a \misc{declare} \term{expression} 
+      or a \term{form}
+then $S$ is taken to be a \term{form};
+otherwise, $S$ is taken as a \term{documentation string}.
+The consequences are unspecified if more than one such \term{documentation string} 
+is present.
+
+\endsubsection%{Syntactic Interaction of Documentation Strings and Declarations}

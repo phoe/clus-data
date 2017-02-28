@@ -1,0 +1,244 @@
+% -*- Mode: TeX -*-
+
+\beginsubsection{Array Elements}
+\DefineSection{ArrayElements}
+
+An \term{array} contains a set of \term{objects} called \term{elements}
+that can be referenced individually according to a rectilinear coordinate system.
+
+\beginsubsubsection{Array Indices}
+
+%% 2.5.0 5
+An \term{array} \term{element} is referred to by a (possibly empty) series of indices.
+The length of the series must equal the \term{rank} of the \term{array}.
+\issue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+Each index must be a non-negative \term{fixnum} 
+\endissue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+%strictly
+less than the corresponding \term{array} \term{dimension}.
+\term{Array} indexing is zero-origin.
+
+\endsubsubsection%{Array Indices}
+
+\beginsubsubsection{Array Dimensions}
+
+An axis of an \term{array} is called a \newterm{dimension}.
+
+Each \term{dimension} is a non-negative 
+\issue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+\term{fixnum};
+\endissue{ARRAY-DIMENSION-LIMIT-IMPLICATIONS:ALL-FIXNUM}
+ if any dimension of an \term{array} is zero, the \term{array} has no elements.
+% Maybe this part isn't in glossary...I just moved it from somewhere else per 
+% suggestion of Barmar.  -kmp 14-Jan-92
+It is permissible for a \term{dimension} to be zero, 
+in which case the \term{array} has no elements, 
+and any attempt to \term{access} an \term{element}
+is an error.  However, other properties of the \term{array},  
+such as the \term{dimensions} themselves, may be used.
+
+\beginsubsubsubsection{Implementation Limits on Individual Array Dimensions}
+
+An \term{implementation} may impose a limit on \term{dimensions} of an \term{array},
+but there is a minimum requirement on that limit.  \Seevar{array-dimension-limit}.
+
+\endsubsubsubsection%{Implementation Limits on Individual Array Dimensions}
+
+\endsubsubsection%{Array Dimensions}
+
+\beginsubsubsection{Array Rank}
+
+%% 2.5.0 3
+%% 2.5.0 4
+
+An \term{array} can have any number of \term{dimensions} (including zero).
+The number of \term{dimensions} is called the \newterm{rank}.
+
+If the rank of an \term{array} is zero then the \term{array} is said to have
+no \term{dimensions}, and the product of the dimensions (see \funref{array-total-size})
+is then 1; a zero-rank \term{array} therefore has a single element.
+
+\beginsubsubsubsection{Vectors}
+
+An \term{array} of \term{rank} one (\ie a one-dimensional \term{array})
+is called a \newterm{vector}.
+
+\beginsubsubsubsubsection{Fill Pointers}
+
+A \newterm{fill pointer} is a non-negative \term{integer} no
+larger than the total number of \term{elements} in a \term{vector}.
+Not all \term{vectors} have \term{fill pointers}.
+\Seefuns{make-array} and \funref{adjust-array}.
+
+An \term{element} of a \term{vector} is said to be \newterm{active} if it has
+an index that is greater than or equal to zero, 
+but less than the \term{fill pointer} (if any).
+For an \term{array} that has no \term{fill pointer},
+all \term{elements} are considered \term{active}.
+
+%% 17.5.0 4
+Only \term{vectors} may have \term{fill pointers}; 
+multidimensional \term{arrays} may not.
+A multidimensional \term{array} that is displaced to a \term{vector} 
+that has a \term{fill pointer} can be created.
+
+\endsubsubsubsubsection%{Fill Pointers}
+
+\endsubsubsubsection%{Vectors}
+
+\beginsubsubsubsection{Multidimensional Arrays}
+
+\beginsubsubsubsubsection{Storage Layout for Multidimensional Arrays}
+
+%% 2.5.0 8
+Multidimensional \term{arrays} store their components in row-major order;
+that is, internally a multidimensional \term{array} is stored as a
+one-dimensional \term{array}, with the multidimensional index sets
+ordered lexicographically, last index varying fastest.  
+ 
+\endsubsubsubsubsection%{Storage Layout for Multidimensional Arrays}
+
+\beginsubsubsubsubsection{Implementation Limits on Array Rank}
+
+An \term{implementation} may impose a limit on the \term{rank} of an \term{array},
+but there is a minimum requirement on that limit.  \Seevar{array-rank-limit}.
+
+\endsubsubsubsubsection%{Implementation Limits on Array Rank}
+
+\endsubsubsubsection%{Multidimensional Arrays}
+
+\endsubsubsection%{Array Rank}
+
+\endsubsection%{Array Elements}
+
+\beginsubsection{Specialized Arrays}
+
+%% 17.0.0 4
+An \term{array} can be a \term{general} \term{array}, 
+    meaning each \term{element} may be any \term{object},
+or it may be a \term{specialized} \term{array},
+    meaning that each \term{element} must be of a restricted \term{type}.
+
+The phrasing ``an \term{array} \term{specialized} to \term{type} \metavar{type}''
+is sometimes used to emphasize the \term{element type} of an \term{array}.
+This phrasing is tolerated even when the \metavar{type} is \typeref{t},
+even though an \term{array} \term{specialized} to \term{type} \term{t}
+is a \term{general} \term{array}, not a \term{specialized} \term{array}.
+
+\Thenextfigure\ lists some \term{defined names} that are applicable to \term{array} 
+creation, \term{access}, and information operations.
+
+%% Added ARRAY-DISPLACEMENT per Tom Shepard.  (X3J13 approved: May 4-5, 1994)
+%% -kmp 9-May-94
+\displaythree{General Purpose Array-Related Defined Names}{
+adjust-array&array-has-fill-pointer-p&make-array\cr
+adjustable-array-p&array-in-bounds-p&svref\cr
+aref&array-rank&upgraded-array-element-type\cr
+array-dimension&array-rank-limit&upgraded-complex-part-type\cr
+array-dimension-limit&array-row-major-index&vector\cr
+array-dimensions&array-total-size&vector-pop\cr
+array-displacement&array-total-size-limit&vector-push\cr
+array-element-type&fill-pointer&vector-push-extend\cr
+}
+
+\beginsubsubsection{Array Upgrading}
+\DefineSection{ArrayUpgrading}
+
+\issue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+% Some of the following was transplanted from the description 
+% of UPGRADED-ARRAY-ELEMENT-TYPE.  Consider also stealing from
+% SUBTYPEP and TYPEP.
+
+The \newterm{upgraded array element type} of a \term{type} $T\sub 1$
+is a \term{type} $T\sub 2$ that is a \term{supertype} of $T\sub 1$
+and that is used instead of $T\sub 1$ whenever $T\sub 1$
+is used as an \term{array element type} 
+for object creation or type discrimination.
+
+During creation of an \term{array},
+the \term{element type} that was requested 
+is called the \newterm{expressed array element type}.
+The \term{upgraded array element type} of the \term{expressed array element type}
+becomes the \newterm{actual array element type} of the \term{array} that is created.
+
+%!!! Barmar thinks this should be removed.
+\term{Type} \term{upgrading} implies a movement upwards in the type hierarchy lattice.
+A \term{type} is always a \term{subtype} of its \term{upgraded array element type}.
+Also, if a \term{type} $T\sub x$ is a \term{subtype} of another \term{type} $T\sub y$,
+then
+the \term{upgraded array element type} of $T\sub x$ 
+must be a \term{subtype} of
+the \term{upgraded array element type} of $T\sub y$.
+Two \term{disjoint} \term{types} can be \term{upgraded} to the same \term{type}.
+
+The \term{upgraded array element type} $T\sub 2$ of a \term{type} $T\sub 1$
+is a function only of $T\sub 1$ itself;
+that is, it is independent of any other property of the \term{array} 
+for which $T\sub 2$ will be used,
+such as \term{rank}, \term{adjustability}, \term{fill pointers}, or displacement.
+%% This next sentence is interesting, but is just Rationale, so is omitted.
+% The reason \term{rank} is included is because it would not
+% be consistently possible to displace \term{arrays} to those of differing
+% \term{rank} otherwise.
+\Thefunction{upgraded-array-element-type} 
+can be used by \term{conforming programs} to predict how the \term{implementation}
+will \term{upgrade} a given \term{type}.
+
+\endissue{ARRAY-TYPE-ELEMENT-TYPE-SEMANTICS:UNIFY-UPGRADING}
+
+\endsubsubsection%{Array Upgrading}
+
+\beginsubsubsection{Required Kinds of Specialized Arrays}
+\DefineSection{RequiredSpecializedArrays}
+
+%% 17.0.0 5
+\term{Vectors} whose \term{elements} are restricted to \term{type}
+\issue{CHARACTER-PROPOSAL:2-3-2}
+\typeref{character} or a \term{subtype} of \typeref{character}
+\endissue{CHARACTER-PROPOSAL:2-3-2}
+are called \newtermidx{strings}{string}. 
+\term{Strings} are \oftype{string}.
+%% 18.0.0 7
+%% 18.0.0 4
+\Thenextfigure\ lists some \term{defined names} related to \term{strings}.
+
+\term{Strings} are \term{specialized} \term{arrays} 
+and might logically have been included in this chapter.
+However, for purposes of readability
+most information about \term{strings} does not appear in this chapter;
+see instead \chapref\Strings.
+
+%% 18.0.0 5
+%% paragraph duplicated in descriptions of string-equal and string=
+%% 18.0.0 6
+%% paragraph duplicated in description of stringp
+
+\displaythree{Operators that Manipulate Strings}{
+char&string-equal&string-upcase\cr
+make-string&string-greaterp&string{\tt /=}\cr
+nstring-capitalize&string-left-trim&string{\tt <}\cr
+nstring-downcase&string-lessp&string{\tt <=}\cr
+nstring-upcase&string-not-equal&string{\tt =}\cr
+schar&string-not-greaterp&string{\tt >}\cr
+string&string-not-lessp&string{\tt >=}\cr
+string-capitalize&string-right-trim&\cr
+string-downcase&string-trim&\cr
+}
+
+\term{Vectors} whose \term{elements} are restricted to \term{type}
+\typeref{bit} are called \newtermidx{bit vectors}{bit vector}.
+\term{Bit vectors} are \oftype{bit-vector}.
+\Thenextfigure\ lists some \term{defined names} for operations on \term{bit arrays}.
+
+\displaythree{Operators that Manipulate Bit Arrays}{
+bit&bit-ior&bit-orc2\cr
+bit-and&bit-nand&bit-xor\cr
+bit-andc1&bit-nor&sbit\cr
+bit-andc2&bit-not&\cr
+bit-eqv&bit-orc1&\cr
+}
+
+\endsubsubsection%{Required Kinds of Specialized Arrays}
+
+\endsubsection%{Specialized Arrays}

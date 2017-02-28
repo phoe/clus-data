@@ -1,0 +1,275 @@
+%-*- Mode: TeX -*-
+
+%%Compliance
+This standard presents the syntax and semantics to be implemented by a
+\term{conforming implementation} (and its accompanying documentation).
+In addition, it imposes requirements on \term{conforming programs}.
+
+\beginsubSection{Conforming Implementations}
+ 
+A \newterm{conforming implementation} shall adhere to the requirements outlined
+in this section.
+
+\beginsubsubsection{Required Language Features}
+\DefineSection{ReqLangFeatures}
+
+A \term{conforming implementation} shall accept all features 
+(including deprecated features)
+of the language specified in this standard,
+with the meanings defined in this standard.
+
+A \term{conforming implementation} shall not require the inclusion of substitute
+or additional language elements in code in order to accomplish a feature of
+the language that is specified in this standard.
+
+\endsubsubsection%{Required Language Features}
+
+\beginsubsubsection{Documentation of Implementation-Dependent Features}
+
+A \term{conforming implementation} shall be accompanied by a document
+that provides a definition of all \term{implementation-defined}
+aspects of the language defined by this specification.
+
+In addition, a \term{conforming implementation} is encouraged (but not required) 
+to document items in this standard that are identified as
+\term{implementation-dependent}, although in some cases
+such documentation might simply identify the item as ``undefined.''
+
+\endsubsubsection%{Documentation of Implementation-Dependent Features}
+
+\beginsubsubsection{Documentation of Extensions}
+
+A \term{conforming implementation} shall be accompanied by a
+document that separately describes any features accepted by the
+\term{implementation} that are not specified in this standard, but that do not
+cause any ambiguity or contradiction when added to the language
+standard.  Such extensions shall be described as being ``extensions to
+\clisp\ as specified by ANSI \metavar{standard number}.''
+ 
+\endsubsubsection%{Documentation of Extensions}
+
+\beginsubsubsection{Treatment of Exceptional Situations}
+
+A \term{conforming implementation} shall treat exceptional situations 
+in a manner consistent with this specification.
+ 
+\beginsubsubsubsection{Resolution of Apparent Conflicts in Exceptional Situations}
+
+If more than one passage in this specification appears to apply to the
+same situation but in conflicting ways, the passage that appears
+to describe the situation in the most specific way (not necessarily the
+passage that provides the most constrained kind of error detection) 
+takes precedence.
+
+\beginsubsubsubsubsection{Examples of Resolution of Apparent Conflicts 
+			  in Exceptional Situations}
+
+Suppose that function \f{foo} is a member of a set $S$ of \term{functions} that
+operate on numbers.  Suppose that one passage states that an error must be
+signaled if any \term{function} in $S$ is ever given an argument of \f{17}.
+Suppose that an apparently conflicting passage states that the consequences 
+are undefined if \f{foo} receives an argument of \f{17}.  Then the second passage
+(the one specifically about \f{foo}) would dominate because the description of
+the situational context is the most specific, and it would not be required that
+\f{foo} signal an error on an argument of \f{17} even though other functions in 
+the set $S$ would be required to do so.
+
+\endsubsubsubsubsection%{Examples of Resolution of Apparent Conflicts
+%			 in Exceptional Situations}
+
+\endsubsubsubsection%{Resolution of Apparent Conflicts in Exceptional Situations}
+
+\endsubsubsection%{Treatment of Exceptional Situations}
+
+\beginsubsubsection{Conformance Statement}
+
+A \term{conforming implementation} shall produce a conformance statement 
+as a consequence of using the implementation, or that statement
+shall be included in the accompanying documentation.  If the implementation
+conforms in all respects with this standard, the conformance statement
+shall be
+ 
+\beginlist
+\item{} ``\metavar{Implementation} conforms with the requirements 
+	  of ANSI \metavar{standard number}''
+\endlist
+ 
+If the \term{implementation} conforms with some but not all of the requirements of this
+standard, then the conformance statement shall be
+ 
+\beginlist
+\item{} ``\metavar{Implementation} conforms with the requirements of
+	  ANSI \metavar{standard number} with the following exceptions: 
+	  \metavar{reference to or complete list of the requirements of
+		   the standard with which the implementation does not conform}.''
+\endlist 
+ 
+\endsubsubsection%{Conformance Statement}
+
+\endsubSection%{Conforming Implementations}
+
+\beginsubSection{Conforming Programs}
+\idxterm{conforming program}\idxterm{conforming code}
+
+Code conforming with the requirements of this standard shall adhere to the
+following:
+
+\beginlist
+ \itemitem{1.} \term{Conforming code} shall use only those features of the
+               language syntax and semantics that are 
+	       either specified in this standard
+		   or defined using the extension mechanisms 
+		      specified in the standard.
+%% This biz about syntactic extension seems overly specific for this context. -kmp 23-Oct-91
+% 		      (\eg \term{symbol macros}, 
+% 			   \term{macros}, 
+% %%Compiler macros do not extend syntax.  
+% %%They only provide an alternate implementation of existing syntax. -kmp 11-Mar-91
+% %\term{compiler macros},
+% 		       and \term{reader macros}).
+ 
+
+%% Rewritten per X3J13 and Boyer/Kaufmann/Moore #2 (second public review).
+%% -kmp 9-May-94
+% \itemitem{2.} \term{Conforming code} shall not rely on any particular
+%               interpretation of \term{implementation-dependent} features.
+\itemitem{2.} \term{Conforming code} may use
+	      \term{implementation-dependent} features and values, 
+	      but shall not rely upon
+	      any particular interpretation of these features and values 
+	      other than those that are discovered by the execution of \term{code}.
+
+\itemitem{3.} \term{Conforming code} shall not depend on the consequences
+	      of undefined or unspecified situations.
+
+\itemitem{4.} \term{Conforming code} does not use any constructions 
+	      that are prohibited by the standard.
+
+\itemitem{5.} \term{Conforming code} does not depend on extensions 
+	      included in an implementation.
+\endlist 
+
+% This material is all covered in more detail in chapter 3 (in the section
+% on constraints on externalizable objects).  There is no need to repeat
+% the material here.  --sjl 13 Mar 92
+%\beginsubsubsection{Conforming Programs in Files}
+%
+%A \term{conforming program} whose source text is in a \term{compilation unit}
+%must satisfy the following constraints:
+%
+%\beginlist
+%
+%\item{\bull} 
+%  Any \term{top level form} in a \term{file} that alters 
+%  \thevalueof{*package*} at compile time must also alter it at load time
+%  to a \term{similar} \term{package}.
+%
+%\item{\bull}
+%  If the first \term{non-atomic} \term{top level form} in the \term{file}
+%  is not a call to \macref{in-package}, then the \term{current package}
+%  at load time must be a \term{similar} \term{package} to the one in effect at 
+%  compile time.
+%
+%\item{\bull}
+%  Any \term{symbol} in the source text \term{accessible} in the
+%  \term{current package} at compile time and whose \term{home package} 
+%  is the package $P$ must be \term{accessible} in the \term{current package} 
+%  at load time and must also be \term{accessible} in a package \term{similar} to $P$.
+%  
+%\item{\bull} 
+%  Any \term{symbol} in the source text that is an \term{external symbol} 
+%  of the package $P$ at compile time must be an \term{external symbol} 
+%  of package \term{similar} to $P$ at load time.
+%
+%\endlist
+%
+%In \term{situations} in which any of these conditions does not hold,
+%an \term{implementation} might signal an error 
+%or might extend \clisp\ to handle the situation.
+%
+%\endsubsubsection%{Conforming Programs in Files}
+
+\beginsubsubsection{Use of Implementation-Defined Language Features}
+
+Note that \term{conforming code} may rely on particular
+\term{implementation-defined} values or features. Also note that the
+requirements for \term{conforming code} and \term{conforming implementations} do not
+require that the results produced by conforming code always be the
+same when processed by a \term{conforming implementation}. The results may be the
+same, or they may differ.
+
+%% Moved to its own section (see below) per Dalton #1 (1st Public Review) 
+%% by X3J13 vote May 4-5, 1994 (after 2nd public review).
+%% -kmp 9-May-94
+% %!!! Barmar wonders if this is really the right place for the next sentence.
+% \term{Portable code} is written using only \term{standard characters}.
+
+%Informally, the basic rules for conformance are as follows:
+%1. Conforming code is defined in terms of its structure,
+%and not in terms of its results and side effects.
+%2. Conforming code is written using only the syntax specified in the standard,
+%or syntax defined using the syntax extension mechanisms (macros and reader
+%macros) specified in the standard.
+%3. Conforming code is written in only the sequence specified in the standard.
+%4. Conforming code is written using only the functions, macros,
+%special forms, variables, and constants specified in the standard.
+%5. Conforming implementations provide the functionality and behavior 
+%specified in the standard.
+%The definitions of all names and syntax that aren't specified in the 
+%standard and aren't provided by the implementation must accompany the code. 
+%6. Conformance is not machine-checkable.
+ 
+Conforming code may run in all conforming implementations, but might
+have allowable \term{implementation-defined} behavior that makes it
+non-portable code.
+%Insofar as we allow options in the standard this will be true.
+For example, the following are examples of \term{forms} that are conforming, but
+that might return different \term{values} in different implementations:
+
+\code
+ (evenp most-positive-fixnum) \EV \term{implementation-dependent}
+ (random) \EV \term{implementation-dependent}
+ (> lambda-parameters-limit 93) \EV \term{implementation-dependent}
+ (char-name #\\A) \EV \term{implementation-dependent}
+\endcode 
+
+\beginsubsubsubsection{Use of Read-Time Conditionals}
+\DefineSection{ReadTimeConditionals}
+
+%The following is added to clarify a question from RWK.
+%Mail sent to him and Quinquevirate noting that this interpretation was made.
+% -kmp 10-Apr-91
+
+Use of \f{\#+} and \f{\#-} does not automatically disqualify a program
+from being conforming.  A program which uses \f{\#+} and \f{\#-} is 
+considered conforming if there is no set of \term{features} in which the
+program would not be conforming.  Of course, \term{conforming programs} are
+not necessarily working programs.  The following program is conforming:
+
+\code
+(defun foo ()
+  \#+ACME (acme:initialize-something)
+  (print 'hello-there))
+\endcode
+
+However, this program might or might not work, depending on whether the
+presence of the feature \f{ACME} really implies that a function named
+\f{acme:initialize-something} is present in the environment.  In effect,
+using \f{\#+} or \f{\#-} in a \term{conforming program} means that the variable
+\varref{*features*}\idxref{*features*}
+becomes just one more piece of input data to that 
+program.  Like any other data coming into a program, the programmer
+is responsible for assuring that the program does not make unwarranted
+assumptions on the basis of input data.
+
+\endsubsubsubsection%{Use of Read-Time Conditionals}
+
+\endsubsubsection%{Use of Implementation-Defined Language Features}
+
+\beginsubsubsection{Character Set for Portable Code}
+
+\term{Portable code} is written using only \term{standard characters}.
+
+\endsubsubsection%{Character Set for Portable Code}
+
+\endsubSection%{Conforming Programs}

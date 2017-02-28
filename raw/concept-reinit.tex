@@ -1,0 +1,41 @@
+% -*- Mode: TeX -*-
+                      
+The generic function \funref{reinitialize-instance} may be used to change
+the values of \term{slots} according to initialization arguments.
+
+The process of reinitialization changes the values of some \term{slots} and
+performs any user-defined actions.  It does not modify the structure
+of an \term{instance} to add or delete \term{slots}, 
+and it does not use any \kwd{initform} forms to initialize \term{slots}.
+
+The generic function \funref{reinitialize-instance} may be called
+directly.  It takes one required argument, the \term{instance}.  It also
+takes any number of initialization arguments to be used by \term{methods} for
+\funref{reinitialize-instance} or for \funref{shared-initialize}. The
+arguments after the required \term{instance} must form an 
+\term{initialization argument list}.
+                                               
+There is a system-supplied primary \term{method} for 
+\funref{reinitialize-instance} whose \term{parameter specializer} is 
+\theclass{standard-object}.  First this \term{method} checks the validity of
+initialization arguments and signals an error if an initialization
+argument is supplied that is not declared as valid. 
+(For more information, \seesection\DeclaringInitargValidity.)
+Then it calls the generic function 
+\funref{shared-initialize} with the following arguments: the \term{instance},
+\nil, and the initialization arguments it received.
+
+\beginsubsection{Customizing Reinitialization}             
+
+\term{Methods} for \funref{reinitialize-instance} may be defined to specify
+actions to be taken when an \term{instance} is updated.  If only
+\term{after methods} for \funref{reinitialize-instance} are defined, 
+they will be run after the system-supplied primary \term{method} for 
+initialization and therefore will not interfere with the default behavior of 
+\funref{reinitialize-instance}.
+
+\term{Methods} for \funref{shared-initialize} may be defined to customize 
+\term{class} redefinition.  For more information, \seesection\SharedInitialize.
+
+\endsubsection%{Customizing Reinitialization}
+

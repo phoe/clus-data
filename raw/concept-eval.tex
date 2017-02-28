@@ -1,0 +1,1274 @@
+% -*- Mode: TeX -*-
+%%Evaluation
+
+\term{Execution} of \term{code} can be accomplished by a variety of means ranging
+from direct interpretation of a \term{form} representing a \term{program}
+to invocation of \term{compiled code} produced by a \term{compiler}.
+ 
+\newtermidx{Evaluation}{evaluation} is the process by which a \term{program} is \term{executed} in \clisp.
+The mechanism of \term{evaluation} is manifested
+ both implicitly through the effect of the \term{Lisp read-eval-print loop},
+ and  explicitly through the presence of the \term{functions} 
+       \funref{eval},
+       \funref{compile},
+       \funref{compile-file},
+   and \funref{load}.
+Any of these facilities might share the same execution strategy, 
+or each might use a different one.
+
+The behavior of a \term{conforming program} processed by \funref{eval}
+and by \funref{compile-file} might differ; \seesection\SemanticConstraints.
+
+\term{Evaluation} can be understood in terms of a model in which an
+interpreter recursively traverses a \term{form} performing each
+step of the computation as it goes.  
+This model, which describes the semantics of \clisp\ \term{programs},
+is described in \secref\EvaluationModel.
+
+\beginsubSection{Introduction to Environments}
+\DefineSection{IntroToEnvs}
+
+A \newterm{binding} is an association between a \term{name} and
+that which the name denotes.  \term{Bindings} are \term{established}
+in a \term{lexical environment} or a \term{dynamic environment}
+by particular \term{special operators}.
+
+An \newterm{environment} is a set of \term{bindings} and other information
+used during evaluation (\eg to associate meanings with names).
+
+\term{Bindings} in an \term{environment} are partitioned into \newtermidx{namespaces}{namespace}.
+A single \term{name} can simultaneously have more than one
+associated \term{binding} per \term{environment},
+but can have only one associated \term{binding} per \term{namespace}.
+
+%!!!! Moon: There out to be a list of the namespaces!!
+%           Do they even have agreed-upon names?
+
+\beginsubsubsection{The Global Environment}
+
+The \newterm{global environment} is that part of an \term{environment}
+that contains \term{bindings} with both \term{indefinite scope} 
+and \term{indefinite extent}.
+The \term{global environment} contains, among other things, the following:
+
+\beginlist
+\item{\bull} \term{bindings} of \term{dynamic variables} and \term{constant variables}.
+\item{\bull} \term{bindings} of \term{functions}, \term{macros}, and \term{special operators}.
+\item{\bull}%
+\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}%
+ \term{bindings} of \term{compiler macros}.
+\endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}%
+\item{\bull} \term{bindings} of \term{type} and \term{class} \term{names}
+\item{\bull} information about \term{proclamations}.
+\endlist
+
+\endsubsubsection%{The Global Environment}
+
+\beginsubsubsection{Dynamic Environments}
+
+A \newterm{dynamic environment} for \term{evaluation} is that part of an
+\term{environment} that contains \term{bindings} whose duration
+is bounded by points of \term{establishment} and \term{disestablishment} 
+within the execution of the \term{form} that
+established the \term{binding}.
+A \term{dynamic environment} contains, among other things, the following:
+
+\beginlist
+\item{\bull} \term{bindings} for \term{dynamic variables}.
+\item{\bull} information about \term{active} \term{catch tags}.
+\item{\bull} information about \term{exit points} established by \specref{unwind-protect}.
+\item{\bull} information about \term{active} \term{handlers} and \term{restarts}.
+\endlist
+
+The \term{dynamic environment} that is active at any given point 
+in the \term{execution} of a \term{program} is referred to by 
+definite reference as ``the current \term{dynamic environment},''
+or sometimes as just ``the \term{dynamic environment}.''
+
+Within a given \term{namespace},
+a \term{name} is said to be \term{bound}
+in a \term{dynamic environment} if there is a \term{binding} 
+%or mapping
+associated with its \term{name} in the \term{dynamic environment} 
+or, if not, there is a \term{binding} 
+%or mapping
+associated with its name in the \term{global environment}.
+
+\endsubsubsection%{Dynamic Environments}
+
+\beginsubsubsection{Lexical Environments}
+
+A \newterm{lexical environment} for \term{evaluation} at some position in a \term{program}
+is that part of the \term{environment} that contains information having 
+\term{lexical scope} within the \term{forms} containing that position.
+A \term{lexical environment} contains, among other things, the following:
+
+\beginlist
+\item{\bull} \term{bindings} of \term{lexical variables} and \term{symbol macros}.
+\item{\bull} \term{bindings} of \term{functions} and \term{macros}.
+             (Implicit in this is information about those \term{compiler macros} 
+	      that are locally disabled.)
+%% Replaced by parenthetical remark on previous bullet. -kmp 5-Dec-91
+% \item{\bull} \term{bindings} of \term{compiler macros}
+% 	     (specifically, information about those \term{compiler macros} 
+% 	      that are locally disabled)
+\item{\bull} \term{bindings} of \term{block tags}.
+\item{\bull} \term{bindings} of \term{go tags}.
+\item{\bull} information about \term{declarations}.
+\endlist
+
+The \term{lexical environment} that is active at any given position
+in a \term{program} being semantically processed is referred to by
+definite reference as ``the current \term{lexical environment},''
+or sometimes as just ``the \term{lexical environment}.''  
+
+Within a given \term{namespace},
+a \term{name} is said to be \term{bound} in a \term{lexical environment}
+if there is a \term{binding} 
+%or mapping
+associated with its \term{name}
+in the \term{lexical environment} or, if not, there is a \term{binding} 
+%or mapping
+associated with its name in the \term{global environment}.
+
+\beginsubsubsubsection{The Null Lexical Environment}
+\DefineSection{NullLexicalEnv}
+
+The \newterm{null lexical environment} is equivalent to the \term{global environment}.
+
+Although in general the representation of an \term{environment} \term{object}
+is \term{implementation-dependent}, \nil\ can be used in any situation where an
+\term{environment} \term{object} is called for in order to denote 
+the \term{null lexical environment}.
+
+\endsubsubsubsection%{The Null Lexical Environment}
+
+\endsubsubsection%{Lexical Environments}
+
+\beginsubsubsection{Environment Objects}
+\DefineSection{EnvObjs}
+
+Some \term{operators} make use of an \term{object}, 
+called an \newterm{environment object},
+that represents the set of \term{lexical bindings} needed to perform
+semantic analysis on a \term{form} in a given \term{lexical environment}.
+The set of \term{bindings} in an \term{environment object}
+may be a subset of the \term{bindings} that would be needed to actually 
+perform an \term{evaluation}; for example, \term{values} associated with
+\term{variable} \term{names} and \term{function names} in the corresponding
+\term{lexical environment} might not be available in an \term{environment object}.
+
+The \term{type} and nature of an \term{environment object} is \term{implementation-dependent}.
+The \term{values} of \term{environment parameters} to \term{macro functions}
+are examples of \term{environment objects}.
+
+The \term{object} \nil\ when used as an \term{environment object}
+denotes the \term{null lexical environment};
+\seesection\NullLexicalEnv.
+
+\endsubsubsection%{Environment Objects}
+
+\endSubsection%{Introduction to Environments}
+
+\beginSubsection{The Evaluation Model}
+\DefineSection{EvaluationModel}
+
+A \clisp\ system evaluates \term{forms} with respect to lexical,
+dynamic, and global \term{environments}.  The following sections
+describe the components of the \clisp\ evaluation model.
+
+\beginsubsubsection{Form Evaluation}
+
+%% 5.1.0 2
+%% 5.1.1 1
+\term{Forms} fall into three categories:
+%!!!Is this a correct use of self-evaluating? -kmp 09-Apr-91
+\term{symbols}, \term{conses}, and \term{self-evaluating objects}.
+The following sections explain these categories.
+                                            
+\beginsubsubsubsection{Symbols as Forms}
+\DefineSection{SymbolsAsForms}
+
+If a \term{form} is a \term{symbol},
+then it is either a \term{symbol macro} or a \term{variable}.
+
+The \term{symbol} names a \term{symbol macro} 
+if there is a \term{binding} of the \term{symbol} as a \term{symbol macro}
+in the current \term{lexical environment} 
+\issue{ISO-COMPATIBILITY:ADD-SUBSTRATE}
+ (see \macref{define-symbol-macro} and \specref{symbol-macrolet}).
+\endissue{ISO-COMPATIBILITY:ADD-SUBSTRATE}
+If the \term{symbol} is a \term{symbol macro},
+its expansion function is obtained.
+The expansion function is a function of two arguments, and is invoked
+by calling the \term{macroexpand hook} with 
+     the expansion function as its first argument,
+     the \term{symbol} as its second argument,
+ and an \term{environment object} (corresponding to the current \term{lexical environment})
+      as its third argument.
+The \term{macroexpand hook}, in turn, calls the expansion function with the
+\term{form} as its first argument and the \term{environment} as its second argument.
+The \term{value} of the expansion function, which is passed through
+by the \term{macroexpand hook}, is a \term{form}. 
+This resulting \term{form} is processed in place of the original \term{symbol}.
+
+If a \term{form} is a \term{symbol} that is not a \term{symbol macro},
+then it is the \term{name} of a \term{variable}, and the \term{value} of that
+\term{variable} is returned. There are three kinds of variables:
+ \term{lexical variables},
+ \term{dynamic variables},
+and
+ \term{constant variables}.
+% global variables.
+A \term{variable} can store one \term{object}.
+The main operations on a \term{variable} are 
+ to \term{read}\meaning{1} and 
+ to \term{write}\meaning{1}
+its \term{value}.
+
+%% 7.1.1 1
+%% 7.2.0 2
+%% 7.2.0 3
+
+An error \oftype{unbound-variable} should be signaled if
+an \term{unbound variable} is referenced.
+
+\term{Non-constant variables} can be \term{assigned} by using \specref{setq} 
+or \term{bound}\meaning{3} by using \specref{let}.
+\Thenextfigure\ lists some \term{defined names} that
+are applicable to assigning, binding, and defining \term{variables}.
+
+\displaythree{Some Defined Names Applicable to Variables}{
+boundp&let&progv\cr
+defconstant&let*&psetq\cr
+defparameter&makunbound&set\cr
+defvar&multiple-value-bind&setq\cr
+lambda&multiple-value-setq&symbol-value\cr
+}
+
+The following is a description of each kind of variable.
+
+\beginsubsubsubsubsection{Lexical Variables}
+
+%!!! Issue of (let ((x x)) (declare (special x)) ...). Is the outer X special? -kmp
+%% 5.1.2 2
+%% Rewritten by KAB and KMP.
+% A \term{variable} that occurs textually within a \term{form}
+% that creates a \term{lexical binding} for a \term{variable}
+% of the same name is a \term{lexical variable} unless the reference is locally
+% declared \declref{special} (see \misc{declare}) or the \term{binding}
+% is shadowed by a \term{form} that creates a \term{dynamic binding} of the same name.
+
+%% 5.1.2 3
+A \term{lexical variable} is a \term{variable} that can be referenced only within 
+the \term{lexical scope} of the \term{form} that establishes that \term{variable};
+\term{lexical variables} have \term{lexical scope}.
+Each time a \term{form} creates a \term{lexical binding} of a \term{variable},
+a \term{fresh} \term{binding} is \term{established}.
+
+Within the \term{scope} of a \term{binding} for a \term{lexical variable} \term{name},
+uses of that \term{name} as a \term{variable} are considered to be references
+to that \term{binding} except where the \term{variable} is \term{shadowed}\meaning{2} 
+by a \term{form} that \term{establishes} a \term{fresh} \term{binding} for that 
+\term{variable} \term{name},
+or by a \term{form} that locally \term{declares} the \term{name} \declref{special}.
+
+A \term{lexical variable} always has a \term{value}.
+There is no \term{operator} that introduces a \term{binding} for a
+\term{lexical variable} without giving it an initial \term{value}, nor
+is there any \term{operator} that can make a \term{lexical variable} be \term{unbound}.
+
+\term{Bindings} of \term{lexical variables} are found in the \term{lexical environment}.
+
+\endsubsubsubsubsection%{Lexical Variables}
+
+\beginsubsubsubsubsection{Dynamic Variables}
+
+A \term{variable} is a \term{dynamic variable} if one of the following
+conditions hold:
+
+\beginlist
+
+ \item{\bull} It is locally declared or globally proclaimed \declref{special}.
+
+ \item{\bull} It occurs textually within a \term{form} that
+creates a \term{dynamic binding} for a \term{variable} of the \term{same} \term{name},
+and the \term{binding} is not \term{shadowed}\meaning{2} by a \term{form}
+that creates a \term{lexical binding} of the same \term{variable} \term{name}.
+
+%% Is this right? Is there an issue that applies to this? -kmp
+%% Removed for now because Barrett and Moon balked, too. -kmp 13-Oct-91
+%  \item{\bull} It is not locally declared \declref{special}, 
+%  and it does not occur textually within a \term{form} that creates
+%  a lexical \term{binding} for a variable of the same name.
+
+\endlist
+
+%!!! Barrett wants to mention "dynamic scope" here someplace.
+A \term{dynamic variable} can be referenced at any time in any \term{program};
+there is no textual limitation on references to \term{dynamic variables}.
+At any given time, all \term{dynamic variables} with a given name refer to 
+exactly one \term{binding}, either in the \term{dynamic environment}
+or in the \term{global environment}.
+
+%% 5.1.2 5
+The \term{value} part of the \term{binding} for a \term{dynamic variable} might
+be empty; in this case, the \term{dynamic variable} is said to have no \term{value},
+or to be \term{unbound}.  A \term{dynamic variable} can be made \term{unbound}
+by using \funref{makunbound}.
+           
+The effect of \term{binding} a \term{dynamic variable} is to create
+a new \term{binding} to which all references to that \term{dynamic variable}
+in any \term{program} refer for the duration of the \term{evaluation} of the \term{form}
+that creates the \term{dynamic binding}.
+
+% %!!! Need to merge this in with previous or delete it.
+% %% 5.1.2 4
+% A \term{dynamic variable} that is referenced outside the \term{dynamic extent} of
+% a \term{form} that \term{binds} the \term{symbol} that names the
+% variable is a global variable. A global variable is \term{unbound}
+% unless and until explicitly assigned a value, except for global
+% variables defined in this specification or by an implementation.
+
+A \term{dynamic variable} can be referenced outside the \term{dynamic extent} of
+a \term{form} that \term{binds} it.  Such a \term{variable} is sometimes called 
+a ``global variable'' but is still in all respects just a \term{dynamic variable}
+whose \term{binding} happens to exist in the \term{global environment} rather than in some
+\term{dynamic environment}.
+
+% slight rewording  --sjl 3 Mar 92
+A \term{dynamic variable} is \term{unbound}
+unless and until explicitly assigned a value, except for 
+those variables whose initial value is 
+defined in this specification or by an \term{implementation}.
+
+%% Pretty much said above.
+% \term{Bindings} of \term{dynamic variables} are found in the \term{dynamic environment}
+% or the \term{global environment}.
+
+\endsubsubsubsubsection%{Dynamic Variables}
+
+\beginsubsubsubsubsection{Constant Variables}
+\DefineSection{ConstantVars}
+
+%% 1.2.5 6
+%% 5.1.2 6
+Certain variables, called \term{constant variables}, are reserved as ``named constants.''  
+The consequences are undefined if an attempt is made to 
+    assign a value to,
+ or create
+a \term{binding} for a \term{constant variable}, 
+except that a `compatible' redefinition of a \term{constant variable}
+using \macref{defconstant} is permitted; \seemac{defconstant}.
+
+\term{Keywords}, 
+\term{symbols} defined by \clisp\ or the \term{implementation}
+  as constant (such as \nil, \t, and \conref{pi}),
+and \term{symbols} declared as constant using \macref{defconstant}
+are \term{constant variables}.
+
+\endsubsubsubsubsection%{Constant Variables}
+
+\beginsubsubsubsubsection{Symbols Naming Both Lexical and Dynamic Variables}
+
+%A \term{symbol} can name both a \term{lexical variable} and a \term{dynamic variable}.
+%%KAB: The above is a little confusing, as it could be read to mean they 
+%%     are somehow in different namespaces.
+%%KMP: Replaced by the following section:
+
+The same \term{symbol} can name both 
+    a \term{lexical variable} 
+and a \term{dynamic variable},
+but never in the same \term{lexical environment}.
+
+In the following example, the \term{symbol} \f{x} is used,
+at different times, 
+    as the \term{name} of a \term{lexical variable}
+and as the \term{name} of a \term{dynamic variable}.
+ 
+\code
+ (let ((x 1))            ;Binds a special variable X
+   (declare (special x))
+   (let ((x 2))          ;Binds a lexical variable X
+     (+ x                ;Reads a lexical variable X
+        (locally (declare (special x))
+                 x))))   ;Reads a special variable X
+\EV 3
+\endcode
+
+\endsubsubsubsubsection%{Symbols Naming Both Lexical and Dynamic Variables}
+
+\endsubsubsubsection%{Symbols as Forms}
+
+\beginsubsubsubsection{Conses as Forms}
+
+A \term{cons} that is used as a \term{form} is called a \term{compound form}.
+
+If the \term{car} of that \term{compound form} is a \term{symbol}, 
+that \term{symbol} is the \term{name} of an \term{operator},
+and the \term{form} is either a \term{special form}, a \term{macro form},
+or a \term{function form}, depending on the \term{function} \term{binding} 
+of the \term{operator} in the current \term{lexical environment}.
+If the \term{operator} is neither a \term{special operator}
+nor a \term{macro name}, it is assumed to be a \term{function name}
+(even if there is no definition for such a \term{function}).
+
+If the \term{car} of the \term{compound form} is not a \term{symbol},
+then that \term{car} must be a \term{lambda expression},
+in which case the \term{compound form} is a \term{lambda form}.
+
+How a \term{compound form} is processed depends on whether it is 
+classified as a \term{special form}, a \term{macro form}, 
+a \term{function form}, or a \term{lambda form}.
+
+\beginsubsubsubsubsection{Special Forms}
+
+% special form changed to special operator in a few places  --sjl 3 Mar 92
+A \term{special form} is a \term{form} with special syntax,
+special evaluation rules, or both, possibly manipulating the
+evaluation environment, control flow, or both.
+% When the operator names a \term{special form},
+% the operation is performed using special purpose code 
+% in the current \term{lexical environment} and \term{dynamic environments}.
+%% Simplified for Sandra:
+A \term{special operator} has access to
+    the current \term{lexical environment} 
+and the current \term{dynamic environment}.
+Each \term{special operator} defines the manner in which its \term{subexpressions}
+are treated---which are \term{forms}, which are special syntax, \etc.
+
+Some \term{special operators} create new 
+lexical or dynamic \term{environments} for use during the 
+\term{evaluation} of \term{subforms}
+of the \term{special form}.  For example, \specref{block} creates a
+new \term{lexical environment} that is the same as the one in force
+at the point of evaluation of the \specref{block} \term{form}
+with the addition of a \term{binding} of the \specref{block} name
+to an \term{exit point} from the \specref{block}.
+
+%Moon observes that this is no different than for any other form:
+%
+% Generally, \term{special forms} will return normally, \term{yielding}
+% one or more values, but some \term{special forms} may cause a non-local exit.
+
+The set of \term{special operator} \term{names} is fixed in \clisp; 
+no way is provided for the user to define a \term{special operator}.
+\Thenextfigure\ lists all of the \clisp\ \term{symbols}
+that have definitions as \term{special operators}.
+
+\DefineFigure{CLSpecialOps}
+%% 5.1.3 2
+%% 7.0.0 5
+%% 7.7.0 1
+%% 7.8.3 3
+%% 7.8.3 5
+%% 7.8.5 3
+%% 7.10.0 1
+\issue{COMPILER-LET-CONFUSION:ELIMINATE}
+\issue{WITH-ADDED-METHODS:DELETE}
+\issue{LOAD-TIME-EVAL:R**2-NEW-SPECIAL-FORM}
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\displaythree{Common Lisp Special Operators}{
+block&let*&return-from\cr
+catch&load-time-value&setq\cr
+eval-when&locally&symbol-macrolet\cr
+flet&macrolet&tagbody\cr
+function&multiple-value-call&the\cr
+go&multiple-value-prog1&throw\cr
+if&progn&unwind-protect\cr
+labels&progv&\cr
+let&quote&\cr
+}
+%Removed COMPILER-LET -kmp 3-Jan-91
+%Removed WITH-ADDED-METHODS -kmp 7-Jan-91
+%Removed DECLARE per Moon's comments. -kmp 10-Mar-91
+%Added LOAD-TIME-VALUE -kmp 26-May-91
+%Added LOCALLY per Barrett comments. -kmp 13-Oct-91
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\endissue{LOAD-TIME-EVAL:R**2-NEW-SPECIAL-FORM}
+\endissue{WITH-ADDED-METHODS:DELETE}
+\endissue{COMPILER-LET-CONFUSION:ELIMINATE}
+
+%% 5.1.3 9
+\endsubsubsubsubsection%{Special Forms}
+
+\beginsubsubsubsubsection{Macro Forms}
+
+If the \term{operator} names a \term{macro},
+its associated \term{macro function} is applied
+to the entire \term{form} and the result of that application is
+used in place of the original \term{form}.
+
+Specifically, a \term{symbol} names a \term{macro} in a given \term{lexical environment} if
+\funref{macro-function} is \term{true} of the 
+\term{symbol} and that \term{environment}.
+The \term{function} returned by \funref{macro-function}
+is a \term{function} of two arguments, called the
+expansion function.
+The expansion function is invoked by calling the \term{macroexpand hook} with
+      the expansion function as its first argument,
+      the entire \term{macro form} as its second argument,
+%   and the current \term{lexical environment} 
+% %% KAB thinks this is a bogus distinction.
+% %       (or with the current compilation \term{environment},
+% %        if the \term{form} is being processed by \funref{compile-file})
+%% Trying again... -kmp&kab 8-Feb-92
+    and an \term{environment object} (corresponding to the current \term{lexical environment})
+      as its third argument.
+The \term{macroexpand hook}, in turn, calls the expansion function with the
+\term{form} as its first argument and the \term{environment} as its second argument.
+The \term{value} of the expansion function, which is passed through
+by the \term{macroexpand hook}, is a \term{form}. 
+% (\funref{macroexpand}
+% and \funref{macroexpand-1} attach a second, \term{generalized boolean} return value
+% which is always \term{true} in this context, and hence always ignored.)
+The returned \term{form} is \term{evaluated} in place of the original \term{form}.
+
+\issue{SELF-MODIFYING-CODE:FORBID}
+The consequences are undefined if a \term{macro function} destructively modifies
+any part of its \term{form} argument.
+\endissue{SELF-MODIFYING-CODE:FORBID}
+
+%% 8.0.0 6
+A \term{macro name} is not a \term{function designator},
+and cannot be used as the \param{function} argument to \term{functions} 
+such as \funref{apply}, \funref{funcall}, or \funref{map}.
+
+An \term{implementation} is free to implement a \clisp\ \term{special operator}
+as a \term{macro}.  An \term{implementation} is free to implement any
+\term{macro} \term{operator} as a \term{special operator}, but only
+if an equivalent definition of the \term{macro} is also provided.
+% I don't think this adds anything to the above, and it's more confusing.
+% So I commented it out.  --sjl 3 Mar 92
+% %% 7.1.1 23
+% A \clisp\ \term{symbol} may name both a \term{special operator} 
+% and a \term{macro},
+% %I added this: -kmp -kmp 12-Mar-91
+% but in that case the definitions must be semantically equivalent.
+
+\Thenextfigure\ lists some \term{defined names} that are applicable
+to \term{macros}.
+
+\displaythree{Defined names applicable to macros}{
+*macroexpand-hook*&macro-function&macroexpand-1\cr
+defmacro&macroexpand&macrolet\cr
+}
+%DEFINE-COMPILER-MACRO and COMPILER-MACRO-FUNCTION removed per Moon. -kmp 10-Mar-91
+
+\endsubsubsubsubsection%{Macro Forms}
+
+\beginsubsubsubsubsection{Function Forms}
+\DefineSection{FunctionForms}
+
+If the \term{operator} is a \term{symbol} naming a \term{function},
+the \term{form} represents a \term{function form},
+and the \term{cdr} of the list contains the \term{forms} 
+which when evaluated will supply the arguments passed to the \term{function}.
+
+When a \term{function name} is not defined, 
+an error \oftype{undefined-function} should be signaled at run time;
+\seesection\SemanticConstraints.
+
+A \term{function form} is evaluated as follows:
+
+The \term{subforms} in the \term{cdr} of the original \term{form}
+are evaluated in left-to-right order in the current lexical and 
+dynamic \term{environments}.  The \term{primary value} of each
+such \term{evaluation} becomes an \term{argument} to the named \term{function};
+% removed inappropriate reference to Lambda List section.  --sjl 3 Mar 92
+any additional \term{values} returned by the \term{subforms} are discarded.
+
+The \term{functional value} of the \term{operator} 
+is retrieved from the \term{lexical environment},
+and that \term{function} is invoked with the indicated arguments.
+
+%%How the function treats its arguments, what bindings it establishes, etc. 
+%% does not belong here. -kmp,moon
+% and a new \term{lexical environment} is created that contains only
+% the \term{bindings} established by \term{binding} each parameter
+% name in the lambda list of the \term{function} with the
+% corresponding value in the evaluated arguments along with a binding of
+% the name of the \term{function} with the \term{exit point} that
+% returns from the \term{function}. This is the lexical 
+% \term{environment} used for evaluating the body of the \term{function}.
+
+\issue{FUNCTION-CALL-EVALUATION-ORDER:MORE-UNSPECIFIED}
+Although the order of \term{evaluation} of 
+the \term{argument} \term{subforms} themselves is 
+strictly left-to-right, it is not specified whether 
+the definition of the \term{operator} in a \term{function form} is looked up 
+before the \term{evaluation} of the \term{argument} \term{subforms},
+after the \term{evaluation} of the \term{argument} \term{subforms},
+or between the \term{evaluation} of any two \term{argument} \term{subforms} 
+if there is more than one such \term{argument} \term{subform}.  
+For example, the following might return 23 or~24.
+
+\code
+ (defun foo (x) (+ x 3))
+ (defun bar () (setf (symbol-function 'foo) #'(lambda (x) (+ x 4))))
+ (foo (progn (bar) 20))
+\endcode
+\endissue{FUNCTION-CALL-EVALUATION-ORDER:MORE-UNSPECIFIED}
+
+A \term{binding} for a \term{function name} can be \term{established} in 
+one of several ways.  A \term{binding} for a \term{function name} in 
+the \term{global environment} can be \term{established} by 
+ \macref{defun},
+ \SETFof{fdefinition},
+% added symbol-function --sjl 3 Mar 92
+ \SETFof{symbol-function},
+%% KAB: Doesn't belong here.
+%\macref{defmacro},
+%\SETFof{macro-function},
+ \funref{ensure-generic-function},
+ \macref{defmethod} (implicitly, due to \funref{ensure-generic-function}),
+or
+ \macref{defgeneric}.
+A \term{binding} for a \term{function name} in the \term{lexical environment}
+can be \term{established} by
+   \specref{flet}
+or \specref{labels}.
+\issue{WITH-ADDED-METHODS:DELETE}
+%\specref{with-added-methods},
+\endissue{WITH-ADDED-METHODS:DELETE}%
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+%  \specref{generic-flet},
+% or
+%  \specref{generic-labels}.
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+
+%%Moon thinks this is redundant, so asked that it be deleted. -kmp 11-Mar-91
+% If a \term{symbol} that names a \term{function} appears
+% as the first element of a function call \term{form}, then it refers
+% to the definition established by the innermost
+%  \specref{flet},
+%  \specref{labels},
+% \issue{WITH-ADDED-METHODS:DELETE}
+% %\specref{with-added-methods},
+% \endissue{WITH-ADDED-METHODS:DELETE}%
+%  \specref{generic-flet},
+% or
+%  \specref{generic-labels}
+% that textually contains the reference, or to the global definition (if any) if there
+% is no such containing \term{form}.  As noted earlier, this use
+% of \term{symbols} to name \term{functions} is
+% independent of their use in naming dynamic and lexical variables.
+
+\Thenextfigure\ lists some \term{defined names} that are applicable to \term{functions}.
+
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\issue{WITH-ADDED-METHODS:DELETE}
+\displaythree{Some function-related defined names}{
+apply&fdefinition&mapcan\cr
+call-arguments-limit&flet&mapcar\cr
+complement&fmakunbound&mapcon\cr
+constantly&funcall&mapl\cr
+defgeneric&function&maplist\cr
+defmethod&functionp&multiple-value-call\cr
+defun&labels&reduce\cr
+fboundp&map&symbol-function\cr
+}
+%Removed GENERIC-FLET, GENERIC-LABELS. -kmp 7-Feb-92
+%Removed WITH-ADDED-METHODS -kmp 7-Jan-91
+%Added MAPC, MAPCAR, MAPCAN, MAPLIST, MAPL, MAPCON, 
+% CONSTANTLY, COMPLEMENT, REDUCE, FDEFINITION.
+%Removed LAMBDA-LIST-KEYWORDS.
+%Not including all the things with :TEST, :TEST-NOT, :KEY arguments, though.
+%  -kmp 16-Oct-91
+\endissue{WITH-ADDED-METHODS:DELETE}
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+
+\endsubsubsubsubsection%{Function Forms}
+
+\beginsubsubsubsubsection{Lambda Forms}
+\DefineSection{LambdaForms}
+
+A \term{lambda form} is similar to a \term{function form}, except that
+the \term{function name} is replaced by a \term{lambda expression}.
+
+A \term{lambda form} is equivalent to using \term{funcall} of a
+\term{lexical closure} of the \term{lambda expression} on the given \term{arguments}.
+(In practice, some compilers are more likely to produce inline code 
+for a \term{lambda form} than for an arbitrary named function 
+that has been declared \declref{inline}; however, such a difference
+is not semantic.)
+
+For further information, \seesection\LambdaExpressions.
+
+\endsubsubsubsubsection%{Lambda Forms}
+
+\endsubsubsubsection%{Conses as forms}
+
+\beginsubsubsubsection{Self-Evaluating Objects}
+
+\issue{EVAL-OTHER:SELF-EVALUATE}
+A \term{form} that is neither a \term{symbol} nor a \term{cons} is 
+defined to be a \term{self-evaluating object}.  \term{Evaluating}
+such an \term{object} \term{yields} the \term{same} \term{object} 
+as a result.
+\endissue{EVAL-OTHER:SELF-EVALUATE}
+
+Certain specific \term{symbols} and \term{conses} might also happen 
+to be ``self-evaluating'' but only as a special case of a more 
+general set of rules for the \term{evaluation} of \term{symbols} and
+\term{conses}; such \term{objects} are not considered to be
+\term{self-evaluating objects}.
+
+% added  --sjl 3 Mar 92
+The consequences are undefined if \term{literal objects} (including
+\term{self-evaluating objects}) are destructively modified.
+
+\beginsubsubsubsubsection{Examples of Self-Evaluating Objects}
+
+\term{Numbers}, \term{pathnames}, and \term{arrays} are examples of
+\term{self-evaluating objects}.
+
+\code
+ 3 \EV 3
+ #c(2/3 5/8) \EV #C(2/3 5/8)
+ #p"S:[BILL]OTHELLO.TXT" \EV #P"S:[BILL]OTHELLO.TXT"
+ #(a b c) \EV #(A B C)
+ "fred smith" \EV "fred smith"
+\endcode
+
+\endsubsubsubsubsection%{Examples of Self-Evaluating Objects}
+
+\endsubsubsubsection%{Self-Evaluating Objects}
+
+\endsubsubsection%{Form Evaluation}
+
+\endSubsection%{The Evaluation Model}
+
+\beginsubsection{Lambda Expressions}
+\DefineSection{LambdaExpressions}
+
+% I found the last paragraph of this section very confusing, so I
+% reworded the first paragraph to make it unnecessary.  -- sjl 3 Mar 92
+
+% In a \term{lambda expression},
+% the current lexical \term{environment} is extended by adding the \term{binding} of
+% each \term{parameter} in the \term{lambda list} of the \term{lambda expression}
+% with the corresponding \term{value} from the \term{arguments}.
+% This is the \term{lexical environment} used for evaluating the body
+% of the \term{lambda expression}.
+
+In a \term{lambda expression},
+the body is evaluated in a lexical \term{environment} that is formed by
+adding the \term{binding} of 
+each \term{parameter} in the \term{lambda list}
+with the corresponding \term{value} from the \term{arguments}
+to the current lexical \term{environment}.
+
+For further discussion of how \term{bindings} are \term{established} 
+based on the \term{lambda list}, \seesection\LambdaLists.
+
+The body of a \term{lambda expression} is an \term{implicit progn};
+the \term{values} it returns are returned by the \term{lambda expression}.
+
+% When the \term{function} returns,
+% the \term{lexical environment} that was in effect
+% when the original \term{form} was evaluated 
+% is re-established.
+
+\endsubsection%{Lambda Expressions}
+
+\beginSubsection{Closures and Lexical Binding}
+ 
+%% 7.1.1 5
+A \term{lexical closure} is a \term{function} that can refer to and alter
+the values of \term{lexical bindings} \term{established} by \term{binding} \term{forms}
+that textually include the function definition.
+ 
+Consider this code, where \f{x} is not declared \declref{special}:
+ 
+\code
+ (defun two-funs (x)
+   (list (function (lambda () x))
+         (function (lambda (y) (setq x y)))))
+ (setq funs (two-funs 6))
+ (funcall (car funs)) \EV 6
+ (funcall (cadr funs) 43) \EV 43
+ (funcall (car funs)) \EV 43
+\endcode
+
+\Thespecform{function} coerces a 
+\term{lambda expression} into a \term{closure} in which the 
+\term{lexical environment} in effect when the \term{special form} is
+evaluated is captured along with the \term{lambda expression}.
+
+The function \f{two-funs} returns a \term{list} of two 
+\term{functions}, each of which refers to the \term{binding} of the
+variable \f{x} created on entry to the function \f{two-funs} when it
+was called.
+%% For Moon.
+%with argument \f{6}.
+This variable has the value \f{6}
+initially, but \specref{setq} can alter this \term{binding}.
+% %Barrett finds the next sentence confusing.
+% %Moon, too.
+% The \term{lexical closure} created for the first 
+% \term{lambda expression} does not capture the value \f{6} for \f{x}
+% when the \term{closure} is created.  The second \term{function} can be
+% used to alter the variable binding (to \f{43}, in the example), and
+% this altered variable binding then becomes accessible to the first
+% \term{function}.
+The \term{lexical closure} created for the first 
+\term{lambda expression} does not ``snapshot'' the \term{value} \f{6} for \f{x}
+when the \term{closure} is created; rather it captures the \term{binding} of \f{x}.
+The second \term{function} can be used to alter the \term{value} in the same (captured)
+\term{binding} (to \f{43}, in the example), and
+this altered variable binding then affects the value returned by the first \term{function}.
+
+                     
+%% 7.1.1 6
+In situations where a \term{closure} of a 
+\term{lambda expression} over the same set of \term{bindings} may be
+produced more than once, the various resulting \term{closures} may
+or may not be \term{identical}, at the discretion of the \term{implementation}.
+That is, two \term{functions} that are behaviorally
+indistinguishable might or might not be \term{identical}.
+Two \term{functions} that are behaviorally distinguishable are \term{distinct}.
+For example:
+ 
+\code
+ (let ((x 5) (funs '()))
+   (dotimes (j 10)                          
+     (push #'(lambda (z)                        
+               (if (null z) (setq x 0) (+ x z)))
+           funs))
+   funs)
+\endcode
+The result of the above \term{form} is a \term{list} of ten \term{closures}.
+Each requires only the \term{binding} of \f{x}.
+It is the same \term{binding} in each case, 
+but the ten \term{closure} \term{objects} might or might not be \term{identical}.
+On the other hand, the result of the \term{form}
+ 
+\code
+ (let ((funs '()))     
+   (dotimes (j 10)
+     (let ((x 5))
+       (push (function (lambda (z)
+                        (if (null z) (setq x 0) (+ x z))))
+             funs)))
+  funs)
+\endcode
+is also a \term{list} of ten \term{closures}.
+However, in this case no two of the \term{closure} \term{objects} can
+be \term{identical} because each \term{closure} is closed over a distinct
+\term{binding} of \f{x}, and these \term{bindings} can be behaviorally
+distinguished because of the use of \specref{setq}.
+ 
+%% 7.1.1 7                        
+The result of the \term{form}
+ 
+\code
+ (let ((funs '()))
+   (dotimes (j 10)
+     (let ((x 5))
+       (push (function (lambda (z) (+ x z)))
+            funs)))
+   funs)
+\endcode
+is a \term{list} of ten \term{closure} \term{objects} that
+might or might not be \term{identical}.
+A different \term{binding} of \f{x} is involved for
+each \term{closure}, but the \term{bindings} cannot be distinguished
+because their values are the \term{same} and immutable (there being no occurrence
+of \specref{setq} on \f{x}).  A compiler could internally
+transform the \term{form} to
+ 
+\code
+ (let ((funs '()))
+   (dotimes (j 10)
+     (push (function (lambda (z) (+ 5 z)))
+           funs))
+  funs)
+\endcode
+where the \term{closures} may be \term{identical}.
+%% Moon thought this was redundant and distracting. -kmp 8-Feb-92
+% In some \term{implementations},
+% two distinct evaluations of the same \specref{function} \term{form} might 
+% produce \term{identical} \term{closures} if they must be behaviorally
+% identical with respect to invocation.
+ 
+%% 7.1.1 9
+It is possible that a \term{closure} does not
+close over any variable bindings.
+In the code fragment
+ 
+\code
+ (mapcar (function (lambda (x) (+ x 2))) y)
+\endcode
+the function \f{(lambda (x) (+ x 2))} contains no references to any outside
+object. In this case, the same \term{closure} might be returned
+for all evaluations of the \specref{function} \term{form}.
+
+\endSubsection%{Closures and Lexical Binding}
+ 
+\beginSubsection{Shadowing}
+\DefineSection{Shadowing}
+%% 5.1.3 10
+%% 3.0.0 13
+%
+% If two \term{forms} that establish lexical entities with the same
+% \term{name} are textually nested, then references within the inner
+% \term{form} refer to the entity established by the inner one; the
+% inner one shadows the outer one.  Outside the inner \term{form} but
+% inside the outer one, references refer to the entity established by
+% the outer \term{form}.  For example:
+%
+%% Rewritten for Sandra:
+
+If two \term{forms} that \term{establish} \term{lexical bindings} with
+the same \term{name} $N$ are textually nested, then references to $N$
+within the inner \term{form} refer to the \term{binding} established by
+the inner \term{form}; the inner \term{binding} for $N$
+\newtermidx{shadows}{shadow} the outer \term{binding} for $N$.  Outside the inner
+\term{form} but inside the outer one, references to $N$ refer to the
+\term{binding} established by the outer \term{form}.  For example:
+
+%!!! Barrett thinks this doesn't explain, and that we should discuss,
+%    (let ((x ...)) (let ((x ...)) (declare (special x)) ...))
+
+\code
+ (defun test (x z)
+   (let ((z (* x 2)))
+     (print z))
+   z)
+\endcode
+The \term{binding} of the variable \f{z} by
+\specref{let} shadows
+the \term{parameter} binding for the function \f{test}.  The reference to the
+variable \f{z} in the \funref{print} \term{form} refers to the \specref{let} binding.
+The reference to \f{z} at the end of the function \f{test} 
+refers to the \term{parameter} named \f{z}.
+
+%!!! What to do with this use of "construct"? -kmp 3-Sep-91
+%% 3.0.0 26
+Constructs that are lexically scoped act as if new names were
+generated for each \term{object} on each execution.  Therefore,
+dynamic shadowing cannot occur.  For example:
+
+\code
+ (defun contorted-example (f g x)
+   (if (= x 0)
+       (funcall f)
+       (block here
+          (+ 5 (contorted-example g
+                                  #'(lambda () (return-from here 4))
+                                  (- x 1))))))
+\endcode
+Consider the call \f{(contorted-example nil nil 2)}.  This produces
+\f{4}.  During the course of execution, there are three
+calls to \f{contorted-example}, interleaved with two 
+blocks:
+
+\code
+ (contorted-example nil nil 2)
+   (block here\ssso ...)
+     (contorted-example nil #'(lambda () (return-from here\ssso 4)) 1)
+       (block here\ssst ...)
+         (contorted-example #'(lambda () (return-from here\ssso 4))
+                            #'(lambda () (return-from here\ssst 4))
+                            0)
+             (funcall f)
+                    where f \EV #'(lambda () (return-from here\ssso 4))
+                 (return-from here\ssso 4)
+\endcode
+At the time the \f{funcall} is executed
+there are two \specref{block} \term{exit points} outstanding, each apparently
+named \f{here}.
+The \specref{return-from} \term{form} executed as a result of the \f{funcall}
+operation
+refers to the outer outstanding \term{exit point}
+(here\ssso), not the
+inner one (here\ssst).
+It
+refers to that \term{exit point} textually visible at the point of
+execution of \specref{function}
+(here abbreviated by the \f{\#'} syntax) that resulted
+in creation of the \term{function} \term{object} actually invoked by 
+\funref{funcall}.                       
+
+%% 3.0.0 27
+If, in this example, one were to change the \f{(funcall f)} to
+\f{(funcall g)}, then the value of the call \f{(contorted-example nil nil 2)}
+would be \f{9}.  The value would change because 
+\funref{funcall} would cause the
+execution of \f{(return-from here\ssst\ 4)}, thereby causing
+a return from the inner \term{exit point} (here\ssst).
+When that occurs, the value \f{4} is returned from the
+middle invocation of \f{contorted-example}, \f{5} is added to that
+to get \f{9}, and that value is returned from the outer block
+and the outermost call to \f{contorted-example}.  The point
+is that the choice of \term{exit point}
+returned from has nothing to do with its
+being innermost or outermost; rather,
+it depends on the lexical environment
+that is packaged up with a \term{lambda expression} when
+\specref{function} is executed.
+                                  
+\endSubsection%{Shadowing}
+
+\beginSubsection{Extent}
+%% 3.0.0 28
+\f{Contorted-example} works only because the
+\term{function} named by \f{f} is invoked during the \term{extent} of the 
+\term{exit point}.
+Once the flow of execution has left the block,
+the \term{exit point} is \term{disestablished}.  For example:
+
+\code
+ (defun invalid-example ()
+   (let ((y (block here #'(lambda (z) (return-from here z)))))
+     (if (numberp y) y (funcall y 5))))
+\endcode
+One might expect the call \f{(invalid-example)} to produce \f{5}
+by the following incorrect reasoning:
+\specref{let} binds \f{y} to the
+value of \specref{block}; this value is a \term{function} resulting
+from the \term{lambda expression}.  Because \f{y} is not a number, it is
+invoked on the value \f{5}.  The \specref{return-from} should then
+return this value from the                      
+\term{exit point} named \f{here}, thereby
+exiting from the block again and giving \f{y} the value \f{5}
+which, being a number, is then returned as the value of the call
+to \f{invalid-example}.
+
+%% 3.0.0 29
+The argument fails only because \term{exit points} have 
+\term{dynamic extent}.  The argument is correct up to the execution of
+\specref{return-from}.  The execution of \specref{return-from}
+should signal an error \oftype{control-error}, however, not
+because it cannot refer to the \term{exit point}, but because it
+does correctly refer to an \term{exit point} and that 
+\term{exit point} has been \term{disestablished}.
+
+%% 3.0.0 14
+%% 3.0.0 16
+A reference by name to a dynamic \term{exit point} binding such as
+a \term{catch tag} refers to the most recently 
+\term{established} \term{binding} of that name that has not been 
+\term{disestablished}.  For example:
+
+\code
+ (defun fun1 (x)
+   (catch 'trap (+ 3 (fun2 x))))
+ (defun fun2 (y)
+   (catch 'trap (* 5 (fun3 y))))
+ (defun fun3 (z)
+   (throw 'trap z))
+\endcode
+Consider the call \f{(fun1 7)}.  The result is \f{10}.  At the time
+the \specref{throw} is executed, there are two outstanding catchers with the
+name \f{trap}: one established within procedure \f{fun1}, and the other
+within procedure \f{fun2}.  The latter is the more recent, and so the
+value \f{7} is returned from \specref{catch} in \f{fun2}.
+Viewed from within \f{fun3}, the \specref{catch} 
+in \f{fun2} shadows the one in \f{fun1}.
+Had \f{fun2} been defined as
+
+\code
+ (defun fun2 (y)
+   (catch 'snare (* 5 (fun3 y))))
+\endcode
+then the two \term{exit points} 
+would have different \term{names}, and therefore the one
+in \f{fun1} would not be shadowed.  The result would then have been \f{7}.
+
+\endSubsection%{Extent}
+
+\beginSubsection{Return Values}
+
+Ordinarily the result of calling a \term{function} is a single \term{object}.
+Sometimes, however, it is convenient for a function to compute several
+\term{objects} and return them.
+
+% slight rewording -- sjl 3 Mar 92
+In order to receive other than exactly one value from a \term{form},
+one of several \term{special forms} or \term{macros} must be used to request those
+values.  If a \term{form} produces \term{multiple values} which were not
+requested in this way, then the first value is given to the caller and
+all others are discarded; if the \term{form} produces zero values,
+then the caller receives \nil\ as a value.
+
+\Thenextfigure\ lists 
+some \term{operators} for receiving \term{multiple values}\meaning{2}.
+These \term{operators} can be used to specify 
+    one or more \term{forms} to \term{evaluate} 
+and where to put the \term{values} returned by those \term{forms}.
+
+\displaythree{Some operators applicable to receiving multiple values}{
+multiple-value-bind&multiple-value-prog1&return-from\cr
+multiple-value-call&multiple-value-setq&throw\cr
+multiple-value-list&return&\cr
+}
+
+\Thefunction{values} can produce \term{multiple values}\meaning{2}.
+\f{(values)} returns zero values;
+\f{(values \param{form})} returns the \term{primary value} returned by \param{form};
+\f{(values \param{form1} \param{form2})} returns two values,
+    the \term{primary value} of \param{form1}
+and the \term{primary value} of \param{form2};
+and so on.
+
+See \conref{multiple-values-limit} and \funref{values-list}.
+
+%% This little piece of language analysis isn't useful to the spec.
+%% -kmp&kab 13-Oct-91
+% 
+% \term{Multiple values} can result from a \term{form} under precisely these
+% circumstances:
+% \beginlist
+% \itemitem{\b{Evaluation and Application}}
+% 
+% \beginlist
+% \itemitem{\funref{eval}}
+% 
+% \funref{eval} returns \term{multiple values} if the form given it to
+% evaluate produces \term{multiple values}.
+% 
+% \itemitem{\funref{apply}, \funref{funcall}, \specref{multiple-value-call}}
+% 
+% \funref{apply}, \funref{funcall}, and \specref{multiple-value-call}
+% can return \term{multiple values} from the function applied or called.
+% \endlist
+% 
+% \itemitem{\b{Sequential Forms}}
+% 
+% \beginlist
+% \itemitem{\specref{progn}}
+% 
+% The special form \specref{progn} can return \term{multiple values} resulting
+% from evaluation of the last \term{subform}.
+% 
+% \itemitem{\term{implicit progn}}
+% 
+% Other situations are referred to as an \term{implicit progn}, in
+% which several forms are evaluated and the results of all but the last
+% form are discarded.  An \term{implicit progn} returns multiple
+% values if the last form does.  These situations include the body of a
+% \term{lambda expression}, including those constructed implicitly by
+% \macref{defmethod}, \macref{defun}, \macref{defmacro},
+% \issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+% \macref{define-compiler-macro},
+% \endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+% \specref{flet},
+% \specref{macrolet}, \specref{generic-flet}, \specref{labels},
+% \specref{generic-labels}, \macref{deftype}.  Also included are
+% bodies of the \specref{eval-when}, \specref{progv},
+% \specref{let}, \specref{let*}, \macref{when},
+% \macref{unless}, \specref{block},
+% \macref{multiple-value-bind}, and \specref{catch} \term{forms}, as well as
+% clauses in such conditional \term{forms} as \macref{case},
+% \macref{typecase}, \macref{ecase}, \macref{etypecase},
+% \macref{ccase}, and \macref{ctypecase}. If a body has no
+% \term{forms}, a single \nil\ is returned.
+% \endlist
+% 
+% \itemitem{\b{Conditional Forms}}
+% 
+% \beginlist
+% \itemitem{\specref{if}}
+% 
+% \specref{if} can return \term{multiple values} from whichever \term{subform} is selected
+% (the \i{then} form or the \i{else} form).
+% 
+% \itemitem{\macref{and}, \macref{or}}
+% 
+% \macref{and} and \macref{or} can return \term{multiple values} from the last \term{subform}
+% but not from \term{subforms} other than the last.
+% 
+% \itemitem{\macref{cond}}
+% 
+% \macref{cond} can return \term{multiple values} from the last \term{subform} of
+% the \term{implicit progn} of the selected clause.
+% If, however, the clause selected is a singleton clause,
+% then only a single value (the \term{true} value returned by the predicate)
+% is returned.  This is true even if the singleton clause is
+% the last clause of the \macref{cond}.  A final clause
+% {\tt (\i{form})} is not equivalent to {\tt (t \i{form})}
+% because the latter returns \term{multiple values} from \i{form}
+% while the former does not; a final clause of {\tt (\i{form})}
+% is instead equivalent to {\tt (t (values \i{forms}))}.
+% \endlist
+% 
+% \itemitem{\b{Returning from a Block}}
+% 
+% \beginlist
+% \itemitem{\specref{block}}
+% 
+% The \specref{block} special form can return \term{multiple values} 
+% from its last \term{subform} when it exits normally.  
+% If \specref{return-from} (or \macref{return}) is used to terminate
+% the \term{block} prematurely, then \specref{return-from} can
+% return \term{multiple values} 
+% %from its \term{subform} 
+% as the \term{values} of the terminated \term{block}.
+% Other \term{operators} that implicitly create \term{blocks},
+% such as \macref{do}, \macref{dolist}, \macref{dotimes}, 
+%         \macref{prog}, and \macref{prog*},
+% also can return \term{multiple values} specified by
+% \specref{return-from} (or \macref{return}).
+% 
+% \itemitem{\macref{do}}
+% 
+% \macref{do} can return \term{multiple values} from the last form of the
+% exit clause, exactly as if the exit clause were a \macref{cond}
+% clause.  Similarly, \macref{dolist} and \macref{dotimes} can
+% return \term{multiple values} from the \param{result-form} if that is
+% executed.  \macref{loop} can return \term{multiple values} by using
+% \macref{return} and \specref{return-from}.  These situations are
+% all examples of implicit uses of \specref{return-from}.
+% 
+% \endlist
+% 
+% \itemitem{\b{Throwing out of a Catch}}
+% 
+% \beginlist
+% 
+% \itemitem{\specref{catch}}
+% 
+% The \specref{catch} \term{form} returns \term{multiple values} if
+% the result form in a \specref{throw} exiting from
+% such a catch produces \term{multiple values}.
+% \endlist
+% 
+% \itemitem{\b{Miscellaneous Situations}}
+% 
+% \beginlist
+% 
+% \itemitem{\macref{multiple-value-prog1}}
+% 
+% \specref{multiple-value-prog1} can return \term{multiple values} from its first
+% \term{subform}.  \macref{prog1} always returns a single value.
+% 
+% \itemitem{\specref{unwind-protect}}
+% 
+% \specref{unwind-protect} returns \term{multiple values} if the form it protects
+% returns \term{multiple values}.
+% 
+% \itemitem{\specref{the}}
+% 
+% \specref{the} returns \term{multiple values} if the form it contains returns
+% \term{multiple values}.
+% \endlist
+% \endlist
+% 
+% Among special forms that never return \term{multiple values} are
+% \specref{setq}, \macref{multiple-value-setq}, \macref{prog1}, and
+% \macref{prog2}.
+% 
+% In an ordinary function call,
+% each argument form produces exactly one argument;  if such a form
+% returns zero values, \nil\ is used for the argument, and if more than one
+% value, all but the first are discarded.
+% Similarly, conditional \term{forms} (such as \specref{if} \term{forms})
+% that test the value of a form
+% will use exactly one value, the first one, from that form and discard the rest;
+% such \term{forms} will use \nil\ as the test value if zero values are returned.
+%          
+\endSubsection%{Return Values}
+
+

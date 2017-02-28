@@ -1,0 +1,109 @@
+% -*- Mode: TeX -*-
+              
+\Thefunction{change-class} can be used to change the \term{class} 
+of an \term{instance} from its current class, $C\sub {\hbox{{\prmseven from}}}$,
+to a different class, $C\sub {\hbox{{\prmseven to}}}$; it changes the
+structure of the \term{instance} to conform to the definition of the class
+$C\sub {\hbox{{\prmseven to}}}$.
+
+Note that changing the \term{class} of an \term{instance} may cause
+\term{slots} to be added or deleted.  Changing the \term{class} of an
+\term{instance} does not change its identity as defined by the
+\funref{eq} function.
+      
+When \funref{change-class} is invoked on an \term{instance}, a two-step
+updating process takes place.  The first step modifies the structure of
+the \term{instance} by adding new \term{local slots} and discarding 
+\term{local slots} that are not specified in the new version of the \term{instance}.
+The second step initializes the newly added \term{local slots} and performs 
+any other user-defined actions. These two steps are further described in the 
+two following sections.
+
+\beginsubsection{Modifying the Structure of the Instance}
+
+In order to make the \term{instance} conform to the class $C\sub
+{\hbox{{\prmseven to}}}$, \term{local slots} specified by the class $C\sub
+{\hbox{{\prmseven to}}}$ that are not specified by the class $C\sub
+{\hbox{{\prmseven from}}}$ are added, and \term{local slots} not specified by
+the class $C\sub {\hbox{{\prmseven to}}}$ that are specified by the
+class $C\sub {\hbox{{\prmseven from}}}$ are discarded.
+
+The values of \term{local slots} specified by both the class $C\sub
+{\hbox{{\prmseven to}}}$ and the class $C\sub {\hbox{{\prmseven
+from}}}$ are retained. If such a \term{local slot} was unbound, it remains
+unbound.
+
+The values of \term{slots} specified as shared in the class $C\sub
+{\hbox{{\prmseven from}}}$ and as local in the class $C\sub
+{\hbox{{\prmseven to}}}$ are retained.
+
+This first step of the update does not affect the values of any 
+\term{shared slots}.
+
+\endsubsection%{Modifying the Structure of the Instance}
+
+\beginsubsection{Initializing Newly Added Local Slots}
+\DefineSection{InitNewLocalSlots}
+
+The second step of the update initializes the newly added \term{slots} and
+performs any other user-defined actions.  This step is implemented by
+the generic function \funref{update-instance-for-different-class}.  The
+generic function \funref{update-instance-for-different-class} is invoked
+by \funref{change-class} after the first step of the update has been
+completed.
+
+\issue{CHANGE-CLASS-INITARGS:PERMIT}
+The generic function \funref{update-instance-for-different-class} is
+invoked on arguments computed by \funref{change-class}.
+The first argument passed is a copy of the \term{instance} being updated 
+and is an \term{instance} of the class $C\sub {\hbox{{\prmseven from}}}$; 
+this copy has \term{dynamic extent} within the generic function \funref{change-class}.  
+The second argument is the \term{instance} as updated so far by \funref{change-class}
+and is an \term{instance} of the class $C\sub {\hbox{{\prmseven to}}}$.
+The remaining arguments are an \term{initialization argument list}.
+
+% The generic function \funref{update-instance-for-different-class} also
+% takes any number of initialization arguments.  When it is called by
+% \funref{change-class}, no initialization arguments are provided.
+\endissue{CHANGE-CLASS-INITARGS:PERMIT}
+
+There is a system-supplied primary \term{method} for 
+\funref{update-instance-for-different-class} that has two parameter
+specializers, each of which is \theclass{standard-object}.  First
+this \term{method} checks the validity of initialization arguments and
+signals an error if an initialization argument is supplied that is not
+declared as valid.  (For more information, \seesection\DeclaringInitargValidity.)
+Then it calls the
+generic function \funref{shared-initialize} with the following arguments:
+the
+%Barmar suggested we insert the word "new" here.
+new
+\term{instance}, a list of \term{names} of the newly added 
+\term{slots}, and the
+initialization arguments it received.
+
+\endsubsection%{Initializing Newly added Local Slots}
+
+\beginsubsection{Customizing the Change of Class of an Instance}
+             
+\term{Methods} for \funref{update-instance-for-different-class} may be defined
+to specify actions to be taken when an \term{instance} is updated.  If only
+\term{after methods} for \funref{update-instance-for-different-class} are
+defined, they will be run after the system-supplied primary \term{method} for
+initialization and will not interfere with the default behavior of
+\funref{update-instance-for-different-class}.
+%% Removed per X3J13. -kmp 05-Oct-93
+% Because no initialization
+% arguments are passed to \funref{update-instance-for-different-class} when
+% it is called by \funref{change-class}, 
+% the \kwd{initform} forms for \term{slots}
+% that are filled by \term{before methods} for 
+% \funref{update-instance-for-different-class} will not be evaluated by
+% \funref{shared-initialize}.
+
+\term{Methods} 
+for \funref{shared-initialize} may be defined to customize \term{class}
+redefinition.  For more information, \seesection\SharedInitialize.
+  
+\endsubsection%{Customizing the Change of Class of an Instance}
+

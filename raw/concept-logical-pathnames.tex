@@ -1,0 +1,169 @@
+% -*- Mode: TeX -*-
+
+\beginSubsection{Syntax of Logical Pathname Namestrings}
+\DefineSection{LogPathNamestrings}
+
+\issue{PATHNAME-LOGICAL:ADD}
+The syntax of a \term{logical pathname} \term{namestring} is as follows.
+%Added for clarity. -kmp 26-Jun-93
+(Note that unlike many notational descriptions in this document,
+ this is a syntactic description of character sequences,
+ not a structural description of \term{objects}.)
+
+\auxbnf{logical-pathname}%
+{\brac{\down{host} \param{host-marker}} \CR
+ \brac{\down{\param{relative-directory-marker}}}
+ \star{\curly{\down{directory} \param{directory-marker}}} \CR
+ \brac{\down{name}} 
+ \brac{\param{type-marker} \down{type} 
+ \brac{\param{version-marker} \down{version}}}}
+
+\auxbnf{host}{\down{word}}
+\auxbnf{directory}{\down{word} | \down{wildcard-word} | \down{wild-inferiors-word}}
+\auxbnf{name}{\down{word} | \down{wildcard-word}}
+\auxbnf{type}{\down{word} | \down{wildcard-word}}
+\auxbnf{version}{\down{pos-int} | \param{newest-word} | \param{wildcard-version}}
+
+\param{host-marker}---a \term{colon}.
+
+\param{relative-directory-marker}---a \term{semicolon}.
+
+\param{directory-marker}---a \term{semicolon}.
+
+\param{type-marker}---a \term{dot}.
+
+\param{version-marker}---a \term{dot}.
+
+\param{wild-inferiors-word}---The two character sequence ``\f{**}'' (two \term{asterisks}).
+
+\param{newest-word}---The six character sequence ``\f{newest}'' 
+		   or the six character sequence ``\f{NEWEST}''.
+
+\param{wildcard-version}---an \term{asterisk}.
+
+\param{wildcard-word}---one or more \term{asterisks}, uppercase letters,
+   digits, and hyphens, including at least one \term{asterisk}, 
+   with no two \term{asterisks} adjacent.
+
+\param{word}---one or more uppercase letters, digits, and hyphens.
+
+\param{pos-int}---a positive \term{integer}.
+
+\beginsubsubsection{Additional Information about Parsing Logical Pathname Namestrings}
+
+\beginsubsubsubsection{The Host part of a Logical Pathname Namestring}
+
+The \param{host} must have been defined as a \term{logical pathname} host;
+this can be done by using \macref{setf} of \funref{logical-pathname-translations}.
+
+The \term{logical pathname} host name \f{"SYS"} is reserved for the implementation.
+The existence and meaning of \f{SYS:} \term{logical pathnames} 
+is \term{implementation-defined}.
+ 
+\endsubsubsubsection%{The Host part of a Logical Pathname Namestring}
+
+\beginsubsubsubsection{The Device part of a Logical Pathname Namestring}
+ 
+There is no syntax for a \term{logical pathname} device since
+the device component of a \term{logical pathname} is always \kwd{unspecific};
+\seesection\LogicalPathCompUnspecific.
+
+\endsubsubsubsection%{The Device part of a Logical Pathname Namestring}
+
+\beginsubsubsubsection{The Directory part of a Logical Pathname Namestring}
+
+If a \param{relative-directory-marker} precedes the \param{directories},
+the directory component parsed is as \term{relative};
+otherwise, the directory component is parsed as \term{absolute}.
+
+If a \param{wild-inferiors-marker} is specified,
+it parses into \kwd{wild-inferiors}.
+ 
+\endsubsubsubsection%{The Directory part of a Logical Pathname Namestring}
+
+\beginsubsubsubsection{The Type part of a Logical Pathname Namestring}
+
+The \param{type} of a \term{logical pathname} for a \term{source file}
+is \f{"LISP"}.   This should be translated into whatever type is 
+appropriate in a physical pathname.
+ 
+\endsubsubsubsection%{The Type part of a Logical Pathname Namestring}
+
+\beginsubsubsubsection{The Version part of a Logical Pathname Namestring}
+
+Some \term{file systems} do not have \param{versions}. 
+\term{Logical pathname} translation to such a \term{file system}
+ignores the \param{version}.
+This implies that a program cannot rely on being able to store
+more than one version of a file named by a \term{logical pathname}.
+
+If a \param{wildcard-version} is specified,
+it parses into \kwd{wild}.
+
+\endsubsubsubsection%{The Version part of a Logical Pathname Namestring}
+
+\beginsubsubsubsection{Wildcard Words in a Logical Pathname Namestring}
+
+Each \term{asterisk} in a \param{wildcard-word} matches a sequence of 
+zero or more characters.  The \param{wildcard-word} ``\f{*}'' 
+parses into \kwd{wild}; other \term{wildcard-words} parse into \term{strings}.
+ 
+\endsubsubsubsection%{Wildcard Words in a Logical Pathname Namestring}
+
+\beginsubsubsubsection{Lowercase Letters in a Logical Pathname Namestring}
+
+When parsing \param{words} and \param{wildcard-words},
+lowercase letters are translated to uppercase.
+
+\endsubsubsubsection%{Lowercase Letters in a Logical Pathname Namestring}
+
+\beginsubsubsubsection{Other Syntax in a Logical Pathname Namestring}
+
+The consequences of using characters other than those specified here
+in a \term{logical pathname} \term{namestring} are unspecified.
+
+%% !!! What does this mean??  This section is supposed to be about syntax, 
+%%     not component values.  Sigh.  -kmp 26-Jun-93
+The consequences of using any value not specified here as a 
+\term{logical pathname} component are unspecified.
+
+\endsubsubsubsection%{Other Syntax in a Logical Pathname Namestring}
+
+%This wasn't a valid reference.
+%See ``Input/Output'' for parsing and file manipulation details.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\endsubsubsection%{Additional Information about Parsing Logical Pathname Namestrings}
+
+\endSubsection%{Syntax of Logical Pathname Namestrings}
+
+\beginSubsection{Logical Pathname Components}
+
+\beginsubsubsection{Unspecific Components of a Logical Pathname}
+\DefineSection{LogicalPathCompUnspecific}
+
+The device component of a \term{logical pathname} is always \kwd{unspecific};
+no other component of a \term {logical pathname} can be \kwd{unspecific}.  
+
+\endsubsubsection%{Unspecific Components of a Logical Pathname}
+
+\beginsubsubsection{Null Strings as Components of a Logical Pathname}
+
+The null string, \f{""}, is not a valid value for any component of a \term{logical pathname}.
+%% I removed the following because:
+%%   - it's redundant with the syntax info above
+%%   - I doubt it's really the reason
+%%   - it's not sufficient to cause this: e.g., you might assume that
+%%       (probe-file "X:FOO;*.LISP") could return a logical pathname containing
+%%     a null string name even though you didn't type it in, since * is not a zero-char
+%%     string but only matches one.  The resulting logical pathname might have no 
+%%     printed representation.  But the previous sentence makes a stronger claim:  it
+%%     says that there is no such file, whether printable or not.  So the following
+%%     cannot be the reason.
+%%  -kmp 26-Jun-93
+%
+% since it is neither a \param{word} nor a \param{wildcard-word}.
+
+\endsubsubsection%{Null Strings as Components of a Logical Pathname}
+
+\endSubsection%{Logical Pathname Components}

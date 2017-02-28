@@ -1,0 +1,573 @@
+% -*- Mode: TeX -*-
+
+\issue{PRETTY-PRINT-INTERFACE}
+
+\beginsubSection{Pretty Printer Concepts}
+
+The facilities provided by the \newterm{pretty printer} permit
+\term{programs} to redefine the way in which \term{code} is displayed, 
+and allow the full power of \term{pretty printing} to be applied 
+to complex combinations of data structures.
+
+Whether any given style of output is in fact ``pretty'' is inherently a
+somewhat subjective issue.  However, since the effect of the 
+\term{pretty printer} can be customized by \term{conforming programs},
+the necessary flexibility is provided for individual \term{programs}
+to achieve an arbitrary degree of aesthetic control.
+
+By providing direct access to the mechanisms within the pretty printer
+that make dynamic decisions about layout, the macros and functions
+\macref{pprint-logical-block}, \funref{pprint-newline}, and
+\funref{pprint-indent} make it possible to specify pretty printing
+layout rules as a part of any function that produces output.  They also
+make it very easy for the detection of circularity and sharing, and
+abbreviation based on length and nesting depth to be supported by the
+function.
+
+The \term{pretty printer} is driven entirely by dispatch based on
+\thevalueof{*print-pprint-dispatch*}.
+\Thefunction{set-pprint-dispatch} makes it possible
+for \term{conforming programs} to associate new pretty printing 
+functions with a \term{type}.
+
+\beginsubsubsection{Dynamic Control of the Arrangement of Output}
+\DefineSection{DynamicControlofOutput}
+ 
+The actions of the \term{pretty printer} when a piece of output is too
+large to fit in the space available can be precisely controlled.
+Three concepts underlie 
+the way these operations work---\newterm{logical blocks},
+			        \newterm{conditional newlines},
+			    and \newterm{sections}.
+Before proceeding further, it is important to define these terms.
+ 
+The first line of \thenextfigure\ shows a schematic piece of output.  Each of
+the characters in the output is represented by ``\f{-}''.  The positions of
+conditional newlines are indicated by digits.  The beginnings and ends of
+logical blocks are indicated by ``\f{<}'' and ``\f{>}'' respectively.
+ 
+The output as a whole is a logical block and the outermost section.  This
+section is indicated by the \f{0}'s on the second line of Figure 1.  Logical
+blocks nested within the output are specified by the macro
+\macref{pprint-logical-block}.  Conditional newline positions are specified 
+by calls to \funref{pprint-newline}.  Each conditional newline defines 
+two sections (one before it and one after it) and is associated with a 
+third (the section immediately containing it).
+ 
+The section after a conditional newline consists of: all the output up to,
+but not including, (a) the next conditional newline immediately contained
+in the same logical block; or if (a) is not applicable, (b) the next
+newline that is at a lesser level of nesting in logical blocks; or if (b)
+is not applicable, (c) the end of the output.
+ 
+The section before a conditional newline consists of: all the output back
+to, but not including, (a) the previous conditional newline that is
+immediately contained in the same logical block; or if (a) is not
+applicable, (b) the beginning of the immediately containing logical block.
+The last four lines in Figure 1 indicate the sections before and after the
+four conditional newlines.
+ 
+The section immediately containing a conditional newline is the shortest
+section that contains the conditional newline in question.  In \thenextfigure,
+the first conditional newline is immediately contained in the section
+marked with \f{0}'s, the second and third conditional newlines are immediately
+contained in the section before the fourth conditional newline, and the
+fourth conditional newline is immediately contained in the section after
+the first conditional newline.
+ 
+\code
+ <-1---<--<--2---3->--4-->->
+ 000000000000000000000000000
+ 11 111111111111111111111111
+           22 222
+              333 3333
+        44444444444444 44444
+\endcode
+\simplecaption{Example of Logical Blocks, Conditional Newlines, and Sections}
+ 
+Whenever possible, the pretty printer displays the entire contents of a
+section on a single line.  However, if the section is too long to fit in
+the space available, line breaks are inserted at conditional newline
+positions within the section.
+
+\endsubsubsection%{Dynamic Control of the Arrangement of Output}
+
+\beginsubsubsection{Format Directive Interface}
+
+The primary interface to operations for dynamically determining the
+arrangement of output is provided through the functions and macros of the
+pretty printer.  \Thenextfigure\ shows the defined names related to \term{pretty printing}.
+
+\displaythree{Defined names related to pretty printing.}{
+*print-lines*&pprint-dispatch&pprint-pop\cr
+*print-miser-width*&pprint-exit-if-list-exhausted&pprint-tab\cr
+*print-pprint-dispatch*&pprint-fill&pprint-tabular\cr
+*print-right-margin*&pprint-indent&set-pprint-dispatch\cr
+copy-pprint-dispatch&pprint-linear&write\cr
+format&pprint-logical-block&\cr
+formatter&pprint-newline&\cr
+}
+
+\Thenextfigure\ identifies a set of \term{format directives} which serve
+as an alternate interface to the same pretty printing operations in a 
+more textually compact form.
+
+%%Only of interest historically. -kmp
+%In addition, it permits one would have to abandon the use of \funref{format}
+%when interacting with the pretty printer.
+ 
+\displaythree{Format directives related to Pretty Printing}{
+\formatOp{I}&\formatOp{W}&\formatOp{<...~:>}\cr
+\formatOp{:T}&\formatOp{/.../}&\formatOp{_}\cr
+}
+
+\endsubsubsection%{Format Directive Interface}
+
+\beginsubsubsection{Compiling Format Strings}
+\DefineSection{CompilingFormatStrings}
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+A \term{format string} is essentially a program in a special-purpose language
+that performs printing, and that is interpreted by \thefunction{format}.
+\Themacro{formatter} provides the efficiency of using a \term{compiled function} 
+to do that same printing but without losing the textual compactness of \term{format strings}.
+
+A \newterm{format control} is either a \term{format string} or a \term{function}
+that was returned by the \themacro{formatter}.
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+\endsubsubsection%{Compiling Format Strings}
+
+\beginsubsubsection{Pretty Print Dispatch Tables}
+\DefineSection{PPrintDispatchTables}
+ 
+\issue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+
+%KAB: Are all type specifiers really valid?
+%Waters: Yes.
+%KMP: Actually, CONS was not originally valid, but has been added due to a cleanup.
+A \newterm{pprint dispatch table} is a mapping from keys to pairs of values.  
+Each key is a \term{type specifier}.  
+The values associated with a key are
+     a ``function'' (specifically, a \term{function designator} or \nil)
+%% Per X3J13. -kmp 05-Oct-93
+% and a ``numerical priorities'' (specifically, a \term{real}).
+ and a ``numerical priority'' (specifically, a \term{real}).
+Basic insertion and retrieval is done based on the keys with the equality
+of keys being tested by \funref{equal}.
+
+When \varref{*print-pretty*} is \term{true}, 
+the \newterm{current pprint dispatch table} (in \varref{*print-pprint-dispatch*})
+controls how \term{objects} are printed.
+The information in this table takes precedence over
+all other mechanisms for specifying how to print \term{objects}.
+In particular, it 
+%overrides
+has priority over
+user-defined \funref{print-object} \term{methods} 
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+%and print functions for \term{structures} 
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+because the \term{current pprint dispatch table} is consulted first.
+
+%%Just trying to simplify wording to fit context. -kmp 27-Aug-93
+%The function to use when \term{pretty printing} an \term{object} is chosen 
+The function is chosen from the \term{current pprint dispatch table}
+by finding the highest priority function 
+%% Again, this should follow from context.
+%from the \term{current pprint dispatch table} 
+that is associated with a \term{type specifier} that matches the \term{object};
+%KAB: What if there are several matches with equal priority?
+%Waters: It's not well-defined.
+%KMP: I've added this text to clarify that point:
+if there is more than one such function, 
+it is \term{implementation-dependent} which is used.
+
+However, if there is no 
+%% better parallel construction. -kmp 27-Aug-93
+%specification
+information in the table
+about how to \term{pretty print} a particular kind of \term{object}, 
+% it is then printed using the standard mechanisms as if
+% \varref{*print-pretty*} were \term{false}.
+a \term{function} is invoked which uses \funref{print-object} to print the \term{object}.
+The value of \varref{*print-pretty*} is still \term{true} 
+when this function is \term{called},
+and individual methods for \funref{print-object} might still elect to
+produce output in a special format conditional on \thevalueof{*print-pretty*}.
+\endissue{GENERALIZE-PRETTY-PRINTER:UNIFY}
+
+\endsubsubsection%{Pretty Print Dispatch Tables}
+
+\beginsubsubsection{Pretty Printer Margins}
+
+A primary goal of pretty printing is to keep the output between a pair of
+margins. 
+%This used to say:
+%  The left margin is set at the column where the output begins.
+%KMP asked:
+%  Does this mean that
+%   a. the cursor is moved 
+%   b. the position at the cursor is assumed to be zero
+%   c. that the position at the cursor becomes the new left margin?
+%Waters replied (c), so the following new sentence was made:
+The column where the output begins is taken as the left margin.
+%This used to say:
+%  If this cannot be determined, the left margin is set to zero.
+%KMP asked:
+%  Does this mean ``assumed to be''
+%Waters replied yes, so the following new sentence was made:
+If the current column cannot be determined at the time output begins,
+the left margin is assumed to be zero.
+The right margin is controlled by \varref{*print-right-margin*}.
+
+\endsubsubsection%{Pretty Printer Margins}
+
+\endsubSection%{Pretty Printer Concepts}
+
+\beginsubSection{Examples of using the Pretty Printer}
+\DefineSection{PrettyPrinterExamples}
+
+As an example of the interaction of logical blocks, conditional newlines,
+and indentation, consider the function \f{simple-pprint-defun} below.  This
+function prints out lists whose \term{cars} are \macref{defun} in the 
+standard way assuming that the list has exactly length \f{4}.
+ 
+\code
+(defun simple-pprint-defun (*standard-output* list)
+  (pprint-logical-block (*standard-output* list :prefix "(" :suffix ")")
+    (write (first list))
+    (write-char #\\Space)
+    (pprint-newline :miser)
+    (pprint-indent :current 0)
+    (write (second list))
+    (write-char #\\Space)
+    (pprint-newline :fill)
+    (write (third list))
+    (pprint-indent :block 1)
+    (write-char #\\Space)
+    (pprint-newline :linear)
+    (write (fourth list))))
+\endcode
+
+Suppose that one evaluates the following:
+
+\code
+(simple-pprint-defun *standard-output* '(defun prod (x y) (* x y)))
+\endcode
+ 
+If the line width available is greater than or equal to \f{26}, then all of the
+output appears on one line.  If the line width available is reduced to \f{25},
+a line break is inserted at the 
+linear-style conditional newline\idxtext{linear-style conditional newline}
+before the
+\term{expression} \f{(* x y)}, producing the output shown.  The
+\f{(pprint-indent :block 1)} causes \f{(* x y)} to be printed at a relative
+indentation of \f{1} in the logical block.
+ 
+\code
+ (DEFUN PROD (X Y) 
+   (* X Y))
+\endcode 
+
+If the line width available is \f{15}, a line break is also inserted at the
+fill style conditional newline before the argument list.  The call on
+\f{(pprint-indent :current 0)} causes the argument list to line up under the
+function name.
+ 
+\code
+(DEFUN PROD
+       (X Y)
+  (* X Y))
+\endcode
+ 
+If \varref{*print-miser-width*} were greater than or equal to 14, the example 
+output above would have been as follows, because all indentation changes 
+are ignored in miser mode and line breaks are inserted at 
+miser-style conditional newlines.\idxtext{miser-style conditional newline}
+ 
+\code
+ (DEFUN
+  PROD
+  (X Y)
+  (* X Y))
+\endcode 
+
+As an example of a per-line prefix, consider that evaluating the following
+produces the output shown with a line width of \f{20} and
+\varref{*print-miser-width*} of \nil.
+ 
+\code
+ (pprint-logical-block (*standard-output* nil :per-line-prefix ";;; ")
+   (simple-pprint-defun *standard-output* '(defun prod (x y) (* x y))))
+ 
+ ;;; (DEFUN PROD
+ ;;;        (X Y)
+ ;;;   (* X Y))
+\endcode
+ 
+As a more complex (and realistic) example, consider the function \f{pprint-let}
+below.  This specifies how to print a \specref{let} \term{form} in the traditional
+style.  It is more complex than the example above, because it has to deal with
+nested structure.  Also, unlike the example above it contains complete code to 
+readably print any possible list that begins with the \term{symbol} \specref{let}.
+The outermost \macref{pprint-logical-block} \term{form} handles the printing of
+the input list as a whole and specifies that parentheses should be printed in the
+output.  The second \macref{pprint-logical-block} \term{form} handles the list 
+of binding pairs.  Each pair in the list is itself printed by the innermost
+\macref{pprint-logical-block}.  (A \macref{loop} \term{form} is used instead of
+merely decomposing the pair into two \term{objects} so that readable output will
+be produced no matter whether the list corresponding to the pair has one element,
+two elements, or (being malformed) has more than two elements.)   
+A space and a 
+fill-style conditional newline\idxtext{fill-style conditional newline}
+are placed after
+each pair except the last.  The loop at the end of the topmost
+\macref{pprint-logical-block} \term{form} prints out the forms in the body
+of the \specref{let} \term{form} separated by spaces and 
+linear-style conditional newlines.
+ 
+\code
+ (defun pprint-let (*standard-output* list)
+   (pprint-logical-block (nil list :prefix "(" :suffix ")")
+     (write (pprint-pop))
+     (pprint-exit-if-list-exhausted)
+     (write-char #\\Space)
+     (pprint-logical-block (nil (pprint-pop) :prefix "(" :suffix ")")
+       (pprint-exit-if-list-exhausted)
+       (loop (pprint-logical-block (nil (pprint-pop) :prefix "(" :suffix ")")
+               (pprint-exit-if-list-exhausted)
+               (loop (write (pprint-pop))
+                     (pprint-exit-if-list-exhausted)
+                     (write-char #\\Space)
+                     (pprint-newline :linear)))
+             (pprint-exit-if-list-exhausted)
+             (write-char #\\Space)
+             (pprint-newline :fill)))
+     (pprint-indent :block 1)
+     (loop (pprint-exit-if-list-exhausted)
+           (write-char #\\Space)
+           (pprint-newline :linear)
+           (write (pprint-pop)))))
+\endcode
+ 
+Suppose that one evaluates the following with \varref{*print-level*} being 4, 
+and \varref{*print-circle*} being \term{true}.
+
+\code
+ (pprint-let *standard-output*
+             '#1=(let (x (*print-length* (f (g 3))) 
+                       (z . 2) (k (car y)))
+                   (setq x (sqrt z)) #1#))
+\endcode
+ 
+If the line length is greater than or equal to \f{77}, the output produced
+appears on one line.  However, if the line length is \f{76}, line breaks are
+inserted at the linear-style conditional newlines separating the forms in
+the body and the output below is produced.  Note that, the degenerate
+binding pair \f{x} is printed readably even though it fails to be a list; a
+depth abbreviation marker is printed in place of \f{(g 3)}; the binding pair
+\f{(z . 2)} is printed readably even though it is not a proper list; and
+appropriate circularity markers are printed.
+
+\code
+ #1=(LET (X (*PRINT-LENGTH* (F #)) (Z . 2) (K (CAR Y))) 
+      (SETQ X (SQRT Z))
+      #1#)
+\endcode
+
+If the line length is reduced to \f{35}, a line break is inserted at one of the
+fill-style conditional newlines separating the binding pairs.
+ 
+\code
+ #1=(LET (X (*PRINT-PRETTY* (F #))
+          (Z . 2) (K (CAR Y)))
+      (SETQ X (SQRT Z))
+      #1#)
+\endcode
+ 
+Suppose that the line length is further reduced to \f{22} and \varref{*print-length*} is
+set to \f{3}. In this situation, line breaks are inserted after both the first
+and second binding pairs.  In addition, the second binding pair is itself
+broken across two lines.  Clause (b) of the description of fill-style
+conditional newlines (\seefun{pprint-newline}) 
+prevents the binding pair \f{(z . 2)} from being printed
+at the end of the third line.  Note that the length abbreviation hides the
+circularity from view and therefore the printing of circularity markers
+disappears.
+ 
+\code
+ (LET (X
+       (*PRINT-LENGTH*
+        (F #))
+       (Z . 2) ...)
+   (SETQ X (SQRT Z))
+   ...)
+\endcode
+ 
+The next function prints a vector using ``\f{\#(...)}'' notation.
+      
+\code
+(defun pprint-vector (*standard-output* v)
+  (pprint-logical-block (nil nil :prefix "#(" :suffix ")")
+    (let ((end (length v)) (i 0))
+      (when (plusp end)
+        (loop (pprint-pop)
+              (write (aref v i))
+              (if (= (incf i) end) (return nil))
+              (write-char #\\Space)
+              (pprint-newline :fill))))))
+\endcode
+
+Evaluating the following with a line length of 15 produces the output shown.
+ 
+\code
+ (pprint-vector *standard-output* '#(12 34 567 8 9012 34 567 89 0 1 23))
+ 
+ #(12 34 567 8 
+   9012 34 567 
+   89 0 1 23)
+\endcode
+
+As examples of the convenience of specifying pretty printing with 
+\term{format strings}, consider that the functions \f{simple-pprint-defun}
+and \f{pprint-let} used as examples above can be compactly defined as follows.
+(The function \f{pprint-vector} cannot be defined using \funref{format}
+because the data structure it traverses is not a list.)
+ 
+\code
+(defun simple-pprint-defun (*standard-output* list)
+  (format T "~:<~W ~@_~:I~W ~:_~W~1I ~_~W~:>" list))
+
+(defun pprint-let (*standard-output* list)
+  (format T "~:<~W~{\hat}~:<~@\{~:<~@\{~W~{\hat}~_~\}~:>~{\hat}~:_~\}~:>~1I~@\{~{\hat}~_~W~\}~:>" list)) 
+\endcode
+
+In the following example, the first \term{form} restores
+\varref{*print-pprint-dispatch*} to the equivalent of its initial value.
+The next two forms then set up a special way to pretty print ratios.
+Note that the more specific \term{type specifier} has to be associated
+with a higher priority.
+ 
+\code
+ (setq *print-pprint-dispatch* (copy-pprint-dispatch nil))
+
+ (set-pprint-dispatch 'ratio
+   #'(lambda (s obj)
+       (format s "#.(/ ~W ~W)" 
+                 (numerator obj) (denominator obj))))
+
+ (set-pprint-dispatch '(and ratio (satisfies minusp))
+   #'(lambda (s obj)
+       (format s "#.(- (/ ~W ~W))" 
+               (- (numerator obj)) (denominator obj)))
+   5)
+
+ (pprint '(1/3 -2/3))
+ (#.(/ 1 3) \#.(- (/ 2 3)))
+\endcode
+
+The following two \term{forms} illustrate the definition of 
+pretty printing functions for types of \term{code}.  The first
+\term{form} illustrates how to specify the traditional method 
+for printing quoted objects using \term{single-quote}.  Note
+the care taken to ensure that data lists that happen to begin
+with \misc{quote} will be printed readably.  The second form 
+specifies that lists beginning with the symbol \f{my-let}
+should print the same way that lists beginning with \specref{let}
+print when the initial \term{pprint dispatch table} is in effect.
+ 
+\code
+ (set-pprint-dispatch '(cons (member quote)) () 
+   #'(lambda (s list)
+       (if (and (consp (cdr list)) (null (cddr list)))
+          (funcall (formatter "'~W") s (cadr list))
+          (pprint-fill s list))))
+ 
+ (set-pprint-dispatch '(cons (member my-let)) 
+                      (pprint-dispatch '(let) nil))
+\endcode
+ 
+The next example specifies a default method for printing lists that do not
+correspond to function calls.  Note that the functions \funref{pprint-linear},
+\funref{pprint-fill}, and \funref{pprint-tabular} are all defined with
+optional \param{colon-p} and \param{at-sign-p} arguments so that they can 
+be used as \funref{pprint dispatch functions} as well as \formatOp{/.../} 
+functions.
+
+\code
+ (set-pprint-dispatch '(cons (not (and symbol (satisfies fboundp))))
+                      #'pprint-fill -5)
+ 
+ ;; Assume a line length of 9
+ (pprint '(0 b c d e f g h i j k))
+ (0 b c d
+  e f g h
+  i j k)
+\endcode 
+
+This final example shows how to define a pretty printing function for a
+user defined data structure.
+ 
+\code
+ (defstruct family mom kids)
+ 
+ (set-pprint-dispatch 'family
+   #'(lambda (s f)
+       (funcall (formatter "~@<#<~;~W and ~2I~_~/pprint-fill/~;>~:>")
+               s (family-mom f) (family-kids f))))
+\endcode
+ 
+The pretty printing function for the structure \f{family} specifies how to
+adjust the layout of the output so that it can fit aesthetically into
+a variety of line widths.  In addition, it obeys 
+the printer control variables \varref{*print-level*},
+\varref{*print-length*}, \varref{*print-lines*},
+\varref{*print-circle*}
+%% There's no such var.  (Flanagan pointed this out in private mail.) -kmp 26-Jul-93
+%, \varref{*print-shared*}
+and \varref{*print-escape*},
+and can tolerate several different kinds of malformity in the data structure.
+The output below shows what is printed out with a right margin of \f{25},
+\varref{*print-pretty*} being \term{true}, \varref{*print-escape*} being \term{false},
+and a malformed \f{kids} list.
+ 
+\code
+ (write (list 'principal-family
+              (make-family :mom "Lucy"
+                           :kids '("Mark" "Bob" . "Dan")))
+        :right-margin 25 :pretty T :escape nil :miser-width nil)
+ (PRINCIPAL-FAMILY
+  #<Lucy and
+      Mark Bob . Dan>)
+\endcode
+  
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+Note that a pretty printing function for a structure is different from
+%the structure's print function.
+the structure's \funref{print-object} \term{method}.
+While
+%print functions
+\funref{print-object} \term{methods}
+are permanently associated with a structure,
+pretty printing functions are stored in 
+\term{pprint dispatch tables} and can be rapidly changed to reflect 
+different printing needs.  If there is no pretty printing function for 
+a structure in the current \term{pprint dispatch table},
+% the print function (if any) 
+its \funref{print-object} \term{method}
+is used instead.
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+
+\endsubSection%{Examples of using the Pretty Printer}
+
+\beginsubsection{Notes about the Pretty Printer's Background}
+
+For a background reference to the abstract concepts detailed in this
+section, see \XPPaper.  The details of that paper are not binding on
+this document, but may be helpful in establishing a conceptual basis for
+understanding this material.
+
+\endsubsection%{Notes about the Pretty Printer's Background}
+
+\endissue{PRETTY-PRINT-INTERFACE}

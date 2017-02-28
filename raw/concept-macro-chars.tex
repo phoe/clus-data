@@ -1,0 +1,1419 @@
+% -*- Mode: TeX -*-
+%% Standard Macro Characters
+
+%% 22.1.3 1
+If the reader encounters a \term{macro character},
+then its associated \term{reader macro function} 
+is invoked and may produce an \term{object} to be returned.
+This \term{function} may read the \term{characters} 
+following the \term{macro character} in the \term{stream} 
+in any syntax and return the \term{object} represented by that syntax.
+
+%% 22.1.3 2
+Any \term{character} can be made to be a \term{macro character}.
+The \term{macro characters} defined initially in a \term{conforming implementation}
+include
+the following:
+
+\beginsubsection{Left-Parenthesis}
+\DefineSection{LeftParen}\idxcode{(}\idxtext{Left-Parenthesis (reader macro)}\idxref{list}
+
+%% 22.1.3 3
+%% 2.4.0 3                    
+
+The \term{left-parenthesis} initiates reading of a \term{list}.
+\funref{read} is called recursively to read successive \term{objects}
+until a right parenthesis is found in the input \term{stream}.
+A \term{list} of the \term{objects} read is returned.  Thus
+
+\code
+ (a b c)
+\endcode
+is read as a \term{list} of three \term{objects}
+(the \term{symbols} \f{a}, \f{b}, and \f{c}).
+The right parenthesis need not immediately follow the printed representation of
+the last \term{object}; \term{whitespace}\meaning{2}                              
+characters and comments may precede it.
+
+%\code
+% (defun traffic-light (color)
+%   (case color
+%     (green)
+%     (red (stop))
+%     (amber (accelerate))      ;Insert more colors after this line.
+%     ))
+%\endcode
+
+%% 22.1.3 4
+If no \term{objects} precede the right parenthesis, 
+it reads as a \term{list} of zero \term{objects} 
+(the \term{empty list}).
+
+%% 22.1.3 5
+If a \term{token} that is just a dot\idxterm{dot}\idxcode{.}
+not immediately preceded by an escape character
+is read after some \term{object}
+then exactly one more \term{object} must follow the dot,
+possibly preceded or followed by \term{whitespace}\meaning{2} or a comment,
+followed by the right parenthesis:
+
+\code
+ (a b c . d)
+\endcode
+This means that the \term{cdr} of the last \term{cons} in the 
+\term{list} is not \nil,
+but rather the \term{object} whose representation followed the dot.
+The above example might have been the result of evaluating
+
+\code
+ (cons 'a (cons 'b (cons 'c 'd)))
+\endcode
+Similarly,
+
+\code
+ (cons 'this-one 'that-one) \EV (this-one . that-one)
+\endcode
+It is permissible for the \term{object} 
+following the dot to be a \term{list}:
+
+\code
+ (a b c d . (e f . (g))) \EQ (a b c d e f g)
+\endcode
+
+For information on how the \term{Lisp printer} prints \term{lists} and \term{conses},
+\seesection\PrintingListsAndConses.
+
+\endsubsection%{Left-Parenthesis}
+
+\beginsubsection{Right-Parenthesis}
+\idxcode{)}\idxtext{Right-Parenthesis (reader macro)}
+
+%% 22.1.3 6
+
+The \term{right-parenthesis} is invalid 
+except when used in conjunction with the left parenthesis character.
+For more information, \seesection\ReaderAlgorithm.
+
+\endsubsection%{Right-Parenthesis}
+
+\beginsubsection{Single-Quote}
+\DefineSection{QuoteMacro}
+\idxcode{'}\idxtext{Single-Quote (reader macro)}\idxtext{quotation (of forms)}\idxref{quote}
+
+\b{Syntax:}  \f{'\metaparam{exp}}
+
+%% 22.1.3 7
+
+A \term{single-quote} introduces an \term{expression} to be ``quoted.''
+\term{Single-quote} followed by an \term{expression} \param{exp} 
+is treated by the \term{Lisp reader} as an abbreviation for
+and is parsed identically to the \term{expression} \f{(quote \param{exp})}.
+\Seespec{quote}.
+
+\beginsubsubsection{Examples of Single-Quote}
+
+\code
+ 'foo \EV FOO
+ ''foo \EV (QUOTE FOO)
+ (car ''foo) \EV QUOTE
+\endcode
+
+\endsubsubsection%{Examples of Single-Quote}
+
+\endsubsection%{Single-Quote}
+
+\beginsubsection{Semicolon}
+\idxcode{;}\idxtext{Semicolon (reader macro)}\idxtext{comment}
+
+\b{Syntax:} \f{;\metaparam{text}}
+
+%% 22.1.3 8   
+
+A \term{semicolon} introduces \term{characters} that are to be ignored,
+such as comments.  The \term{semicolon} and all \term{characters} up to
+and including the next \term{newline} or end of file are ignored.
+
+\beginsubsubsection{Examples of Semicolon}
+
+\code
+ (+ 3 ; three
+    4)
+\EV 7    
+\endcode
+
+\endsubsubsection%{Examples of Semicolon}
+
+\beginsubsubsection{Notes about Style for Semicolon}
+
+Some text editors make assumptions about desired indentation based on
+the number of \term{semicolons} that begin a comment.  The following style 
+conventions are common, although not by any means universal.  
+
+\beginsubsubsubsection{Use of Single Semicolon}
+
+%% 22.1.3 9
+
+Comments that begin with a single \term{semicolon} are all aligned to 
+the same column at the right (sometimes called the ``comment column'').
+The text of such a comment generally applies only to the line on which it appears.
+Occasionally two or three contain a single sentence together;
+this is sometimes indicated by indenting all but the first with an additional
+space (after the \term{semicolon}).
+
+\endsubsubsubsection%{Use of Single Semicolon}
+
+\beginsubsubsubsection{Use of Double Semicolon}
+
+%% 22.1.3 10
+
+Comments that begin with a double \term{semicolon} are all aligned to
+the same level of indentation as a \term{form} would be at that same
+position in the \term{code}.
+%% I think this is a matter of personal taste,
+%% independent of the semicolon convention. -kmp 25-Jan-92
+% A space generally follows the two semicolons.
+The text of such a comment usually describes
+    the state of the \term{program} at the point where the comment occurs,
+    the \term{code} which follows the comment,
+ or both.
+
+\endsubsubsubsection%{Use of Double Semicolon}
+
+\beginsubsubsubsection{Use of Triple Semicolon}
+
+%% 22.1.3 11
+
+Comments that begin with a triple \term{semicolon} are all aligned to
+the left margin.  Usually they are used prior to a definition or set
+of definitions, rather than within a definition.
+
+\endsubsubsubsection%{Use of Triple Semicolon}
+
+%% 22.1.3 12
+
+\beginsubsubsubsection{Use of Quadruple Semicolon}
+
+Comments that begin with a quadruple \term{semicolon} are all aligned to
+the left margin, and generally contain only a short piece of text that
+serve as a title for the code which follows, and might be used in the
+header or footer of a program that prepares code for presentation as 
+a hardcopy document.
+
+\endsubsubsubsection%{Use of Quadruple Semicolon}
+
+\beginsubsubsubsection{Examples of Style for Semicolon}
+
+\code
+;;;; Math Utilities
+
+;;; FIB computes the the Fibonacci function in the traditional
+;;; recursive way.
+
+(defun fib (n)
+  (check-type n integer)
+  ;; At this point we're sure we have an integer argument.
+  ;; Now we can get down to some serious computation.
+  (cond ((< n 0)
+         ;; Hey, this is just supposed to be a simple example.
+         ;; Did you really expect me to handle the general case?
+         (error "FIB got ~D as an argument." n))
+        ((< n 2) n)             ;fib[0]=0 and fib[1]=1
+        ;; The cheap cases didn't work.
+        ;; Nothing more to do but recurse.
+        (t (+ (fib (- n 1))     ;The traditional formula
+              (fib (- n 2)))))) ; is fib[n-1]+fib[n-2].
+\endcode
+
+\endsubsubsubsection%{Examples of Style for Semicolon}
+
+\endsubsubsection%{Notes about Style for Semicolon}
+
+\endsubsection%{Semicolon}
+
+\beginsubsection{Double-Quote}
+\DefineSection{Doublequote}
+\idxtext{Double-Quote (reader macro)}\idxtext{quotation (of strings)}\idxref{string}
+
+\b{Syntax:} \f{"\metaparam{text}"}
+
+%% 22.1.3 14
+%% 2.5.2 1
+
+The \term{double-quote} is used to begin and end a \term{string}.
+When a \term{double-quote} is encountered,
+\term{characters} are read from the \term{input} \term{stream} 
+and accumulated until another \term{double-quote} is encountered.
+If a \term{single escape} \term{character} is seen,
+the \term{single escape} \term{character} is discarded,
+the next \term{character} is accumulated, and accumulation continues.
+%% 2.5.2 3
+The accumulated \term{characters} 
+up to but not including the matching \term{double-quote} 
+are made into a \term{simple string} and returned.
+\issue{CHARACTER-PROPOSAL:2-1-1}
+It is \term{implementation-dependent}
+which \term{attributes} of the accumulated characters are removed in this process.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+Examples of the use of the \term{double-quote} character are in \thenextfigure. 
+
+\showtwo{Examples of the use of double-quote}{
+\f{"Foo"}                          & ;A string with three characters in it \cr
+\f{""}			           & ;An empty string \cr
+\f{"\\"APL\\\\360?\\" he cried."}  & ;A string with twenty characters \cr
+\f{"|x| = |-x|"}                   & ;A ten-character string \cr
+}
+
+Note that to place a single escape character or a \term{double-quote} into a string,
+such a character must be preceded by a single escape character.
+Note, too, that a multiple escape character need not be quoted by a 
+single escape character within a string.
+
+%% 2.5.2 2
+%With the exception of unquoted escape characters,
+%the characters contained by the double-quotes, taken from left to right,
+%occupy locations within the string with increasing indices.
+%The leftmost character is string element number 0, the next one
+%is element number 1, and so on.
+
+For information on how the \term{Lisp printer} prints \term{strings},
+\seesection\PrintingStrings.
+
+\endsubsection%{Double-Quote}
+
+\beginsubsection{Backquote}
+\DefineSection{Backquote}
+\idxcode{`}\idxtext{Backquote (reader macro)}\idxtext{quotation (of forms)}
+\idxref{quote}\idxref{list}\idxref{cons}
+
+%% 22.1.3 15
+
+The \term{backquote} introduces a template of a data structure to be built.  
+For example, writing
+
+\code
+ `(cond ((numberp ,x) ,@y) (t (print ,x) ,@y))
+\endcode
+is roughly equivalent to writing
+
+\code
+ (list 'cond 
+       (cons (list 'numberp x) y) 
+       (list* 't (list 'print x) y))
+\endcode
+Where a comma
+occurs in the template, 
+the \term{expression}
+following the comma is to be evaluated to produce an \term{object} to
+be inserted at that point.  Assume \f{b} has the value 3, for example, then
+evaluating the \term{form} denoted by \f{`(a b ,b ,(+ b 1) b)} produces
+the result \f{(a b 3 4 b)}.
+
+
+%% 22.1.3 16
+If a comma is immediately followed by an \term{at-sign}, 
+then the \term{form} following the \term{at-sign}
+is evaluated to produce a \term{list} of \term{objects}.
+These \term{objects} are then ``spliced'' into place in the template.  For
+example, if \f{x} has the value \f{(a b c)}, then
+
+\code
+ `(x ,x ,@x foo ,(cadr x) bar ,(cdr x) baz ,@(cdr x))
+\EV (x (a b c) a b c foo b bar (b c) baz b c)
+\endcode
+%% 22.1.3 17
+The backquote syntax can be summarized formally as follows.
+
+\beginlist
+\itemitem{\bull}
+\f{`\param{basic}} is the same as \f{'\param{basic}},
+that is, \f{(quote \param{basic})}, for any \term{expression} 
+\param{basic} that is not a \term{list} or a general \term{vector}.
+
+%% 22.1.3 18
+\itemitem{\bull}
+\f{`,\param{form}} is the same as \param{form}, for any \param{form}, provided
+that the representation of \param{form} does not begin with \term{at-sign}
+or \term{dot}.  (A similar caveat holds for all occurrences of a form after a \term{comma}.)
+
+%% 22.1.3 19
+\itemitem{\bull}
+\f{`,@\param{form}} has undefined consequences.
+
+%% 22.1.3 20
+\itemitem{\bull}
+\f{`(x1 x2 x3 ... xn . atom)}
+may be interpreted to mean
+
+\code
+ (append \lbracket\ x1\rbracket \lbracket\ x2\rbracket \lbracket\ x3\rbracket ... \lbracket\ xn\rbracket (quote atom))
+\endcode
+where the brackets are used to indicate
+a transformation of an \param{xj} as follows:
+
+%% 22.1.3 21
+\beginlist
+\itemitem{--}
+\f{[\param{form}]} is interpreted as \f{(list `\param{form})}, 
+which contains a backquoted form that must then be further interpreted.
+
+%% 22.1.3 22
+\itemitem{--}
+\f{[,\param{form}]} is interpreted as \f{(list \param{form})}.
+
+%% 22.1.3 23
+\itemitem{--}
+\f{[,@\param{form}]} is interpreted as \param{form}.
+\endlist
+
+%% 22.1.3 24
+\itemitem{\bull}
+\f{`(x1 x2 x3 ... xn)} may be interpreted to mean
+the same as the backquoted form
+\f{`(x1 x2 x3 ... xn . \nil)},
+thereby reducing it to the previous case.
+
+%% 22.1.3 25
+\itemitem{\bull}
+\f{`(x1 x2 x3 ... xn . ,form)} may be interpreted to mean
+
+\code
+ (append \lbracket\ x1\rbracket \lbracket\ x2\rbracket \lbracket\ x3\rbracket ... \lbracket\ xn\rbracket form)
+\endcode
+where the brackets indicate a transformation of an {\tt xj} as described above.
+
+%% 22.1.3 26
+\itemitem{\bull}
+\f{`(x1 x2 x3 ... xn . ,@form)} has undefined consequences.
+
+%% 22.1.3 27
+\itemitem{\bull}
+\f{`\#(x1 x2 x3 ... xn)} may be interpreted to mean
+\f{(apply \#'vector `(x1 x2 x3 ... xn))}.
+\endlist
+
+
+%% 22.1.3 28
+Anywhere ``\f{,@}'' may be used, the syntax ``\f{,.}'' may be used instead
+to indicate that it is permissible to operate \term{destructively} on 
+the \term{list structure}  produced by the form following the ``\f{,.}'' 
+(in effect, to use \funref{nconc} instead of \funref{append}).
+
+%% 22.1.3 29
+If the backquote syntax is nested, the innermost backquoted form
+should be expanded first.  This means that if several commas occur
+in a row, the leftmost one belongs to the innermost \term{backquote}.
+
+%% 22.1.3 30
+
+% An implementation is free to interpret
+% a backquoted form as any form that, when evaluated, will produce a result
+% that is \funref{equal} to the result implied by the above definition.
+% % Barmar:
+% %  Except for the non-destructive nature of ,@.  
+% %  It must also cons a new top-level list if comma is used.  e.g.,
+% %  (defun foo (x) `'(,x))
+% %  (eq (foo 1) (foo 2)) => \term{false}
+% %  i.e., it can't cache a structure and then replac it each time.
+% %
+%% Rewritten for Barmar. -kmp 11-Feb-92
+An \term{implementation} is free to interpret a backquoted \term{form} $F\sub 1$
+as any \term{form} $F\sub 2$ that, when evaluated, will produce a result that is
+the \term{same} under \funref{equal} as the result implied by the above definition, 
+provided that the side-effect behavior of the substitute \term{form} $F\sub 2$ 
+is also consistent with the description given above.
+%End of rewrite.
+The constructed
+copy of the template might or might not share \term{list} structure with the
+template itself.  As an example, the above definition implies that
+
+\code
+ `((,a b) ,c ,@d)
+\endcode
+will be interpreted as if it were
+
+\code
+ (append (list (append (list a) (list 'b) '\nil)) (list c) d '\nil)
+\endcode
+but it could also be legitimately interpreted to mean any of the following:
+
+\code
+ (append (list (append (list a) (list 'b))) (list c) d)
+ (append (list (append (list a) '(b))) (list c) d)
+ (list* (cons a '(b)) c d)
+ (list* (cons a (list 'b)) c d)
+ (append (list (cons a '(b))) (list c) d)
+ (list* (cons a '(b)) c (copy-list d))
+\endcode
+               
+\beginsubsubsection{Notes about Backquote}
+
+Since the exact manner in which the \term{Lisp reader} will parse
+an \term{expression} involving the \term{backquote} \term{reader macro} 
+is not specified, an \term{implementation} is free to choose any
+representation that preserves the semantics described.
+
+Often an \term{implementation} will choose a representation that facilitates
+pretty printing of the expression, so that \f{(pprint `(a ,b))} will display
+\f{`(a ,b)} and not, for example, \f{(list 'a b)}.  However, this is not a
+requirement.
+
+Implementors who have no particular reason to make one choice or another
+might wish to refer to {\IEEEScheme}, which identifies a popular choice of
+representation for such expressions that might provide useful to be useful
+compatibility for some user communities.  There is no requirement, however,
+that any \term{conforming implementation} use this particular representation.
+This information is provided merely for cross-reference purposes.
+
+\endsubsubsection%{Notes about Backquote}
+
+\endsubsection%{Backquote}
+
+\beginsubsection{Comma}
+\idxcode{,}\idxtext{Comma (reader macro)}\idxtext{quotation (of forms)}
+\idxref{quote}\idxref{list}\idxref{cons}
+
+%% 22.1.3 31                               
+           
+The \term{comma} is part of the backquote syntax; \seesection\Backquote.
+\term{Comma} is invalid if used other than inside the body of a 
+backquote \term{expression} as described above.
+
+\endsubsection%{Comma}
+
+\beginsubsection{Sharpsign}
+\idxcode{\#}\idxtext{Sharpsign (reader macro)}
+
+%% 22.1.3 32
+%% 22.1.3 33
+
+\term{Sharpsign} is a \term{non-terminating} \term{dispatching macro character}.
+It reads an optional 
+%was "digit \term{string}". ugh. -kmp 10-Apr-91
+sequence of digits and then one more character,
+and uses that character to select a \term{function} to run as a
+\term{reader macro function}.
+
+%% 22.1.4 1
+The \term{standard syntax} includes constructs introduced by the \f{\#} character.
+The syntax of these constructs is as follows:
+a character that identifies the type of construct is 
+followed by arguments in some form.
+If the character is a letter, its \term{case} is not important;
+\f{\#O} and \f{\#o} are considered to be equivalent, for example.
+
+%% 22.1.4 2
+Certain \f{\#} constructs allow an unsigned decimal number to appear
+between the \f{\#} and the character.
+
+%% 22.1.4 4
+The \term{reader macros} associated with the \term{dispatching macro character} \f{\#}
+are described later in this section and summarized in \thenextfigure.
+
+%% 22.1.4 3
+
+% \boxfig
+% {        
+% \def\u{undefined}
+% \def\s{signals error}
+% \def\ia{infix argument}
+% \tabskip 1pc
+% \halign to \hsize {#\hfil\tabskip 1pc&#\hfil\tabskip 0pt plus 1fil
+% &#\hfil\tabskip 1pc&#\hfil\cr
+% \noalign{\vskip -9pt}   
+% \omit\bf character&\omit\bf purpose&\omit\bf character& \omit\bf purpose\cr
+% \omit\bf combination&\omit&\omit\bf  combination\cr
+% \noalign{\vskip 2pt\hrule\vskip 2pt}
+% Backspace&\s&\f{\{}&\u*\cr
+% Tab&\s&\f{\}}&\u*\cr
+% Newline&\s&+&read-time conditional\cr
+% Linefeed&\s&-&read-time conditional\cr
+% Page&\s&.&read-time evaluation\cr
+% Return&\s&/&\u\cr
+% Space&\s&A, a&array\cr
+% !&\u*&B, b&binary rational\cr
+% \f{"}&\u&C, c&complex number\cr
+% \#&reference to = label&D, d&\u\cr
+% \$&\u&E, e&\u\cr
+% \%&\u&F, f&\u\cr      
+% \&&\u&G, g&\u\cr
+% '&function abbreviation&H, h&\u\cr
+% (&simple vector&I, i&\u\cr
+% )&\s&J, j&\u\cr
+% {\tt *}&bit vector&K, k&\u\cr
+% ,&\u&L, l&\u\cr
+% :&uninterned symbol&M, m&\u\cr
+% ;&\u&N, n&\u\cr
+% \f{<}&\s&O, o&octal rational\cr
+% \f{=}&labels following object&P, p&pathname\cr
+% \f{>}&\u&Q, q&\u\cr
+% ?&\u*&R, r&radix-$n$ rational\cr
+% @&\u&S, s&structure\cr
+% [&\u*&T, t&\u\cr
+% \f{\\}&character object&U, u&\u\cr
+% ]&\u*&V, v&\u\cr
+% {\hat}&\u&W, w&\u\cr
+% \f{\_}&\u&X, x&hexadecimal rational\cr
+% `&\u&Y, y&\u\cr
+% \f{|}&balanced comment&Z, z&\u\cr
+% \f{~}&\u&Rubout&\u\cr
+% \noalign{\vskip -9pt}
+% }}            
+% \caption{Standard \# Dispatching Macro Character Syntax}
+% \endfig
+
+{\def\u{undefined}
+\def\s{signals error}
+\def\ia{infix argument}
+\tablefigfour{Standard \# Dispatching Macro Character Syntax}{dispatch char}{purpose}{dispatch char}{purpose}{
+Backspace&\s&\f{\{}&\u*\cr
+Tab&\s&\f{\}}&\u*\cr
+Newline&\s&+&read-time conditional\cr
+Linefeed&\s&-&read-time conditional\cr
+Page&\s&.&read-time evaluation\cr
+Return&\s&/&\u\cr
+Space&\s&A, a&array\cr
+!&\u*&B, b&binary rational\cr
+\f{"}&\u&C, c&complex number\cr
+\#&reference to = label&D, d&\u\cr
+\$&\u&E, e&\u\cr
+\%&\u&F, f&\u\cr      
+\&&\u&G, g&\u\cr
+'&function abbreviation&H, h&\u\cr
+(&simple vector&I, i&\u\cr
+)&\s&J, j&\u\cr
+{\tt *}&bit vector&K, k&\u\cr
+,&\u&L, l&\u\cr
+:&uninterned symbol&M, m&\u\cr
+;&\u&N, n&\u\cr
+\f{<}&\s&O, o&octal rational\cr
+\f{=}&labels following object&P, p&pathname\cr
+\f{>}&\u&Q, q&\u\cr
+?&\u*&R, r&radix-$n$ rational\cr
+@&\u&S, s&structure\cr
+[&\u*&T, t&\u\cr
+\f{\\}&character object&U, u&\u\cr
+]&\u*&V, v&\u\cr
+{\hat}&\u&W, w&\u\cr
+\f{\_}&\u&X, x&hexadecimal rational\cr
+`&\u&Y, y&\u\cr
+\f{|}&balanced comment&Z, z&\u\cr
+\f{~}&\u&Rubout&\u\cr
+}}
+
+%* The combinations marked by an asterisk are explicitly reserved to the
+% user and will never be defined by the \clisp\ standard.
+The combinations marked by an asterisk (*) are explicitly reserved to the
+user.  No \term{conforming implementation} defines them.
+
+Note also that \term{digits} do not appear in the preceding table.  This is
+because the notations {\tt \#0}, {\tt \#1}, ..., {\tt \#9} are
+reserved for another purpose which occupies the same syntactic space.
+When a \term{digit} follows a \term{sharpsign},
+it is not treated as a dispatch character.
+Instead, an unsigned integer argument is accumulated 
+and passed as an \term{argument} to the \term{reader macro} 
+for the \term{character} that follows the digits.
+For example,
+\f{\#2A((1 2) (3 4))} is a use of {\tt \#A} with an argument of \f{2}.
+
+%% 1.2.7 13
+%% 22.1.4 5
+
+\beginsubsubsection{Sharpsign Backslash}
+\DefineSection{SharpsignBackslash}
+\idxtext{Sharpsign Backslash (reader macro)}\idxtext{Backslash (sharpsign reader macro)}\idxref{character}
+
+\b{Syntax:} \f{\#\\\metaparam{x}}
+
+%% 2.2.0 3
+
+When the \term{token} \param{x} is a single \term{character} long, 
+this parses as the literal \term{character} \param{char}.
+%% 22.1.4 7
+\term{Uppercase} and \term{lowercase} letters are distinguished after \f{\#\\};
+\f{\#\\A} and \f{\#\\a} denote different \term{character} \term{objects}.
+Any single \term{character} works after \f{\#\\},
+even those that are normally special to \funref{read}, 
+such as \term{left-parenthesis} and \term{right-parenthesis}.
+
+%% 22.1.4 6
+In the single \term{character} case,
+the \param{x} must be followed by a non-constituent \term{character}.
+After \f{\#\\} is read,
+the reader backs up over the \term{slash} and then reads a \term{token},
+treating the initial \term{slash} as a \term{single escape} \term{character}
+(whether it really is or not in the \term{current readtable}).
+
+% When the \term{token} \param{x} is more than one \term{character} long,
+% %% 22.1.4 8
+% the \param{x} has the syntax of a \term{symbol},
+% and the \term{sharpsign} \term{backslash} notation
+% parses as the \term{character} whose \term{name} is \f{(string-upcase \param{x})};
+% \seesection\CharacterNames.
+
+When the \term{token} \param{x} is more than one \term{character} long,
+%% 22.1.4 8
+the \param{x} must have the syntax of a \term{symbol} 
+with no embedded \term{package markers}.
+In this case, the \term{sharpsign} \term{backslash} notation
+parses as the \term{character} whose \term{name} is \f{(string-upcase \param{x})};
+\seesection\CharacterNames.
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+\issue{CHARACTER-LOOSE-ENDS:FIX}
+%% 22.1.4 18
+%% 2.2.4 2
+% Discussion of #n\x notation for font n removed.
+%% 2.2.4 3
+%%% 22.1.4 17
+% Discussion of bits \term{attribute} and stuff like #\Control-Meta-Return removed.
+\endissue{CHARACTER-LOOSE-ENDS:FIX}
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+For information about how the \term{Lisp printer} prints \term{character} \term{objects},
+\seesection\PrintingCharacters.
+
+\endsubsubsection%{Sharpsign Backslash}
+
+\beginsubsubsection{Sharpsign Single-Quote}
+\DefineSection{SharpsignQuote}
+\idxtext{Sharpsign Single-Quote (reader macro)}\idxtext{Single-Quote (sharpsign reader macro)}\idxref{function}
+
+%% 22.1.4 19
+%% 7.1.1 10
+
+% %\f{\#'\param{foo}} is an abbreviation for \f{(function \param{foo})}.
+% Any form \param{f} preceded by \f{\#'} (\f{\#} followed by an apostrophe)
+% is assumed to have \f{(function)} wrapped around it to make
+% {\tt (function \param{f})}.  For example,
+
+Any \param{expression} preceded by \f{\#'} 
+(\term{sharpsign} followed by \term{single-quote}),
+as in \f{\#'\param{expression}},
+is treated by the \term{Lisp reader} as an abbreviation for and parsed identically 
+to the \term{expression} \f{(function \param{expression})}.
+See \specref{function}.  For example,
+
+\code
+(apply #'+ l) \EQ (apply (function +) l)
+\endcode
+
+\endsubsubsection%{Sharpsign Single-Quote}
+                   
+\beginsubsubsection{Sharpsign Left-Parenthesis}
+\DefineSection{SharpsignLeftParen}
+\idxtext{Sharpsign Left-Parenthesis (reader macro)}\idxtext{Left-Parenthesis (sharpsign reader macro)}\idxref{vector}\idxref{simple-vector}
+
+%% 2.5.1 2                                  
+%% 22.1.4 20
+
+\f{\#(} and \f{)} are used to notate a \term{simple vector}. 
+
+%% 22.1.4 21
+If an unsigned decimal integer
+appears between the \f{\#} and \f{(},
+it specifies explicitly the length of the \term{vector}.  
+The consequences are undefined if the number of \term{objects} 
+specified before the closing \f{)}
+exceeds the unsigned decimal integer.
+If the number of \term{objects} supplied before the closing \f{)}
+is less than the unsigned decimal integer but greater than zero,
+the last \term{object}
+is used to fill all
+remaining elements of the \term{vector}.
+\editornote{Barmar: This should say "signals...".}
+The consequences are undefined if the unsigned decimal integer is non-zero and
+number of \term{objects} supplied before the closing \f{)}
+is zero.
+For example,
+
+\code
+ #(a b c c c c)
+ #6(a b c c c c)
+ #6(a b c)
+ #6(a b c c)
+\endcode
+
+all mean the same thing: a \term{vector} of length \f{6}
+with \term{elements} \f{a}, \f{b}, and four occurrences of \f{c}.  
+Other examples follow:
+
+\code
+ #(a b c)               ;A vector of length 3
+ #(2 3 5 7 11 13 17 19 23 29 31 37 41 43 47)
+                        ;A vector containing the primes below 50
+ #()                    ;An empty vector
+\endcode
+The notation \f{\#()} denotes an empty \term{vector}, as does \f{\#0()}.
+
+For information on how the \term{Lisp printer} prints \term{vectors},
+see \secref\PrintingStrings,
+    \secref\PrintingBitVectors,
+ or \secref\PrintingOtherVectors.
+
+\endsubsubsection%{Sharpsign Left-Parenthesis}
+
+\beginsubsubsection{Sharpsign Asterisk}
+\DefineSection{SharpsignStar}
+\idxtext{Sharpsign Asterisk (reader macro)}\idxtext{Asterisk (sharpsign reader macro)}\idxref{bit-vector}\idxref{simple-bit-vector}
+
+%% 22.1.4 22
+%% 2.5.3 1
+\b{Syntax:} \f{\#*\metaparam{bits}}
+
+%% 2.5.3 2
+A \term{simple bit vector} is constructed containing the indicated \term{bits}
+(\f{0}'s and \f{1}'s), where the leftmost \param{bit} has index zero 
+and the subsequent \param{bits} have increasing indices.
+
+\b{Syntax:} \f{\#\metaparam{n}*\metaparam{bits}}
+
+%% 22.1.4 23
+With an argument \param{n},
+the \term{vector} to be created is of \term{length} \param{n}.
+If the number of \param{bits} is less than \param{n} but greater than zero,
+the last bit is used to fill all remaining bits of the \term{bit vector}.
+
+The notations \f{\#*} and \f{\#0*} each denote an empty \term{bit vector}.
+
+\issue{SHARP-STAR-DELIMITER:NORMAL-DELIMITER}
+Regardless of whether the optional numeric argument \param{n} is provided,
+the \term{token} that follows the \term{asterisk} is delimited by 
+a normal \term{token} delimiter.
+However, (unless \thevalueof{*read-suppress*} is \term{true})
+an error \oftype{reader-error} is signaled 
+     if that \term{token} is not composed entirely of \f{0}'s and \f{1}'s,
+  or if \param{n} was supplied 
+        and the \term{token} is composed of more than \param{n} \param{bits},
+  or if \param{n} is greater than one, but no \param{bits} were specified.
+Neither a \term{single escape} nor a \term{multiple escape} is permitted in this \term{token}.
+\endissue{SHARP-STAR-DELIMITER:NORMAL-DELIMITER}
+
+For information on how the \term{Lisp printer} prints \term{bit vectors},
+\seesection\PrintingBitVectors.
+
+\beginsubsubsubsection{Examples of Sharpsign Asterisk}
+
+For example, 
+\code
+  #*101111
+ #6*101111
+ #6*101
+ #6*1011
+\endcode
+all mean the same thing: a \term{vector} of length \f{6}
+with \term{elements} \f{1}, \f{0}, \f{1}, \f{1}, \f{1}, and \f{1}.
+
+For example:
+
+\code
+ #*         ;An empty bit-vector
+\endcode
+
+\endsubsubsubsection%{Examples of Sharpsign Asterisk}
+
+\endsubsubsection%{Sharpsign Asterisk}
+
+\beginsubsubsection{Sharpsign Colon}
+\DefineSection{SharpsignColon}
+\idxtext{Sharpsign Colon (reader macro)}\idxtext{Colon (sharpsign reader macro)}\idxref{symbol}
+
+%% 22.1.4 24 
+
+% \f{\#:\param{foo}} denotes an \term{uninterned} \term{symbol} 
+% whose \term{name} is \param{foo}.
+% Every time this syntax is encountered,
+% a \term{distinct} \term{uninterned} \term{symbol} is created.
+% \f{\#:} requires \param{foo} to have the syntax of a 
+% \term{symbol} name with no embedded \term{package markers}.
+%% Replaced:
+
+\b{Syntax:}  \f{\#:\metaparam{symbol-name}}
+
+\f{\#:} introduces an \term{uninterned} \term{symbol} whose \term{name} 
+is \param{symbol-name}.  Every time this syntax is encountered,
+a \term{distinct} \term{uninterned} \term{symbol} is created.
+The \param{symbol-name} must have the syntax of a \term{symbol} 
+with no \term{package prefix}.
+
+For information on how the \term{Lisp reader} 
+prints \term{uninterned} \term{symbols},
+\seesection\PrintingSymbols.
+
+\endsubsubsection%{Sharpsign Colon}
+
+\beginsubsubsection{Sharpsign Dot}
+\DefineSection{SharpsignDot}
+\idxtext{Sharpsign Dot (reader macro)}\idxtext{Dot (sharpsign reader macro)}\idxref{eval}\idxref{*read-eval*}
+
+%% 22.1.4 25
+
+\f{\#.\param{foo}} is read as the \term{object} resulting from the evaluation
+of the \term{object} represented by \param{foo}.
+The evaluation is done during the \funref{read} process,
+when the \f{\#.} notation is encountered.
+The \f{\#.} syntax therefore performs a read-time evaluation of \param{foo}.
+
+The normal effect of {\tt \#.} is inhibited when \thevalueof{*read-eval*} is \term{false}.
+%Barmar asked what error type gets signaled. I made it be PARSE-ERROR. -kmp 17-Oct-90
+%Oops. READER-ERROR. -kmp 15-Jan-91
+\issue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+In that situation, an error \oftype{reader-error} is signaled.
+\endissue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+
+%% 22.1.4 26
+For an \term{object}
+that does not have a convenient printed
+representation, a \term{form} that computes the \term{object} can be given using
+the \f{\#.} notation.
+\issue{SHARP-COMMA-CONFUSION:REMOVE}
+%% issue here
+%The following will be deleted.
+%
+%or {\tt \#,}.
+%End of deletion.
+\endissue{SHARP-COMMA-CONFUSION:REMOVE}
+
+\endsubsubsection%{Sharpsign Dot}
+
+\issue{SHARP-COMMA-CONFUSION:REMOVE}
+%% 22.1.4 27
+%\beginsubsubsection{Sharpsign Comma}
+% Discussion of Sharpsign Comma removed here.
+%\endsubsubsection%{Sharpsign Comma}
+\endissue{SHARP-COMMA-CONFUSION:REMOVE}
+
+\beginsubsubsection{Sharpsign B}
+\DefineSection{SharpsignB}
+\idxtext{Sharpsign B (reader macro)}\idxtext{B (sharpsign reader macro)}\idxref{*read-base*}
+
+%% 22.1.4 28
+
+\f{\#B}\param{rational} reads \param{rational} in binary (radix 2).
+For example, 
+
+\code
+ #B1101 \EQ 13 ;1101\ssst
+ #b101/11 \EQ 5/3
+\endcode
+
+\issue{SHARP-O-FOOBAR:CONSEQUENCES-UNDEFINED}
+The consequences are undefined if the token immediately following
+the \f{\#B} does not have the syntax of a binary (\ie radix 2) \term{rational}.
+\endissue{SHARP-O-FOOBAR:CONSEQUENCES-UNDEFINED}
+
+\endsubsubsection%{Sharpsign B}
+
+\beginsubsubsection{Sharpsign O}
+\DefineSection{SharpsignO}
+\idxtext{Sharpsign O (reader macro)}\idxtext{O (sharpsign reader macro)}\idxref{*read-base*}
+
+%% 22.1.4 29
+
+\f{\#O}\param{rational} reads \param{rational} in octal (radix 8).
+For example, 
+
+\code
+ #o37/15 \EQ 31/13
+ #o777 \EQ 511
+ #o105 \EQ 69 ;105\ssse
+\endcode
+
+\issue{SHARP-O-FOOBAR:CONSEQUENCES-UNDEFINED}
+The consequences are undefined if the token immediately following
+the \f{\#O} does not have the syntax of an octal (\ie radix 8) \term{rational}.
+\endissue{SHARP-O-FOOBAR:CONSEQUENCES-UNDEFINED}
+
+\endsubsubsection%{Sharpsign O}
+
+\beginsubsubsection{Sharpsign X}
+\DefineSection{SharpsignX}
+\idxtext{Sharpsign X (reader macro)}\idxtext{X (sharpsign reader macro)}\idxref{*read-base*}
+
+%% 22.1.4 30
+
+\f{\#X}\param{rational} reads \param{rational} in hexadecimal (radix 16).
+The digits above \f{9} are the letters \f{A} through \f{F} (the lowercase
+letters \f{a} through \f{f} are also acceptable).  For example,
+
+\code
+ #xF00 \EQ 3840             
+ #x105 \EQ 261 ;105\ssss
+\endcode
+
+\issue{SHARP-O-FOOBAR:CONSEQUENCES-UNDEFINED}
+The consequences are undefined if the token immediately following
+the \f{\#X} does not have the syntax of a hexadecimal (\ie radix 16) \term{rational}.
+\endissue{SHARP-O-FOOBAR:CONSEQUENCES-UNDEFINED}
+
+\endsubsubsection%{Sharpsign X}
+
+\beginsubsubsection{Sharpsign R}
+\DefineSection{SharpsignR}
+\idxtext{Sharpsign R (reader macro)}\idxtext{R (sharpsign reader macro)}\idxref{*read-base*}
+
+%% 22.1.4 31                 
+\f{\#\param{n}R}
+                                                             
+\f{\#\param{radix}R\param{rational}} reads \param{rational} in radix \param{radix}.
+\param{radix} must consist of only digits
+that are interpreted as an \term{integer}
+in decimal radix; its value must be between 2 and 36 (inclusive).
+Only valid digits
+for the specified radix may be used.
+
+%% 22.1.4 32
+For example, \f{\#3r102} is another way of writing \f{11} (decimal), 
+and \f{\#11R32}
+is another way of writing \f{35} (decimal).  
+For radices larger than 10, letters of
+the alphabet are used in order for the digits after \f{9}.
+No alternate \f{\#} notation exists for the decimal radix since a
+decimal point suffices.
+
+\Thenextfigure\ contains examples of the use of {\tt\#B},
+{\tt \#O}, {\tt \#X}, and {\tt \#R}.
+
+\showtwo{Radix Indicator Example}{
+\f{\#2r11010101}  & ;Another way of writing \f{213} decimal \cr
+\f{\#b11010101}   & ;Ditto                                  \cr
+\f{\#b+11010101}  & ;Ditto                                  \cr
+\f{\#o325}        & ;Ditto, in octal radix                  \cr
+\f{\#xD5}         & ;Ditto, in hexadecimal radix            \cr
+\f{\#16r+D5}      & ;Ditto                                  \cr
+\f{\#o-300}       & ;Decimal \f{-192}, written in base 8    \cr
+\f{\#3r-21010}    & ;Same thing in base 3                   \cr
+\f{\#25R-7H}      & ;Same thing in base 25                  \cr
+\f{\#xACCEDED}    & ;\f{181202413}, in hexadecimal radix    \cr
+}
+
+\issue{SHARP-O-FOOBAR:CONSEQUENCES-UNDEFINED}
+The consequences are undefined if the token immediately following
+the \f{\#\param{n}R} does not have the syntax of a \term{rational} in radix \param{n}.
+\endissue{SHARP-O-FOOBAR:CONSEQUENCES-UNDEFINED}
+
+\endsubsubsection%{Sharpsign R}
+
+\beginsubsubsection{Sharpsign C}
+\DefineSection{SharpsignC}
+\idxtext{Sharpsign C (reader macro)}\idxtext{C (sharpsign reader macro)}\idxref{complex}
+
+\issue{READ-SUPPRESS-CONFUSING:GENERALIZE}
+% \f{\#C} followed by a \term{list} of the real and imaginary parts denotes
+% a \term{complex} number.
+\f{\#C} reads a following \term{object}, which must be a \term{list} of
+length two whose \term{elements} are both \term{reals}.
+These \term{reals} denote, respectively,
+the real and imaginary parts of a \term{complex} number.
+\endissue{READ-SUPPRESS-CONFUSING:GENERALIZE}
+%% 2.1.4 2
+If the two parts as notated are not of the same data type,
+then they are converted 
+according to the rules of floating-point \term{contagion}
+described in \secref\NumericContagionRules.
+
+\f{\#C(\param{real} \param{imag})} is equivalent to 
+\f{\#.(complex (quote \param{real}) (quote \param{imag}))},
+% I added this next phrase for clarity. -kmp 23-Aug-93
+except that \f{\#C} is not affected by \varref{*read-eval*}.
+\Seefun{complex}.
+
+\Thenextfigure\ contains examples of the use of {\tt \#C}.
+
+\showtwo{Complex Number Example}{
+\f{\#C(3.0s1 2.0s-1)} & ;A \term{complex} with \term{small float} parts.      \cr
+\f{\#C(5 -3)      }   & ;A ``Gaussian integer''                               \cr
+\f{\#C(5/3 7.0) }     & ;Will be converted internally to \f{\#C(1.66666 7.0)} \cr
+\f{\#C(0 1)}          & ;The imaginary unit; that is, i.                      \cr
+}
+
+For further information, 
+\seesection\PrintingComplexes\ and \secref\SyntaxOfComplexes.
+
+\endsubsubsection%{Sharpsign C}
+
+\beginsubsubsection{Sharpsign A}
+\DefineSection{SharpsignA}
+\idxtext{Sharpsign A (reader macro)}\idxtext{A (sharpsign reader macro)}\idxref{array}
+
+%% 22.1.4 33           
+\f{\#\param{n}A}
+
+\f{\#\param{n}\f{A}\param{object}} constructs an \param{n}-dimensional \term{array},
+using \param{object} as the value of the \kwd{initial-contents} argument
+to \funref{make-array}.
+
+%% 22.1.4 34                                                  
+For example, \f{\#2A((0 1 5) (foo 2 (hot dog)))} represents a 2-by-3 matrix:
+
+\code
+ 0       1       5
+ foo     2       (hot dog)
+\endcode
+In contrast, \f{\#1A((0 1 5) (foo 2 (hot dog)))} 
+represents a \term{vector} of \term{length} \f{2} 
+whose \term{elements} are \term{lists}:
+
+\code
+ (0 1 5) (foo 2 (hot dog))
+\endcode
+\f{\#0A((0 1 5) (foo 2 (hot dog)))} represents a zero-dimensional
+\term{array} whose sole element is a \term{list}:
+
+\code
+ ((0 1 5) (foo 2 (hot dog)))
+\endcode
+\f{\#0A foo} represents 
+a zero-dimensional \term{array} whose sole element is the 
+\term{symbol} \f{foo}.
+The notation \f{\#1A foo} is not valid because \f{foo} is
+not a \term{sequence}.
+
+If some \term{dimension} of the \term{array}
+whose representation is being parsed is found to be \f{0},
+all \term{dimensions} to the right 
+(\ie the higher numbered \term{dimensions})
+are also considered to be \f{0}.
+
+For information on how the \term{Lisp printer} prints \term{arrays},
+see \secref\PrintingStrings,
+    \secref\PrintingBitVectors,
+    \secref\PrintingOtherVectors,
+ or \secref\PrintingOtherArrays.
+
+\endsubsubsection%{Sharpsign A}
+
+\beginsubsubsection{Sharpsign S}
+\DefineSection{SharpsignS}
+\idxtext{Sharpsign S (reader macro)}\idxtext{S (sharpsign reader macro)}\idxref{structure}
+
+%% 22.1.4 35
+
+\f{\#s(name slot1 value1 slot2 value2 ...)}
+denotes a \term{structure}.  This is valid only if \param{name} is the name
+of a \term{structure} \term{type} already defined by \macref{defstruct} 
+and if the \term{structure} \term{type} has a standard constructor function.
+Let \param{cm} stand for the name of this constructor function;
+then this syntax is equivalent to
+
+\code
+ #.(cm keyword1 'value1 keyword2 'value2 ...)
+\endcode
+
+where each \param{keywordj} is the result of computing
+
+\code
+ (intern (string slotj) (find-package 'keyword))
+\endcode
+    
+The net effect is that the constructor function is called with the specified
+slots having the specified values. 
+\issue{STRUCTURE-READ-PRINT-SYNTAX:KEYWORDS}
+(This coercion feature is deprecated; in the future, keyword names will 
+ be taken in the package they are read in, so \term{symbols} that are 
+ actually in \thepackage{keyword} should be used if that is what is desired.)
+\endissue{STRUCTURE-READ-PRINT-SYNTAX:KEYWORDS}
+
+Whatever \term{object} the constructor function returns
+is returned by the \f{\#S} syntax.
+
+For information on how the \term{Lisp printer} prints \term{structures},
+\seesection\PrintingStructures.
+
+\endsubsubsection%{Sharpsign S}
+
+\beginsubsubsection{Sharpsign P}
+\DefineSection{SharpsignP}
+\idxtext{Sharpsign P (reader macro)}\idxtext{P (sharpsign reader macro)}\idxref{pathname}
+
+\issue{PATHNAME-PRINT-READ:SHARPSIGN-P}                  
+
+\f{\#P} reads a following \term{object}, which must be a \term{string}.
+
+% {\tt \#P"..."} is equivalent to 
+% {\tt  \#.(parse-namestring "...")}.
+\f{\#P\metaparam{expression}} is equivalent to 
+\f{\#.(parse-namestring '\metaparam{expression})},
+% I added this next phrase for clarity. -kmp 23-Aug-93
+except that \f{\#P} is not affected by \varref{*read-eval*}.
+
+For information on how the \term{Lisp printer} prints \term{pathnames},
+see \secref\PrintingPathnames.
+
+\endissue{PATHNAME-PRINT-READ:SHARPSIGN-P}                  
+
+\endsubsubsection%{Sharpsign P}
+
+\beginsubsubsection{Sharpsign Equal-Sign}
+\idxtext{Sharpsign Equal-Sign (reader macro)}\idxtext{Equal-Sign (sharpsign reader macro)}\idxref{*print-circle*}
+
+%% 22.1.4 36                      
+\f{\#\param{n}=}
+
+\f{\#\param{n}=\param{object}} reads as whatever \term{object}
+has \param{object} as its printed representation.  However, that \term{object}
+is labeled by \param{n}, a required unsigned decimal integer, for
+possible reference by the syntax \f{\#\param{n}\#}.
+The scope of the label is the \term{expression} being read by the outermost
+call to \funref{read}; within this \term{expression},
+the same label may not appear twice.
+
+\endsubsubsection%{Sharpsign Equal-Sign}
+
+\beginsubsubsection{Sharpsign Sharpsign}
+\idxtext{Sharpsign Sharpsign (reader macro)}\idxtext{Sharpsign (sharpsign reader macro)}\idxref{*print-circle*}
+
+%% 22.1.4 37                  
+\f{\#\param{n}\#}
+ 
+\f{\#\param{n}\#}, where \param{n} is a required unsigned decimal
+\term{integer},
+provides a reference to some \term{object} labeled by \f{\#\param{n}=};
+that is, \f{\#\param{n}\#} represents a pointer to the same 
+(\funref{eq}) \term{object} labeled by \f{\#\param{n}=}.
+For example, a structure created in the variable \f{y} by this code:
+
+\code
+ (setq x (list 'p 'q))
+ (setq y (list (list 'a 'b) x 'foo x))
+ (rplacd (last y) (cdr y))
+\endcode
+could be represented in this way:
+
+\code
+ ((a b) . #1=(#2=(p q) foo #2# . #1#))
+\endcode
+Without this notation, but with \varref{*print-length*} set to \f{10}
+and \varref{*print-circle*} set to \nil,
+the structure would print in this way:
+
+\code
+ ((a b) (p q) foo (p q) (p q) foo (p q) (p q) foo (p q) ...)
+\endcode
+A reference \f{\#\param{n}\#} may only occur after a label \f{\#\param{n}=};
+forward references are not permitted.  The reference
+may not appear as the labeled object itself (that is,
+\f{\#\param{n}=\#\param{n}\#}) may not be written 
+because the \term{object}
+labeled by \f{\#\param{n}=} is not well defined in this case.
+
+\endsubsubsection%{Sharpsign Sharpsign}
+
+\beginsubsubsection{Sharpsign Plus}
+\idxtext{Sharpsign Plus (reader macro)}\idxtext{Plus (sharpsign reader macro)}\idxref{*features*}
+
+%% 22.1.4 38
+
+\f{\#+} provides a read-time conditionalization facility;
+the syntax is \f{\#+\param{test} \param{expression}}.
+If the \term{feature expression} \param{test} succeeds,
+then this textual notation represents an \term{object}
+ whose printed representation is \param{expression}.
+If the \term{feature expression} \param{test} fails,
+then this textual notation is treated as \term{whitespace}\meaning{2}; 
+ that is, it is as if the ``\f{\#+} \param{test} \param{expression}'' 
+ did not appear and only a \term{space} appeared in its place.
+
+%% 22.1.4 39
+For a detailed description of success and failure in \term{feature expressions},
+\seesection\FeatureExpressions.
+
+%% 22.1.4 42
+\f{\#+} operates by first reading the \term{feature expression}
+and then skipping over the \param{form} if the \term{feature expression} fails.
+\issue{SHARPSIGN-PLUS-MINUS-PACKAGE:KEYWORD}
+While reading the \param{test}, the \term{current package} is \thepackage{keyword}.
+\endissue{SHARPSIGN-PLUS-MINUS-PACKAGE:KEYWORD}
+Skipping over the \param{form} is accomplished by \term{binding} 
+\varref{*read-suppress*} to \term{true} and then calling \funref{read}.
+
+For examples, \seesection\FeatureExpExamples.
+
+\endsubsubsection%{Sharpsign Plus}
+
+\beginsubsubsection{Sharpsign Minus}
+\idxtext{Sharpsign Minus (reader macro)}\idxtext{Minus (sharpsign reader macro)}\idxref{*features*}
+
+%% 22.1.4 43
+
+\f{\#-} is like \f{\#+} 
+except that it skips the \param{expression} if the \param{test} succeeds; 
+that is,
+
+\code
+#-\param{test} \param{expression} \EQ #+(not \param{test}) \param{expression}
+\endcode
+
+For examples, \seesection\FeatureExpExamples.
+
+\endsubsubsection%{Sharpsign Minus}
+
+\beginsubsubsection{Sharpsign Vertical-Bar}
+\idxtext{Sharpsign Vertical-Bar (reader macro)}\idxtext{Vertical-Bar (sharpsign reader macro)}\idxtext{comment}
+
+%% 22.1.4 44      
+
+\f{\#|...|\#} is treated as a comment by the reader.
+It must be balanced with respect to other occurrences of \f{\#|} and \f{|\#},
+but otherwise may contain any characters whatsoever.
+
+\beginsubsubsubsection{Examples of Sharpsign Vertical-Bar}
+
+The following are some examples that exploit the \f{\#|...|\#} notation:
+
+\code
+;;; In this example, some debugging code is commented out with #|...|#
+;;; Note that this kind of comment can occur in the middle of a line
+;;; (because a delimiter marks where the end of the comment occurs)
+;;; where a semicolon comment can only occur at the end of a line 
+;;; (because it comments out the rest of the line).
+ (defun add3 (n) #|(format t "~&Adding 3 to ~D." n)|# (+ n 3))
+\goodbreak
+;;; The examples that follow show issues related to #| ... |# nesting.
+
+;;; In this first example, #| and |# always occur properly paired,
+;;; so nesting works naturally.
+ (defun mention-fun-fact-1a ()
+   (format t "CL uses ; and #|...|# in comments."))
+\EV MENTION-FUN-FACT-1A
+ (mention-fun-fact-1a)
+\OUT CL uses ; and #|...|# in comments.
+\EV NIL
+ #| (defun mention-fun-fact-1b ()
+      (format t "CL uses ; and #|...|# in comments.")) |#
+ (fboundp 'mention-fun-fact-1b) \EV NIL
+\goodbreak
+;;; In this example, vertical-bar followed by sharpsign needed to appear
+;;; in a string without any matching sharpsign followed by vertical-bar
+;;; having preceded this.  To compensate, the programmer has included a
+;;; slash separating the two characters.  In case 2a, the slash is 
+;;; unnecessary but harmless, but in case 2b, the slash is critical to
+;;; allowing the outer #| ... |# pair match.  If the slash were not present,
+;;; the outer comment would terminate prematurely.
+ (defun mention-fun-fact-2a ()
+   (format t "Don't use |\\# unmatched or you'll get in trouble!"))
+\EV MENTION-FUN-FACT-2A
+ (mention-fun-fact-2a)
+\OUT Don't use |# unmatched or you'll get in trouble!
+\EV NIL
+ #| (defun mention-fun-fact-2b ()
+      (format t "Don't use |\\# unmatched or you'll get in trouble!") |#
+ (fboundp 'mention-fun-fact-2b) \EV NIL
+\goodbreak
+;;; In this example, the programmer attacks the mismatch problem in a
+;;; different way.  The sharpsign vertical bar in the comment is not needed
+;;; for the correct parsing of the program normally (as in case 3a), but 
+;;; becomes important to avoid premature termination of a comment when such 
+;;; a program is commented out (as in case 3b).
+ (defun mention-fun-fact-3a () ; #|
+   (format t "Don't use |# unmatched or you'll get in trouble!"))
+\EV MENTION-FUN-FACT-3A
+ (mention-fun-fact-3a)
+\OUT Don't use |# unmatched or you'll get in trouble!
+\EV NIL
+ #|
+ (defun mention-fun-fact-3b () ; #|
+   (format t "Don't use |# unmatched or you'll get in trouble!"))
+ |#
+ (fboundp 'mention-fun-fact-3b) \EV NIL
+\endcode
+
+\endsubsubsubsection%{Examples of Sharpsign Vertical-Bar}
+
+\beginsubsubsubsection{Notes about Style for Sharpsign Vertical-Bar}
+
+Some text editors that purport to understand Lisp syntax treat any \f{|...|}
+as balanced pairs that cannot nest (as if they were just balanced pairs of 
+the multiple escapes used in notating certain symbols).  To compensate for 
+this deficiency, some programmers use the notation \f{\#||...\#||...||\#...||\#}
+instead of \f{\#|...\#|...|\#...|\#}.   Note that this alternate usage is not
+a different \term{reader macro}; it merely exploits the fact that the additional
+vertical-bars occur within the comment in a way that tricks certain text editor
+into better supporting nested comments.  As such, one might sometimes see code
+like:
+
+\code
+ #|| (+ #|| 3 ||# 4 5) ||# 
+\endcode
+
+Such code is equivalent to:
+
+\code
+ #| (+ #| 3 |# 4 5) |#
+\endcode
+
+\endsubsubsubsection%{Notes about Style for Sharpsign Vertical-Bar}
+
+\endsubsubsection%{Sharpsign Vertical-Bar}
+
+\beginsubsubsection{Sharpsign Less-Than-Sign}
+\DefineSection{SharpsignLeftAngle}
+\idxtext{Sharpsign Less-Than-Sign (reader macro)}\idxtext{Less-Than-Sign (sharpsign reader macro)}
+
+%% 22.1.4 46      
+
+{\tt  \#<} is not valid reader syntax.
+The \term{Lisp reader} will signal an error 
+\issue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+\oftype{reader-error}
+\endissue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+on encountering \f{\#<}.
+This syntax is typically used in the printed representation 
+of \term{objects} that cannot be read back in.  
+
+\endsubsubsection%{Sharpsign Less-Than-Sign}
+
+\beginsubsubsection{Sharpsign Whitespace}
+\idxtext{Sharpsign Whitespace}
+
+%% 22.1.4 47
+
+%Used to explicitly mention Newline, Page, Return
+%but those are not chars in the standard syntax. -kmp 13-May-91
+
+\f{\#} followed immediately by \term{whitespace}\meaning{1} is not valid reader syntax.
+The \term{Lisp reader} will signal an error \oftype{reader-error} if it
+encounters the reader macro notation \f{\#\NewlineChar} or \f{\#\SpaceChar}.
+
+\endsubsubsection%{Sharpsign Whitespace}
+
+\beginsubsubsection{Sharpsign Right-Parenthesis}
+\idxtext{Sharpsign Right-Parenthesis}
+
+%% 22.1.4 48
+
+This is not valid reader syntax.
+
+%I added this.  It's alluded to elsewhere that it really signals. -kmp 15-Jan-91
+The \term{Lisp reader} will signal an error 
+\issue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+\oftype{reader-error}
+\endissue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+%(
+upon encountering \f{\#)}.
+
+\endsubsubsection%{Sharpsign Right-Parenthesis}
+
+\endsubsection%{Sharpsign}
+
+\beginsubsection{Re-Reading Abbreviated Expressions}
+\idxtext{Dot Dot}\idxcode{..}
+\idxtext{Dot Dot Dot}\idxcode{...}
+\idxtext{Sharpsign Whitespace}\idxtext{Sharpsign Right-Parenthesis}
+
+%% 22.1.6 53
+Note that the \term{Lisp reader} will 
+% Only generally because ".." due to print-lines in mid-string won't reliably signal.
+generally
+signal an error \oftype{reader-error}
+when reading an \term{expression}\meaning{2} that has been
+abbreviated because of length or level limits 
+(see \varref{*print-level*},
+     \varref{*print-length*},
+ and \varref{*print-lines*})
+due to restrictions on ``\f{..}'', ``\f{...}'', ``\f{\#}'' followed by \term{whitespace}\meaning{1},
+%(
+and ``\f{\#)}''.
+
+\endsubsection%{Re-Reading Abbreviated Expressions}
