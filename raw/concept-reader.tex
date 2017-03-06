@@ -1,8 +1,8 @@
-% -*- Mode: TeX -*-
+
 
 \beginsubsection{Dynamic Control of the Lisp Reader}
 
-Various aspects of the \term{Lisp reader} can be controlled dynamically.
+Various aspects of the //[[CL:Glossary:Lisp reader]]// can be controlled dynamically.
 \Seesection\Readtables\ and \secref\ReaderVars.
 
 \endsubsection%{Dynamic Control of the Lisp Reader}
@@ -10,31 +10,31 @@ Various aspects of the \term{Lisp reader} can be controlled dynamically.
 \beginsubsection{Effect of Readtable Case on the Lisp Reader}
 \DefineSection{ReadtableCaseReadEffect}
 
-The \term{readtable case} of the \term{current readtable} affects the \term{Lisp reader}
+The //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]// affects the //[[CL:Glossary:Lisp reader]]//
 in the following ways:
 
 \beginlist
-\itemitem{\kwd{upcase}}
+\itemitem{**'':upcase''**}
 
- When the \term{readtable case} is \kwd{upcase},
- unescaped constituent \term{characters} are converted to \term{uppercase},
+ When the //[[CL:Glossary:readtable case]]// is **'':upcase''**,
+ unescaped constituent //[[CL:Glossary:characters]]// are converted to //[[CL:Glossary:uppercase]]//,
  as specified in \secref\ReaderAlgorithm.
 
-\itemitem{\kwd{downcase}}
+\itemitem{**'':downcase''**}
 
- When the \term{readtable case} is \kwd{downcase},
- unescaped constituent \term{characters} are converted to \term{lowercase}.
+ When the //[[CL:Glossary:readtable case]]// is **'':downcase''**,
+ unescaped constituent //[[CL:Glossary:characters]]// are converted to //[[CL:Glossary:lowercase]]//.
 
-\itemitem{\kwd{preserve}}
+\itemitem{**'':preserve''**}
 
-When the \term{readtable case} is \kwd{preserve},
- the case of all \term{characters} remains unchanged.
+When the //[[CL:Glossary:readtable case]]// is **'':preserve''**,
+ the case of all //[[CL:Glossary:characters]]// remains unchanged.
 
-\itemitem{\kwd{invert}}
+\itemitem{**'':invert''**}
 
-When the \term{readtable case} is \kwd{invert},
- then if all of the unescaped letters in the extended token are of the same \term{case}, 
- those (unescaped) letters are converted to the opposite \term{case}.
+When the //[[CL:Glossary:readtable case]]// is **'':invert''**,
+ then if all of the unescaped letters in the extended token are of the same //[[CL:Glossary:case]]//, 
+ those (unescaped) letters are converted to the opposite //[[CL:Glossary:case]]//.
 
 \endlist
 
@@ -83,64 +83,64 @@ The output from \f{(test-readtable-case-reading)} should be as follows:
 
 \beginsubsubsection{The EOF-ERROR-P argument}
 
-%% 22.2.1 2
 
-\param{Eof-error-p} in input function calls
+
+//Eof-error-p// in input function calls
 controls what happens if input is from a file (or any other
 input source that has a definite end) and the end of the file is reached.
-If \param{eof-error-p} is \term{true} (the default), 
+If //eof-error-p// is //[[CL:Glossary:true]]// (the default), 
 an error \oftype{end-of-file} is signaled
-at end of file.  If it is \term{false}, then no error is signaled, and instead
-the function returns \param{eof-value}.
+at end of file.  If it is //[[CL:Glossary:false]]//, then no error is signaled, and instead
+the function returns //eof-value//.
 
-Functions such as \funref{read} that read the representation
-of an \term{object} rather than a single
-character always signals an error, regardless of \param{eof-error-p}, if
+Functions such as **[[CL:Functions:read]]** that read the representation
+of an //[[CL:Glossary:object]]// rather than a single
+character always signals an error, regardless of //eof-error-p//, if
 the file ends in the middle of an object representation.
 For example, if a file does
 not contain enough right parentheses to balance the left parentheses in
-it, \funref{read} signals an error.  If a file ends in a 
-\term{symbol} or a \term{number}
-immediately followed by end-of-file, \funref{read} reads the 
-\term{symbol} or
-\term{number} 
+it, **[[CL:Functions:read]]** signals an error.  If a file ends in a 
+//[[CL:Glossary:symbol]]// or a //[[CL:Glossary:number]]//
+immediately followed by end-of-file, **[[CL:Functions:read]]** reads the 
+//[[CL:Glossary:symbol]]// or
+//[[CL:Glossary:number]]// 
 successfully and when called again will
-%%Barmar thought this wasn't needed:
-% see the end-of-file and
-% only then
-act according to \param{eof-error-p}.
+
+
+
+act according to //eof-error-p//.
 Similarly, \thefunction{read-line}
 successfully reads the last line of a file even if that line
 is terminated by end-of-file rather than the newline character.
-Ignorable text, such as lines containing only \term{whitespace}\meaning{2} or comments,
-are not considered to begin an \term{object}; 
-if \funref{read} begins to read an \term{expression} but sees only such
-ignorable text, it does not consider the file to end in the middle of an \term{object}.
-Thus an \param{eof-error-p} argument controls what happens
-when the file ends between \term{objects}.
+Ignorable text, such as lines containing only //[[CL:Glossary:whitespace]]//\meaning{2} or comments,
+are not considered to begin an //[[CL:Glossary:object]]//; 
+if **[[CL:Functions:read]]** begins to read an //[[CL:Glossary:expression]]// but sees only such
+ignorable text, it does not consider the file to end in the middle of an //[[CL:Glossary:object]]//.
+Thus an //eof-error-p// argument controls what happens
+when the file ends between //[[CL:Glossary:objects]]//.
 
 \endsubsubsection%{The EOF-ERROR-P argument}
 
 \beginsubsubsection{The RECURSIVE-P argument}
 
-%% 22.2.1 4
 
-If \param{recursive-p} is supplied and not \nil, it specifies that
-this function call is not an outermost call to \funref{read} but an 
-embedded call, typically from a \term{reader macro function}.
+
+If //recursive-p// is supplied and not \nil, it specifies that
+this function call is not an outermost call to **[[CL:Functions:read]]** but an 
+embedded call, typically from a //[[CL:Glossary:reader macro function]]//.
 It is important to distinguish such recursive calls for three reasons.
 
-%% 22.2.1 5
+
 \beginlist
 \itemitem{1.}
 An outermost call establishes the context within which the
-\f{\#\param{n}=} and \f{\#\param{n}\#} syntax is scoped.  Consider, for example,
+\f{\#//n//=} and \f{\#//n//\#} syntax is scoped.  Consider, for example,
 the expression
 
 \code
  (cons '#3=(p q r) '(x y . #3#))
 \endcode
-If the \term{single-quote} \term{reader macro} were defined in this way:
+If the //[[CL:Glossary:single-quote]]// //[[CL:Glossary:reader macro]]// were defined in this way:
 
 \code
  (set-macro-character #\\'       ;incorrect
@@ -149,21 +149,21 @@ If the \term{single-quote} \term{reader macro} were defined in this way:
          (list 'quote (read stream))))
 \endcode
 
-% then the expression could not be read properly, because there would be no way
-% to know when \funref{read} is called recursively by the first
-% occurrence of \f{'} that the label \f{\#3=} would be referred to
-% later in the containing expression.
-% There would be no way to know because \funref{read}
-% could not determine that it was called by a \term{reader macro function}
-% rather than from an outermost form.
-%% per JonL:
-then each call to the \term{single-quote} \term{reader macro function} would establish
-independent contexts for the scope of \funref{read} information, including the scope of
+
+
+
+
+
+
+
+
+then each call to the //[[CL:Glossary:single-quote]]// //[[CL:Glossary:reader macro function]]// would establish
+independent contexts for the scope of **[[CL:Functions:read]]** information, including the scope of
 identifications between markers like ``\f{\#3=}'' and ``\f{\#3\#}''.  However, for
 this expression, the scope was clearly intended to be determined by the outer set 
 of parentheses, so such a definition would be incorrect.
-The correct way to define the \term{single-quote}
-\term{reader macro} uses \param{recursive-p}: 
+The correct way to define the //[[CL:Glossary:single-quote]]//
+//[[CL:Glossary:reader macro]]// uses //recursive-p//: 
 
 \code
  (set-macro-character #\\'       ;correct
@@ -172,35 +172,35 @@ The correct way to define the \term{single-quote}
          (list 'quote (read stream t nil t))))
 \endcode
 
-%% 22.2.1 6
+
 \itemitem{2.}
 A recursive call does not alter whether the reading process
-is to preserve \term{whitespace}\meaning{2} or not (as determined by whether the
-outermost call was to \funref{read} or \funref{read-preserving-whitespace}).
-Suppose again that \term{single-quote} 
-% had the first, incorrect, \term{reader macro}
-% definition shown above.
-%% per JonL:
-were to be defined as shown above in the incorrect definition.
-Then a call to \funref{read-preserving-whitespace}
-that read the expression \f{'foo\SpaceChar} would fail to preserve the space
-character following the symbol \f{foo} because the \term{single-quote}
-\term{reader macro function} calls \funref{read}, 
-not \funref{read-preserving-whitespace},
-to read the following expression (in this case \f{foo}).
-The correct definition, which passes the value \term{true} for \param{recursive-p}
-to \funref{read}, allows the outermost call to determine
-whether \term{whitespace}\meaning{2} is preserved.
+is to preserve //[[CL:Glossary:whitespace]]//\meaning{2} or not (as determined by whether the
+outermost call was to **[[CL:Functions:read]]** or **[[CL:Functions:read-preserving-whitespace]]**).
+Suppose again that //[[CL:Glossary:single-quote]]// 
 
-%% 22.2.1 8
+
+
+were to be defined as shown above in the incorrect definition.
+Then a call to **[[CL:Functions:read-preserving-whitespace]]**
+that read the expression \f{'foo\SpaceChar} would fail to preserve the space
+character following the symbol \f{foo} because the //[[CL:Glossary:single-quote]]//
+//[[CL:Glossary:reader macro function]]// calls **[[CL:Functions:read]]**, 
+not **[[CL:Functions:read-preserving-whitespace]]**,
+to read the following expression (in this case \f{foo}).
+The correct definition, which passes the value //[[CL:Glossary:true]]// for //recursive-p//
+to **[[CL:Functions:read]]**, allows the outermost call to determine
+whether //[[CL:Glossary:whitespace]]//\meaning{2} is preserved.
+
+
 \itemitem{3.}
-When end-of-file is encountered and the \param{eof-error-p} argument
+When end-of-file is encountered and the //eof-error-p// argument
 is not \nil, the kind of error that is signaled may depend on the value
-of \param{recursive-p}.  If \param{recursive-p} 
-is \term{true}, then the end-of-file
+of //recursive-p//.  If //recursive-p// 
+is //[[CL:Glossary:true]]//, then the end-of-file
 is deemed to have occurred within the middle of a printed representation;
-if \param{recursive-p} is \term{false}, then the end-of-file may be deemed to have
-occurred between \term{objects} rather than within the middle of one.
+if //recursive-p// is //[[CL:Glossary:false]]//, then the end-of-file may be deemed to have
+occurred between //[[CL:Glossary:objects]]// rather than within the middle of one.
 
 \endlist
 

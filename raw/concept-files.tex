@@ -1,20 +1,20 @@
-% -*- Mode: TeX -*-
 
-%% 23.0.0 6 was left out.
+
+
 
 This section describes the \clisp\ interface to file systems.
-%% 23.0.0 5
+
 The model used by this interface assumes 
      that \newtermidx{files}{file} are named by \newtermidx{filenames}{filename},
-     that a \term{filename} can be represented by a \term{pathname} \term{object}, 
- and that given a \term{pathname} a \newterm{stream} can be constructed 
-      that connects to a \term{file} whose \term{filename} it represents.
+     that a //[[CL:Glossary:filename]]// can be represented by a //[[CL:Glossary:pathname]]// //[[CL:Glossary:object]]//, 
+ and that given a //[[CL:Glossary:pathname]]// a //[[CL:Glossary:stream]]// can be constructed 
+      that connects to a //[[CL:Glossary:file]]// whose //[[CL:Glossary:filename]]// it represents.
 
-For information about opening and closing \term{files},
+For information about opening and closing //[[CL:Glossary:files]]//,
 and manipulating their contents, \seechapter\Streams.
 
-\Thenextfigure\ lists some \term{operators} 
-that are applicable to \term{files} and directories.
+\Thenextfigure\ lists some //[[CL:Glossary:operators]]// 
+that are applicable to //[[CL:Glossary:files]]// and directories.
 
 \displaythree{File and Directory Operations}{
 compile-file&file-length&open\cr
@@ -26,18 +26,18 @@ file-author&load&with-open-file\cr
 \beginsubsection{Coercion of Streams to Pathnames}
 \DefineSection{StreamsToPathnames}
 
-A \newterm{stream associated with a file} is either a \term{file stream}
-or a \term{synonym stream} whose target is a \newterm{stream associated with a file}.
-Such streams can be used as \term{pathname designators}.
+A //[[CL:Glossary:stream associated with a file]]// is either a //[[CL:Glossary:file stream]]//
+or a //[[CL:Glossary:synonym stream]]// whose target is a //[[CL:Glossary:stream associated with a file]]//.
+Such streams can be used as //[[CL:Glossary:pathname designators]]//.
 
-Normally, when a \term{stream associated with a file} is used as a
-\term{pathname designator}, it denotes the \term{pathname} used to 
-open the \term{file}; this may be, but is not required to be, the
-actual name of the \term{file}.
+Normally, when a //[[CL:Glossary:stream associated with a file]]// is used as a
+//[[CL:Glossary:pathname designator]]//, it denotes the //[[CL:Glossary:pathname]]// used to 
+open the //[[CL:Glossary:file]]//; this may be, but is not required to be, the
+actual name of the //[[CL:Glossary:file]]//.
 
-Some functions, such as \funref{truename} and \funref{delete-file},
-coerce \term{streams} to \term{pathnames} in a different way that 
-involves referring to the actual \term{file} that is open, which might
+Some functions, such as **[[CL:Functions:truename]]** and **[[CL:Functions:delete-file]]**,
+coerce //[[CL:Glossary:streams]]// to //[[CL:Glossary:pathnames]]// in a different way that 
+involves referring to the actual //[[CL:Glossary:file]]// that is open, which might
 or might not be the file whose name was opened originally.  Such special
 situations are always notated specifically and are not the default.
 
@@ -48,89 +48,89 @@ situations are always notated specifically and are not the default.
 
 \issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
 
-Many \term{functions} that perform \term{file} operations accept either
-\term{open} or \term{closed} \term{streams} as \term{arguments};
+Many //[[CL:Glossary:functions]]// that perform //[[CL:Glossary:file]]// operations accept either
+//[[CL:Glossary:open]]// or //[[CL:Glossary:closed]]// //[[CL:Glossary:streams]]// as //[[CL:Glossary:arguments]]//;
 \seesection\StreamArgsToStandardizedFns.
 
-Of these, the \term{functions} in \thenextfigure\ treat \term{open} and 
-\term{closed} \term{streams} differently.
+Of these, the //[[CL:Glossary:functions]]// in \thenextfigure\ treat //[[CL:Glossary:open]]// and 
+//[[CL:Glossary:closed]]// //[[CL:Glossary:streams]]// differently.
 
 \displaythree{File Functions that Treat Open and Closed Streams Differently}{
 delete-file&file-author&probe-file\cr
 directory&file-write-date&truename\cr
 }
 
-Since treatment of \term{open} \term{streams} by the \term{file system} 
-may vary considerably between \term{implementations}, however, 
-a \term{closed} \term{stream} might be the most reliable kind of
-\term{argument} for some of these functions---in particular, those in
-\thenextfigure.  For example, in some \term{file systems}, 
-\term{open} \term{files} are written under temporary names 
-and not renamed until \term{closed}
-and/or are held invisible until \term{closed}.
+Since treatment of //[[CL:Glossary:open]]// //[[CL:Glossary:streams]]// by the //[[CL:Glossary:file system]]// 
+may vary considerably between //[[CL:Glossary:implementations]]//, however, 
+a //[[CL:Glossary:closed]]// //[[CL:Glossary:stream]]// might be the most reliable kind of
+//[[CL:Glossary:argument]]// for some of these functions---in particular, those in
+\thenextfigure.  For example, in some //[[CL:Glossary:file systems]]//, 
+//[[CL:Glossary:open]]// //[[CL:Glossary:files]]// are written under temporary names 
+and not renamed until //[[CL:Glossary:closed]]//
+and/or are held invisible until //[[CL:Glossary:closed]]//.
 In general, any code that is intended to be portable should
-use such \term{functions} carefully.
+use such //[[CL:Glossary:functions]]// carefully.
 
 \displaythree{File Functions where Closed Streams Might Work Best}{
 directory&probe-file&truename\cr
 }
-\endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+
 
 \endsubsection%{File Operations on Open and Closed Streams}
 
 \beginsubsection{Truenames}
 \DefineSection{Truenames}
 
-Many \term{file systems} permit more than one \term{filename} to designate 
-a particular \term{file}.
+Many //[[CL:Glossary:file systems]]// permit more than one //[[CL:Glossary:filename]]// to designate 
+a particular //[[CL:Glossary:file]]//.
 
-Even where multiple names are possible, most \term{file systems} have a convention
-for generating a canonical \term{filename} in such situations.  Such a canonical
-\term{filename} (or the \term{pathname} representing such a \term{filename}) is
-called a \newterm{truename}.  
+Even where multiple names are possible, most //[[CL:Glossary:file systems]]// have a convention
+for generating a canonical //[[CL:Glossary:filename]]// in such situations.  Such a canonical
+//[[CL:Glossary:filename]]// (or the //[[CL:Glossary:pathname]]// representing such a //[[CL:Glossary:filename]]//) is
+called a //[[CL:Glossary:truename]]//.  
 
-%This came from the CLtL description of PROBE-FILE
-The \term{truename} of a \term{file} may differ from other \term{filenames}
+
+The //[[CL:Glossary:truename]]// of a //[[CL:Glossary:file]]// may differ from other //[[CL:Glossary:filenames]]//
 for the file because of
      symbolic links,
      version numbers,
-% Added to distinguish from Sandra's addition that follows. -kmp 12-Dec-91
-     logical device translations in the \term{file system},
-% Added per Sandra. -kmp 12-Dec-91
-     \term{logical pathname} translations within \clisp,
-  or other artifacts of the \term{file system}.
 
-The \term{truename} for a \term{file} is often, but not necessarily, unique for
-each \term{file}.  For instance, a Unix \term{file} with multiple hard links 
-could have several \term{truenames}.
+     logical device translations in the //[[CL:Glossary:file system]]//,
+
+     //[[CL:Glossary:logical pathname]]// translations within \clisp,
+  or other artifacts of the //[[CL:Glossary:file system]]//.
+
+The //[[CL:Glossary:truename]]// for a //[[CL:Glossary:file]]// is often, but not necessarily, unique for
+each //[[CL:Glossary:file]]//.  For instance, a Unix //[[CL:Glossary:file]]// with multiple hard links 
+could have several //[[CL:Glossary:truenames]]//.
 
 \beginsubsubsection{Examples of Truenames}
 
-For example, a DEC TOPS-20 system with \term{files} \f{PS:<JOE>FOO.TXT.1} 
-and \f{PS:<JOE>FOO.TXT.2} might permit the second \term{file} to be referred
+For example, a DEC TOPS-20 system with //[[CL:Glossary:files]]// \f{PS:<JOE>FOO.TXT.1} 
+and \f{PS:<JOE>FOO.TXT.2} might permit the second //[[CL:Glossary:file]]// to be referred
 to as \f{PS:<JOE>FOO.TXT.0}, since the ``\f{.0}'' notation denotes ``newest''
-version of several \term{files}.
-In the same \term{file system}, a ``logical device'' ``\f{JOE:}'' might be 
+version of several //[[CL:Glossary:files]]//.
+In the same //[[CL:Glossary:file system]]//, a ``logical device'' ``\f{JOE:}'' might be 
 taken to refer to \f{PS:<JOE>}'' and so the names \f{JOE:FOO.TXT.2} or
 \f{JOE:FOO.TXT.0} might refer to \f{PS:<JOE>FOO.TXT.2}.
-In all of these cases, the \term{truename} of the file would probably be
+In all of these cases, the //[[CL:Glossary:truename]]// of the file would probably be
 \f{PS:<JOE>FOO.TXT.2}.
 
-If a \term{file} is a symbolic link to another \term{file} (in a \term{file system}
-permitting such a thing), it is conventional for the \term{truename} to be
-the canonical name of the \term{file} after any symbolic links have been followed;
-that is, it is the canonical name of the \term{file} whose contents would
-become available if an \term{input} \term{stream} to that \term{file} were 
+If a //[[CL:Glossary:file]]// is a symbolic link to another //[[CL:Glossary:file]]// (in a //[[CL:Glossary:file system]]//
+permitting such a thing), it is conventional for the //[[CL:Glossary:truename]]// to be
+the canonical name of the //[[CL:Glossary:file]]// after any symbolic links have been followed;
+that is, it is the canonical name of the //[[CL:Glossary:file]]// whose contents would
+become available if an //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]// to that //[[CL:Glossary:file]]// were 
 opened.
 
-In the case of a \term{file} still being created (that is, of an \term{output}
-\term{stream} open to such a \term{file}), the exact \term{truename} of the file
-might not be known until the \term{stream} is closed.  In this case, 
-\thefunction{truename} might return different values for such a \term{stream}
+In the case of a //[[CL:Glossary:file]]// still being created (that is, of an //[[CL:Glossary:output]]//
+//[[CL:Glossary:stream]]// open to such a //[[CL:Glossary:file]]//), the exact //[[CL:Glossary:truename]]// of the file
+might not be known until the //[[CL:Glossary:stream]]// is closed.  In this case, 
+\thefunction{truename} might return different values for such a //[[CL:Glossary:stream]]//
 before and after it was closed.  In fact, before it is closed, the name returned
-might not even be a valid name in the \term{file system}---for example, while a
+might not even be a valid name in the //[[CL:Glossary:file system]]//---for example, while a
 file is being written, it might have version \kwdref{newest} and might only take on 
-a specific numeric value later when the file is closed even in a \term{file system}
+a specific numeric value later when the file is closed even in a //[[CL:Glossary:file system]]//
 where all files have numeric versions.
 
 \endsubsubsection%{Examples of Truenames}
