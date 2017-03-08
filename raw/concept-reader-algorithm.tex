@@ -1,225 +1,62 @@
 
 
+This section describes the algorithm used by the //[[CL:Glossary:Lisp reader]]// to parse //[[CL:Glossary:objects]]// from an //[[CL:Glossary:input]]// //[[CL:Glossary:character]]// //[[CL:Glossary:stream]]//, including how the //[[CL:Glossary:Lisp reader]]// processes //[[CL:Glossary:macro characters]]//.
 
+When dealing with //[[CL:Glossary:tokens]]//, the reader's basic function is to distinguish representations of //[[CL:Glossary:symbols]]// from those of //[[CL:Glossary:numbers]]//.
 
-This section describes the algorithm used by the //[[CL:Glossary:Lisp reader]]//
-to parse //[[CL:Glossary:objects]]// from an //[[CL:Glossary:input]]// //[[CL:Glossary:character]]// //[[CL:Glossary:stream]]//,
-including how the //[[CL:Glossary:Lisp reader]]// processes //[[CL:Glossary:macro characters]]//.
+When a //[[CL:Glossary:token]]// is accumulated, it is assumed to represent a //[[CL:Glossary:number]]// if it satisfies the syntax for numbers listed in \figref\SyntaxForNumericTokens.
 
-When dealing with //[[CL:Glossary:tokens]]//, the reader's basic function is to distinguish
-representations of //[[CL:Glossary:symbols]]// from those of //[[CL:Glossary:numbers]]//.
-
-
-
-
-When a //[[CL:Glossary:token]]// is accumulated, it is assumed to represent a //[[CL:Glossary:number]]// if it
-satisfies the syntax for numbers listed in \figref\SyntaxForNumericTokens.
-
-
-
-
-If it does not represent a //[[CL:Glossary:number]]//,
-it is then assumed to be a //[[CL:Glossary:potential number]]// 
-if it satisfies the rules governing the syntax for a //[[CL:Glossary:potential number]]//.
-If a valid //[[CL:Glossary:token]]// is neither a representation of a //[[CL:Glossary:number]]// 
-			       nor a //[[CL:Glossary:potential number]]//,
-it represents a //[[CL:Glossary:symbol]]//.
+If it does not represent a //[[CL:Glossary:number]]//, it is then assumed to be a //[[CL:Glossary:potential number]]//  if it satisfies the rules governing the syntax for a //[[CL:Glossary:potential number]]//. If a valid //[[CL:Glossary:token]]// is neither a representation of a //[[CL:Glossary:number]]//  			       nor a //[[CL:Glossary:potential number]]//, it represents a //[[CL:Glossary:symbol]]//.
 
 The algorithm performed by the //[[CL:Glossary:Lisp reader]]// is as follows:
 
+\beginlist \item{1.}             If at end of file, end-of-file processing is performed as specified in **[[CL:Functions:read]]**. Otherwise, one //[[CL:Glossary:character]]//, //x//,  is read from the //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//, and dispatched according to the //[[CL:Glossary:syntax type]]// of //x// to one of steps 2 to 7.
 
-\beginlist
-\item{1.}            
-If at end of file, end-of-file processing is performed as specified
-in **[[CL:Functions:read]]**.
-Otherwise,
-one //[[CL:Glossary:character]]//, //x//,  is read from the //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//, and
-dispatched according to the //[[CL:Glossary:syntax type]]// of //x// to one
-of steps 2 to 7.
+\item{2.}                                           If //x// is an //[[CL:Glossary:invalid]]// //[[CL:Glossary:character]]//, an error \oftype{reader-error} is signaled.
 
+\item{3.} If //x// is a //[[CL:Glossary:whitespace]]//\meaning{2} //[[CL:Glossary:character]]//, then it is discarded and step 1 is re-entered.
 
-\item{2.}                                          
-If //x// is an //[[CL:Glossary:invalid]]// //[[CL:Glossary:character]]//,
-an error \oftype{reader-error} is signaled.
+\item{4.} If //x// is a //[[CL:Glossary:terminating]]// or //[[CL:Glossary:non-terminating]]// //[[CL:Glossary:macro character]]// then its associated //[[CL:Glossary:reader macro function]]// is called with two //[[CL:Glossary:arguments]]//, the //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]// and //x//.
 
+The //[[CL:Glossary:reader macro function]]// may read //[[CL:Glossary:characters]]//  from the //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//;  if it does, it will see those //[[CL:Glossary:characters]]// following the //[[CL:Glossary:macro character]]//. The //[[CL:Glossary:Lisp reader]]// may be invoked recursively from the //[[CL:Glossary:reader macro function]]//.
 
-\item{3.}
-If //x// is a //[[CL:Glossary:whitespace]]//\meaning{2} //[[CL:Glossary:character]]//,
-then it is discarded and step 1 is re-entered.
+The //[[CL:Glossary:reader macro function]]// must not have any side effects other than on the //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//; because of backtracking and restarting of the **[[CL:Functions:read]]** operation, front ends to the //[[CL:Glossary:Lisp reader]]// (\eg ``editors'' and ``rubout handlers'')  may cause the //[[CL:Glossary:reader macro function]]// to be called repeatedly during the reading of a single //[[CL:Glossary:expression]]// in which //x// only appears once.
 
+The //[[CL:Glossary:reader macro function]]// may return zero values or one value. If one value is returned, then that value is returned as the result of the read operation; the algorithm is done. If zero values are returned, then step 1 is re-entered.
 
-\item{4.}
-If //x// is a //[[CL:Glossary:terminating]]// or //[[CL:Glossary:non-terminating]]// //[[CL:Glossary:macro character]]//
-then its associated //[[CL:Glossary:reader macro function]]// is called with two //[[CL:Glossary:arguments]]//,
-the //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]// and //x//.
+\item{5.} If //x// is a //[[CL:Glossary:single escape]]// //[[CL:Glossary:character]]// then the next //[[CL:Glossary:character]]//, //y//, is read, or an error \oftype{end-of-file}  is signaled if at the end of file. //y// is treated as if it is a //[[CL:Glossary:constituent]]//  whose only //[[CL:Glossary:constituent trait]]// is //[[CL:Glossary:alphabetic]]//\meaning{2}. //y// is used to begin a //[[CL:Glossary:token]]//, and step 8 is entered.
 
+\item{6.} If //x// is a //[[CL:Glossary:multiple escape]]// //[[CL:Glossary:character]]// then a //[[CL:Glossary:token]]// (initially containing no //[[CL:Glossary:characters]]//) is  begun and step 9 is entered.
 
-The //[[CL:Glossary:reader macro function]]// may read //[[CL:Glossary:characters]]// 
-from the //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//; 
-if it does, it will see those //[[CL:Glossary:characters]]// following the //[[CL:Glossary:macro character]]//.
-The //[[CL:Glossary:Lisp reader]]// may be invoked recursively from the //[[CL:Glossary:reader macro function]]//.
+\item{7.} If //x// is a //[[CL:Glossary:constituent]]// //[[CL:Glossary:character]]//, then it begins a //[[CL:Glossary:token]]//. After the //[[CL:Glossary:token]]// is read in, it will be interpreted either as a \Lisp\ //[[CL:Glossary:object]]// or as being of invalid syntax. If the //[[CL:Glossary:token]]// represents an //[[CL:Glossary:object]]//, that //[[CL:Glossary:object]]// is returned as the result of the read operation. If the //[[CL:Glossary:token]]// is of invalid syntax, an error is signaled.
 
+If //x// is a //[[CL:Glossary:character]]// with //[[CL:Glossary:case]]//, it might be replaced with the corresponding //[[CL:Glossary:character]]// of the opposite //[[CL:Glossary:case]]//,  depending on the //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]//, as outlined in \secref\ReadtableCaseReadEffect. //X// is used to begin a //[[CL:Glossary:token]]//, and step 8 is entered.
 
-The //[[CL:Glossary:reader macro function]]// must not have any side effects other than on the
-//[[CL:Glossary:input]]// //[[CL:Glossary:stream]]//;
-because of backtracking and restarting of the **[[CL:Functions:read]]** operation,
-front ends to the //[[CL:Glossary:Lisp reader]]// (\eg ``editors'' and ``rubout handlers'') 
-may cause the //[[CL:Glossary:reader macro function]]// to be called repeatedly during the
-reading of a single //[[CL:Glossary:expression]]// in which //x// only appears once.
+\item{8.} At this point a //[[CL:Glossary:token]]// is being accumulated, and an even number of //[[CL:Glossary:multiple escape]]// //[[CL:Glossary:characters]]// have been encountered. If at end of file, step 10 is entered. Otherwise, a //[[CL:Glossary:character]]//, //y//, is read, and one of the following actions is performed according to its //[[CL:Glossary:syntax type]]//:
 
+\beginlist \itemitem{\bull} If //y// is a //[[CL:Glossary:constituent]]// or //[[CL:Glossary:non-terminating]]// //[[CL:Glossary:macro character]]//: \beginlist \itemitem{--}
 
-The //[[CL:Glossary:reader macro function]]// may return zero values or one value.
-If one value is returned,
-then that value is returned as the result of the read operation;
-the algorithm is done.
-If zero values are returned, then step 1 is re-entered.
+If //y// is a //[[CL:Glossary:character]]// with //[[CL:Glossary:case]]//, it might be replaced with the corresponding //[[CL:Glossary:character]]// of the opposite //[[CL:Glossary:case]]//,  depending on the //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]//, as outlined in \secref\ReadtableCaseReadEffect. \itemitem{--} //Y// is appended to the //[[CL:Glossary:token]]// being built. \itemitem{--} Step 8 is repeated. \endlist
 
+\itemitem{\bull} If //y// is a //[[CL:Glossary:single escape]]// //[[CL:Glossary:character]]//, then the next //[[CL:Glossary:character]]//, //z//, is read, or an error \oftype{end-of-file} is signaled if at end of file. //Z// is treated as if it is a //[[CL:Glossary:constituent]]//  whose only //[[CL:Glossary:constituent trait]]// is //[[CL:Glossary:alphabetic]]//\meaning{2}. //Z// is appended to the //[[CL:Glossary:token]]// being built, and step 8 is repeated.
 
-\item{5.}
-If //x// is a //[[CL:Glossary:single escape]]// //[[CL:Glossary:character]]//
-then the next //[[CL:Glossary:character]]//, //y//, is read, or an error \oftype{end-of-file} 
-is signaled if at the end of file.
-//y// is treated as if it is a //[[CL:Glossary:constituent]]// 
-whose only //[[CL:Glossary:constituent trait]]// is //[[CL:Glossary:alphabetic]]//\meaning{2}.
-//y// is used to begin a //[[CL:Glossary:token]]//, and step 8 is entered.
+\itemitem{\bull} If //y// is a //[[CL:Glossary:multiple escape]]// //[[CL:Glossary:character]]//, then step 9 is entered.
 
+\itemitem{\bull} If //y// is an //[[CL:Glossary:invalid]]// //[[CL:Glossary:character]]//, an error \oftype{reader-error} is signaled.
 
-\item{6.}
-If //x// is a //[[CL:Glossary:multiple escape]]// //[[CL:Glossary:character]]//
-then a //[[CL:Glossary:token]]// (initially
-containing no //[[CL:Glossary:characters]]//) is  begun and step 9 is entered.
+\itemitem{\bull} If //y// is a //[[CL:Glossary:terminating]]// //[[CL:Glossary:macro character]]//, then it terminates the //[[CL:Glossary:token]]//. First the //[[CL:Glossary:character]]// //y// is unread (see **[[CL:Functions:unread-char]]**), and then step 10 is entered.
 
+\itemitem{\bull} If //y// is a //[[CL:Glossary:whitespace]]//\meaning{2} //[[CL:Glossary:character]]//, then it terminates the //[[CL:Glossary:token]]//.  First the //[[CL:Glossary:character]]// //y// is unread if appropriate (see **[[CL:Functions:read-preserving-whitespace]]**), and then step 10 is entered. \endlist
 
-\item{7.}
-If //x// is a //[[CL:Glossary:constituent]]// //[[CL:Glossary:character]]//, then it begins a //[[CL:Glossary:token]]//.
-After the //[[CL:Glossary:token]]// is read in, it will be interpreted
-either as a \Lisp\ //[[CL:Glossary:object]]// or as being of invalid syntax.
-If the //[[CL:Glossary:token]]// represents an //[[CL:Glossary:object]]//,
-that //[[CL:Glossary:object]]// is returned as the result of the read operation.
-If the //[[CL:Glossary:token]]// is of invalid syntax, an error is signaled.
+\item{9.} At this point a //[[CL:Glossary:token]]// is being accumulated, and an odd number of //[[CL:Glossary:multiple escape]]// //[[CL:Glossary:characters]]// have been encountered. If at end of file, an error \oftype{end-of-file} is signaled. Otherwise, a //[[CL:Glossary:character]]//, //y//, is read, and one of the following actions is performed according to its //[[CL:Glossary:syntax type]]//:
 
+\beginlist \itemitem{\bull} If //y// is a //[[CL:Glossary:constituent]]//, macro, or //[[CL:Glossary:whitespace]]//\meaning{2} //[[CL:Glossary:character]]//, //y// is treated as a //[[CL:Glossary:constituent]]//  whose only //[[CL:Glossary:constituent trait]]// is //[[CL:Glossary:alphabetic]]//\meaning{2}.              //Y// is appended to the //[[CL:Glossary:token]]// being built, and step 9 is repeated.
 
+\itemitem{\bull} If //y// is a //[[CL:Glossary:single escape]]// //[[CL:Glossary:character]]//, then the next //[[CL:Glossary:character]]//, //z//, is read, or an error \oftype{end-of-file} is signaled if at end of file. //Z// is treated as a //[[CL:Glossary:constituent]]// whose only //[[CL:Glossary:constituent trait]]// is //[[CL:Glossary:alphabetic]]//\meaning{2}. //Z// is appended to the //[[CL:Glossary:token]]// being built, and step 9 is repeated.
 
-If //x// is a //[[CL:Glossary:character]]// with //[[CL:Glossary:case]]//,
-it might be replaced with the corresponding //[[CL:Glossary:character]]// of the opposite //[[CL:Glossary:case]]//, 
-depending on the //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]//,
-as outlined in \secref\ReadtableCaseReadEffect.
-//X// is used to begin a //[[CL:Glossary:token]]//, and step 8 is entered.
+\itemitem{\bull} If //y// is a //[[CL:Glossary:multiple escape]]// //[[CL:Glossary:character]]//, then step 8 is entered.
 
+\itemitem{\bull} If //y// is an //[[CL:Glossary:invalid]]// //[[CL:Glossary:character]]//, an error \oftype{reader-error} is signaled. \endlist
 
-
-
-\item{8.}
-At this point a //[[CL:Glossary:token]]// is being accumulated, and an even number
-of //[[CL:Glossary:multiple escape]]// //[[CL:Glossary:characters]]// have been encountered.
-If at end of file, step 10 is entered.
-Otherwise, a //[[CL:Glossary:character]]//, //y//, is read, and
-one of the following actions is performed according to its //[[CL:Glossary:syntax type]]//:
-
-\beginlist
-\itemitem{\bull}
-If //y// is a //[[CL:Glossary:constituent]]// or //[[CL:Glossary:non-terminating]]// //[[CL:Glossary:macro character]]//:
-\beginlist
-\itemitem{--}
-
-
-
-If //y// is a //[[CL:Glossary:character]]// with //[[CL:Glossary:case]]//,
-it might be replaced with the corresponding //[[CL:Glossary:character]]// of the opposite //[[CL:Glossary:case]]//, 
-depending on the //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]//,
-as outlined in \secref\ReadtableCaseReadEffect.
-\itemitem{--}
-//Y// is appended to the //[[CL:Glossary:token]]// being built.
-\itemitem{--}
-Step 8 is repeated.
-\endlist
-
-
-\itemitem{\bull}
-If //y// is a //[[CL:Glossary:single escape]]// //[[CL:Glossary:character]]//, then the next //[[CL:Glossary:character]]//,
-//z//, is read, or an error \oftype{end-of-file} is signaled if at end of file.
-//Z// is treated as if it is a //[[CL:Glossary:constituent]]// 
-whose only //[[CL:Glossary:constituent trait]]// is //[[CL:Glossary:alphabetic]]//\meaning{2}.
-//Z// is appended to the //[[CL:Glossary:token]]// being built,
-and step 8 is repeated.
-
-
-\itemitem{\bull}
-If //y// is a //[[CL:Glossary:multiple escape]]// //[[CL:Glossary:character]]//,
-then step 9 is entered.
-
-
-\itemitem{\bull}
-If //y// is an //[[CL:Glossary:invalid]]// //[[CL:Glossary:character]]//,
-an error \oftype{reader-error} is signaled.
-
-
-\itemitem{\bull}
-If //y// is a //[[CL:Glossary:terminating]]// //[[CL:Glossary:macro character]]//,
-then it terminates the //[[CL:Glossary:token]]//.
-First the //[[CL:Glossary:character]]// //y// is unread (see **[[CL:Functions:unread-char]]**),
-and then step 10 is entered.
-
-
-\itemitem{\bull}
-If //y// is a //[[CL:Glossary:whitespace]]//\meaning{2} //[[CL:Glossary:character]]//, then it terminates
-the //[[CL:Glossary:token]]//.  First the //[[CL:Glossary:character]]// //y// is unread
-if appropriate (see **[[CL:Functions:read-preserving-whitespace]]**),
-and then step 10 is entered.
-\endlist
-
-
-
-\item{9.}
-At this point a //[[CL:Glossary:token]]// is being accumulated, and an odd number
-of //[[CL:Glossary:multiple escape]]// //[[CL:Glossary:characters]]// have been encountered.
-If at end of file, an error \oftype{end-of-file} is signaled.
-Otherwise, a //[[CL:Glossary:character]]//, //y//, is read, and
-one of the following actions is performed according to its //[[CL:Glossary:syntax type]]//:
-
-
-\beginlist
-\itemitem{\bull}
-If //y// is a //[[CL:Glossary:constituent]]//, macro, or //[[CL:Glossary:whitespace]]//\meaning{2} //[[CL:Glossary:character]]//,
-//y// is treated as a //[[CL:Glossary:constituent]]// 
-whose only //[[CL:Glossary:constituent trait]]// is //[[CL:Glossary:alphabetic]]//\meaning{2}.             
-//Y// is appended to the //[[CL:Glossary:token]]// being built, and step 9 is repeated.
-
-
-\itemitem{\bull}
-If //y// is a //[[CL:Glossary:single escape]]// //[[CL:Glossary:character]]//, then the next //[[CL:Glossary:character]]//,
-//z//, is read, or an error \oftype{end-of-file} is signaled if at end of file.
-//Z// is treated as a //[[CL:Glossary:constituent]]//
-whose only //[[CL:Glossary:constituent trait]]// is //[[CL:Glossary:alphabetic]]//\meaning{2}.
-//Z// is appended to the //[[CL:Glossary:token]]// being built,
-and step 9 is repeated.
-
-
-\itemitem{\bull}
-If //y// is a //[[CL:Glossary:multiple escape]]// //[[CL:Glossary:character]]//,
-then step 8 is entered.
-
-
-\itemitem{\bull}
-If //y// is an //[[CL:Glossary:invalid]]// //[[CL:Glossary:character]]//,
-an error \oftype{reader-error} is signaled.
-\endlist
-
-
-\item{10.}
-An entire //[[CL:Glossary:token]]// has been accumulated.
-The //[[CL:Glossary:object]]// represented by the //[[CL:Glossary:token]]// is returned 
-as the result of the read operation,
-or an error \oftype{reader-error} is signaled if the //[[CL:Glossary:token]]// is not of valid syntax.
-\endlist
-
-
-
-
-
-
-
-
-
-
+\item{10.} An entire //[[CL:Glossary:token]]// has been accumulated. The //[[CL:Glossary:object]]// represented by the //[[CL:Glossary:token]]// is returned  as the result of the read operation, or an error \oftype{reader-error} is signaled if the //[[CL:Glossary:token]]// is not of valid syntax. \endlist
 

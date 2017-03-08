@@ -1,61 +1,21 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \def\sim#1#2#3{{\cal S}\sub{#1}(#2,#3)}
 
+\beginsubSection{Compiler Terminology} \DefineSection{CompilationTerms}
 
-
-
-
-
-\beginsubSection{Compiler Terminology}
-\DefineSection{CompilationTerms}
-
-
- 
-The following terminology is used in this section.
+  The following terminology is used in this section.
  
 
-The //[[CL:Glossary:compiler]]// is a utility that translates code into an
-//[[CL:Glossary:implementation-dependent]]// form that might be represented or
-executed efficiently.
+The //[[CL:Glossary:compiler]]// is a utility that translates code into an //[[CL:Glossary:implementation-dependent]]// form that might be represented or executed efficiently.
 
-The term //[[CL:Glossary:compiler]]// refers to both of the //[[CL:Glossary:functions]]//
-**[[CL:Functions:compile]]** and **[[CL:Functions:compile-file]]**.
+The term //[[CL:Glossary:compiler]]// refers to both of the //[[CL:Glossary:functions]]// **[[CL:Functions:compile]]** and **[[CL:Functions:compile-file]]**.
 
+The term //[[CL:Glossary:compiled code]]// refers to  //[[CL:Glossary:objects]]// representing compiled programs, such as //[[CL:Glossary:objects]]// constructed by **[[CL:Functions:compile]]** or by **[[CL:Functions:load]]** when //[[CL:Glossary:loading]]// a //[[CL:Glossary:compiled file]]//.
 
-
-The term //[[CL:Glossary:compiled code]]// refers to 
-//[[CL:Glossary:objects]]// representing compiled programs, such as //[[CL:Glossary:objects]]// constructed
-by **[[CL:Functions:compile]]** or by **[[CL:Functions:load]]** when //[[CL:Glossary:loading]]// a //[[CL:Glossary:compiled file]]//.
-
-
-The term //[[CL:Glossary:implicit compilation]]// refers to //[[CL:Glossary:compilation]]//
-performed during //[[CL:Glossary:evaluation]]//.
+The term //[[CL:Glossary:implicit compilation]]// refers to //[[CL:Glossary:compilation]]// performed during //[[CL:Glossary:evaluation]]//.
 
 \DefineSection{ConstantModification}
-
 
 The term //[[CL:Glossary:literal object]]// refers to 
      a quoted //[[CL:Glossary:object]]// 
@@ -64,303 +24,119 @@ The term //[[CL:Glossary:literal object]]// refers to
 
 A //[[CL:Glossary:constant variable]]// is not itself a //[[CL:Glossary:literal object]]//.
 
-
-
-
-
-
-
-
-
-
  
 
+The term //[[CL:Glossary:coalesce]]// is defined as follows. Suppose \f{A} and \f{B} are two //[[CL:Glossary:literal constants]]// in the //[[CL:Glossary:source code]]//, and that \f{A'} and \f{B'} are the corresponding //[[CL:Glossary:objects]]// in the //[[CL:Glossary:compiled code]]//. If \f{A'} and \f{B'} are **[[CL:Functions:eql]]** but \f{A} and \f{B} are not **[[CL:Functions:eql]]**, then it is said that \f{A} and \f{B} have been coalesced by the compiler.
 
+The term //[[CL:Glossary:minimal compilation]]// refers to actions the compiler must take at //[[CL:Glossary:compile time]]//. These actions are specified in  \secref\CompilationSemantics.
 
+The verb //[[CL:Glossary:process]]// refers to performing //[[CL:Glossary:minimal compilation]]//, determining the time of evaluation for a //[[CL:Glossary:form]]//, and possibly //[[CL:Glossary:evaluating]]// that //[[CL:Glossary:form]]// (if required).
 
-The term //[[CL:Glossary:coalesce]]// is defined as follows.
-Suppose \f{A} and \f{B} are two //[[CL:Glossary:literal constants]]// in the //[[CL:Glossary:source code]]//,
-and that \f{A'} and \f{B'} are the corresponding //[[CL:Glossary:objects]]// in the //[[CL:Glossary:compiled code]]//.
-If \f{A'} and \f{B'} are **[[CL:Functions:eql]]** but
-\f{A} and \f{B} are not **[[CL:Functions:eql]]**, then it is said
-that \f{A} and \f{B} have been coalesced by the compiler.
+The term //[[CL:Glossary:further compilation]]// refers to //[[CL:Glossary:implementation-dependent]]// compilation beyond //[[CL:Glossary:minimal compilation]]//.
 
+That is, //[[CL:Glossary:processing]]// does not imply complete compilation. Block compilation and generation of machine-specific instructions are  examples of further compilation. Further compilation is permitted to take place at //[[CL:Glossary:run time]]//.
 
-The term //[[CL:Glossary:minimal compilation]]// refers to actions the compiler
-must take at //[[CL:Glossary:compile time]]//. These actions are specified in 
-\secref\CompilationSemantics.
-
-
-The verb //[[CL:Glossary:process]]// refers to performing //[[CL:Glossary:minimal compilation]]//,
-determining the time of evaluation for a //[[CL:Glossary:form]]//,
-and possibly //[[CL:Glossary:evaluating]]// that //[[CL:Glossary:form]]// (if required).
-
-
-The term //[[CL:Glossary:further compilation]]// refers to
-//[[CL:Glossary:implementation-dependent]]// compilation beyond //[[CL:Glossary:minimal compilation]]//.
-
-That is, //[[CL:Glossary:processing]]// does not imply complete compilation.
-Block compilation and generation of machine-specific instructions are 
-examples of further compilation.
-Further compilation is permitted to take place at //[[CL:Glossary:run time]]//.
-
-
-Four different //[[CL:Glossary:environments]]// relevant to compilation are
-distinguished:
+Four different //[[CL:Glossary:environments]]// relevant to compilation are distinguished:
   the //[[CL:Glossary:startup environment]]//,
   the //[[CL:Glossary:compilation environment]]//,
   the //[[CL:Glossary:evaluation environment]]//, and
   the //[[CL:Glossary:run-time environment]]//.
 
+The //[[CL:Glossary:startup environment]]// is the //[[CL:Glossary:environment]]// of the //[[CL:Glossary:Lisp image]]//  from which the //[[CL:Glossary:compiler]]// was invoked.
 
-The //[[CL:Glossary:startup environment]]// is
-the //[[CL:Glossary:environment]]// of the //[[CL:Glossary:Lisp image]]// 
-from which the //[[CL:Glossary:compiler]]// was invoked.
+The //[[CL:Glossary:compilation environment]]// is maintained by the compiler and is used to hold definitions and declarations to be used internally by the compiler.  Only those parts of a definition needed for correct compilation are saved. The //[[CL:Glossary:compilation environment]]// is used as the //[[CL:Glossary:environment]]// //[[CL:Glossary:argument]]// to macro expanders called by the compiler. It is unspecified whether a definition available in the //[[CL:Glossary:compilation environment]]// can be used in an //[[CL:Glossary:evaluation]]// initiated in the //[[CL:Glossary:startup environment]]// or //[[CL:Glossary:evaluation environment]]//.
 
+The //[[CL:Glossary:evaluation environment]]// is a //[[CL:Glossary:run-time environment]]// in which macro expanders and code specified by \specref{eval-when} to be evaluated are evaluated.  All evaluations initiated by the //[[CL:Glossary:compiler]]// take place in the //[[CL:Glossary:evaluation environment]]//.
 
+The //[[CL:Glossary:run-time environment]]// is the  //[[CL:Glossary:environment]]// in which the program being compiled will be executed.
 
-The //[[CL:Glossary:compilation environment]]// is maintained by the compiler
-and is used to hold definitions and declarations to be used internally
-by the compiler.  Only those parts of a definition needed for correct
-compilation are saved. The //[[CL:Glossary:compilation environment]]// is used
-as the //[[CL:Glossary:environment]]// //[[CL:Glossary:argument]]// to macro expanders called by
-the compiler. It is unspecified whether a definition available in the
-//[[CL:Glossary:compilation environment]]// can be used in an //[[CL:Glossary:evaluation]]//
-initiated in the //[[CL:Glossary:startup environment]]// or //[[CL:Glossary:evaluation environment]]//.
+The //[[CL:Glossary:compilation environment]]// inherits from the //[[CL:Glossary:evaluation environment]]//, and the //[[CL:Glossary:compilation environment]]// and //[[CL:Glossary:evaluation environment]]//  might be //[[CL:Glossary:identical]]//. The //[[CL:Glossary:evaluation environment]]// inherits from the //[[CL:Glossary:startup environment]]//,  and the //[[CL:Glossary:startup environment]]// and //[[CL:Glossary:evaluation environment]]//  might be //[[CL:Glossary:identical]]//.
 
+The term //[[CL:Glossary:compile time]]// refers to the duration of time that the compiler is processing //[[CL:Glossary:source code]]//. At //[[CL:Glossary:compile time]]//, only the //[[CL:Glossary:compilation environment]]//  and  the //[[CL:Glossary:evaluation environment]]// are available.
 
-The //[[CL:Glossary:evaluation environment]]// is a //[[CL:Glossary:run-time environment]]//
-in which macro expanders and code specified by \specref{eval-when}
-to be evaluated are evaluated.  All evaluations initiated by the
-//[[CL:Glossary:compiler]]// take place in the //[[CL:Glossary:evaluation environment]]//.
+The term //[[CL:Glossary:compile-time definition]]// refers to a definition in the //[[CL:Glossary:compilation environment]]//. For example, when compiling a file,  the definition of a function might be retained in the //[[CL:Glossary:compilation environment]]//  if it is declared **[[CL:Declarations:inline]]**.  This definition might not be available in the //[[CL:Glossary:evaluation environment]]//.
 
-
-The //[[CL:Glossary:run-time environment]]// is the 
-//[[CL:Glossary:environment]]// in which the program being compiled will be executed.
-
-
-The //[[CL:Glossary:compilation environment]]// inherits from
-the //[[CL:Glossary:evaluation environment]]//,
-and the //[[CL:Glossary:compilation environment]]// and //[[CL:Glossary:evaluation environment]]// 
-might be //[[CL:Glossary:identical]]//.
-The //[[CL:Glossary:evaluation environment]]// inherits from
-the //[[CL:Glossary:startup environment]]//, 
-and the //[[CL:Glossary:startup environment]]// and //[[CL:Glossary:evaluation environment]]// 
-might be //[[CL:Glossary:identical]]//.
-
-
-
-The term //[[CL:Glossary:compile time]]// refers to the duration of time that
-the compiler is processing //[[CL:Glossary:source code]]//.
-At //[[CL:Glossary:compile time]]//,
-only the //[[CL:Glossary:compilation environment]]// 
-and  the //[[CL:Glossary:evaluation environment]]//
-are available.
-
-
-The term //[[CL:Glossary:compile-time definition]]// refers to a definition in
-the //[[CL:Glossary:compilation environment]]//.
-For example, when compiling a file, 
-the definition of a function might be retained in the //[[CL:Glossary:compilation environment]]// 
-if it is declared **[[CL:Declarations:inline]]**. 
-This definition might not be available in the //[[CL:Glossary:evaluation environment]]//.
-
-
-The term //[[CL:Glossary:run time]]// refers to the duration of time that the
-loader is loading compiled code or compiled code is being executed.
+The term //[[CL:Glossary:run time]]// refers to the duration of time that the loader is loading compiled code or compiled code is being executed.
 
 At run time, only the //[[CL:Glossary:run-time environment]]// is available.
 
+The term //[[CL:Glossary:run-time definition]]// refers to a definition in the //[[CL:Glossary:run-time environment]]//.
 
-The term //[[CL:Glossary:run-time definition]]// refers to a definition in the
-//[[CL:Glossary:run-time environment]]//.
+The term //[[CL:Glossary:run-time compiler]]// refers to \thefunction{compile} or //[[CL:Glossary:implicit compilation]]//, for which the compilation and run-time  //[[CL:Glossary:environments]]// are maintained in the same //[[CL:Glossary:Lisp image]]//.
 
-
-The term //[[CL:Glossary:run-time compiler]]// refers to \thefunction{compile}
-or //[[CL:Glossary:implicit compilation]]//, for which the compilation and run-time 
-//[[CL:Glossary:environments]]// are maintained in the same //[[CL:Glossary:Lisp image]]//.
-
-Note that when the //[[CL:Glossary:run-time compiler]]// is used,
-the //[[CL:Glossary:run-time environment]]// 
-and //[[CL:Glossary:startup environment]]// 
-are the same.
+Note that when the //[[CL:Glossary:run-time compiler]]// is used, the //[[CL:Glossary:run-time environment]]//  and //[[CL:Glossary:startup environment]]//  are the same.
 
 \endsubSection%{Compiler Terminology}
- 
-\beginsubSection{Compilation Semantics}
-\DefineSection{CompilationSemantics}
- 
-Conceptually, compilation is a process that traverses code, performs
-certain kinds of syntactic and semantic analyses using information
-(such as proclamations and //[[CL:Glossary:macro]]// definitions) present in the
-//[[CL:Glossary:compilation environment]]//, and produces equivalent, possibly
-more efficient code.
+  \beginsubSection{Compilation Semantics} \DefineSection{CompilationSemantics}
+  Conceptually, compilation is a process that traverses code, performs certain kinds of syntactic and semantic analyses using information (such as proclamations and //[[CL:Glossary:macro]]// definitions) present in the //[[CL:Glossary:compilation environment]]//, and produces equivalent, possibly more efficient code.
 
 \issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
 
-\beginsubsubsection{Compiler Macros}
-\DefineSection{CompilerMacros}
+\beginsubsubsection{Compiler Macros} \DefineSection{CompilerMacros}
 
-A //[[CL:Glossary:compiler macro]]// can be defined for a //[[CL:Glossary:name]]//
-that also names a //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]//.
+A //[[CL:Glossary:compiler macro]]// can be defined for a //[[CL:Glossary:name]]// that also names a //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]//.
 
+That is, it is possible for a //[[CL:Glossary:function name]]// to name both a //[[CL:Glossary:function]]// and a //[[CL:Glossary:compiler macro]]//.
 
+A //[[CL:Glossary:function name]]// names a //[[CL:Glossary:compiler macro]]// if **[[CL:Functions:compiler-macro-function]]** is //[[CL:Glossary:true]]// of the //[[CL:Glossary:function name]]// in the //[[CL:Glossary:lexical environment]]// in which it appears.  Creating a //[[CL:Glossary:lexical binding]]// for the //[[CL:Glossary:function name]]// not only creates a new local //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]// definition, but also //[[CL:Glossary:shadows]]//\meaning{2} the //[[CL:Glossary:compiler macro]]//.
 
-That is, it is possible for a
-//[[CL:Glossary:function name]]// to name both a //[[CL:Glossary:function]]// and a //[[CL:Glossary:compiler macro]]//.
-
-A //[[CL:Glossary:function name]]// names a //[[CL:Glossary:compiler macro]]// if **[[CL:Functions:compiler-macro-function]]**
-is //[[CL:Glossary:true]]// of the //[[CL:Glossary:function name]]// in the //[[CL:Glossary:lexical environment]]// in which
-it appears.  Creating a //[[CL:Glossary:lexical binding]]// for the //[[CL:Glossary:function name]]//
-not only creates a new local //[[CL:Glossary:function]]// or
-//[[CL:Glossary:macro]]// definition, but also //[[CL:Glossary:shadows]]//\meaning{2} the //[[CL:Glossary:compiler macro]]//.
-
-The //[[CL:Glossary:function]]// returned by **[[CL:Functions:compiler-macro-function]]**
-is a //[[CL:Glossary:function]]// of two arguments, called the
-expansion function.  To expand a //[[CL:Glossary:compiler macro]]//,
-the expansion function is invoked by calling the //[[CL:Glossary:macroexpand hook]]// with
+The //[[CL:Glossary:function]]// returned by **[[CL:Functions:compiler-macro-function]]** is a //[[CL:Glossary:function]]// of two arguments, called the expansion function.  To expand a //[[CL:Glossary:compiler macro]]//, the expansion function is invoked by calling the //[[CL:Glossary:macroexpand hook]]// with
       the expansion function as its first argument,
       the entire compiler macro //[[CL:Glossary:form]]// as its second argument,
   and the current compilation //[[CL:Glossary:environment]]// 
        (or with the current lexical //[[CL:Glossary:environment]]//,
- 	 if the //[[CL:Glossary:form]]// is being processed by something
-	 other than **[[CL:Functions:compile-file]]**) 
-       as its third argument.
-The //[[CL:Glossary:macroexpand hook]]//, in turn, calls the expansion function with the
-//[[CL:Glossary:form]]// as its first argument and the //[[CL:Glossary:environment]]// as its second argument.
-The return value from the expansion function, which is passed through
-by the //[[CL:Glossary:macroexpand hook]]//, might either be the //[[CL:Glossary:same]]// //[[CL:Glossary:form]]//, 
-or else a form that can, at the discretion of the //[[CL:Glossary:code]]// doing the expansion, 
-be used in place of the original //[[CL:Glossary:form]]//.
+ 	 if the //[[CL:Glossary:form]]// is being processed by something 	 other than **[[CL:Functions:compile-file]]**) 
+       as its third argument. The //[[CL:Glossary:macroexpand hook]]//, in turn, calls the expansion function with the //[[CL:Glossary:form]]// as its first argument and the //[[CL:Glossary:environment]]// as its second argument. The return value from the expansion function, which is passed through by the //[[CL:Glossary:macroexpand hook]]//, might either be the //[[CL:Glossary:same]]// //[[CL:Glossary:form]]//,  or else a form that can, at the discretion of the //[[CL:Glossary:code]]// doing the expansion,  be used in place of the original //[[CL:Glossary:form]]//.
 
-\displaythree{Defined names applicable to compiler macros}{
-*macroexpand-hook*&compiler-macro-function&define-compiler-macro\cr
-}
+\displaythree{Defined names applicable to compiler macros}{ *macroexpand-hook*&compiler-macro-function&define-compiler-macro\cr }
 
 \beginsubsubsubsection{Purpose of Compiler Macros}
 
-The purpose of the //[[CL:Glossary:compiler macro]]// facility is to permit 
-selective source code transformations as optimization advice 
-to the //[[CL:Glossary:compiler]]//.  When a //[[CL:Glossary:compound form]]// is being
-processed (as by the compiler), if the //[[CL:Glossary:operator]]// names a
-//[[CL:Glossary:compiler macro]]// then the //[[CL:Glossary:compiler macro function]]// may be
-invoked on the form, and the resulting expansion recursively processed
-in preference to performing the usual processing on the original //[[CL:Glossary:form]]//
-according to its normal interpretation as a //[[CL:Glossary:function form]]// or
-//[[CL:Glossary:macro form]]//.
- 
-A //[[CL:Glossary:compiler macro function]]//, like a //[[CL:Glossary:macro function]]//,
-is a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]//: the entire call //[[CL:Glossary:form]]//
-and the //[[CL:Glossary:environment]]//. Unlike an ordinary //[[CL:Glossary:macro function]]//, a 
-//[[CL:Glossary:compiler macro function]]// can decline to provide an expansion merely by
-returning a value that is the //[[CL:Glossary:same]]// as the original //[[CL:Glossary:form]]//.
-The consequences are undefined if a //[[CL:Glossary:compiler macro function]]//
-destructively modifies any part of its //[[CL:Glossary:form]]// argument.
- 
-The //[[CL:Glossary:form]]// passed to the compiler macro function can either be a //[[CL:Glossary:list]]//
-whose //[[CL:Glossary:car]]// is the function name, or a //[[CL:Glossary:list]]// whose //[[CL:Glossary:car]]// is
-**[[CL:Functions:funcall]]** and whose //[[CL:Glossary:cadr]]// is a list \f{(function //name//)};
-note that this affects destructuring of the form argument by the 
-//[[CL:Glossary:compiler macro function]]//.
-\macref{define-compiler-macro} arranges for destructuring of arguments to be
-performed correctly for both possible formats.
+The purpose of the //[[CL:Glossary:compiler macro]]// facility is to permit  selective source code transformations as optimization advice  to the //[[CL:Glossary:compiler]]//.  When a //[[CL:Glossary:compound form]]// is being processed (as by the compiler), if the //[[CL:Glossary:operator]]// names a //[[CL:Glossary:compiler macro]]// then the //[[CL:Glossary:compiler macro function]]// may be invoked on the form, and the resulting expansion recursively processed in preference to performing the usual processing on the original //[[CL:Glossary:form]]// according to its normal interpretation as a //[[CL:Glossary:function form]]// or //[[CL:Glossary:macro form]]//.
+  A //[[CL:Glossary:compiler macro function]]//, like a //[[CL:Glossary:macro function]]//, is a //[[CL:Glossary:function]]// of two //[[CL:Glossary:arguments]]//: the entire call //[[CL:Glossary:form]]// and the //[[CL:Glossary:environment]]//. Unlike an ordinary //[[CL:Glossary:macro function]]//, a  //[[CL:Glossary:compiler macro function]]// can decline to provide an expansion merely by returning a value that is the //[[CL:Glossary:same]]// as the original //[[CL:Glossary:form]]//. The consequences are undefined if a //[[CL:Glossary:compiler macro function]]// destructively modifies any part of its //[[CL:Glossary:form]]// argument.
+  The //[[CL:Glossary:form]]// passed to the compiler macro function can either be a //[[CL:Glossary:list]]// whose //[[CL:Glossary:car]]// is the function name, or a //[[CL:Glossary:list]]// whose //[[CL:Glossary:car]]// is **[[CL:Functions:funcall]]** and whose //[[CL:Glossary:cadr]]// is a list \f{(function //name//)}; note that this affects destructuring of the form argument by the  //[[CL:Glossary:compiler macro function]]//. \macref{define-compiler-macro} arranges for destructuring of arguments to be performed correctly for both possible formats.
 
-
-
-
-
-When **[[CL:Functions:compile-file]]** chooses to expand a //[[CL:Glossary:top level form]]// that is
-a //[[CL:Glossary:compiler macro]]// //[[CL:Glossary:form]]//, the expansion is also treated as a //[[CL:Glossary:top level form]]//
-for the purposes of \specref{eval-when} processing; \seesection\TopLevelForms.
-
-
+When **[[CL:Functions:compile-file]]** chooses to expand a //[[CL:Glossary:top level form]]// that is a //[[CL:Glossary:compiler macro]]// //[[CL:Glossary:form]]//, the expansion is also treated as a //[[CL:Glossary:top level form]]// for the purposes of \specref{eval-when} processing; \seesection\TopLevelForms.
 
 \endsubsubsubsection%{Purpose of Compiler Macros}
 
 \beginsubsubsubsection{Naming of Compiler Macros}
- 
-//[[CL:Glossary:Compiler macros]]// may be defined for //[[CL:Glossary:function names]]// that name
-//[[CL:Glossary:macros]]// as well as //[[CL:Glossary:functions]]//.  
+  //[[CL:Glossary:Compiler macros]]// may be defined for //[[CL:Glossary:function names]]// that name //[[CL:Glossary:macros]]// as well as //[[CL:Glossary:functions]]//.  
 
+//[[CL:Glossary:Compiler macro]]// definitions are strictly global.  There is no provision for defining local //[[CL:Glossary:compiler macros]]// in the way that \specref{macrolet} defines local //[[CL:Glossary:macros]]//.  Lexical bindings of a function name shadow any compiler macro definition associated with the name as well as its  global //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]// definition.
+  Note that the presence of a compiler macro definition does not affect the values returned by \issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
 
-
-
-
-
-//[[CL:Glossary:Compiler macro]]// definitions are strictly global.  There is no provision
-for defining local //[[CL:Glossary:compiler macros]]// in the way that \specref{macrolet}
-defines local //[[CL:Glossary:macros]]//.  Lexical bindings of a function name shadow any
-compiler macro definition associated with the name as well as its 
-global //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]// definition.
- 
-Note that the presence of a compiler macro definition does not affect
-the values returned by
-\issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
-
-
-functions that access //[[CL:Glossary:function]]// definitions (\eg **[[CL:Functions:fboundp]]**)
-or //[[CL:Glossary:macro]]// definitions (\eg **[[CL:Functions:macroexpand]]**).
-Compiler macros are global, and the function
-**[[CL:Functions:compiler-macro-function]]** is sufficient to resolve their interaction
-with other lexical and global definitions.
+functions that access //[[CL:Glossary:function]]// definitions (\eg **[[CL:Functions:fboundp]]**) or //[[CL:Glossary:macro]]// definitions (\eg **[[CL:Functions:macroexpand]]**). Compiler macros are global, and the function **[[CL:Functions:compiler-macro-function]]** is sufficient to resolve their interaction with other lexical and global definitions.
 
 \endsubsubsubsection%{Naming of Compiler Macros}
 
 \beginsubsubsubsection{When Compiler Macros Are Used}
 
-The presence of a //[[CL:Glossary:compiler macro]]// definition for a //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]//
-indicates that it is desirable for the //[[CL:Glossary:compiler]]// to use the expansion
-of the //[[CL:Glossary:compiler macro]]// instead of the original //[[CL:Glossary:function form]]// or
-//[[CL:Glossary:macro form]]//.  However, no language processor
-(compiler, evaluator, or other code walker) is ever required to actually
-invoke //[[CL:Glossary:compiler macro functions]]//, or to 
-make use of the resulting expansion if it does invoke 
-a //[[CL:Glossary:compiler macro function]]//.
+The presence of a //[[CL:Glossary:compiler macro]]// definition for a //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]// indicates that it is desirable for the //[[CL:Glossary:compiler]]// to use the expansion of the //[[CL:Glossary:compiler macro]]// instead of the original //[[CL:Glossary:function form]]// or //[[CL:Glossary:macro form]]//.  However, no language processor (compiler, evaluator, or other code walker) is ever required to actually invoke //[[CL:Glossary:compiler macro functions]]//, or to  make use of the resulting expansion if it does invoke  a //[[CL:Glossary:compiler macro function]]//.
 
-When the //[[CL:Glossary:compiler]]// encounters a //[[CL:Glossary:form]]// during processing that represents
-a call to a //[[CL:Glossary:compiler macro]]// //[[CL:Glossary:name]]// (that is not declared **[[CL:Declarations:notinline]]**),
-the //[[CL:Glossary:compiler]]// might expand the //[[CL:Glossary:compiler macro]]//, 
-and might use the expansion in place of the original //[[CL:Glossary:form]]//.
+When the //[[CL:Glossary:compiler]]// encounters a //[[CL:Glossary:form]]// during processing that represents a call to a //[[CL:Glossary:compiler macro]]// //[[CL:Glossary:name]]// (that is not declared **[[CL:Declarations:notinline]]**), the //[[CL:Glossary:compiler]]// might expand the //[[CL:Glossary:compiler macro]]//,  and might use the expansion in place of the original //[[CL:Glossary:form]]//.
 
-When **[[CL:Functions:eval]]** encounters a //[[CL:Glossary:form]]// during processing that represents 
-a call to a //[[CL:Glossary:compiler macro]]// //[[CL:Glossary:name]]// (that is not declared **[[CL:Declarations:notinline]]**),
-**[[CL:Functions:eval]]** might expand the //[[CL:Glossary:compiler macro]]//,
-and might use the expansion in place of the original //[[CL:Glossary:form]]//.
+When **[[CL:Functions:eval]]** encounters a //[[CL:Glossary:form]]// during processing that represents  a call to a //[[CL:Glossary:compiler macro]]// //[[CL:Glossary:name]]// (that is not declared **[[CL:Declarations:notinline]]**), **[[CL:Functions:eval]]** might expand the //[[CL:Glossary:compiler macro]]//, and might use the expansion in place of the original //[[CL:Glossary:form]]//.
 
-There are two situations in which a //[[CL:Glossary:compiler macro]]// definition must not be
-applied by any language processor:
+There are two situations in which a //[[CL:Glossary:compiler macro]]// definition must not be applied by any language processor:
 
-\beginlist
-\itemitem{\bull}
+\beginlist \itemitem{\bull}
  The global function name binding associated with the compiler
  macro is shadowed by a lexical binding of the function name.
 
 \itemitem{\bull}
  The function name has been declared or proclaimed **[[CL:Declarations:notinline]]** and
- the call form appears within the scope of the declaration.
-\endlist
+ the call form appears within the scope of the declaration. \endlist
 
-It is unspecified whether //[[CL:Glossary:compiler macros]]// are expanded or used in any other
-situations.
+It is unspecified whether //[[CL:Glossary:compiler macros]]// are expanded or used in any other situations.
 
 \beginsubsubsubsubsection{Notes about the Implementation of Compiler Macros}
 
-Although it is technically permissible, as described above,
-for **[[CL:Functions:eval]]** to treat //[[CL:Glossary:compiler macros]]// in the same situations
-as //[[CL:Glossary:compiler]]// might, this is not necessarily a good idea in
-//[[CL:Glossary:interpreted implementations]]//.
+Although it is technically permissible, as described above, for **[[CL:Functions:eval]]** to treat //[[CL:Glossary:compiler macros]]// in the same situations as //[[CL:Glossary:compiler]]// might, this is not necessarily a good idea in //[[CL:Glossary:interpreted implementations]]//.
 
-//[[CL:Glossary:Compiler macros]]// exist for the purpose of trading compile-time speed
-for run-time speed.  Programmers who write //[[CL:Glossary:compiler macros]]// tend to
-assume that the //[[CL:Glossary:compiler macros]]// can take more time than normal //[[CL:Glossary:functions]]//
-and //[[CL:Glossary:macros]]// in order to produce code which is especially optimal for use
-at run time.  Since **[[CL:Functions:eval]]** in an //[[CL:Glossary:interpreted implementation]]//
-might perform semantic analysis of the same form multiple times, it might be 
-inefficient in general for the //[[CL:Glossary:implementation]]// to choose to call
-//[[CL:Glossary:compiler macros]]// on every such //[[CL:Glossary:evaluation]]//.
+//[[CL:Glossary:Compiler macros]]// exist for the purpose of trading compile-time speed for run-time speed.  Programmers who write //[[CL:Glossary:compiler macros]]// tend to assume that the //[[CL:Glossary:compiler macros]]// can take more time than normal //[[CL:Glossary:functions]]// and //[[CL:Glossary:macros]]// in order to produce code which is especially optimal for use at run time.  Since **[[CL:Functions:eval]]** in an //[[CL:Glossary:interpreted implementation]]// might perform semantic analysis of the same form multiple times, it might be  inefficient in general for the //[[CL:Glossary:implementation]]// to choose to call //[[CL:Glossary:compiler macros]]// on every such //[[CL:Glossary:evaluation]]//.
 
-Nevertheless, the decision about what to do in these situations is left to
-each //[[CL:Glossary:implementation]]//.
+Nevertheless, the decision about what to do in these situations is left to each //[[CL:Glossary:implementation]]//.
 
 \endsubsubsubsubsection%{Notes about the Implementation of Compiler Macros}
 
@@ -368,476 +144,159 @@ each //[[CL:Glossary:implementation]]//.
 
 \endsubsubsection%{Compiler Macros}
 
-
-
-\beginsubsubsection{Minimal Compilation}
-\DefineSection{MinimalCompilation}
-
-
-
-
+\beginsubsubsection{Minimal Compilation} \DefineSection{MinimalCompilation}
 
 //[[CL:Glossary:Minimal compilation]]// is defined as follows:
 
-\beginlist 
-\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+\beginlist  \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
 
+\itemitem{\bull} All //[[CL:Glossary:compiler macro]]//\idxterm{compiler macro} calls appearing in the //[[CL:Glossary:source code]]// being compiled are expanded, if at all, at compile time; they will not be expanded at run time.
 
-
-
-
-
-
-
-\itemitem{\bull} All //[[CL:Glossary:compiler macro]]//\idxterm{compiler macro} calls appearing in the
-//[[CL:Glossary:source code]]// being compiled are expanded, if at all, at compile time;
-they will not be expanded at run time.
-
-
-
- \itemitem{\bull} All //[[CL:Glossary:macro]]//\idxterm{macro} and 
-//[[CL:Glossary:symbol macro]]//\idxterm{symbol macro} calls
-appearing in the source code being compiled are expanded at compile time
-in such a way that they will not be expanded again at run time.
-\specref{macrolet}\idxref{macrolet}
-and
-\specref{symbol-macrolet}\idxref{symbol-macrolet}
-are effectively replaced by
-//[[CL:Glossary:forms]]// corresponding to their bodies in which calls to 
-//[[CL:Glossary:macros]]// are replaced by their expansions.
+ \itemitem{\bull} All //[[CL:Glossary:macro]]//\idxterm{macro} and  //[[CL:Glossary:symbol macro]]//\idxterm{symbol macro} calls appearing in the source code being compiled are expanded at compile time in such a way that they will not be expanded again at run time. \specref{macrolet}\idxref{macrolet} and \specref{symbol-macrolet}\idxref{symbol-macrolet} are effectively replaced by //[[CL:Glossary:forms]]// corresponding to their bodies in which calls to  //[[CL:Glossary:macros]]// are replaced by their expansions.
  
 
-\itemitem{\bull} 
-The first //[[CL:Glossary:argument]]// in a \specref{load-time-value}\idxref{load-time-value}
-//[[CL:Glossary:form]]// 
-in //[[CL:Glossary:source code]]// processed by **[[CL:Functions:compile]]**\idxref{compile}
-is //[[CL:Glossary:evaluated]]// at //[[CL:Glossary:compile time]]//;
-in //[[CL:Glossary:source code]]// processed by **[[CL:Functions:compile-file]]**\idxref{compile-file}, 
-the compiler arranges for it to be //[[CL:Glossary:evaluated]]// at //[[CL:Glossary:load time]]//.
-In either case, the result of the //[[CL:Glossary:evaluation]]//
-is remembered and used later as the value of the 
-\specref{load-time-value} //[[CL:Glossary:form]]// at //[[CL:Glossary:execution time]]//.
-
-
-
-
-
-
+\itemitem{\bull}  The first //[[CL:Glossary:argument]]// in a \specref{load-time-value}\idxref{load-time-value} //[[CL:Glossary:form]]//  in //[[CL:Glossary:source code]]// processed by **[[CL:Functions:compile]]**\idxref{compile} is //[[CL:Glossary:evaluated]]// at //[[CL:Glossary:compile time]]//; in //[[CL:Glossary:source code]]// processed by **[[CL:Functions:compile-file]]**\idxref{compile-file},  the compiler arranges for it to be //[[CL:Glossary:evaluated]]// at //[[CL:Glossary:load time]]//. In either case, the result of the //[[CL:Glossary:evaluation]]// is remembered and used later as the value of the  \specref{load-time-value} //[[CL:Glossary:form]]// at //[[CL:Glossary:execution time]]//.
 
 \endlist
- 
-\endsubsubsection%{Minimal Compilation}
+  \endsubsubsection%{Minimal Compilation}
 
-\beginsubsubsection{Semantic Constraints}
-\DefineSection{SemanticConstraints}
+\beginsubsubsection{Semantic Constraints} \DefineSection{SemanticConstraints}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-All //[[CL:Glossary:conforming programs]]// must obey the following constraints,
-which are designed to minimize the observable differences 
-between compiled and interpreted programs:
+All //[[CL:Glossary:conforming programs]]// must obey the following constraints, which are designed to minimize the observable differences  between compiled and interpreted programs:
 
 \beginlist
 
+ \itemitem{\bull} Definitions of any referenced //[[CL:Glossary:macros]]// must be present in the //[[CL:Glossary:compilation environment]]//.   Any //[[CL:Glossary:form]]// that is a //[[CL:Glossary:list]]// beginning with a //[[CL:Glossary:symbol]]// that does not name a //[[CL:Glossary:special operator]]// or a //[[CL:Glossary:macro]]// defined in the  //[[CL:Glossary:compilation environment]]// is treated by the compiler as a  function call.
 
+ \itemitem{\bull} **[[CL:Declarations:Special]]** proclamations for //[[CL:Glossary:dynamic variables]]// must be made in the //[[CL:Glossary:compilation environment]]//.  Any //[[CL:Glossary:binding]]// for which there is no **[[CL:Declarations:special]]** declaration or proclamation in the //[[CL:Glossary:compilation environment]]// is treated by the compiler as a //[[CL:Glossary:lexical binding]]//.
 
-
-
-
-
-
-
-
-
-
-
-
-
- \itemitem{\bull} Definitions of any referenced //[[CL:Glossary:macros]]//
-must be present in the //[[CL:Glossary:compilation environment]]//.  
-Any //[[CL:Glossary:form]]// that is a //[[CL:Glossary:list]]//
-beginning with a //[[CL:Glossary:symbol]]// that does not name a
-//[[CL:Glossary:special operator]]// or a //[[CL:Glossary:macro]]// defined in the 
-//[[CL:Glossary:compilation environment]]// is treated by the compiler as a 
-function call.
-
-
-
-
- \itemitem{\bull} **[[CL:Declarations:Special]]** proclamations for //[[CL:Glossary:dynamic variables]]//
-must be made in the //[[CL:Glossary:compilation environment]]//.  Any //[[CL:Glossary:binding]]//
-for which there is no **[[CL:Declarations:special]]** declaration or proclamation in
-the //[[CL:Glossary:compilation environment]]// is treated by the compiler as
-a //[[CL:Glossary:lexical binding]]//.
-
-
-
- \itemitem{\bull} The definition of a function that is defined and
-declared **[[CL:Declarations:inline]]** in the //[[CL:Glossary:compilation environment]]// must be
-the same at run time.
+ \itemitem{\bull} The definition of a function that is defined and declared **[[CL:Declarations:inline]]** in the //[[CL:Glossary:compilation environment]]// must be the same at run time.
  
 
+  
+ \itemitem{\bull} Within a //[[CL:Glossary:function]]// named $F$, the compiler may (but is not required to) assume that an apparent recursive call to a //[[CL:Glossary:function]]// named $F$  refers to the same definition of $F$, unless that function has been declared **[[CL:Declarations:notinline]]**. The consequences of redefining such a recursively defined //[[CL:Glossary:function]]// $F$  while it is executing are undefined.
 
-
+ \itemitem{\bull} A call within a file to a named function that is defined in the same file refers to that function, unless that function has been declared **[[CL:Declarations:notinline]]**.  The consequences are unspecified if functions are redefined individually at run time or multiply defined in the same file.
 
   
- \itemitem{\bull} Within a //[[CL:Glossary:function]]// named $F$, the compiler may
-(but is not required to)
-assume that an apparent recursive call to a //[[CL:Glossary:function]]// named $F$ 
-refers to the same definition of $F$,
-unless that function has been declared **[[CL:Declarations:notinline]]**.
-The consequences of redefining such a recursively defined //[[CL:Glossary:function]]// $F$ 
-while it is executing are undefined.
-
- \itemitem{\bull} A call within a file to a named function that is
-defined in the same file refers to that function, unless that function
-has been declared **[[CL:Declarations:notinline]]**.  The consequences are unspecified
-if functions are redefined individually at run time or multiply
-defined in the same file.
-
-
-
-
-
-  
- \itemitem{\bull} The argument syntax and number of return values for
-all functions whose **[[CL:Declarations:ftype]]** is declared at compile time must
-remain the same at run time.
+ \itemitem{\bull} The argument syntax and number of return values for all functions whose **[[CL:Declarations:ftype]]** is declared at compile time must remain the same at run time.
  
 
+ \itemitem{\bull} //[[CL:Glossary:Constant variables]]// defined in the //[[CL:Glossary:compilation environment]]// must have a //[[CL:Glossary:similar]]// value at run time.  A reference to 
 
- \itemitem{\bull} //[[CL:Glossary:Constant variables]]// defined in
-the //[[CL:Glossary:compilation environment]]// must have a //[[CL:Glossary:similar]]// value at
-run time.  A reference to 
-
-a //[[CL:Glossary:constant variable]]// 
-in //[[CL:Glossary:source code]]// is equivalent to a reference to 
+a //[[CL:Glossary:constant variable]]//  in //[[CL:Glossary:source code]]// is equivalent to a reference to 
 
 a //[[CL:Glossary:literal]]// //[[CL:Glossary:object]]// that is the //[[CL:Glossary:value]]// of the //[[CL:Glossary:constant variable]]//.
  
 
+ \itemitem{\bull} Type definitions made with \macref{deftype} or \macref{defstruct} in the //[[CL:Glossary:compilation environment]]// must retain the same definition at run time.  Classes defined by \macref{defclass} in the //[[CL:Glossary:compilation environment]]// must be defined at run time to have the same //[[CL:Glossary:superclasses]]// and same  //[[CL:Glossary:metaclass]]//.
 
-
- \itemitem{\bull} Type definitions made with \macref{deftype} or
-\macref{defstruct} in the //[[CL:Glossary:compilation environment]]// must
-retain the same definition at run time.  Classes defined by \macref{defclass}
-in the //[[CL:Glossary:compilation environment]]// must be defined
-at run time to have the same //[[CL:Glossary:superclasses]]// and same 
-//[[CL:Glossary:metaclass]]//.
-
-This implies that //[[CL:Glossary:subtype]]/////[[CL:Glossary:supertype]]// relationships of 
-//[[CL:Glossary:type specifiers]]// must not change between //[[CL:Glossary:compile time]]// and //[[CL:Glossary:run time]]//.  
+This implies that //[[CL:Glossary:subtype]]/////[[CL:Glossary:supertype]]// relationships of  //[[CL:Glossary:type specifiers]]// must not change between //[[CL:Glossary:compile time]]// and //[[CL:Glossary:run time]]//.  
  
 
- \itemitem{\bull} Type declarations present in the compilation 
-//[[CL:Glossary:environment]]// must accurately describe the corresponding values at run time;
-otherwise, the consequences are undefined.  It is permissible
-for an unknown //[[CL:Glossary:type]]// to appear in a declaration at 
-compile time, though a warning might be signaled in such a case.
+ \itemitem{\bull} Type declarations present in the compilation  //[[CL:Glossary:environment]]// must accurately describe the corresponding values at run time; otherwise, the consequences are undefined.  It is permissible for an unknown //[[CL:Glossary:type]]// to appear in a declaration at  compile time, though a warning might be signaled in such a case.
 
- \itemitem{\bull} Except in the situations explicitly listed above, a
-//[[CL:Glossary:function]]// defined in the //[[CL:Glossary:evaluation environment]]//
-is permitted to have a different definition or a different //[[CL:Glossary:signature]]//
-at run time, and the run-time definition prevails.
+ \itemitem{\bull} Except in the situations explicitly listed above, a //[[CL:Glossary:function]]// defined in the //[[CL:Glossary:evaluation environment]]// is permitted to have a different definition or a different //[[CL:Glossary:signature]]// at run time, and the run-time definition prevails.
 
 \endlist 
 
-//[[CL:Glossary:Conforming programs]]// should not be written using any additional
-assumptions about consistency between the run-time 
-//[[CL:Glossary:environment]]// and the startup, evaluation, and compilation 
-//[[CL:Glossary:environments]]//.
+//[[CL:Glossary:Conforming programs]]// should not be written using any additional assumptions about consistency between the run-time  //[[CL:Glossary:environment]]// and the startup, evaluation, and compilation  //[[CL:Glossary:environments]]//.
 
-Except where noted, when a compile-time and a run-time definition are
-different, one of the following occurs at run time:
+Except where noted, when a compile-time and a run-time definition are different, one of the following occurs at run time:
 
 \beginlist
-                                                          
-\item{\bull} an error \oftype{error} is signaled
-\item{\bull} the compile-time definition prevails
-\item{\bull} the run-time definition prevails
+                                                           \item{\bull} an error \oftype{error} is signaled \item{\bull} the compile-time definition prevails \item{\bull} the run-time definition prevails
 
 \endlist
- 
-If the //[[CL:Glossary:compiler]]// processes a //[[CL:Glossary:function form]]// whose //[[CL:Glossary:operator]]// 
-is not defined at compile time, no error is signaled at compile time.
+  If the //[[CL:Glossary:compiler]]// processes a //[[CL:Glossary:function form]]// whose //[[CL:Glossary:operator]]//  is not defined at compile time, no error is signaled at compile time.
 
-\endsubsubsection%{Semantic Constraints}
-\endsubSection%{Compilation Semantics}
-\beginsubSection{File Compilation}
-\DefineSection{FileCompilation}
- 
-\Thefunction{compile-file} performs compilation of 
-//[[CL:Glossary:forms]]// in a file following the rules specified in \secref\CompilationSemantics,
-and produces an output file that can be loaded by using **[[CL:Functions:load]]**.
- 
-Normally, the //[[CL:Glossary:top level forms]]// appearing in a file compiled with
-**[[CL:Functions:compile-file]]** are evaluated only when the resulting
-compiled file is loaded, and not when the file is compiled.  However,
+\endsubsubsection%{Semantic Constraints} \endsubSection%{Compilation Semantics} \beginsubSection{File Compilation} \DefineSection{FileCompilation}
+  \Thefunction{compile-file} performs compilation of  //[[CL:Glossary:forms]]// in a file following the rules specified in \secref\CompilationSemantics, and produces an output file that can be loaded by using **[[CL:Functions:load]]**.
+  Normally, the //[[CL:Glossary:top level forms]]// appearing in a file compiled with **[[CL:Functions:compile-file]]** are evaluated only when the resulting compiled file is loaded, and not when the file is compiled.  However,
 
+it is typically the case that some forms in the file need to be evaluated at compile time so the remainder of the file can be read and compiled correctly.
 
-it is typically the case that some forms in the file need to be evaluated
-at compile time so the
-remainder of the file can be read and compiled correctly.
+\Thespecform{eval-when} can be used to control whether a //[[CL:Glossary:top level form]]// is evaluated at compile time, load time, or both.  It is possible to specify any of three situations with \specref{eval-when}, denoted by the symbols **'':compile-toplevel''**, **'':load-toplevel''**, and **'':execute''**.  For top level  \specref{eval-when} forms, **'':compile-toplevel''** specifies that the compiler must evaluate the body at compile time, and {\tt :load-toplevel} specifies that the compiler must arrange to evaluate the body at load time. For non-top level \specref{eval-when} forms, **'':execute''** specifies that the body must be executed in the run-time //[[CL:Glossary:environment]]//.
 
-\Thespecform{eval-when} can be used to control
-whether a //[[CL:Glossary:top level form]]// is evaluated at compile time, load
-time, or both.  It is possible to specify any of three situations with
-\specref{eval-when}, denoted by the symbols **'':compile-toplevel''**,
-**'':load-toplevel''**, and **'':execute''**.  For top level 
-\specref{eval-when} forms, **'':compile-toplevel''** specifies that the
-compiler must evaluate the body at compile time, and {\tt
-:load-toplevel} specifies that the compiler must arrange to evaluate
-the body at load time. For non-top level \specref{eval-when} forms,
-**'':execute''** specifies that the body must be executed in the run-time
-//[[CL:Glossary:environment]]//.
+The behavior of this //[[CL:Glossary:form]]// can be more precisely understood in terms of a model of how **[[CL:Functions:compile-file]]** processes forms in a file to be compiled. There are two processing modes, called ``not-compile-time'' and ``compile-time-too''.
+  Successive forms are read from the file by **[[CL:Functions:compile-file]]** and processed in not-compile-time mode; in this mode,  **[[CL:Functions:compile-file]]** arranges for forms to be evaluated only at load time and not at compile time.  When **[[CL:Functions:compile-file]]** is in compile-time-too mode, forms are evaluated both at compile time and load time.
 
-The behavior of this //[[CL:Glossary:form]]// can be more precisely understood in
-terms of a model of how **[[CL:Functions:compile-file]]** processes forms in
-a file to be compiled. There are two processing modes, called
-``not-compile-time'' and ``compile-time-too''.
- 
-Successive forms are read from the file by **[[CL:Functions:compile-file]]**
-and processed in not-compile-time mode; in this mode, 
-**[[CL:Functions:compile-file]]** arranges for forms to be evaluated only at load time
-and not at compile time.  When **[[CL:Functions:compile-file]]** is in
-compile-time-too mode, forms are evaluated both at compile time and
-load time.
+\beginsubsubsection{Processing of Top Level Forms} \DefineSection{TopLevelForms}
 
-\beginsubsubsection{Processing of Top Level Forms}
-\DefineSection{TopLevelForms}
+Processing of //[[CL:Glossary:top level forms]]// in the file compiler is defined as follows:
 
-Processing of //[[CL:Glossary:top level forms]]// in the file compiler is defined
-as follows:
+\beginlist \issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+ \itemitem{1.} If the //[[CL:Glossary:form]]// is a //[[CL:Glossary:compiler macro form]]// (not disabled by a **[[CL:Declarations:notinline]]** //[[CL:Glossary:declaration]]//),
 
-\beginlist
-\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
- \itemitem{1.} If the //[[CL:Glossary:form]]// is a //[[CL:Glossary:compiler macro form]]//
-(not disabled by a **[[CL:Declarations:notinline]]** //[[CL:Glossary:declaration]]//),
-
-
-the //[[CL:Glossary:implementation]]// might or might not choose to compute
-the //[[CL:Glossary:compiler macro expansion]]// of the //[[CL:Glossary:form]]// and,
-having performed the expansion, might or might not choose to process the result
-as a //[[CL:Glossary:top level form]]// in the same processing mode
-(compile-time-too or not-compile-time).
+the //[[CL:Glossary:implementation]]// might or might not choose to compute the //[[CL:Glossary:compiler macro expansion]]// of the //[[CL:Glossary:form]]// and, having performed the expansion, might or might not choose to process the result as a //[[CL:Glossary:top level form]]// in the same processing mode (compile-time-too or not-compile-time).
 
 If it declines to obtain or use the expansion, it must process the original //[[CL:Glossary:form]]//.
 
  
  \itemitem{2.} If the form is a //[[CL:Glossary:macro form]]//,
 
-
-
-
-
-
-its //[[CL:Glossary:macro expansion]]// is computed and processed as a 
-//[[CL:Glossary:top level form]]// in
-the same processing mode (compile-time-too or not-compile-time).
+its //[[CL:Glossary:macro expansion]]// is computed and processed as a  //[[CL:Glossary:top level form]]// in the same processing mode (compile-time-too or not-compile-time).
  
- \itemitem{3.} If the form is a \specref{progn} form, each of its
-body //[[CL:Glossary:forms]]// is sequentially processed as a 
-//[[CL:Glossary:top level form]]// in the same processing mode.
+ \itemitem{3.} If the form is a \specref{progn} form, each of its body //[[CL:Glossary:forms]]// is sequentially processed as a  //[[CL:Glossary:top level form]]// in the same processing mode.
  
- \itemitem{4.} If the form is a \specref{locally}, 
-\specref{macrolet}, or \specref{symbol-macrolet}, 
-**[[CL:Functions:compile-file]]** establishes the appropriate bindings and processes the
-body forms as //[[CL:Glossary:top level forms]]// with those bindings in effect
-in the same processing mode.  (Note that this implies that the lexical
-//[[CL:Glossary:environment]]// in which //[[CL:Glossary:top level forms]]// are processed
-is not necessarily the //[[CL:Glossary:null lexical environment]]//.)
+ \itemitem{4.} If the form is a \specref{locally},  \specref{macrolet}, or \specref{symbol-macrolet},  **[[CL:Functions:compile-file]]** establishes the appropriate bindings and processes the body forms as //[[CL:Glossary:top level forms]]// with those bindings in effect in the same processing mode.  (Note that this implies that the lexical //[[CL:Glossary:environment]]// in which //[[CL:Glossary:top level forms]]// are processed is not necessarily the //[[CL:Glossary:null lexical environment]]//.)
  
- \itemitem{5.} If the form is an \specref{eval-when}\idxref{eval-when} form, it is
-handled according to \thenextfigure.
+ \itemitem{5.} If the form is an \specref{eval-when}\idxref{eval-when} form, it is handled according to \thenextfigure.
 
-\boxfig
-{\dimen0=.75pc
-\tabskip \dimen0 plus .5 fil
-\offinterlineskip
-\halign to \hsize {\strut#\hfil\tabskip \dimen0 plus 1fil&#\hfil\tabskip 
-\dimen0 plus .5 fil&#\hfil\tabskip \dimen0 plus 1fil&#\hfil\tabskip \dimen0 plus 1fil
-&#\hfil&#\hfil&#\hfil\cr 
-\noalign{\vskip -11pt}
-\hfil\b{CT} &\hfil\b{LT} &\hfil\b{E} &\hfil\b{Mode}&\hfil\b{Action}&\hfil\b{New Mode}\cr
-\noalign{\hrule}
-Yes&Yes&\hfil---&\hfil---&Process&compile-time-too\cr
-No&Yes&Yes&\hfil CTT&Process&compile-time-too\cr
-No&Yes&Yes&\hfil NCT&Process&not-compile-time\cr
-No&Yes&No&\hfil---&Process&not-compile-time\cr
-Yes&No&\hfil---&\hfil---&Evaluate&\hfil---\cr
-No&No&Yes&\hfil CTT&Evaluate&\hfil---\cr
-No&No&Yes&\hfil NCT&Discard&\hfil---\cr
-No&No&No&\hfil---&Discard&\hfil---\cr
-\noalign{\vskip -9pt}
-}}
-\caption{EVAL-WHEN processing}
-\endfig
+\boxfig {\dimen0=.75pc \tabskip \dimen0 plus .5 fil \offinterlineskip \halign to \hsize {\strut#\hfil\tabskip \dimen0 plus 1fil&#\hfil\tabskip  \dimen0 plus .5 fil&#\hfil\tabskip \dimen0 plus 1fil&#\hfil\tabskip \dimen0 plus 1fil &#\hfil&#\hfil&#\hfil\cr  \noalign{\vskip -11pt} \hfil\b{CT} &\hfil\b{LT} &\hfil\b{E} &\hfil\b{Mode}&\hfil\b{Action}&\hfil\b{New Mode}\cr \noalign{\hrule} Yes&Yes&\hfil---&\hfil---&Process&compile-time-too\cr No&Yes&Yes&\hfil CTT&Process&compile-time-too\cr No&Yes&Yes&\hfil NCT&Process&not-compile-time\cr No&Yes&No&\hfil---&Process&not-compile-time\cr Yes&No&\hfil---&\hfil---&Evaluate&\hfil---\cr No&No&Yes&\hfil CTT&Evaluate&\hfil---\cr No&No&Yes&\hfil NCT&Discard&\hfil---\cr No&No&No&\hfil---&Discard&\hfil---\cr \noalign{\vskip -9pt} }} \caption{EVAL-WHEN processing} \endfig
 
-Column \b{CT}   indicates whether **'':compile-toplevel''** is specified.
-Column \b{LT}   indicates whether **'':load-toplevel''** is specified.
-Column \b{E}    indicates whether **'':execute''** is specified.  
-Column \b{Mode} indicates the processing mode; 
-		a dash (---) indicates that the processing mode is not relevant.
-   
-The \b{Action} column specifies one of three actions:
+Column \b{CT}   indicates whether **'':compile-toplevel''** is specified. Column \b{LT}   indicates whether **'':load-toplevel''** is specified. Column \b{E}    indicates whether **'':execute''** is specified.   Column \b{Mode} indicates the processing mode;  		a dash (---) indicates that the processing mode is not relevant.
+    The \b{Action} column specifies one of three actions:
 
 \beginlist
 
- \item{}\b{Process:} process the body as //[[CL:Glossary:top level forms]]// in the
-specified mode.
+ \item{}\b{Process:} process the body as //[[CL:Glossary:top level forms]]// in the specified mode.
  
- \item{}\b{Evaluate:} evaluate the body in the dynamic execution
-context of the compiler, using the //[[CL:Glossary:evaluation environment]]// as
-the global environment and the //[[CL:Glossary:lexical environment]]// in which
-the \specref{eval-when} appears.
- 
-\item{}\b{Discard:} ignore the //[[CL:Glossary:form]]//.
-\endlist
+ \item{}\b{Evaluate:} evaluate the body in the dynamic execution context of the compiler, using the //[[CL:Glossary:evaluation environment]]// as the global environment and the //[[CL:Glossary:lexical environment]]// in which the \specref{eval-when} appears.
+  \item{}\b{Discard:} ignore the //[[CL:Glossary:form]]//. \endlist
 
-The \b{New Mode} column indicates the new processing mode. 
-A dash (---) indicates the compiler remains in its current mode.
+The \b{New Mode} column indicates the new processing mode.  A dash (---) indicates the compiler remains in its current mode.
 
- \itemitem{6.} Otherwise, the form is a //[[CL:Glossary:top level form]]// that
-is not one of the special cases.  In compile-time-too mode, the
-compiler first evaluates the form in the evaluation 
-//[[CL:Glossary:environment]]// and then minimally compiles it.  In not-compile-time
-mode, the //[[CL:Glossary:form]]// is simply minimally compiled.  All //[[CL:Glossary:subforms]]//
-are treated as //[[CL:Glossary:non-top-level forms]]//.
+ \itemitem{6.} Otherwise, the form is a //[[CL:Glossary:top level form]]// that is not one of the special cases.  In compile-time-too mode, the compiler first evaluates the form in the evaluation  //[[CL:Glossary:environment]]// and then minimally compiles it.  In not-compile-time mode, the //[[CL:Glossary:form]]// is simply minimally compiled.  All //[[CL:Glossary:subforms]]// are treated as //[[CL:Glossary:non-top-level forms]]//.
 
-Note that //[[CL:Glossary:top level forms]]// are processed in the order in
-which they textually appear in the file and that each 
-//[[CL:Glossary:top level form]]// read by the compiler is processed before the next is
-read.  However, the order of processing (including macro expansion) of
-//[[CL:Glossary:subforms]]// that are not //[[CL:Glossary:top level forms]]// and the order of
-further compilation is unspecified as long as Common Lisp semantics
-are preserved.
+Note that //[[CL:Glossary:top level forms]]// are processed in the order in which they textually appear in the file and that each  //[[CL:Glossary:top level form]]// read by the compiler is processed before the next is read.  However, the order of processing (including macro expansion) of //[[CL:Glossary:subforms]]// that are not //[[CL:Glossary:top level forms]]// and the order of further compilation is unspecified as long as Common Lisp semantics are preserved.
 
 \endlist 
- 
-\specref{eval-when} forms cause compile-time evaluation only at
-top level.  Both **'':compile-toplevel''** and **'':load-toplevel''** situation specifications
-are ignored for //[[CL:Glossary:non-top-level forms]]//. For //[[CL:Glossary:non-top-level forms]]//, 
-an \specref{eval-when}
-specifying the **'':execute''** situation is treated as an //[[CL:Glossary:implicit progn]]//
-including the //[[CL:Glossary:forms]]// in the body of the \specref{eval-when} //[[CL:Glossary:form]]//;
-otherwise, the //[[CL:Glossary:forms]]// in the body are ignored.
+  \specref{eval-when} forms cause compile-time evaluation only at top level.  Both **'':compile-toplevel''** and **'':load-toplevel''** situation specifications are ignored for //[[CL:Glossary:non-top-level forms]]//. For //[[CL:Glossary:non-top-level forms]]//,  an \specref{eval-when} specifying the **'':execute''** situation is treated as an //[[CL:Glossary:implicit progn]]// including the //[[CL:Glossary:forms]]// in the body of the \specref{eval-when} //[[CL:Glossary:form]]//; otherwise, the //[[CL:Glossary:forms]]// in the body are ignored.
 
-\beginsubsubsubsection{Processing of Defining Macros}
-\DefineSection{DefiningMacros}
-
-
-
+\beginsubsubsubsection{Processing of Defining Macros} \DefineSection{DefiningMacros}
 
 \issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
 
-Defining //[[CL:Glossary:macros]]// (such as \macref{defmacro} or \macref{defvar})
-appearing within a file being processed by **[[CL:Functions:compile-file]]**
-normally have compile-time side effects which affect how subsequent //[[CL:Glossary:forms]]//
-in the same //[[CL:Glossary:file]]// are compiled.  A convenient model for explaining how these
-side effects happen is that the defining macro expands into one or
-more \specref{eval-when} //[[CL:Glossary:forms]]//, and that the calls which cause the compile-time
-side effects to happen appear 
-in the body of an \f{(eval-when (:compile-toplevel) ...)} //[[CL:Glossary:form]]//.
+Defining //[[CL:Glossary:macros]]// (such as \macref{defmacro} or \macref{defvar}) appearing within a file being processed by **[[CL:Functions:compile-file]]** normally have compile-time side effects which affect how subsequent //[[CL:Glossary:forms]]// in the same //[[CL:Glossary:file]]// are compiled.  A convenient model for explaining how these side effects happen is that the defining macro expands into one or more \specref{eval-when} //[[CL:Glossary:forms]]//, and that the calls which cause the compile-time side effects to happen appear  in the body of an \f{(eval-when (:compile-toplevel) ...)} //[[CL:Glossary:form]]//.
 
+The compile-time side effects may cause information about the definition to be stored differently than if the defining macro had been processed in the `normal' way (either interpretively or by loading the compiled file).
 
-
-
-
-
-The compile-time side effects may cause information about the definition to
-be stored differently than if the defining macro had been processed in the
-`normal' way (either interpretively or by loading the compiled file).
-
-In particular, the information stored by the defining //[[CL:Glossary:macros]]// at compile time
-might or might not be available to the interpreter (either during or after compilation),
-or during subsequent calls to the //[[CL:Glossary:compiler]]//.  For example,
-the following code is nonportable because it assumes that the //[[CL:Glossary:compiler]]//
-stores the macro definition of \f{foo} where it is available to the interpreter:
-    
-\code
+In particular, the information stored by the defining //[[CL:Glossary:macros]]// at compile time might or might not be available to the interpreter (either during or after compilation), or during subsequent calls to the //[[CL:Glossary:compiler]]//.  For example, the following code is nonportable because it assumes that the //[[CL:Glossary:compiler]]// stores the macro definition of \f{foo} where it is available to the interpreter:
+     \code
  (defmacro foo (x) `(car ,x))
  (eval-when (:execute :compile-toplevel :load-toplevel)
-   (print (foo '(a b c))))
-\endcode
-    
-A portable way to do the same thing would be to include the macro
-definition inside the \specref{eval-when} //[[CL:Glossary:form]]//, as in:
-    
-\code
+   (print (foo '(a b c)))) \endcode
+     A portable way to do the same thing would be to include the macro definition inside the \specref{eval-when} //[[CL:Glossary:form]]//, as in:
+     \code
  (eval-when (:execute :compile-toplevel :load-toplevel)
    (defmacro foo (x) `(car ,x))
-   (print (foo '(a b c))))
-\endcode
+   (print (foo '(a b c)))) \endcode
 
+\Thenextfigure\ lists macros that make definitions available both in the compilation and run-time //[[CL:Glossary:environments]]//. It is not specified whether definitions made available in the //[[CL:Glossary:compilation environment]]// are available in the evaluation //[[CL:Glossary:environment]]//, nor is it specified whether they are available in subsequent compilation units or subsequent invocations of the compiler.  As with \specref{eval-when}, these compile-time side effects happen only when the defining macros appear at  top level.
+  \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \issue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO} \issue{DEFINE-COMPILER-MACRO:X3J13-NOV89} \issue{CLOS-MACRO-COMPILATION:MINIMAL}
 
-
-
-
-\Thenextfigure\ lists macros that make definitions
-available both in the compilation and run-time //[[CL:Glossary:environments]]//.
-It is not specified whether definitions made available in the
-//[[CL:Glossary:compilation environment]]// are available in the evaluation
-//[[CL:Glossary:environment]]//, nor is it specified whether they are available
-in subsequent compilation units or subsequent invocations of the
-compiler.  As with \specref{eval-when}, these compile-time side
-effects happen only when the defining macros appear at 
-top level.
- 
-\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
-\issue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO}
-\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
-\issue{CLOS-MACRO-COMPILATION:MINIMAL}
-
-
-\displaythree{Defining Macros That Affect the Compile-Time Environment}{
-declaim&define-modify-macro&defsetf\cr
-defclass&define-setf-expander&defstruct\cr
-defconstant&defmacro&deftype\cr
-define-compiler-macro&defpackage&defvar\cr
-define-condition&defparameter&\cr
-}
-
-
-
-
-
+\displaythree{Defining Macros That Affect the Compile-Time Environment}{ declaim&define-modify-macro&defsetf\cr defclass&define-setf-expander&defstruct\cr defconstant&defmacro&deftype\cr define-compiler-macro&defpackage&defvar\cr define-condition&defparameter&\cr }
 
 \endsubsubsubsection%{Processing of Defining Macros}
 
-\beginsubsubsubsection{Constraints on Macros and Compiler Macros}
-\DefineSection{ConstraintsOnMacros}
-
-
+\beginsubsubsubsection{Constraints on Macros and Compiler Macros} \DefineSection{ConstraintsOnMacros}
 
 \issue{MACRO-SUBFORMS-TOP-LEVEL-P:ADD-CONSTRAINTS}
 
-Except where explicitly stated otherwise, no //[[CL:Glossary:macro]]// defined in
-the \clisp\ standard produces an expansion that could cause any of the
-//[[CL:Glossary:subforms]]// of the //[[CL:Glossary:macro form]]// to be treated as 
-//[[CL:Glossary:top level forms]]//.  If an //[[CL:Glossary:implementation]]// also provides a
-//[[CL:Glossary:special operator]]// definition of a \clisp\ //[[CL:Glossary:macro]]//, 
-the //[[CL:Glossary:special operator]]// definition must be semantically equivalent
-in this respect.
+Except where explicitly stated otherwise, no //[[CL:Glossary:macro]]// defined in the \clisp\ standard produces an expansion that could cause any of the //[[CL:Glossary:subforms]]// of the //[[CL:Glossary:macro form]]// to be treated as  //[[CL:Glossary:top level forms]]//.  If an //[[CL:Glossary:implementation]]// also provides a //[[CL:Glossary:special operator]]// definition of a \clisp\ //[[CL:Glossary:macro]]//,  the //[[CL:Glossary:special operator]]// definition must be semantically equivalent in this respect.
 
-//[[CL:Glossary:Compiler macro]]// expansions must also have the same
-top level evaluation semantics as the //[[CL:Glossary:form]]// which they replace.
-This is of concern both to //[[CL:Glossary:conforming implementations]]// and to
-//[[CL:Glossary:conforming programs]]//.
-
+//[[CL:Glossary:Compiler macro]]// expansions must also have the same top level evaluation semantics as the //[[CL:Glossary:form]]// which they replace. This is of concern both to //[[CL:Glossary:conforming implementations]]// and to //[[CL:Glossary:conforming programs]]//.
 
 \endsubsubsubsection%{Constraints on Macros and Compiler Macros}
 
@@ -845,128 +304,32 @@ This is of concern both to //[[CL:Glossary:conforming implementations]]// and to
 
 \endsubSection%{File Compilation}
 
+\beginsubSection{Literal Objects in Compiled Files} \DefineSection{LiteralsInCompiledFiles}
 
+The functions **[[CL:Functions:eval]]** and **[[CL:Functions:compile]]** are required to ensure that //[[CL:Glossary:literal objects]]// referenced within the resulting interpreted or compiled code objects are the //[[CL:Glossary:same]]// as the corresponding //[[CL:Glossary:objects]]// in the //[[CL:Glossary:source code]]//. **[[CL:Functions:compile-file]]**, on the other hand,  must produce a //[[CL:Glossary:compiled file]]// that, when loaded with **[[CL:Functions:load]]**, constructs the //[[CL:Glossary:objects]]// defined by the //[[CL:Glossary:source code]]// and produces references to them.
+  In the case of **[[CL:Functions:compile-file]]**, //[[CL:Glossary:objects]]// constructed by **[[CL:Functions:load]]** of the //[[CL:Glossary:compiled file]]// cannot be spoken of as being the //[[CL:Glossary:same]]// as the //[[CL:Glossary:objects]]// constructed at compile time, because the //[[CL:Glossary:compiled file]]// may be loaded into a different //[[CL:Glossary:Lisp image]]// than the one in which it was compiled.  This section defines the concept of //[[CL:Glossary:similarity]]// which relates //[[CL:Glossary:objects]]// in the //[[CL:Glossary:evaluation environment]]// to the corresponding //[[CL:Glossary:objects]]// in the //[[CL:Glossary:run-time environment]]//.
+  The constraints on //[[CL:Glossary:literal objects]]// described in this section apply only to **[[CL:Functions:compile-file]]**; **[[CL:Functions:eval]]** and **[[CL:Functions:compile]]** do not copy or coalesce constants.
 
+\beginsubsubsection{Externalizable Objects} \DefineSection{ExternalizableObjects}
 
+\issue{CONSTANT-COMPILABLE-TYPES:SPECIFY} The fact that the //[[CL:Glossary:file compiler]]// represents //[[CL:Glossary:literal]]// //[[CL:Glossary:objects]]//  externally in a //[[CL:Glossary:compiled file]]// and must later reconstruct suitable  equivalents of those //[[CL:Glossary:objects]]// when that //[[CL:Glossary:file]]// is loaded imposes a need for constraints on the nature of the //[[CL:Glossary:objects]]// that can be  used as //[[CL:Glossary:literal]]// //[[CL:Glossary:objects]]// in //[[CL:Glossary:code]]// to be processed  by the //[[CL:Glossary:file compiler]]//.
 
+An //[[CL:Glossary:object]]// that can be used as a //[[CL:Glossary:literal]]// //[[CL:Glossary:object]]//  in //[[CL:Glossary:code]]// to be processed by the //[[CL:Glossary:file compiler]]// is called an //[[CL:Glossary:externalizable object]]//.
 
+We define that two //[[CL:Glossary:objects]]// are //[[CL:Glossary:similar]]// if they satisfy a two-place conceptual equivalence predicate (defined below), which is independent of the //[[CL:Glossary:Lisp image]]// so that the two //[[CL:Glossary:objects]]// in different //[[CL:Glossary:Lisp images]]// can be understood to be equivalent under this predicate.  Further, by inspecting the definition of this conceptual predicate, the programmer can anticipate what aspects of an //[[CL:Glossary:object]]// are reliably preserved by //[[CL:Glossary:file compilation]]//.
 
+The //[[CL:Glossary:file compiler]]// must cooperate with the //[[CL:Glossary:loader]]// in order to assure that in each case where an //[[CL:Glossary:externalizable object]]// is processed as a //[[CL:Glossary:literal object]]//, the //[[CL:Glossary:loader]]// will construct a //[[CL:Glossary:similar]]// //[[CL:Glossary:object]]//.
 
-\beginsubSection{Literal Objects in Compiled Files}
-\DefineSection{LiteralsInCompiledFiles}
-
-
-
-
-
-The functions **[[CL:Functions:eval]]** and **[[CL:Functions:compile]]** are
-required to ensure that //[[CL:Glossary:literal objects]]// referenced within the resulting
-interpreted or compiled code objects are the //[[CL:Glossary:same]]// as the
-corresponding //[[CL:Glossary:objects]]// in the //[[CL:Glossary:source code]]//.
-**[[CL:Functions:compile-file]]**, on the other hand, 
-must produce a //[[CL:Glossary:compiled file]]// that, when loaded with
-**[[CL:Functions:load]]**, constructs the //[[CL:Glossary:objects]]// defined by the
-//[[CL:Glossary:source code]]// and produces references to them.
- 
-In the case of **[[CL:Functions:compile-file]]**, //[[CL:Glossary:objects]]//
-constructed by **[[CL:Functions:load]]** of the //[[CL:Glossary:compiled file]]// cannot be spoken
-of as being the //[[CL:Glossary:same]]// as the //[[CL:Glossary:objects]]// constructed at
-compile time, because the //[[CL:Glossary:compiled file]]// may be loaded into a different
-//[[CL:Glossary:Lisp image]]// than the one in which it was compiled.  This section
-defines the concept of //[[CL:Glossary:similarity]]// which relates
-//[[CL:Glossary:objects]]// in the //[[CL:Glossary:evaluation environment]]// to the
-corresponding //[[CL:Glossary:objects]]// in the //[[CL:Glossary:run-time environment]]//.
- 
-The constraints on //[[CL:Glossary:literal objects]]// described in this section
-apply only to **[[CL:Functions:compile-file]]**;
-**[[CL:Functions:eval]]** and **[[CL:Functions:compile]]** do not copy or coalesce constants.
-
-\beginsubsubsection{Externalizable Objects}
-\DefineSection{ExternalizableObjects}
-
-\issue{CONSTANT-COMPILABLE-TYPES:SPECIFY}
-The fact that the //[[CL:Glossary:file compiler]]// represents //[[CL:Glossary:literal]]// //[[CL:Glossary:objects]]// 
-externally in a //[[CL:Glossary:compiled file]]// and must later reconstruct suitable 
-equivalents of those //[[CL:Glossary:objects]]// when that //[[CL:Glossary:file]]// is loaded
-imposes a need for constraints on the nature of the //[[CL:Glossary:objects]]// that can be 
-used as //[[CL:Glossary:literal]]// //[[CL:Glossary:objects]]// in //[[CL:Glossary:code]]// to be processed 
-by the //[[CL:Glossary:file compiler]]//.
-
-An //[[CL:Glossary:object]]// that can be used as a //[[CL:Glossary:literal]]// //[[CL:Glossary:object]]// 
-in //[[CL:Glossary:code]]// to be processed by the //[[CL:Glossary:file compiler]]// is called an
-//[[CL:Glossary:externalizable object]]//.
-
-We define that two //[[CL:Glossary:objects]]// are //[[CL:Glossary:similar]]// if they satisfy
-a two-place conceptual equivalence predicate (defined below), which is
-independent of the //[[CL:Glossary:Lisp image]]// so that the two //[[CL:Glossary:objects]]// in
-different //[[CL:Glossary:Lisp images]]// can be understood to be equivalent under
-this predicate.  Further, by inspecting the definition of this conceptual
-predicate, the programmer can anticipate what aspects of an //[[CL:Glossary:object]]//
-are reliably preserved by //[[CL:Glossary:file compilation]]//.
-
-The //[[CL:Glossary:file compiler]]// must cooperate with the //[[CL:Glossary:loader]]// in order to
-assure that in each case where an //[[CL:Glossary:externalizable object]]// is processed
-as a //[[CL:Glossary:literal object]]//, the //[[CL:Glossary:loader]]// will construct a //[[CL:Glossary:similar]]//
-//[[CL:Glossary:object]]//.
-
-The set of //[[CL:Glossary:objects]]// that are \newtermidx{externalizable objects}{externalizable object} are those
-for which the new conceptual term ``//[[CL:Glossary:similar]]//'' is defined, such that
-when a //[[CL:Glossary:compiled file]]// is //[[CL:Glossary:loaded]]//, an //[[CL:Glossary:object]]// can be constructed
-which can be shown to be //[[CL:Glossary:similar]]// to the original //[[CL:Glossary:object]]// which
-existed at the time the //[[CL:Glossary:file compiler]]// was operating.
-
+The set of //[[CL:Glossary:objects]]// that are \newtermidx{externalizable objects}{externalizable object} are those for which the new conceptual term ``//[[CL:Glossary:similar]]//'' is defined, such that when a //[[CL:Glossary:compiled file]]// is //[[CL:Glossary:loaded]]//, an //[[CL:Glossary:object]]// can be constructed which can be shown to be //[[CL:Glossary:similar]]// to the original //[[CL:Glossary:object]]// which existed at the time the //[[CL:Glossary:file compiler]]// was operating.
 
 \endsubsubsection%{Externalizable Objects}
 
-\beginsubsubsection{Similarity of Literal Objects}
-\DefineSection{Similarity}
+\beginsubsubsection{Similarity of Literal Objects} \DefineSection{Similarity}
 
 \beginsubsubsubsection{Similarity of Aggregate Objects}
 
-
-Of the //[[CL:Glossary:types]]// over which //[[CL:Glossary:similarity]]// is defined, 
-some are treated as aggregate objects.  For these types, 
-//[[CL:Glossary:similarity]]// is defined recursively.  
-We say that an //[[CL:Glossary:object]]// of these types has certain ``basic qualities''
-and to satisfy the //[[CL:Glossary:similarity]]// relationship, the values of the
-corresponding qualities of the two //[[CL:Glossary:objects]]// must also be similar.
- 
-\endsubsubsubsection%{Similarity of Aggregate Objects}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Of the //[[CL:Glossary:types]]// over which //[[CL:Glossary:similarity]]// is defined,  some are treated as aggregate objects.  For these types,  //[[CL:Glossary:similarity]]// is defined recursively.   We say that an //[[CL:Glossary:object]]// of these types has certain ``basic qualities'' and to satisfy the //[[CL:Glossary:similarity]]// relationship, the values of the corresponding qualities of the two //[[CL:Glossary:objects]]// must also be similar.
+  \endsubsubsubsection%{Similarity of Aggregate Objects}
 
 \beginsubsubsubsection{Definition of Similarity}
 
@@ -980,78 +343,45 @@ Two //[[CL:Glossary:objects]]// $S$ (in //[[CL:Glossary:source code]]//) and $C$
 \beginlist
 
 \itemitem{\typeref{number}}
- 
-Two //[[CL:Glossary:numbers]]// $S$ and $C$ are //[[CL:Glossary:similar]]// if they are of the same //[[CL:Glossary:type]]//
-and represent the same mathematical value.
+  Two //[[CL:Glossary:numbers]]// $S$ and $C$ are //[[CL:Glossary:similar]]// if they are of the same //[[CL:Glossary:type]]// and represent the same mathematical value.
 
 \itemitem{\typeref{character}}
  
 
+Two //[[CL:Glossary:simple]]// //[[CL:Glossary:characters]]// $S$ and $C$ are //[[CL:Glossary:similar]]//  if they have //[[CL:Glossary:similar]]// //[[CL:Glossary:code]]// //[[CL:Glossary:attributes]]//.
 
-
-
-
-
-Two //[[CL:Glossary:simple]]// //[[CL:Glossary:characters]]// $S$ and $C$ are //[[CL:Glossary:similar]]// 
-if they have //[[CL:Glossary:similar]]// //[[CL:Glossary:code]]// //[[CL:Glossary:attributes]]//.
-
-//[[CL:Glossary:Implementations]]// providing additional, //[[CL:Glossary:implementation-defined]]// 
-//[[CL:Glossary:attributes]]// must define whether and how //[[CL:Glossary:non-simple]]// //[[CL:Glossary:characters]]// 
-can be regarded as //[[CL:Glossary:similar]]//.
+//[[CL:Glossary:Implementations]]// providing additional, //[[CL:Glossary:implementation-defined]]//  //[[CL:Glossary:attributes]]// must define whether and how //[[CL:Glossary:non-simple]]// //[[CL:Glossary:characters]]//  can be regarded as //[[CL:Glossary:similar]]//.
 
 \itemitem{\typeref{symbol}}
 
-Two //[[CL:Glossary:apparently uninterned]]// //[[CL:Glossary:symbols]]// $S$ and $C$ are //[[CL:Glossary:similar]]//
-if their
+Two //[[CL:Glossary:apparently uninterned]]// //[[CL:Glossary:symbols]]// $S$ and $C$ are //[[CL:Glossary:similar]]// if their
 
+//[[CL:Glossary:names]]// are //[[CL:Glossary:similar]]//.
 
-//[[CL:Glossary:names]]//
-are //[[CL:Glossary:similar]]//.
-
-\issue{COMPILE-FILE-SYMBOL-HANDLING:NEW-REQUIRE-CONSISTENCY}
-Two //[[CL:Glossary:interned]]// symbols $S$ and $C$ are //[[CL:Glossary:similar]]// 
-if their //[[CL:Glossary:names]]// are //[[CL:Glossary:similar]]//,
-and if either $S$ is accessible in the //[[CL:Glossary:current package]]// at compile time
+\issue{COMPILE-FILE-SYMBOL-HANDLING:NEW-REQUIRE-CONSISTENCY} Two //[[CL:Glossary:interned]]// symbols $S$ and $C$ are //[[CL:Glossary:similar]]//  if their //[[CL:Glossary:names]]// are //[[CL:Glossary:similar]]//, and if either $S$ is accessible in the //[[CL:Glossary:current package]]// at compile time
           and $C$ is accessible in the //[[CL:Glossary:current package]]// at load time,
        or $C$ is accessible in the //[[CL:Glossary:package]]// that is //[[CL:Glossary:similar]]// to
           the //[[CL:Glossary:home package]]// of $S$.
 
 (Note that //[[CL:Glossary:similarity]]// of
 
-
-//[[CL:Glossary:symbols]]// is dependent
-on neither the //[[CL:Glossary:current readtable]]// nor how \thefunction{read} would
-parse the //[[CL:Glossary:characters]]// in the //[[CL:Glossary:name]]// of the //[[CL:Glossary:symbol]]//.)
-
+//[[CL:Glossary:symbols]]// is dependent on neither the //[[CL:Glossary:current readtable]]// nor how \thefunction{read} would parse the //[[CL:Glossary:characters]]// in the //[[CL:Glossary:name]]// of the //[[CL:Glossary:symbol]]//.)
 
 \itemitem{\typeref{package}}
 
 Two //[[CL:Glossary:packages]]// $S$ and $C$ are //[[CL:Glossary:similar]]// if their //[[CL:Glossary:names]]// are //[[CL:Glossary:similar]]//.
 
-Note that although a //[[CL:Glossary:package]]// //[[CL:Glossary:object]]// is an //[[CL:Glossary:externalizable object]]//,
-the programmer is responsible for ensuring that the corresponding //[[CL:Glossary:package]]// is
-already in existence when code referencing it as a //[[CL:Glossary:literal]]// //[[CL:Glossary:object]]// 
-is //[[CL:Glossary:loaded]]//.  The //[[CL:Glossary:loader]]// finds the corresponding //[[CL:Glossary:package]]// //[[CL:Glossary:object]]//
-as if by calling **[[CL:Functions:find-package]]** with that //[[CL:Glossary:name]]// as an //[[CL:Glossary:argument]]//.
-An error is signaled by the //[[CL:Glossary:loader]]// if no //[[CL:Glossary:package]]// exists at load time.
+Note that although a //[[CL:Glossary:package]]// //[[CL:Glossary:object]]// is an //[[CL:Glossary:externalizable object]]//, the programmer is responsible for ensuring that the corresponding //[[CL:Glossary:package]]// is already in existence when code referencing it as a //[[CL:Glossary:literal]]// //[[CL:Glossary:object]]//  is //[[CL:Glossary:loaded]]//.  The //[[CL:Glossary:loader]]// finds the corresponding //[[CL:Glossary:package]]// //[[CL:Glossary:object]]// as if by calling **[[CL:Functions:find-package]]** with that //[[CL:Glossary:name]]// as an //[[CL:Glossary:argument]]//. An error is signaled by the //[[CL:Glossary:loader]]// if no //[[CL:Glossary:package]]// exists at load time.
 
 \itemitem{\typeref{random-state}}
- 
-Two //[[CL:Glossary:random states]]// $S$ and $C$ are //[[CL:Glossary:similar]]// if $S$
-would always produce the same sequence of pseudo-random numbers 
-as a //[[CL:Glossary:copy]]//\meaning{5} of $C$
-when given as the //random-state// //[[CL:Glossary:argument]]// to \thefunction{random}, 
-assuming equivalent //limit// //[[CL:Glossary:arguments]]// in each case.
+  Two //[[CL:Glossary:random states]]// $S$ and $C$ are //[[CL:Glossary:similar]]// if $S$ would always produce the same sequence of pseudo-random numbers  as a //[[CL:Glossary:copy]]//\meaning{5} of $C$ when given as the //random-state// //[[CL:Glossary:argument]]// to \thefunction{random},  assuming equivalent //limit// //[[CL:Glossary:arguments]]// in each case.
 
-(Note that since $C$ has been processed by the //[[CL:Glossary:file compiler]]//,
-it cannot be used directly as an //[[CL:Glossary:argument]]// to **[[CL:Functions:random]]**
-because **[[CL:Functions:random]]** would perform a side effect.)
+(Note that since $C$ has been processed by the //[[CL:Glossary:file compiler]]//, it cannot be used directly as an //[[CL:Glossary:argument]]// to **[[CL:Functions:random]]** because **[[CL:Functions:random]]** would perform a side effect.)
 
 \itemitem{\typeref{cons}} 
 
 Two //[[CL:Glossary:conses]]//, $S$ and $C$, are //[[CL:Glossary:similar]]// if
-    the //[[CL:Glossary:car]]//\meaning{2} of $S$ is //[[CL:Glossary:similar]]// to the //[[CL:Glossary:car]]//\meaning{2} of $C$,
-and the //[[CL:Glossary:cdr]]//\meaning{2} of $S$ is //[[CL:Glossary:similar]]// to the //[[CL:Glossary:cdr]]//\meaning{2} of $C$.
+    the //[[CL:Glossary:car]]//\meaning{2} of $S$ is //[[CL:Glossary:similar]]// to the //[[CL:Glossary:car]]//\meaning{2} of $C$, and the //[[CL:Glossary:cdr]]//\meaning{2} of $S$ is //[[CL:Glossary:similar]]// to the //[[CL:Glossary:cdr]]//\meaning{2} of $C$.
 
 \itemitem{\typeref{array}}
 
@@ -1071,59 +401,30 @@ Two //[[CL:Glossary:arrays]]// of //[[CL:Glossary:rank]]// other than one, $S$ a
  and each //[[CL:Glossary:element]]// of $S$ is //[[CL:Glossary:similar]]// to
       the corresponding //[[CL:Glossary:element]]// of $C$.
 
-In addition,
-if $S$ is a //[[CL:Glossary:simple array]]//, then $C$ must also be a //[[CL:Glossary:simple array]]//.
-If $S$ is a //[[CL:Glossary:displaced array]]//,
+In addition, if $S$ is a //[[CL:Glossary:simple array]]//, then $C$ must also be a //[[CL:Glossary:simple array]]//. If $S$ is a //[[CL:Glossary:displaced array]]//,
        has a //[[CL:Glossary:fill pointer]]//,
-    or is //[[CL:Glossary:actually adjustable]]//, 
-$C$ is permitted to lack any or all of these qualities.
+    or is //[[CL:Glossary:actually adjustable]]//,  $C$ is permitted to lack any or all of these qualities.
 
 \itemitem{\typeref{hash-table}}
 
-Two //[[CL:Glossary:hash tables]]// $S$ and $C$ are //[[CL:Glossary:similar]]// if they meet the following
-three requirements:
- 
-\beginlist
-\item{1.}  They both have the same test 
+Two //[[CL:Glossary:hash tables]]// $S$ and $C$ are //[[CL:Glossary:similar]]// if they meet the following three requirements:
+  \beginlist \item{1.}  They both have the same test 
  	    (\eg they are both **[[CL:Functions:eql]]** //[[CL:Glossary:hash tables]]//).
- 
-\item{2.}  There is a unique one-to-one correspondence between the keys of
-           the two //[[CL:Glossary:hash tables]]//, such that the corresponding keys are 
-	   //[[CL:Glossary:similar]]//.
+  \item{2.}  There is a unique one-to-one correspondence between the keys of
+           the two //[[CL:Glossary:hash tables]]//, such that the corresponding keys are  	   //[[CL:Glossary:similar]]//.
 
 \item{3.}  For all keys, the values associated with two corresponding keys
-           are //[[CL:Glossary:similar]]//.
-\endlist
- 
-If there is more than one possible one-to-one correspondence between
-the keys of $S$ and $C$, the consequences are unspecified.  
-A //[[CL:Glossary:conforming program]]// cannot use a table such as $S$ as an
-//[[CL:Glossary:externalizable constant]]//.
- 
-\itemitem{\typeref{pathname}}
- 
-Two //[[CL:Glossary:pathnames]]// $S$ and $C$ are //[[CL:Glossary:similar]]// if all corresponding 
-//[[CL:Glossary:pathname components]]// are //[[CL:Glossary:similar]]//.
+           are //[[CL:Glossary:similar]]//. \endlist
+  If there is more than one possible one-to-one correspondence between the keys of $S$ and $C$, the consequences are unspecified.   A //[[CL:Glossary:conforming program]]// cannot use a table such as $S$ as an //[[CL:Glossary:externalizable constant]]//.
+  \itemitem{\typeref{pathname}}
+  Two //[[CL:Glossary:pathnames]]// $S$ and $C$ are //[[CL:Glossary:similar]]// if all corresponding  //[[CL:Glossary:pathname components]]// are //[[CL:Glossary:similar]]//.
 
 \itemitem{\typeref{function}}
- 
-\issue{CONSTANT-FUNCTION-COMPILATION:NO}
-//[[CL:Glossary:Functions]]// are not //[[CL:Glossary:externalizable objects]]//.
-
+  \issue{CONSTANT-FUNCTION-COMPILATION:NO} //[[CL:Glossary:Functions]]// are not //[[CL:Glossary:externalizable objects]]//.
 
 \itemitem{\typeref{structure-object} and \typeref{standard-object}}
 
-\issue{LOAD-OBJECTS:MAKE-LOAD-FORM}
-A general-purpose concept of //[[CL:Glossary:similarity]]// does not exist for //[[CL:Glossary:structures]]//
-and //[[CL:Glossary:standard objects]]//.
-However, a //[[CL:Glossary:conforming program]]// is permitted to define a **[[CL:Functions:make-load-form]]**
-//[[CL:Glossary:method]]// for any //[[CL:Glossary:class]]// $K$ defined by that //[[CL:Glossary:program]]// that is
-a //[[CL:Glossary:subclass]]// of either \typeref{structure-object} or \typeref{standard-object}.
-The effect of such a //[[CL:Glossary:method]]// is to define that an //[[CL:Glossary:object]]// $S$ of //[[CL:Glossary:type]]// $K$
-in //[[CL:Glossary:source code]]// is //[[CL:Glossary:similar]]// to an //[[CL:Glossary:object]]// $C$ of //[[CL:Glossary:type]]// $K$
-in //[[CL:Glossary:compiled code]]// if $C$ was constructed from //[[CL:Glossary:code]]// produced by 
-calling **[[CL:Functions:make-load-form]]** on $S$.
-
+\issue{LOAD-OBJECTS:MAKE-LOAD-FORM} A general-purpose concept of //[[CL:Glossary:similarity]]// does not exist for //[[CL:Glossary:structures]]// and //[[CL:Glossary:standard objects]]//. However, a //[[CL:Glossary:conforming program]]// is permitted to define a **[[CL:Functions:make-load-form]]** //[[CL:Glossary:method]]// for any //[[CL:Glossary:class]]// $K$ defined by that //[[CL:Glossary:program]]// that is a //[[CL:Glossary:subclass]]// of either \typeref{structure-object} or \typeref{standard-object}. The effect of such a //[[CL:Glossary:method]]// is to define that an //[[CL:Glossary:object]]// $S$ of //[[CL:Glossary:type]]// $K$ in //[[CL:Glossary:source code]]// is //[[CL:Glossary:similar]]// to an //[[CL:Glossary:object]]// $C$ of //[[CL:Glossary:type]]// $K$ in //[[CL:Glossary:compiled code]]// if $C$ was constructed from //[[CL:Glossary:code]]// produced by  calling **[[CL:Functions:make-load-form]]** on $S$.
 
 \endlist
 
@@ -1131,79 +432,32 @@ calling **[[CL:Functions:make-load-form]]** on $S$.
 
 \beginsubsubsection{Extensions to Similarity Rules}
 
-Some //[[CL:Glossary:objects]]//, such as //[[CL:Glossary:streams]]//, \typeref{readtables}, and \typeref{methods}
-are not //[[CL:Glossary:externalizable objects]]// under the definition of similarity given above.
-That is, such //[[CL:Glossary:objects]]// may not portably appear as //[[CL:Glossary:literal]]// //[[CL:Glossary:objects]]// 
-in //[[CL:Glossary:code]]// to be processed by the //[[CL:Glossary:file compiler]]//. 
+Some //[[CL:Glossary:objects]]//, such as //[[CL:Glossary:streams]]//, \typeref{readtables}, and \typeref{methods} are not //[[CL:Glossary:externalizable objects]]// under the definition of similarity given above. That is, such //[[CL:Glossary:objects]]// may not portably appear as //[[CL:Glossary:literal]]// //[[CL:Glossary:objects]]//  in //[[CL:Glossary:code]]// to be processed by the //[[CL:Glossary:file compiler]]//. 
 
-An //[[CL:Glossary:implementation]]// is permitted to extend the rules of similarity, 
-so that other kinds of //[[CL:Glossary:objects]]// are //[[CL:Glossary:externalizable objects]]//
-for that //[[CL:Glossary:implementation]]//.
+An //[[CL:Glossary:implementation]]// is permitted to extend the rules of similarity,  so that other kinds of //[[CL:Glossary:objects]]// are //[[CL:Glossary:externalizable objects]]// for that //[[CL:Glossary:implementation]]//.
 
-If for some kind of //[[CL:Glossary:object]]//, //[[CL:Glossary:similarity]]// is
-neither defined by this specification 
-	    nor by the //[[CL:Glossary:implementation]]//, 
-then the //[[CL:Glossary:file compiler]]// must signal an error upon encountering such 
-an //[[CL:Glossary:object]]// as a //[[CL:Glossary:literal constant]]//.
+If for some kind of //[[CL:Glossary:object]]//, //[[CL:Glossary:similarity]]// is neither defined by this specification  	    nor by the //[[CL:Glossary:implementation]]//,  then the //[[CL:Glossary:file compiler]]// must signal an error upon encountering such  an //[[CL:Glossary:object]]// as a //[[CL:Glossary:literal constant]]//.
 
 \endsubsubsection%{Extensions to Similarity Rules}
-  
-\beginsubsubsection{Additional Constraints on Externalizable Objects}
+   \beginsubsubsection{Additional Constraints on Externalizable Objects}
 
+If two //[[CL:Glossary:literal objects]]// appearing in the source code for a single file processed with
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-If two //[[CL:Glossary:literal objects]]// appearing in the source code for a single file
-processed with
-
-the //[[CL:Glossary:file compiler]]// 
-are the //[[CL:Glossary:identical]]//,
-the corresponding //[[CL:Glossary:objects]]// in the //[[CL:Glossary:compiled code]]// 
-must also be the //[[CL:Glossary:identical]]//.
-\issue{CONSTANT-COLLAPSING:GENERALIZE}
-
-
-
-
-
-
+the //[[CL:Glossary:file compiler]]//  are the //[[CL:Glossary:identical]]//, the corresponding //[[CL:Glossary:objects]]// in the //[[CL:Glossary:compiled code]]//  must also be the //[[CL:Glossary:identical]]//. \issue{CONSTANT-COLLAPSING:GENERALIZE}
 
 With the exception of //[[CL:Glossary:symbols]]// and //[[CL:Glossary:packages]]//, any two
 
-//[[CL:Glossary:literal objects]]//
-in //[[CL:Glossary:code]]// being processed by
+//[[CL:Glossary:literal objects]]// in //[[CL:Glossary:code]]// being processed by
 
-the //[[CL:Glossary:file compiler]]//
-may be //[[CL:Glossary:coalesced]]// 
-if and only if they are //[[CL:Glossary:similar]]//; 
-if they are either both //[[CL:Glossary:symbols]]// or both //[[CL:Glossary:packages]]//,
-they may only be //[[CL:Glossary:coalesced]]// if and only if they are //[[CL:Glossary:identical]]//.
+the //[[CL:Glossary:file compiler]]// may be //[[CL:Glossary:coalesced]]//  if and only if they are //[[CL:Glossary:similar]]//;  if they are either both //[[CL:Glossary:symbols]]// or both //[[CL:Glossary:packages]]//, they may only be //[[CL:Glossary:coalesced]]// if and only if they are //[[CL:Glossary:identical]]//.
 
+\issue{CONSTANT-CIRCULAR-COMPILATION:YES} //[[CL:Glossary:Objects]]// containing circular references can 
 
-\issue{CONSTANT-CIRCULAR-COMPILATION:YES}
-//[[CL:Glossary:Objects]]// containing circular references can 
-
-be //[[CL:Glossary:externalizable objects]]//.
-The //[[CL:Glossary:file compiler]]// is required to preserve **[[CL:Functions:eql]]**ness of 
-substructures within a //[[CL:Glossary:file]]//.
+be //[[CL:Glossary:externalizable objects]]//. The //[[CL:Glossary:file compiler]]// is required to preserve **[[CL:Functions:eql]]**ness of  substructures within a //[[CL:Glossary:file]]//.
 
 Preserving **[[CL:Functions:eql]]**ness means that subobjects that are
 
-the //[[CL:Glossary:same]]//
-in the //[[CL:Glossary:source code]]// must 
+the //[[CL:Glossary:same]]// in the //[[CL:Glossary:source code]]// must 
 
 be
 
@@ -1211,96 +465,34 @@ the //[[CL:Glossary:same]]//
 
 in the corresponding //[[CL:Glossary:compiled code]]//.
 
+In addition, the following are constraints on the handling of //[[CL:Glossary:literal objects]]// by the //[[CL:Glossary:file compiler]]//:
+  \beginlist
 
+ \item{}\b{array:} If an //[[CL:Glossary:array]]// in the source code is a //[[CL:Glossary:simple array]]//, then the corresponding //[[CL:Glossary:array]]// in the compiled code will also be a //[[CL:Glossary:simple array]]//.  If an //[[CL:Glossary:array]]// in the source code is displaced, has a  //[[CL:Glossary:fill pointer]]//, or is //[[CL:Glossary:actually adjustable]]//, the corresponding  //[[CL:Glossary:array]]// in the compiled code might lack any or all of these qualities. If an //[[CL:Glossary:array]]// in the source code has a fill pointer, then the corresponding //[[CL:Glossary:array]]// in the compiled code might be only the size implied by the fill pointer.
 
+ \item{}\b{packages:} The loader is required to find the corresponding //[[CL:Glossary:package]]// //[[CL:Glossary:object]]// as if by calling  **[[CL:Functions:find-package]]** with the package name as an argument.   An error \oftype{package-error} is signaled if no  //[[CL:Glossary:package]]// of that name exists at load time.
 
+ \item{}\b{random-state:} A constant //[[CL:Glossary:random state]]// object cannot be used as the state argument  to \thefunction{random} because **[[CL:Functions:random]]** modifies this data structure.
+  \item{}\b{structure, standard-object:} //[[CL:Glossary:Objects]]// of //[[CL:Glossary:type]]// \typeref{structure-object} and \typeref{standard-object} may appear in compiled constants if there is an appropriate **[[CL:Functions:make-load-form]]** method defined for that //[[CL:Glossary:type]]//.
+  \issue{LOAD-OBJECTS:MAKE-LOAD-FORM} \DefineSection{CallingMakeLoadForm}
 
-In addition, the following are constraints on the handling of
-//[[CL:Glossary:literal objects]]// by the //[[CL:Glossary:file compiler]]//:
- 
-\beginlist
-
- \item{}\b{array:} If an //[[CL:Glossary:array]]// in the source code is a
-//[[CL:Glossary:simple array]]//, then the corresponding //[[CL:Glossary:array]]//
-in the compiled code will also be a //[[CL:Glossary:simple array]]//.  If
-an //[[CL:Glossary:array]]// in the source code is displaced, has a 
-//[[CL:Glossary:fill pointer]]//, or is //[[CL:Glossary:actually adjustable]]//, the corresponding 
-//[[CL:Glossary:array]]// in the compiled code might lack any or all of these
-qualities. If an //[[CL:Glossary:array]]// in the source code has a fill
-pointer, then the corresponding //[[CL:Glossary:array]]// in the compiled
-code might be only the size implied by the fill pointer.
-
- \item{}\b{packages:} The loader is required to find the
-corresponding //[[CL:Glossary:package]]// //[[CL:Glossary:object]]// as if by calling 
-**[[CL:Functions:find-package]]** with the package name as an argument.  
-An error \oftype{package-error} is signaled if no 
-//[[CL:Glossary:package]]// of that name exists at load time.
-
-
- \item{}\b{random-state:} A constant //[[CL:Glossary:random state]]//
-object cannot be used as the state argument 
-to \thefunction{random} because **[[CL:Functions:random]]** modifies this data structure.
- 
-\item{}\b{structure, standard-object:}
-//[[CL:Glossary:Objects]]// of //[[CL:Glossary:type]]// \typeref{structure-object} and \typeref{standard-object}
-may appear in compiled constants if there is an
-appropriate **[[CL:Functions:make-load-form]]** method defined for that
-//[[CL:Glossary:type]]//.
- 
-\issue{LOAD-OBJECTS:MAKE-LOAD-FORM}
-\DefineSection{CallingMakeLoadForm}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\issue{MAKE-LOAD-FORM-CONFUSION:REWRITE}
-The //[[CL:Glossary:file compiler]]// calls **[[CL:Functions:make-load-form]]** on any //[[CL:Glossary:object]]//
-that is referenced as a //[[CL:Glossary:literal object]]// if the //[[CL:Glossary:object]]// is a
-//[[CL:Glossary:generalized instance]]// of \typeref{standard-object},
-\typeref{structure-object}, \typeref{condition}, or any of a 
-(possibly empty) //[[CL:Glossary:implementation-dependent]]// set of other //[[CL:Glossary:classes]]//.
-The //[[CL:Glossary:file compiler]]// only calls **[[CL:Functions:make-load-form]]** once for
-any given //[[CL:Glossary:object]]// within a single //[[CL:Glossary:file]]//.
-
-
+\issue{MAKE-LOAD-FORM-CONFUSION:REWRITE} The //[[CL:Glossary:file compiler]]// calls **[[CL:Functions:make-load-form]]** on any //[[CL:Glossary:object]]// that is referenced as a //[[CL:Glossary:literal object]]// if the //[[CL:Glossary:object]]// is a //[[CL:Glossary:generalized instance]]// of \typeref{standard-object}, \typeref{structure-object}, \typeref{condition}, or any of a  (possibly empty) //[[CL:Glossary:implementation-dependent]]// set of other //[[CL:Glossary:classes]]//. The //[[CL:Glossary:file compiler]]// only calls **[[CL:Functions:make-load-form]]** once for any given //[[CL:Glossary:object]]// within a single //[[CL:Glossary:file]]//.
 
 \issue{COMPILE-FILE-SYMBOL-HANDLING:NEW-REQUIRE-CONSISTENCY}
  \item{}\b{symbol:} In order to guarantee that //[[CL:Glossary:compiled files]]// can be //[[CL:Glossary:loaded]]//
   correctly, users must ensure that the //[[CL:Glossary:packages]]// referenced in those //[[CL:Glossary:files]]//
   are defined consistently at compile time and load time.  //[[CL:Glossary:Conforming programs]]//
   must satisfy the following requirements:
-  
-\beginlist
-\itemitem{1.} The //[[CL:Glossary:current package]]// when a //[[CL:Glossary:top level form]]// in the //[[CL:Glossary:file]]//
+   \beginlist \itemitem{1.} The //[[CL:Glossary:current package]]// when a //[[CL:Glossary:top level form]]// in the //[[CL:Glossary:file]]//
       is processed by **[[CL:Functions:compile-file]]** must be the same as the //[[CL:Glossary:current package]]//
       when the //[[CL:Glossary:code]]// corresponding to that //[[CL:Glossary:top level form]]// in the
       //[[CL:Glossary:compiled file]]// is executed by **[[CL:Functions:load]]**.  In particular:
 
 \beginlist
 
-\itemitem{a.} Any //[[CL:Glossary:top level form]]// in a //[[CL:Glossary:file]]// that alters
-	  the //[[CL:Glossary:current package]]// must change it to a //[[CL:Glossary:package]]//
-	  of the same //[[CL:Glossary:name]]// both at compile time and at load time.
+\itemitem{a.} Any //[[CL:Glossary:top level form]]// in a //[[CL:Glossary:file]]// that alters 	  the //[[CL:Glossary:current package]]// must change it to a //[[CL:Glossary:package]]// 	  of the same //[[CL:Glossary:name]]// both at compile time and at load time.
 
-\itemitem{b.} If the first //[[CL:Glossary:non-atomic]]// //[[CL:Glossary:top level form]]// in the //[[CL:Glossary:file]]//
-	  is not an \macref{in-package} //[[CL:Glossary:form]]//, then the //[[CL:Glossary:current package]]//
-	  at the time **[[CL:Functions:load]]** is called must be a //[[CL:Glossary:package]]// with the 
-	  same //[[CL:Glossary:name]]// as the package that was the //[[CL:Glossary:current package]]//
-	  at the time **[[CL:Functions:compile-file]]** was called.
-\endlist
+\itemitem{b.} If the first //[[CL:Glossary:non-atomic]]// //[[CL:Glossary:top level form]]// in the //[[CL:Glossary:file]]// 	  is not an \macref{in-package} //[[CL:Glossary:form]]//, then the //[[CL:Glossary:current package]]// 	  at the time **[[CL:Functions:load]]** is called must be a //[[CL:Glossary:package]]// with the  	  same //[[CL:Glossary:name]]// as the package that was the //[[CL:Glossary:current package]]// 	  at the time **[[CL:Functions:compile-file]]** was called. \endlist
 
 \itemitem{2.} For all //[[CL:Glossary:symbols]]// 
       appearing lexically within a //[[CL:Glossary:top level form]]// that
@@ -1311,18 +503,15 @@ any given //[[CL:Glossary:object]]// within a single //[[CL:Glossary:file]]//.
       load-time //[[CL:Glossary:current package]]// and in the //[[CL:Glossary:package]]//
       with the same //[[CL:Glossary:name]]// as the
       compile-time //[[CL:Glossary:home package]]//. 
-  
-\itemitem{3.} For all //[[CL:Glossary:symbols]]// represented in the //[[CL:Glossary:compiled file]]// 
+   \itemitem{3.} For all //[[CL:Glossary:symbols]]// represented in the //[[CL:Glossary:compiled file]]// 
       that were //[[CL:Glossary:external symbols]]// in
       their //[[CL:Glossary:home package]]// at compile time, there must be a //[[CL:Glossary:symbol]]// with the
       same //[[CL:Glossary:name]]// that is an //[[CL:Glossary:external symbol]]// in the //[[CL:Glossary:package]]// 
-      with the same //[[CL:Glossary:name]]// at load time.
-\endlist
+      with the same //[[CL:Glossary:name]]// at load time. \endlist
         
   If any of these conditions do not hold, the //[[CL:Glossary:package]]// in which the //[[CL:Glossary:loader]]// looks
   for the affected //[[CL:Glossary:symbols]]// is unspecified.  //[[CL:Glossary:Implementations]]// are permitted 
   to signal an error or to define this behavior.
-
 
 \endlist
 
@@ -1330,89 +519,31 @@ any given //[[CL:Glossary:object]]// within a single //[[CL:Glossary:file]]//.
 
 \endsubSection%{Literal Objects in Compiled Files}
 
-\beginsubsection{Exceptional Situations in the Compiler}
-\DefineSection{FileCompilerExceptions}
+\beginsubsection{Exceptional Situations in the Compiler} \DefineSection{FileCompilerExceptions}
 
 \issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
 
+\issue{COMPILER-WARNING-STREAM} \issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
 
-
-
-
-
-
-
-
-
-
-
-\issue{COMPILER-WARNING-STREAM}
-\issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
-
-
-
-
-
-
-
-
-**[[CL:Functions:compile]]** and **[[CL:Functions:compile-file]]** are permitted to
-signal errors and warnings, including errors due to compile-time
-processing of \f{(eval-when (:compile-toplevel) ...)} forms,
-macro expansion, and conditions signaled by the compiler itself.
-                                                
-//[[CL:Glossary:Conditions]]// \oftype{error} might be signaled by the compiler
-in situations where the compilation cannot proceed without intervention.  
- 
-In addition to situations for which the standard specifies that
-//[[CL:Glossary:conditions]]// \oftype{warning} must or might be signaled,
-warnings might be signaled in situations where the compiler can
-determine that the consequences are undefined or that a run-time
-error will be signaled.  Examples of this situation are as follows: 
+**[[CL:Functions:compile]]** and **[[CL:Functions:compile-file]]** are permitted to signal errors and warnings, including errors due to compile-time processing of \f{(eval-when (:compile-toplevel) ...)} forms, macro expansion, and conditions signaled by the compiler itself.
+                                                 //[[CL:Glossary:Conditions]]// \oftype{error} might be signaled by the compiler in situations where the compilation cannot proceed without intervention.  
+  In addition to situations for which the standard specifies that //[[CL:Glossary:conditions]]// \oftype{warning} must or might be signaled, warnings might be signaled in situations where the compiler can determine that the consequences are undefined or that a run-time error will be signaled.  Examples of this situation are as follows: 
     violating type declarations,
     altering or assigning the value of a constant defined with \macref{defconstant},
     calling built-in Lisp functions with a wrong number of arguments or malformed keyword
-      argument lists, 
-and using unrecognized declaration specifiers.
- 
-The compiler is permitted to issue warnings about matters of
-programming style as conditions \oftype{style-warning}.
-Examples of this situation are as follows:
+      argument lists,  and using unrecognized declaration specifiers.
+  The compiler is permitted to issue warnings about matters of programming style as conditions \oftype{style-warning}. Examples of this situation are as follows:
       redefining a function using a different argument list,
       calling a function with a wrong number of arguments,
       not declaring **[[CL:Declarations:ignore]]** of a local variable that is not referenced,
   and referencing a variable declared **[[CL:Declarations:ignore]]**.
 
+Both **[[CL:Functions:compile]]** and **[[CL:Functions:compile-file]]** are permitted (but not required) to //[[CL:Glossary:establish]]// a //[[CL:Glossary:handler]]// for //[[CL:Glossary:conditions]]// \oftype{error}.  For example, they might signal a warning, and restart compilation from some //[[CL:Glossary:implementation-dependent]]// point in order to let the  compilation proceed without manual intervention.
 
-
-
-
-Both **[[CL:Functions:compile]]** and **[[CL:Functions:compile-file]]** are permitted
-(but not required) to //[[CL:Glossary:establish]]// a //[[CL:Glossary:handler]]//
-for //[[CL:Glossary:conditions]]// \oftype{error}.  For example, they
-might signal a warning, and restart compilation from some
-//[[CL:Glossary:implementation-dependent]]// point in order to let the 
-compilation proceed without manual intervention.
-
-Both **[[CL:Functions:compile]]** and **[[CL:Functions:compile-file]]** return three
-values, the second two indicating whether the source code being compiled
-contained errors and whether style warnings were issued.
+Both **[[CL:Functions:compile]]** and **[[CL:Functions:compile-file]]** return three values, the second two indicating whether the source code being compiled contained errors and whether style warnings were issued.
  
 
- 
-Some warnings might be deferred until the end of compilation. 
-See \macref{with-compilation-unit}.
-
-
-
-
-
-
-
-
+  Some warnings might be deferred until the end of compilation.  See \macref{with-compilation-unit}.
 
 \endsubSection%{Exceptional Situations in the Compiler}
-
-
-
 

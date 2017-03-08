@@ -1,165 +1,60 @@
 
 
-
 \beginsubsection{Numbers as Tokens}
 
-
-
-When a //[[CL:Glossary:token]]// is read,
-it is interpreted as a //[[CL:Glossary:number]]// or //[[CL:Glossary:symbol]]//.
-The //[[CL:Glossary:token]]// is interpreted as a //[[CL:Glossary:number]]// if it satisfies
-the syntax for numbers specified in \thenextfigure.
-
-
-
+When a //[[CL:Glossary:token]]// is read, it is interpreted as a //[[CL:Glossary:number]]// or //[[CL:Glossary:symbol]]//. The //[[CL:Glossary:token]]// is interpreted as a //[[CL:Glossary:number]]// if it satisfies the syntax for numbers specified in \thenextfigure.
 
 \DefineFigure{SyntaxForNumericTokens}
 
+\boxfig {\advance\baselineskip by 2.5pt \halign{{\hskip 2pc}#\hfil&#\hfil&#\hfil\cr
+ //numeric-token//   & ::$=$ & \down{integer} $\vert$  				   \down{ratio}   $\vert$ 				   \down{float}   \cr
+ //integer//         & ::$=$ & \ttbrac{//sign//}  				   \plusparam{decimal-digit}  				   //decimal-point// $\vert$ 				   \ttbrac{//sign//}  				   \plusparam{digit} \cr
 
-
-\boxfig
-{\advance\baselineskip by 2.5pt
-\halign{{\hskip 2pc}#\hfil&#\hfil&#\hfil\cr
- //numeric-token//   & ::$=$ & \down{integer} $\vert$ 
-				   \down{ratio}   $\vert$
-				   \down{float}   \cr
- //integer//         & ::$=$ & \ttbrac{//sign//} 
-				   \plusparam{decimal-digit} 
-				   //decimal-point// $\vert$
-				   \ttbrac{//sign//} 
-				   \plusparam{digit} \cr
-
-
-
- //ratio//           & ::$=$ & \ttbrac{//sign//}
-				   \plus{\curly{//digit//}}
-				   //slash// 
-				   \plus{\curly{//digit//}}   \cr
- //float//           & ::$=$ & \ttbrac{//sign//}
-				   \star{\curly{//decimal-digit//}}
-				   //decimal-point//
-				   \plus{\curly{//decimal-digit//}}
-				   \ttbrac{\down{exponent}}      \cr
-		         &       & $\vert\;$
-				   \ttbrac{//sign//}
-				   \plus{\curly{//decimal-digit//}} 
-				   \ttbrac{//decimal-point// 
-					   \star{\curly{//decimal-digit//}}}
-				   \down{exponent} \cr
- //exponent//        & ::$=$ & //exponent-marker//
-				   \ttbrac{//sign//}
-				   \plus{\curly{//digit//}}   \cr
+ //ratio//           & ::$=$ & \ttbrac{//sign//} 				   \plus{\curly{//digit//}} 				   //slash//  				   \plus{\curly{//digit//}}   \cr
+ //float//           & ::$=$ & \ttbrac{//sign//} 				   \star{\curly{//decimal-digit//}} 				   //decimal-point// 				   \plus{\curly{//decimal-digit//}} 				   \ttbrac{\down{exponent}}      \cr 		         &       & $\vert\;$ 				   \ttbrac{//sign//} 				   \plus{\curly{//decimal-digit//}}  				   \ttbrac{//decimal-point//  					   \star{\curly{//decimal-digit//}}} 				   \down{exponent} \cr
+ //exponent//        & ::$=$ & //exponent-marker// 				   \ttbrac{//sign//} 				   \plus{\curly{//digit//}}   \cr
  \noalign{\vskip 5pt}
  //sign//---a //[[CL:Glossary:sign]]//.\span\span\cr
  //slash//---a //[[CL:Glossary:slash]]//\span\span\cr
  //decimal-point//---a //[[CL:Glossary:dot]]//.\span\span\cr
  //exponent-marker//---an //[[CL:Glossary:exponent marker]]//.\span\span\cr
  //decimal-digit//---a //[[CL:Glossary:digit]]// in //[[CL:Glossary:radix]]// \f{10}.\span\span\cr
- //digit//---a //[[CL:Glossary:digit]]// in the //[[CL:Glossary:current input radix]]//.\span\span\cr
-}}
-\caption{Syntax for Numeric Tokens}
-\endfig
+ //digit//---a //[[CL:Glossary:digit]]// in the //[[CL:Glossary:current input radix]]//.\span\span\cr }} \caption{Syntax for Numeric Tokens} \endfig
 
-\beginsubsubsection{Potential Numbers as Tokens}
-\DefineSection{PotentialNumbersAsTokens}
+\beginsubsubsection{Potential Numbers as Tokens} \DefineSection{PotentialNumbersAsTokens}
 
+To allow implementors and future \clisp\ standards to extend the syntax of numbers, a syntax for //[[CL:Glossary:potential numbers]]// is defined that is more general than the syntax for numbers. A //[[CL:Glossary:token]]// is a //[[CL:Glossary:potential number]]// if it satisfies all of the following requirements:
 
-
-To allow implementors and future \clisp\ standards
-to extend the syntax of numbers, a
-syntax for //[[CL:Glossary:potential numbers]]// is defined that is
-more general than the syntax for numbers.
-A //[[CL:Glossary:token]]// is a //[[CL:Glossary:potential number]]// if it satisfies all of the following
-requirements:
-
-
-\beginlist
-\item{1.}
-The //[[CL:Glossary:token]]// consists entirely of 
+\beginlist \item{1.} The //[[CL:Glossary:token]]// consists entirely of 
   //[[CL:Glossary:digits]]//,
   //[[CL:Glossary:signs]]//,
   //[[CL:Glossary:ratio markers]]//,
   decimal points (\f{.}),
   extension characters (\hat\ or \f{\_}),
-  and number markers.
-A number marker is a letter. 
-Whether a letter may be treated as a number marker depends on context,
-but no letter that is adjacent to another letter may ever be treated as a number marker.
-//[[CL:Glossary:Exponent markers]]// are number markers.
+  and number markers. A number marker is a letter.  Whether a letter may be treated as a number marker depends on context, but no letter that is adjacent to another letter may ever be treated as a number marker. //[[CL:Glossary:Exponent markers]]// are number markers.
 
+\item{2.} The //[[CL:Glossary:token]]// contains at least one digit.  Letters may be considered to be digits, depending on the //[[CL:Glossary:current input base]]//, but only in //[[CL:Glossary:tokens]]// containing no decimal points.
 
-\item{2.}
-The //[[CL:Glossary:token]]// contains at least one digit.  Letters may be considered to be
-digits, depending on the //[[CL:Glossary:current input base]]//, but only
-in //[[CL:Glossary:tokens]]// containing no decimal points.
+\item{3.} The //[[CL:Glossary:token]]// begins with a //[[CL:Glossary:digit]]//, //[[CL:Glossary:sign]]//, decimal point, or extension character, \issue{COLON-NUMBER} \reviewer{Barmar: This section is unnecessary because the first bullet already  		  omits discussion of a colon (//[[CL:Glossary:package marker]]//).}%!!! but not a 
 
+//[[CL:Glossary:package marker]]//. The syntax involving a leading 
 
+//[[CL:Glossary:package marker]]// followed by a //[[CL:Glossary:potential number]]// is not well-defined. The consequences of the use  of notation such as \f{:1}, \f{:1/2}, and \f{:2{\hat}3} in a position where an expression appropriate for **[[CL:Functions:read]]**  is expected are unspecified.
 
-\item{3.}
-The //[[CL:Glossary:token]]// begins with a //[[CL:Glossary:digit]]//, //[[CL:Glossary:sign]]//, decimal point, or extension character,
-\issue{COLON-NUMBER}
-\reviewer{Barmar: This section is unnecessary because the first bullet already 
-		  omits discussion of a colon (//[[CL:Glossary:package marker]]//).}%!!!
-but not a 
+\item{4.} The //[[CL:Glossary:token]]// does not end with a sign. \endlist
 
-//[[CL:Glossary:package marker]]//.
-The syntax involving a leading 
+If a //[[CL:Glossary:potential number]]// has number syntax,  a //[[CL:Glossary:number]]// of the appropriate type is constructed and returned,  if the //[[CL:Glossary:number]]// is representable in an implementation. A //[[CL:Glossary:number]]// will not be representable in an implementation  if it is outside the boundaries set by the //[[CL:Glossary:implementation-dependent]]//  constants for //[[CL:Glossary:numbers]]//. For example, specifying too large or too small an exponent for a //[[CL:Glossary:float]]// may make the //[[CL:Glossary:number]]// impossible to represent in the implementation. A //[[CL:Glossary:ratio]]// with denominator zero (such as \f{-35/000}) is not represented in any implementation. When a //[[CL:Glossary:token]]// with the syntax of a number cannot be converted to an internal //[[CL:Glossary:number]]//, an error \oftype{reader-error} is signaled.  An error must not be signaled for specifying too many significant digits for a //[[CL:Glossary:float]]//; a truncated or rounded value should be produced.
 
-//[[CL:Glossary:package marker]]// followed by a //[[CL:Glossary:potential number]]// is
-not well-defined. The consequences of the use 
-of notation such as \f{:1}, \f{:1/2}, and \f{:2{\hat}3} in a
-position where an expression appropriate for **[[CL:Functions:read]]** 
-is expected are unspecified.
+If there is an ambiguity as to whether a letter should be treated as a digit or as a number marker, the letter is treated as a digit.
 
+\beginsubsubsubsection{Escape Characters and Potential Numbers} \DefineSection{EscCharsAndPotentialNums}
 
-
-\item{4.}
-The //[[CL:Glossary:token]]// does not end with a sign.
-\endlist
-
-
-If a //[[CL:Glossary:potential number]]// has number syntax, 
-a //[[CL:Glossary:number]]// of the appropriate type is constructed and returned, 
-if the //[[CL:Glossary:number]]// is representable in an implementation.
-A //[[CL:Glossary:number]]// will not be representable in an implementation 
-if it is outside the boundaries set by the //[[CL:Glossary:implementation-dependent]]// 
-constants for //[[CL:Glossary:numbers]]//.
-For example, specifying too large or too small an exponent for a //[[CL:Glossary:float]]//
-may make the //[[CL:Glossary:number]]// impossible to represent in the implementation.
-A //[[CL:Glossary:ratio]]// with denominator zero (such as \f{-35/000})
-is not represented in any implementation.
-When a //[[CL:Glossary:token]]// with the syntax of a number cannot be converted to an internal
-//[[CL:Glossary:number]]//, an error \oftype{reader-error} is signaled.  An error
-must not be signaled for specifying too many significant digits
-for a //[[CL:Glossary:float]]//; a truncated or rounded value should be produced.
-
-
-
-If there is an ambiguity as to whether
-a letter should be treated as a digit or as a number marker,
-the letter is treated as a digit.
-
-\beginsubsubsubsection{Escape Characters and Potential Numbers}
-\DefineSection{EscCharsAndPotentialNums}
-
-
-
-
-A //[[CL:Glossary:potential number]]// cannot contain any //[[CL:Glossary:escape]]//
-//[[CL:Glossary:characters]]//.  An //[[CL:Glossary:escape]]// //[[CL:Glossary:character]]// robs the following
-//[[CL:Glossary:character]]// of all syntactic qualities, forcing it to be strictly
-//[[CL:Glossary:alphabetic]]//\meaning{2} and therefore unsuitable for use in a
-//[[CL:Glossary:potential number]]//.  For example, all of the following
-representations are interpreted as //[[CL:Glossary:symbols]]//, not //[[CL:Glossary:numbers]]//:
+A //[[CL:Glossary:potential number]]// cannot contain any //[[CL:Glossary:escape]]// //[[CL:Glossary:characters]]//.  An //[[CL:Glossary:escape]]// //[[CL:Glossary:character]]// robs the following //[[CL:Glossary:character]]// of all syntactic qualities, forcing it to be strictly //[[CL:Glossary:alphabetic]]//\meaning{2} and therefore unsuitable for use in a //[[CL:Glossary:potential number]]//.  For example, all of the following representations are interpreted as //[[CL:Glossary:symbols]]//, not //[[CL:Glossary:numbers]]//:
 
 \code
- \\256   25\\64   1.0\\E6   |100|   3\\.14159   |3/4|   3\\/4   5||
-\endcode
+ \\256   25\\64   1.0\\E6   |100|   3\\.14159   |3/4|   3\\/4   5|| \endcode
 
-In each case, removing the //[[CL:Glossary:escape]]// //[[CL:Glossary:character]]// (or //[[CL:Glossary:characters]]//) 
-would 
-
-
+In each case, removing the //[[CL:Glossary:escape]]// //[[CL:Glossary:character]]// (or //[[CL:Glossary:characters]]//)  would 
 
 cause the token to be a //[[CL:Glossary:potential number]]//.
 
@@ -167,33 +62,16 @@ cause the token to be a //[[CL:Glossary:potential number]]//.
 
 \beginsubsubsubsection{Examples of Potential Numbers}
 
-As examples, the //[[CL:Glossary:tokens]]// in \thenextfigure\ are //[[CL:Glossary:potential numbers]]//,
-but they are not actually numbers, and so are reserved //[[CL:Glossary:tokens]]//;
-a //[[CL:Glossary:conforming implementation]]// is permitted, but not required,
-to define their meaning.
+As examples, the //[[CL:Glossary:tokens]]// in \thenextfigure\ are //[[CL:Glossary:potential numbers]]//, but they are not actually numbers, and so are reserved //[[CL:Glossary:tokens]]//; a //[[CL:Glossary:conforming implementation]]// is permitted, but not required, to define their meaning.
 
-\showfive{Examples of reserved tokens}{
-\f{1b5000}    & \f{777777q}     & \f{1.7J} & \f{-3/4+6.7J} & \f{12/25/83}\cr
-\f{27{\hat}19} & \f{3{\hat}4/5}   & \f{6//7} & \f{3.1.2.6}   & \f{{\hat}-43\hat}\cr
-\f{3.141_592_653_589_793_238_4} & \f{-3.7+2.6i-6.17j+19.6k}\cr
-}
+\showfive{Examples of reserved tokens}{ \f{1b5000}    & \f{777777q}     & \f{1.7J} & \f{-3/4+6.7J} & \f{12/25/83}\cr \f{27{\hat}19} & \f{3{\hat}4/5}   & \f{6//7} & \f{3.1.2.6}   & \f{{\hat}-43\hat}\cr \f{3.141_592_653_589_793_238_4} & \f{-3.7+2.6i-6.17j+19.6k}\cr }
 
+The //[[CL:Glossary:tokens]]// in \thenextfigure\ are not //[[CL:Glossary:potential numbers]]//;  they are always treated as //[[CL:Glossary:symbols]]//:
 
-The //[[CL:Glossary:tokens]]// in \thenextfigure\ are not //[[CL:Glossary:potential numbers]]//; 
-they are always treated as //[[CL:Glossary:symbols]]//:
+\showfive{Examples of symbols}{ \f{/}    & \f{/5}    & \f{+}  & \f{1+}   & \f{1-}\cr \f{foo+} & \f{ab.cd} & \f{\_} & \f{\hat} & \f{{\hat}/-}\cr }
+                                   The //[[CL:Glossary:tokens]]// in \thenextfigure\ are //[[CL:Glossary:potential numbers]]// if the //[[CL:Glossary:current input base]]// is \f{16},  but they are always treated as //[[CL:Glossary:symbols]]// if the //[[CL:Glossary:current input base]]// is \f{10}. 
 
-\showfive{Examples of symbols}{
-\f{/}    & \f{/5}    & \f{+}  & \f{1+}   & \f{1-}\cr
-\f{foo+} & \f{ab.cd} & \f{\_} & \f{\hat} & \f{{\hat}/-}\cr
-}
-                                  
-The //[[CL:Glossary:tokens]]// in \thenextfigure\ are //[[CL:Glossary:potential numbers]]//
-if the //[[CL:Glossary:current input base]]// is \f{16}, 
-but they are always treated as //[[CL:Glossary:symbols]]// if the //[[CL:Glossary:current input base]]// is \f{10}. 
-
-\showfive{Examples of symbols or potential numbers}{
-\f{bad-face} & \f{25-dec-83} & \f{a/b} & \f{fad_cafe} & \f{f{\hat}}\cr
-}
+\showfive{Examples of symbols or potential numbers}{ \f{bad-face} & \f{25-dec-83} & \f{a/b} & \f{fad_cafe} & \f{f{\hat}}\cr }
 
 \endsubsubsubsection%{Examples of Potential Numbers}
 
@@ -201,17 +79,13 @@ but they are always treated as //[[CL:Glossary:symbols]]// if the //[[CL:Glossar
 
 \endsubsection%{Numbers as Tokens}
 
-\beginsubsection{Constructing Numbers from Tokens}
-\DefineSection{NumsFromTokens}
+\beginsubsection{Constructing Numbers from Tokens} \DefineSection{NumsFromTokens}
 
-A //[[CL:Glossary:real]]// is constructed directly from a corresponding numeric //[[CL:Glossary:token]]//;
-\seefigure\SyntaxForNumericTokens.
+A //[[CL:Glossary:real]]// is constructed directly from a corresponding numeric //[[CL:Glossary:token]]//; \seefigure\SyntaxForNumericTokens.
 
-A //[[CL:Glossary:complex]]// is notated as a \f{\#C} (or \f{\#c}) followed by a //[[CL:Glossary:list]]//
-of two //[[CL:Glossary:reals]]//; \seesection\SharpsignC.
+A //[[CL:Glossary:complex]]// is notated as a \f{\#C} (or \f{\#c}) followed by a //[[CL:Glossary:list]]// of two //[[CL:Glossary:reals]]//; \seesection\SharpsignC.
 
-The //[[CL:Glossary:reader macros]]// \f{\#B}, \f{\#O}, \f{\#X}, and \f{\#R} may also be useful
-in controlling the input //[[CL:Glossary:radix]]// in which //[[CL:Glossary:rationals]]// are parsed;
+The //[[CL:Glossary:reader macros]]// \f{\#B}, \f{\#O}, \f{\#X}, and \f{\#R} may also be useful in controlling the input //[[CL:Glossary:radix]]// in which //[[CL:Glossary:rationals]]// are parsed;
  \seesection\SharpsignB,
      \secref\SharpsignO,
      \secref\SharpsignX,
@@ -221,152 +95,72 @@ This section summarizes the full syntax for //[[CL:Glossary:numbers]]//.
 
 \beginsubsubsection{Syntax of a Rational}
 
-\beginsubsubsubsection{Syntax of an Integer}
-\DefineSection{SyntaxOfIntegers}
+\beginsubsubsubsection{Syntax of an Integer} \DefineSection{SyntaxOfIntegers}
 
-
-
-
-
-
-
-//[[CL:Glossary:Integers]]// can be written as a sequence of //[[CL:Glossary:digits]]//, 
-optionally preceded by a //[[CL:Glossary:sign]]// and optionally followed by a decimal point;
-\seefigure\SyntaxForNumericTokens.
-When a decimal point is used,
-the //[[CL:Glossary:digits]]// are taken to be in //[[CL:Glossary:radix]]// \f{10};
-when no decimal point is used,
-the //[[CL:Glossary:digits]]// are taken to be in radix given by the //[[CL:Glossary:current input base]]//.
+//[[CL:Glossary:Integers]]// can be written as a sequence of //[[CL:Glossary:digits]]//,  optionally preceded by a //[[CL:Glossary:sign]]// and optionally followed by a decimal point; \seefigure\SyntaxForNumericTokens. When a decimal point is used, the //[[CL:Glossary:digits]]// are taken to be in //[[CL:Glossary:radix]]// \f{10}; when no decimal point is used, the //[[CL:Glossary:digits]]// are taken to be in radix given by the //[[CL:Glossary:current input base]]//.
 
 For information on how //[[CL:Glossary:integers]]// are printed, \seesection\PrintingIntegers.
 
 \endsubsubsubsection%{Syntax of an Integer}
 
-\beginsubsubsubsection{Syntax of a Ratio}
-\DefineSection{SyntaxOfRatios}
+\beginsubsubsubsection{Syntax of a Ratio} \DefineSection{SyntaxOfRatios}
 
-//[[CL:Glossary:Ratios]]// can be written as an optional //[[CL:Glossary:sign]]// followed by two
-non-empty sequences of //[[CL:Glossary:digits]]// separated by a //[[CL:Glossary:slash]]//;
-\seefigure\SyntaxForNumericTokens.
+//[[CL:Glossary:Ratios]]// can be written as an optional //[[CL:Glossary:sign]]// followed by two non-empty sequences of //[[CL:Glossary:digits]]// separated by a //[[CL:Glossary:slash]]//; \seefigure\SyntaxForNumericTokens.
 
-The second sequence may not consist
-entirely of zeros.
-
-
-
+The second sequence may not consist entirely of zeros.
 
 Examples of //[[CL:Glossary:ratios]]// are in \thenextfigure.
 
-\showtwo{Examples of Ratios}{
-\f{2/3}                & ;This is in canonical form                   \cr
-\f{4/6}                & ;A non-canonical form for 2/3                \cr
-\f{-17/23}             & ;A ratio preceded by a sign                  \cr
-\f{-30517578125/32768} & ;This is $(-5/2)^{15}$                       \cr
-\f{10/5}               & ;The canonical form for this is \f{2}        \cr
-\f{\#o-101/75}         & ;Octal notation for $-65/61$                 \cr
-\f{\#3r120/21}         & ;Ternary notation for $15/7$                 \cr
-\f{\#Xbc/ad}           & ;Hexadecimal notation for $188/173$          \cr
-\f{\#xFADED/FACADE}    & ;Hexadecimal notation for $1027565/16435934$ \cr
-}
+\showtwo{Examples of Ratios}{ \f{2/3}                & ;This is in canonical form                   \cr \f{4/6}                & ;A non-canonical form for 2/3                \cr \f{-17/23}             & ;A ratio preceded by a sign                  \cr \f{-30517578125/32768} & ;This is $(-5/2)^{15}$                       \cr \f{10/5}               & ;The canonical form for this is \f{2}        \cr \f{\#o-101/75}         & ;Octal notation for $-65/61$                 \cr \f{\#3r120/21}         & ;Ternary notation for $15/7$                 \cr \f{\#Xbc/ad}           & ;Hexadecimal notation for $188/173$          \cr \f{\#xFADED/FACADE}    & ;Hexadecimal notation for $1027565/16435934$ \cr }
 
-\reviewer{Barmar: \#o, \#3r, \#X, and \#x mentioned above 
-		  are not in the syntax rules defined just above that.}
+\reviewer{Barmar: \#o, \#3r, \#X, and \#x mentioned above  		  are not in the syntax rules defined just above that.}
 
-
-For information on how //[[CL:Glossary:ratios]]// are printed,
-\seesection\PrintingRatios.
+For information on how //[[CL:Glossary:ratios]]// are printed, \seesection\PrintingRatios.
 
 \endsubsubsubsection%{Syntax of a Ratio}
 
 \endsubsubsection%{Syntax of a Rational}
 
-\beginsubsubsection{Syntax of a Float}
-\DefineSection{SyntaxOfFloats}
+\beginsubsubsection{Syntax of a Float} \DefineSection{SyntaxOfFloats}
 
+//[[CL:Glossary:Floats]]// can be written in either decimal fraction or computerized scientific notation: an optional sign, then a non-empty sequence of digits with an embedded decimal point, then an optional decimal exponent specification. If there is no exponent specifier, then the decimal point is required, and there must be digits after it. The exponent specifier consists of an //[[CL:Glossary:exponent marker]]//, an optional sign, and a non-empty sequence of digits. If no exponent specifier is present, or if the //[[CL:Glossary:exponent marker]]// \f{e} (or \f{E}) is used, then
 
-//[[CL:Glossary:Floats]]// can be written in either decimal fraction or computerized
-scientific notation: an optional sign, then a non-empty sequence of digits
-with an embedded decimal point,
-then an optional decimal exponent specification.
-If there is no exponent specifier, then
-the decimal point is required, and there must be digits
-after it.
-The exponent specifier consists of an //[[CL:Glossary:exponent marker]]//,
-an optional sign, and a non-empty sequence of digits.
-If no exponent specifier is present, or if the //[[CL:Glossary:exponent marker]]// \f{e}
-(or \f{E}) is used, then
+the format specified by \varref{*read-default-float-format*} is used. \Seefigure\SyntaxForNumericTokens.
 
+An implementation may provide one or more kinds of //[[CL:Glossary:float]]// that collectively make up \thetype{float}.
 
-
-the format specified
-by \varref{*read-default-float-format*} is used.
-\Seefigure\SyntaxForNumericTokens.
-
-
-An implementation may provide one or more kinds of //[[CL:Glossary:float]]//
-that collectively make up \thetype{float}.
-
-The letters \f{s}, \f{f}, \f{d}, and \f{l} (or their
-respective uppercase equivalents) explicitly specify the
-use of the //[[CL:Glossary:types]]// \typeref{short-float}, \typeref{single-float}, 
-\typeref{double-float}, and \typeref{long-float}, respectively.
+The letters \f{s}, \f{f}, \f{d}, and \f{l} (or their respective uppercase equivalents) explicitly specify the use of the //[[CL:Glossary:types]]// \typeref{short-float}, \typeref{single-float},  \typeref{double-float}, and \typeref{long-float}, respectively.
                                                 
 
-The internal format used for an external representation depends only
-on the //[[CL:Glossary:exponent marker]]//, and not on the number of decimal digits
-in the external representation.
+The internal format used for an external representation depends only on the //[[CL:Glossary:exponent marker]]//, and not on the number of decimal digits in the external representation.
 
 \Thenextfigure\ contains examples of notations for //[[CL:Glossary:floats]]//: 
-                                   
-\showtwo{Examples of Floating-point numbers}{
+                                    \showtwo{Examples of Floating-point numbers}{
  \f{0.0}      & ;Floating-point zero in default format                          \cr
- \f{0E0}      & ;As input, this is also floating-point zero in default format.  \cr
-	      & ;As output, this would appear as \f{0.0}.			\cr
- \f{0e0}      & ;As input, this is also floating-point zero in default format.  \cr
-	      & ;As output, this would appear as \f{0.0}.			\cr
+ \f{0E0}      & ;As input, this is also floating-point zero in default format.  \cr 	      & ;As output, this would appear as \f{0.0}.			\cr
+ \f{0e0}      & ;As input, this is also floating-point zero in default format.  \cr 	      & ;As output, this would appear as \f{0.0}.			\cr
  \f{-.0}      & ;As input, this might be a zero or a minus zero,                \cr
               & ; depending on whether the implementation supports              \cr
               & ; a distinct minus zero.                                        \cr
               & ;As output, \f{0.0} is zero and \f{-0.0} is minus zero.         \cr
- \f{0.}       & ;On input, the integer zero---\i{not} a floating-point number!  \cr
-	      & ;Whether this appears as \f{0} or \f{0.} on output depends	\cr
-	      & ;on \thevalueof{*print-radix*}.					\cr
+ \f{0.}       & ;On input, the integer zero---\i{not} a floating-point number!  \cr 	      & ;Whether this appears as \f{0} or \f{0.} on output depends	\cr 	      & ;on \thevalueof{*print-radix*}.					\cr
  \f{0.0s0}    & ;A floating-point zero in short format                          \cr
  \f{0s0}      & ;As input, this is a floating-point zero in short format.       \cr
               & ;As output, such a zero would appear as \f{0.0s0}               \cr
               & ; (or as \f{0.0} if \misc{short-float} was the default format). \cr
  \f{6.02E+23} & ;Avogadro's number, in default format                           \cr
- \f{602E+21}  & ;Also Avogadro's number, in default format                      \cr
-}
+ \f{602E+21}  & ;Also Avogadro's number, in default format                      \cr }
 
-For information on how //[[CL:Glossary:floats]]// are printed,
-\seesection\PrintingFloats.
+For information on how //[[CL:Glossary:floats]]// are printed, \seesection\PrintingFloats.
 
 \endsubsubsection%{Syntax of a Float}
 
+\beginsubsubsection{Syntax of a Complex} \DefineSection{SyntaxOfComplexes}
 
+A //[[CL:Glossary:complex]]// has a Cartesian structure,  with a real part and an imaginary part each of which is a  \issue{REAL-NUMBER-TYPE:X3J13-MAR-89} //[[CL:Glossary:real]]//.
 
-
-\beginsubsubsection{Syntax of a Complex}
-\DefineSection{SyntaxOfComplexes}
-
-A //[[CL:Glossary:complex]]// has a Cartesian structure, 
-with a real part and an imaginary part each of which is a 
-\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
-//[[CL:Glossary:real]]//.
-
-The parts of a //[[CL:Glossary:complex]]// are not necessarily //[[CL:Glossary:floats]]// 
-but both parts must be of the same //[[CL:Glossary:type]]//: 
-\editornote{KMP: This is not the same as saying they must be the same type.
-                 Maybe we mean they are of the same `precision' or `format'?
-		 GLS had suggestions which are not yet merged.}%!!! 4-Jan-91
-either both are //[[CL:Glossary:rationals]]//, or both are of the same //[[CL:Glossary:float]]// //[[CL:Glossary:subtype]]//.
-When constructing a //[[CL:Glossary:complex]]//, if the specified parts are not the
-same //[[CL:Glossary:type]]//, the parts are converted to be the same //[[CL:Glossary:type]]//
-internally (\ie the //[[CL:Glossary:rational]]// part is converted to a //[[CL:Glossary:float]]//). 
-An //[[CL:Glossary:object]]// of type \f{(complex rational)} is converted internally
-and represented thereafter as a //[[CL:Glossary:rational]]// if its imaginary part is an 
-//[[CL:Glossary:integer]]// whose value is 0.
+The parts of a //[[CL:Glossary:complex]]// are not necessarily //[[CL:Glossary:floats]]//  but both parts must be of the same //[[CL:Glossary:type]]//:  \editornote{KMP: This is not the same as saying they must be the same type.
+                 Maybe we mean they are of the same `precision' or `format'? 		 GLS had suggestions which are not yet merged.}%!!! 4-Jan-91 either both are //[[CL:Glossary:rationals]]//, or both are of the same //[[CL:Glossary:float]]// //[[CL:Glossary:subtype]]//. When constructing a //[[CL:Glossary:complex]]//, if the specified parts are not the same //[[CL:Glossary:type]]//, the parts are converted to be the same //[[CL:Glossary:type]]// internally (\ie the //[[CL:Glossary:rational]]// part is converted to a //[[CL:Glossary:float]]//).  An //[[CL:Glossary:object]]// of type \f{(complex rational)} is converted internally and represented thereafter as a //[[CL:Glossary:rational]]// if its imaginary part is an  //[[CL:Glossary:integer]]// whose value is 0.
 
 For further information, \seesection\SharpsignC\ and \secref\PrintingComplexes.
 
@@ -376,119 +170,29 @@ For further information, \seesection\SharpsignC\ and \secref\PrintingComplexes.
 
 \beginsubsection{The Consing Dot}
 
-
-If a //[[CL:Glossary:token]]// consists solely of dots (with no escape characters),
-then an error \oftype{reader-error} is signaled,
-except in one circumstance:
-if the //[[CL:Glossary:token]]// is a single //[[CL:Glossary:dot]]//
-and appears in a situation where //[[CL:Glossary:dotted pair]]// notation permits a //[[CL:Glossary:dot]]//,
-then it is accepted as part of such syntax and no error is signaled. 
-\Seesection\LeftParen.
+If a //[[CL:Glossary:token]]// consists solely of dots (with no escape characters), then an error \oftype{reader-error} is signaled, except in one circumstance: if the //[[CL:Glossary:token]]// is a single //[[CL:Glossary:dot]]// and appears in a situation where //[[CL:Glossary:dotted pair]]// notation permits a //[[CL:Glossary:dot]]//, then it is accepted as part of such syntax and no error is signaled.  \Seesection\LeftParen.
 
 \endsubsection%{The Consing Dot}
 
-\beginsubSection{Symbols as Tokens}
-\DefineSection{SymbolTokens}
+\beginsubSection{Symbols as Tokens} \DefineSection{SymbolTokens}
 
 Any //[[CL:Glossary:token]]// that is not a //[[CL:Glossary:potential number]]//,
 
-does not contain a //[[CL:Glossary:package marker]]//,
-and does not consist entirely of dots
-will always be interpreted as a //[[CL:Glossary:symbol]]//.
-Any //[[CL:Glossary:token]]// that is a //[[CL:Glossary:potential number]]// but does not fit the       
-number syntax is a reserved //[[CL:Glossary:token]]// and
-has an //[[CL:Glossary:implementation-dependent]]// interpretation.
-
-
+does not contain a //[[CL:Glossary:package marker]]//, and does not consist entirely of dots will always be interpreted as a //[[CL:Glossary:symbol]]//. Any //[[CL:Glossary:token]]// that is a //[[CL:Glossary:potential number]]// but does not fit the        number syntax is a reserved //[[CL:Glossary:token]]// and has an //[[CL:Glossary:implementation-dependent]]// interpretation.
 
 In all other cases, the //[[CL:Glossary:token]]// is construed to be the name of a //[[CL:Glossary:symbol]]//.
 
-Examples of the printed representation of //[[CL:Glossary:symbols]]// are in \thenextfigure. 
-For presentational simplicity,
-these examples assume that
-the //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]// is **'':upcase''**.
+Examples of the printed representation of //[[CL:Glossary:symbols]]// are in \thenextfigure.  For presentational simplicity, these examples assume that the //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]// is **'':upcase''**.
 
+\showtwo{Examples of the printed representation of symbols (Part 1 of 2)}{ \f{FROBBOZ}                        & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is \f{FROBBOZ}. \cr \f{frobboz}                        & Another way to notate the same //[[CL:Glossary:symbol]]//.       \cr \f{fRObBoz}                        & Yet another way to notate it.                       \cr \f{unwind-protect}                 & A //[[CL:Glossary:symbol]]// with a hyphen in its //[[CL:Glossary:name]]//.   \cr \f{+\$}                            & The //[[CL:Glossary:symbol]]// named \f{+\$}.                    \cr \f{1+}                             & The //[[CL:Glossary:symbol]]// named \f{1+}.                     \cr \f{+1}                             & This is the //[[CL:Glossary:integer]]// \f{1}, 				     not a //[[CL:Glossary:symbol]]//.                                \cr \f{pascal\_style}                  & This //[[CL:Glossary:symbol]]// has an underscore  				     in its //[[CL:Glossary:name]]//.                                 \cr \f{file.rel.43}                    & This //[[CL:Glossary:symbol]]// has periods in its //[[CL:Glossary:name]]//.  \cr \f{\\(}				   & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is \f{(}.       \cr%)) \f{\\+1}                           & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is \f{+1}.      \cr \f{+\\1}                           & Also the //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is \f{+1}. \cr \f{\\frobboz}                      & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is \f{fROBBOZ}. \cr \f{3.14159265\\s0}                 & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// 				     is \f{3.14159265s0}.                                \cr \f{3.14159265\\S0}                 & A different //[[CL:Glossary:symbol]]//,  				     whose //[[CL:Glossary:name]]// is \f{3.14159265S0}.              \cr \f{3.14159265s0}                   & A possible //[[CL:Glossary:short float]]//  				     approximation to $\pi$.                             \cr }
 
-\showtwo{Examples of the printed representation of symbols (Part 1 of 2)}{
-\f{FROBBOZ}                        & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is \f{FROBBOZ}. \cr
-\f{frobboz}                        & Another way to notate the same //[[CL:Glossary:symbol]]//.       \cr
-\f{fRObBoz}                        & Yet another way to notate it.                       \cr
-\f{unwind-protect}                 & A //[[CL:Glossary:symbol]]// with a hyphen in its //[[CL:Glossary:name]]//.   \cr
-\f{+\$}                            & The //[[CL:Glossary:symbol]]// named \f{+\$}.                    \cr
-\f{1+}                             & The //[[CL:Glossary:symbol]]// named \f{1+}.                     \cr
-\f{+1}                             & This is the //[[CL:Glossary:integer]]// \f{1},
-				     not a //[[CL:Glossary:symbol]]//.                                \cr
-\f{pascal\_style}                  & This //[[CL:Glossary:symbol]]// has an underscore 
-				     in its //[[CL:Glossary:name]]//.                                 \cr
-\f{file.rel.43}                    & This //[[CL:Glossary:symbol]]// has periods in its //[[CL:Glossary:name]]//.  \cr
-\f{\\(}				   & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is \f{(}.       \cr%))
-\f{\\+1}                           & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is \f{+1}.      \cr
-\f{+\\1}                           & Also the //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is \f{+1}. \cr
-\f{\\frobboz}                      & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// is \f{fROBBOZ}. \cr
-\f{3.14159265\\s0}                 & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]//
-				     is \f{3.14159265s0}.                                \cr
-\f{3.14159265\\S0}                 & A different //[[CL:Glossary:symbol]]//, 
-				     whose //[[CL:Glossary:name]]// is \f{3.14159265S0}.              \cr
-\f{3.14159265s0}                   & A possible //[[CL:Glossary:short float]]// 
-				     approximation to $\pi$.                             \cr
-}
+\showtwo{Examples of the printed representation of symbols (Part 2 of 2)}{ \f{APL\\\\360}                     & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]//  				     is \f{APL\\360}.                                    \cr \f{apl\\\\360}                     & Also the //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]//  				     is \f{APL\\360}.                                    \cr \f{\\(b{\hat}2\\)\\ -\\ 4*a\f{*c}} & The //[[CL:Glossary:name]]// is \f{(B{\hat}2) - 4*A*C}.          \cr 				   & Parentheses and two spaces in it.                   \cr \f{\\(\\b{\hat}2\\)\\ -\\4*\\a*\\c} & The //[[CL:Glossary:name]]// is \f{(b{\hat}2) - 4*a*c}.         \cr 				   & Letters explicitly lowercase.                       \cr \f{|"|}                            & The same as writing \f{\\"}.                        \cr \f{|(b{\hat}2) - 4*a*c|}           & The //[[CL:Glossary:name]]// is \f{(b{\hat}2) - 4*a*c}.          \cr \f{|frobboz|}                      & The //[[CL:Glossary:name]]// is \f{frobboz}, not \f{FROBBOZ}.    \cr \f{|APL\\360|}                     & The //[[CL:Glossary:name]]// is \f{APL360}.                      \cr \f{|APL\\\\360|}                   & The //[[CL:Glossary:name]]// is \f{APL\\360}.                    \cr \f{|apl\\\\360|}                   & The //[[CL:Glossary:name]]// is \f{apl\\360}.                    \cr \f{|\\|\\||}                       & Same as \f{\\|\\|} ---the //[[CL:Glossary:name]]// is \f{||}.    \cr \f{|(B{\hat}2) - 4*A*C|}           & The //[[CL:Glossary:name]]// is \f{(B{\hat}2) - 4*A*C}.          \cr 				   & Parentheses and two spaces in it.                   \cr \f{|(b{\hat}2) - 4*a*c|}           & The //[[CL:Glossary:name]]// is \f{(b{\hat}2) - 4*a*c}.          \cr }
 
+\issue{CHARACTER-PROPOSAL:2-1-1} In the process of parsing a //[[CL:Glossary:symbol]]//, it is //[[CL:Glossary:implementation-dependent]]// which
 
+//[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:attributes]]// are removed from the //[[CL:Glossary:characters]]// forming a //[[CL:Glossary:token]]// that represents a //[[CL:Glossary:symbol]]//.
 
-
-
-\showtwo{Examples of the printed representation of symbols (Part 2 of 2)}{
-\f{APL\\\\360}                     & The //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// 
-				     is \f{APL\\360}.                                    \cr
-\f{apl\\\\360}                     & Also the //[[CL:Glossary:symbol]]// whose //[[CL:Glossary:name]]// 
-				     is \f{APL\\360}.                                    \cr
-\f{\\(b{\hat}2\\)\\ -\\ 4*a\f{*c}} & The //[[CL:Glossary:name]]// is \f{(B{\hat}2) - 4*A*C}.          \cr
-				   & Parentheses and two spaces in it.                   \cr
-\f{\\(\\b{\hat}2\\)\\ -\\4*\\a*\\c} & The //[[CL:Glossary:name]]// is \f{(b{\hat}2) - 4*a*c}.         \cr
-				   & Letters explicitly lowercase.                       \cr
-\f{|"|}                            & The same as writing \f{\\"}.                        \cr
-\f{|(b{\hat}2) - 4*a*c|}           & The //[[CL:Glossary:name]]// is \f{(b{\hat}2) - 4*a*c}.          \cr
-\f{|frobboz|}                      & The //[[CL:Glossary:name]]// is \f{frobboz}, not \f{FROBBOZ}.    \cr
-\f{|APL\\360|}                     & The //[[CL:Glossary:name]]// is \f{APL360}.                      \cr
-\f{|APL\\\\360|}                   & The //[[CL:Glossary:name]]// is \f{APL\\360}.                    \cr
-\f{|apl\\\\360|}                   & The //[[CL:Glossary:name]]// is \f{apl\\360}.                    \cr
-\f{|\\|\\||}                       & Same as \f{\\|\\|} ---the //[[CL:Glossary:name]]// is \f{||}.    \cr
-\f{|(B{\hat}2) - 4*A*C|}           & The //[[CL:Glossary:name]]// is \f{(B{\hat}2) - 4*A*C}.          \cr
-				   & Parentheses and two spaces in it.                   \cr
-\f{|(b{\hat}2) - 4*a*c|}           & The //[[CL:Glossary:name]]// is \f{(b{\hat}2) - 4*a*c}.          \cr
-}
-
-
-\issue{CHARACTER-PROPOSAL:2-1-1}
-In the process of parsing a //[[CL:Glossary:symbol]]//,
-it is //[[CL:Glossary:implementation-dependent]]// which
-
-
-//[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:attributes]]// are removed
-from the //[[CL:Glossary:characters]]// forming a //[[CL:Glossary:token]]// that represents a //[[CL:Glossary:symbol]]//.
-
-
-
-
-
-
-
-
-When parsing the syntax for a //[[CL:Glossary:symbol]]//,
-the //[[CL:Glossary:Lisp reader]]// looks up the //[[CL:Glossary:name]]// of that //[[CL:Glossary:symbol]]// 
-in the //[[CL:Glossary:current package]]//.
-This lookup may involve looking in other 
-//[[CL:Glossary:packages]]// whose //[[CL:Glossary:external symbols]]//
-are inherited by the //[[CL:Glossary:current package]]//.  If the name is found,
-the corresponding //[[CL:Glossary:symbol]]// is returned.  If the name is not found
-(that is, there is no //[[CL:Glossary:symbol]]// 
-of that name //[[CL:Glossary:accessible]]// in the //[[CL:Glossary:current package]]//),
-a new //[[CL:Glossary:symbol]]// is created and is placed in the //[[CL:Glossary:current package]]//
-as an //[[CL:Glossary:internal symbol]]//.  The //[[CL:Glossary:current package]]// becomes the owner
-(//[[CL:Glossary:home package]]//) of the //[[CL:Glossary:symbol]]//, 
-and the //[[CL:Glossary:symbol]]// becomes interned in the //[[CL:Glossary:current package]]//.
-If the name is later read again while this same //[[CL:Glossary:package]]// is
-current, the same //[[CL:Glossary:symbol]]// will be found and returned.
+When parsing the syntax for a //[[CL:Glossary:symbol]]//, the //[[CL:Glossary:Lisp reader]]// looks up the //[[CL:Glossary:name]]// of that //[[CL:Glossary:symbol]]//  in the //[[CL:Glossary:current package]]//. This lookup may involve looking in other  //[[CL:Glossary:packages]]// whose //[[CL:Glossary:external symbols]]// are inherited by the //[[CL:Glossary:current package]]//.  If the name is found, the corresponding //[[CL:Glossary:symbol]]// is returned.  If the name is not found (that is, there is no //[[CL:Glossary:symbol]]//  of that name //[[CL:Glossary:accessible]]// in the //[[CL:Glossary:current package]]//), a new //[[CL:Glossary:symbol]]// is created and is placed in the //[[CL:Glossary:current package]]// as an //[[CL:Glossary:internal symbol]]//.  The //[[CL:Glossary:current package]]// becomes the owner (//[[CL:Glossary:home package]]//) of the //[[CL:Glossary:symbol]]//,  and the //[[CL:Glossary:symbol]]// becomes interned in the //[[CL:Glossary:current package]]//. If the name is later read again while this same //[[CL:Glossary:package]]// is current, the same //[[CL:Glossary:symbol]]// will be found and returned.
 
 \endsubSection%{Symbols as Tokens}
 
@@ -496,177 +200,70 @@ current, the same //[[CL:Glossary:symbol]]// will be found and returned.
 
 The valid patterns for //[[CL:Glossary:tokens]]// are summarized in \thenextfigure. 
 
-\showtwo{Valid patterns for tokens}{
-\f{\i{nnnnn}}                     & a //[[CL:Glossary:number]]// \cr
-\f{\i{xxxxx}}                     & a //[[CL:Glossary:symbol]]// in the //[[CL:Glossary:current package]]// \cr
-\f{:\i{xxxxx}}                    & a //[[CL:Glossary:symbol]]// in the \thepackage{keyword} \cr
-\f{\i{ppppp}:\i{xxxxx}}           & an //[[CL:Glossary:external symbol]]// 
-				    in the \i{ppppp} //[[CL:Glossary:package]]// \cr
-\f{\i{ppppp}::\i{xxxxx}}          & a (possibly internal) //[[CL:Glossary:symbol]]// 
-				    in the \i{ppppp} //[[CL:Glossary:package]]// \cr
-\f{:\i{nnnnn}}                    & undefined \cr
-\f{\i{ppppp}:\i{nnnnn}}           & undefined \cr
-\f{\i{ppppp}::\i{nnnnn}}          & undefined \cr
-\f{::\i{aaaaa}}                   & undefined \cr
-\f{\i{aaaaa}:}                    & undefined \cr
-\f{\i{aaaaa}:\i{aaaaa}:\i{aaaaa}} & undefined \cr
-}
+\showtwo{Valid patterns for tokens}{ \f{\i{nnnnn}}                     & a //[[CL:Glossary:number]]// \cr \f{\i{xxxxx}}                     & a //[[CL:Glossary:symbol]]// in the //[[CL:Glossary:current package]]// \cr \f{:\i{xxxxx}}                    & a //[[CL:Glossary:symbol]]// in the \thepackage{keyword} \cr \f{\i{ppppp}:\i{xxxxx}}           & an //[[CL:Glossary:external symbol]]//  				    in the \i{ppppp} //[[CL:Glossary:package]]// \cr \f{\i{ppppp}::\i{xxxxx}}          & a (possibly internal) //[[CL:Glossary:symbol]]//  				    in the \i{ppppp} //[[CL:Glossary:package]]// \cr \f{:\i{nnnnn}}                    & undefined \cr \f{\i{ppppp}:\i{nnnnn}}           & undefined \cr \f{\i{ppppp}::\i{nnnnn}}          & undefined \cr \f{::\i{aaaaa}}                   & undefined \cr \f{\i{aaaaa}:}                    & undefined \cr \f{\i{aaaaa}:\i{aaaaa}:\i{aaaaa}} & undefined \cr }
 
 Note that \i{nnnnn} has number syntax,
           neither \i{xxxxx} nor \i{ppppp} has number syntax,
       and \i{aaaaa} has any syntax.
 
+A summary of rules concerning //[[CL:Glossary:package markers]]// follows. In each case, examples are offered to illustrate the case; for presentational simplicity, the examples assume that the //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]// is **'':upcase''**.
 
-A summary of rules concerning //[[CL:Glossary:package markers]]// follows.
-In each case, examples are offered to illustrate the case;
-for presentational simplicity, the examples assume that
-the //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]// is **'':upcase''**.
+\beginlist                                            \item{1.} If there is a single //[[CL:Glossary:package marker]]//, and it occurs at the beginning of the //[[CL:Glossary:token]]//, then the //[[CL:Glossary:token]]// is interpreted as a //[[CL:Glossary:symbol]]// in \thepackage{keyword}. It also sets the **[[CL:Functions:symbol-value]]** of the newly-created //[[CL:Glossary:symbol]]// to that same //[[CL:Glossary:symbol]]// so that the //[[CL:Glossary:symbol]]// will self-evaluate.
 
+For example,  \f{:bar}, when read, interns \f{BAR} as an //[[CL:Glossary:external symbol]]// in \thepackage{keyword}.
 
+\item{2.} If there is a single //[[CL:Glossary:package marker]]// not at the beginning or end of the //[[CL:Glossary:token]]//, then it divides the //[[CL:Glossary:token]]// into two parts.  The first part specifies a //[[CL:Glossary:package]]//;  the second part is the name of an //[[CL:Glossary:external symbol]]// available in that package.  
 
-\beginlist                                           
-\item{1.}
-If there is a single //[[CL:Glossary:package marker]]//, and it occurs at the beginning of the
-//[[CL:Glossary:token]]//, then the //[[CL:Glossary:token]]// is interpreted as a //[[CL:Glossary:symbol]]// in \thepackage{keyword}.
-It also sets the **[[CL:Functions:symbol-value]]** of the newly-created //[[CL:Glossary:symbol]]// to that
-same //[[CL:Glossary:symbol]]// so that the //[[CL:Glossary:symbol]]// will self-evaluate.
+For example,  \f{foo:bar}, when read, looks up \f{BAR} among the //[[CL:Glossary:external symbols]]// of the //[[CL:Glossary:package]]// named \f{FOO}.
 
-For example, 
-\f{:bar}, when read, interns \f{BAR} as an //[[CL:Glossary:external symbol]]// in \thepackage{keyword}.
+\item{3.} If there are two adjacent //[[CL:Glossary:package markers]]// not at the beginning or end of the //[[CL:Glossary:token]]//, then they divide the //[[CL:Glossary:token]]// into two parts.  The first part specifies a //[[CL:Glossary:package]]//; the second part is the name of a //[[CL:Glossary:symbol]]// within that //[[CL:Glossary:package]]// (possibly an //[[CL:Glossary:internal symbol]]//).
 
+For example,  \f{foo::bar}, when read, interns \f{BAR} in the //[[CL:Glossary:package]]// named \f{FOO}.
 
+\item{4.} If the //[[CL:Glossary:token]]// contains no //[[CL:Glossary:package markers]]//,  and does not have //[[CL:Glossary:potential number]]// syntax, then the entire //[[CL:Glossary:token]]// is the name of the //[[CL:Glossary:symbol]]//. The //[[CL:Glossary:symbol]]// is looked up in the //[[CL:Glossary:current package]]//.
 
+For example,  \f{bar}, when read, interns \f{BAR} in the //[[CL:Glossary:current package]]//.
 
-\item{2.}
-If there is a single //[[CL:Glossary:package marker]]// not at the beginning or end of the
-//[[CL:Glossary:token]]//, then it divides the //[[CL:Glossary:token]]// into two parts.  The first part
-specifies a //[[CL:Glossary:package]]//; 
-the second part is the name of an //[[CL:Glossary:external symbol]]//
-available in that package.  
+\item{5.} The consequences are unspecified if any other pattern of //[[CL:Glossary:package markers]]// in a //[[CL:Glossary:token]]// is used. All other uses of //[[CL:Glossary:package markers]]// within names of //[[CL:Glossary:symbols]]//  are not defined by this standard  but are reserved for //[[CL:Glossary:implementation-dependent]]// use. \endlist
 
-For example, 
-\f{foo:bar}, when read, looks up \f{BAR} among the //[[CL:Glossary:external symbols]]// of
-the //[[CL:Glossary:package]]// named \f{FOO}.
+For example, assuming the //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]// is **'':upcase''**, \f{editor:buffer} refers to the //[[CL:Glossary:external symbol]]//  named \f{BUFFER} present in the //[[CL:Glossary:package]]// named \f{editor}, regardless of whether there is a //[[CL:Glossary:symbol]]// named \f{BUFFER} in the //[[CL:Glossary:current package]]//.  If there is no //[[CL:Glossary:package]]// named \f{editor}, or if no //[[CL:Glossary:symbol]]// named \f{BUFFER} is present in \f{editor}, or if \f{BUFFER} is not exported by \f{editor}, the reader signals a correctable error.
 
-
-
-
-
-
-
-
-
-
-
-
-
-\item{3.}
-If there are two adjacent //[[CL:Glossary:package markers]]// not at the beginning or end of the
-//[[CL:Glossary:token]]//, then they divide the //[[CL:Glossary:token]]// into two parts.  The first part
-specifies a //[[CL:Glossary:package]]//;
-the second part is the name of a //[[CL:Glossary:symbol]]// within
-that //[[CL:Glossary:package]]// (possibly an //[[CL:Glossary:internal symbol]]//).
-
-For example, 
-\f{foo::bar}, when read, interns \f{BAR} in the //[[CL:Glossary:package]]// named \f{FOO}.
-
-
-\item{4.}
-If the //[[CL:Glossary:token]]// contains no //[[CL:Glossary:package markers]]//, 
-and does not have //[[CL:Glossary:potential number]]// syntax,
-then the entire //[[CL:Glossary:token]]// is the name of the //[[CL:Glossary:symbol]]//.
-The //[[CL:Glossary:symbol]]// is looked up in the //[[CL:Glossary:current package]]//.
-
-For example, 
-\f{bar}, when read, interns \f{BAR} in the //[[CL:Glossary:current package]]//.
-
-
-
-\item{5.}
-The consequences are unspecified if any other pattern of //[[CL:Glossary:package markers]]//
-in a //[[CL:Glossary:token]]// is used.
-All other uses of //[[CL:Glossary:package markers]]// within names of //[[CL:Glossary:symbols]]// 
-are not defined by this standard 
-but are reserved for //[[CL:Glossary:implementation-dependent]]// use.
-\endlist
-
-
-For example,
-assuming the //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]// is **'':upcase''**,
-\f{editor:buffer} refers to the //[[CL:Glossary:external symbol]]// 
-named \f{BUFFER} present in the //[[CL:Glossary:package]]// named \f{editor},
-regardless of whether there is a //[[CL:Glossary:symbol]]// named \f{BUFFER} in
-the //[[CL:Glossary:current package]]//.  If there is no //[[CL:Glossary:package]]// named
-\f{editor}, or if no //[[CL:Glossary:symbol]]// named \f{BUFFER}
-is present in \f{editor}, or if \f{BUFFER} is not exported by
-\f{editor}, the reader signals
-a correctable error.
-
-If \f{editor::buffer} is seen, the effect is exactly the same as
-reading \f{buffer} with \thepackage{editor} being the //[[CL:Glossary:current package]]//.
+If \f{editor::buffer} is seen, the effect is exactly the same as reading \f{buffer} with \thepackage{editor} being the //[[CL:Glossary:current package]]//.
 
 \endsubSection%{Valid Patterns for Tokens}
 
-\beginsubSection{Package System Consistency Rules}
-\DefineSection{PackageSysConsistencyRules}
+\beginsubSection{Package System Consistency Rules} \DefineSection{PackageSysConsistencyRules}
 
+The following rules apply to the package system as long as  \thevalueof{*package*} is not changed:
 
-The following rules apply to the package system as long as 
-\thevalueof{*package*} is not changed:
-
-
-\beginlist
-\itemitem{\b{Read-read consistency}}
-
-
+\beginlist \itemitem{\b{Read-read consistency}}
 
 Reading the same //[[CL:Glossary:symbol]]// //[[CL:Glossary:name]]//
 
 always results in the //[[CL:Glossary:same]]// //[[CL:Glossary:symbol]]//.
 
-
 \itemitem{\b{Print-read consistency}}
 
+An //[[CL:Glossary:interned symbol]]// always prints as a sequence of characters that,  when read back in, yields the //[[CL:Glossary:same]]// //[[CL:Glossary:symbol]]//.
 
-An //[[CL:Glossary:interned symbol]]// always prints as a sequence of characters that, 
-when read back in, yields the //[[CL:Glossary:same]]// //[[CL:Glossary:symbol]]//.
-
-For information about how the //[[CL:Glossary:Lisp printer]]// treats //[[CL:Glossary:symbols]]//,
-\seesection\PrintingSymbols.
-
+For information about how the //[[CL:Glossary:Lisp printer]]// treats //[[CL:Glossary:symbols]]//, \seesection\PrintingSymbols.
 
 \itemitem{\b{Print-print consistency}}
 
+If two interned //[[CL:Glossary:symbols]]// are not the //[[CL:Glossary:same]]//, then their printed representations will be different sequences of characters. \endlist
 
-If two interned //[[CL:Glossary:symbols]]// are not the //[[CL:Glossary:same]]//,
-then their printed representations will be different sequences of characters.
-\endlist
-
-
-These rules are true regardless of any implicit interning.
-As long as the //[[CL:Glossary:current package]]// is not changed,
-results are reproducible regardless of the order of //[[CL:Glossary:loading]]// files 
-or the exact history of what //[[CL:Glossary:symbols]]// were typed in when.  
-If \thevalueof{*package*} is changed and then changed back to the previous value,
-consistency is maintained.
-The rules can be violated by
+These rules are true regardless of any implicit interning. As long as the //[[CL:Glossary:current package]]// is not changed, results are reproducible regardless of the order of //[[CL:Glossary:loading]]// files  or the exact history of what //[[CL:Glossary:symbols]]// were typed in when.   If \thevalueof{*package*} is changed and then changed back to the previous value, consistency is maintained. The rules can be violated by
     changing \thevalueof{*package*},
     forcing a change to //[[CL:Glossary:symbols]]// 
                   or to //[[CL:Glossary:packages]]// 
     	          or to both
-    by continuing from an error,
-or calling one of the following //[[CL:Glossary:functions]]//:
+    by continuing from an error, or calling one of the following //[[CL:Glossary:functions]]//:
     **[[CL:Functions:unintern]]**,
     **[[CL:Functions:unexport]]**,
     **[[CL:Functions:shadow]]**,
     **[[CL:Functions:shadowing-import]]**,
  or **[[CL:Functions:unuse-package]]**.
 
-An inconsistency only applies if one of the restrictions is violated
-between two of the named //[[CL:Glossary:symbols]]//.
-**[[CL:Functions:shadow]]**, **[[CL:Functions:unexport]]**, **[[CL:Functions:unintern]]**,
-and **[[CL:Functions:shadowing-import]]** can only affect the consistency of
-//[[CL:Glossary:symbols]]// with the same //[[CL:Glossary:names]]// (under **[[CL:Functions:string=]]**)
-as the ones supplied as arguments.
+An inconsistency only applies if one of the restrictions is violated between two of the named //[[CL:Glossary:symbols]]//. **[[CL:Functions:shadow]]**, **[[CL:Functions:unexport]]**, **[[CL:Functions:unintern]]**, and **[[CL:Functions:shadowing-import]]** can only affect the consistency of //[[CL:Glossary:symbols]]// with the same //[[CL:Glossary:names]]// (under **[[CL:Functions:string=]]**) as the ones supplied as arguments.
 
 \endsubsection%{Package System Consistency Rules}

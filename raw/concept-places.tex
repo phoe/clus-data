@@ -1,156 +1,58 @@
 
 
-
-
-
-
 \beginsubSection{Overview of Places and Generalized Reference}
 
-A //[[CL:Glossary:generalized reference]]// is the use of a //[[CL:Glossary:form]]//,
-sometimes called a //[[CL:Glossary:place]]//,
-as if it were a //[[CL:Glossary:variable]]// that could be read and written.
-The //[[CL:Glossary:value]]// of a //[[CL:Glossary:place]]// is 
-the //[[CL:Glossary:object]]// to which the //[[CL:Glossary:place]]// //[[CL:Glossary:form]]// evaluates.
-The //[[CL:Glossary:value]]// of a //[[CL:Glossary:place]]// can be changed by using \macref{setf}.
-The concept of binding a //[[CL:Glossary:place]]// is not defined in \clisp,
-but an //[[CL:Glossary:implementation]]// is permitted to extend the language by defining this concept.
+A //[[CL:Glossary:generalized reference]]// is the use of a //[[CL:Glossary:form]]//, sometimes called a //[[CL:Glossary:place]]//, as if it were a //[[CL:Glossary:variable]]// that could be read and written. The //[[CL:Glossary:value]]// of a //[[CL:Glossary:place]]// is  the //[[CL:Glossary:object]]// to which the //[[CL:Glossary:place]]// //[[CL:Glossary:form]]// evaluates. The //[[CL:Glossary:value]]// of a //[[CL:Glossary:place]]// can be changed by using \macref{setf}. The concept of binding a //[[CL:Glossary:place]]// is not defined in \clisp, but an //[[CL:Glossary:implementation]]// is permitted to extend the language by defining this concept.
 
-\Thenextfigure\ contains examples of the use of \macref{setf}.
-Note that the values returned by evaluating the //[[CL:Glossary:forms]]// in column two 
-are not necessarily the same as those obtained by evaluating the 
-//[[CL:Glossary:forms]]// in column three.
+\Thenextfigure\ contains examples of the use of \macref{setf}. Note that the values returned by evaluating the //[[CL:Glossary:forms]]// in column two  are not necessarily the same as those obtained by evaluating the  //[[CL:Glossary:forms]]// in column three.
 
-In general, the exact //[[CL:Glossary:macro expansion]]// of a \macref{setf} //[[CL:Glossary:form]]// is not guaranteed 
-and can even be //[[CL:Glossary:implementation-dependent]]//;
-all that is guaranteed is 
+In general, the exact //[[CL:Glossary:macro expansion]]// of a \macref{setf} //[[CL:Glossary:form]]// is not guaranteed  and can even be //[[CL:Glossary:implementation-dependent]]//; all that is guaranteed is 
  that the expansion is an update form that works
    for that particular //[[CL:Glossary:implementation]]//,
- that the left-to-right evaluation of //[[CL:Glossary:subforms]]// is preserved, 
-and
+ that the left-to-right evaluation of //[[CL:Glossary:subforms]]// is preserved,  and
 
  that the ultimate result of evaluating \macref{setf} is the value
   or values being stored.
 
-\tablefigthree{Examples of setf}{Access function}{Update Function}{Update using \macref{setf}}{
-\f{x}                & \f{(setq x datum)}   & \f{(setf x datum)}                \cr
-\f{(car x)}          & \f{(rplaca x datum)} & \f{(setf (car x) datum)}          \cr
-\f{(symbol-value x)} & \f{(set x datum)}    & \f{(setf (symbol-value x) datum)} \cr}
+\tablefigthree{Examples of setf}{Access function}{Update Function}{Update using \macref{setf}}{ \f{x}                & \f{(setq x datum)}   & \f{(setf x datum)}                \cr \f{(car x)}          & \f{(rplaca x datum)} & \f{(setf (car x) datum)}          \cr \f{(symbol-value x)} & \f{(set x datum)}    & \f{(setf (symbol-value x) datum)} \cr}
 
-\Thenextfigure\ shows //[[CL:Glossary:operators]]// relating to
-//[[CL:Glossary:places]]// and //[[CL:Glossary:generalized reference]]//.
+\Thenextfigure\ shows //[[CL:Glossary:operators]]// relating to //[[CL:Glossary:places]]// and //[[CL:Glossary:generalized reference]]//.
 
 \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
 
-\displaythree{Operators relating to places and generalized reference.}{
-assert&defsetf&push\cr
-ccase&get-setf-expansion&remf\cr
-ctypecase&getf&rotatef\cr
-decf&incf&setf\cr
-define-modify-macro&pop&shiftf\cr
-define-setf-expander&psetf&\cr
-}
+\displaythree{Operators relating to places and generalized reference.}{ assert&defsetf&push\cr ccase&get-setf-expansion&remf\cr ctypecase&getf&rotatef\cr decf&incf&setf\cr define-modify-macro&pop&shiftf\cr define-setf-expander&psetf&\cr }
 
-
-
-
-\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
-Some of the //[[CL:Glossary:operators]]// above manipulate //[[CL:Glossary:places]]//
-and some manipulate //[[CL:Glossary:setf expanders]]//.
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} Some of the //[[CL:Glossary:operators]]// above manipulate //[[CL:Glossary:places]]// and some manipulate //[[CL:Glossary:setf expanders]]//.
 
 A //[[CL:Glossary:setf expansion]]// can be derived from any //[[CL:Glossary:place]]//.
 
+New //[[CL:Glossary:setf expanders]]// can be defined by using \macref{defsetf}  and \macref{define-setf-expander}.
 
-New //[[CL:Glossary:setf expanders]]// can be defined by using \macref{defsetf} 
-and \macref{define-setf-expander}.
+\issue{PUSH-EVALUATION-ORDER:ITEM-FIRST} \beginsubsubsection{Evaluation of Subforms to Places} \DefineSection{GenRefSubFormEval}
 
+The following rules apply to the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subforms]]// in a //[[CL:Glossary:place]]//:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\issue{PUSH-EVALUATION-ORDER:ITEM-FIRST}
-\beginsubsubsection{Evaluation of Subforms to Places}
-\DefineSection{GenRefSubFormEval}
-
-The following rules apply to the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subforms]]// in a
-//[[CL:Glossary:place]]//:
-
-\beginlist
-\itemitem{1.}
-The evaluation ordering of //[[CL:Glossary:subforms]]// within a //[[CL:Glossary:place]]//
-is determined by the order specified by the second value returned by
-\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
-**[[CL:Functions:get-setf-expansion]]**. 
+\beginlist \itemitem{1.} The evaluation ordering of //[[CL:Glossary:subforms]]// within a //[[CL:Glossary:place]]// is determined by the order specified by the second value returned by \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} **[[CL:Functions:get-setf-expansion]]**. 
 
 For all //[[CL:Glossary:places]]// defined by this specification
 
-(\eg **[[CL:Functions:getf]]**, **[[CL:Functions:ldb]]**, $\ldots$),
-this order of evaluation is left-to-right.
-\idxtext{order of evaluation}\idxtext{evaluation order}%
+(\eg **[[CL:Functions:getf]]**, **[[CL:Functions:ldb]]**, $\ldots$), this order of evaluation is left-to-right. \idxtext{order of evaluation}\idxtext{evaluation order}%
 
+When a //[[CL:Glossary:place]]// is derived from a macro expansion, this rule is applied after the macro is expanded to find the appropriate //[[CL:Glossary:place]]//. 
 
-When a //[[CL:Glossary:place]]// is derived from a macro expansion,
-this rule is applied after the macro is expanded to find the appropriate //[[CL:Glossary:place]]//. 
+//[[CL:Glossary:Places]]// defined by using \macref{defmacro} or \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} \macref{define-setf-expander}
 
-//[[CL:Glossary:Places]]// defined by using \macref{defmacro} or
-\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
-\macref{define-setf-expander}
-
-use the evaluation order defined by those definitions.
-For example, consider the following:
+use the evaluation order defined by those definitions. For example, consider the following:
 
 \code
- (defmacro wrong-order (x y) `(getf ,y ,x))
-\endcode
+ (defmacro wrong-order (x y) `(getf ,y ,x)) \endcode
 
-This following //[[CL:Glossary:form]]// evaluates \f{place2} first and
-then \f{place1} because that is the order they are evaluated in
-the macro expansion:
+This following //[[CL:Glossary:form]]// evaluates \f{place2} first and then \f{place1} because that is the order they are evaluated in the macro expansion:
 
 \code
- (push value (wrong-order place1 place2))
-\endcode
+ (push value (wrong-order place1 place2)) \endcode
 
-\itemitem{2.}
-\issue{JUN90-TRIVIAL-ISSUES:4}
-For the //[[CL:Glossary:macros]]// that manipulate //[[CL:Glossary:places]]// 
+\itemitem{2.} \issue{JUN90-TRIVIAL-ISSUES:4} For the //[[CL:Glossary:macros]]// that manipulate //[[CL:Glossary:places]]// 
   (\macref{push},
    \macref{pushnew},
    \macref{remf},
@@ -160,60 +62,30 @@ For the //[[CL:Glossary:macros]]// that manipulate //[[CL:Glossary:places]]//
    \macref{rotatef},
    \macref{psetf},
    \macref{setf},
-   \macref{pop}, and those defined by \macref{define-modify-macro})
-the //[[CL:Glossary:subforms]]// of the macro call are evaluated exactly once
-in left-to-right order, with the //[[CL:Glossary:subforms]]// of the //[[CL:Glossary:places]]//
-evaluated in the order specified in (1).
+   \macref{pop}, and those defined by \macref{define-modify-macro}) the //[[CL:Glossary:subforms]]// of the macro call are evaluated exactly once in left-to-right order, with the //[[CL:Glossary:subforms]]// of the //[[CL:Glossary:places]]// evaluated in the order specified in (1).
 
-
-\macref{push}, \macref{pushnew}, \macref{remf}, 
-\macref{incf}, \macref{decf}, \macref{shiftf}, \macref{rotatef}, 
-\macref{psetf}, \macref{pop} evaluate all //[[CL:Glossary:subforms]]// before modifying
-any of the //[[CL:Glossary:place]]// locations.
-\macref{setf} (in the case when \macref{setf} has more than two arguments) 
-performs its operation on each pair in sequence. For example, in 
+\macref{push}, \macref{pushnew}, \macref{remf},  \macref{incf}, \macref{decf}, \macref{shiftf}, \macref{rotatef},  \macref{psetf}, \macref{pop} evaluate all //[[CL:Glossary:subforms]]// before modifying any of the //[[CL:Glossary:place]]// locations. \macref{setf} (in the case when \macref{setf} has more than two arguments)  performs its operation on each pair in sequence. For example, in 
 
 \code
- (setf place1 value1 place2 value2 ...)
-\endcode
-the //[[CL:Glossary:subforms]]// of \f{place1} and \f{value1} are evaluated, the location
-specified by 
-\f{place1} is modified to contain the value returned by 
-\f{value1}, and
-then the rest of the \macref{setf} form is processed in a like manner.
+ (setf place1 value1 place2 value2 ...) \endcode the //[[CL:Glossary:subforms]]// of \f{place1} and \f{value1} are evaluated, the location specified by  \f{place1} is modified to contain the value returned by  \f{value1}, and then the rest of the \macref{setf} form is processed in a like manner.
 
-\itemitem{3.}
-For \macref{check-type}, \macref{ctypecase}, and \macref{ccase},
-//[[CL:Glossary:subforms]]// of the //[[CL:Glossary:place]]// are evaluated once as in (1),
-but might be evaluated again if the
-type check fails in the case of \macref{check-type} 
-or none of the cases hold in
-\macref{ctypecase} and \macref{ccase}.
+\itemitem{3.} For \macref{check-type}, \macref{ctypecase}, and \macref{ccase}, //[[CL:Glossary:subforms]]// of the //[[CL:Glossary:place]]// are evaluated once as in (1), but might be evaluated again if the type check fails in the case of \macref{check-type}  or none of the cases hold in \macref{ctypecase} and \macref{ccase}.
 
-\itemitem{4.}
-For \macref{assert}, the order of evaluation of the generalized 
-references is not specified.\idxtext{order of evaluation}\idxtext{evaluation order}
+\itemitem{4.} For \macref{assert}, the order of evaluation of the generalized  references is not specified.\idxtext{order of evaluation}\idxtext{evaluation order}
 
-
-
-\endlist
-Rules 2, 3 and 4 cover all //[[CL:Glossary:standardized]]// //[[CL:Glossary:macros]]// that manipulate //[[CL:Glossary:places]]//.
+\endlist Rules 2, 3 and 4 cover all //[[CL:Glossary:standardized]]// //[[CL:Glossary:macros]]// that manipulate //[[CL:Glossary:places]]//.
 
 \beginsubsubsubsection{Examples of Evaluation of Subforms to Places}
 
 \code
  (let ((ref2 (list '())))
    (push (progn (princ "1") 'ref-1)
-         (car (progn (princ "2") ref2)))) 
-\OUT 12
-\EV (REF1)
+         (car (progn (princ "2") ref2))))  \OUT 12 \EV (REF1)
 
  (let (x)
     (push (setq x (list 'a))
           (car (setq x (list 'b))))
-     x)
-\EV (((A) . B))
-\endcode
+     x) \EV (((A) . B)) \endcode
 
 \macref{push} first evaluates {\tt (setq x (list 'a)) \EV\ (a)},
  then evaluates {\tt (setq x (list 'b)) \EV\ (b)},
@@ -223,151 +95,60 @@ Rules 2, 3 and 4 cover all //[[CL:Glossary:standardized]]// //[[CL:Glossary:macr
 
 \endsubsubsection%{Evaluation of Subforms to Places}
 
+\beginsubsubsection{Setf Expansions} \DefineSection{SetfExpansions}
 
-
-
-\beginsubsubsection{Setf Expansions}
-\DefineSection{SetfExpansions}
-
-
-Sometimes it is possible to avoid evaluating //[[CL:Glossary:subforms]]// of a 
-//[[CL:Glossary:place]]// multiple times or in the wrong order.  A
-\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
-//[[CL:Glossary:setf expansion]]//
+Sometimes it is possible to avoid evaluating //[[CL:Glossary:subforms]]// of a  //[[CL:Glossary:place]]// multiple times or in the wrong order.  A \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} //[[CL:Glossary:setf expansion]]//
 
 for a given access form can be expressed as an ordered collection of five //[[CL:Glossary:objects]]//:
-
-
-
-
-
 
 \beginlist
 
 \itemitem{\b{List of temporary variables}}
 
-a list of symbols naming temporary variables to be bound
-sequentially, as if by \specref{let*}, to //[[CL:Glossary:values]]// 
-resulting from value forms.
-     
-\itemitem{\b{List of value forms}}
+a list of symbols naming temporary variables to be bound sequentially, as if by \specref{let*}, to //[[CL:Glossary:values]]//  resulting from value forms.
+      \itemitem{\b{List of value forms}}
 
-a list of forms (typically, //[[CL:Glossary:subforms]]// of the
-//[[CL:Glossary:place]]//) which when evaluated 
-yield the values to which the corresponding temporary 
-variables should be bound.
-
-
+a list of forms (typically, //[[CL:Glossary:subforms]]// of the //[[CL:Glossary:place]]//) which when evaluated  yield the values to which the corresponding temporary  variables should be bound.
 
 \itemitem{\b{List of store variables}}
 
-a list of symbols naming temporary store variables which are
-to hold the new values that will be assigned to the
-//[[CL:Glossary:place]]//.
-
+a list of symbols naming temporary store variables which are to hold the new values that will be assigned to the //[[CL:Glossary:place]]//.
 
 \itemitem{\b{Storing form}}
 
-a form which can reference both the temporary and the store variables,
-and which changes the //[[CL:Glossary:value]]// of the //[[CL:Glossary:place]]//
-and guarantees to return as its values the values of the store variables,
-which are the correct values for \macref{setf} to return.
-
+a form which can reference both the temporary and the store variables, and which changes the //[[CL:Glossary:value]]// of the //[[CL:Glossary:place]]// and guarantees to return as its values the values of the store variables, which are the correct values for \macref{setf} to return.
 
 \itemitem{\b{Accessing form}}
 
-a //[[CL:Glossary:form]]// which can reference the temporary variables,
-and which returns the //[[CL:Glossary:value]]// of the //[[CL:Glossary:place]]//.
-\endlist
+a //[[CL:Glossary:form]]// which can reference the temporary variables, and which returns the //[[CL:Glossary:value]]// of the //[[CL:Glossary:place]]//. \endlist
 
+The value returned by the accessing form is affected by execution of the storing form, but either of these forms might be evaluated any number of times.
 
-The value returned by the accessing form is
-affected by execution of the storing form, but either of these
-forms might be evaluated any number of times.
+It is possible to do more than one \macref{setf} in parallel via \macref{psetf}, \macref{shiftf}, and \macref{rotatef}.   Because of this, the  \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} //[[CL:Glossary:setf expander]]//
 
+must produce new temporary  and store variable names every time.  For examples of how to do this, see **[[CL:Functions:gensym]]**.
 
-
-
-
-
-
-It is possible
-to do more than one \macref{setf} in parallel via
-\macref{psetf}, \macref{shiftf}, and \macref{rotatef}.  
-Because of this, the 
-\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
-//[[CL:Glossary:setf expander]]//
-
-must produce new temporary 
-and store variable names every time.  For examples of how to do this,
-see **[[CL:Functions:gensym]]**.
-
-
-\issue{SETF-FUNCTIONS-AGAIN:MINIMAL-CHANGES}
-For each //[[CL:Glossary:standardized]]// accessor function //F//,
-unless it is explicitly documented otherwise,
-it is //[[CL:Glossary:implementation-dependent]]// whether the ability to 
-use an //F// //[[CL:Glossary:form]]// as a \macref{setf} //[[CL:Glossary:place]]//
-is implemented by a //[[CL:Glossary:setf expander]]// or a //[[CL:Glossary:setf function]]//.
-Also, it follows from this that it is //[[CL:Glossary:implementation-dependent]]// 
-whether the name \f{(setf //F//)} is //[[CL:Glossary:fbound]]//.
-
+\issue{SETF-FUNCTIONS-AGAIN:MINIMAL-CHANGES} For each //[[CL:Glossary:standardized]]// accessor function //F//, unless it is explicitly documented otherwise, it is //[[CL:Glossary:implementation-dependent]]// whether the ability to  use an //F// //[[CL:Glossary:form]]// as a \macref{setf} //[[CL:Glossary:place]]// is implemented by a //[[CL:Glossary:setf expander]]// or a //[[CL:Glossary:setf function]]//. Also, it follows from this that it is //[[CL:Glossary:implementation-dependent]]//  whether the name \f{(setf //F//)} is //[[CL:Glossary:fbound]]//.
 
 \beginsubsubsubsection{Examples of Setf Expansions}
 
-\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
-Examples of the contents of the constituents of //[[CL:Glossary:setf expansions]]//
-follow.
-
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} Examples of the contents of the constituents of //[[CL:Glossary:setf expansions]]// follow.
 
 For a variable //x//:
 
-\showtwo{Sample Setf Expansion of a Variable}{
-\f{()}                     & ;list of temporary variables \cr
-\f{()}                     & ;list of value forms         \cr
-\f{(g0001)}                & ;list of store variables     \cr
-\f{(setq //x// g0001)} & ;storing form                \cr
-//x//                  & ;accessing form              \cr
-}
-
+\showtwo{Sample Setf Expansion of a Variable}{ \f{()}                     & ;list of temporary variables \cr \f{()}                     & ;list of value forms         \cr \f{(g0001)}                & ;list of store variables     \cr \f{(setq //x// g0001)} & ;storing form                \cr //x//                  & ;accessing form              \cr }
 
 For {\tt (car //exp//)}:
 
-\showtwo{Sample Setf Expansion of a CAR Form}{
-\f{(g0002)}                            & ;list of temporary variables \cr
-\f{(//exp//)}                      & ;list of value forms         \cr
-\f{(g0003)}                            & ;list of store variables     \cr
-\f{(progn (rplaca g0002 g0003) g0003)} & ;storing form                \cr
-\f{(car g0002)}                        & ;accessing form              \cr
-}
-
+\showtwo{Sample Setf Expansion of a CAR Form}{ \f{(g0002)}                            & ;list of temporary variables \cr \f{(//exp//)}                      & ;list of value forms         \cr \f{(g0003)}                            & ;list of store variables     \cr \f{(progn (rplaca g0002 g0003) g0003)} & ;storing form                \cr \f{(car g0002)}                        & ;accessing form              \cr }
 
 For \f{(subseq //seq// //s// //e//)}:
 
-\showtwo{Sample Setf Expansion of a SUBSEQ Form}{
-\f{(g0004 g0005 g0006)}               & ;list of temporary variables    \cr
-\f{(//seq// //s// //e//)} & ;list of value forms            \cr
-\f{(g0007)}                           & ;list of store variables        \cr
-\f{(progn (replace g0004 g0007 :start1 g0005 :end1 g0006) g0007)} \span \cr
-				      & ;storing form                   \cr
-\f{(subseq g0004 g0005 g0006)}        & ; accessing form                \cr
-}
+\showtwo{Sample Setf Expansion of a SUBSEQ Form}{ \f{(g0004 g0005 g0006)}               & ;list of temporary variables    \cr \f{(//seq// //s// //e//)} & ;list of value forms            \cr \f{(g0007)}                           & ;list of store variables        \cr \f{(progn (replace g0004 g0007 :start1 g0005 :end1 g0006) g0007)} \span \cr 				      & ;storing form                   \cr \f{(subseq g0004 g0005 g0006)}        & ; accessing form                \cr }
 
-In some cases, if a //[[CL:Glossary:subform]]// of a //[[CL:Glossary:place]]// is itself
-a //[[CL:Glossary:place]]//, it is necessary to expand the //[[CL:Glossary:subform]]//
-in order to compute some of the values in the expansion of the outer
-//[[CL:Glossary:place]]//.  For \f{(ldb //bs// (car //exp//))}:
+In some cases, if a //[[CL:Glossary:subform]]// of a //[[CL:Glossary:place]]// is itself a //[[CL:Glossary:place]]//, it is necessary to expand the //[[CL:Glossary:subform]]// in order to compute some of the values in the expansion of the outer //[[CL:Glossary:place]]//.  For \f{(ldb //bs// (car //exp//))}:
 
-\showtwo{Sample Setf Expansion of a LDB Form}{
-\f{(g0001 g0002)}	              & ;list of temporary variables    \cr
-\f{(//bs// //exp//)}	      & ;list of value forms            \cr
-\f{(g0003)}                           & ;list of store variables        \cr
-\f{(progn (rplaca g0002 (dpb g0003 g0001 (car g0002))) g0003)} \span    \cr
-				      & ;storing form                   \cr
-\f{(ldb g0001 (car g0002))}           & ; accessing form                \cr
-}
-
-
+\showtwo{Sample Setf Expansion of a LDB Form}{ \f{(g0001 g0002)}	              & ;list of temporary variables    \cr \f{(//bs// //exp//)}	      & ;list of value forms            \cr \f{(g0003)}                           & ;list of store variables        \cr \f{(progn (rplaca g0002 (dpb g0003 g0001 (car g0002))) g0003)} \span    \cr 				      & ;storing form                   \cr \f{(ldb g0001 (car g0002))}           & ; accessing form                \cr }
 
 \endsubsubsubsection%{Examples of Setf Expansions}
 
@@ -375,282 +156,101 @@ in order to compute some of the values in the expansion of the outer
 
 \endsubSection%{Overview of Places and Generalized Reference}
 
-\beginsubSection{Kinds of Places}
-\DefineSection{KindsOfPlaces}
+\beginsubSection{Kinds of Places} \DefineSection{KindsOfPlaces}
 
-
-Several kinds of //[[CL:Glossary:places]]// are defined by \clisp; 
-this section enumerates them.
-This set can be extended by //[[CL:Glossary:implementations]]// and by //[[CL:Glossary:programmer code]]//.
-
-
+Several kinds of //[[CL:Glossary:places]]// are defined by \clisp;  this section enumerates them. This set can be extended by //[[CL:Glossary:implementations]]// and by //[[CL:Glossary:programmer code]]//.
 
 \beginsubsubsection{Variable Names as Places}
 
-The name of a //[[CL:Glossary:lexical variable]]// or //[[CL:Glossary:dynamic variable]]// 
-can be used as a //[[CL:Glossary:place]]//.
+The name of a //[[CL:Glossary:lexical variable]]// or //[[CL:Glossary:dynamic variable]]//  can be used as a //[[CL:Glossary:place]]//.
 
 \endsubsubsection%{Variable Names as Places}
 
+\beginsubsubsection{Function Call Forms as Places} \DefineSection{FnFormsAsGenRefs}
 
-\beginsubsubsection{Function Call Forms as Places}
-\DefineSection{FnFormsAsGenRefs}
-
-A //[[CL:Glossary:function form]]// can be used as a //[[CL:Glossary:place]]// if it falls
-into one of the following categories:
+A //[[CL:Glossary:function form]]// can be used as a //[[CL:Glossary:place]]// if it falls into one of the following categories:
 
 \beginlist
 
-\itemitem{\bull}
-A function call form whose first element is the name of
-any one of the functions in \thenextfigure.
-
-
-
-
-
-
-
+\itemitem{\bull} A function call form whose first element is the name of any one of the functions in \thenextfigure.
 
 \issue{CONDITION-ACCESSORS-SETFABLE:NO}
 
-\editornote{KMP: Note that what are in some places still called `condition accessors'
-		 are deliberately omitted from this table, and are not labeled as
-		 accessors in their entries.  I have not yet had time to do a full
-	         search for these items and eliminate stray references to them as `accessors',
-		 which they are not, but I will do that at some point.}%!!!
+\editornote{KMP: Note that what are in some places still called `condition accessors' 		 are deliberately omitted from this table, and are not labeled as 		 accessors in their entries.  I have not yet had time to do a full 	         search for these items and eliminate stray references to them as `accessors', 		 which they are not, but I will do that at some point.}%!!!
 
-\issue{PATHNAME-LOGICAL:ADD}
-\issue{AREF-1D}
-\issue{FUNCTION-NAME:LARGE}
+\issue{PATHNAME-LOGICAL:ADD} \issue{AREF-1D} \issue{FUNCTION-NAME:LARGE}
 
+\displaythree{Functions that setf can be used with---1}{ aref&cdadr&get\cr bit&cdar&gethash\cr caaaar&cddaar&logical-pathname-translations\cr caaadr&cddadr&macro-function\cr caaar&cddar&ninth\cr caadar&cdddar&nth\cr caaddr&cddddr&readtable-case\cr caadr&cdddr&rest\cr caar&cddr&row-major-aref\cr cadaar&cdr&sbit\cr cadadr&char&schar\cr cadar&class-name&second\cr caddar&compiler-macro-function&seventh\cr cadddr&documentation&sixth\cr caddr&eighth&slot-value\cr cadr&elt&subseq\cr car&fdefinition&svref\cr cdaaar&fifth&symbol-function\cr cdaadr&fill-pointer&symbol-plist\cr cdaar&find-class&symbol-value\cr cdadar&first&tenth\cr cdaddr&fourth&third\cr }
 
+In the case of **[[CL:Functions:subseq]]**, the replacement value must be a //[[CL:Glossary:sequence]]// whose elements might be contained by the sequence argument to **[[CL:Functions:subseq]]**, but does not have to be a //[[CL:Glossary:sequence]]// of the same //[[CL:Glossary:type]]// 
 
+as the //[[CL:Glossary:sequence]]// of which the subsequence is specified. If the length of the replacement value does not equal the length of the subsequence to be replaced, then the shorter length determines the number of elements to be stored, as for **[[CL:Functions:replace]]**.
 
-\displaythree{Functions that setf can be used with---1}{
-aref&cdadr&get\cr
-bit&cdar&gethash\cr
-caaaar&cddaar&logical-pathname-translations\cr
-caaadr&cddadr&macro-function\cr
-caaar&cddar&ninth\cr
-caadar&cdddar&nth\cr
-caaddr&cddddr&readtable-case\cr
-caadr&cdddr&rest\cr
-caar&cddr&row-major-aref\cr
-cadaar&cdr&sbit\cr
-cadadr&char&schar\cr
-cadar&class-name&second\cr
-caddar&compiler-macro-function&seventh\cr
-cadddr&documentation&sixth\cr
-caddr&eighth&slot-value\cr
-cadr&elt&subseq\cr
-car&fdefinition&svref\cr
-cdaaar&fifth&symbol-function\cr
-cdaadr&fill-pointer&symbol-plist\cr
-cdaar&find-class&symbol-value\cr
-cdadar&first&tenth\cr
-cdaddr&fourth&third\cr
-}
+   \itemitem{\bull}
 
+A function call form whose first element is the name of a selector function constructed by \macref{defstruct}.
 
-
-
-
-
-In the case of **[[CL:Functions:subseq]]**, the replacement value must be a //[[CL:Glossary:sequence]]//
-whose elements might be contained by the sequence argument to **[[CL:Functions:subseq]]**,
-but does not have to be a //[[CL:Glossary:sequence]]// of the same //[[CL:Glossary:type]]// 
-
-as the //[[CL:Glossary:sequence]]// of which the subsequence is specified.
-If the length of the replacement value does not equal the length of
-the subsequence to be replaced, then the shorter length determines
-the number of elements to be stored, as for **[[CL:Functions:replace]]**.
-
-  
-\itemitem{\bull}
-
-A function call form whose first element is the name of
-a selector function constructed by \macref{defstruct}.
-
-
-\issue{FUNCTION-NAME:LARGE}
-The function name must refer to the global function definition,
-rather than a locally defined //[[CL:Glossary:function]]//.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\issue{FUNCTION-NAME:LARGE} The function name must refer to the global function definition, rather than a locally defined //[[CL:Glossary:function]]//.
 
 \itemitem{\bull}
 
-A function call form whose first element is the name of
-any one of the functions in \thenextfigure, 
-provided that the supplied argument
-to that function is in turn a //[[CL:Glossary:place]]// form;
-in this case the new //[[CL:Glossary:place]]// has stored back into it the
-result of applying the supplied ``update'' function.
+A function call form whose first element is the name of any one of the functions in \thenextfigure,  provided that the supplied argument to that function is in turn a //[[CL:Glossary:place]]// form; in this case the new //[[CL:Glossary:place]]// has stored back into it the result of applying the supplied ``update'' function.
 
+\issue{SETF-SUB-METHODS:DELAYED-ACCESS-STORES}                         \tablefigthree{Functions that setf can be used with---2}{Function name}{Argument that is a //place//}{Update function used}{ **[[CL:Functions:ldb]]**        & second & **[[CL:Functions:dpb]]**                     \cr **[[CL:Functions:mask-field]]** & second & **[[CL:Functions:deposit-field]]**           \cr **[[CL:Functions:getf]]**       & first  &  //[[CL:Glossary:implementation-dependent]]// \cr }
 
-
-
-
-
-
-
-\issue{SETF-SUB-METHODS:DELAYED-ACCESS-STORES}                        
-\tablefigthree{Functions that setf can be used with---2}{Function name}{Argument that is a //place//}{Update function used}{
-**[[CL:Functions:ldb]]**        & second & **[[CL:Functions:dpb]]**                     \cr
-**[[CL:Functions:mask-field]]** & second & **[[CL:Functions:deposit-field]]**           \cr
-**[[CL:Functions:getf]]**       & first  &  //[[CL:Glossary:implementation-dependent]]// \cr
-}
-
-
-
-During the \macref{setf} expansion of these //[[CL:Glossary:forms]]//, it is necessary to call 
-\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
-**[[CL:Functions:get-setf-expansion]]** 
+During the \macref{setf} expansion of these //[[CL:Glossary:forms]]//, it is necessary to call  \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} **[[CL:Functions:get-setf-expansion]]** 
 
 in order to figure out how the inner, nested generalized variable must be treated.  
- 
-The information from
-\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
-**[[CL:Functions:get-setf-expansion]]**
+  The information from \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} **[[CL:Functions:get-setf-expansion]]**
 
-is used as follows.
-\beginlist
-\issue{CHARACTER-PROPOSAL:2-1-1} 
-
+is used as follows. \beginlist \issue{CHARACTER-PROPOSAL:2-1-1} 
 
 \itemitem{**[[CL:Functions:ldb]]**}
- 
-In a form such as:
-       
-{\tt (setf (ldb //byte-spec// //place-form//) //value-form//)}
- 
-the place referred to by the //place-form// must always be both //[[CL:Glossary:read]]// 
-and //[[CL:Glossary:written]]//;  note that the update is to the generalized variable 
-specified by //place-form//, not to any object \oftype{integer}.
-       
-Thus this \macref{setf} should generate code to do the following:
- 
-\beginlist
-\itemitem{1.} Evaluate //byte-spec// (and bind it into a temporary variable).
-\itemitem{2.} Bind the temporary variables for //place-form//.
-\itemitem{3.} Evaluate //value-form//  (and bind 
-\issue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW}
-its value or values into the store variable).
+  In a form such as:
+        {\tt (setf (ldb //byte-spec// //place-form//) //value-form//)}
+  the place referred to by the //place-form// must always be both //[[CL:Glossary:read]]//  and //[[CL:Glossary:written]]//;  note that the update is to the generalized variable  specified by //place-form//, not to any object \oftype{integer}.
+        Thus this \macref{setf} should generate code to do the following:
+  \beginlist \itemitem{1.} Evaluate //byte-spec// (and bind it into a temporary variable). \itemitem{2.} Bind the temporary variables for //place-form//. \itemitem{3.} Evaluate //value-form//  (and bind  \issue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW} its value or values into the store variable).
 
-
-
-\itemitem{4.} Do the //[[CL:Glossary:read]]// from //place-form//.
-\itemitem{5.} Do the //[[CL:Glossary:write]]// into //place-form// with 
-the given bits of the //[[CL:Glossary:integer]]//
-       fetched in step 4 replaced with the value from step 3.
-\endlist 
-    If the evaluation of //value-form// 
-in step 3 alters what is found in //place-form//,
-such as setting different bits of //[[CL:Glossary:integer]]//,
-    then the change of the bits denoted by 
-//byte-spec// is to that 
-    altered //[[CL:Glossary:integer]]//, 
-because step 4 is done after the //value-form//
+\itemitem{4.} Do the //[[CL:Glossary:read]]// from //place-form//. \itemitem{5.} Do the //[[CL:Glossary:write]]// into //place-form// with  the given bits of the //[[CL:Glossary:integer]]//
+       fetched in step 4 replaced with the value from step 3. \endlist 
+    If the evaluation of //value-form//  in step 3 alters what is found in //place-form//, such as setting different bits of //[[CL:Glossary:integer]]//,
+    then the change of the bits denoted by  //byte-spec// is to that 
+    altered //[[CL:Glossary:integer]]//,  because step 4 is done after the //value-form//
     evaluation.  Nevertheless, the 
-    evaluations required for //[[CL:Glossary:binding]]// 
-the temporary variables are done in steps 1 and 
-    2, and thus the expected left-to-right evaluation order is seen.
-For example:
+    evaluations required for //[[CL:Glossary:binding]]//  the temporary variables are done in steps 1 and 
+    2, and thus the expected left-to-right evaluation order is seen. For example:
 
 \code
  (setq integer #x69) \EV #x69
  (rotatef (ldb (byte 4 4) integer) 
           (ldb (byte 4 0) integer))
- integer \EV #x96
-;;; This example is trying to swap two independent bit fields 
-;;; in an integer.  Note that the generalized variable of 
-;;; interest here is just the (possibly local) program variable
-;;; integer.
-\endcode
- 
-\itemitem{**[[CL:Functions:mask-field]]**}
+ integer \EV #x96 ;;; This example is trying to swap two independent bit fields  ;;; in an integer.  Note that the generalized variable of  ;;; interest here is just the (possibly local) program variable ;;; integer. \endcode
+  \itemitem{**[[CL:Functions:mask-field]]**}
  
    This case is the same as **[[CL:Functions:ldb]]** in all essential aspects.
- 
-\itemitem{**[[CL:Functions:getf]]**}
+  \itemitem{**[[CL:Functions:getf]]**}
  
     In a form such as:
- 
-\f{(setf (getf //place-form// //ind-form//) //value-form//)}
+  \f{(setf (getf //place-form// //ind-form//) //value-form//)}
  
     the place referred to by //place-form// must always be both //[[CL:Glossary:read]]//
     and //[[CL:Glossary:written]]//;  note that the update is to the generalized variable 
-    specified by //place-form//, not necessarily to the particular 
-//[[CL:Glossary:list]]//
-that is the property list in question.
+    specified by //place-form//, not necessarily to the particular  //[[CL:Glossary:list]]// that is the property list in question.
  
-    Thus this \macref{setf} should generate code to do the following:
-\beginlist
-\itemitem{1.} 
-Bind the temporary variables for //place-form//.
-\itemitem{2.} 
-Evaluate //ind-form// (and bind it into a temporary variable).
-\itemitem{3.} 
-Evaluate //value-form// (and bind 
-\issue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW}
-its value or values into the store variable).
+    Thus this \macref{setf} should generate code to do the following: \beginlist \itemitem{1.}  Bind the temporary variables for //place-form//. \itemitem{2.}  Evaluate //ind-form// (and bind it into a temporary variable). \itemitem{3.}  Evaluate //value-form// (and bind  \issue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW} its value or values into the store variable).
 
-
-
-\itemitem{4.} 
-Do the //[[CL:Glossary:read]]// from //place-form//.
-\itemitem{5.} 
-Do the //[[CL:Glossary:write]]// into //place-form// with a possibly-new property list
-       obtained by combining the values from steps 2, 3, and 4.  
-(Note that the phrase ``possibly-new property list'' can mean that 
+\itemitem{4.}  Do the //[[CL:Glossary:read]]// from //place-form//. \itemitem{5.}  Do the //[[CL:Glossary:write]]// into //place-form// with a possibly-new property list
+       obtained by combining the values from steps 2, 3, and 4.   (Note that the phrase ``possibly-new property list'' can mean that 
     the former property list is somehow destructively re-used, or it can 
-    mean partial or full copying of it.  
-Since either copying or destructive re-use can occur, 
-the treatment of the resultant value for the 
+    mean partial or full copying of it.   Since either copying or destructive re-use can occur,  the treatment of the resultant value for the 
     possibly-new property list must proceed as if it were a different copy
-    needing to be stored back into the generalized variable.)
-\endlist 
-    If the evaluation of //value-form// 
-in step 3 alters what is found in
-//place-form//, such as setting a different named property in the list,
-    then the change of the property denoted by //ind-form// 
-is to that 
-    altered list, because step 4 is done after the 
-//value-form//
+    needing to be stored back into the generalized variable.) \endlist 
+    If the evaluation of //value-form//  in step 3 alters what is found in //place-form//, such as setting a different named property in the list,
+    then the change of the property denoted by //ind-form//  is to that 
+    altered list, because step 4 is done after the  //value-form//
     evaluation.  Nevertheless, the 
-    evaluations required for //[[CL:Glossary:binding]]// 
-the temporary variables  are done in steps 1 and 
+    evaluations required for //[[CL:Glossary:binding]]//  the temporary variables  are done in steps 1 and 
     2,  and thus the expected left-to-right evaluation order is seen.
 
 For example:
@@ -660,29 +260,15 @@ For example:
  (setf (getf (car r) 'b) 
        (progn (setq r nil) 6)) \EV 6
  r \EV NIL
- s \EV ((A 1 B 6 C 3))
-;;; Note that the (setq r nil) does not affect the actions of 
-;;; the SETF because the value of R had already been saved in 
-;;; a temporary variable as part of the step 1. Only the CAR
-;;; of this value will be retrieved, and subsequently modified 
-;;; after the value computation.
-\endcode
+ s \EV ((A 1 B 6 C 3)) ;;; Note that the (setq r nil) does not affect the actions of  ;;; the SETF because the value of R had already been saved in  ;;; a temporary variable as part of the step 1. Only the CAR ;;; of this value will be retrieved, and subsequently modified  ;;; after the value computation. \endcode
+  \endlist \endlist
  
-\endlist
-\endlist
- 
-
 
 \endsubsubsection%{Function Call Forms as Places}
 
+\issue{SETF-OF-VALUES:ADD} \beginsubsubsection{VALUES Forms as Places} \DefineSection{SETFofVALUES}
 
-
-\issue{SETF-OF-VALUES:ADD}
-\beginsubsubsection{VALUES Forms as Places}
-\DefineSection{SETFofVALUES}
-
-A **[[CL:Functions:values]]** //[[CL:Glossary:form]]// can be used as a //[[CL:Glossary:place]]//,
-provided that each of its //[[CL:Glossary:subforms]]// is also a //[[CL:Glossary:place]]// form.
+A **[[CL:Functions:values]]** //[[CL:Glossary:form]]// can be used as a //[[CL:Glossary:place]]//, provided that each of its //[[CL:Glossary:subforms]]// is also a //[[CL:Glossary:place]]// form.
 
 A form such as
 
@@ -690,175 +276,75 @@ A form such as
 
 does the following:
 
-\beginlist
-\itemitem{1.} The //[[CL:Glossary:subforms]]// of each nested //place// are evaluated
-in left-to-right order.
-\itemitem{2.} The //values-form// is evaluated, and the first store
-variable from each //place// is bound to its return values as if by 
-\macref{multiple-value-bind}.  
-\itemitem{3.} If the //[[CL:Glossary:setf expansion]]// for any //place// 
-involves more than one store variable, then the additional
-store variables are bound to \nil.
-\itemitem{4.} The storing forms for each //place// are evaluated in
-left-to-right order.
-\endlist
+\beginlist \itemitem{1.} The //[[CL:Glossary:subforms]]// of each nested //place// are evaluated in left-to-right order. \itemitem{2.} The //values-form// is evaluated, and the first store variable from each //place// is bound to its return values as if by  \macref{multiple-value-bind}.   \itemitem{3.} If the //[[CL:Glossary:setf expansion]]// for any //place//  involves more than one store variable, then the additional store variables are bound to \nil. \itemitem{4.} The storing forms for each //place// are evaluated in left-to-right order. \endlist
 
-The storing form in the //[[CL:Glossary:setf expansion]]// of **[[CL:Functions:values]]**
-returns as //[[CL:Glossary:multiple values]]//\meaning{2} the values of the store
-variables in step 2.  That is, the number of values returned is the
-same as the number of //[[CL:Glossary:place]]// forms.  This may be more or fewer
-values than are produced by the //values-form//.
-
-
+The storing form in the //[[CL:Glossary:setf expansion]]// of **[[CL:Functions:values]]** returns as //[[CL:Glossary:multiple values]]//\meaning{2} the values of the store variables in step 2.  That is, the number of values returned is the same as the number of //[[CL:Glossary:place]]// forms.  This may be more or fewer values than are produced by the //values-form//.
 
 \endsubsubsection%{VALUES Forms as Places}
 
-
-
 \beginsubsubsection{THE Forms as Places}
 
-
-A \specref{the} //[[CL:Glossary:form]]// can be used as a //[[CL:Glossary:place]]//,
-in which case the declaration is transferred to the //newvalue// form,
-and the resulting \macref{setf} is analyzed.  For example,
+A \specref{the} //[[CL:Glossary:form]]// can be used as a //[[CL:Glossary:place]]//, in which case the declaration is transferred to the //newvalue// form, and the resulting \macref{setf} is analyzed.  For example,
 
 \code
- (setf (the integer (cadr x)) (+ y 3))
-\endcode
-is processed as if it were
+ (setf (the integer (cadr x)) (+ y 3)) \endcode is processed as if it were
 
 \code
- (setf (cadr x) (the integer (+ y 3)))
-\endcode
+ (setf (cadr x) (the integer (+ y 3))) \endcode
 
 \endsubsubsection%{THE Forms as Places}
-     
-\issue{SETF-APPLY-EXPANSION:IGNORE-EXPANDER}
-\issue{SETF-OF-APPLY:ONLY-AREF-AND-FRIENDS}
-\issue{JUN90-TRIVIAL-ISSUES:27}
-\beginsubsubsection{APPLY Forms as Places}
-\DefineSection{SETFofAPPLY}
+      \issue{SETF-APPLY-EXPANSION:IGNORE-EXPANDER} \issue{SETF-OF-APPLY:ONLY-AREF-AND-FRIENDS} \issue{JUN90-TRIVIAL-ISSUES:27} \beginsubsubsection{APPLY Forms as Places} \DefineSection{SETFofAPPLY}
 
 The following situations involving \macref{setf} of **[[CL:Functions:apply]]** must be supported:
 
-\beginlist
-\itemitem{\bull} \f{(setf (apply \#'aref //array//
-				        \starparam{subscript}
-					//more-subscripts//)
-			  //new-element//)}
-\itemitem{\bull} \f{(setf (apply \#'bit //array// 
-				       \starparam{subscript}
-				       //more-subscripts//)
-			  //new-element//)}
-\itemitem{\bull} \f{(setf (apply \#'sbit //array// 
-					\starparam{subscript}
-					//more-subscripts//) 
-			  //new-element//)}
-\endlist
+\beginlist \itemitem{\bull} \f{(setf (apply \#'aref //array// 				        \starparam{subscript} 					//more-subscripts//) 			  //new-element//)} \itemitem{\bull} \f{(setf (apply \#'bit //array//  				       \starparam{subscript} 				       //more-subscripts//) 			  //new-element//)} \itemitem{\bull} \f{(setf (apply \#'sbit //array//  					\starparam{subscript} 					//more-subscripts//)  			  //new-element//)} \endlist
 
-In all three cases, the //[[CL:Glossary:element]]// of //array// designated
-by the concatenation of //subscripts// and //more-subscripts//
-(\ie the same //[[CL:Glossary:element]]// which would be //[[CL:Glossary:read]]// by the call to
-     //[[CL:Glossary:apply]]// if it were not part of a \macref{setf} //[[CL:Glossary:form]]//)
-is changed to have the //[[CL:Glossary:value]]// given by //new-element//.
-\issue{FUNCTION-NAME:LARGE}
-For these usages, the function name (**[[CL:Functions:aref]]**, **[[CL:Functions:bit]]**, or **[[CL:Functions:sbit]]**)
-must refer to the global function definition, rather than a locally defined
-//[[CL:Glossary:function]]//.
+In all three cases, the //[[CL:Glossary:element]]// of //array// designated by the concatenation of //subscripts// and //more-subscripts// (\ie the same //[[CL:Glossary:element]]// which would be //[[CL:Glossary:read]]// by the call to
+     //[[CL:Glossary:apply]]// if it were not part of a \macref{setf} //[[CL:Glossary:form]]//) is changed to have the //[[CL:Glossary:value]]// given by //new-element//. \issue{FUNCTION-NAME:LARGE} For these usages, the function name (**[[CL:Functions:aref]]**, **[[CL:Functions:bit]]**, or **[[CL:Functions:sbit]]**) must refer to the global function definition, rather than a locally defined //[[CL:Glossary:function]]//.
 
+No other //[[CL:Glossary:standardized]]// //[[CL:Glossary:function]]// is required to be supported, but an //[[CL:Glossary:implementation]]// may define such support. An //[[CL:Glossary:implementation]]// may also define support  for //[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:operators]]//.
 
-No other //[[CL:Glossary:standardized]]// //[[CL:Glossary:function]]// is required to be supported,
-but an //[[CL:Glossary:implementation]]// may define such support.
-An //[[CL:Glossary:implementation]]// may also define support 
-for //[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:operators]]//.
-
-If a user-defined //[[CL:Glossary:function]]// is used in this context,
-the following equivalence is true, except that care is taken
-to preserve proper left-to-right evaluation of argument //[[CL:Glossary:subforms]]//:
+If a user-defined //[[CL:Glossary:function]]// is used in this context, the following equivalence is true, except that care is taken to preserve proper left-to-right evaluation of argument //[[CL:Glossary:subforms]]//:
 
 \code
  (setf (apply \#'//name// \starparam{arg}) //val//)
- \EQ (apply \#'(setf //name//) //val// \starparam{arg})
-\endcode
-
-
+ \EQ (apply \#'(setf //name//) //val// \starparam{arg}) \endcode
 
 \endsubsubsection%{APPLY Forms as Places}
 
-
-
-
 \beginsubsubsection{Setf Expansions and Places}
 
+Any //[[CL:Glossary:compound form]]// for which the //[[CL:Glossary:operator]]// has a \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} //[[CL:Glossary:setf expander]]//
 
+defined can be used as a //[[CL:Glossary:place]]//. \issue{FUNCTION-NAME:LARGE} The 
 
-
-
-Any //[[CL:Glossary:compound form]]// for which the //[[CL:Glossary:operator]]// has a
-\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
-//[[CL:Glossary:setf expander]]//
-
-defined can be used as a //[[CL:Glossary:place]]//.
-\issue{FUNCTION-NAME:LARGE}
-The 
-
-
-
-
-
-
-//[[CL:Glossary:operator]]//
-must refer to the global function definition,
-rather than a locally defined //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]//.
-
+//[[CL:Glossary:operator]]// must refer to the global function definition, rather than a locally defined //[[CL:Glossary:function]]// or //[[CL:Glossary:macro]]//.
 
 \issue{FUNCTION-NAME:LARGE}
 
 \endsubsubsection%{Setf Expansions and Places}
 
-
 \beginsubsubsection{Macro Forms as Places}
 
-A //[[CL:Glossary:macro form]]// can be used as a //[[CL:Glossary:place]]//, 
-in which case \clisp\ expands the //[[CL:Glossary:macro form]]//
-\issue{FUNCTION-NAME:LARGE}
-as if by **[[CL:Functions:macroexpand-1]]**
+A //[[CL:Glossary:macro form]]// can be used as a //[[CL:Glossary:place]]//,  in which case \clisp\ expands the //[[CL:Glossary:macro form]]// \issue{FUNCTION-NAME:LARGE} as if by **[[CL:Functions:macroexpand-1]]**
 
-and then uses the //[[CL:Glossary:macro expansion]]// in place of the original //[[CL:Glossary:place]]//.
-\issue{SETF-MACRO-EXPANSION:LAST}
+and then uses the //[[CL:Glossary:macro expansion]]// in place of the original //[[CL:Glossary:place]]//. \issue{SETF-MACRO-EXPANSION:LAST}
 
-
-Such //[[CL:Glossary:macro expansion]]// is attempted only after exhausting all other possibilities
-other than expanding into a call to a function named \f{(setf //reader//)}.
-
+Such //[[CL:Glossary:macro expansion]]// is attempted only after exhausting all other possibilities other than expanding into a call to a function named \f{(setf //reader//)}.
 
 \endsubsubsection%{Macro Forms as Places}
 
+\issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM} \beginsubsubsection{Symbol Macros as Places}
 
-
-\issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM}
-\beginsubsubsection{Symbol Macros as Places}
-
-A reference to a //[[CL:Glossary:symbol]]// that has been //[[CL:Glossary:established]]// as a //[[CL:Glossary:symbol macro]]// 
-can be used as a //[[CL:Glossary:place]]//.  In this case,
-\macref{setf} expands the reference and then analyzes the resulting //[[CL:Glossary:form]]//.
-
+A reference to a //[[CL:Glossary:symbol]]// that has been //[[CL:Glossary:established]]// as a //[[CL:Glossary:symbol macro]]//  can be used as a //[[CL:Glossary:place]]//.  In this case, \macref{setf} expands the reference and then analyzes the resulting //[[CL:Glossary:form]]//.
 
 \endsubsubsection%{Symbol Macros as Places}
 
 \beginsubsubsection{Other Compound Forms as Places}
 
-For any other //[[CL:Glossary:compound form]]// for which the //[[CL:Glossary:operator]]// is a
-//[[CL:Glossary:symbol]]// //f//,
-the \macref{setf} //[[CL:Glossary:form]]// expands into a call 
-to the //[[CL:Glossary:function]]// named \f{(setf //f//)}.
-The first //[[CL:Glossary:argument]]// in the newly constructed //[[CL:Glossary:function form]]//
-is //newvalue// and the
+For any other //[[CL:Glossary:compound form]]// for which the //[[CL:Glossary:operator]]// is a //[[CL:Glossary:symbol]]// //f//, the \macref{setf} //[[CL:Glossary:form]]// expands into a call  to the //[[CL:Glossary:function]]// named \f{(setf //f//)}. The first //[[CL:Glossary:argument]]// in the newly constructed //[[CL:Glossary:function form]]// is //newvalue// and the
      remaining //[[CL:Glossary:arguments]]// are the remaining //[[CL:Glossary:elements]]// of
-     //place//.
-This expansion occurs regardless of whether //f// or \f{(setf //f//)}
-is defined as a //[[CL:Glossary:function]]// locally, globally, or not at all.
-For example,
+     //place//. This expansion occurs regardless of whether //f// or \f{(setf //f//)} is defined as a //[[CL:Glossary:function]]// locally, globally, or not at all. For example,
 
 \f{(setf (//f// //arg1// //arg2// ...) //new-value//)}
 
@@ -869,18 +355,11 @@ expands into a form with the same effect and value as
        (#:temp-2 arg2)
        ...
        (#:temp-0 //new-value//))
-   (funcall (function (setf //f//)) #:temp-0 #:temp-1 #:temp-2...))
-\endcode
+   (funcall (function (setf //f//)) #:temp-0 #:temp-1 #:temp-2...)) \endcode
 
-A //[[CL:Glossary:function]]// named \f{(setf //f//)} must return its first argument
-as its only value in order to preserve the semantics of \macref{setf}.
-
-
+A //[[CL:Glossary:function]]// named \f{(setf //f//)} must return its first argument as its only value in order to preserve the semantics of \macref{setf}.
 
 \endsubsubsection%{Other Compound Forms as Places}
-
-
-
 
 \endsubSection%{Kinds of Places}
 
@@ -888,41 +367,19 @@ as its only value in order to preserve the semantics of \macref{setf}.
 
 \issue{READ-MODIFY-WRITE-EVALUATION-ORDER:DELAYED-ACCESS-STORES}
 
-For each of the ``read-modify-write'' //[[CL:Glossary:operators]]// in \thenextfigure, 
-and for any additional //[[CL:Glossary:macros]]// 
-defined by the //[[CL:Glossary:programmer]]// using \macref{define-modify-macro},
-an exception is made to the normal rule of left-to-right evaluation of arguments.
-Evaluation of //[[CL:Glossary:argument]]// //[[CL:Glossary:forms]]// occurs in left-to-right order,
-with the exception that for the //place// //[[CL:Glossary:argument]]//, the actual
-//[[CL:Glossary:read]]// of the ``old value'' from that //place// happens 
-after all of the //[[CL:Glossary:argument]]// //[[CL:Glossary:form]]// //[[CL:Glossary:evaluations]]//, 
-and just before a ``new value'' is computed and //[[CL:Glossary:written]]// back into the //place//.
+For each of the ``read-modify-write'' //[[CL:Glossary:operators]]// in \thenextfigure,  and for any additional //[[CL:Glossary:macros]]//  defined by the //[[CL:Glossary:programmer]]// using \macref{define-modify-macro}, an exception is made to the normal rule of left-to-right evaluation of arguments. Evaluation of //[[CL:Glossary:argument]]// //[[CL:Glossary:forms]]// occurs in left-to-right order, with the exception that for the //place// //[[CL:Glossary:argument]]//, the actual //[[CL:Glossary:read]]// of the ``old value'' from that //place// happens  after all of the //[[CL:Glossary:argument]]// //[[CL:Glossary:form]]// //[[CL:Glossary:evaluations]]//,  and just before a ``new value'' is computed and //[[CL:Glossary:written]]// back into the //place//.
 
-Specifically, each of these //[[CL:Glossary:operators]]// can be viewed as involving a
-//[[CL:Glossary:form]]// with the following general syntax:
+Specifically, each of these //[[CL:Glossary:operators]]// can be viewed as involving a //[[CL:Glossary:form]]// with the following general syntax:
 
 \code
- (//[[CL:Glossary:operator]]// \starparam{preceding-form} //place// \starparam{following-form})
-\endcode
+ (//[[CL:Glossary:operator]]// \starparam{preceding-form} //place// \starparam{following-form}) \endcode
 
 The evaluation of each such //[[CL:Glossary:form]]// proceeds like this:
 
-\beginlist
-\itemitem{1.} //[[CL:Glossary:Evaluate]]// each of the //preceding-forms//, in left-to-right order.
-\itemitem{2.} //[[CL:Glossary:Evaluate]]// the //[[CL:Glossary:subforms]]// of the //place//,
+\beginlist \itemitem{1.} //[[CL:Glossary:Evaluate]]// each of the //preceding-forms//, in left-to-right order. \itemitem{2.} //[[CL:Glossary:Evaluate]]// the //[[CL:Glossary:subforms]]// of the //place//,
  in the order specified by the second value of the //[[CL:Glossary:setf expansion]]//
- for that //place//.
-\itemitem{3.} //[[CL:Glossary:Evaluate]]// each of the //following-forms//, in left-to-right order.
-\itemitem{4.} //[[CL:Glossary:Read]]// the old value from //place//.
-\itemitem{5.} Compute the new value.
-\itemitem{6.} Store the new value into //place//.
-\endlist
+ for that //place//. \itemitem{3.} //[[CL:Glossary:Evaluate]]// each of the //following-forms//, in left-to-right order. \itemitem{4.} //[[CL:Glossary:Read]]// the old value from //place//. \itemitem{5.} Compute the new value. \itemitem{6.} Store the new value into //place//. \endlist
 
-\displaythree{Read-Modify-Write Macros}{
-decf&pop&pushnew\cr
-incf&push&remf\cr
-}
-
-
+\displaythree{Read-Modify-Write Macros}{ decf&pop&pushnew\cr incf&push&remf\cr }
 
 \endsubSection%{Treatment of Other Macros Based on SETF}

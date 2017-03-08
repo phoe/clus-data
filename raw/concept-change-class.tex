@@ -1,109 +1,36 @@
 
-              
-\Thefunction{change-class} can be used to change the //[[CL:Glossary:class]]// 
-of an //[[CL:Glossary:instance]]// from its current class, $C\sub {\hbox{{\prmseven from}}}$,
-to a different class, $C\sub {\hbox{{\prmseven to}}}$; it changes the
-structure of the //[[CL:Glossary:instance]]// to conform to the definition of the class
-$C\sub {\hbox{{\prmseven to}}}$.
+               \Thefunction{change-class} can be used to change the //[[CL:Glossary:class]]//  of an //[[CL:Glossary:instance]]// from its current class, $C\sub {\hbox{{\prmseven from}}}$, to a different class, $C\sub {\hbox{{\prmseven to}}}$; it changes the structure of the //[[CL:Glossary:instance]]// to conform to the definition of the class $C\sub {\hbox{{\prmseven to}}}$.
 
-Note that changing the //[[CL:Glossary:class]]// of an //[[CL:Glossary:instance]]// may cause
-//[[CL:Glossary:slots]]// to be added or deleted.  Changing the //[[CL:Glossary:class]]// of an
-//[[CL:Glossary:instance]]// does not change its identity as defined by the
-**[[CL:Functions:eq]]** function.
-      
-When **[[CL:Functions:change-class]]** is invoked on an //[[CL:Glossary:instance]]//, a two-step
-updating process takes place.  The first step modifies the structure of
-the //[[CL:Glossary:instance]]// by adding new //[[CL:Glossary:local slots]]// and discarding 
-//[[CL:Glossary:local slots]]// that are not specified in the new version of the //[[CL:Glossary:instance]]//.
-The second step initializes the newly added //[[CL:Glossary:local slots]]// and performs 
-any other user-defined actions. These two steps are further described in the 
-two following sections.
+Note that changing the //[[CL:Glossary:class]]// of an //[[CL:Glossary:instance]]// may cause //[[CL:Glossary:slots]]// to be added or deleted.  Changing the //[[CL:Glossary:class]]// of an //[[CL:Glossary:instance]]// does not change its identity as defined by the **[[CL:Functions:eq]]** function.
+       When **[[CL:Functions:change-class]]** is invoked on an //[[CL:Glossary:instance]]//, a two-step updating process takes place.  The first step modifies the structure of the //[[CL:Glossary:instance]]// by adding new //[[CL:Glossary:local slots]]// and discarding  //[[CL:Glossary:local slots]]// that are not specified in the new version of the //[[CL:Glossary:instance]]//. The second step initializes the newly added //[[CL:Glossary:local slots]]// and performs  any other user-defined actions. These two steps are further described in the  two following sections.
 
 \beginsubsection{Modifying the Structure of the Instance}
 
-In order to make the //[[CL:Glossary:instance]]// conform to the class $C\sub
-{\hbox{{\prmseven to}}}$, //[[CL:Glossary:local slots]]// specified by the class $C\sub
-{\hbox{{\prmseven to}}}$ that are not specified by the class $C\sub
-{\hbox{{\prmseven from}}}$ are added, and //[[CL:Glossary:local slots]]// not specified by
-the class $C\sub {\hbox{{\prmseven to}}}$ that are specified by the
-class $C\sub {\hbox{{\prmseven from}}}$ are discarded.
+In order to make the //[[CL:Glossary:instance]]// conform to the class $C\sub {\hbox{{\prmseven to}}}$, //[[CL:Glossary:local slots]]// specified by the class $C\sub {\hbox{{\prmseven to}}}$ that are not specified by the class $C\sub {\hbox{{\prmseven from}}}$ are added, and //[[CL:Glossary:local slots]]// not specified by the class $C\sub {\hbox{{\prmseven to}}}$ that are specified by the class $C\sub {\hbox{{\prmseven from}}}$ are discarded.
 
-The values of //[[CL:Glossary:local slots]]// specified by both the class $C\sub
-{\hbox{{\prmseven to}}}$ and the class $C\sub {\hbox{{\prmseven
-from}}}$ are retained. If such a //[[CL:Glossary:local slot]]// was unbound, it remains
-unbound.
+The values of //[[CL:Glossary:local slots]]// specified by both the class $C\sub {\hbox{{\prmseven to}}}$ and the class $C\sub {\hbox{{\prmseven from}}}$ are retained. If such a //[[CL:Glossary:local slot]]// was unbound, it remains unbound.
 
-The values of //[[CL:Glossary:slots]]// specified as shared in the class $C\sub
-{\hbox{{\prmseven from}}}$ and as local in the class $C\sub
-{\hbox{{\prmseven to}}}$ are retained.
+The values of //[[CL:Glossary:slots]]// specified as shared in the class $C\sub {\hbox{{\prmseven from}}}$ and as local in the class $C\sub {\hbox{{\prmseven to}}}$ are retained.
 
-This first step of the update does not affect the values of any 
-//[[CL:Glossary:shared slots]]//.
+This first step of the update does not affect the values of any  //[[CL:Glossary:shared slots]]//.
 
 \endsubsection%{Modifying the Structure of the Instance}
 
-\beginsubsection{Initializing Newly Added Local Slots}
-\DefineSection{InitNewLocalSlots}
+\beginsubsection{Initializing Newly Added Local Slots} \DefineSection{InitNewLocalSlots}
 
-The second step of the update initializes the newly added //[[CL:Glossary:slots]]// and
-performs any other user-defined actions.  This step is implemented by
-the generic function **[[CL:Functions:update-instance-for-different-class]]**.  The
-generic function **[[CL:Functions:update-instance-for-different-class]]** is invoked
-by **[[CL:Functions:change-class]]** after the first step of the update has been
-completed.
+The second step of the update initializes the newly added //[[CL:Glossary:slots]]// and performs any other user-defined actions.  This step is implemented by the generic function **[[CL:Functions:update-instance-for-different-class]]**.  The generic function **[[CL:Functions:update-instance-for-different-class]]** is invoked by **[[CL:Functions:change-class]]** after the first step of the update has been completed.
 
-\issue{CHANGE-CLASS-INITARGS:PERMIT}
-The generic function **[[CL:Functions:update-instance-for-different-class]]** is
-invoked on arguments computed by **[[CL:Functions:change-class]]**.
-The first argument passed is a copy of the //[[CL:Glossary:instance]]// being updated 
-and is an //[[CL:Glossary:instance]]// of the class $C\sub {\hbox{{\prmseven from}}}$; 
-this copy has //[[CL:Glossary:dynamic extent]]// within the generic function **[[CL:Functions:change-class]]**.  
-The second argument is the //[[CL:Glossary:instance]]// as updated so far by **[[CL:Functions:change-class]]**
-and is an //[[CL:Glossary:instance]]// of the class $C\sub {\hbox{{\prmseven to}}}$.
-The remaining arguments are an //[[CL:Glossary:initialization argument list]]//.
+\issue{CHANGE-CLASS-INITARGS:PERMIT} The generic function **[[CL:Functions:update-instance-for-different-class]]** is invoked on arguments computed by **[[CL:Functions:change-class]]**. The first argument passed is a copy of the //[[CL:Glossary:instance]]// being updated  and is an //[[CL:Glossary:instance]]// of the class $C\sub {\hbox{{\prmseven from}}}$;  this copy has //[[CL:Glossary:dynamic extent]]// within the generic function **[[CL:Functions:change-class]]**.   The second argument is the //[[CL:Glossary:instance]]// as updated so far by **[[CL:Functions:change-class]]** and is an //[[CL:Glossary:instance]]// of the class $C\sub {\hbox{{\prmseven to}}}$. The remaining arguments are an //[[CL:Glossary:initialization argument list]]//.
 
+There is a system-supplied primary //[[CL:Glossary:method]]// for  **[[CL:Functions:update-instance-for-different-class]]** that has two parameter specializers, each of which is \theclass{standard-object}.  First this //[[CL:Glossary:method]]// checks the validity of initialization arguments and signals an error if an initialization argument is supplied that is not declared as valid.  (For more information, \seesection\DeclaringInitargValidity.) Then it calls the generic function **[[CL:Functions:shared-initialize]]** with the following arguments: the
 
-
-
-
-
-There is a system-supplied primary //[[CL:Glossary:method]]// for 
-**[[CL:Functions:update-instance-for-different-class]]** that has two parameter
-specializers, each of which is \theclass{standard-object}.  First
-this //[[CL:Glossary:method]]// checks the validity of initialization arguments and
-signals an error if an initialization argument is supplied that is not
-declared as valid.  (For more information, \seesection\DeclaringInitargValidity.)
-Then it calls the
-generic function **[[CL:Functions:shared-initialize]]** with the following arguments:
-the
-
-new
-//[[CL:Glossary:instance]]//, a list of //[[CL:Glossary:names]]// of the newly added 
-//[[CL:Glossary:slots]]//, and the
-initialization arguments it received.
+new //[[CL:Glossary:instance]]//, a list of //[[CL:Glossary:names]]// of the newly added  //[[CL:Glossary:slots]]//, and the initialization arguments it received.
 
 \endsubsection%{Initializing Newly added Local Slots}
 
 \beginsubsection{Customizing the Change of Class of an Instance}
-             
-//[[CL:Glossary:Methods]]// for **[[CL:Functions:update-instance-for-different-class]]** may be defined
-to specify actions to be taken when an //[[CL:Glossary:instance]]// is updated.  If only
-//[[CL:Glossary:after methods]]// for **[[CL:Functions:update-instance-for-different-class]]** are
-defined, they will be run after the system-supplied primary //[[CL:Glossary:method]]// for
-initialization and will not interfere with the default behavior of
-**[[CL:Functions:update-instance-for-different-class]]**.
+              //[[CL:Glossary:Methods]]// for **[[CL:Functions:update-instance-for-different-class]]** may be defined to specify actions to be taken when an //[[CL:Glossary:instance]]// is updated.  If only //[[CL:Glossary:after methods]]// for **[[CL:Functions:update-instance-for-different-class]]** are defined, they will be run after the system-supplied primary //[[CL:Glossary:method]]// for initialization and will not interfere with the default behavior of **[[CL:Functions:update-instance-for-different-class]]**.
 
-
-
-
-
-
-
-
-
-//[[CL:Glossary:Methods]]// 
-for **[[CL:Functions:shared-initialize]]** may be defined to customize //[[CL:Glossary:class]]//
-redefinition.  For more information, \seesection\SharedInitialize.
-  
-\endsubsection%{Customizing the Change of Class of an Instance}
+//[[CL:Glossary:Methods]]//  for **[[CL:Functions:shared-initialize]]** may be defined to customize //[[CL:Glossary:class]]// redefinition.  For more information, \seesection\SharedInitialize.
+   \endsubsection%{Customizing the Change of Class of an Instance}
 

@@ -1,12 +1,6 @@
 
 
-A //[[CL:Glossary:lambda list]]// is a //[[CL:Glossary:list]]// that
-specifies a set of //[[CL:Glossary:parameters]]// (sometimes called //[[CL:Glossary:lambda variables]]//)
-and a protocol for receiving //[[CL:Glossary:values]]// for those //[[CL:Glossary:parameters]]//.
-
-
-
-
+A //[[CL:Glossary:lambda list]]// is a //[[CL:Glossary:list]]// that specifies a set of //[[CL:Glossary:parameters]]// (sometimes called //[[CL:Glossary:lambda variables]]//) and a protocol for receiving //[[CL:Glossary:values]]// for those //[[CL:Glossary:parameters]]//.
 
 There are several kinds of //[[CL:Glossary:lambda lists]]//.
 
@@ -16,15 +10,11 @@ There are several kinds of //[[CL:Glossary:lambda lists]]//.
  //[[CL:Glossary:lambda expression]]//                          & //[[CL:Glossary:ordinary lambda list]]//         \cr
  \specref{flet} local //[[CL:Glossary:function]]// definition   & //[[CL:Glossary:ordinary lambda list]]//         \cr
  \specref{labels} local //[[CL:Glossary:function]]// definition & //[[CL:Glossary:ordinary lambda list]]//         \cr
- \specref{handler-case} //clause// specification
-						   & //[[CL:Glossary:ordinary lambda list]]//         \cr
- \specref{restart-case} //clause// specification
-						   & //[[CL:Glossary:ordinary lambda list]]//         \cr
+ \specref{handler-case} //clause// specification 						   & //[[CL:Glossary:ordinary lambda list]]//         \cr
+ \specref{restart-case} //clause// specification 						   & //[[CL:Glossary:ordinary lambda list]]//         \cr
  \macref{macrolet} local //[[CL:Glossary:macro]]// definition   & //[[CL:Glossary:macro lambda list]]//            \cr
  \macref{define-method-combination}		   & //[[CL:Glossary:ordinary lambda list]]//	 \cr
  \macref{define-method-combination} **'':arguments''** option &
-
-
 
        //[[CL:Glossary:define-method-combination arguments lambda list]]//         \cr
  \macref{defstruct} **'':constructor''** option       & //[[CL:Glossary:boa lambda list]]//              \cr
@@ -36,297 +26,109 @@ There are several kinds of //[[CL:Glossary:lambda lists]]//.
  \macref{deftype} //[[CL:Glossary:form]]//			   & //[[CL:Glossary:deftype lambda list]]//		 \cr
  \macref{destructuring-bind} //[[CL:Glossary:form]]//	   & //[[CL:Glossary:destructuring lambda list]]//    \cr
 
-
-
-
-
-
-
  \macref{define-compiler-macro} //[[CL:Glossary:form]]//       & //[[CL:Glossary:macro lambda list]]//             \cr
- \macref{define-modify-macro} //[[CL:Glossary:form]]//         & //[[CL:Glossary:define-modify-macro lambda list]]// \cr
-}
+ \macref{define-modify-macro} //[[CL:Glossary:form]]//         & //[[CL:Glossary:define-modify-macro lambda list]]// \cr }
 
-\Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that are applicable
-to //[[CL:Glossary:lambda lists]]//.
+\Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that are applicable to //[[CL:Glossary:lambda lists]]//.
 
-\displaythree{Defined names applicable to lambda lists}{
-lambda-list-keywords&lambda-parameters-limit&\cr
-}
+\displaythree{Defined names applicable to lambda lists}{ lambda-list-keywords&lambda-parameters-limit&\cr }
 
+\beginsubSection{Ordinary Lambda Lists} \DefineSection{OrdinaryLambdaLists}
 
-\beginsubSection{Ordinary Lambda Lists}
-\DefineSection{OrdinaryLambdaLists}
+An //[[CL:Glossary:ordinary lambda list]]// is used to describe how a set of //[[CL:Glossary:arguments]]// is received by an //[[CL:Glossary:ordinary]]// //[[CL:Glossary:function]]//.   The //[[CL:Glossary:defined names]]// in \thenextfigure\ are those which use //[[CL:Glossary:ordinary lambda lists]]//:
 
-An //[[CL:Glossary:ordinary lambda list]]// is used to describe how a set of
-//[[CL:Glossary:arguments]]// is received by an //[[CL:Glossary:ordinary]]// //[[CL:Glossary:function]]//.  
-The //[[CL:Glossary:defined names]]// in \thenextfigure\ are those which use
-//[[CL:Glossary:ordinary lambda lists]]//:
+\displaythree{Standardized Operators that use Ordinary Lambda Lists}{ define-method-combination&handler-case&restart-case\cr defun&labels&\cr flet&lambda&\cr }
 
+An //[[CL:Glossary:ordinary lambda list]]// can contain the //[[CL:Glossary:lambda list keywords]]// shown in \thenextfigure.
 
+\showthree{Lambda List Keywords used by Ordinary Lambda Lists}{ ''&allow-other-keys''&''&key''&''&rest''\cr ''&aux''&''&optional''&\cr }
 
-\displaythree{Standardized Operators that use Ordinary Lambda Lists}{
-define-method-combination&handler-case&restart-case\cr
-defun&labels&\cr
-flet&lambda&\cr
-}
+Each //[[CL:Glossary:element]]// of a //[[CL:Glossary:lambda list]]// is either a parameter specifier or a //[[CL:Glossary:lambda list keyword]]//.
 
-An //[[CL:Glossary:ordinary lambda list]]// can contain the //[[CL:Glossary:lambda list keywords]]// shown
-in \thenextfigure.
-
-\showthree{Lambda List Keywords used by Ordinary Lambda Lists}{
-''&allow-other-keys''&''&key''&''&rest''\cr
-''&aux''&''&optional''&\cr
-}
-
-Each //[[CL:Glossary:element]]// of a //[[CL:Glossary:lambda list]]// is either a parameter specifier
-or a //[[CL:Glossary:lambda list keyword]]//.
-
-Implementations are free to provide additional //[[CL:Glossary:lambda list keywords]]//.
-For a list of all //[[CL:Glossary:lambda list keywords]]//
-used by the implementation, see \conref{lambda-list-keywords}.
+Implementations are free to provide additional //[[CL:Glossary:lambda list keywords]]//. For a list of all //[[CL:Glossary:lambda list keywords]]// used by the implementation, see \conref{lambda-list-keywords}.
 
 The syntax for //[[CL:Glossary:ordinary lambda lists]]// is as follows: 
 
-\Vskip 1pc!
-\auxbnf{lambda-list}{\lparen\starparam{var}\CR
-		     \ \ttbrac{{\opt} \star{\VarValueSuppliedP}}\CR
-		     \ \ttbrac{{\rest} //var//}\CR
-		     \ \f{[}\Vtop{\hbox{{\key} \star{\KeyVarValueSuppliedP}}
-				  \vskip 4pt
-				  \hbox{\brac{\allowotherkeys}\f{]}}}\CR
-		     \ \ttbrac{{\aux} \star{\VarValue}}\rparen\CR}
+\Vskip 1pc! \auxbnf{lambda-list}{\lparen\starparam{var}\CR 		     \ \ttbrac{{\opt} \star{\VarValueSuppliedP}}\CR 		     \ \ttbrac{{\rest} //var//}\CR 		     \ \f{[}\Vtop{\hbox{{\key} \star{\KeyVarValueSuppliedP}} 				  \vskip 4pt 				  \hbox{\brac{\allowotherkeys}\f{]}}}\CR 		     \ \ttbrac{{\aux} \star{\VarValue}}\rparen\CR}
 
-
-A //var// or //supplied-p-parameter// must be a //[[CL:Glossary:symbol]]//
-that is not the name of a //[[CL:Glossary:constant variable]]//.
+A //var// or //supplied-p-parameter// must be a //[[CL:Glossary:symbol]]// that is not the name of a //[[CL:Glossary:constant variable]]//.
 
 An //init-form// can be any //[[CL:Glossary:form]]//.
 
-Whenever any //init-form// is evaluated for any parameter
-specifier, that //[[CL:Glossary:form]]// may refer to any parameter variable to
-the left of the specifier in which the //init-form// appears,
-including any //supplied-p-parameter// variables, and may rely 
-on the fact that no other parameter variable has yet been bound
-(including its own parameter variable).
+Whenever any //init-form// is evaluated for any parameter specifier, that //[[CL:Glossary:form]]// may refer to any parameter variable to the left of the specifier in which the //init-form// appears, including any //supplied-p-parameter// variables, and may rely  on the fact that no other parameter variable has yet been bound (including its own parameter variable).
 
-A //keyword-name// can be any //[[CL:Glossary:symbol]]//, 
-but by convention is normally a //[[CL:Glossary:keyword]]//\meaning{1};
-all //[[CL:Glossary:standardized]]// //[[CL:Glossary:functions]]// follow that convention.
+A //keyword-name// can be any //[[CL:Glossary:symbol]]//,  but by convention is normally a //[[CL:Glossary:keyword]]//\meaning{1}; all //[[CL:Glossary:standardized]]// //[[CL:Glossary:functions]]// follow that convention.
 
-
-An //[[CL:Glossary:ordinary lambda list]]// has five parts, any or all of which may be empty.
-For information about the treatment of argument mismatches,
-\seesection\FuncallErrorChecking.
-
-
-
+An //[[CL:Glossary:ordinary lambda list]]// has five parts, any or all of which may be empty. For information about the treatment of argument mismatches, \seesection\FuncallErrorChecking.
 
 \beginsubsubsection{Specifiers for the required parameters}
-     
-These are all the parameter specifiers up to 
-the first //[[CL:Glossary:lambda list keyword]]//;
-if there are no //[[CL:Glossary:lambda list keywords]]//, 
-then all the specifiers are for required parameters.
-Each required parameter is specified by a parameter variable //var//.
-//var// is bound as a lexical variable unless it is declared **[[CL:Declarations:special]]**.
+      These are all the parameter specifiers up to  the first //[[CL:Glossary:lambda list keyword]]//; if there are no //[[CL:Glossary:lambda list keywords]]//,  then all the specifiers are for required parameters. Each required parameter is specified by a parameter variable //var//. //var// is bound as a lexical variable unless it is declared **[[CL:Declarations:special]]**.
 
-
-If there are \f{n} required parameters (\f{n} may be zero), 
-there must be at least \f{n} passed arguments, and the 
-required parameters are bound to the first \f{n} passed arguments;
-\seesection\FuncallErrorChecking.
-The other parameters are then processed using any remaining arguments.
+If there are \f{n} required parameters (\f{n} may be zero),  there must be at least \f{n} passed arguments, and the  required parameters are bound to the first \f{n} passed arguments; \seesection\FuncallErrorChecking. The other parameters are then processed using any remaining arguments.
 
 \endsubsubsection%{Specifiers for the required parameters}
 
+\beginsubsubsection{Specifiers for optional parameters} \idxkeyref{optional}
 
-
-\beginsubsubsection{Specifiers for optional parameters}
-\idxkeyref{optional}
-
-If ''&optional'' is present,
-the optional parameter specifiers are those following 
-''&optional'' 
-up to the next //[[CL:Glossary:lambda list keyword]]// or the end of the list.
-If optional parameters are specified, then each one is processed as
-follows.  If any unprocessed arguments remain, then the parameter variable
-//var// is bound to the next remaining argument, just as for a required
-parameter.  If no arguments remain, however, then //init-form// 
-is evaluated, and the parameter variable
-is bound to the resulting value 
-(or to \nil\ if no //init-form// appears
-in the parameter specifier).
-If another variable name //supplied-p-parameter// 
-appears in the specifier, it is bound
-to //[[CL:Glossary:true]]// if an argument had been available, and to //[[CL:Glossary:false]]// if no
-argument remained (and therefore //init-form// had to be evaluated).
-//Supplied-p-parameter//
-is bound not to an argument but to a value indicating whether or not
-an argument had been supplied for the corresponding //var//.
+If ''&optional'' is present, the optional parameter specifiers are those following  ''&optional''  up to the next //[[CL:Glossary:lambda list keyword]]// or the end of the list. If optional parameters are specified, then each one is processed as follows.  If any unprocessed arguments remain, then the parameter variable //var// is bound to the next remaining argument, just as for a required parameter.  If no arguments remain, however, then //init-form//  is evaluated, and the parameter variable is bound to the resulting value  (or to \nil\ if no //init-form// appears in the parameter specifier). If another variable name //supplied-p-parameter//  appears in the specifier, it is bound to //[[CL:Glossary:true]]// if an argument had been available, and to //[[CL:Glossary:false]]// if no argument remained (and therefore //init-form// had to be evaluated). //Supplied-p-parameter// is bound not to an argument but to a value indicating whether or not an argument had been supplied for the corresponding //var//.
 
 \endsubsubsection%{Specifiers for optional parameters}
 
+\beginsubsubsection{A specifier for a rest parameter} \idxkeyref{rest}
 
-\beginsubsubsection{A specifier for a rest parameter}
-\idxkeyref{rest}
+''&rest'', if present, must be followed by a single //[[CL:Glossary:rest parameter]]// specifier, which in turn must be followed by another  //[[CL:Glossary:lambda list keyword]]// or the end of the //[[CL:Glossary:lambda list]]//.  After all optional parameter specifiers have been processed, then there may or may not be a //[[CL:Glossary:rest parameter]]//.  If there is a //[[CL:Glossary:rest parameter]]//, it is bound to a //[[CL:Glossary:list]]// of all as-yet-unprocessed arguments.  If no unprocessed arguments remain, the //[[CL:Glossary:rest parameter]]// is bound to the //[[CL:Glossary:empty list]]//.  If there is no //[[CL:Glossary:rest parameter]]// and there are no  //[[CL:Glossary:keyword parameters]]//, then an error 
 
-''&rest'', if present, must be followed by a single //[[CL:Glossary:rest parameter]]//
-specifier, which in turn must be followed by another 
-//[[CL:Glossary:lambda list keyword]]// or the end of the //[[CL:Glossary:lambda list]]//.  After all
-optional parameter specifiers have been processed, then there may or
-may not be a //[[CL:Glossary:rest parameter]]//.  If there is a //[[CL:Glossary:rest parameter]]//, it is
-bound to a //[[CL:Glossary:list]]// of all as-yet-unprocessed arguments.  If
-no unprocessed arguments remain, the //[[CL:Glossary:rest parameter]]// is bound to the
-//[[CL:Glossary:empty list]]//.  If there is no //[[CL:Glossary:rest parameter]]// and there are no 
-//[[CL:Glossary:keyword parameters]]//, then an error 
+should be signaled if any unprocessed arguments remain; \seesection\FuncallErrorChecking. The value of a //[[CL:Glossary:rest parameter]]// is permitted, but not required, to share structure with the last argument to **[[CL:Functions:apply]]**.
 
-
-should be signaled if
-any unprocessed arguments remain; \seesection\FuncallErrorChecking.
-The value of a //[[CL:Glossary:rest parameter]]//
-is permitted, but not required, to share structure with the
-last argument to **[[CL:Functions:apply]]**.
-
-\endsubsubsection%{A specifier for a rest parameter}
-\idxkeyref{key}
-\idxkeyref{allow-other-keys}
-
+\endsubsubsection%{A specifier for a rest parameter} \idxkeyref{key} \idxkeyref{allow-other-keys}
 
 \beginsubsubsection{Specifiers for keyword parameters}
-                       
-\issue{PLIST-DUPLICATES:ALLOW}
+                        \issue{PLIST-DUPLICATES:ALLOW}
 
+If ''&key''  is present, all specifiers up to the next //[[CL:Glossary:lambda list keyword]]// or the end of the //[[CL:Glossary:list]]// are keyword parameter specifiers. When keyword parameters are processed, the same arguments are processed that would be made into a //[[CL:Glossary:list]]// for a //[[CL:Glossary:rest parameter]]//. It is permitted to specify both ''&rest'' and ''&key''. In this case the remaining arguments are used for both purposes; that is, all remaining arguments are made into a //[[CL:Glossary:list]]// for the //[[CL:Glossary:rest parameter]]//, and are also processed for the ''&key'' parameters. \issue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT} If ''&key'' is specified, there must remain an even number of arguments; \seesection\OddNumberOfKeyArgs.
 
+These arguments are considered as pairs, the first argument in each pair being interpreted as a name and the second as the corresponding value. The first //[[CL:Glossary:object]]// of each pair must be a //[[CL:Glossary:symbol]]//; \seesection\InvalidKeyArgs. The keyword parameter specifiers may optionally be followed by the //[[CL:Glossary:lambda list keyword]]// ''&allow-other-keys''.
 
-If ''&key'' 
-is present, all specifiers up to the next //[[CL:Glossary:lambda list keyword]]//
-or the end of the //[[CL:Glossary:list]]// are keyword parameter specifiers.
-When keyword parameters are processed,
-the same arguments are processed that
-would be made into a //[[CL:Glossary:list]]// for a //[[CL:Glossary:rest parameter]]//.
-It is permitted to specify both ''&rest'' and ''&key''.
-In this case the remaining arguments are used for both purposes;
-that is, all remaining arguments are made into a //[[CL:Glossary:list]]// for the
-//[[CL:Glossary:rest parameter]]//, and are also processed for the ''&key'' parameters.
-\issue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
-If ''&key'' is specified, there must remain
-an even number of arguments; \seesection\OddNumberOfKeyArgs.
-
-These arguments are considered as pairs,
-the first argument in each pair being interpreted as a name
-and the second as the corresponding value.
-The first //[[CL:Glossary:object]]// of each pair must be a //[[CL:Glossary:symbol]]//;
-\seesection\InvalidKeyArgs.
-The keyword parameter specifiers may optionally be followed by the
-//[[CL:Glossary:lambda list keyword]]// ''&allow-other-keys''.
-
-
-In each keyword parameter specifier must be a name //var// for
-the parameter variable.
-\issue{KEYWORD-ARGUMENT-NAME-PACKAGE:ANY}
-If the //var// appears alone or in a \f{(//var// //init-form//)}
-combination, the keyword name used when matching //[[CL:Glossary:arguments]]// to //[[CL:Glossary:parameters]]//
-is a //[[CL:Glossary:symbol]]// in \thepackage{keyword} whose //[[CL:Glossary:name]]// is the
-//[[CL:Glossary:same]]// (under **[[CL:Functions:string=]]**) as //var//'s.
-If the notation \f{((//keyword-name// //var//) //init-form//)} is used,
-then the keyword name used to match //[[CL:Glossary:arguments]]// to //[[CL:Glossary:parameters]]// is
-//keyword-name//, which may be a //[[CL:Glossary:symbol]]// in any //[[CL:Glossary:package]]//.
-(Of course, if it is not a //[[CL:Glossary:symbol]]// in \thepackage{keyword},
-it does not necessarily self-evaluate, so care must be taken when calling the function
-to make sure that normal evaluation still yields the keyword name.)
+In each keyword parameter specifier must be a name //var// for the parameter variable. \issue{KEYWORD-ARGUMENT-NAME-PACKAGE:ANY} If the //var// appears alone or in a \f{(//var// //init-form//)} combination, the keyword name used when matching //[[CL:Glossary:arguments]]// to //[[CL:Glossary:parameters]]// is a //[[CL:Glossary:symbol]]// in \thepackage{keyword} whose //[[CL:Glossary:name]]// is the //[[CL:Glossary:same]]// (under **[[CL:Functions:string=]]**) as //var//'s. If the notation \f{((//keyword-name// //var//) //init-form//)} is used, then the keyword name used to match //[[CL:Glossary:arguments]]// to //[[CL:Glossary:parameters]]// is //keyword-name//, which may be a //[[CL:Glossary:symbol]]// in any //[[CL:Glossary:package]]//. (Of course, if it is not a //[[CL:Glossary:symbol]]// in \thepackage{keyword}, it does not necessarily self-evaluate, so care must be taken when calling the function to make sure that normal evaluation still yields the keyword name.)
 
 Thus
 
 \code
- (defun foo (&key radix (type 'integer)) ...)
-\endcode
-means exactly the same as
+ (defun foo (&key radix (type 'integer)) ...) \endcode means exactly the same as
 
 \code
- (defun foo (&key ((:radix radix)) ((:type type) 'integer)) ...)
-\endcode
+ (defun foo (&key ((:radix radix)) ((:type type) 'integer)) ...) \endcode
 
-The keyword parameter specifiers are, like all parameter specifiers,
-effectively processed from left to right.  For each keyword parameter
-specifier, if there is an argument pair whose name matches that
-specifier's name (that is, the names are **[[CL:Functions:eq]]**), then the
-parameter variable for that specifier is bound to the second item (the
-value) of that argument pair.  If more than one such argument pair
-matches, the leftmost argument pair is used.  If no such argument pair
-exists, then the //init-form// for that specifier is evaluated and
-the parameter variable is bound to that value (or to \nil\ if no
-//init-form// was specified).  //supplied-p-parameter// is
-treated as for ''&optional'' parameters: it is bound to //[[CL:Glossary:true]]// if there
-was a matching argument pair, and to //[[CL:Glossary:false]]// otherwise.
+The keyword parameter specifiers are, like all parameter specifiers, effectively processed from left to right.  For each keyword parameter specifier, if there is an argument pair whose name matches that specifier's name (that is, the names are **[[CL:Functions:eq]]**), then the parameter variable for that specifier is bound to the second item (the value) of that argument pair.  If more than one such argument pair matches, the leftmost argument pair is used.  If no such argument pair exists, then the //init-form// for that specifier is evaluated and the parameter variable is bound to that value (or to \nil\ if no //init-form// was specified).  //supplied-p-parameter// is treated as for ''&optional'' parameters: it is bound to //[[CL:Glossary:true]]// if there was a matching argument pair, and to //[[CL:Glossary:false]]// otherwise.
 
+Unless keyword argument checking is suppressed, an argument pair must a name matched by a parameter specifier; \seesection\UnrecognizedKeyArgs.
 
-Unless keyword argument checking is suppressed,
-an argument pair must a name matched by a parameter specifier;
-\seesection\UnrecognizedKeyArgs.
+If keyword argument checking is suppressed,  then it is permitted for an argument pair to match no parameter specifier, and the argument pair is ignored, but such an argument pair is accessible through the //[[CL:Glossary:rest parameter]]// if one was supplied.  The purpose of these mechanisms is to allow sharing of argument lists among several //[[CL:Glossary:lambda expressions]]// and to allow either the caller or the called //[[CL:Glossary:lambda expression]]// to specify that such sharing may be taking place.
 
+\issue{ALLOW-OTHER-KEYS-NIL:PERMIT} Note that if ''&key'' is present, a keyword argument of **'':allow-other-keys''** is always permitted---regardless of whether the associated value is //[[CL:Glossary:true]]// or //[[CL:Glossary:false]]//.  However, if the value is //[[CL:Glossary:false]]//, other non-matching keywords are not tolerated (unless ''&allow-other-keys'' was used).
 
+Furthermore, if the receiving argument list specifies a regular argument which would be flagged by **'':allow-other-keys''**, then **'':allow-other-keys''** has both its special-cased meaning (identifying whether additional keywords are permitted) and its normal meaning (data flow into the function in question).
 
+\beginsubsubsubsection{Suppressing Keyword Argument Checking} \DefineSection{SuppressingKeyArgChecks}
 
+If ''&allow-other-keys'' was specified in the //[[CL:Glossary:lambda list]]// of a //[[CL:Glossary:function]]//, //[[CL:Glossary:keyword]]//\meaning{2} //[[CL:Glossary:argument]]// checking is suppressed in calls to that //[[CL:Glossary:function]]//.
 
-If keyword argument checking is suppressed, 
-then it is permitted for an argument pair
-to match no parameter specifier, and the argument pair is ignored, but
-such an argument pair is accessible through the //[[CL:Glossary:rest parameter]]// if
-one was supplied.  The purpose of these mechanisms is to allow sharing
-of argument lists among several //[[CL:Glossary:lambda expressions]]// and to
-allow either the caller or the called //[[CL:Glossary:lambda expression]]// to
-specify that such sharing may be taking place.
-
-\issue{ALLOW-OTHER-KEYS-NIL:PERMIT}
-Note that if ''&key'' is present, a keyword argument of **'':allow-other-keys''**
-is always permitted---regardless of whether the associated value is //[[CL:Glossary:true]]//
-or //[[CL:Glossary:false]]//.  However, if the value is //[[CL:Glossary:false]]//, other non-matching
-keywords are not tolerated (unless ''&allow-other-keys'' was used).
-
-Furthermore, if the receiving argument list specifies a regular argument which
-would be flagged by **'':allow-other-keys''**, then **'':allow-other-keys''** has both
-its special-cased meaning (identifying whether additional keywords are permitted)
-and its normal meaning (data flow into the function in question).
-
-
-
-\beginsubsubsubsection{Suppressing Keyword Argument Checking}
-\DefineSection{SuppressingKeyArgChecks}
-
-If ''&allow-other-keys'' was specified in the //[[CL:Glossary:lambda list]]// of a //[[CL:Glossary:function]]//,
-//[[CL:Glossary:keyword]]//\meaning{2} //[[CL:Glossary:argument]]// checking is suppressed in calls
-to that //[[CL:Glossary:function]]//.
-
-If \thekeyarg{allow-other-keys} is //[[CL:Glossary:true]]// in a call to a //[[CL:Glossary:function]]//,
-//[[CL:Glossary:keyword]]//\meaning{2} //[[CL:Glossary:argument]]// checking is suppressed 
-
+If \thekeyarg{allow-other-keys} is //[[CL:Glossary:true]]// in a call to a //[[CL:Glossary:function]]//, //[[CL:Glossary:keyword]]//\meaning{2} //[[CL:Glossary:argument]]// checking is suppressed 
 
 in that call.
 
-\Thekeyarg{allow-other-keys} is permissible in all situations involving
-//[[CL:Glossary:keyword]]//\meaning{2} //[[CL:Glossary:arguments]]//, even when its associated //[[CL:Glossary:value]]//
-is //[[CL:Glossary:false]]//.
+\Thekeyarg{allow-other-keys} is permissible in all situations involving //[[CL:Glossary:keyword]]//\meaning{2} //[[CL:Glossary:arguments]]//, even when its associated //[[CL:Glossary:value]]// is //[[CL:Glossary:false]]//.
 
 \beginsubsubsubsubsection{Examples of Suppressing Keyword Argument Checking}
 
-\code
-;;; The caller can supply :ALLOW-OTHER-KEYS T to suppress checking.
- ((lambda (&key x) x) :x 1 :y 2 :allow-other-keys t) \EV 1
-;;; The callee can use &ALLOW-OTHER-KEYS to suppress checking.
- ((lambda (&key x &allow-other-keys) x) :x 1 :y 2) \EV 1
-;;; :ALLOW-OTHER-KEYS NIL is always permitted.
- ((lambda (&key) t) :allow-other-keys nil) \EV T
-;;; As with other keyword arguments, only the left-most pair
-;;; named :ALLOW-OTHER-KEYS has any effect.
+\code ;;; The caller can supply :ALLOW-OTHER-KEYS T to suppress checking.
+ ((lambda (&key x) x) :x 1 :y 2 :allow-other-keys t) \EV 1 ;;; The callee can use &ALLOW-OTHER-KEYS to suppress checking.
+ ((lambda (&key x &allow-other-keys) x) :x 1 :y 2) \EV 1 ;;; :ALLOW-OTHER-KEYS NIL is always permitted.
+ ((lambda (&key) t) :allow-other-keys nil) \EV T ;;; As with other keyword arguments, only the left-most pair ;;; named :ALLOW-OTHER-KEYS has any effect.
  ((lambda (&key x) x) 
-  :x 1 :y 2 :allow-other-keys t :allow-other-keys nil)
-\EV 1
-;;; Only the left-most pair named :ALLOW-OTHER-KEYS has any effect,
-;;; so in safe code this signals a PROGRAM-ERROR (and might enter the
-;;; debugger).  In unsafe code, the consequences are undefined.
+  :x 1 :y 2 :allow-other-keys t :allow-other-keys nil) \EV 1 ;;; Only the left-most pair named :ALLOW-OTHER-KEYS has any effect, ;;; so in safe code this signals a PROGRAM-ERROR (and might enter the ;;; debugger).  In unsafe code, the consequences are undefined.
  ((lambda (&key x) x)                   ;This call is not valid
-  :x 1 :y 2 :allow-other-keys nil :allow-other-keys t)
-\endcode
+  :x 1 :y 2 :allow-other-keys nil :allow-other-keys t) \endcode
 
 \endsubsubsubsubsection%{Examples of Suppressing Keyword Argument Checking}
 
@@ -334,23 +136,13 @@ is //[[CL:Glossary:false]]//.
 
 \endsubsubsection%{Specifiers for keyword parameters}
 
+\beginsubsubsection{Specifiers for ''&aux'' variables} \idxkeyref{aux}
 
-\beginsubsubsection{Specifiers for ''&aux'' variables}
-\idxkeyref{aux}
-
-These are not really parameters.  If the //[[CL:Glossary:lambda list keyword]]//
-''&aux'' is present, all specifiers after it are auxiliary variable
-specifiers.  After all parameter specifiers have been processed, the
-auxiliary variable specifiers (those following {\aux}) are processed
-from left to right.  For each one, //init-form// is evaluated and
-//var// is bound to that value (or to \nil\ if no //init-form//
-was specified).  ''&aux'' variable processing is analogous to
-\specref{let*} processing.
+These are not really parameters.  If the //[[CL:Glossary:lambda list keyword]]// ''&aux'' is present, all specifiers after it are auxiliary variable specifiers.  After all parameter specifiers have been processed, the auxiliary variable specifiers (those following {\aux}) are processed from left to right.  For each one, //init-form// is evaluated and //var// is bound to that value (or to \nil\ if no //init-form// was specified).  ''&aux'' variable processing is analogous to \specref{let*} processing.
 
 \code
  (lambda (x y &aux (a (car x)) (b 2) c) (list x y a b c))
-    \EQ (lambda (x y) (let* ((a (car x)) (b 2) c) (list x y a b c)))
-\endcode
+    \EQ (lambda (x y) (let* ((a (car x)) (b 2) c) (list x y a b c))) \endcode
 
 \endsubsubsection%{Specifiers for ''&aux'' variables}
 
@@ -362,18 +154,12 @@ Here are some examples involving //[[CL:Glossary:optional parameters]]// and //[
  ((lambda (a b) (+ a (* b 3))) 4 5) \EV 19
  ((lambda (a &optional (b 2)) (+ a (* b 3))) 4 5) \EV 19
  ((lambda (a &optional (b 2)) (+ a (* b 3))) 4) \EV 10
- ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x)))
-\EV (2 NIL 3 NIL NIL)
- ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x)) 6)
-\EV (6 T 3 NIL NIL)
- ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x)) 6 3)
-\EV (6 T 3 T NIL)
- ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x)) 6 3 8)
-\EV (6 T 3 T (8))
+ ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x))) \EV (2 NIL 3 NIL NIL)
+ ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x)) 6) \EV (6 T 3 NIL NIL)
+ ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x)) 6 3) \EV (6 T 3 T NIL)
+ ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x)) 6 3 8) \EV (6 T 3 T (8))
  ((lambda (&optional (a 2 b) (c 3 d) &rest x) (list a b c d x))
-  6 3 8 9 10 11)
-\EV (6 t 3 t (8 9 10 11))
-\endcode
+  6 3 8 9 10 11) \EV (6 t 3 t (8 9 10 11)) \endcode
 
 Here are some examples involving //[[CL:Glossary:keyword parameters]]//:
 
@@ -386,38 +172,25 @@ Here are some examples involving //[[CL:Glossary:keyword parameters]]//:
  ((lambda (a b &key c d) (list a b c d)) :a 1 :d 8 :c 6) \EV (:a 1 6 8)
  ((lambda (a b &key c d) (list a b c d)) :a :b :c :d) \EV (:a :b :d NIL)
  ((lambda (a b &key ((:sea c)) d) (list a b c d)) 1 2 :sea 6) \EV (1 2 6 NIL)
- ((lambda (a b &key ((c c)) d) (list a b c d)) 1 2 'c 6) \EV (1 2 6 NIL)
-\endcode
+ ((lambda (a b &key ((c c)) d) (list a b c d)) 1 2 'c 6) \EV (1 2 6 NIL) \endcode
 
-Here are some examples involving //[[CL:Glossary:optional parameters]]//, //[[CL:Glossary:rest parameters]]//,
-and //[[CL:Glossary:keyword parameters]]// together:
+Here are some examples involving //[[CL:Glossary:optional parameters]]//, //[[CL:Glossary:rest parameters]]//, and //[[CL:Glossary:keyword parameters]]// together:
 
 \code
  ((lambda (a &optional (b 3) &rest x &key c (d a))
-    (list a b c d x)) 1)   
-\EV (1 3 NIL 1 ()) 
+    (list a b c d x)) 1)    \EV (1 3 NIL 1 ()) 
  ((lambda (a &optional (b 3) &rest x &key c (d a))
-    (list a b c d x)) 1 2)
-\EV (1 2 NIL 1 ())
+    (list a b c d x)) 1 2) \EV (1 2 NIL 1 ())
  ((lambda (a &optional (b 3) &rest x &key c (d a))
-    (list a b c d x)) :c 7)
-\EV (:c 7 NIL :c ())
+    (list a b c d x)) :c 7) \EV (:c 7 NIL :c ())
  ((lambda (a &optional (b 3) &rest x &key c (d a))
-    (list a b c d x)) 1 6 :c 7)
-\EV (1 6 7 1 (:c 7))
+    (list a b c d x)) 1 6 :c 7) \EV (1 6 7 1 (:c 7))
  ((lambda (a &optional (b 3) &rest x &key c (d a))
-    (list a b c d x)) 1 6 :d 8)
-\EV (1 6 NIL 8 (:d 8))
+    (list a b c d x)) 1 6 :d 8) \EV (1 6 NIL 8 (:d 8))
  ((lambda (a &optional (b 3) &rest x &key c (d a))
-    (list a b c d x)) 1 6 :d 8 :c 9 :d 10)
-\EV (1 6 9 8 (:d 8 :c 9 :d 10))
-\endcode
+    (list a b c d x)) 1 6 :d 8 :c 9 :d 10) \EV (1 6 9 8 (:d 8 :c 9 :d 10)) \endcode
 
-
-As an example of the use of ''&allow-other-keys'' and
-**'':allow-other-keys''**, consider a //[[CL:Glossary:function]]// that takes two named
-arguments of its own and also accepts additional named arguments to be
-passed to **[[CL:Functions:make-array]]**:
+As an example of the use of ''&allow-other-keys'' and **'':allow-other-keys''**, consider a //[[CL:Glossary:function]]// that takes two named arguments of its own and also accepts additional named arguments to be passed to **[[CL:Functions:make-array]]**:
 
 \code
  (defun array-of-strings (str dims &rest named-pairs
@@ -425,167 +198,69 @@ passed to **[[CL:Functions:make-array]]**:
    (apply #'make-array dims
           :initial-element (subseq str start end)
           :allow-other-keys t
-          named-pairs))
-\endcode
+          named-pairs)) \endcode
 
-This //[[CL:Glossary:function]]// takes a //[[CL:Glossary:string]]// and dimensioning
-information and returns an //[[CL:Glossary:array]]// of the specified
-dimensions, each of whose elements is the specified 
-//[[CL:Glossary:string]]//.  However, **'':start''** and **'':end''** named
-arguments may be used to specify that a substring of the given
-//[[CL:Glossary:string]]// should be used.  In addition, the presence of
-''&allow-other-keys'' in the //[[CL:Glossary:lambda list]]// indicates that the
-caller may supply additional named arguments; the //[[CL:Glossary:rest parameter]]//
-provides access to them.  These additional named arguments are passed
-to **[[CL:Functions:make-array]]**.  The //[[CL:Glossary:function]]// **[[CL:Functions:make-array]]**
-normally does not allow the named arguments **'':start''** 
-and **'':end''** to be used, and an error should be
-signaled if such named arguments are supplied to **[[CL:Functions:make-array]]**.
-However, the presence in the call to **[[CL:Functions:make-array]]** 
-of the named argument **'':allow-other-keys''** with
-a //[[CL:Glossary:true]]// value causes any extraneous named arguments, including
-**'':start''** and **'':end''**, to be acceptable and ignored.
+This //[[CL:Glossary:function]]// takes a //[[CL:Glossary:string]]// and dimensioning information and returns an //[[CL:Glossary:array]]// of the specified dimensions, each of whose elements is the specified  //[[CL:Glossary:string]]//.  However, **'':start''** and **'':end''** named arguments may be used to specify that a substring of the given //[[CL:Glossary:string]]// should be used.  In addition, the presence of ''&allow-other-keys'' in the //[[CL:Glossary:lambda list]]// indicates that the caller may supply additional named arguments; the //[[CL:Glossary:rest parameter]]// provides access to them.  These additional named arguments are passed to **[[CL:Functions:make-array]]**.  The //[[CL:Glossary:function]]// **[[CL:Functions:make-array]]** normally does not allow the named arguments **'':start''**  and **'':end''** to be used, and an error should be signaled if such named arguments are supplied to **[[CL:Functions:make-array]]**. However, the presence in the call to **[[CL:Functions:make-array]]**  of the named argument **'':allow-other-keys''** with a //[[CL:Glossary:true]]// value causes any extraneous named arguments, including **'':start''** and **'':end''**, to be acceptable and ignored.
 
 \endsubsubsection%{Examples of Ordinary Lambda Lists}
 
 \endsubSection%{Ordinary Lambda Lists}
 
-\beginsubSection{Generic Function Lambda Lists}
-\DefineSection{GFLambdaLists}
+\beginsubSection{Generic Function Lambda Lists} \DefineSection{GFLambdaLists}
 
-A //[[CL:Glossary:generic function lambda list]]// is used to describe the overall shape of
-the argument list to be accepted by a //[[CL:Glossary:generic function]]//.
-Individual //[[CL:Glossary:method]]// //[[CL:Glossary:signatures]]// might contribute additional 
-//[[CL:Glossary:keyword parameters]]// to the //[[CL:Glossary:lambda list]]// of the //[[CL:Glossary:effective method]]//.
-
+A //[[CL:Glossary:generic function lambda list]]// is used to describe the overall shape of the argument list to be accepted by a //[[CL:Glossary:generic function]]//. Individual //[[CL:Glossary:method]]// //[[CL:Glossary:signatures]]// might contribute additional  //[[CL:Glossary:keyword parameters]]// to the //[[CL:Glossary:lambda list]]// of the //[[CL:Glossary:effective method]]//.
 
 A //[[CL:Glossary:generic function lambda list]]// is used by \macref{defgeneric}.
 
-
-
-
-
-
-
-
-
-
-
 A //[[CL:Glossary:generic function lambda list]]// has the following syntax:
 
-\Vskip 1pc!
-\auxbnf{lambda-list}{\lparen\starparam{var}\CR
-		     \ \ttbrac{{\opt} \star{\JustVar}}\CR
-		     \ \ttbrac{{\rest} //var//}\CR
-		     \ \f{[}\Vtop{\hbox{{\key} \star{\JustKey}}
-				  \vskip 4pt
-				  \hbox{\brac{\allowotherkeys}\f{]}\rparen}}\CR}
+\Vskip 1pc! \auxbnf{lambda-list}{\lparen\starparam{var}\CR 		     \ \ttbrac{{\opt} \star{\JustVar}}\CR 		     \ \ttbrac{{\rest} //var//}\CR 		     \ \f{[}\Vtop{\hbox{{\key} \star{\JustKey}} 				  \vskip 4pt 				  \hbox{\brac{\allowotherkeys}\f{]}\rparen}}\CR}
 
-A //[[CL:Glossary:generic function lambda list]]// can contain the //[[CL:Glossary:lambda list keywords]]// shown
-in \thenextfigure.
+A //[[CL:Glossary:generic function lambda list]]// can contain the //[[CL:Glossary:lambda list keywords]]// shown in \thenextfigure.
 
-\showthree{Lambda List Keywords used by Generic Function Lambda Lists}{
-''&allow-other-keys''&''&optional''&\cr
-''&key''&''&rest''&\cr
-}
+\showthree{Lambda List Keywords used by Generic Function Lambda Lists}{ ''&allow-other-keys''&''&optional''&\cr ''&key''&''&rest''&\cr }
 
-A //[[CL:Glossary:generic function lambda list]]// differs from an //[[CL:Glossary:ordinary lambda list]]// 
-in the following ways:
- 
-\beginlist
-\itemitem{\bf Required arguments}
-
-
-
+A //[[CL:Glossary:generic function lambda list]]// differs from an //[[CL:Glossary:ordinary lambda list]]//  in the following ways:
+  \beginlist \itemitem{\bf Required arguments}
 
 Zero or more //[[CL:Glossary:required parameters]]// must be specified.
 
 \itemitem{\bf Optional and keyword arguments}
- 
-//[[CL:Glossary:Optional parameters]]// and //[[CL:Glossary:keyword parameters]]// may not have 
-default initial value forms nor use supplied-p parameters.
+  //[[CL:Glossary:Optional parameters]]// and //[[CL:Glossary:keyword parameters]]// may not have  default initial value forms nor use supplied-p parameters.
 
 \itemitem{\bf Use of ''&aux''}
 
-The use of ''&aux'' is not allowed. 
-\endlist
+The use of ''&aux'' is not allowed.  \endlist
 
 \endsubSection%{Generic Function Lambda Lists}
 
-\goodbreak
-\beginsubSection{Specialized Lambda Lists}
-\DefineSection{SpecializedLambdaLists}
+\goodbreak \beginsubSection{Specialized Lambda Lists} \DefineSection{SpecializedLambdaLists}
 
-A //[[CL:Glossary:specialized lambda list]]// is used to //[[CL:Glossary:specialize]]// a //[[CL:Glossary:method]]//
-for a particular //[[CL:Glossary:signature]]// and to describe how //[[CL:Glossary:arguments]]// matching
-that //[[CL:Glossary:signature]]// are received by the //[[CL:Glossary:method]]//.  
-The //[[CL:Glossary:defined names]]// in \thenextfigure\ use //[[CL:Glossary:specialized lambda lists]]//
-in some way; see the dictionary entry for each for information about how.
+A //[[CL:Glossary:specialized lambda list]]// is used to //[[CL:Glossary:specialize]]// a //[[CL:Glossary:method]]// for a particular //[[CL:Glossary:signature]]// and to describe how //[[CL:Glossary:arguments]]// matching that //[[CL:Glossary:signature]]// are received by the //[[CL:Glossary:method]]//.   The //[[CL:Glossary:defined names]]// in \thenextfigure\ use //[[CL:Glossary:specialized lambda lists]]// in some way; see the dictionary entry for each for information about how.
 
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE} \displaythree{Standardized Operators that use Specialized Lambda Lists}{ defmethod&defgeneric&\cr }
 
-\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
-\displaythree{Standardized Operators that use Specialized Lambda Lists}{
-defmethod&defgeneric&\cr
-}
+A //[[CL:Glossary:specialized lambda list]]// can contain the //[[CL:Glossary:lambda list keywords]]// shown in \thenextfigure.
 
+\showthree{Lambda List Keywords used by Specialized Lambda Lists}{ ''&allow-other-keys''&''&key''&''&rest''\cr ''&aux''&''&optional''&\cr }
 
+A //[[CL:Glossary:specialized lambda list]]// is syntactically the same as an //[[CL:Glossary:ordinary lambda list]]// except that each //[[CL:Glossary:required parameter]]// may optionally be associated with a //[[CL:Glossary:class]]// or //[[CL:Glossary:object]]// for which that //[[CL:Glossary:parameter]]// is //[[CL:Glossary:specialized]]//.
 
-A //[[CL:Glossary:specialized lambda list]]// can contain the //[[CL:Glossary:lambda list keywords]]// shown
-in \thenextfigure.
-
-\showthree{Lambda List Keywords used by Specialized Lambda Lists}{
-''&allow-other-keys''&''&key''&''&rest''\cr
-''&aux''&''&optional''&\cr
-}
-
-A //[[CL:Glossary:specialized lambda list]]// is syntactically the same as an //[[CL:Glossary:ordinary lambda list]]//
-except that each //[[CL:Glossary:required parameter]]// may optionally be associated with a //[[CL:Glossary:class]]//
-or //[[CL:Glossary:object]]// for which that //[[CL:Glossary:parameter]]// is //[[CL:Glossary:specialized]]//.
-
-\Vskip 1pc!
-\auxbnf{lambda-list}{\lparen\star{\SpecializedVar}\CR
-		     \xparen\ttbrac{{\opt} \star{\VarValueSuppliedP}}\CR
-		     \xparen\ttbrac{{\rest} //var//}\CR
-		     \xparen\ttbrac{{\key} \star{\KeyVarValueSuppliedP} \brac{\allowotherkeys}}\CR
-		     \xparen\ttbrac{{\aux} \star{\VarValue}}\rparen\CR}
-
-
+\Vskip 1pc! \auxbnf{lambda-list}{\lparen\star{\SpecializedVar}\CR 		     \xparen\ttbrac{{\opt} \star{\VarValueSuppliedP}}\CR 		     \xparen\ttbrac{{\rest} //var//}\CR 		     \xparen\ttbrac{{\key} \star{\KeyVarValueSuppliedP} \brac{\allowotherkeys}}\CR 		     \xparen\ttbrac{{\aux} \star{\VarValue}}\rparen\CR}
 
 \endsubSection%{Specialized Lambda Lists}
 
-\beginsubSection{Macro Lambda Lists}
-\DefineSection{MacroLambdaLists}
+\beginsubSection{Macro Lambda Lists} \DefineSection{MacroLambdaLists}
 
-A //[[CL:Glossary:macro lambda list]]// is used in describing //[[CL:Glossary:macros]]// 
-defined by the //[[CL:Glossary:operators]]// in \thenextfigure.
+A //[[CL:Glossary:macro lambda list]]// is used in describing //[[CL:Glossary:macros]]//  defined by the //[[CL:Glossary:operators]]// in \thenextfigure.
 
+\displaythree{Operators that use Macro Lambda Lists}{ define-compiler-macro&defmacro&macrolet\cr define-setf-expander& &\cr }
 
+With the additional restriction that an //[[CL:Glossary:environment parameter]]// may appear only once (at any of the positions indicated), a //[[CL:Glossary:macro lambda list]]// has the following syntax:
 
-\displaythree{Operators that use Macro Lambda Lists}{
-define-compiler-macro&defmacro&macrolet\cr
-define-setf-expander& &\cr
-}
+\Vskip 1pc! {\def\TVar{\curly{//var// | \down{pattern}}}\def\starTVar{\star{\TVar}} \auxbnf{reqvars}{\starTVar} \auxbnf{optvars}{\ttbrac{{\opt} \star{\VarValueSuppliedP}}} \auxbnf{restvar}{\ttbrac{\curly{{\rest} | {\body}} //\TVar//}} \auxbnf{keyvars}{\lbrac{\key} \star{\KeyVarValueSuppliedP}\CR 		 \xbrac\brac{\allowotherkeys}\rbrac} {\let\TVar=\GTVar\let\starTVar=\GstarTVar% \auxbnf{auxvars}{\ttbrac{{\aux} \star{\VarValue}}}} \auxbnf{envvar}{\ttbrac{{\environment} //var//}}
 
-With the additional restriction that
-an //[[CL:Glossary:environment parameter]]// may appear only once
-(at any of the positions indicated),
-a //[[CL:Glossary:macro lambda list]]// has the following syntax:
-
-
-\Vskip 1pc!
-{\def\TVar{\curly{//var// | \down{pattern}}}\def\starTVar{\star{\TVar}}
-\auxbnf{reqvars}{\starTVar}
-\auxbnf{optvars}{\ttbrac{{\opt} \star{\VarValueSuppliedP}}}
-\auxbnf{restvar}{\ttbrac{\curly{{\rest} | {\body}} //\TVar//}}
-\auxbnf{keyvars}{\lbrac{\key} \star{\KeyVarValueSuppliedP}\CR
-		 \xbrac\brac{\allowotherkeys}\rbrac}
-{\let\TVar=\GTVar\let\starTVar=\GstarTVar%
-\auxbnf{auxvars}{\ttbrac{{\aux} \star{\VarValue}}}}
-\auxbnf{envvar}{\ttbrac{{\environment} //var//}}
-
-\auxbnf{wholevar}{\ttbrac{{\whole} //var//}}
-\auxbnf{lambda-list}%
-{\lparen\down{wholevar} \down{envvar}
+\auxbnf{wholevar}{\ttbrac{{\whole} //var//}} \auxbnf{lambda-list}% {\lparen\down{wholevar} \down{envvar}
  \xparen\down{reqvars}  \down{envvar}
  \xparen\down{optvars}  \down{envvar}\CR
  \xparen\down{restvar}  \down{envvar}
@@ -595,9 +270,7 @@ a //[[CL:Glossary:macro lambda list]]// has the following syntax:
  \xparen\down{reqvars}  \down{envvar}
  \xparen\down{optvars}  \down{envvar} \f{.}
 
- \xparen//var//\rparen}
-\auxbnf{pattern}%
-{\paren{\down{wholevar}
+ \xparen//var//\rparen} \auxbnf{pattern}% {\paren{\down{wholevar}
         \down{reqvars}
         \down{optvars}
         \down{restvar}
@@ -605,282 +278,87 @@ a //[[CL:Glossary:macro lambda list]]// has the following syntax:
         \down{auxvars}} |\CR
  \paren{\down{wholevar} \down{reqvars} \down{optvars} \f{.}
 
-        //var//}}
-}
-\Vskip 1pc!
+        //var//}} } \Vskip 1pc!
 
-A //[[CL:Glossary:macro lambda list]]// can contain
-the //[[CL:Glossary:lambda list keywords]]// shown in \thenextfigure.
+A //[[CL:Glossary:macro lambda list]]// can contain the //[[CL:Glossary:lambda list keywords]]// shown in \thenextfigure.
 
-\showthree{Lambda List Keywords used by Macro Lambda Lists}{
-''&allow-other-keys''&''&environment''&''&rest''\cr
-''&aux''&''&key''&''&whole''\cr
-''&body''&''&optional''&\cr
-}
+\showthree{Lambda List Keywords used by Macro Lambda Lists}{ ''&allow-other-keys''&''&environment''&''&rest''\cr ''&aux''&''&key''&''&whole''\cr ''&body''&''&optional''&\cr }
 
-//[[CL:Glossary:Optional parameters]]// (introduced by ''&optional'') and
-//[[CL:Glossary:keyword parameters]]// (introduced by ''&key'')
-can be supplied in a //[[CL:Glossary:macro lambda list]]//,
-just as in an //[[CL:Glossary:ordinary lambda list]]//.
-Both may contain default initialization forms and //[[CL:Glossary:supplied-p parameters]]//.
+//[[CL:Glossary:Optional parameters]]// (introduced by ''&optional'') and //[[CL:Glossary:keyword parameters]]// (introduced by ''&key'') can be supplied in a //[[CL:Glossary:macro lambda list]]//, just as in an //[[CL:Glossary:ordinary lambda list]]//. Both may contain default initialization forms and //[[CL:Glossary:supplied-p parameters]]//.
  
 
-''&body''\idxkeyref{body}
-is identical in function to ''&rest'',
-but it can be used to inform certain output-formatting 
-and editing functions that the remainder of the //[[CL:Glossary:form]]// is
-treated as a body, and should be indented accordingly.
-Only one of ''&body'' or ''&rest'' can be used at any particular level; 
-\seesection\DestructuringByLambdaLists.
-\issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
-''&body'' can appear at any level of a 
-//[[CL:Glossary:macro lambda list]]//; 
-for details, \seesection\DestructuringByLambdaLists.
+''&body''\idxkeyref{body} is identical in function to ''&rest'', but it can be used to inform certain output-formatting  and editing functions that the remainder of the //[[CL:Glossary:form]]// is treated as a body, and should be indented accordingly. Only one of ''&body'' or ''&rest'' can be used at any particular level;  \seesection\DestructuringByLambdaLists. \issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION} ''&body'' can appear at any level of a  //[[CL:Glossary:macro lambda list]]//;  for details, \seesection\DestructuringByLambdaLists.
 
  
 
-''&whole''\idxkeyref{whole}
-is followed by a single variable that is bound to the
-entire macro-call form; this is the value that the //[[CL:Glossary:macro function]]//
-receives as its first argument.
-\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+''&whole''\idxkeyref{whole} is followed by a single variable that is bound to the entire macro-call form; this is the value that the //[[CL:Glossary:macro function]]// receives as its first argument. \issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
 
-If ''&whole'' and a following variable appear,
-they must appear first in //lambda-list//,
+If ''&whole'' and a following variable appear, they must appear first in //lambda-list//,
 
-before any other parameter or //[[CL:Glossary:lambda list keyword]]//.
-\issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
-''&whole'' can appear at any level of a //[[CL:Glossary:macro lambda list]]//. 
-At inner levels, the ''&whole'' variable is bound to
-		the corresponding part of the argument, 
-as with ''&rest'', but unlike ''&rest'', other arguments are also allowed.
-The use of ''&whole'' does not affect the pattern of arguments
+before any other parameter or //[[CL:Glossary:lambda list keyword]]//. \issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION} ''&whole'' can appear at any level of a //[[CL:Glossary:macro lambda list]]//.  At inner levels, the ''&whole'' variable is bound to 		the corresponding part of the argument,  as with ''&rest'', but unlike ''&rest'', other arguments are also allowed. The use of ''&whole'' does not affect the pattern of arguments
      specified.
 
+''&environment''\idxkeyref{environment} is followed by a single variable that is bound to an //[[CL:Glossary:environment]]// representing the //[[CL:Glossary:lexical environment]]// in which the
 
+macro call is to be interpreted. This //[[CL:Glossary:environment]]// 
 
+should be used with \issue{MACRO-FUNCTION-ENVIRONMENT:YES} **[[CL:Functions:macro-function]]**,
 
-
-''&environment''\idxkeyref{environment}
-is followed by a single variable that is bound
-to an //[[CL:Glossary:environment]]// representing the //[[CL:Glossary:lexical environment]]// in which the
-
-
-
-
-macro call is to be interpreted.
-This //[[CL:Glossary:environment]]// 
-
-
-
-should be used with
-\issue{MACRO-FUNCTION-ENVIRONMENT:YES}
-**[[CL:Functions:macro-function]]**,
-
-\issue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG}
-\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
-**[[CL:Functions:get-setf-expansion]]**,
-
+\issue{GET-SETF-METHOD-ENVIRONMENT:ADD-ARG} \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} **[[CL:Functions:get-setf-expansion]]**,
 
 \issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
 
+\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89} **[[CL:Functions:compiler-macro-function]]**, 
 
+and **[[CL:Functions:macroexpand]]** 
 
+(for example) in computing the expansion of the macro, to ensure that any //[[CL:Glossary:lexical bindings]]// or definitions established in the  //[[CL:Glossary:compilation environment]]// are taken into account. \issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION} ''&environment'' can only appear at the top level of a 	//[[CL:Glossary:macro lambda list]]//, and can only appear once, but can appear anywhere in that list;
 
-\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
-**[[CL:Functions:compiler-macro-function]]**, 
+\issue{&ENVIRONMENT-BINDING-ORDER:FIRST} the ''&environment'' //[[CL:Glossary:parameter]]// is //[[CL:Glossary:bound]]// along with ''&whole'' before any other //[[CL:Glossary:variables]]// in the //[[CL:Glossary:lambda list]]//, regardless of where ''&environment'' appears in the //[[CL:Glossary:lambda list]]//.
 
-
-and
-**[[CL:Functions:macroexpand]]** 
-
-
-
-
-
-
-
-
-(for example) in computing the expansion of the macro, to ensure that any
-//[[CL:Glossary:lexical bindings]]// or definitions established in the 
-//[[CL:Glossary:compilation environment]]// are taken into account.
-\issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
-''&environment'' can only appear at the top level of a
-	//[[CL:Glossary:macro lambda list]]//, and can only
-appear once, but can appear anywhere in that list;
-
-\issue{&ENVIRONMENT-BINDING-ORDER:FIRST}
-the ''&environment'' //[[CL:Glossary:parameter]]// is //[[CL:Glossary:bound]]// along with ''&whole''
-before any other //[[CL:Glossary:variables]]// in the //[[CL:Glossary:lambda list]]//, regardless of where
-''&environment'' appears in the //[[CL:Glossary:lambda list]]//.
-
-\issue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC}
-The //[[CL:Glossary:object]]// that is bound to the
-//[[CL:Glossary:environment parameter]]// has //[[CL:Glossary:dynamic extent]]//.
-
-
-
-
-
+\issue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC} The //[[CL:Glossary:object]]// that is bound to the //[[CL:Glossary:environment parameter]]// has //[[CL:Glossary:dynamic extent]]//.
 
  
 
-Destructuring allows a //[[CL:Glossary:macro lambda list]]// to express
-the structure of a macro call syntax.
-If no //[[CL:Glossary:lambda list keywords]]// appear,
-then the //[[CL:Glossary:macro lambda list]]// is a //[[CL:Glossary:tree]]//
-containing parameter names at the leaves.
+Destructuring allows a //[[CL:Glossary:macro lambda list]]// to express the structure of a macro call syntax. If no //[[CL:Glossary:lambda list keywords]]// appear, then the //[[CL:Glossary:macro lambda list]]// is a //[[CL:Glossary:tree]]// containing parameter names at the leaves.
 
-The pattern and the //[[CL:Glossary:macro form]]// must have compatible //[[CL:Glossary:tree structure]]//; 
-that is, their //[[CL:Glossary:tree structure]]// must be equivalent,
-or it must differ only in that some //[[CL:Glossary:leaves]]// of the pattern
-match //[[CL:Glossary:non-atomic]]// //[[CL:Glossary:objects]]// of the //[[CL:Glossary:macro form]]//.
-\issue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
-For information about error detection in this //[[CL:Glossary:situation]]//,
-\seesection\DestructuringMismatch.
-
-
-
-
-
-
+The pattern and the //[[CL:Glossary:macro form]]// must have compatible //[[CL:Glossary:tree structure]]//;  that is, their //[[CL:Glossary:tree structure]]// must be equivalent, or it must differ only in that some //[[CL:Glossary:leaves]]// of the pattern match //[[CL:Glossary:non-atomic]]// //[[CL:Glossary:objects]]// of the //[[CL:Glossary:macro form]]//. \issue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT} For information about error detection in this //[[CL:Glossary:situation]]//, \seesection\DestructuringMismatch.
 
 \DefineSection{ExtraDestructureInfo}
 
+A destructuring //[[CL:Glossary:lambda list]]// (whether at top level or embedded) 
 
+can be dotted, ending in a parameter name.  This situation is treated exactly as if the parameter name that ends the //[[CL:Glossary:list]]// had appeared preceded by ''&rest''.
 
-A destructuring //[[CL:Glossary:lambda list]]//
-(whether at top level or embedded) 
-
-can
-be dotted, ending
-in a parameter name.  This situation is treated exactly as if the
-parameter name that ends the //[[CL:Glossary:list]]// had appeared preceded by ''&rest''.
-
-
-
-
-
-
-\issue{DOTTED-MACRO-FORMS:ALLOW}
-It is permissible for a //[[CL:Glossary:macro]]// //[[CL:Glossary:form]]// (or a //[[CL:Glossary:subexpression]]// of a
-//[[CL:Glossary:macro]]// //[[CL:Glossary:form]]//)
-to be a //[[CL:Glossary:dotted list]]// 
-only  when \f{(... \&rest var)} or \f{(... . var)} is used to match
+\issue{DOTTED-MACRO-FORMS:ALLOW} It is permissible for a //[[CL:Glossary:macro]]// //[[CL:Glossary:form]]// (or a //[[CL:Glossary:subexpression]]// of a //[[CL:Glossary:macro]]// //[[CL:Glossary:form]]//) to be a //[[CL:Glossary:dotted list]]//  only  when \f{(... \&rest var)} or \f{(... . var)} is used to match
  it. It is the responsibility of the //[[CL:Glossary:macro]]// to recognize and deal
- with such situations.
-\editornote{KMP: Apparently the dotted-macro-forms cleanup doesn't allow for
-		 the macro to `manually' notice dotted forms and fix them as well.
-		 It shouldn't be required that this be done only by \&REST or 
-		 a dotted pattern; it should only matter that ultimately the 
-		 non-macro result of a full-macro expansion not contain dots.
-		 Anyway, I plan to address this editorially unless someone
-		 raises an objection.}%!!! 16-Jan-91
+ with such situations. \editornote{KMP: Apparently the dotted-macro-forms cleanup doesn't allow for 		 the macro to `manually' notice dotted forms and fix them as well. 		 It shouldn't be required that this be done only by \&REST or  		 a dotted pattern; it should only matter that ultimately the  		 non-macro result of a full-macro expansion not contain dots. 		 Anyway, I plan to address this editorially unless someone 		 raises an objection.}%!!! 16-Jan-91
 
+\beginsubsubsection{Destructuring by Lambda Lists} \DefineSection{DestructuringByLambdaLists}
 
-\beginsubsubsection{Destructuring by Lambda Lists}
-\DefineSection{DestructuringByLambdaLists}
-
-
-
-Anywhere in a //[[CL:Glossary:macro lambda list]]// where a parameter
-name can appear, and where //[[CL:Glossary:ordinary lambda list]]// syntax
-(as described in \secref\OrdinaryLambdaLists) does not 
-otherwise allow a //[[CL:Glossary:list]]//, a //[[CL:Glossary:destructuring lambda list]]// 
-can appear in place
-of the parameter name.  When this is done, then the argument 
-that would match the parameter is treated as a (possibly dotted) //[[CL:Glossary:list]]//,
-to be used as an argument list for satisfying the
-parameters in the embedded //[[CL:Glossary:lambda list]]//.
-This is known as destructuring.
+Anywhere in a //[[CL:Glossary:macro lambda list]]// where a parameter name can appear, and where //[[CL:Glossary:ordinary lambda list]]// syntax (as described in \secref\OrdinaryLambdaLists) does not  otherwise allow a //[[CL:Glossary:list]]//, a //[[CL:Glossary:destructuring lambda list]]//  can appear in place of the parameter name.  When this is done, then the argument  that would match the parameter is treated as a (possibly dotted) //[[CL:Glossary:list]]//, to be used as an argument list for satisfying the parameters in the embedded //[[CL:Glossary:lambda list]]//. This is known as destructuring.
  
 
-
-
-
-
-
-
-
-Destructuring is the process of decomposing a compound //[[CL:Glossary:object]]// into
-its component parts, using an abbreviated, declarative syntax, rather
-than writing it out by hand using the primitive component-accessing
-functions.  Each component part is bound to a variable.
-
-
-
-
+Destructuring is the process of decomposing a compound //[[CL:Glossary:object]]// into its component parts, using an abbreviated, declarative syntax, rather than writing it out by hand using the primitive component-accessing functions.  Each component part is bound to a variable.
 
  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
  
 
+  A destructuring operation requires an //[[CL:Glossary:object]]// to be decomposed,  a pattern that specifies what components are to be extracted, and the names of the variables whose values are to be the components.
 
+  \beginsubsubsubsection{Data-directed Destructuring by Lambda Lists}
 
+In data-directed destructuring, the pattern is a sample //[[CL:Glossary:object]]// of the //[[CL:Glossary:type]]// to be decomposed. Wherever a component is to be extracted,  a //[[CL:Glossary:symbol]]// appears in the pattern;  this //[[CL:Glossary:symbol]]// is the name of the variable whose value will be that component.
 
- 
-A destructuring operation requires an //[[CL:Glossary:object]]// to be decomposed, 
-a pattern that specifies what components are to be extracted, and the names
-of the variables whose values are to be the components.
-
-
-
-
-
- 
-\beginsubsubsubsection{Data-directed Destructuring by Lambda Lists}
-
-In data-directed destructuring,
-the pattern is a sample //[[CL:Glossary:object]]// of the //[[CL:Glossary:type]]// to be decomposed.
-Wherever a component is to be extracted, 
-a //[[CL:Glossary:symbol]]// appears in the pattern; 
-this //[[CL:Glossary:symbol]]// is the name of the variable whose value will be that component.
-
-
-
-
-
-
-
-
-
-
-
-
- 
-\beginsubsubsubsubsection{Examples of Data-directed Destructuring by Lambda Lists}
+  \beginsubsubsubsubsection{Examples of Data-directed Destructuring by Lambda Lists}
 
 An example pattern is
- 
-{\tt 	(a b c)}
- 
-which destructures a list of three elements.  The variable \f{a} is assigned
-to the first element, \f{b} to the second, etc.  A more complex example
-is
+  {\tt 	(a b c)}
+  which destructures a list of three elements.  The variable \f{a} is assigned to the first element, \f{b} to the second, etc.  A more complex example is
 
 {\tt 	((first . rest) . more)}
- 
-The important features of data-directed destructuring are its syntactic
-simplicity and the ability to extend it to lambda-list-directed destructuring.
+  The important features of data-directed destructuring are its syntactic simplicity and the ability to extend it to lambda-list-directed destructuring.
 
 \endsubsubsubsubsection%{Examples of Data-directed Destructuring by Lambda Lists}
 
@@ -888,81 +366,32 @@ simplicity and the ability to extend it to lambda-list-directed destructuring.
 
 \beginsubsubsubsection{Lambda-list-directed Destructuring by Lambda Lists}
 
-An extension of data-directed destructuring of //[[CL:Glossary:trees]]// is
-lambda-list-directed destructuring.  This derives from the analogy
-between the three-element destructuring pattern
- 
-{\tt 	(first second third)}
- 
-and the three-argument //[[CL:Glossary:lambda list]]//
- 
-{\tt	(first second third)}
+An extension of data-directed destructuring of //[[CL:Glossary:trees]]// is lambda-list-directed destructuring.  This derives from the analogy between the three-element destructuring pattern
+  {\tt 	(first second third)}
+  and the three-argument //[[CL:Glossary:lambda list]]//
+  {\tt	(first second third)}
  
 
+Lambda-list-directed destructuring is identical to data-directed destructuring if no //[[CL:Glossary:lambda list keywords]]// appear in the pattern.   Any list in the pattern (whether a sub-list or the whole pattern itself) that contains a //[[CL:Glossary:lambda list keyword]]// is interpreted specially. Elements of the list to the left of the first //[[CL:Glossary:lambda list keyword]]// are treated as destructuring patterns, as usual, but the remaining elements of the list are treated like a function's  //[[CL:Glossary:lambda list]]// except that where a variable would normally be required, an arbitrary destructuring pattern is allowed.  Note that in case of ambiguity, //[[CL:Glossary:lambda list]]// syntax is preferred over destructuring syntax.  Thus, after ''&optional'' a list of elements is a list of a destructuring pattern and a default value form.
+  The detailed behavior of each //[[CL:Glossary:lambda list keyword]]// in a  lambda-list-directed destructuring pattern is as follows:
 
+\beginlist \itemitem{''&optional''}
 
+Each following element is a variable or a list of a destructuring pattern, a default value form, and a supplied-p variable.  The default value and the supplied-p variable can be omitted.   If the list being destructured ends early, so that it does not have an element to match against this destructuring (sub)-pattern, the default form is evaluated and destructured instead.  The supplied-p variable receives the value  \nil\ if the default form is used, \t\ otherwise.
+  \itemitem{''&rest'', ''&body''}
 
+The next element is a destructuring pattern that matches the rest of the list.  ''&body'' is identical to ''&rest'' but declares that what is being matched is a list of forms that constitutes the body of //[[CL:Glossary:form]]//. This next element must be the last unless a //[[CL:Glossary:lambda list keyword]]// follows it.
+  \itemitem{''&aux''} 
 
+The remaining elements are not destructuring patterns at all, but are auxiliary variable bindings.  
 
-Lambda-list-directed destructuring is identical to data-directed destructuring
-if no //[[CL:Glossary:lambda list keywords]]// appear in the pattern.  
-Any list in the pattern (whether a sub-list or the whole pattern itself)
-that contains a //[[CL:Glossary:lambda list keyword]]// is interpreted specially.
-Elements of the list to the left of the first
-//[[CL:Glossary:lambda list keyword]]// are treated as destructuring patterns, as usual, but the
-remaining elements of the list are treated like a function's 
-//[[CL:Glossary:lambda list]]//
-except that where a variable would normally be required, an arbitrary
-destructuring pattern is allowed.  Note that in case of ambiguity,
-//[[CL:Glossary:lambda list]]// syntax is preferred over destructuring syntax.  Thus, after
-''&optional'' a list of elements is a list of a destructuring pattern
-and a default value form.
- 
-The detailed behavior of each //[[CL:Glossary:lambda list keyword]]// in a 
-lambda-list-directed destructuring
-pattern is as follows:
+  \itemitem{''&whole''}
 
-\beginlist
-\itemitem{''&optional''}
+The next element is a destructuring pattern that matches the entire form in a macro, or the entire //[[CL:Glossary:subexpression]]// at inner levels. \issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
 
-Each following element is a variable or a list of a destructuring
-pattern, a default value form, and a supplied-p variable.  The default value and
-the supplied-p variable can be omitted.  
-If the list being destructured ends
-early, so that it does not have an element to match against this destructuring
-(sub)-pattern, the default form is evaluated and destructured instead.  The
-supplied-p variable receives the value 
-\nil\ if the default form is used, \t\ otherwise.
- 
-\itemitem{''&rest'', ''&body''}
+  \itemitem{''&key''}
 
-The next element is a destructuring pattern that matches the
-rest of the list.  ''&body'' is identical to ''&rest'' but declares that what
-is being matched is a list of forms that constitutes the body of //[[CL:Glossary:form]]//.
-This next element must be the last unless a //[[CL:Glossary:lambda list keyword]]// follows it.
- 
-\itemitem{''&aux''} 
-
-The remaining elements are not destructuring patterns at all, but are
-auxiliary variable bindings.  
-
-
- 
-\itemitem{''&whole''}
-
-The next element is a destructuring pattern that matches the entire
-form in a macro, or the entire //[[CL:Glossary:subexpression]]// at inner levels.
-\issue{DEFMACRO-LAMBDA-LIST:TIGHTEN-DESCRIPTION}
-
-
-
-
-
- 
-\itemitem{''&key''}
-
-Each following element is one of
-\beginlist
+Each following element is one of \beginlist
 
 \itemitem{}
  a //[[CL:Glossary:variable]]//,
@@ -975,65 +404,28 @@ Each following element is one of
 \itemitem{or}
  a list of a list of a keyword and a destructuring pattern,
            an optional initialization form,
-       and an optional supplied-p variable.
-\endlist
-The rest of the list being destructured
-is taken to be alternating keywords and values and is taken apart appropriately.
- 
-\itemitem{''&allow-other-keys''}
+       and an optional supplied-p variable. \endlist The rest of the list being destructured is taken to be alternating keywords and values and is taken apart appropriately.
+  \itemitem{''&allow-other-keys''}
 
-Stands by itself.
-\endlist 
+Stands by itself. \endlist 
 
-
-
- 
-\endsubsubsubsection%{Lambda-list-directed Destructuring by Lambda Lists}
-
-
-
-
-
-
-
-
-
+  \endsubsubsubsection%{Lambda-list-directed Destructuring by Lambda Lists}
 
 \endsubsubsection%{Destructuring by Lambda Lists}
 
 \endsubSection%{Macro Lambda Lists}
 
-
-
-\beginsubsection{Destructuring Lambda Lists}
-\DefineSection{DestructuringLambdaLists}
+\beginsubsection{Destructuring Lambda Lists} \DefineSection{DestructuringLambdaLists}
 
 A //[[CL:Glossary:destructuring lambda list]]// is used by \macref{destructuring-bind}.
 
-//[[CL:Glossary:Destructuring lambda lists]]// are closely related to 
-//[[CL:Glossary:macro lambda lists]]//; \seesection\MacroLambdaLists.
-A //[[CL:Glossary:destructuring lambda list]]// can contain all of the
-//[[CL:Glossary:lambda list keywords]]// listed for //[[CL:Glossary:macro lambda lists]]//
-except for ''&environment'', and supports destructuring in the
-same way.  Inner //[[CL:Glossary:lambda lists]]// nested within a //[[CL:Glossary:macro lambda list]]//
-have the syntax of //[[CL:Glossary:destructuring lambda lists]]//.
+//[[CL:Glossary:Destructuring lambda lists]]// are closely related to  //[[CL:Glossary:macro lambda lists]]//; \seesection\MacroLambdaLists. A //[[CL:Glossary:destructuring lambda list]]// can contain all of the //[[CL:Glossary:lambda list keywords]]// listed for //[[CL:Glossary:macro lambda lists]]// except for ''&environment'', and supports destructuring in the same way.  Inner //[[CL:Glossary:lambda lists]]// nested within a //[[CL:Glossary:macro lambda list]]// have the syntax of //[[CL:Glossary:destructuring lambda lists]]//.
 
 A //[[CL:Glossary:destructuring lambda list]]// has the following syntax:
 
-\Vskip 1pc!
-{\def\TVar{\curly{//var// | \down{lambda-list}}}\def\starTVar{\star{\TVar}}
-\auxbnf{reqvars}{\starTVar}
-\auxbnf{optvars}{\ttbrac{{\opt} \star{\VarValueSuppliedP}}}
-\auxbnf{restvar}{\ttbrac{\curly{{\rest} | {\body}} //\TVar//}}
-\auxbnf{keyvars}{\lbrac{\key} \star{\KeyVarValueSuppliedP}\CR
-		 \xbrac\brac{\allowotherkeys}\rbrac}
-{\let\TVar=\GTVar\let\starTVar=\GstarTVar%
-\auxbnf{auxvars}{\ttbrac{{\aux} \star{\VarValue}}}}
-\auxbnf{envvar}{\ttbrac{{\environment} //var//}}
+\Vskip 1pc! {\def\TVar{\curly{//var// | \down{lambda-list}}}\def\starTVar{\star{\TVar}} \auxbnf{reqvars}{\starTVar} \auxbnf{optvars}{\ttbrac{{\opt} \star{\VarValueSuppliedP}}} \auxbnf{restvar}{\ttbrac{\curly{{\rest} | {\body}} //\TVar//}} \auxbnf{keyvars}{\lbrac{\key} \star{\KeyVarValueSuppliedP}\CR 		 \xbrac\brac{\allowotherkeys}\rbrac} {\let\TVar=\GTVar\let\starTVar=\GstarTVar% \auxbnf{auxvars}{\ttbrac{{\aux} \star{\VarValue}}}} \auxbnf{envvar}{\ttbrac{{\environment} //var//}}
 
-\auxbnf{wholevar}{\ttbrac{{\whole} //var//}}
-\auxbnf{lambda-list}%
-{\paren{\down{wholevar}
+\auxbnf{wholevar}{\ttbrac{{\whole} //var//}} \auxbnf{lambda-list}% {\paren{\down{wholevar}
         \down{reqvars}
         \down{optvars}
         \down{restvar}
@@ -1041,64 +433,27 @@ A //[[CL:Glossary:destructuring lambda list]]// has the following syntax:
         \down{auxvars}} |\CR
  \paren{\down{wholevar} \down{reqvars} \down{optvars} \f{.}
 
-	 //var//}}
-}
-\Vskip 1pc!
+	 //var//}} } \Vskip 1pc!
 
 \endsubsection%{Destructuring Lambda Lists}
 
+\beginsubsection{Boa Lambda Lists} \DefineSection{BoaLambdaLists}
 
+A //[[CL:Glossary:boa lambda list]]// is a //[[CL:Glossary:lambda list]]// that is syntactically  like an //[[CL:Glossary:ordinary lambda list]]//, but that is processed in ``\b{b}y \b{o}rder of \b{a}rgument'' style.
 
-\beginsubsection{Boa Lambda Lists}
-\DefineSection{BoaLambdaLists}
+A //[[CL:Glossary:boa lambda list]]// is used only in a \macref{defstruct} //[[CL:Glossary:form]]//, when explicitly specifying the //[[CL:Glossary:lambda list]]//  of a constructor //[[CL:Glossary:function]]// (sometimes called a ``boa constructor'').
 
-A //[[CL:Glossary:boa lambda list]]// is a //[[CL:Glossary:lambda list]]// that is syntactically 
-like an //[[CL:Glossary:ordinary lambda list]]//, but that is processed in
-``\b{b}y \b{o}rder of \b{a}rgument'' style.
+The ''&optional'', ''&rest'', ''&aux'', \issue{DEFSTRUCT-CONSTRUCTOR-KEY-MIXTURE:ALLOW-KEY} ''&key'', and ''&allow-other-keys''
 
-A //[[CL:Glossary:boa lambda list]]// is used only in a \macref{defstruct} //[[CL:Glossary:form]]//,
-when explicitly specifying the //[[CL:Glossary:lambda list]]// 
-of a constructor //[[CL:Glossary:function]]// (sometimes called a ``boa constructor'').
+//[[CL:Glossary:lambda list keywords]]// are recognized in a //[[CL:Glossary:boa lambda list]]//. The way these //[[CL:Glossary:lambda list keywords]]// differ from their use in an //[[CL:Glossary:ordinary lambda list]]// follows.
 
-
-The ''&optional'', ''&rest'', ''&aux'',
-\issue{DEFSTRUCT-CONSTRUCTOR-KEY-MIXTURE:ALLOW-KEY}
-''&key'', and ''&allow-other-keys''
-
-//[[CL:Glossary:lambda list keywords]]// are recognized in a //[[CL:Glossary:boa lambda list]]//.
-The way these //[[CL:Glossary:lambda list keywords]]// differ from their
-use in an //[[CL:Glossary:ordinary lambda list]]// follows.
-
-Consider this example, which describes how \macref{destruct} processes
-its **'':constructor''** option.
+Consider this example, which describes how \macref{destruct} processes its **'':constructor''** option.
 
 \code
  (:constructor create-foo
-         (a &optional b (c 'sea) &rest d &aux e (f 'eff)))
-\endcode
+         (a &optional b (c 'sea) &rest d &aux e (f 'eff))) \endcode
 
-This defines \f{create-foo} to be a constructor of one or more arguments.
-The first argument is used to initialize the \f{a} slot.  The second
-argument is used to initialize the \f{b} slot.  If there isn't any
-second argument, then the default value given in the body of the
-\macref{defstruct} (if given) is used instead.  
-The third argument is used to
-initialize the \f{c} slot.  If there isn't any third argument, then the
-symbol \f{sea} is used instead.  Any arguments following the third
-argument are collected into a //[[CL:Glossary:list]]// 
-and used to initialize the \f{d}
-slot.  If there are three or fewer arguments, then \nil\ is placed in
-the \f{d} slot.  The \f{e} slot is not initialized; 
-its initial value is //[[CL:Glossary:implementation-defined]]//.
-Finally, the \f{f} slot is initialized to contain the symbol \f{eff}.
-\issue{DEFSTRUCT-CONSTRUCTOR-KEY-MIXTURE:ALLOW-KEY}
-''&key'' and ''&allow-other-keys'' arguments default
-in a manner similar to that of ''&optional'' arguments: if no default
-is supplied in the //[[CL:Glossary:lambda list]]// then the default value 
-given in the body of the \macref{defstruct} (if given) is used instead.
-
-
-
+This defines \f{create-foo} to be a constructor of one or more arguments. The first argument is used to initialize the \f{a} slot.  The second argument is used to initialize the \f{b} slot.  If there isn't any second argument, then the default value given in the body of the \macref{defstruct} (if given) is used instead.   The third argument is used to initialize the \f{c} slot.  If there isn't any third argument, then the symbol \f{sea} is used instead.  Any arguments following the third argument are collected into a //[[CL:Glossary:list]]//  and used to initialize the \f{d} slot.  If there are three or fewer arguments, then \nil\ is placed in the \f{d} slot.  The \f{e} slot is not initialized;  its initial value is //[[CL:Glossary:implementation-defined]]//. Finally, the \f{f} slot is initialized to contain the symbol \f{eff}. \issue{DEFSTRUCT-CONSTRUCTOR-KEY-MIXTURE:ALLOW-KEY} ''&key'' and ''&allow-other-keys'' arguments default in a manner similar to that of ''&optional'' arguments: if no default is supplied in the //[[CL:Glossary:lambda list]]// then the default value  given in the body of the \macref{defstruct} (if given) is used instead.
 
 For example:
 
@@ -1109,178 +464,91 @@ For example:
    (a 1) (b 2) (c 3) (d 4) (e 5) (f 6))
  
  (create-foo 10) \EV #S(FOO A 10 B 2 C SEA D 2 E //[[CL:Glossary:implemention-dependent]]// F EFF)
- (create-foo 10 'bee 'see :d 'dee) 
-\EV #S(FOO A 10 B BEE C SEE D DEE E //[[CL:Glossary:implemention-dependent]]// F EFF)
-\endcode
+ (create-foo 10 'bee 'see :d 'dee)  \EV #S(FOO A 10 B BEE C SEE D DEE E //[[CL:Glossary:implemention-dependent]]// F EFF) \endcode
 
-If keyword arguments of the form 
-\f{((\i{key} \i{var}) \brac{\i{default} \brac{\i{svar}}})}
-are specified, the //[[CL:Glossary:slot]]// //[[CL:Glossary:name]]// is matched with \i{var} 
-(not \i{key}).
+If keyword arguments of the form  \f{((\i{key} \i{var}) \brac{\i{default} \brac{\i{svar}}})} are specified, the //[[CL:Glossary:slot]]// //[[CL:Glossary:name]]// is matched with \i{var}  (not \i{key}).
 
+The actions taken in the \f{b} and \f{e} cases were carefully chosen to allow the user to specify all possible behaviors.  The ''&aux'' variables can be used to completely override the default initializations given in the body.
 
-The actions taken in the \f{b} and \f{e} cases were carefully
-chosen to allow the user to specify all possible behaviors. 
-The ''&aux'' variables can be used to completely override the default
-initializations given in the body.
-
-\issue{BOA-AUX-INITIALIZATION:ERROR-ON-READ}
-If no default value is supplied for an //[[CL:Glossary:aux variable]]// variable,
-the consequences are undefined if an attempt is later made to read
-the corresponding //[[CL:Glossary:slot]]//'s value before a value is explicitly assigned.
-If such a //[[CL:Glossary:slot]]// has a **'':type''** option specified,
-this suppressed initialization does not imply a type mismatch situation;
-the declared type is only required to apply when the //[[CL:Glossary:slot]]// is finally assigned.
-
-
+\issue{BOA-AUX-INITIALIZATION:ERROR-ON-READ} If no default value is supplied for an //[[CL:Glossary:aux variable]]// variable, the consequences are undefined if an attempt is later made to read the corresponding //[[CL:Glossary:slot]]//'s value before a value is explicitly assigned. If such a //[[CL:Glossary:slot]]// has a **'':type''** option specified, this suppressed initialization does not imply a type mismatch situation; the declared type is only required to apply when the //[[CL:Glossary:slot]]// is finally assigned.
 
 With this definition, the following can be written:
 
 \code
- (create-foo 1 2)
-\endcode
-instead of
+ (create-foo 1 2) \endcode instead of
 
 \code
- (make-foo :a 1 :b 2)
-\endcode
-and \f{create-foo} provides defaulting different
-from that of \f{make-foo}.
+ (make-foo :a 1 :b 2) \endcode and \f{create-foo} provides defaulting different from that of \f{make-foo}.
 
-Additional arguments that do not correspond to slot names but
-are merely present to supply values used in subsequent initialization 
-computations are allowed.
-For example, in the definition
+Additional arguments that do not correspond to slot names but are merely present to supply values used in subsequent initialization  computations are allowed. For example, in the definition
 
 \code
  (defstruct (frob (:constructor create-frob
                   (a &key (b 3 have-b) (c-token 'c) 
                           (c (list c-token (if have-b 7 2))))))
-         a b c)
-\endcode
+         a b c) \endcode
+  the {\tt c-token} argument is used merely to supply a value used in the  initialization of the {\tt c} slot. The //[[CL:Glossary:supplied-p parameters]]//  associated with //[[CL:Glossary:optional parameters]]// and //[[CL:Glossary:keyword parameters]]// might also be used this way.
  
-the {\tt c-token} argument is used merely to supply a value used in the 
-initialization of the {\tt c} slot. The //[[CL:Glossary:supplied-p parameters]]// 
-associated with //[[CL:Glossary:optional parameters]]// and //[[CL:Glossary:keyword parameters]]//
-might also be used this way.
- 
-
 
 \endsubsection%{Boa Lambda Lists}
 
-\beginsubSection{Defsetf Lambda Lists}
-\DefineSection{DefsetfLambdaLists}
+\beginsubSection{Defsetf Lambda Lists} \DefineSection{DefsetfLambdaLists}
 
 A //[[CL:Glossary:defsetf lambda list]]// is used by \macref{defsetf}.
 
 A //[[CL:Glossary:defsetf lambda list]]// has the following syntax:
 
+\Vskip 1pc! \auxbnf{lambda-list}{\lparen\starparam{var}\CR 		     \xparen\ttbrac{{\opt} \star{\VarValueSuppliedP}}\CR 		     \xparen\ttbrac{{\rest} //var//}\CR 		     \xparen\f{[}\Vtop{\hbox{{\key} \star{\KeyVarValueSuppliedP}} 				  \vskip 4pt 				  \hbox{\brac{\allowotherkeys}\f{]}}}\CR 		     \xparen\ttbrac{{\environment} //var//}}
 
+A //[[CL:Glossary:defsetf lambda list]]// can contain the //[[CL:Glossary:lambda list keywords]]// shown in \thenextfigure.
 
-\Vskip 1pc!
-\auxbnf{lambda-list}{\lparen\starparam{var}\CR
-		     \xparen\ttbrac{{\opt} \star{\VarValueSuppliedP}}\CR
-		     \xparen\ttbrac{{\rest} //var//}\CR
-		     \xparen\f{[}\Vtop{\hbox{{\key} \star{\KeyVarValueSuppliedP}}
-				  \vskip 4pt
-				  \hbox{\brac{\allowotherkeys}\f{]}}}\CR
-		     \xparen\ttbrac{{\environment} //var//}}
+\showthree{Lambda List Keywords used by Defsetf Lambda Lists}{ ''&allow-other-keys''&''&key''&''&rest''\cr ''&environment''&''&optional''&\cr }
 
-A //[[CL:Glossary:defsetf lambda list]]// can contain the //[[CL:Glossary:lambda list keywords]]// shown
-in \thenextfigure.
-
-
-\showthree{Lambda List Keywords used by Defsetf Lambda Lists}{
-''&allow-other-keys''&''&key''&''&rest''\cr
-''&environment''&''&optional''&\cr
-}
-
-A //[[CL:Glossary:defsetf lambda list]]// differs from an //[[CL:Glossary:ordinary lambda list]]// 
-only in that it does not permit the use of ''&aux'', 
-and that it permits use of ''&environment'', 
+A //[[CL:Glossary:defsetf lambda list]]// differs from an //[[CL:Glossary:ordinary lambda list]]//  only in that it does not permit the use of ''&aux'',  and that it permits use of ''&environment'', 
      which introduces an //[[CL:Glossary:environment parameter]]//.
 
 \endsubSection%{Defsetf Lambda Lists}
 
-\beginsubSection{Deftype Lambda Lists}
-\DefineSection{DeftypeLambdaLists}
+\beginsubSection{Deftype Lambda Lists} \DefineSection{DeftypeLambdaLists}
 
 A //[[CL:Glossary:deftype lambda list]]// is used by \macref{deftype}.
 
-A //[[CL:Glossary:deftype lambda list]]// has the same syntax as a //[[CL:Glossary:macro lambda list]]//,
-and can therefore contain the //[[CL:Glossary:lambda list keywords]]// as a //[[CL:Glossary:macro lambda list]]//.
+A //[[CL:Glossary:deftype lambda list]]// has the same syntax as a //[[CL:Glossary:macro lambda list]]//, and can therefore contain the //[[CL:Glossary:lambda list keywords]]// as a //[[CL:Glossary:macro lambda list]]//.
 
-\issue{DEFTYPE-DESTRUCTURING:YES}
-\issue{DEFTYPE-KEY:ALLOW}
-A //[[CL:Glossary:deftype lambda list]]// differs from a //[[CL:Glossary:macro lambda list]]// 
-only in that if no //init-form// is supplied for an //[[CL:Glossary:optional parameter]]//
-or //[[CL:Glossary:keyword parameter]]// in the //lambda-list//, the default //[[CL:Glossary:value]]// 
-for that //[[CL:Glossary:parameter]]// is the //[[CL:Glossary:symbol]]// \misc{*} (rather than \nil).
-
-
+\issue{DEFTYPE-DESTRUCTURING:YES} \issue{DEFTYPE-KEY:ALLOW} A //[[CL:Glossary:deftype lambda list]]// differs from a //[[CL:Glossary:macro lambda list]]//  only in that if no //init-form// is supplied for an //[[CL:Glossary:optional parameter]]// or //[[CL:Glossary:keyword parameter]]// in the //lambda-list//, the default //[[CL:Glossary:value]]//  for that //[[CL:Glossary:parameter]]// is the //[[CL:Glossary:symbol]]// \misc{*} (rather than \nil).
 
 \endsubSection%{Deftype Lambda Lists}
 
+\beginsubsection{Define-modify-macro Lambda Lists} \DefineSection{DefineModifyMacroLambdaLists}
 
+A //[[CL:Glossary:define-modify-macro lambda list]]// is used by  \macref{define-modify-macro}.
 
+A //[[CL:Glossary:define-modify-macro lambda list]]// can contain the  //[[CL:Glossary:lambda list keywords]]// shown in \thenextfigure.
 
-\beginsubsection{Define-modify-macro Lambda Lists}
-\DefineSection{DefineModifyMacroLambdaLists}
+\showtwo{Lambda List Keywords used by Define-modify-macro Lambda Lists}{ ''&optional''&''&rest''\cr }
 
-A //[[CL:Glossary:define-modify-macro lambda list]]// is used by 
-\macref{define-modify-macro}.
-
-A //[[CL:Glossary:define-modify-macro lambda list]]// can contain the 
-//[[CL:Glossary:lambda list keywords]]// shown in \thenextfigure.
-
-\showtwo{Lambda List Keywords used by Define-modify-macro Lambda Lists}{
-''&optional''&''&rest''\cr
-}
-
-//[[CL:Glossary:Define-modify-macro lambda lists]]// are similar to 
-//[[CL:Glossary:ordinary lambda lists]]//, but do not support keyword arguments.
-\macref{define-modify-macro} has no need match keyword arguments, and
-a //[[CL:Glossary:rest parameter]]// is sufficient.  //[[CL:Glossary:Aux variables]]// are also
-not supported, since \macref{define-modify-macro} has no body //[[CL:Glossary:forms]]//
-which could refer to such //[[CL:Glossary:bindings]]//.  \Seemac{define-modify-macro}.
+//[[CL:Glossary:Define-modify-macro lambda lists]]// are similar to  //[[CL:Glossary:ordinary lambda lists]]//, but do not support keyword arguments. \macref{define-modify-macro} has no need match keyword arguments, and a //[[CL:Glossary:rest parameter]]// is sufficient.  //[[CL:Glossary:Aux variables]]// are also not supported, since \macref{define-modify-macro} has no body //[[CL:Glossary:forms]]// which could refer to such //[[CL:Glossary:bindings]]//.  \Seemac{define-modify-macro}.
 
 \endsubsection%{Define-modify-macro Lambda Lists}
 
+\beginsubsection{Define-method-combination Arguments Lambda Lists} \DefineSection{DefMethCombArgsLambdaLists}
 
-\beginsubsection{Define-method-combination Arguments Lambda Lists}
-\DefineSection{DefMethCombArgsLambdaLists}
+A //[[CL:Glossary:define-method-combination arguments lambda list]]// is used by  the **'':arguments''** option to \macref{define-method-combination}.
 
-A //[[CL:Glossary:define-method-combination arguments lambda list]]// is used by 
-the **'':arguments''** option to \macref{define-method-combination}.
+A //[[CL:Glossary:define-method-combination arguments lambda list]]// can contain the  //[[CL:Glossary:lambda list keywords]]// shown in \thenextfigure.
 
-A //[[CL:Glossary:define-method-combination arguments lambda list]]// can contain the 
-//[[CL:Glossary:lambda list keywords]]// shown in \thenextfigure.
+\showthree{Lambda List Keywords used by Define-method-combination arguments Lambda Lists}{ ''&allow-other-keys''&''&key''&''&rest''\cr ''&aux''&''&optional''&''&whole''\cr }
 
-\showthree{Lambda List Keywords used by Define-method-combination arguments Lambda Lists}{
-''&allow-other-keys''&''&key''&''&rest''\cr
-''&aux''&''&optional''&''&whole''\cr
-}
-
-//[[CL:Glossary:Define-method-combination arguments lambda lists]]// are similar to 
-//[[CL:Glossary:ordinary lambda lists]]//, but also permit the use of ''&whole''.
+//[[CL:Glossary:Define-method-combination arguments lambda lists]]// are similar to  //[[CL:Glossary:ordinary lambda lists]]//, but also permit the use of ''&whole''.
 
 \endsubsection%{Define-Modify-Macro Arguments Lambda Lists}
 
-\beginsubsection{Syntactic Interaction of Documentation Strings and Declarations}
-\DefineSection{DocVsDecls}
+\beginsubsection{Syntactic Interaction of Documentation Strings and Declarations} \DefineSection{DocVsDecls}
 
+In a number of situations, a //[[CL:Glossary:documentation string]]// can appear amidst a series of \misc{declare} //[[CL:Glossary:expressions]]// prior to a series of //[[CL:Glossary:forms]]//.
 
-
-In a number of situations, a //[[CL:Glossary:documentation string]]// can appear amidst a
-series of \misc{declare} //[[CL:Glossary:expressions]]// prior to a series of //[[CL:Glossary:forms]]//.
-
-In that case, if a //[[CL:Glossary:string]]// $S$ appears where a //[[CL:Glossary:documentation string]]// is
-permissible and is not followed by 
+In that case, if a //[[CL:Glossary:string]]// $S$ appears where a //[[CL:Glossary:documentation string]]// is permissible and is not followed by 
   either a \misc{declare} //[[CL:Glossary:expression]]// 
-      or a //[[CL:Glossary:form]]//
-then $S$ is taken to be a //[[CL:Glossary:form]]//;
-otherwise, $S$ is taken as a //[[CL:Glossary:documentation string]]//.
-The consequences are unspecified if more than one such //[[CL:Glossary:documentation string]]// 
-is present.
+      or a //[[CL:Glossary:form]]// then $S$ is taken to be a //[[CL:Glossary:form]]//; otherwise, $S$ is taken as a //[[CL:Glossary:documentation string]]//. The consequences are unspecified if more than one such //[[CL:Glossary:documentation string]]//  is present.
 
 \endsubsection%{Syntactic Interaction of Documentation Strings and Declarations}

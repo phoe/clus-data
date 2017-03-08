@@ -1,96 +1,30 @@
 
 
-There are many kinds of //[[CL:Glossary:file systems]]//,
-varying widely both in their superficial syntactic details,
-		and in their underlying power and structure.
-The facilities provided by \clisp\ for referring to and manipulating //[[CL:Glossary:files]]//
-has been chosen to be compatible with many kinds of //[[CL:Glossary:file systems]]//,
-while at the same time minimizing the program-visible differences 
-between kinds of //[[CL:Glossary:file systems]]//.
+There are many kinds of //[[CL:Glossary:file systems]]//, varying widely both in their superficial syntactic details, 		and in their underlying power and structure. The facilities provided by \clisp\ for referring to and manipulating //[[CL:Glossary:files]]// has been chosen to be compatible with many kinds of //[[CL:Glossary:file systems]]//, while at the same time minimizing the program-visible differences  between kinds of //[[CL:Glossary:file systems]]//.
 
-
-Since //[[CL:Glossary:file systems]]// vary in their conventions for naming //[[CL:Glossary:files]]//,
-there are two distinct ways to represent //[[CL:Glossary:filenames]]//:
-as //[[CL:Glossary:namestrings]]// and as //[[CL:Glossary:pathnames]]//.
+Since //[[CL:Glossary:file systems]]// vary in their conventions for naming //[[CL:Glossary:files]]//, there are two distinct ways to represent //[[CL:Glossary:filenames]]//: as //[[CL:Glossary:namestrings]]// and as //[[CL:Glossary:pathnames]]//.
 
 \beginSubsection{Namestrings as Filenames}
 
-\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
-A //[[CL:Glossary:namestring]]// is a //[[CL:Glossary:string]]// that represents a //[[CL:Glossary:filename]]//.
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES} A //[[CL:Glossary:namestring]]// is a //[[CL:Glossary:string]]// that represents a //[[CL:Glossary:filename]]//.
 
-In general, the syntax of //[[CL:Glossary:namestrings]]// involves the use of 
-//[[CL:Glossary:implementation-defined]]// conventions, 
-usually those customary for the //[[CL:Glossary:file system]]// in which the named //[[CL:Glossary:file]]// resides.
-The only exception is the syntax of a //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestring]]//,
-which is defined in this specification; \seesection\LogPathNamestrings.
+In general, the syntax of //[[CL:Glossary:namestrings]]// involves the use of  //[[CL:Glossary:implementation-defined]]// conventions,  usually those customary for the //[[CL:Glossary:file system]]// in which the named //[[CL:Glossary:file]]// resides. The only exception is the syntax of a //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestring]]//, which is defined in this specification; \seesection\LogPathNamestrings.
 
+A //[[CL:Glossary:conforming program]]// must never unconditionally use a //[[CL:Glossary:literal]]// //[[CL:Glossary:namestring]]// other than a //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestring]]// because \clisp\ does not define any //[[CL:Glossary:namestring]]// syntax  other than that for //[[CL:Glossary:logical pathnames]]// that would be guaranteed to be portable. However, a //[[CL:Glossary:conforming program]]// can, if it is careful,  successfully manipulate user-supplied data  which contains or refers to non-portable //[[CL:Glossary:namestrings]]//.
 
-A //[[CL:Glossary:conforming program]]// must never unconditionally use a
-//[[CL:Glossary:literal]]// //[[CL:Glossary:namestring]]// other than a //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestring]]//
-because \clisp\ does not define any //[[CL:Glossary:namestring]]// syntax 
-other than that for //[[CL:Glossary:logical pathnames]]//
-that would be guaranteed to be portable.
-However, a //[[CL:Glossary:conforming program]]// can, if it is careful, 
-successfully manipulate user-supplied data 
-which contains or refers to non-portable //[[CL:Glossary:namestrings]]//.
-
-
-A //[[CL:Glossary:namestring]]// can be //[[CL:Glossary:coerced]]// to a //[[CL:Glossary:pathname]]// by \thefunctions{pathname}
-or **[[CL:Functions:parse-namestring]]**.
-
-
-
-
+A //[[CL:Glossary:namestring]]// can be //[[CL:Glossary:coerced]]// to a //[[CL:Glossary:pathname]]// by \thefunctions{pathname} or **[[CL:Functions:parse-namestring]]**.
 
 \endSubsection%{Namestrings as Filenames}
 
-\beginSubsection{Pathnames as Filenames}
-\DefineSection{PathnamesAsFilenames}
+\beginSubsection{Pathnames as Filenames} \DefineSection{PathnamesAsFilenames}
 
+\newtermidx{Pathnames}{pathname} are structured //[[CL:Glossary:objects]]// that can represent, in an //[[CL:Glossary:implementation-independent]]// way, the //[[CL:Glossary:filenames]]// that are used natively by an underlying //[[CL:Glossary:file system]]//.
 
+In addition, //[[CL:Glossary:pathnames]]// can also represent certain partially composed  //[[CL:Glossary:filenames]]// for which an underlying //[[CL:Glossary:file system]]//  might not have a specific //[[CL:Glossary:namestring]]// representation.
 
+A //[[CL:Glossary:pathname]]// need not correspond to any file that actually exists,  and more than one //[[CL:Glossary:pathname]]// can refer to the same file. For example, the //[[CL:Glossary:pathname]]// with a version of **'':newest''**  might refer to the same file as a //[[CL:Glossary:pathname]]//  with the same components except a certain number as the version. Indeed, a //[[CL:Glossary:pathname]]// with version **'':newest''** might refer to different files as time passes, because the meaning of such a //[[CL:Glossary:pathname]]// depends on the state of the file system.  
 
-
-
-
-\newtermidx{Pathnames}{pathname} are structured //[[CL:Glossary:objects]]// that can represent,
-in an //[[CL:Glossary:implementation-independent]]// way,
-the //[[CL:Glossary:filenames]]// that are used natively by an underlying //[[CL:Glossary:file system]]//.
-
-In addition, //[[CL:Glossary:pathnames]]// can also represent certain partially composed 
-//[[CL:Glossary:filenames]]// for which an underlying //[[CL:Glossary:file system]]// 
-might not have a specific //[[CL:Glossary:namestring]]// representation.
-
-
-
-
-
-
-
-A //[[CL:Glossary:pathname]]// need not correspond to any file that actually exists, 
-and more than one //[[CL:Glossary:pathname]]// can refer to the same file.
-For example, the //[[CL:Glossary:pathname]]// with a version of **'':newest''** 
-might refer to the same file as a //[[CL:Glossary:pathname]]// 
-with the same components except a certain number as the version.
-Indeed, a //[[CL:Glossary:pathname]]// with version **'':newest''** might refer to
-different files as time passes, because the meaning of such a //[[CL:Glossary:pathname]]//
-depends on the state of the file system.  
-
-Some //[[CL:Glossary:file systems]]// naturally use a structural model for their
-//[[CL:Glossary:filenames]]//, while others do not.  Within the \clisp\ //[[CL:Glossary:pathname]]// model, 
-all //[[CL:Glossary:filenames]]// are seen as having a particular structure,
-even if that structure is not reflected in the underlying //[[CL:Glossary:file system]]//.
-The nature of the mapping between structure imposed by //[[CL:Glossary:pathnames]]//
-and the structure, if any, that is used by the underlying //[[CL:Glossary:file system]]//
-is //[[CL:Glossary:implementation-defined]]//.
-
-
-
-
-
-
-
-
+Some //[[CL:Glossary:file systems]]// naturally use a structural model for their //[[CL:Glossary:filenames]]//, while others do not.  Within the \clisp\ //[[CL:Glossary:pathname]]// model,  all //[[CL:Glossary:filenames]]// are seen as having a particular structure, even if that structure is not reflected in the underlying //[[CL:Glossary:file system]]//. The nature of the mapping between structure imposed by //[[CL:Glossary:pathnames]]// and the structure, if any, that is used by the underlying //[[CL:Glossary:file system]]// is //[[CL:Glossary:implementation-defined]]//.
 
 Every //[[CL:Glossary:pathname]]// has six components:
      a host,
@@ -98,73 +32,28 @@ Every //[[CL:Glossary:pathname]]// has six components:
      a directory,
      a name,
      a type,
- and a version.
-By naming //[[CL:Glossary:files]]// with //[[CL:Glossary:pathnames]]//, 
-\clisp\ programs can work in essentially the same way even in //[[CL:Glossary:file systems]]//
-that seem superficially quite different.
-For a detailed description of these components, \seesection\PathnameComponents.
+ and a version. By naming //[[CL:Glossary:files]]// with //[[CL:Glossary:pathnames]]//,  \clisp\ programs can work in essentially the same way even in //[[CL:Glossary:file systems]]// that seem superficially quite different. For a detailed description of these components, \seesection\PathnameComponents.
 
-\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
-\issue{PATHNAME-SYNTAX-ERROR-TIME:EXPLICITLY-VAGUE}%
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR} \issue{PATHNAME-SYNTAX-ERROR-TIME:EXPLICITLY-VAGUE}%
 
+The mapping of the //[[CL:Glossary:pathname]]// components into the concepts peculiar to each //[[CL:Glossary:file system]]// is //[[CL:Glossary:implementation-defined]]//. There exist conceivable //[[CL:Glossary:pathnames]]// for which there is no mapping to a syntactically valid //[[CL:Glossary:filename]]// in a particular //[[CL:Glossary:implementation]]//. An //[[CL:Glossary:implementation]]// may use various strategies in an attempt to find a mapping; for example,  an //[[CL:Glossary:implementation]]// may quietly truncate //[[CL:Glossary:filenames]]// that exceed length limitations imposed by the underlying //[[CL:Glossary:file system]]//, or ignore certain //[[CL:Glossary:pathname]]// components for which the //[[CL:Glossary:file system]]// provides no support. If such a mapping cannot be found, an error \oftype{file-error} is signaled.
 
-
-
-
-
-The mapping of the //[[CL:Glossary:pathname]]// components into the concepts peculiar to
-each //[[CL:Glossary:file system]]// is //[[CL:Glossary:implementation-defined]]//.
-There exist conceivable //[[CL:Glossary:pathnames]]//
-for which there is no mapping to a syntactically valid //[[CL:Glossary:filename]]//
-in a particular //[[CL:Glossary:implementation]]//.
-An //[[CL:Glossary:implementation]]// may use various strategies in an attempt to find a mapping;
-for example, 
-an //[[CL:Glossary:implementation]]// may quietly truncate //[[CL:Glossary:filenames]]//
-that exceed length limitations imposed by the underlying //[[CL:Glossary:file system]]//,
-or ignore certain //[[CL:Glossary:pathname]]// components
-for which the //[[CL:Glossary:file system]]// provides no support.
-If such a mapping cannot be found,
-an error \oftype{file-error} is signaled.
-
-The time at which this mapping and associated error signaling 
-occurs is //[[CL:Glossary:implementation-dependent]]//.
-Specifically, it may occur 
+The time at which this mapping and associated error signaling  occurs is //[[CL:Glossary:implementation-dependent]]//. Specifically, it may occur 
     at the time the //[[CL:Glossary:pathname]]// is constructed,
     when coercing a //[[CL:Glossary:pathname]]// to a //[[CL:Glossary:namestring]]//,
  or when an attempt is made to //[[CL:Glossary:open]]// or otherwise access the //[[CL:Glossary:file]]// 
      designated by the //[[CL:Glossary:pathname]]//.
 
-
-
 \Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that are applicable to //[[CL:Glossary:pathnames]]//.
 
-\displaythree{Pathname Operations}{
-*default-pathname-defaults*&namestring&pathname-name\cr
-directory-namestring&open&pathname-type\cr
-enough-namestring&parse-namestring&pathname-version\cr
-file-namestring&pathname&pathnamep\cr
-file-string-length&pathname-device&translate-pathname\cr
-host-namestring&pathname-directory&truename\cr
-make-pathname&pathname-host&user-homedir-pathname\cr
-merge-pathnames&pathname-match-p&wild-pathname-p\cr
-}
-\endSubsection%{Pathnames as Filenames}
+\displaythree{Pathname Operations}{ *default-pathname-defaults*&namestring&pathname-name\cr directory-namestring&open&pathname-type\cr enough-namestring&parse-namestring&pathname-version\cr file-namestring&pathname&pathnamep\cr file-string-length&pathname-device&translate-pathname\cr host-namestring&pathname-directory&truename\cr make-pathname&pathname-host&user-homedir-pathname\cr merge-pathnames&pathname-match-p&wild-pathname-p\cr } \endSubsection%{Pathnames as Filenames}
 
 \beginSubsection{Parsing Namestrings Into Pathnames}
 
+Parsing is the operation used to convert a //[[CL:Glossary:namestring]]// into a //[[CL:Glossary:pathname]]//. \issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES} Except in the case of parsing //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestrings]]//,
 
-Parsing is the operation used to convert a //[[CL:Glossary:namestring]]// into a //[[CL:Glossary:pathname]]//.
-\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
-Except in the case of parsing //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestrings]]//,
+this operation is //[[CL:Glossary:implementation-dependent]]//, because the format of //[[CL:Glossary:namestrings]]// is //[[CL:Glossary:implementation-dependent]]//.
 
-this operation is //[[CL:Glossary:implementation-dependent]]//,
-because the format of //[[CL:Glossary:namestrings]]// is //[[CL:Glossary:implementation-dependent]]//.
-
-
-A //[[CL:Glossary:conforming implementation]]// is free to accommodate other //[[CL:Glossary:file system]]//
-features in its //[[CL:Glossary:pathname]]// representation and provides a parser that can process 
-such specifications in //[[CL:Glossary:namestrings]]//.  
-//[[CL:Glossary:Conforming programs]]// must not depend on any such features, 
-since those features will not be portable.
+A //[[CL:Glossary:conforming implementation]]// is free to accommodate other //[[CL:Glossary:file system]]// features in its //[[CL:Glossary:pathname]]// representation and provides a parser that can process  such specifications in //[[CL:Glossary:namestrings]]//.   //[[CL:Glossary:Conforming programs]]// must not depend on any such features,  since those features will not be portable.
 
 \endSubsection%{Parsing Namestrings Into Pathnames}
