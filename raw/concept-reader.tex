@@ -2,19 +2,14 @@
 
 \beginsubsection{Dynamic Control of the Lisp Reader}
 
-Various aspects of the //[[CL:Glossary:Lisp reader]]// can be controlled dynamically.
-\Seesection\Readtables\ and \secref\ReaderVars.
+Various aspects of the //[[CL:Glossary:Lisp reader]]// can be controlled dynamically. \Seesection\Readtables\ and \secref\ReaderVars.
 
 \endsubsection%{Dynamic Control of the Lisp Reader}
- 
-\beginsubsection{Effect of Readtable Case on the Lisp Reader}
-\DefineSection{ReadtableCaseReadEffect}
+  \beginsubsection{Effect of Readtable Case on the Lisp Reader} \DefineSection{ReadtableCaseReadEffect}
 
-The //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]// affects the //[[CL:Glossary:Lisp reader]]//
-in the following ways:
+The //[[CL:Glossary:readtable case]]// of the //[[CL:Glossary:current readtable]]// affects the //[[CL:Glossary:Lisp reader]]// in the following ways:
 
-\beginlist
-\itemitem{**'':upcase''**}
+\beginlist \itemitem{**'':upcase''**}
 
  When the //[[CL:Glossary:readtable case]]// is **'':upcase''**,
  unescaped constituent //[[CL:Glossary:characters]]// are converted to //[[CL:Glossary:uppercase]]//,
@@ -38,8 +33,7 @@ When the //[[CL:Glossary:readtable case]]// is **'':invert''**,
 
 \endlist
 
-\beginsubsubsection{Examples of Effect of Readtable Case on the Lisp Reader}
-\DefineSection{ReadtableCaseReadExamples}
+\beginsubsubsection{Examples of Effect of Readtable Case on the Lisp Reader} \DefineSection{ReadtableCaseReadExamples}
 
 \code
  (defun test-readtable-case-reading ()
@@ -53,10 +47,8 @@ When the //[[CL:Glossary:readtable case]]// is **'':invert''**,
          (format t "~&:~A~16T~A~24T~A"
                  (string-upcase readtable-case)
                  input
-                 (symbol-name (read-from-string input)))))))
-\endcode
- 
-The output from \f{(test-readtable-case-reading)} should be as follows:
+                 (symbol-name (read-from-string input))))))) \endcode
+  The output from \f{(test-readtable-case-reading)} should be as follows:
 
 \code
  READTABLE-CASE     Input Symbol-name
@@ -72,8 +64,7 @@ The output from \f{(test-readtable-case-reading)} should be as follows:
     :PRESERVE       zebra   zebra
     :INVERT         ZEBRA   zebra
     :INVERT         Zebra   Zebra
-    :INVERT         zebra   ZEBRA
-\endcode
+    :INVERT         zebra   ZEBRA \endcode
 
 \endsubsubsection%{Examples of Effect of Readtable Case on the Lisp Reader}
 
@@ -83,124 +74,42 @@ The output from \f{(test-readtable-case-reading)} should be as follows:
 
 \beginsubsubsection{The EOF-ERROR-P argument}
 
+//Eof-error-p// in input function calls controls what happens if input is from a file (or any other input source that has a definite end) and the end of the file is reached. If //eof-error-p// is //[[CL:Glossary:true]]// (the default),  an error \oftype{end-of-file} is signaled at end of file.  If it is //[[CL:Glossary:false]]//, then no error is signaled, and instead the function returns //eof-value//.
 
+Functions such as **[[CL:Functions:read]]** that read the representation of an //[[CL:Glossary:object]]// rather than a single character always signals an error, regardless of //eof-error-p//, if the file ends in the middle of an object representation. For example, if a file does not contain enough right parentheses to balance the left parentheses in it, **[[CL:Functions:read]]** signals an error.  If a file ends in a  //[[CL:Glossary:symbol]]// or a //[[CL:Glossary:number]]// immediately followed by end-of-file, **[[CL:Functions:read]]** reads the  //[[CL:Glossary:symbol]]// or //[[CL:Glossary:number]]//  successfully and when called again will
 
-//Eof-error-p// in input function calls
-controls what happens if input is from a file (or any other
-input source that has a definite end) and the end of the file is reached.
-If //eof-error-p// is //[[CL:Glossary:true]]// (the default), 
-an error \oftype{end-of-file} is signaled
-at end of file.  If it is //[[CL:Glossary:false]]//, then no error is signaled, and instead
-the function returns //eof-value//.
-
-Functions such as **[[CL:Functions:read]]** that read the representation
-of an //[[CL:Glossary:object]]// rather than a single
-character always signals an error, regardless of //eof-error-p//, if
-the file ends in the middle of an object representation.
-For example, if a file does
-not contain enough right parentheses to balance the left parentheses in
-it, **[[CL:Functions:read]]** signals an error.  If a file ends in a 
-//[[CL:Glossary:symbol]]// or a //[[CL:Glossary:number]]//
-immediately followed by end-of-file, **[[CL:Functions:read]]** reads the 
-//[[CL:Glossary:symbol]]// or
-//[[CL:Glossary:number]]// 
-successfully and when called again will
-
-
-
-act according to //eof-error-p//.
-Similarly, \thefunction{read-line}
-successfully reads the last line of a file even if that line
-is terminated by end-of-file rather than the newline character.
-Ignorable text, such as lines containing only //[[CL:Glossary:whitespace]]//\meaning{2} or comments,
-are not considered to begin an //[[CL:Glossary:object]]//; 
-if **[[CL:Functions:read]]** begins to read an //[[CL:Glossary:expression]]// but sees only such
-ignorable text, it does not consider the file to end in the middle of an //[[CL:Glossary:object]]//.
-Thus an //eof-error-p// argument controls what happens
-when the file ends between //[[CL:Glossary:objects]]//.
+act according to //eof-error-p//. Similarly, \thefunction{read-line} successfully reads the last line of a file even if that line is terminated by end-of-file rather than the newline character. Ignorable text, such as lines containing only //[[CL:Glossary:whitespace]]//\meaning{2} or comments, are not considered to begin an //[[CL:Glossary:object]]//;  if **[[CL:Functions:read]]** begins to read an //[[CL:Glossary:expression]]// but sees only such ignorable text, it does not consider the file to end in the middle of an //[[CL:Glossary:object]]//. Thus an //eof-error-p// argument controls what happens when the file ends between //[[CL:Glossary:objects]]//.
 
 \endsubsubsection%{The EOF-ERROR-P argument}
 
 \beginsubsubsection{The RECURSIVE-P argument}
 
+If //recursive-p// is supplied and not \nil, it specifies that this function call is not an outermost call to **[[CL:Functions:read]]** but an  embedded call, typically from a //[[CL:Glossary:reader macro function]]//. It is important to distinguish such recursive calls for three reasons.
 
-
-If //recursive-p// is supplied and not \nil, it specifies that
-this function call is not an outermost call to **[[CL:Functions:read]]** but an 
-embedded call, typically from a //[[CL:Glossary:reader macro function]]//.
-It is important to distinguish such recursive calls for three reasons.
-
-
-\beginlist
-\itemitem{1.}
-An outermost call establishes the context within which the
-\f{\#//n//=} and \f{\#//n//\#} syntax is scoped.  Consider, for example,
-the expression
+\beginlist \itemitem{1.} An outermost call establishes the context within which the \f{\#//n//=} and \f{\#//n//\#} syntax is scoped.  Consider, for example, the expression
 
 \code
- (cons '#3=(p q r) '(x y . #3#))
-\endcode
-If the //[[CL:Glossary:single-quote]]// //[[CL:Glossary:reader macro]]// were defined in this way:
+ (cons '#3=(p q r) '(x y . #3#)) \endcode If the //[[CL:Glossary:single-quote]]// //[[CL:Glossary:reader macro]]// were defined in this way:
 
 \code
  (set-macro-character #\\'       ;incorrect
     #'(lambda (stream char)
          (declare (ignore char))
-         (list 'quote (read stream))))
-\endcode
+         (list 'quote (read stream)))) \endcode
 
-
-
-
-
-
-
-
-
-then each call to the //[[CL:Glossary:single-quote]]// //[[CL:Glossary:reader macro function]]// would establish
-independent contexts for the scope of **[[CL:Functions:read]]** information, including the scope of
-identifications between markers like ``\f{\#3=}'' and ``\f{\#3\#}''.  However, for
-this expression, the scope was clearly intended to be determined by the outer set 
-of parentheses, so such a definition would be incorrect.
-The correct way to define the //[[CL:Glossary:single-quote]]//
-//[[CL:Glossary:reader macro]]// uses //recursive-p//: 
+then each call to the //[[CL:Glossary:single-quote]]// //[[CL:Glossary:reader macro function]]// would establish independent contexts for the scope of **[[CL:Functions:read]]** information, including the scope of identifications between markers like ``\f{\#3=}'' and ``\f{\#3\#}''.  However, for this expression, the scope was clearly intended to be determined by the outer set  of parentheses, so such a definition would be incorrect. The correct way to define the //[[CL:Glossary:single-quote]]// //[[CL:Glossary:reader macro]]// uses //recursive-p//: 
 
 \code
  (set-macro-character #\\'       ;correct
     #'(lambda (stream char)
          (declare (ignore char))
-         (list 'quote (read stream t nil t))))
-\endcode
+         (list 'quote (read stream t nil t)))) \endcode
 
+\itemitem{2.} A recursive call does not alter whether the reading process is to preserve //[[CL:Glossary:whitespace]]//\meaning{2} or not (as determined by whether the outermost call was to **[[CL:Functions:read]]** or **[[CL:Functions:read-preserving-whitespace]]**). Suppose again that //[[CL:Glossary:single-quote]]// 
 
-\itemitem{2.}
-A recursive call does not alter whether the reading process
-is to preserve //[[CL:Glossary:whitespace]]//\meaning{2} or not (as determined by whether the
-outermost call was to **[[CL:Functions:read]]** or **[[CL:Functions:read-preserving-whitespace]]**).
-Suppose again that //[[CL:Glossary:single-quote]]// 
+were to be defined as shown above in the incorrect definition. Then a call to **[[CL:Functions:read-preserving-whitespace]]** that read the expression \f{'foo\SpaceChar} would fail to preserve the space character following the symbol \f{foo} because the //[[CL:Glossary:single-quote]]// //[[CL:Glossary:reader macro function]]// calls **[[CL:Functions:read]]**,  not **[[CL:Functions:read-preserving-whitespace]]**, to read the following expression (in this case \f{foo}). The correct definition, which passes the value //[[CL:Glossary:true]]// for //recursive-p// to **[[CL:Functions:read]]**, allows the outermost call to determine whether //[[CL:Glossary:whitespace]]//\meaning{2} is preserved.
 
-
-
-were to be defined as shown above in the incorrect definition.
-Then a call to **[[CL:Functions:read-preserving-whitespace]]**
-that read the expression \f{'foo\SpaceChar} would fail to preserve the space
-character following the symbol \f{foo} because the //[[CL:Glossary:single-quote]]//
-//[[CL:Glossary:reader macro function]]// calls **[[CL:Functions:read]]**, 
-not **[[CL:Functions:read-preserving-whitespace]]**,
-to read the following expression (in this case \f{foo}).
-The correct definition, which passes the value //[[CL:Glossary:true]]// for //recursive-p//
-to **[[CL:Functions:read]]**, allows the outermost call to determine
-whether //[[CL:Glossary:whitespace]]//\meaning{2} is preserved.
-
-
-\itemitem{3.}
-When end-of-file is encountered and the //eof-error-p// argument
-is not \nil, the kind of error that is signaled may depend on the value
-of //recursive-p//.  If //recursive-p// 
-is //[[CL:Glossary:true]]//, then the end-of-file
-is deemed to have occurred within the middle of a printed representation;
-if //recursive-p// is //[[CL:Glossary:false]]//, then the end-of-file may be deemed to have
-occurred between //[[CL:Glossary:objects]]// rather than within the middle of one.
+\itemitem{3.} When end-of-file is encountered and the //eof-error-p// argument is not \nil, the kind of error that is signaled may depend on the value of //recursive-p//.  If //recursive-p//  is //[[CL:Glossary:true]]//, then the end-of-file is deemed to have occurred within the middle of a printed representation; if //recursive-p// is //[[CL:Glossary:false]]//, then the end-of-file may be deemed to have occurred between //[[CL:Glossary:objects]]// rather than within the middle of one.
 
 \endlist
 

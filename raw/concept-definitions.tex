@@ -1,13 +1,10 @@
 
 
-
-This section contains notational conventions and definitions of terms
-used in this manual.
+This section contains notational conventions and definitions of terms used in this manual.
 
 \beginsubSection{Notational Conventions}\idxtext{notation}
 
 The following notational conventions are used throughout this document.
-
 
 \beginsubsubsection{Font Key}\idxtext{font key}
 
@@ -17,38 +14,22 @@ Fonts are used in this document to convey information.
 
 \itemitem{//[[CL:Glossary:name]]//} 
 
-Denotes a formal term whose meaning is defined in the Glossary.
-When this font is used, the Glossary definition takes precedence 
-over normal English usage.
+Denotes a formal term whose meaning is defined in the Glossary. When this font is used, the Glossary definition takes precedence  over normal English usage.
 
-Sometimes a glossary term appears subscripted, 
-as in ``//[[CL:Glossary:whitespace]]//\meaning{2}.''  
-Such a notation selects one particular Glossary definition out of several,
-in this case the second.
-The subscript notation for Glossary terms is generally used where the
-context might be insufficient to disambiguate among the available definitions.
+Sometimes a glossary term appears subscripted,  as in ``//[[CL:Glossary:whitespace]]//\meaning{2}.''   Such a notation selects one particular Glossary definition out of several, in this case the second. The subscript notation for Glossary terms is generally used where the context might be insufficient to disambiguate among the available definitions.
 
 \itemitem{//[[CL:Glossary:name]]//} 
 
-Denotes the introduction of a formal term locally to the current text.
-There is still a corresponding glossary entry, and is formally equivalent
-to a use of ``//[[CL:Glossary:name]]//,'' but the hope is that making such uses 
-conspicuous will save the reader a trip to the glossary in some cases.
+Denotes the introduction of a formal term locally to the current text. There is still a corresponding glossary entry, and is formally equivalent to a use of ``//[[CL:Glossary:name]]//,'' but the hope is that making such uses  conspicuous will save the reader a trip to the glossary in some cases.
 
 \itemitem{\misc{name}}
-                           
-Denotes a symbol in \thepackage{common-lisp}.
-For information about //[[CL:Glossary:case]]// conventions,
-\seesection\CaseInSymbols.
+                            Denotes a symbol in \thepackage{common-lisp}. For information about //[[CL:Glossary:case]]// conventions, \seesection\CaseInSymbols.
 
 \itemitem{\f{name}} 
 
-Denotes a sample //[[CL:Glossary:name]]// or piece of //[[CL:Glossary:code]]// that a programmer
-might write in \clisp.
+Denotes a sample //[[CL:Glossary:name]]// or piece of //[[CL:Glossary:code]]// that a programmer might write in \clisp.
 
-This font is also used for certain //[[CL:Glossary:standardized]]// names that are not
-names of //[[CL:Glossary:external symbols]]// of \thepackage{common-lisp}, 
-such as //[[CL:Glossary:keywords]]//\meaning{1},
+This font is also used for certain //[[CL:Glossary:standardized]]// names that are not names of //[[CL:Glossary:external symbols]]// of \thepackage{common-lisp},  such as //[[CL:Glossary:keywords]]//\meaning{1},
         //[[CL:Glossary:package]]// //[[CL:Glossary:names]]//,
     and //[[CL:Glossary:loop keywords]]//.
 
@@ -56,22 +37,15 @@ such as //[[CL:Glossary:keywords]]//\meaning{1},
 
 Denotes the name of a //[[CL:Glossary:parameter]]// or //[[CL:Glossary:value]]//.
 
-In some situations the notation ``\metaparam{name}'' (\ie the same font,
-but with surrounding ``angle brackets'') is used instead in order to
-provide better visual separation from surrounding characters.  These
-``angle brackets'' are metasyntactic, and never actually appear in program
-input or output.
+In some situations the notation ``\metaparam{name}'' (\ie the same font, but with surrounding ``angle brackets'') is used instead in order to provide better visual separation from surrounding characters.  These ``angle brackets'' are metasyntactic, and never actually appear in program input or output.
 
 \endlist
 
 \endsubsubsection%{Font Key}
 
-\beginsubsubsection{Modified BNF Syntax}\idxtext{bnf key}
-\DefineSection{ModifiedBNF}
+\beginsubsubsection{Modified BNF Syntax}\idxtext{bnf key} \DefineSection{ModifiedBNF}
 
-This specification uses an extended Backus Normal Form (BNF) to
-describe the syntax of \clisp\ //[[CL:Glossary:macro forms]]// and //[[CL:Glossary:special forms]]//.
-This section discusses the syntax of BNF expressions.
+This specification uses an extended Backus Normal Form (BNF) to describe the syntax of \clisp\ //[[CL:Glossary:macro forms]]// and //[[CL:Glossary:special forms]]//. This section discusses the syntax of BNF expressions.
 
 \beginsubsubsubsection{Splicing in Modified BNF Syntax}
 
@@ -79,90 +53,63 @@ The primary extension used is the following:
 
 $$\hbox{\interleave{$O$}}$$
 
-An expression of this form appears whenever a list of elements is
-to be spliced into a larger structure and the elements can appear in
-any order. The symbol $O$ represents a description of the syntax of
-some number of syntactic elements to be spliced; that description must
-be of the form
+An expression of this form appears whenever a list of elements is to be spliced into a larger structure and the elements can appear in any order. The symbol $O$ represents a description of the syntax of some number of syntactic elements to be spliced; that description must be of the form
 
 $$O\sub 1\ \vert\ \ldots\ \vert\ O\sub l$$
 
-\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
-\noindent where each $O\sub i$ can be of the form $S$ or of
-the form \star{$S$} or of the form \one{$S$}.
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX} \noindent where each $O\sub i$ can be of the form $S$ or of the form \star{$S$} or of the form \one{$S$}.
 
 The expression \interleave{$O$} means that a list of the form
 
 $$(O\sub{i\sub 1}\ldots O\sub{i\sub j})\quad 1\leq j$$
 
-\noindent is spliced into the enclosing expression,
-such that if $n \neq m$ and $1\leq n,m\leq j$,
-then either $O\sub{i\sub n}\neq O\sub{i\sub m}$
-         or $O\sub{i\sub n} = O\sub{i\sub m} = Q\sub{k}$, 
-where for some $1\leq k \leq n$, $O\sub{k}$ is of the form \star{$Q\sub{k}$}.
-\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+\noindent is spliced into the enclosing expression, such that if $n \neq m$ and $1\leq n,m\leq j$, then either $O\sub{i\sub n}\neq O\sub{i\sub m}$
+         or $O\sub{i\sub n} = O\sub{i\sub m} = Q\sub{k}$,  where for some $1\leq k \leq n$, $O\sub{k}$ is of the form \star{$Q\sub{k}$}. \issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
 
-Furthermore, for each $O\sub{i\sub n}$ that is of the form \one{$Q\sub{k}$},
-that element is required to appear somewhere in the list to be spliced.
-
+Furthermore, for each $O\sub{i\sub n}$ that is of the form \one{$Q\sub{k}$}, that element is required to appear somewhere in the list to be spliced.
 
 For example, the expression
 
 \f{(x \interleave{A | \star{B} | C} y)}
 
-\noindent means that at most one {\tt A}, any number of {\tt B}'s, and
-at most one {\tt C} can occur in any order.
-It is a description of any of these:
+\noindent means that at most one {\tt A}, any number of {\tt B}'s, and at most one {\tt C} can occur in any order. It is a description of any of these:
 
 \code
  (x y)
  (x B A C y)
  (x A B B B B B C y)
- (x C B A B B B y)
-\endcode
+ (x C B A B B B y) \endcode
 
 \noindent but not any of these:
 
 \code
  (x B B A A C C y)
- (x C B C y)
-\endcode
+ (x C B C y) \endcode
 
-\noindent In the first case, both {\tt A} and {\tt C} appear too often,
-and in the second case {\tt C} appears too often.
+\noindent In the first case, both {\tt A} and {\tt C} appear too often, and in the second case {\tt C} appears too often.
 
 \issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
 
-
-The notation \plus{\interleave{$O\sub1$ | $O\sub2$ | $\ldots$}} 
-adds the additional restriction that at least one item from among the possible
-choices must be used.  For example:
+The notation \plus{\interleave{$O\sub1$ | $O\sub2$ | $\ldots$}}  adds the additional restriction that at least one item from among the possible choices must be used.  For example:
 
 \f{(x \plus{\interleave{A | \star{B} | C}} y)}
 
-\noindent means that at most one {\tt A}, any number of {\tt B}'s, and
-at most one {\tt C} can occur in any order, but that in any case at least
-one of these options must be selected.
-It is a description of any of these:
+\noindent means that at most one {\tt A}, any number of {\tt B}'s, and at most one {\tt C} can occur in any order, but that in any case at least one of these options must be selected. It is a description of any of these:
 
 \code
  (x B y)
  (x B A C y)
  (x A B B B B B C y)
- (x C B A B B B y)
-\endcode
+ (x C B A B B B y) \endcode
 
 \noindent but not any of these:
 
 \code
  (x y)
  (x B B A A C C y)
- (x C B C y)
-\endcode
+ (x C B C y) \endcode
 
-\noindent In the first case, no item was used;
-in the second case, both {\tt A} and {\tt C} appear too often;
-and in the third case {\tt C} appears too often.
+\noindent In the first case, no item was used; in the second case, both {\tt A} and {\tt C} appear too often; and in the third case {\tt C} appears too often.
 
 Also, the expression:
 
@@ -178,58 +125,31 @@ Also, the expression:
  (x B C A y)
  (x B A y)
  (x C A B y)
- (x C B A y)
-\endcode
-
-
+ (x C B A y) \endcode
 
 \endsubsubsubsection%{Splicing in Modified BNF Syntax}
 
 \beginsubsubsubsection{Indirection in Modified BNF Syntax}
 
-An indirection extension is introduced in order to make this
-new syntax more readable:
+An indirection extension is introduced in order to make this new syntax more readable:
 
 $$\hbox{\down{O}}$$
 
-\noindent If //O// is a non-terminal symbol, the right-hand side
-of its definition is substituted for the entire expression 
-\down{O}.  For example, the following BNF is equivalent to
-the BNF in the previous example:
+\noindent If //O// is a non-terminal symbol, the right-hand side of its definition is substituted for the entire expression  \down{O}.  For example, the following BNF is equivalent to the BNF in the previous example:
 
-\f{(x \interleave{\down{O}} y)}
-\Vskip 1pc!
-\auxbnf{O}{\f{A} | \star{\f{B}} | \f{C}}
-\Vskip 1pc!
+\f{(x \interleave{\down{O}} y)} \Vskip 1pc! \auxbnf{O}{\f{A} | \star{\f{B}} | \f{C}} \Vskip 1pc!
 
 \endsubsubsubsection%{Indirection in Modified BNF Syntax}
 
 \beginsubsubsubsection{Additional Uses for Indirect Definitions in Modified BNF Syntax}
 
-In some cases, an auxiliary definition in the BNF might appear to be unused
-within the BNF, but might still be useful elsewhere.  For example, consider the
-following definitions:
+In some cases, an auxiliary definition in the BNF might appear to be unused within the BNF, but might still be useful elsewhere.  For example, consider the following definitions:
 
-\DefmacWithValues case
-		  {keyform  \stardown{normal-clause} \brac{\down{otherwise-clause}}}
-		  {\starparam{result}}
-\DefmacWithValues ccase
-		  {keyplace \stardown{normal-clause}}
-		  {\starparam{result}}
-\DefmacWithValues ecase
-		  {keyform  \stardown{normal-clause}}
-		  {\starparam{result}}
+\DefmacWithValues case 		  {keyform  \stardown{normal-clause} \brac{\down{otherwise-clause}}} 		  {\starparam{result}} \DefmacWithValues ccase 		  {keyplace \stardown{normal-clause}} 		  {\starparam{result}} \DefmacWithValues ecase 		  {keyform  \stardown{normal-clause}} 		  {\starparam{result}}
 
-\auxbnf{normal-clause}{\paren{keys \starparam{form}}}
-\auxbnf{otherwise-clause}{\paren{\curly{otherwise | t} \starparam{form}}}
-\auxbnf{clause}{normal-clause | otherwise-clause}
-\Vskip 1pc!
+\auxbnf{normal-clause}{\paren{keys \starparam{form}}} \auxbnf{otherwise-clause}{\paren{\curly{otherwise | t} \starparam{form}}} \auxbnf{clause}{normal-clause | otherwise-clause} \Vskip 1pc!
 
-Here the term ``//clause//'' might appear to be ``dead'' in that it
-is not used in the BNF.  However, the purpose of the BNF is not just to guide parsing,
-but also to define useful terms for reference in the descriptive text which follows.
-As such, the term ``//clause//'' might appear in text that follows,
-as shorthand for ``//normal-clause// or //otherwise-clause//.''
+Here the term ``//clause//'' might appear to be ``dead'' in that it is not used in the BNF.  However, the purpose of the BNF is not just to guide parsing, but also to define useful terms for reference in the descriptive text which follows. As such, the term ``//clause//'' might appear in text that follows, as shorthand for ``//normal-clause// or //otherwise-clause//.''
 
 \endsubsubsubsection%{Additional Uses for Indirect Definitions in Modified BNF Syntax}
 
@@ -237,130 +157,70 @@ as shorthand for ``//normal-clause// or //otherwise-clause//.''
 
 \beginsubsubsection{Special Symbols}
 
-The special symbols described here are used as a notational convenience
-within this document, and are part of neither the \clisp\ language nor
-its environment.
+The special symbols described here are used as a notational convenience within this document, and are part of neither the \clisp\ language nor its environment.
 
-\beginlist
-\itemitem{\EV}
+\beginlist \itemitem{\EV}
 
-This indicates evaluation.
-For example:
+This indicates evaluation. For example:
 
 \code
- (+ 4 5) \EV 9 
-\endcode
-This means that the result of
-evaluating the //[[CL:Glossary:form]]// \f{(+ 4 5)} is \f{9}.
+ (+ 4 5) \EV 9  \endcode This means that the result of evaluating the //[[CL:Glossary:form]]// \f{(+ 4 5)} is \f{9}.
                                                                  
 
-If a //[[CL:Glossary:form]]// returns //[[CL:Glossary:multiple values]]//, those values might
-be shown separated by spaces, line breaks, or commas.
-For example:
+If a //[[CL:Glossary:form]]// returns //[[CL:Glossary:multiple values]]//, those values might be shown separated by spaces, line breaks, or commas. For example:
 
 \code
- (truncate 7 5)
-\EV 1 2
- (truncate 7 5) 
-\EV 1
+ (truncate 7 5) \EV 1 2
+ (truncate 7 5)  \EV 1
    2
- (truncate 7 5)
-\EV 1, 2
-\endcode
+ (truncate 7 5) \EV 1, 2 \endcode
 
-Each of the above three examples is equivalent, and specifies
-that \f{(truncate 7 5)} returns two values, which are \f{1} and \f{2}.
+Each of the above three examples is equivalent, and specifies that \f{(truncate 7 5)} returns two values, which are \f{1} and \f{2}.
 
-Some //[[CL:Glossary:conforming implementations]]// actually type an arrow (or some
-other indicator) before showing return values, while others do not.
+Some //[[CL:Glossary:conforming implementations]]// actually type an arrow (or some other indicator) before showing return values, while others do not.
 
 \itemitem{\OV}
 
-The notation ``{\OV}'' is used to denote one of several possible
-alternate results.  The example
+The notation ``{\OV}'' is used to denote one of several possible alternate results.  The example
 
 \code
- (char-name #\\a)
-\EV NIL
-\OV "LOWERCASE-a"
-\OV "Small-A"
-\OV "LA01"
-\endcode
+ (char-name #\\a) \EV NIL \OV "LOWERCASE-a" \OV "Small-A" \OV "LA01" \endcode
 
-indicates that \nil, \f{"LOWERCASE-a"}, \f{"Small-A"}, \f{"LA01"} are
-among the possible results of \f{(char-name \#\\a)}---each with equal preference.
-Unless explicitly specified otherwise, it should not be assumed that the set of possible 
-results shown is exhaustive.
-Formally, the above example is equivalent to
+indicates that \nil, \f{"LOWERCASE-a"}, \f{"Small-A"}, \f{"LA01"} are among the possible results of \f{(char-name \#\\a)}---each with equal preference. Unless explicitly specified otherwise, it should not be assumed that the set of possible  results shown is exhaustive. Formally, the above example is equivalent to
 
 \code
- (char-name #\\a) \EV //[[CL:Glossary:implementation-dependent]]//
-\endcode
+ (char-name #\\a) \EV //[[CL:Glossary:implementation-dependent]]// \endcode
 
-but it is intended to provide additional information to illustrate some
-of the ways in which it is permitted for implementations to diverge.
+but it is intended to provide additional information to illustrate some of the ways in which it is permitted for implementations to diverge.
 
 \itemitem{\NV}
 
-The notation ``{\NV}'' is used to denote a result which is not possible.
-This might be used, for example, in order to emphasize a situation where
-some anticipated misconception might lead the reader to falsely believe
-that the result might be possible.  For example,
+The notation ``{\NV}'' is used to denote a result which is not possible. This might be used, for example, in order to emphasize a situation where some anticipated misconception might lead the reader to falsely believe that the result might be possible.  For example,
 
 \code
  (function-lambda-expression 
-    (funcall #'(lambda (x) #'(lambda () x)) nil))
-\EV NIL, //[[CL:Glossary:true]]//, NIL
-\OV (LAMBDA () X), //[[CL:Glossary:true]]//, NIL
-\NV NIL, //[[CL:Glossary:false]]//, NIL
-\NV (LAMBDA () X), //[[CL:Glossary:false]]//, NIL
-\endcode
-
+    (funcall #'(lambda (x) #'(lambda () x)) nil)) \EV NIL, //[[CL:Glossary:true]]//, NIL \OV (LAMBDA () X), //[[CL:Glossary:true]]//, NIL \NV NIL, //[[CL:Glossary:false]]//, NIL \NV (LAMBDA () X), //[[CL:Glossary:false]]//, NIL \endcode
 
 \itemitem{\EQ} 
 
 This indicates code equivalence. For example:
 
 \code
- (gcd x (gcd y z)) \EQ (gcd (gcd x y) z)
-\endcode
-This means that the results and observable side-effects of evaluating
-the //[[CL:Glossary:form]]//
-\hbox{\f{(gcd x (gcd y z))} } are always the same as the results
-and observable side-effects of
-\hbox{\f{(gcd (gcd x y) z)} } for any 
-\f{x}, \f{y}, and \f{z}.
+ (gcd x (gcd y z)) \EQ (gcd (gcd x y) z) \endcode This means that the results and observable side-effects of evaluating the //[[CL:Glossary:form]]// \hbox{\f{(gcd x (gcd y z))} } are always the same as the results and observable side-effects of \hbox{\f{(gcd (gcd x y) z)} } for any  \f{x}, \f{y}, and \f{z}.
                       
-
 
 \itemitem{{\OUT}}
 
-\clisp\ specifies input and output with respect to a non-interactive stream model.
-The specific details of how interactive input and output are mapped onto that
-non-interactive model are //[[CL:Glossary:implementation-defined]]//.
+\clisp\ specifies input and output with respect to a non-interactive stream model. The specific details of how interactive input and output are mapped onto that non-interactive model are //[[CL:Glossary:implementation-defined]]//.
 
-For example, //[[CL:Glossary:conforming implementations]]// are permitted to differ in issues 
-of how interactive input is terminated.  For example, \thefunction{read}
-terminates when the final delimiter is typed on a non-interactive stream.
-In some //[[CL:Glossary:implementations]]//, an interactive call to **[[CL:Functions:read]]** returns
-as soon as the final delimiter is typed, even if that delimiter is not a //[[CL:Glossary:newline]]//.
-In other //[[CL:Glossary:implementations]]//, a final //[[CL:Glossary:newline]]// is always required.
-In still other //[[CL:Glossary:implementations]]//, there might be a command which ``activates''
-a buffer full of input without the command itself being visible on the program's
-input stream.
+For example, //[[CL:Glossary:conforming implementations]]// are permitted to differ in issues  of how interactive input is terminated.  For example, \thefunction{read} terminates when the final delimiter is typed on a non-interactive stream. In some //[[CL:Glossary:implementations]]//, an interactive call to **[[CL:Functions:read]]** returns as soon as the final delimiter is typed, even if that delimiter is not a //[[CL:Glossary:newline]]//. In other //[[CL:Glossary:implementations]]//, a final //[[CL:Glossary:newline]]// is always required. In still other //[[CL:Glossary:implementations]]//, there might be a command which ``activates'' a buffer full of input without the command itself being visible on the program's input stream.
 
-In the examples in this document, the notation ``{\OUT}'' precedes 
-lines where interactive input and output occurs.  Within such a scenario,
-``\IN{this notation}'' notates user input.
+In the examples in this document, the notation ``{\OUT}'' precedes  lines where interactive input and output occurs.  Within such a scenario, ``\IN{this notation}'' notates user input.
 
 For example, the notation
 
 \code
- (+ 1 (print (+ (sqrt (read)) (sqrt (read)))))
-\OUT \IN{9 16 }
-\OUT 7
-\EV 8
-\endcode
+ (+ 1 (print (+ (sqrt (read)) (sqrt (read))))) \OUT \IN{9 16 } \OUT 7 \EV 8 \endcode
 
 shows an interaction in which
   ``\f{(+ 1 (print (+ (sqrt (read)) (sqrt (read)))))}''
@@ -369,19 +229,12 @@ shows an interaction in which
   ``\f{7}'' is interactive output, and 
   ``\f{8}'' is the //[[CL:Glossary:value]]// //[[CL:Glossary:yielded]]// from the //[[CL:Glossary:evaluation]]//.
 
-The use of this notation is intended to disguise small differences 
-in interactive input and output behavior between //[[CL:Glossary:implementations]]//.
+The use of this notation is intended to disguise small differences  in interactive input and output behavior between //[[CL:Glossary:implementations]]//.
 
-Sometimes, the non-interactive stream model calls for a //[[CL:Glossary:newline]]//.
-How that //[[CL:Glossary:newline]]// character is interactively entered is an 
-//[[CL:Glossary:implementation-defined]]// detail of the user interface, but in that
-case, either the notation ``\NewlineChar'' or ``\CRLF'' might be used.
+Sometimes, the non-interactive stream model calls for a //[[CL:Glossary:newline]]//. How that //[[CL:Glossary:newline]]// character is interactively entered is an  //[[CL:Glossary:implementation-defined]]// detail of the user interface, but in that case, either the notation ``\NewlineChar'' or ``\CRLF'' might be used.
 
 \code
- (progn (format t "~&Who? ") (read-line))
-\OUT Who? \IN{Fred, Mary, and Sally\CRLF}
-\EV "Fred, Mary, and Sally", //[[CL:Glossary:false]]//
-\endcode
+ (progn (format t "~&Who? ") (read-line)) \OUT Who? \IN{Fred, Mary, and Sally\CRLF} \EV "Fred, Mary, and Sally", //[[CL:Glossary:false]]// \endcode
 
 \endlist
 
@@ -389,57 +242,33 @@ case, either the notation ``\NewlineChar'' or ``\CRLF'' might be used.
 
 \beginsubsubsection{Objects with Multiple Notations}
 
-Some //[[CL:Glossary:objects]]// in \clisp\ can be notated in more than one way.
-In such situations, the choice of which notation to use is technically arbitrary,
-but conventions may exist which convey a ``point of view'' or ``sense of intent.''
+Some //[[CL:Glossary:objects]]// in \clisp\ can be notated in more than one way. In such situations, the choice of which notation to use is technically arbitrary, but conventions may exist which convey a ``point of view'' or ``sense of intent.''
 
+\beginsubsubsubsection{Case in Symbols}\idxtext{case in symbol names} \DefineSection{CaseInSymbols}
 
-\beginsubsubsubsection{Case in Symbols}\idxtext{case in symbol names}
-\DefineSection{CaseInSymbols}
+While //[[CL:Glossary:case]]// is significant in the process of //[[CL:Glossary:interning]]// a //[[CL:Glossary:symbol]]//, the //[[CL:Glossary:Lisp reader]]//, by default, attempts to canonicalize the case of a //[[CL:Glossary:symbol]]// prior to interning; \seesection\ReadtableCaseReadEffect. As such, case in //[[CL:Glossary:symbols]]// is not, by default, significant. Throughout this document, except as explicitly noted otherwise, the case in which a //[[CL:Glossary:symbol]]// appears is not significant;  that is, \f{HELLO}, \f{Hello}, \f{hElLo}, and \f{hello} are all equivalent ways to denote a symbol whose name is \f{"HELLO"}.
 
-While //[[CL:Glossary:case]]// is significant in the process of //[[CL:Glossary:interning]]// a //[[CL:Glossary:symbol]]//,
-the //[[CL:Glossary:Lisp reader]]//, by default, attempts to canonicalize the case of a
-//[[CL:Glossary:symbol]]// prior to interning; \seesection\ReadtableCaseReadEffect.
-As such, case in //[[CL:Glossary:symbols]]// is not, by default, significant.
-Throughout this document, except as explicitly noted otherwise,
-the case in which a //[[CL:Glossary:symbol]]// appears is not significant; 
-that is, \f{HELLO}, \f{Hello}, \f{hElLo}, and \f{hello} are
-all equivalent ways to denote a symbol whose name is \f{"HELLO"}.
+The characters //[[CL:Glossary:backslash]]// and //[[CL:Glossary:vertical-bar]]// are used to explicitly quote the //[[CL:Glossary:case]]// and other parsing-related 
 
-The characters //[[CL:Glossary:backslash]]// and //[[CL:Glossary:vertical-bar]]// are used to explicitly
-quote the //[[CL:Glossary:case]]// and other parsing-related 
+aspects of characters.  As such, the notations \f{|hello|} and \f{\\h\\e\\l\\l\\o} are equivalent ways to refer to a symbol whose name is \f{"hello"}, and which is //[[CL:Glossary:distinct]]// from any symbol whose name is \f{"HELLO"}.
 
-
-aspects
-of characters.  As such,
-the notations \f{|hello|} and \f{\\h\\e\\l\\l\\o} are equivalent ways
-to refer to a symbol whose name is \f{"hello"}, and which is //[[CL:Glossary:distinct]]// from
-any symbol whose name is \f{"HELLO"}.
-
-The //[[CL:Glossary:symbols]]// that correspond to \clisp\ //[[CL:Glossary:defined names]]//
-have //[[CL:Glossary:uppercase]]// names even though their names generally appear
-in //[[CL:Glossary:lowercase]]// in this document.
+The //[[CL:Glossary:symbols]]// that correspond to \clisp\ //[[CL:Glossary:defined names]]// have //[[CL:Glossary:uppercase]]// names even though their names generally appear in //[[CL:Glossary:lowercase]]// in this document.
 
 \endsubsubsubsection%{Case in Symbols}
 
 \beginsubsubsubsection{Numbers}
 
-
-Although \clisp\ provides a variety of ways for programs to manipulate the
-input and output radix for rational numbers, all numbers in this document
-are in decimal notation unless explicitly noted otherwise.
+Although \clisp\ provides a variety of ways for programs to manipulate the input and output radix for rational numbers, all numbers in this document are in decimal notation unless explicitly noted otherwise.
 
 \endsubsubsubsection%{Numbers}
 
 \beginsubsubsubsection{Use of the Dot Character}
 
-
 The dot appearing by itself in an //[[CL:Glossary:expression]]// such as
 
 \f{(//item1// //item2// {\dot} //tail//)}
 
-means that //tail// represents a //[[CL:Glossary:list]]// of //[[CL:Glossary:objects]]// 
-at the end of a list.  For example,
+means that //tail// represents a //[[CL:Glossary:list]]// of //[[CL:Glossary:objects]]//  at the end of a list.  For example,
 
 \f{(A B C {\dot} (D E F))}
 
@@ -447,46 +276,22 @@ is notationally equivalent to:
 
 \f{(A B C D E F)}
 
-Although //[[CL:Glossary:dot]]// is a valid constituent character in a symbol, no 
-//[[CL:Glossary:standardized]]// //[[CL:Glossary:symbols]]// contain the character //[[CL:Glossary:dot]]//,
-so a period that follows a reference to a //[[CL:Glossary:symbol]]// at the end of
-a sentence in this document should always be interpreted as a period
-and never as part of the //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:name]]//.
-For example, within this document, a sentence such as
+Although //[[CL:Glossary:dot]]// is a valid constituent character in a symbol, no  //[[CL:Glossary:standardized]]// //[[CL:Glossary:symbols]]// contain the character //[[CL:Glossary:dot]]//, so a period that follows a reference to a //[[CL:Glossary:symbol]]// at the end of a sentence in this document should always be interpreted as a period and never as part of the //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:name]]//. For example, within this document, a sentence such as
  ``This sample sentence refers to the symbol **[[CL:Functions:car]]**.'' 
 
-
-
-
-refers to a symbol whose name is \f{"CAR"} (with three letters),
-and never to a four-letter symbol \f{"CAR."}
+refers to a symbol whose name is \f{"CAR"} (with three letters), and never to a four-letter symbol \f{"CAR."}
 
 \endsubsubsubsection%{Use of the Dot Character}
 
 \beginsubsubsubsection{NIL}\idxterm{nil}\idxterm{()}\idxref{nil}
 
-\nil\ has a variety of meanings.
-It is a //[[CL:Glossary:symbol]]// in \thepackage{common-lisp} with the //[[CL:Glossary:name]]// \f{"NIL"},
-it is //[[CL:Glossary:boolean]]// (and //[[CL:Glossary:generalized boolean]]//) //[[CL:Glossary:false]]//,
-it is the //[[CL:Glossary:empty list]]//,
-and it is the //[[CL:Glossary:name]]// of the //[[CL:Glossary:empty type]]// (a //[[CL:Glossary:subtype]]// of all //[[CL:Glossary:types]]//).
+\nil\ has a variety of meanings. It is a //[[CL:Glossary:symbol]]// in \thepackage{common-lisp} with the //[[CL:Glossary:name]]// \f{"NIL"}, it is //[[CL:Glossary:boolean]]// (and //[[CL:Glossary:generalized boolean]]//) //[[CL:Glossary:false]]//, it is the //[[CL:Glossary:empty list]]//, and it is the //[[CL:Glossary:name]]// of the //[[CL:Glossary:empty type]]// (a //[[CL:Glossary:subtype]]// of all //[[CL:Glossary:types]]//).
 
-Within \clisp, \nil\ can be notated interchangeably as either \f{NIL} or \f{()}.
-By convention, the choice of notation offers a hint as to which of its many
-roles it is playing.
+Within \clisp, \nil\ can be notated interchangeably as either \f{NIL} or \f{()}. By convention, the choice of notation offers a hint as to which of its many roles it is playing.
 
-\showthree{Notations for NIL}{
-\hfil\b{For Evaluation?}&\hfil\b{Notation}\hfil&\b{Typically Implied Role}\cr
-\noalign{\vskip 2pt\hrule\vskip 2pt}
-Yes&\f{nil}&use as a //[[CL:Glossary:boolean]]//.\cr
-Yes&\f{'nil}&use as a //[[CL:Glossary:symbol]]//.\cr
-Yes&\f{'()}&use as an //[[CL:Glossary:empty list]]//\cr
-No&\f{nil}&use as a //[[CL:Glossary:symbol]]// or //[[CL:Glossary:boolean]]//.\cr
-No&\f{()}&use as an //[[CL:Glossary:empty list]]//.\cr
-}
+\showthree{Notations for NIL}{ \hfil\b{For Evaluation?}&\hfil\b{Notation}\hfil&\b{Typically Implied Role}\cr \noalign{\vskip 2pt\hrule\vskip 2pt} Yes&\f{nil}&use as a //[[CL:Glossary:boolean]]//.\cr Yes&\f{'nil}&use as a //[[CL:Glossary:symbol]]//.\cr Yes&\f{'()}&use as an //[[CL:Glossary:empty list]]//\cr No&\f{nil}&use as a //[[CL:Glossary:symbol]]// or //[[CL:Glossary:boolean]]//.\cr No&\f{()}&use as an //[[CL:Glossary:empty list]]//.\cr }
 
-Within this document only, \nil\ is also sometimes notated as //[[CL:Glossary:false]]// to
-emphasize its role as a //[[CL:Glossary:boolean]]//.
+Within this document only, \nil\ is also sometimes notated as //[[CL:Glossary:false]]// to emphasize its role as a //[[CL:Glossary:boolean]]//.
 
 For example:
 
@@ -498,393 +303,176 @@ For example:
  (defun three () 3)                  ;Emphasize empty parameter list.
  (append '() '()) \EV ()              ;Emphasize use of empty lists
  (not nil) \EV //[[CL:Glossary:true]]//                   ;Emphasize use as Boolean false
- (get 'nil 'color)                   ;Emphasize use as a symbol
-\endcode
+ (get 'nil 'color)                   ;Emphasize use as a symbol \endcode
 
-A //[[CL:Glossary:function]]// is sometimes said to ``be //[[CL:Glossary:false]]//'' or ``be //[[CL:Glossary:true]]//''
-in some circumstance.
-Since no //[[CL:Glossary:function]]// object can be the same as \nil\ 
-and all //[[CL:Glossary:function]]// //[[CL:Glossary:objects]]// represent //[[CL:Glossary:true]]// when viewed as //[[CL:Glossary:booleans]]//,
-it would be meaningless to say that the //[[CL:Glossary:function]]// was literally //[[CL:Glossary:false]]// 
-and uninteresting to say that it was literally //[[CL:Glossary:true]]//.
-Instead, these phrases are just traditional alternative ways of saying that the
-//[[CL:Glossary:function]]// ``returns //[[CL:Glossary:false]]//'' or ``returns //[[CL:Glossary:true]]//,'' respectively.
+A //[[CL:Glossary:function]]// is sometimes said to ``be //[[CL:Glossary:false]]//'' or ``be //[[CL:Glossary:true]]//'' in some circumstance. Since no //[[CL:Glossary:function]]// object can be the same as \nil\  and all //[[CL:Glossary:function]]// //[[CL:Glossary:objects]]// represent //[[CL:Glossary:true]]// when viewed as //[[CL:Glossary:booleans]]//, it would be meaningless to say that the //[[CL:Glossary:function]]// was literally //[[CL:Glossary:false]]//  and uninteresting to say that it was literally //[[CL:Glossary:true]]//. Instead, these phrases are just traditional alternative ways of saying that the //[[CL:Glossary:function]]// ``returns //[[CL:Glossary:false]]//'' or ``returns //[[CL:Glossary:true]]//,'' respectively.
 
 \endsubsubsubsection%{NIL}
 
 \endsubsubsection%{Objects with Multiple Notations}
 
-
-\beginsubsubsection{Designators}
-\DefineSection{Designators}
+\beginsubsubsection{Designators} \DefineSection{Designators}
 
 A //[[CL:Glossary:designator]]// is an //[[CL:Glossary:object]]// that denotes another //[[CL:Glossary:object]]//.
 
+Where a //[[CL:Glossary:parameter]]// of an //[[CL:Glossary:operator]]// is described as a //[[CL:Glossary:designator]]//, the description of the //[[CL:Glossary:operator]]// is written in a way that assumes that the value of the //[[CL:Glossary:parameter]]// is the denoted //[[CL:Glossary:object]]//; that is, that the //[[CL:Glossary:parameter]]// is already of the denoted //[[CL:Glossary:type]]//. (The specific nature of the //[[CL:Glossary:object]]// denoted by
+   a ``\metavar{type} //[[CL:Glossary:designator]]//'' or a ``//[[CL:Glossary:designator]]// for a \metavar{type}''  can be found in the Glossary entry for ``\metavar{type} //[[CL:Glossary:designator]]//.'')
 
-Where a //[[CL:Glossary:parameter]]// of an //[[CL:Glossary:operator]]// is described as a //[[CL:Glossary:designator]]//,
-the description of the //[[CL:Glossary:operator]]// is written in a way that assumes that
-the value of the //[[CL:Glossary:parameter]]// is the denoted //[[CL:Glossary:object]]//;
-that is, that the //[[CL:Glossary:parameter]]// is already of the denoted //[[CL:Glossary:type]]//.
-(The specific nature of the //[[CL:Glossary:object]]// denoted by
-   a ``\metavar{type} //[[CL:Glossary:designator]]//''
-or a ``//[[CL:Glossary:designator]]// for a \metavar{type}'' 
-can be found in the Glossary entry for ``\metavar{type} //[[CL:Glossary:designator]]//.'')
+For example, ``\nil'' and ``\thevalueof{*standard-output*}'' are operationally indistinguishable as //[[CL:Glossary:stream designators]]//.  Similarly,  the //[[CL:Glossary:symbol]]// \f{foo} and the //[[CL:Glossary:string]]// \f{"FOO"}  are operationally indistinguishable as //[[CL:Glossary:string designators]]//.  
 
-For example, ``\nil'' and ``\thevalueof{*standard-output*}'' are operationally
-indistinguishable as //[[CL:Glossary:stream designators]]//.  Similarly, 
-the //[[CL:Glossary:symbol]]// \f{foo} and the //[[CL:Glossary:string]]// \f{"FOO"} 
-are operationally indistinguishable as //[[CL:Glossary:string designators]]//.  
+Except as otherwise noted, in a situation where the denoted //[[CL:Glossary:object]]//  might be used multiple times, it is //[[CL:Glossary:implementation-dependent]]// whether the //[[CL:Glossary:object]]// is coerced only once or whether the coercion occurs each time the //[[CL:Glossary:object]]// must be used.
 
-Except as otherwise noted, in a situation where the denoted //[[CL:Glossary:object]]// 
-might be used multiple times, it is //[[CL:Glossary:implementation-dependent]]//
-whether the //[[CL:Glossary:object]]// is coerced only once or whether the coercion occurs
-each time the //[[CL:Glossary:object]]// must be used.
-
-For example, **[[CL:Functions:mapcar]]** receives a //[[CL:Glossary:function designator]]// as an argument,
-and its description is written as if this were simply a function.  In fact, it
-is //[[CL:Glossary:implementation-dependent]]// whether the //[[CL:Glossary:function designator]]// is 
-coerced right away or whether it is carried around internally in the form that
-it was given as an //[[CL:Glossary:argument]]// and re-coerced each time it is needed.  In most
-cases, //[[CL:Glossary:conforming programs]]// cannot detect the distinction, but there are some 
-pathological situations (particularly those involving self-redefining or 
-mutually-redefining functions) which do conform and which can detect this difference.
-The following program is a //[[CL:Glossary:conforming program]]//, but might or might not have
-portably correct results, depending on whether its correctness depends on one or
-the other of the results:
+For example, **[[CL:Functions:mapcar]]** receives a //[[CL:Glossary:function designator]]// as an argument, and its description is written as if this were simply a function.  In fact, it is //[[CL:Glossary:implementation-dependent]]// whether the //[[CL:Glossary:function designator]]// is  coerced right away or whether it is carried around internally in the form that it was given as an //[[CL:Glossary:argument]]// and re-coerced each time it is needed.  In most cases, //[[CL:Glossary:conforming programs]]// cannot detect the distinction, but there are some  pathological situations (particularly those involving self-redefining or  mutually-redefining functions) which do conform and which can detect this difference. The following program is a //[[CL:Glossary:conforming program]]//, but might or might not have portably correct results, depending on whether its correctness depends on one or the other of the results:
 
 \code
  (defun add-some (x) 
    (defun add-some (x) (+ x 2))
    (+ x 1)) \EV ADD-SOME
- (mapcar 'add-some '(1 2 3 4))
-\EV (2 3 4 5)
-\OV (2 4 5 6)
-\endcode
+ (mapcar 'add-some '(1 2 3 4)) \EV (2 3 4 5) \OV (2 4 5 6) \endcode
 
-In a few rare situations, there may be a need in a dictionary entry
-to refer to the //[[CL:Glossary:object]]// that was the original //[[CL:Glossary:designator]]//
-for a //[[CL:Glossary:parameter]]//.
-Since naming the //[[CL:Glossary:parameter]]// would refer to the denoted //[[CL:Glossary:object]]//,
-the phrase ``the \metavar{parameter-name} //[[CL:Glossary:designator]]//'' 
-can be used to refer to the //[[CL:Glossary:designator]]// which was the //[[CL:Glossary:argument]]//
-from which the //[[CL:Glossary:value]]// of \metavar{parameter-name} was computed.
+In a few rare situations, there may be a need in a dictionary entry to refer to the //[[CL:Glossary:object]]// that was the original //[[CL:Glossary:designator]]// for a //[[CL:Glossary:parameter]]//. Since naming the //[[CL:Glossary:parameter]]// would refer to the denoted //[[CL:Glossary:object]]//, the phrase ``the \metavar{parameter-name} //[[CL:Glossary:designator]]//''  can be used to refer to the //[[CL:Glossary:designator]]// which was the //[[CL:Glossary:argument]]// from which the //[[CL:Glossary:value]]// of \metavar{parameter-name} was computed.
 
 \endsubsubsection%{Designators}
 
 \beginsubsubsection{Nonsense Words}\idxcode{foo}\idxcode{bar}\idxcode{baz}\idxcode{quux}
 
-When a word having no pre-attached semantics is required (\eg in an
-example), it is common in the Lisp community to use one of the words
-``foo,'' ``bar,'' ``baz,'' and ``quux.''  For example, in
+When a word having no pre-attached semantics is required (\eg in an example), it is common in the Lisp community to use one of the words ``foo,'' ``bar,'' ``baz,'' and ``quux.''  For example, in
 
 \code
- (defun foo (x) (+ x 1))
-\endcode
-the use of the name \f{foo} is just a shorthand way of saying 
-``please substitute your favorite name here.''
+ (defun foo (x) (+ x 1)) \endcode the use of the name \f{foo} is just a shorthand way of saying  ``please substitute your favorite name here.''
 
-These nonsense words have gained such prevalance of usage, that it is
-commonplace for newcomers to the community to begin to wonder if there
-is an attached semantics which they are overlooking---there is not.
+These nonsense words have gained such prevalance of usage, that it is commonplace for newcomers to the community to begin to wonder if there is an attached semantics which they are overlooking---there is not.
 
 \endsubsubsection%{Nonsense Words}
 
 \endsubSection%{Notational Conventions}
 
+\beginsubSection{Error Terminology}\idxtext{error terminology} \DefineSection{ErrorTerms}
 
+Situations in which errors might, should, or must be signaled are described in the standard.  The wording used to describe such situations is intended to have precise meaning. The following list is a glossary of those meanings.
 
+\beginlist \itemitem{\b{Safe code}}\idxterm{safe}
 
-\beginsubSection{Error Terminology}\idxtext{error terminology}
-\DefineSection{ErrorTerms}
-
-Situations in which errors might, should, or must be signaled are described
-in the standard.  The wording used to describe such situations is intended
-to have precise meaning. The following list is a glossary of those meanings.
-
-\beginlist
-\itemitem{\b{Safe code}}\idxterm{safe}
-
-This is //[[CL:Glossary:code]]// processed with the **[[CL:Declarations:safety]]** optimization 
-at its highest setting (\f{3}).  **[[CL:Declarations:safety]]** is a lexical property
-of code.  The phrase ``the function \f{F} should signal an error'' 
-means that if \f{F} is invoked from code processed with the highest
-**[[CL:Declarations:safety]]** optimization, an error is signaled.
-It is //[[CL:Glossary:implementation-dependent]]// whether \f{F} or the calling 
-code signals the error.
+This is //[[CL:Glossary:code]]// processed with the **[[CL:Declarations:safety]]** optimization  at its highest setting (\f{3}).  **[[CL:Declarations:safety]]** is a lexical property of code.  The phrase ``the function \f{F} should signal an error''  means that if \f{F} is invoked from code processed with the highest **[[CL:Declarations:safety]]** optimization, an error is signaled. It is //[[CL:Glossary:implementation-dependent]]// whether \f{F} or the calling  code signals the error.
 
 \itemitem{\b{Unsafe code}}\idxterm{unsafe}
 
-This is code processed with lower safety levels.
-		        
-Unsafe code might do error checking.  Implementations are permitted to
-treat all code as safe code all the time.
+This is code processed with lower safety levels. 		         Unsafe code might do error checking.  Implementations are permitted to treat all code as safe code all the time.
                         
 
+\itemitem{\b{An error is signaled}}% \idxterm{signal}\idxtext{is signaled}\idxtext{must signal}
 
-
-\itemitem{\b{An error is signaled}}%
-\idxterm{signal}\idxtext{is signaled}\idxtext{must signal}
-
-This means that an error is signaled in both safe and unsafe code.
-//[[CL:Glossary:Conforming code]]// may rely on the fact that the error is signaled
-in both safe and unsafe code.  Every implementation is required to
-detect the error in both safe and unsafe code. For example, ``an error
-is signaled if **[[CL:Functions:unexport]]** is given a //[[CL:Glossary:symbol]]//
-not //[[CL:Glossary:accessible]]// in the //[[CL:Glossary:current package]]//.''
+This means that an error is signaled in both safe and unsafe code. //[[CL:Glossary:Conforming code]]// may rely on the fact that the error is signaled in both safe and unsafe code.  Every implementation is required to detect the error in both safe and unsafe code. For example, ``an error is signaled if **[[CL:Functions:unexport]]** is given a //[[CL:Glossary:symbol]]// not //[[CL:Glossary:accessible]]// in the //[[CL:Glossary:current package]]//.''
 
 If an explicit error type is not specified, the default is \typeref{error}.
 
-\itemitem{\b{An error should be signaled}}%
-\idxterm{signal}\idxtext{should signal}
+\itemitem{\b{An error should be signaled}}% \idxterm{signal}\idxtext{should signal}
 
-This means that an error is signaled in safe code, and an error
-might be signaled in unsafe code.  //[[CL:Glossary:Conforming code]]// may rely on the
-fact that the error is signaled in safe code.  Every
-implementation is required to detect the error at least in safe code.
-When the error is not signaled, the ``consequences are undefined''
-(see below).  For example, ``**[[CL:Functions:+]]** should signal an error \oftype{type-error}
-if any argument is not \oftype{number}.''
+This means that an error is signaled in safe code, and an error might be signaled in unsafe code.  //[[CL:Glossary:Conforming code]]// may rely on the fact that the error is signaled in safe code.  Every implementation is required to detect the error at least in safe code. When the error is not signaled, the ``consequences are undefined'' (see below).  For example, ``**[[CL:Functions:+]]** should signal an error \oftype{type-error} if any argument is not \oftype{number}.''
 
-\itemitem{\b{Should be prepared to signal an error}}%
-\idxterm{signal}\idxtext{prepared to signal}
+\itemitem{\b{Should be prepared to signal an error}}% \idxterm{signal}\idxtext{prepared to signal}
 
-This is similar to ``should be signaled'' except that it does not
-imply that `extra effort' has to be taken on the part of an //[[CL:Glossary:operator]]//
-to discover an erroneous situation if the normal action of that //[[CL:Glossary:operator]]//
-can be performed successfully with only `lazy' checking.
-An //[[CL:Glossary:implementation]]// is always permitted to signal an error,
-but even in //[[CL:Glossary:safe]]// //[[CL:Glossary:code]]//, it is only required to signal the error
-when failing to signal it might lead to incorrect results.
-In //[[CL:Glossary:unsafe]]// //[[CL:Glossary:code]]//, the consequences are undefined.
+This is similar to ``should be signaled'' except that it does not imply that `extra effort' has to be taken on the part of an //[[CL:Glossary:operator]]// to discover an erroneous situation if the normal action of that //[[CL:Glossary:operator]]// can be performed successfully with only `lazy' checking. An //[[CL:Glossary:implementation]]// is always permitted to signal an error, but even in //[[CL:Glossary:safe]]// //[[CL:Glossary:code]]//, it is only required to signal the error when failing to signal it might lead to incorrect results. In //[[CL:Glossary:unsafe]]// //[[CL:Glossary:code]]//, the consequences are undefined.
 
 For example, defining that 
  ``**[[CL:Functions:find]]** should be prepared to signal an error \oftype{type-error}
-   if its second //[[CL:Glossary:argument]]// is not a //[[CL:Glossary:proper list]]//''
-does not imply that an error is always signaled.  The //[[CL:Glossary:form]]//
+   if its second //[[CL:Glossary:argument]]// is not a //[[CL:Glossary:proper list]]//'' does not imply that an error is always signaled.  The //[[CL:Glossary:form]]//
 
 \code
- (find 'a '(a b . c))
-\endcode
+ (find 'a '(a b . c)) \endcode
 
-must either signal an error \oftype{type-error} in //[[CL:Glossary:safe]]// //[[CL:Glossary:code]]//,
-else return \f{A}.
-In //[[CL:Glossary:unsafe]]// //[[CL:Glossary:code]]//, the consequences are undefined.
-By contrast,
+must either signal an error \oftype{type-error} in //[[CL:Glossary:safe]]// //[[CL:Glossary:code]]//, else return \f{A}. In //[[CL:Glossary:unsafe]]// //[[CL:Glossary:code]]//, the consequences are undefined. By contrast,
 
 \code
- (find 'd '(a b . c))
-\endcode
+ (find 'd '(a b . c)) \endcode
 
-must signal an error \oftype{type-error} in //[[CL:Glossary:safe]]// //[[CL:Glossary:code]]//.
-In //[[CL:Glossary:unsafe]]// //[[CL:Glossary:code]]//, the consequences are undefined.
-Also,
+must signal an error \oftype{type-error} in //[[CL:Glossary:safe]]// //[[CL:Glossary:code]]//. In //[[CL:Glossary:unsafe]]// //[[CL:Glossary:code]]//, the consequences are undefined. Also,
 
 \code
- (find 'd '#1=(a b . #1#))
-\endcode
+ (find 'd '#1=(a b . #1#)) \endcode
 
 in //[[CL:Glossary:safe code]]//
    might return \nil\ (as an //[[CL:Glossary:implementation-defined]]// extension),
-   might never return,
-or might signal an error \oftype{type-error}.
-In //[[CL:Glossary:unsafe]]// //[[CL:Glossary:code]]//, the consequences are undefined.
+   might never return, or might signal an error \oftype{type-error}. In //[[CL:Glossary:unsafe]]// //[[CL:Glossary:code]]//, the consequences are undefined.
 
-Typically, the ``should be prepared to signal'' terminology is used in
-type checking situations where there are efficiency considerations that
-make it impractical to detect errors that are not relevant to the
-correct operation of the //[[CL:Glossary:operator]]//.
+Typically, the ``should be prepared to signal'' terminology is used in type checking situations where there are efficiency considerations that make it impractical to detect errors that are not relevant to the correct operation of the //[[CL:Glossary:operator]]//.
 
-\itemitem{\b{The consequences are unspecified}}%
-\idxtext{consequences}\idxtext{unspecified consequences}
+\itemitem{\b{The consequences are unspecified}}% \idxtext{consequences}\idxtext{unspecified consequences}
 
-This means that the consequences are unpredictable but harmless.
-Implementations are permitted to specify the consequences of this
-situation. No //[[CL:Glossary:conforming code]]// may depend on the results or effects of
-this situation, and all //[[CL:Glossary:conforming code]]// is required to treat the
-results and effects of this situation as unpredictable but harmless.
-For example, ``if the second argument to **[[CL:Functions:shared-initialize]]**
-specifies a name that does not correspond to any //[[CL:Glossary:slots]]//
-//[[CL:Glossary:accessible]]// in the //[[CL:Glossary:object]]//, the results are unspecified.''
+This means that the consequences are unpredictable but harmless. Implementations are permitted to specify the consequences of this situation. No //[[CL:Glossary:conforming code]]// may depend on the results or effects of this situation, and all //[[CL:Glossary:conforming code]]// is required to treat the results and effects of this situation as unpredictable but harmless. For example, ``if the second argument to **[[CL:Functions:shared-initialize]]** specifies a name that does not correspond to any //[[CL:Glossary:slots]]// //[[CL:Glossary:accessible]]// in the //[[CL:Glossary:object]]//, the results are unspecified.''
 
+\itemitem{\b{The consequences are undefined}}% \idxtext{consequences}\idxtext{undefined consequences}
 
-\itemitem{\b{The consequences are undefined}}%
-\idxtext{consequences}\idxtext{undefined consequences}
+This means that the consequences are unpredictable. The consequences may range from harmless to fatal.  No //[[CL:Glossary:conforming code]]// may depend on the results or effects. //[[CL:Glossary:Conforming code]]// must treat the consequences as unpredictable.  In places where the words ``must,'' ``must not,'' or ``may not'' are used, then ``the consequences are undefined'' if the stated requirement is not met and no specific consequence is explicitly stated.  An implementation is permitted to signal an error in this case.
 
-This means that the consequences are unpredictable. The consequences
-may range from harmless to fatal.  No //[[CL:Glossary:conforming code]]// may depend on
-the results or effects. //[[CL:Glossary:Conforming code]]// must treat the consequences as
-unpredictable.  In places where the words ``must,'' ``must not,'' or
-``may not'' are used, then ``the consequences are undefined'' if the
-stated requirement is not met and no specific consequence is
-explicitly stated.  An implementation is permitted to signal an error
-in this case.
+For example: ``Once a name has been declared by \macref{defconstant} to be constant, any further assignment or binding of that variable has undefined consequences.''
+                                                \itemitem{\b{An error might be signaled}}% \idxterm{signal}\idxtext{might signal}
 
-For example: ``Once a name has been declared by \macref{defconstant}
-to be constant, any further assignment or binding of that
-variable has undefined consequences.''
-                                               
-\itemitem{\b{An error might be signaled}}%
-\idxterm{signal}\idxtext{might signal}
+This means that the situation has undefined consequences; however, if an error is signaled, it is of the specified //[[CL:Glossary:type]]//. For example, ``**[[CL:Functions:open]]** might signal an error \oftype{file-error}.''
+                            \itemitem{\b{The return values are unspecified}}% \idxtext{unspecified values}
 
-This means that the situation has undefined consequences;
-however, if an error is signaled, it is of the specified //[[CL:Glossary:type]]//.
-For example, ``**[[CL:Functions:open]]** might signal an error \oftype{file-error}.''
-                           
-\itemitem{\b{The return values are unspecified}}%
-\idxtext{unspecified values}
+This means that only the number and nature of the return values of a //[[CL:Glossary:form]]// are not specified.  However, the issue of whether or not any side-effects or transfer of control occurs is still well-specified.
 
-This means that only the number and nature of the return values of a
-//[[CL:Glossary:form]]// are not specified.  However, the issue of whether or not
-any side-effects or transfer of control occurs is still well-specified.
+A program can be well-specified even if it uses a function whose returns values are unspecified.  For example, even if the return values of some function \f{F} are unspecified, an expression such as \f{(length (list (F)))} is still well-specified because it does not rely on any particular aspect of the value or values returned by \f{F}.
 
-A program can be well-specified even if it uses a function whose
-returns values are unspecified.  For example, even if the return
-values of some function \f{F} are unspecified, an expression such as
-\f{(length (list (F)))} is still well-specified because it does not
-rely on any particular aspect of the value or values returned by \f{F}.
+\itemitem{\b{Implementations may be extended to cover this situation}}% \idxtext{extensions}
 
-\itemitem{\b{Implementations may be extended to cover this situation}}%
-\idxtext{extensions}
-
-This means that the //[[CL:Glossary:situation]]// has undefined consequences;
-however, a //[[CL:Glossary:conforming implementation]]// is free to treat
-the situation in a more specific way.  
-For example, an //[[CL:Glossary:implementation]]// might define 
+This means that the //[[CL:Glossary:situation]]// has undefined consequences; however, a //[[CL:Glossary:conforming implementation]]// is free to treat the situation in a more specific way.   For example, an //[[CL:Glossary:implementation]]// might define 
     that      an error is signaled,
  or that      an error should be signaled,
  or even that a certain well-defined non-error behavior occurs.
 
+No //[[CL:Glossary:conforming code]]// may depend on the consequences of such a //[[CL:Glossary:situation]]//; all //[[CL:Glossary:conforming code]]// must treat the consequences of the situation as undefined. //[[CL:Glossary:Implementations]]// are required to document how the situation is treated.
 
-No //[[CL:Glossary:conforming code]]// may depend on the consequences of such a //[[CL:Glossary:situation]]//;
-all //[[CL:Glossary:conforming code]]// must treat the consequences of the situation
-as undefined. //[[CL:Glossary:Implementations]]// are required to document how the
-situation is treated.
+For example, ``implementations may be extended to define other type specifiers to have a corresponding //[[CL:Glossary:class]]//.''
 
-For example, ``implementations may be extended to define other type
-specifiers to have a corresponding //[[CL:Glossary:class]]//.''
+\itemitem{\b{Implementations are free to extend the syntax}}% \idxtext{extensions}
 
-\itemitem{\b{Implementations are free to extend the syntax}}%
-\idxtext{extensions}
-
-This means that in this situation implementations are permitted to
-define unambiguous extensions to the syntax of the //[[CL:Glossary:form]]// being
-described.  No //[[CL:Glossary:conforming code]]// may depend on this extension.
-Implementations are required to document each such extension. All
-//[[CL:Glossary:conforming code]]// is required to treat the syntax as meaningless. The
-standard might disallow certain extensions while allowing others. For
-example, ``no implementation is free to extend the syntax of
-\macref{defclass}.''
-                          
-\issue{ERROR-TERMINOLOGY-WARNING:MIGHT}
-\itemitem{\b{A warning might be issued}}%
-\idxtext{warning}
-         
-This means that //[[CL:Glossary:implementations]]// are encouraged to issue a warning
-if the context is appropriate (\eg when compiling).  However, a
-//[[CL:Glossary:conforming implementation]]// is not required to issue a warning.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+This means that in this situation implementations are permitted to define unambiguous extensions to the syntax of the //[[CL:Glossary:form]]// being described.  No //[[CL:Glossary:conforming code]]// may depend on this extension. Implementations are required to document each such extension. All //[[CL:Glossary:conforming code]]// is required to treat the syntax as meaningless. The standard might disallow certain extensions while allowing others. For example, ``no implementation is free to extend the syntax of \macref{defclass}.''
+                           \issue{ERROR-TERMINOLOGY-WARNING:MIGHT} \itemitem{\b{A warning might be issued}}% \idxtext{warning}
+          This means that //[[CL:Glossary:implementations]]// are encouraged to issue a warning if the context is appropriate (\eg when compiling).  However, a //[[CL:Glossary:conforming implementation]]// is not required to issue a warning.
 
 \endlist
 
 \endsubSection%{Error Terminology}
 
-\beginsubsection{Sections Not Formally Part Of This Standard}
-\DefineSection{RemovableText}
+\beginsubsection{Sections Not Formally Part Of This Standard} \DefineSection{RemovableText}
 
+Front matter and back matter, such as the ``Table of Contents,''  ``Index,'' ``Figures,'' ``Credits,'' and ``Appendix'' are not considered formally  part of this standard, so that we retain the flexibility needed to update these sections even at the last minute without fear of needing a formal  vote to change those parts of the document.  These items are quite short  and very useful, however, and it is not recommended that they be removed  even in an abridged version of this document.
 
+Within the concept sections, subsections whose names begin with  the words ``Note'' or ``Notes'' or ``Example'' or ``Examples''  are provided for illustration purposes only, and are not considered part of the standard.
 
+An attempt has been made to place these sections last in their parent section, so that they could be removed without disturbing the contiguous numbering of the  surrounding sections in order to produce a document of smaller size.
 
-Front matter and back matter, such as the ``Table of Contents,'' 
-``Index,'' ``Figures,'' ``Credits,'' and ``Appendix'' are not considered formally 
-part of this standard, so that we retain the flexibility needed to update
-these sections even at the last minute without fear of needing a formal 
-vote to change those parts of the document.  These items are quite short 
-and very useful, however, and it is not recommended that they be removed 
-even in an abridged version of this document.
+Likewise, the ``Examples'' and ``Notes'' sections in a dictionary entry are not considered part of the standard and could be removed if necessary.
 
-Within the concept sections, subsections whose names begin with 
-the words ``Note'' or ``Notes'' or ``Example'' or ``Examples'' 
-are provided for illustration purposes only, and are not considered
-part of the standard.
-
-An attempt has been made to place these sections last in their parent section,
-so that they could be removed without disturbing the contiguous numbering of the 
-surrounding sections in order to produce a document of smaller size.
-
-Likewise, the ``Examples'' and ``Notes'' sections in a dictionary entry
-are not considered part of the standard and could be removed if necessary.
-
-Nevertheless, the examples provide important clarifications and consistency 
-checks for the rest of the material, and such abridging is not recommended
-unless absolutely unavoidable.
+Nevertheless, the examples provide important clarifications and consistency  checks for the rest of the material, and such abridging is not recommended unless absolutely unavoidable.
 
 \endsubsection%{Sections Not Formally Part Of This Standard}
 
-\beginsubSection{Interpreting Dictionary Entries}
-\DefineSection{InterpretingDictionaryEntries}
+\beginsubSection{Interpreting Dictionary Entries} \DefineSection{InterpretingDictionaryEntries}
 
-The dictionary entry for each //[[CL:Glossary:defined name]]// is partitioned into
-sections.  Except as explicitly indicated otherwise below, each section
-is introduced by a label identifying that section.  The omission of a
-section implies that the section is either not applicable, or would
-provide no interesting information.
+The dictionary entry for each //[[CL:Glossary:defined name]]// is partitioned into sections.  Except as explicitly indicated otherwise below, each section is introduced by a label identifying that section.  The omission of a section implies that the section is either not applicable, or would provide no interesting information.
 
-This section defines the significance of each potential section in a
-dictionary entry.
+This section defines the significance of each potential section in a dictionary entry.
 
 \beginsubsubsection{The ``Affected By'' Section of a Dictionary Entry}
 
-For an //[[CL:Glossary:operator]]//, anything that can affect the side effects of
-or //[[CL:Glossary:values]]// returned by the //[[CL:Glossary:operator]]//.
+For an //[[CL:Glossary:operator]]//, anything that can affect the side effects of or //[[CL:Glossary:values]]// returned by the //[[CL:Glossary:operator]]//.
 
-For a //[[CL:Glossary:variable]]//, anything that can affect the //[[CL:Glossary:value]]// of the //[[CL:Glossary:variable]]//
-including //[[CL:Glossary:functions]]// that bind or assign it.
+For a //[[CL:Glossary:variable]]//, anything that can affect the //[[CL:Glossary:value]]// of the //[[CL:Glossary:variable]]// including //[[CL:Glossary:functions]]// that bind or assign it.
 
 \endsubsubsection%{The ``Affected By'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Arguments'' Section of a Dictionary Entry}
 
-This information describes the syntax information of entries such as those for
-//[[CL:Glossary:declarations]]// and special //[[CL:Glossary:expressions]]// which are never //[[CL:Glossary:evaluated]]//
-as //[[CL:Glossary:forms]]//, and so do not return //[[CL:Glossary:values]]//.
+This information describes the syntax information of entries such as those for //[[CL:Glossary:declarations]]// and special //[[CL:Glossary:expressions]]// which are never //[[CL:Glossary:evaluated]]// as //[[CL:Glossary:forms]]//, and so do not return //[[CL:Glossary:values]]//.
 
 \endsubsubsection%{The ``Arguments'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Arguments and Values'' Section of a Dictionary Entry}
 
-An English language description of what //[[CL:Glossary:arguments]]// the //[[CL:Glossary:operator]]// accepts
-and what //[[CL:Glossary:values]]// it returns, including information about defaults for //[[CL:Glossary:parameters]]//
-corresponding to omittable //[[CL:Glossary:arguments]]//
-(such as //[[CL:Glossary:optional parameters]]// and //[[CL:Glossary:keyword parameters]]//).
-For //[[CL:Glossary:special operators]]// and //[[CL:Glossary:macros]]//,
-their //[[CL:Glossary:arguments]]// are not //[[CL:Glossary:evaluated]]// unless it is explicitly stated in their
-descriptions that they are //[[CL:Glossary:evaluated]]//.
-
-
-
+An English language description of what //[[CL:Glossary:arguments]]// the //[[CL:Glossary:operator]]// accepts and what //[[CL:Glossary:values]]// it returns, including information about defaults for //[[CL:Glossary:parameters]]// corresponding to omittable //[[CL:Glossary:arguments]]// (such as //[[CL:Glossary:optional parameters]]// and //[[CL:Glossary:keyword parameters]]//). For //[[CL:Glossary:special operators]]// and //[[CL:Glossary:macros]]//, their //[[CL:Glossary:arguments]]// are not //[[CL:Glossary:evaluated]]// unless it is explicitly stated in their descriptions that they are //[[CL:Glossary:evaluated]]//.
 
 Except as explicitly specified otherwise,
 
@@ -894,103 +482,65 @@ the consequences are undefined if these type restrictions are violated.
 
 \beginsubsubsection{The ``Binding Types Affected'' Section of a Dictionary Entry}
 
-This information alerts the reader to the kinds of //[[CL:Glossary:bindings]]// that might 
-potentially be affected by a declaration.  Whether in fact any particular such
-//[[CL:Glossary:binding]]// is actually affected is dependent on additional factors as well.
-See the ``Description'' section of the declaration in question for details.
+This information alerts the reader to the kinds of //[[CL:Glossary:bindings]]// that might  potentially be affected by a declaration.  Whether in fact any particular such //[[CL:Glossary:binding]]// is actually affected is dependent on additional factors as well. See the ``Description'' section of the declaration in question for details.
 
 \endsubsubsection%{The ``Binding Types Affected'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Class Precedence List'' Section of a Dictionary Entry}
 
-This appears in the dictionary entry for a //[[CL:Glossary:class]]//,
-and contains an ordered list of the //[[CL:Glossary:classes]]// defined 
-by \clisp\ that must be in the //[[CL:Glossary:class precedence list]]// of this //[[CL:Glossary:class]]//.
+This appears in the dictionary entry for a //[[CL:Glossary:class]]//, and contains an ordered list of the //[[CL:Glossary:classes]]// defined  by \clisp\ that must be in the //[[CL:Glossary:class precedence list]]// of this //[[CL:Glossary:class]]//.
 
-It is permissible for other (//[[CL:Glossary:implementation-defined]]//) //[[CL:Glossary:classes]]//
-to appear in the //[[CL:Glossary:implementation]]//'s //[[CL:Glossary:class precedence list]]// for the //[[CL:Glossary:class]]//.
+It is permissible for other (//[[CL:Glossary:implementation-defined]]//) //[[CL:Glossary:classes]]// to appear in the //[[CL:Glossary:implementation]]//'s //[[CL:Glossary:class precedence list]]// for the //[[CL:Glossary:class]]//.
 
 It is permissible for 
   either \typeref{standard-object}
-      or \typeref{structure-object}
-to appear in the //[[CL:Glossary:implementation]]//'s //[[CL:Glossary:class precedence list]]//;
-for details, \seesection\TypeRelationships.
+      or \typeref{structure-object} to appear in the //[[CL:Glossary:implementation]]//'s //[[CL:Glossary:class precedence list]]//; for details, \seesection\TypeRelationships.
 
-Except as explicitly indicated otherwise somewhere in this specification,
-no additional //[[CL:Glossary:standardized]]// //[[CL:Glossary:classes]]// may appear in 
-the //[[CL:Glossary:implementation]]//'s //[[CL:Glossary:class precedence list]]//.
+Except as explicitly indicated otherwise somewhere in this specification, no additional //[[CL:Glossary:standardized]]// //[[CL:Glossary:classes]]// may appear in  the //[[CL:Glossary:implementation]]//'s //[[CL:Glossary:class precedence list]]//.
 
-By definition of the relationship between //[[CL:Glossary:classes]]// and //[[CL:Glossary:types]]//,
-the //[[CL:Glossary:classes]]// listed in this section are also //[[CL:Glossary:supertypes]]// of 
-the //[[CL:Glossary:type]]// denoted by the //[[CL:Glossary:class]]//.
+By definition of the relationship between //[[CL:Glossary:classes]]// and //[[CL:Glossary:types]]//, the //[[CL:Glossary:classes]]// listed in this section are also //[[CL:Glossary:supertypes]]// of  the //[[CL:Glossary:type]]// denoted by the //[[CL:Glossary:class]]//.
 
 \endsubsubsection%{The ``Class Precedence List'' Section of a Dictionary Entry}
 
-\beginsubsubsection{Dictionary Entries for Type Specifiers}
-\DefineSection{TypeSpecEntries}
+\beginsubsubsection{Dictionary Entries for Type Specifiers} \DefineSection{TypeSpecEntries}
 
-The //[[CL:Glossary:atomic type specifiers]]// are those //[[CL:Glossary:defined names]]// 
-listed in \figref\StandardizedAtomicTypeSpecs.
-Such dictionary entries are of kind 
-``Class,'' ``Condition Type,'' ``System Class,'' or ``Type.''
-A description of how to interpret 
-a //[[CL:Glossary:symbol]]// naming one of these //[[CL:Glossary:types]]// or //[[CL:Glossary:classes]]// 
-as an //[[CL:Glossary:atomic type specifier]]//
-is found in the ``Description'' section of such dictionary entries.
+The //[[CL:Glossary:atomic type specifiers]]// are those //[[CL:Glossary:defined names]]//  listed in \figref\StandardizedAtomicTypeSpecs. Such dictionary entries are of kind  ``Class,'' ``Condition Type,'' ``System Class,'' or ``Type.'' A description of how to interpret  a //[[CL:Glossary:symbol]]// naming one of these //[[CL:Glossary:types]]// or //[[CL:Glossary:classes]]//  as an //[[CL:Glossary:atomic type specifier]]// is found in the ``Description'' section of such dictionary entries.
 
-The //[[CL:Glossary:compound type specifiers]]// are those //[[CL:Glossary:defined names]]// 
-listed in \figref\StandardizedCompoundTypeSpecNames.
-Such dictionary entries are of kind ``Class,'' ``System Class,''
-``Type,'' or ``Type Specifier.''
-A description of how to interpret as a //[[CL:Glossary:compound type specifier]]//
-a //[[CL:Glossary:list]]// whose //[[CL:Glossary:car]]// is such a //[[CL:Glossary:symbol]]//
-is found in the 
+The //[[CL:Glossary:compound type specifiers]]// are those //[[CL:Glossary:defined names]]//  listed in \figref\StandardizedCompoundTypeSpecNames. Such dictionary entries are of kind ``Class,'' ``System Class,'' ``Type,'' or ``Type Specifier.'' A description of how to interpret as a //[[CL:Glossary:compound type specifier]]// a //[[CL:Glossary:list]]// whose //[[CL:Glossary:car]]// is such a //[[CL:Glossary:symbol]]// is found in the 
      ``Compound Type Specifier Kind,''
      ``Compound Type Specifier Syntax,''
      ``Compound Type Specifier Arguments,''
- and ``Compound Type Specifier Description''
-sections of such dictionary entries.
+ and ``Compound Type Specifier Description'' sections of such dictionary entries.
 
 \beginsubsubsubsection{The ``Compound Type Specifier Kind'' Section of a Dictionary Entry}
 
-An ``abbreviating'' //[[CL:Glossary:type specifier]]// is one that describes a //[[CL:Glossary:subtype]]//
-for which it is in principle possible to enumerate the //[[CL:Glossary:elements]]//,
-but for which in practice it is impractical to do so.
+An ``abbreviating'' //[[CL:Glossary:type specifier]]// is one that describes a //[[CL:Glossary:subtype]]// for which it is in principle possible to enumerate the //[[CL:Glossary:elements]]//, but for which in practice it is impractical to do so.
 
-A ``specializing'' //[[CL:Glossary:type specifier]]// is one that describes a //[[CL:Glossary:subtype]]//
-by restricting the //[[CL:Glossary:type]]// of one or more components of the //[[CL:Glossary:type]]//,
-such as //[[CL:Glossary:element type]]// or //[[CL:Glossary:complex part type]]//.
+A ``specializing'' //[[CL:Glossary:type specifier]]// is one that describes a //[[CL:Glossary:subtype]]// by restricting the //[[CL:Glossary:type]]// of one or more components of the //[[CL:Glossary:type]]//, such as //[[CL:Glossary:element type]]// or //[[CL:Glossary:complex part type]]//.
 
-A ``predicating'' //[[CL:Glossary:type specifier]]// is one that describes a //[[CL:Glossary:subtype]]//
-containing only those //[[CL:Glossary:objects]]// that satisfy a given //[[CL:Glossary:predicate]]//.
+A ``predicating'' //[[CL:Glossary:type specifier]]// is one that describes a //[[CL:Glossary:subtype]]// containing only those //[[CL:Glossary:objects]]// that satisfy a given //[[CL:Glossary:predicate]]//.
 
-A ``combining'' //[[CL:Glossary:type specifier]]// is one that describes a //[[CL:Glossary:subtype]]//
-in a compositional way, using combining operations (such as ``and,'' ``or,'' and
-``not'') on other //[[CL:Glossary:types]]//.
+A ``combining'' //[[CL:Glossary:type specifier]]// is one that describes a //[[CL:Glossary:subtype]]// in a compositional way, using combining operations (such as ``and,'' ``or,'' and ``not'') on other //[[CL:Glossary:types]]//.
 
 \endsubsubsubsection%{The ``Compound Type Specifier Kind'' Section of a Dictionary Entry}
 
 \beginsubsubsubsection{The ``Compound Type Specifier Syntax'' Section of a Dictionary Entry}
 
-This information about a //[[CL:Glossary:type]]// describes the syntax of a 
-//[[CL:Glossary:compound type specifier]]// for that //[[CL:Glossary:type]]//.
+This information about a //[[CL:Glossary:type]]// describes the syntax of a  //[[CL:Glossary:compound type specifier]]// for that //[[CL:Glossary:type]]//.
 
-Whether or not the //[[CL:Glossary:type]]// is acceptable as an //[[CL:Glossary:atomic type specifier]]//
-is not represented here; \seesection\TypeSpecEntries.
+Whether or not the //[[CL:Glossary:type]]// is acceptable as an //[[CL:Glossary:atomic type specifier]]// is not represented here; \seesection\TypeSpecEntries.
 
 \endsubsubsubsection%{The ``Compound Type Specifier Syntax'' Section of a Dictionary Entry}
 
 \beginsubsubsubsection{The ``Compound Type Specifier Arguments'' Section of a Dictionary Entry}
 
-This information describes //[[CL:Glossary:type]]// information for the structures defined in
-the ``Compound Type Specifier Syntax'' section.
+This information describes //[[CL:Glossary:type]]// information for the structures defined in the ``Compound Type Specifier Syntax'' section.
 
 \endsubsubsubsection%{The ``Compound Type Specifier Arguments'' Section of a Dictionary Entry}
 
 \beginsubsubsubsection{The ``Compound Type Specifier Description'' Section of a Dictionary Entry}
 
-This information describes the meaning of the structures defined in
-the ``Compound Type Specifier Syntax'' section.
+This information describes the meaning of the structures defined in the ``Compound Type Specifier Syntax'' section.
 
 \endsubsubsubsection%{The ``Compound Type Specifier Description'' Section of a Dictionary Entry}
 
@@ -998,107 +548,62 @@ the ``Compound Type Specifier Syntax'' section.
 
 \beginsubsubsection{The ``Constant Value'' Section of a Dictionary Entry}
 
-This information describes the unchanging //[[CL:Glossary:type]]// and //[[CL:Glossary:value]]// of 
-a //[[CL:Glossary:constant variable]]//.
+This information describes the unchanging //[[CL:Glossary:type]]// and //[[CL:Glossary:value]]// of  a //[[CL:Glossary:constant variable]]//.
 
 \endsubsubsection%{The ``Constant Value'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Description'' Section of a Dictionary Entry}
 
-A summary of the //[[CL:Glossary:operator]]// and all intended aspects of the //[[CL:Glossary:operator]]//, 
-but does not necessarily include all the fields referenced below it 
-(``Side Effects,'' ``Exceptional Situations,'' \etc.)
+A summary of the //[[CL:Glossary:operator]]// and all intended aspects of the //[[CL:Glossary:operator]]//,  but does not necessarily include all the fields referenced below it  (``Side Effects,'' ``Exceptional Situations,'' \etc.)
 
 \endsubsubsection%{The ``Description'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Examples'' Section of a Dictionary Entry}
 
-Examples of use of the //[[CL:Glossary:operator]]//.
-These examples are not considered part of the standard;
-\seesection\RemovableText.
+Examples of use of the //[[CL:Glossary:operator]]//. These examples are not considered part of the standard; \seesection\RemovableText.
 
 \endsubsubsection%{The ``Examples'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Exceptional Situations'' Section of a Dictionary Entry}
 
-  Three kinds of information may appear here:
-\beginlist
-\item{\bull}
-Situations that are detected by the //[[CL:Glossary:function]]// and formally signaled.
-\item{\bull}
-Situations that are handled by the //[[CL:Glossary:function]]//.
-\item{\bull}
-Situations that may be detected by the //[[CL:Glossary:function]]//.
-\endlist
-This field does not include conditions that could
-be signaled by //[[CL:Glossary:functions]]// passed to and called by this //[[CL:Glossary:operator]]//
-as arguments or through dynamic variables, nor by executing subforms of this
-operator if it is a //[[CL:Glossary:macro]]// or //[[CL:Glossary:special operator]]//.
+  Three kinds of information may appear here: \beginlist \item{\bull} Situations that are detected by the //[[CL:Glossary:function]]// and formally signaled. \item{\bull} Situations that are handled by the //[[CL:Glossary:function]]//. \item{\bull} Situations that may be detected by the //[[CL:Glossary:function]]//. \endlist This field does not include conditions that could be signaled by //[[CL:Glossary:functions]]// passed to and called by this //[[CL:Glossary:operator]]// as arguments or through dynamic variables, nor by executing subforms of this operator if it is a //[[CL:Glossary:macro]]// or //[[CL:Glossary:special operator]]//.
 
 \endsubsubsection%{The ``Exceptional Situations'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Initial Value'' Section of a Dictionary Entry}
 
-This information describes the initial //[[CL:Glossary:value]]// of a //[[CL:Glossary:dynamic variable]]//.
-Since this variable might change, see //[[CL:Glossary:type]]// restrictions in the ``Value Type'' section.
+This information describes the initial //[[CL:Glossary:value]]// of a //[[CL:Glossary:dynamic variable]]//. Since this variable might change, see //[[CL:Glossary:type]]// restrictions in the ``Value Type'' section.
 
 \endsubsubsection%{The ``Initial Value'' Section of a Dictionary Entry}
 
-\issue{DOCUMENTATION-FUNCTION-TANGLED:REQUIRE-ARGUMENT}
-\beginsubsubsection{The ``Argument Precedence Order'' Section of a Dictionary Entry}
+\issue{DOCUMENTATION-FUNCTION-TANGLED:REQUIRE-ARGUMENT} \beginsubsubsection{The ``Argument Precedence Order'' Section of a Dictionary Entry}
 
-
-
-This information describes the //[[CL:Glossary:argument precedence order]]//.
-If it is omitted, the //[[CL:Glossary:argument precedence order]]// is the default (left to right).
+This information describes the //[[CL:Glossary:argument precedence order]]//. If it is omitted, the //[[CL:Glossary:argument precedence order]]// is the default (left to right).
 
 \endsubsubsection%{The ``Argument Precedence Order'' Section of a Dictionary Entry}
 
-
 \beginsubsubsection{The ``Method Signature'' Section of a Dictionary Entry}
 
-The description of a //[[CL:Glossary:generic function]]// includes descriptions of the
-//[[CL:Glossary:methods]]// that are defined on that //[[CL:Glossary:generic function]]// by the standard.  
-A method signature is used to describe the //[[CL:Glossary:parameters]]// and 
-//[[CL:Glossary:parameter specializers]]// for each //[[CL:Glossary:method]]//. 
-//[[CL:Glossary:Methods]]// defined for the //[[CL:Glossary:generic function]]// must be of the form described
-by the //[[CL:Glossary:method]]// //[[CL:Glossary:signature]]//. 
+The description of a //[[CL:Glossary:generic function]]// includes descriptions of the //[[CL:Glossary:methods]]// that are defined on that //[[CL:Glossary:generic function]]// by the standard.   A method signature is used to describe the //[[CL:Glossary:parameters]]// and  //[[CL:Glossary:parameter specializers]]// for each //[[CL:Glossary:method]]//.  //[[CL:Glossary:Methods]]// defined for the //[[CL:Glossary:generic function]]// must be of the form described by the //[[CL:Glossary:method]]// //[[CL:Glossary:signature]]//. 
 
-\Defmeth {F} {\paren{//x// //class//}
-	      \paren{//y// t}
-	      {\opt} //z// {\key} //k//}
+\Defmeth {F} {\paren{//x// //class//} 	      \paren{//y// t} 	      {\opt} //z// {\key} //k//}
 
-\noindent This //[[CL:Glossary:signature]]// indicates that this method on the //[[CL:Glossary:generic function]]//
-\b{F} has two //[[CL:Glossary:required parameters]]//:
+\noindent This //[[CL:Glossary:signature]]// indicates that this method on the //[[CL:Glossary:generic function]]// \b{F} has two //[[CL:Glossary:required parameters]]//:
      //x//, which must be a //[[CL:Glossary:generalized instance]]// of the //[[CL:Glossary:class]]// //class//;
  and //y//, which can  be any //[[CL:Glossary:object]]// 
-       (\ie a //[[CL:Glossary:generalized instance]]// of the //[[CL:Glossary:class]]// \typeref{t}).
-In addition, there is an //[[CL:Glossary:optional parameter]]// //z// and a
-//[[CL:Glossary:keyword parameter]]// //k//.  This //[[CL:Glossary:signature]]// also indicates that this
-method on \f{F} is a //[[CL:Glossary:primary method]]// and has no //[[CL:Glossary:qualifiers]]//.
+       (\ie a //[[CL:Glossary:generalized instance]]// of the //[[CL:Glossary:class]]// \typeref{t}). In addition, there is an //[[CL:Glossary:optional parameter]]// //z// and a //[[CL:Glossary:keyword parameter]]// //k//.  This //[[CL:Glossary:signature]]// also indicates that this method on \f{F} is a //[[CL:Glossary:primary method]]// and has no //[[CL:Glossary:qualifiers]]//.
 
-For each //[[CL:Glossary:parameter]]//, the //[[CL:Glossary:argument]]// supplied must be in the
-intersection of the //[[CL:Glossary:type]]// specified in the description of the
-corresponding //[[CL:Glossary:generic function]]// and the //[[CL:Glossary:type]]// given in 
-the //[[CL:Glossary:signature]]// of some //[[CL:Glossary:method]]// (including not only those 
-//[[CL:Glossary:methods]]// defined in this specification, but also
-//[[CL:Glossary:implementation-defined]]// or user-defined //[[CL:Glossary:methods]]// in situations
-where the definition of such //[[CL:Glossary:methods]]// is permitted).
+For each //[[CL:Glossary:parameter]]//, the //[[CL:Glossary:argument]]// supplied must be in the intersection of the //[[CL:Glossary:type]]// specified in the description of the corresponding //[[CL:Glossary:generic function]]// and the //[[CL:Glossary:type]]// given in  the //[[CL:Glossary:signature]]// of some //[[CL:Glossary:method]]// (including not only those  //[[CL:Glossary:methods]]// defined in this specification, but also //[[CL:Glossary:implementation-defined]]// or user-defined //[[CL:Glossary:methods]]// in situations where the definition of such //[[CL:Glossary:methods]]// is permitted).
 
 \endsubsubsection%{The ``Method Signature'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Name'' Section of a Dictionary Entry}
 
-This section introduces the dictionary entry.  It is not explicitly labeled.
-It appears preceded and followed by a horizontal bar.
+This section introduces the dictionary entry.  It is not explicitly labeled. It appears preceded and followed by a horizontal bar.
 
-In large print at left, the //[[CL:Glossary:defined name]]// appears; if more than one
-//[[CL:Glossary:defined name]]// is to be described by the entry, all such //[[CL:Glossary:names]]// 
-are shown separated by commas.
+In large print at left, the //[[CL:Glossary:defined name]]// appears; if more than one //[[CL:Glossary:defined name]]// is to be described by the entry, all such //[[CL:Glossary:names]]//  are shown separated by commas.
 
-In somewhat smaller italic print at right is an indication of what kind
-of dictionary entry this is.  Possible values are:
-
+In somewhat smaller italic print at right is an indication of what kind of dictionary entry this is.  Possible values are:
 
 \beginlist
 
@@ -1114,10 +619,6 @@ This is a //[[CL:Glossary:class]]//.
 
 This is a \subtypeof{condition}.
 
-
-
-
-
 \itemitem{\i{Constant Variable}}
 
 This is a //[[CL:Glossary:constant variable]]//.
@@ -1132,13 +633,11 @@ This is a //[[CL:Glossary:function]]//.
 
 \itemitem{\i{Local Function}}
 
-This is a //[[CL:Glossary:function]]// that is defined only lexically within the scope of some
-other //[[CL:Glossary:macro form]]//.
+This is a //[[CL:Glossary:function]]// that is defined only lexically within the scope of some other //[[CL:Glossary:macro form]]//.
 
 \itemitem{\i{Local Macro}}
 
-This is a //[[CL:Glossary:macro]]// that is defined only lexically within the scope of some
-other //[[CL:Glossary:macro form]]//.
+This is a //[[CL:Glossary:macro]]// that is defined only lexically within the scope of some other //[[CL:Glossary:macro form]]//.
 
 \itemitem{\i{Macro}}
 
@@ -1158,25 +657,19 @@ This is a //[[CL:Glossary:standard generic function]]//.
 
 \itemitem{\i{Symbol}}
 
-This is a //[[CL:Glossary:symbol]]// that is specially recognized in some particular situation,
-such as the syntax of a //[[CL:Glossary:macro]]//.
+This is a //[[CL:Glossary:symbol]]// that is specially recognized in some particular situation, such as the syntax of a //[[CL:Glossary:macro]]//.
 
 \itemitem{\i{System Class}}
 
-This is like //[[CL:Glossary:class]]//, but it identifies a //[[CL:Glossary:class]]// that is potentially
-a //[[CL:Glossary:built-in class]]//.  (No //[[CL:Glossary:class]]// is actually required to be a
-//[[CL:Glossary:built-in class]]//.)
+This is like //[[CL:Glossary:class]]//, but it identifies a //[[CL:Glossary:class]]// that is potentially a //[[CL:Glossary:built-in class]]//.  (No //[[CL:Glossary:class]]// is actually required to be a //[[CL:Glossary:built-in class]]//.)
 
 \itemitem{\i{Type}}
 
-This is an //[[CL:Glossary:atomic type specifier]]//,
-and depending on information for each particular entry,
-may subject to form other //[[CL:Glossary:type specifiers]]//.
+This is an //[[CL:Glossary:atomic type specifier]]//, and depending on information for each particular entry, may subject to form other //[[CL:Glossary:type specifiers]]//.
 
 \itemitem{\i{Type Specifier}}
 
-This is a //[[CL:Glossary:defined name]]// that is not an //[[CL:Glossary:atomic type specifier]]//,
-but that can be used in constructing valid //[[CL:Glossary:type specifiers]]//.
+This is a //[[CL:Glossary:defined name]]// that is not an //[[CL:Glossary:atomic type specifier]]//, but that can be used in constructing valid //[[CL:Glossary:type specifiers]]//.
 
 \itemitem{\i{Variable}}
 
@@ -1188,139 +681,88 @@ This is a //[[CL:Glossary:dynamic variable]]//.
 
 \beginsubsubsection{The ``Notes'' Section of a Dictionary Entry}
 
-Information not found elsewhere in this description
-which pertains to this //[[CL:Glossary:operator]]//.
-Among other things, this might include 
+Information not found elsewhere in this description which pertains to this //[[CL:Glossary:operator]]//. Among other things, this might include 
  cross reference information,
  code equivalences, 
  stylistic hints,
  implementation hints,
- typical uses.
-This information is not considered part of the standard;
-any //[[CL:Glossary:conforming implementation]]// or //[[CL:Glossary:conforming program]]//
-is permitted to ignore the presence of this information.
+ typical uses. This information is not considered part of the standard; any //[[CL:Glossary:conforming implementation]]// or //[[CL:Glossary:conforming program]]// is permitted to ignore the presence of this information.
 
 \endsubsubsection%{The ``Notes'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Pronunciation'' Section of a Dictionary Entry}
 
-This offers a suggested pronunciation for //[[CL:Glossary:defined names]]// 
-so that people not in verbal communication with the original designers
-can figure out how to pronounce words that are not in normal English usage.
-This information is advisory only, and is not considered part of the standard.
+This offers a suggested pronunciation for //[[CL:Glossary:defined names]]//  so that people not in verbal communication with the original designers can figure out how to pronounce words that are not in normal English usage. This information is advisory only, and is not considered part of the standard.
 
-For brevity, it is only provided for entries with names that are specific to
-\clisp\ and would not be found in {\WebstersDictionary}.
+For brevity, it is only provided for entries with names that are specific to \clisp\ and would not be found in {\WebstersDictionary}.
 
 \endsubsubsection%{The ``Pronunciation'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``See Also'' Section of a Dictionary Entry}
 
-List of references to other parts of this standard
-that offer information relevant to this //[[CL:Glossary:operator]]//. 
-This list is not part of the standard.
-         
-\endsubsubsection%{The ``See Also'' Section of a Dictionary Entry}
+List of references to other parts of this standard that offer information relevant to this //[[CL:Glossary:operator]]//.  This list is not part of the standard.
+          \endsubsubsection%{The ``See Also'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Side Effects'' Section of a Dictionary Entry}
 
-Anything that is changed as a result of the
-evaluation of the //[[CL:Glossary:form]]// containing this //[[CL:Glossary:operator]]//.
+Anything that is changed as a result of the evaluation of the //[[CL:Glossary:form]]// containing this //[[CL:Glossary:operator]]//.
 
 \endsubsubsection%{The ``Side Effects'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Supertypes'' Section of a Dictionary Entry}
 
-This appears in the dictionary entry for a //[[CL:Glossary:type]]//,
-and contains a list of the //[[CL:Glossary:standardized]]// //[[CL:Glossary:types]]// 
-that must be //[[CL:Glossary:supertypes]]// of this //[[CL:Glossary:type]]//.
+This appears in the dictionary entry for a //[[CL:Glossary:type]]//, and contains a list of the //[[CL:Glossary:standardized]]// //[[CL:Glossary:types]]//  that must be //[[CL:Glossary:supertypes]]// of this //[[CL:Glossary:type]]//.
 
-
-
-In //[[CL:Glossary:implementations]]// where there is a corresponding //[[CL:Glossary:class]]//,
-the order of the //[[CL:Glossary:classes]]// in the //[[CL:Glossary:class precedence list]]// 
-is consistent with the order presented in this section.
+In //[[CL:Glossary:implementations]]// where there is a corresponding //[[CL:Glossary:class]]//, the order of the //[[CL:Glossary:classes]]// in the //[[CL:Glossary:class precedence list]]//  is consistent with the order presented in this section.
 
 \endsubsubsection%{The ``Supertypes'' Section of a Dictionary Entry}
 
 \beginsubsubsection{The ``Syntax'' Section of a Dictionary Entry}
 
-This section describes how to use the //[[CL:Glossary:defined name]]// in code.
-The ``Syntax'' description for a //[[CL:Glossary:generic function]]// 
-describes the //[[CL:Glossary:lambda list]]// of the //[[CL:Glossary:generic function]]// itself, 
-while the ``Method Signatures'' describe the //[[CL:Glossary:lambda lists]]// 
-of the defined //[[CL:Glossary:methods]]//.
-The ``Syntax'' description for 
+This section describes how to use the //[[CL:Glossary:defined name]]// in code. The ``Syntax'' description for a //[[CL:Glossary:generic function]]//  describes the //[[CL:Glossary:lambda list]]// of the //[[CL:Glossary:generic function]]// itself,  while the ``Method Signatures'' describe the //[[CL:Glossary:lambda lists]]//  of the defined //[[CL:Glossary:methods]]//. The ``Syntax'' description for 
      an //[[CL:Glossary:ordinary function]]//,
      a //[[CL:Glossary:macro]]//,
-  or a //[[CL:Glossary:special operator]]//
-describes its //[[CL:Glossary:parameters]]//.
+  or a //[[CL:Glossary:special operator]]// describes its //[[CL:Glossary:parameters]]//.
 
 For example, an //[[CL:Glossary:operator]]// description might say:
 
 \Defun {F} {x y {\opt} z {\key} k}
 
-\noindent This description indicates that the function \b{F} 
-has two required parameters, //x// and //y//.  In addition,
-there is an optional parameter //z// and a keyword parameter //k//.
+\noindent This description indicates that the function \b{F}  has two required parameters, //x// and //y//.  In addition, there is an optional parameter //z// and a keyword parameter //k//.
 
-For //[[CL:Glossary:macros]]// and //[[CL:Glossary:special operators]]//, syntax is given 
-in modified BNF notation; \seesection\ModifiedBNF.
-For //[[CL:Glossary:functions]]// a //[[CL:Glossary:lambda list]]// is given.
+For //[[CL:Glossary:macros]]// and //[[CL:Glossary:special operators]]//, syntax is given  in modified BNF notation; \seesection\ModifiedBNF. For //[[CL:Glossary:functions]]// a //[[CL:Glossary:lambda list]]// is given.
 
-In both cases, however, the outermost parentheses are omitted,
-and default value information is omitted.
+In both cases, however, the outermost parentheses are omitted, and default value information is omitted.
 
 \beginsubsubsubsection{Special ``Syntax'' Notations for Overloaded Operators}
 
+If two descriptions exist for the same operation but with different numbers of arguments, then the extra arguments are to be treated as optional.  For example, this pair of lines:
 
-If two descriptions exist for the same operation but with different numbers of
-arguments, then the extra arguments are to be treated as optional.  For example,
-this pair of lines:
-
-\DefunWithValues file-position {stream} {position}
-\DefunWithValues file-position {stream position-spec} {success-p}
+\DefunWithValues file-position {stream} {position} \DefunWithValues file-position {stream position-spec} {success-p}
 
 \noindent is operationally equivalent to this line:
 
 \DefunWithValues file-position {stream {\opt} position-spec} {result}
 
-\noindent and differs only in that it provides on opportunity to introduce different
-names for //[[CL:Glossary:parameter]]// and //[[CL:Glossary:values]]// for each case.
-The separated (multi-line) notation is used when an //[[CL:Glossary:operator]]// is overloaded in
-such a way that the //[[CL:Glossary:parameters]]// are used in different ways
-depending on how many //[[CL:Glossary:arguments]]// are supplied (\eg for \thefunction{/})
-or the return values are different in the two cases (\eg for \thefunction{file-position}).
+\noindent and differs only in that it provides on opportunity to introduce different names for //[[CL:Glossary:parameter]]// and //[[CL:Glossary:values]]// for each case. The separated (multi-line) notation is used when an //[[CL:Glossary:operator]]// is overloaded in such a way that the //[[CL:Glossary:parameters]]// are used in different ways depending on how many //[[CL:Glossary:arguments]]// are supplied (\eg for \thefunction{/}) or the return values are different in the two cases (\eg for \thefunction{file-position}).
 
 \endsubsubsubsection%{Special ``Syntax'' Notations for Overloaded Operators}
 
 \beginsubsubsubsection{Naming Conventions for Rest Parameters}
 
-Within this specification, 
-if the name of a //[[CL:Glossary:rest parameter]]// is chosen to be a plural noun,
-use of that name in //parameter// font refers
-to the //[[CL:Glossary:list]]// to which the //[[CL:Glossary:rest parameter]]// is bound.
-Use of the singular form of that name in //parameter// font refers 
-to an //[[CL:Glossary:element]]// of that //[[CL:Glossary:list]]//.
+Within this specification,  if the name of a //[[CL:Glossary:rest parameter]]// is chosen to be a plural noun, use of that name in //parameter// font refers to the //[[CL:Glossary:list]]// to which the //[[CL:Glossary:rest parameter]]// is bound. Use of the singular form of that name in //parameter// font refers  to an //[[CL:Glossary:element]]// of that //[[CL:Glossary:list]]//.
 
 For example, given a syntax description such as:
 
 \Defun {F} {{\rest} //arguments//}
 
-\noindent it is appropriate to refer either to the //[[CL:Glossary:rest parameter]]// named
-//arguments// by name, or to one of its elements by speaking of ``an //argument//,''
-``some //argument//,'' ``each //argument//'' \etc.
+\noindent it is appropriate to refer either to the //[[CL:Glossary:rest parameter]]// named //arguments// by name, or to one of its elements by speaking of ``an //argument//,'' ``some //argument//,'' ``each //argument//'' \etc.
 
 \endsubsubsubsection%{Naming Conventions for Rest Parameters}
 
 \beginsubsubsubsection{Requiring Non-Null Rest Parameters in the ``Syntax'' Section}
 
-In some cases it is useful to refer to all arguments equally as a single
-aggregation using a //[[CL:Glossary:rest parameter]]// while at the same time
-requiring at least one argument.  A variety of imperative and
-declarative means are available in //[[CL:Glossary:code]]// for expressing such a
-restriction, however they generally do not manifest themselves in a
-//[[CL:Glossary:lambda list]]//.  For descriptive purposes within this specification,
+In some cases it is useful to refer to all arguments equally as a single aggregation using a //[[CL:Glossary:rest parameter]]// while at the same time requiring at least one argument.  A variety of imperative and declarative means are available in //[[CL:Glossary:code]]// for expressing such a restriction, however they generally do not manifest themselves in a //[[CL:Glossary:lambda list]]//.  For descriptive purposes within this specification,
 
 \Defun {F} {{\rest} \plus{arguments}}
 
@@ -1328,42 +770,33 @@ restriction, however they generally do not manifest themselves in a
 
 \Defun {F} {{\rest} arguments}
 
-\noindent but introduces the additional requirement that there be 
-at least one //argument//.
+\noindent but introduces the additional requirement that there be  at least one //argument//.
 
 \endsubsubsubsection%{Requiring Non-Null Rest Parameters in the ``Syntax'' Section}
 
 \beginsubsubsubsection{Return values in the ``Syntax'' Section}
 
-An evaluation arrow ``{\EV}'' precedes a list of //[[CL:Glossary:values]]// to be returned.
-For example:
+An evaluation arrow ``{\EV}'' precedes a list of //[[CL:Glossary:values]]// to be returned. For example:
 
 \DefunWithValues {F} {a b c} {x}
 
-\noindent indicates that \f{F} is an operator that has three //[[CL:Glossary:required parameters]]//
-(\ie //a//, //b//, and //c//) and that returns one //[[CL:Glossary:value]]// (\ie //x//).
-If more than one //[[CL:Glossary:value]]// is returned by an operator, the //[[CL:Glossary:names]]// of the
-//[[CL:Glossary:values]]// are separated by commas, as in:
+\noindent indicates that \f{F} is an operator that has three //[[CL:Glossary:required parameters]]// (\ie //a//, //b//, and //c//) and that returns one //[[CL:Glossary:value]]// (\ie //x//). If more than one //[[CL:Glossary:value]]// is returned by an operator, the //[[CL:Glossary:names]]// of the //[[CL:Glossary:values]]// are separated by commas, as in:
 
 \DefunWithValues {F} {a b c} {x, y, z}
 
 \beginsubsubsubsubsection{No Arguments or Values in the ``Syntax'' Section}
 
-If no //[[CL:Glossary:arguments]]// are permitted, or no //[[CL:Glossary:values]]// are returned, 
-a special notation is used to make this more visually apparent.  For example,
+If no //[[CL:Glossary:arguments]]// are permitted, or no //[[CL:Glossary:values]]// are returned,  a special notation is used to make this more visually apparent.  For example,
 
 \DefunWithValues {F} {\noargs} {\novalues}
 
-indicates that \f{F} is an operator that accepts no //[[CL:Glossary:arguments]]// and returns
-no //[[CL:Glossary:values]]//.
+indicates that \f{F} is an operator that accepts no //[[CL:Glossary:arguments]]// and returns no //[[CL:Glossary:values]]//.
 
 \endsubsubsubsubsection%{No Arguments or Values in the ``Syntax'' Section}
 
 \beginsubsubsubsubsection{Unconditional Transfer of Control in the ``Syntax'' Section}
 
-Some //[[CL:Glossary:operators]]// perform an unconditional transfer of control, and
-so never have any return values.  Such //[[CL:Glossary:operators]]// are notated using
-a notation such as the following:
+Some //[[CL:Glossary:operators]]// perform an unconditional transfer of control, and so never have any return values.  Such //[[CL:Glossary:operators]]// are notated using a notation such as the following:
 
 \DefunNoReturn F {a b c}
 
@@ -1375,8 +808,7 @@ a notation such as the following:
 
 \beginsubsubsection{The ``Valid Context'' Section of a Dictionary Entry}
 
-This information is used by dictionary entries such as ``Declarations''
-in order to restrict the context in which the declaration may appear.
+This information is used by dictionary entries such as ``Declarations'' in order to restrict the context in which the declaration may appear.
 
 A given ``Declaration'' might appear in 
      a //[[CL:Glossary:declaration]]// (\ie a \misc{declare} //[[CL:Glossary:expression]]//),
@@ -1388,9 +820,6 @@ A given ``Declaration'' might appear in
 \beginsubsubsection{The ``Value Type'' Section of a Dictionary Entry}
 
 This information describes any //[[CL:Glossary:type]]// restrictions on a //[[CL:Glossary:dynamic variable]]//.
-
-
-
 
 Except as explicitly specified otherwise,
 

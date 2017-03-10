@@ -1,13 +1,8 @@
 
 
+\beginSubsection{Introduction to Generic Functions} \DefineSection{IntroToGFs}
 
-
-\beginSubsection{Introduction to Generic Functions}
-\DefineSection{IntroToGFs}
-
-A //[[CL:Glossary:generic function]]// is a function whose behavior depends on
-the //[[CL:Glossary:classes]]// or identities of the //[[CL:Glossary:arguments]]// supplied to it.
-A //[[CL:Glossary:generic function]]// //[[CL:Glossary:object]]// 
+A //[[CL:Glossary:generic function]]// is a function whose behavior depends on the //[[CL:Glossary:classes]]// or identities of the //[[CL:Glossary:arguments]]// supplied to it. A //[[CL:Glossary:generic function]]// //[[CL:Glossary:object]]// 
 
 is associated with 
      a set of //[[CL:Glossary:methods]]//,
@@ -15,176 +10,58 @@ is associated with
      a //[[CL:Glossary:method combination]]//\meaning{2}, 
  and other information.
 
-Like an //[[CL:Glossary:ordinary function]]//, a //[[CL:Glossary:generic function]]// takes //[[CL:Glossary:arguments]]//,
-performs a series of operations, and perhaps returns useful //[[CL:Glossary:values]]//.
-An //[[CL:Glossary:ordinary function]]// has a single body of //[[CL:Glossary:code]]// that is always //[[CL:Glossary:executed]]//
-when the //[[CL:Glossary:function]]// is called.  A //[[CL:Glossary:generic function]]// has a set of bodies
-of //[[CL:Glossary:code]]// of which a subset is selected for //[[CL:Glossary:execution]]//. The selected
-bodies of //[[CL:Glossary:code]]// and the manner of their combination are determined by
-the //[[CL:Glossary:classes]]// or identities of one or more of the //[[CL:Glossary:arguments]]// to the
-//[[CL:Glossary:generic function]]// and by its //[[CL:Glossary:method combination]]//.
+Like an //[[CL:Glossary:ordinary function]]//, a //[[CL:Glossary:generic function]]// takes //[[CL:Glossary:arguments]]//, performs a series of operations, and perhaps returns useful //[[CL:Glossary:values]]//. An //[[CL:Glossary:ordinary function]]// has a single body of //[[CL:Glossary:code]]// that is always //[[CL:Glossary:executed]]// when the //[[CL:Glossary:function]]// is called.  A //[[CL:Glossary:generic function]]// has a set of bodies of //[[CL:Glossary:code]]// of which a subset is selected for //[[CL:Glossary:execution]]//. The selected bodies of //[[CL:Glossary:code]]// and the manner of their combination are determined by the //[[CL:Glossary:classes]]// or identities of one or more of the //[[CL:Glossary:arguments]]// to the //[[CL:Glossary:generic function]]// and by its //[[CL:Glossary:method combination]]//.
 
 //[[CL:Glossary:Ordinary functions]]// and //[[CL:Glossary:generic functions]]// are called with identical syntax.
- 
-//[[CL:Glossary:Generic functions]]// are true //[[CL:Glossary:functions]]// that can be passed as //[[CL:Glossary:arguments]]//
-and used as the first //[[CL:Glossary:argument]]// to **[[CL:Functions:funcall]]** and **[[CL:Functions:apply]]**.
+  //[[CL:Glossary:Generic functions]]// are true //[[CL:Glossary:functions]]// that can be passed as //[[CL:Glossary:arguments]]// and used as the first //[[CL:Glossary:argument]]// to **[[CL:Functions:funcall]]** and **[[CL:Functions:apply]]**.
 
-A //[[CL:Glossary:binding]]// of a //[[CL:Glossary:function name]]// to a //[[CL:Glossary:generic function]]//
-can be //[[CL:Glossary:established]]// in one of several ways.  It can be
-//[[CL:Glossary:established]]// in the //[[CL:Glossary:global environment]]// by 
+A //[[CL:Glossary:binding]]// of a //[[CL:Glossary:function name]]// to a //[[CL:Glossary:generic function]]// can be //[[CL:Glossary:established]]// in one of several ways.  It can be //[[CL:Glossary:established]]// in the //[[CL:Glossary:global environment]]// by 
  **[[CL:Functions:ensure-generic-function]]**,
- \macref{defmethod} (implicitly, due to **[[CL:Functions:ensure-generic-function]]**)
-or
- \macref{defgeneric} (also implicitly, due to **[[CL:Functions:ensure-generic-function]]**).
-\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
-No //[[CL:Glossary:standardized]]// mechanism is provided for //[[CL:Glossary:establishing]]// a
-//[[CL:Glossary:binding]]// of a //[[CL:Glossary:function name]]// to a //[[CL:Glossary:generic function]]//
-in the //[[CL:Glossary:lexical environment]]//.
+ \macref{defmethod} (implicitly, due to **[[CL:Functions:ensure-generic-function]]**) or
+ \macref{defgeneric} (also implicitly, due to **[[CL:Functions:ensure-generic-function]]**). \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE} No //[[CL:Glossary:standardized]]// mechanism is provided for //[[CL:Glossary:establishing]]// a //[[CL:Glossary:binding]]// of a //[[CL:Glossary:function name]]// to a //[[CL:Glossary:generic function]]// in the //[[CL:Glossary:lexical environment]]//.
 
 \issue{WITH-ADDED-METHODS:DELETE}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \issue{WITH-ADDED-METHODS:DELETE}
-
-
-
-
-
-
-
-
-
 
 \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
 
-
-
-
-
-When a \macref{defgeneric} form is evaluated, one of three actions
-is taken (due to **[[CL:Functions:ensure-generic-function]]**):
-
-
-
+When a \macref{defgeneric} form is evaluated, one of three actions is taken (due to **[[CL:Functions:ensure-generic-function]]**):
 
 \beginlist
 
-\itemitem{\bull} If a generic function of the given name already exists,
-the existing generic function object is modified.  Methods specified
-by the current \macref{defgeneric} form are added, and any methods in the
-existing generic function that were defined by a previous \macref{defgeneric}
-form are removed.  Methods added by the current \macref{defgeneric} 
-form might replace methods defined by \macref{defmethod}, 
-\macref{defclass}, \macref{define-condition}, or \macref{defstruct}.  
-No other methods in the generic function are affected
-or replaced.
+\itemitem{\bull} If a generic function of the given name already exists, the existing generic function object is modified.  Methods specified by the current \macref{defgeneric} form are added, and any methods in the existing generic function that were defined by a previous \macref{defgeneric} form are removed.  Methods added by the current \macref{defgeneric}  form might replace methods defined by \macref{defmethod},  \macref{defclass}, \macref{define-condition}, or \macref{defstruct}.   No other methods in the generic function are affected or replaced.
 
 \itemitem{\bull} If the given name names 
     an //[[CL:Glossary:ordinary function]]//, 
     a  //[[CL:Glossary:macro]]//,
- or a //[[CL:Glossary:special operator]]//, 
-an error is signaled.
+ or a //[[CL:Glossary:special operator]]//,  an error is signaled.
 
-\itemitem{\bull} Otherwise a generic function is created with the
-methods specified by the method definitions in the \macref{defgeneric}
-form.
+\itemitem{\bull} Otherwise a generic function is created with the methods specified by the method definitions in the \macref{defgeneric} form.
 
 \endlist
 
-Some //[[CL:Glossary:operators]]// permit specification of the options of a
-//[[CL:Glossary:generic function]]//, such as 
-the //[[CL:Glossary:type]]// of //[[CL:Glossary:method combination]]// it uses 
-or its //[[CL:Glossary:argument precedence order]]//.
-These //[[CL:Glossary:operators]]// will be referred to as
-``operators that specify generic function options.''
-\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
-
-
+Some //[[CL:Glossary:operators]]// permit specification of the options of a //[[CL:Glossary:generic function]]//, such as  the //[[CL:Glossary:type]]// of //[[CL:Glossary:method combination]]// it uses  or its //[[CL:Glossary:argument precedence order]]//. These //[[CL:Glossary:operators]]// will be referred to as ``operators that specify generic function options.'' \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
 
 The only //[[CL:Glossary:standardized]]// //[[CL:Glossary:operator]]// in this category is \macref{defgeneric}.
 
 \issue{WITH-ADDED-METHODS:DELETE}
 
+Some //[[CL:Glossary:operators]]// define //[[CL:Glossary:methods]]// for a //[[CL:Glossary:generic function]]//. These //[[CL:Glossary:operators]]// will be referred to as \newtermidx{method-defining operators}{method-defining operator}; their associated //[[CL:Glossary:forms]]// are called //[[CL:Glossary:method-defining forms]]//. The //[[CL:Glossary:standardized]]// //[[CL:Glossary:method-defining operators]]// are listed in \thenextfigure.
 
+\DefineFigure{StdMethDefOps} \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE} \issue{WITH-ADDED-METHODS:DELETE}
 
-
-
-
-
-Some //[[CL:Glossary:operators]]// define //[[CL:Glossary:methods]]// for a //[[CL:Glossary:generic function]]//.
-These //[[CL:Glossary:operators]]// will be referred to as
-\newtermidx{method-defining operators}{method-defining operator};
-their associated //[[CL:Glossary:forms]]// are called //[[CL:Glossary:method-defining forms]]//.
-The //[[CL:Glossary:standardized]]// //[[CL:Glossary:method-defining operators]]// are listed in \thenextfigure.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\DefineFigure{StdMethDefOps}
-\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
-\issue{WITH-ADDED-METHODS:DELETE}
-
-
-\displaythree{Standardized Method-Defining Operators}{
-defgeneric&defmethod&defclass\cr
-define-condition&defstruct&\cr
-}
-
+\displaythree{Standardized Method-Defining Operators}{ defgeneric&defmethod&defclass\cr define-condition&defstruct&\cr }
 
 Note that of the //[[CL:Glossary:standardized]]// //[[CL:Glossary:method-defining operators]]//
 
-
-
-
-
-
-only \macref{defgeneric}
-can specify //[[CL:Glossary:generic function]]// options.
-\macref{defgeneric} and any //[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:operators]]//
-that can specify //[[CL:Glossary:generic function]]// options
-are also referred to as ``operators that specify generic function options.''
+only \macref{defgeneric} can specify //[[CL:Glossary:generic function]]// options. \macref{defgeneric} and any //[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:operators]]// that can specify //[[CL:Glossary:generic function]]// options are also referred to as ``operators that specify generic function options.''
 
 \endSubsection%{Introduction to Generic Functions}
 
-\beginSubsection{Introduction to Methods}
-\DefineSection{IntroToMethods}
+\beginSubsection{Introduction to Methods} \DefineSection{IntroToMethods}
 
-//[[CL:Glossary:Methods]]// define the class-specific or identity-specific behavior
-and operations of a //[[CL:Glossary:generic function]]//. 
-
-
+//[[CL:Glossary:Methods]]// define the class-specific or identity-specific behavior and operations of a //[[CL:Glossary:generic function]]//. 
 
 A //[[CL:Glossary:method]]// //[[CL:Glossary:object]]// 
 
@@ -197,353 +74,152 @@ is associated with
  and a sequence of //[[CL:Glossary:qualifiers]]// that are used by the method combination
        facility to distinguish among //[[CL:Glossary:methods]]//.
 
-A method object is not a function and cannot be invoked as a function. 
-Various mechanisms in the \OS\ take a method object and invoke its method
-function, as is the case when a generic function is invoked.  When this
-occurs it is said that the method is invoked or called.
+A method object is not a function and cannot be invoked as a function.  Various mechanisms in the \OS\ take a method object and invoke its method function, as is the case when a generic function is invoked.  When this occurs it is said that the method is invoked or called.
 
-A method-defining form contains the //[[CL:Glossary:code]]// that is to be run when the
-arguments to the generic function cause the method that it defines to
-be invoked.  When a method-defining form is evaluated, a method object
-is created and one of four actions is taken:
+A method-defining form contains the //[[CL:Glossary:code]]// that is to be run when the arguments to the generic function cause the method that it defines to be invoked.  When a method-defining form is evaluated, a method object is created and one of four actions is taken:
 
 \beginlist
 
-\itemitem{\bull} If a //[[CL:Glossary:generic function]]// of the given name already exists
-and if a //[[CL:Glossary:method object]]// already exists that agrees with the new one on
-//[[CL:Glossary:parameter specializers]]// and //[[CL:Glossary:qualifiers]]//, the new //[[CL:Glossary:method object]]// replaces
-the old one.  For a definition of one method agreeing with another on
-//[[CL:Glossary:parameter specializers]]// and //[[CL:Glossary:qualifiers]]//, 
-\seesection\SpecializerQualifierAgreement.
+\itemitem{\bull} If a //[[CL:Glossary:generic function]]// of the given name already exists and if a //[[CL:Glossary:method object]]// already exists that agrees with the new one on //[[CL:Glossary:parameter specializers]]// and //[[CL:Glossary:qualifiers]]//, the new //[[CL:Glossary:method object]]// replaces the old one.  For a definition of one method agreeing with another on //[[CL:Glossary:parameter specializers]]// and //[[CL:Glossary:qualifiers]]//,  \seesection\SpecializerQualifierAgreement.
 
-\itemitem{\bull} If a //[[CL:Glossary:generic function]]// of the given name already exists
-and if there is no //[[CL:Glossary:method object]]// that agrees with the new one on
-//[[CL:Glossary:parameter specializers]]// and //[[CL:Glossary:qualifiers]]//, the existing //[[CL:Glossary:generic function]]//
-//[[CL:Glossary:object]]// is modified to contain the new //[[CL:Glossary:method]]// //[[CL:Glossary:object]]//.
+\itemitem{\bull} If a //[[CL:Glossary:generic function]]// of the given name already exists and if there is no //[[CL:Glossary:method object]]// that agrees with the new one on //[[CL:Glossary:parameter specializers]]// and //[[CL:Glossary:qualifiers]]//, the existing //[[CL:Glossary:generic function]]// //[[CL:Glossary:object]]// is modified to contain the new //[[CL:Glossary:method]]// //[[CL:Glossary:object]]//.
 
-\itemitem{\bull} If the given //[[CL:Glossary:name]]// names an //[[CL:Glossary:ordinary function]]//, a //[[CL:Glossary:macro]]//,
-or a //[[CL:Glossary:special operator]]//, an error is signaled.
+\itemitem{\bull} If the given //[[CL:Glossary:name]]// names an //[[CL:Glossary:ordinary function]]//, a //[[CL:Glossary:macro]]//, or a //[[CL:Glossary:special operator]]//, an error is signaled.
 
-\itemitem{\bull} Otherwise a //[[CL:Glossary:generic function]]// is created with the //[[CL:Glossary:method]]//
-specified by the //[[CL:Glossary:method-defining form]]//.
+\itemitem{\bull} Otherwise a //[[CL:Glossary:generic function]]// is created with the //[[CL:Glossary:method]]// specified by the //[[CL:Glossary:method-defining form]]//.
 
 \endlist
 
-If the //[[CL:Glossary:lambda list]]// of a new //[[CL:Glossary:method]]// is not
-//[[CL:Glossary:congruent]]// with the //[[CL:Glossary:lambda list]]// of the //[[CL:Glossary:generic function]]//,
-an error is signaled.  If a //[[CL:Glossary:method-defining operator]]// that cannot specify
-//[[CL:Glossary:generic function]]// options creates a new //[[CL:Glossary:generic function]]//, 
-a //[[CL:Glossary:lambda list]]// for that //[[CL:Glossary:generic function]]// is derived from the
-//[[CL:Glossary:lambda list]]// of the //[[CL:Glossary:method]]// in the //[[CL:Glossary:method-defining form]]// in such a way
-as to be //[[CL:Glossary:congruent]]// with it.  For a discussion of //[[CL:Glossary:congruence]]//,
-\seesection\GFMethodLambdaListCongruency.
+If the //[[CL:Glossary:lambda list]]// of a new //[[CL:Glossary:method]]// is not //[[CL:Glossary:congruent]]// with the //[[CL:Glossary:lambda list]]// of the //[[CL:Glossary:generic function]]//, an error is signaled.  If a //[[CL:Glossary:method-defining operator]]// that cannot specify //[[CL:Glossary:generic function]]// options creates a new //[[CL:Glossary:generic function]]//,  a //[[CL:Glossary:lambda list]]// for that //[[CL:Glossary:generic function]]// is derived from the //[[CL:Glossary:lambda list]]// of the //[[CL:Glossary:method]]// in the //[[CL:Glossary:method-defining form]]// in such a way as to be //[[CL:Glossary:congruent]]// with it.  For a discussion of //[[CL:Glossary:congruence]]//, \seesection\GFMethodLambdaListCongruency.
 
-Each method has a //[[CL:Glossary:specialized lambda list]]//, which determines
-when that method can be applied.  A //[[CL:Glossary:specialized lambda list]]// is like
-an //[[CL:Glossary:ordinary lambda list]]// except that a specialized parameter
-may occur instead of the name of a required parameter.  A specialized parameter
-is a list \f{(\i{variable-name} \i{parameter-specializer-name})},
-where \i{parameter-specializer-name} is one of the following:
+Each method has a //[[CL:Glossary:specialized lambda list]]//, which determines when that method can be applied.  A //[[CL:Glossary:specialized lambda list]]// is like an //[[CL:Glossary:ordinary lambda list]]// except that a specialized parameter may occur instead of the name of a required parameter.  A specialized parameter is a list \f{(\i{variable-name} \i{parameter-specializer-name})}, where \i{parameter-specializer-name} is one of the following:
 
 \beginlist
 
 \itemitem{a //[[CL:Glossary:symbol]]//}
 
-denotes a //[[CL:Glossary:parameter specializer]]// which is the //[[CL:Glossary:class]]// 
-named by that //[[CL:Glossary:symbol]]//.
+denotes a //[[CL:Glossary:parameter specializer]]// which is the //[[CL:Glossary:class]]//  named by that //[[CL:Glossary:symbol]]//.
 
 \issue{CLASS-OBJECT-SPECIALIZER:AFFIRM}
-
 
 \itemitem{a //[[CL:Glossary:class]]//}
 
 denotes a //[[CL:Glossary:parameter specializer]]// which is the //[[CL:Glossary:class]]// itself.
 
-
 \itemitem{\f{(eql \i{form})}}
 
-denotes a //[[CL:Glossary:parameter specializer]]// which satisfies the //[[CL:Glossary:type specifier]]//
-\f{(eql \i{object})}, where \i{object} is the 
-result of evaluating \i{form}.  The form \i{form} is evaluated in 
-the lexical environment in which the method-defining form is evaluated.
-Note that \i{form} is evaluated only once, at the time the method is
-defined, not each time the generic function is called.
-\endlist
+denotes a //[[CL:Glossary:parameter specializer]]// which satisfies the //[[CL:Glossary:type specifier]]// \f{(eql \i{object})}, where \i{object} is the  result of evaluating \i{form}.  The form \i{form} is evaluated in  the lexical environment in which the method-defining form is evaluated. Note that \i{form} is evaluated only once, at the time the method is defined, not each time the generic function is called. \endlist
 
-//[[CL:Glossary:Parameter specializer names]]// are used in macros intended as the
-user-level interface (\macref{defmethod}), while //[[CL:Glossary:parameter specializers]]//
-are used in the functional interface.
+//[[CL:Glossary:Parameter specializer names]]// are used in macros intended as the user-level interface (\macref{defmethod}), while //[[CL:Glossary:parameter specializers]]// are used in the functional interface.
 
-Only required parameters may be specialized, and there must be a
-//[[CL:Glossary:parameter specializer]]// for each required parameter.  For notational
-simplicity, if some required parameter in a //[[CL:Glossary:specialized lambda list]]// in
-a method-defining form is simply a variable name, its 
-//[[CL:Glossary:parameter specializer]]// defaults to \theclass{t}.
+Only required parameters may be specialized, and there must be a //[[CL:Glossary:parameter specializer]]// for each required parameter.  For notational simplicity, if some required parameter in a //[[CL:Glossary:specialized lambda list]]// in a method-defining form is simply a variable name, its  //[[CL:Glossary:parameter specializer]]// defaults to \theclass{t}.
 
-Given a generic function and a set of arguments, an applicable
-method is a method for that generic function whose parameter
-specializers are satisfied by their corresponding arguments.  The
-following definition specifies what it means for a method to be
-applicable and for an argument to satisfy a //[[CL:Glossary:parameter specializer]]//.
+Given a generic function and a set of arguments, an applicable method is a method for that generic function whose parameter specializers are satisfied by their corresponding arguments.  The following definition specifies what it means for a method to be applicable and for an argument to satisfy a //[[CL:Glossary:parameter specializer]]//.
 
+Let $\langle A\sub 1, \ldots, A\sub n\rangle$ be the required arguments to a generic function in order. Let $\langle P\sub 1, \ldots, P\sub n\rangle$ be the //[[CL:Glossary:parameter specializers]]// corresponding to the required parameters of the method $M$ in order.  The method $M$ is
 
+applicable when each $A\sub i$ is of the //[[CL:Glossary:type]]// specified by  the //[[CL:Glossary:type specifier]]// $P\sub i$.
 
+Because every valid //[[CL:Glossary:parameter specializer]]// is  also a valid //[[CL:Glossary:type specifier]]//, \thefunction{typep} can be used during method selection to determine whether an argument satisfies a //[[CL:Glossary:parameter specializer]]//.  
 
+A method all of whose //[[CL:Glossary:parameter specializers]]// are  \theclass{t} is called a //[[CL:Glossary:default method]]//; it is always applicable but may be shadowed by a more specific method.
 
+Methods can have //[[CL:Glossary:qualifiers]]//, which give the method combination procedure a way to distinguish among methods.  A method that has one or more //[[CL:Glossary:qualifiers]]// is called a //[[CL:Glossary:qualified method]]//. A method with no //[[CL:Glossary:qualifiers]]// is called an //[[CL:Glossary:unqualified method]]//.  A //[[CL:Glossary:qualifier]]// is any //[[CL:Glossary:non-list]]//.
 
-Let $\langle A\sub 1, \ldots, A\sub n\rangle$ be the required
-arguments to a generic function in order. Let $\langle P\sub 1,
-\ldots, P\sub n\rangle$ be the //[[CL:Glossary:parameter specializers]]// corresponding to
-the required parameters of the method $M$ in order.  The method $M$ is
+The //[[CL:Glossary:qualifiers]]// defined by the //[[CL:Glossary:standardized]]// method combination types  are //[[CL:Glossary:symbols]]//.
 
-
-
-
-
-
-
-
-applicable when each $A\sub i$ is of the //[[CL:Glossary:type]]// specified by 
-the //[[CL:Glossary:type specifier]]// $P\sub i$.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Because every valid //[[CL:Glossary:parameter specializer]]// is 
-also a valid //[[CL:Glossary:type specifier]]//, \thefunction{typep} can be used during method
-selection to determine whether an argument satisfies a //[[CL:Glossary:parameter specializer]]//.  
-
-A method all of whose //[[CL:Glossary:parameter specializers]]// are 
-\theclass{t} is called a //[[CL:Glossary:default method]]//; it is always applicable but
-may be shadowed by a more specific method.
-
-Methods can have //[[CL:Glossary:qualifiers]]//, which give the method combination
-procedure a way to distinguish among methods.  A method that has one
-or more //[[CL:Glossary:qualifiers]]// is called a //[[CL:Glossary:qualified method]]//.
-A method with no //[[CL:Glossary:qualifiers]]// is called an //[[CL:Glossary:unqualified method]]//. 
-A //[[CL:Glossary:qualifier]]// is any //[[CL:Glossary:non-list]]//.
-
-
-
-The //[[CL:Glossary:qualifiers]]// defined by the //[[CL:Glossary:standardized]]// method combination types 
-are //[[CL:Glossary:symbols]]//.
-
-In this specification, the terms ``//[[CL:Glossary:primary method]]//'' and 
-``//[[CL:Glossary:auxiliary method]]//'' are used to partition //[[CL:Glossary:methods]]//
-within a method combination type according to their intended use.  
-In standard method combination, //[[CL:Glossary:primary methods]]// are 
-//[[CL:Glossary:unqualified methods]]// 
-and //[[CL:Glossary:auxiliary methods]]// are methods with a single //[[CL:Glossary:qualifier]]// 
-that is one of **'':around''**, **'':before''**, or **'':after''**.
-//[[CL:Glossary:Methods]]// with these //[[CL:Glossary:qualifiers]]// are called //[[CL:Glossary:around methods]]//,
-//[[CL:Glossary:before methods]]//, and //[[CL:Glossary:after methods]]//, respectively.
-When a method combination type is defined using the short form of
-\macref{define-method-combination}, //[[CL:Glossary:primary methods]]// are 
-methods qualified with the name of the type of method combination, 
-and auxiliary methods have the //[[CL:Glossary:qualifier]]// **'':around''**.
-Thus the terms ``//[[CL:Glossary:primary method]]//'' and ``//[[CL:Glossary:auxiliary method]]//''
-have only a relative definition within a given method combination type.
+In this specification, the terms ``//[[CL:Glossary:primary method]]//'' and  ``//[[CL:Glossary:auxiliary method]]//'' are used to partition //[[CL:Glossary:methods]]// within a method combination type according to their intended use.   In standard method combination, //[[CL:Glossary:primary methods]]// are  //[[CL:Glossary:unqualified methods]]//  and //[[CL:Glossary:auxiliary methods]]// are methods with a single //[[CL:Glossary:qualifier]]//  that is one of **'':around''**, **'':before''**, or **'':after''**. //[[CL:Glossary:Methods]]// with these //[[CL:Glossary:qualifiers]]// are called //[[CL:Glossary:around methods]]//, //[[CL:Glossary:before methods]]//, and //[[CL:Glossary:after methods]]//, respectively. When a method combination type is defined using the short form of \macref{define-method-combination}, //[[CL:Glossary:primary methods]]// are  methods qualified with the name of the type of method combination,  and auxiliary methods have the //[[CL:Glossary:qualifier]]// **'':around''**. Thus the terms ``//[[CL:Glossary:primary method]]//'' and ``//[[CL:Glossary:auxiliary method]]//'' have only a relative definition within a given method combination type.
 
 \endSubsection%{Introduction to Methods}
 
-\beginSubsection{Agreement on Parameter Specializers and Qualifiers}
-\DefineSection{SpecializerQualifierAgreement}
+\beginSubsection{Agreement on Parameter Specializers and Qualifiers} \DefineSection{SpecializerQualifierAgreement}
 
-Two //[[CL:Glossary:methods]]// are said to agree with each other on //[[CL:Glossary:parameter specializers]]//
-and //[[CL:Glossary:qualifiers]]// if the following conditions hold:
+Two //[[CL:Glossary:methods]]// are said to agree with each other on //[[CL:Glossary:parameter specializers]]// and //[[CL:Glossary:qualifiers]]// if the following conditions hold:
 
 \beginlist
 
-\itemitem{1.} Both methods have the same number of required parameters.
-Suppose the //[[CL:Glossary:parameter specializers]]// of the two methods are
-$P\sub{1,1}\ldots P\sub{1,n}$ and $P\sub{2,1}\ldots P\sub{2,n}$.
+\itemitem{1.} Both methods have the same number of required parameters. Suppose the //[[CL:Glossary:parameter specializers]]// of the two methods are $P\sub{1,1}\ldots P\sub{1,n}$ and $P\sub{2,1}\ldots P\sub{2,n}$.
 
-\itemitem{2.} For each $1\leq i\leq n$, $P\sub{1,i}$ agrees with $P\sub{2,i}$.
-The //[[CL:Glossary:parameter specializer]]// $P\sub{1,i}$ agrees with $P\sub{2,i}$ if
-$P\sub{1,i}$ and $P\sub{2,i}$ are the same class or if 
-$P\sub{1,i}=\hbox{{\tt(\b{eql} $\hbox{\i{object}}\sub 1$)}}$,
-$P\sub{2,i}=\hbox{{\tt(\b{eql} $\hbox{\i{object}}\sub 2$)}}$, and
-{\tt (\b{eql} $\hbox{\i{object}}\sub 1$ $\hbox{\i{object}}\sub 2$)}.
-Otherwise $P\sub{1,i}$ and $P\sub{2,i}$ do not agree.
+\itemitem{2.} For each $1\leq i\leq n$, $P\sub{1,i}$ agrees with $P\sub{2,i}$. The //[[CL:Glossary:parameter specializer]]// $P\sub{1,i}$ agrees with $P\sub{2,i}$ if $P\sub{1,i}$ and $P\sub{2,i}$ are the same class or if  $P\sub{1,i}=\hbox{{\tt(\b{eql} $\hbox{\i{object}}\sub 1$)}}$, $P\sub{2,i}=\hbox{{\tt(\b{eql} $\hbox{\i{object}}\sub 2$)}}$, and {\tt (\b{eql} $\hbox{\i{object}}\sub 1$ $\hbox{\i{object}}\sub 2$)}. Otherwise $P\sub{1,i}$ and $P\sub{2,i}$ do not agree.
 
-
-\itemitem{3.} The two //[[CL:Glossary:lists]]// of //[[CL:Glossary:qualifiers]]// are the //[[CL:Glossary:same]]// 
-under **[[CL:Functions:equal]]**.
-
-
-
+\itemitem{3.} The two //[[CL:Glossary:lists]]// of //[[CL:Glossary:qualifiers]]// are the //[[CL:Glossary:same]]//  under **[[CL:Functions:equal]]**.
 
 \endlist
 
 \endSubsection%{Agreement on Parameter Specializers and Qualifiers}
 
-\beginSubsection{Congruent Lambda-lists for all Methods of a Generic Function}
-\DefineSection{GFMethodLambdaListCongruency}
+\beginSubsection{Congruent Lambda-lists for all Methods of a Generic Function} \DefineSection{GFMethodLambdaListCongruency}
 
-These rules define the congruence of a set of //[[CL:Glossary:lambda lists]]//, including the
-//[[CL:Glossary:lambda list]]// of each method for a given generic function and the
-//[[CL:Glossary:lambda list]]// specified for the generic function itself, if given.
+These rules define the congruence of a set of //[[CL:Glossary:lambda lists]]//, including the //[[CL:Glossary:lambda list]]// of each method for a given generic function and the //[[CL:Glossary:lambda list]]// specified for the generic function itself, if given.
 
 \beginlist
 
-\itemitem{1.} Each //[[CL:Glossary:lambda list]]// must have the same number of required
-parameters.
+\itemitem{1.} Each //[[CL:Glossary:lambda list]]// must have the same number of required parameters.
 
-\itemitem{2.} Each //[[CL:Glossary:lambda list]]// must have the same number of optional
-parameters.  Each method can supply its own default for an optional
-parameter.
-                                       
-\itemitem{3.} If any //[[CL:Glossary:lambda list]]// mentions ''&rest'' or ''&key'', each
-//[[CL:Glossary:lambda list]]// must mention one or both of them.
-                                                        
-\itemitem{4.} If the //[[CL:Glossary:generic function]]// //[[CL:Glossary:lambda list]]//
-mentions ''&key'', each
-method must accept all of the keyword names mentioned after ''&key'',
-either by accepting them explicitly, by specifying ''&allow-other-keys'',
-or by specifying ''&rest'' but not ''&key''.
-Each method can accept additional keyword arguments of its own.  The
-checking of the validity of keyword names is done in the generic
-function, not in each method.
+\itemitem{2.} Each //[[CL:Glossary:lambda list]]// must have the same number of optional parameters.  Each method can supply its own default for an optional parameter.
+                                        \itemitem{3.} If any //[[CL:Glossary:lambda list]]// mentions ''&rest'' or ''&key'', each //[[CL:Glossary:lambda list]]// must mention one or both of them.
+                                                         \itemitem{4.} If the //[[CL:Glossary:generic function]]// //[[CL:Glossary:lambda list]]// mentions ''&key'', each method must accept all of the keyword names mentioned after ''&key'', either by accepting them explicitly, by specifying ''&allow-other-keys'', or by specifying ''&rest'' but not ''&key''. Each method can accept additional keyword arguments of its own.  The checking of the validity of keyword names is done in the generic function, not in each method.
 
-A method is invoked as if the keyword
-argument pair whose name is **'':allow-other-keys''** and whose value
-is //[[CL:Glossary:true]]// were supplied, though no such argument pair will be passed.
+A method is invoked as if the keyword argument pair whose name is **'':allow-other-keys''** and whose value is //[[CL:Glossary:true]]// were supplied, though no such argument pair will be passed.
 
-                      
-\itemitem{5.} The use of ''&allow-other-keys'' need not be consistent
-across //[[CL:Glossary:lambda lists]]//.  If ''&allow-other-keys'' is mentioned in 
-the //[[CL:Glossary:lambda list]]// of any applicable //[[CL:Glossary:method]]// or of the //[[CL:Glossary:generic function]]//,
-any keyword arguments may be mentioned in the call to the //[[CL:Glossary:generic function]]//.
-                      
-\itemitem{6.} The use of ''&aux'' need not be consistent across methods.
+                       \itemitem{5.} The use of ''&allow-other-keys'' need not be consistent across //[[CL:Glossary:lambda lists]]//.  If ''&allow-other-keys'' is mentioned in  the //[[CL:Glossary:lambda list]]// of any applicable //[[CL:Glossary:method]]// or of the //[[CL:Glossary:generic function]]//, any keyword arguments may be mentioned in the call to the //[[CL:Glossary:generic function]]//.
+                       \itemitem{6.} The use of ''&aux'' need not be consistent across methods.
 
-If a //[[CL:Glossary:method-defining operator]]// that cannot specify //[[CL:Glossary:generic function]]// options
-creates a //[[CL:Glossary:generic function]]//, and if the //[[CL:Glossary:lambda list]]// for the method
-mentions keyword arguments, the //[[CL:Glossary:lambda list]]// of the generic function
-will mention ''&key'' (but no keyword arguments).
+If a //[[CL:Glossary:method-defining operator]]// that cannot specify //[[CL:Glossary:generic function]]// options creates a //[[CL:Glossary:generic function]]//, and if the //[[CL:Glossary:lambda list]]// for the method mentions keyword arguments, the //[[CL:Glossary:lambda list]]// of the generic function will mention ''&key'' (but no keyword arguments).
 
 \endlist
 
 \endSubsection%{Congruent Lambda-lists for All Methods of a Generic Function}
 
+\beginSubsection{Keyword Arguments in Generic Functions and Methods} \DefineSection{KwdArgsInGFsAndMeths}
+                                                         When a generic function or any of its methods mentions  ''&key'' in a //[[CL:Glossary:lambda list]]//, the specific set of keyword arguments accepted by the generic function varies according to the applicable methods.  The set of keyword arguments accepted by the generic function for a particular call is the union of the keyword arguments accepted by all applicable methods and the keyword arguments mentioned after ''&key'' in the generic function definition, if any.  A method that has ''&rest'' but not ''&key'' does not affect the set of acceptable keyword arguments.  If the //[[CL:Glossary:lambda list]]// of any applicable method or of the generic function definition contains ''&allow-other-keys'', all keyword arguments are accepted by the generic function.
 
+The //[[CL:Glossary:lambda list]]// congruence rules require that each method accept all of the keyword arguments mentioned after ''&key'' in the generic function definition, by accepting them explicitly, by specifying ''&allow-other-keys'', or by specifying ''&rest'' but not ''&key''.  Each method can accept additional keyword arguments of its own, in addition to the keyword arguments mentioned in the generic function definition.
 
-\beginSubsection{Keyword Arguments in Generic Functions and Methods}
-\DefineSection{KwdArgsInGFsAndMeths}
-                                                        
-When a generic function or any of its methods mentions 
-''&key'' in a //[[CL:Glossary:lambda list]]//, the specific set of keyword
-arguments accepted by the generic function varies according to the
-applicable methods.  The set of keyword arguments accepted by the
-generic function for a particular call is the union of the keyword
-arguments accepted by all applicable methods and the keyword arguments
-mentioned after ''&key'' in the generic function definition,
-if any.  A method that has ''&rest'' but not ''&key'' does not affect the
-set of acceptable keyword arguments.  If
-the //[[CL:Glossary:lambda list]]// of any applicable method or of the generic
-function definition contains ''&allow-other-keys'', all
-keyword arguments are accepted by the generic function.
-
-The //[[CL:Glossary:lambda list]]// congruence rules require that each method
-accept all of the keyword arguments mentioned after ''&key'' in the
-generic function definition, by accepting them explicitly, by
-specifying ''&allow-other-keys'', or by specifying ''&rest'' but
-not ''&key''.  Each method can accept additional keyword arguments
-of its own, in addition to the keyword arguments mentioned in the
-generic function definition.
-
-If a //[[CL:Glossary:generic function]]// is passed a keyword argument that no applicable
-method accepts, an error should be signaled; \seesection\FuncallErrorChecking.
+If a //[[CL:Glossary:generic function]]// is passed a keyword argument that no applicable method accepts, an error should be signaled; \seesection\FuncallErrorChecking.
 
 \beginsubsubsection{Examples of Keyword Arguments in Generic Functions and Methods}
 
-For example, suppose there are two methods defined for {\tt width}
-as follows:
+For example, suppose there are two methods defined for {\tt width} as follows:
 
 \code
  (defmethod width ((c character-class) &key font) ...)
  
- (defmethod width ((p picture-class) &key pixel-size) ...)
-\endcode
+ (defmethod width ((p picture-class) &key pixel-size) ...) \endcode
 
-\noindent Assume that there are no other methods and no generic
-function definition for {\tt width}. The evaluation of the
-following form should signal an error because 
-the keyword argument **'':pixel-size''** is not accepted by the applicable method.
+\noindent Assume that there are no other methods and no generic function definition for {\tt width}. The evaluation of the following form should signal an error because  the keyword argument **'':pixel-size''** is not accepted by the applicable method.
 
 \code
  (width (make-instance `character-class :char #\\Q) 
-        :font 'baskerville :pixel-size 10)
-\endcode
+        :font 'baskerville :pixel-size 10) \endcode
 
 The evaluation of the following form should signal an error.
 
 \code
  (width (make-instance `picture-class :glyph (glyph #\\Q)) 
-        :font 'baskerville :pixel-size 10)
-\endcode
+        :font 'baskerville :pixel-size 10) \endcode
 
-The evaluation of the following form will not signal an error
-if the class named {\tt character-picture-class} is a subclass of
-both {\tt picture-class} and {\tt character-class}.
+The evaluation of the following form will not signal an error if the class named {\tt character-picture-class} is a subclass of both {\tt picture-class} and {\tt character-class}.
 
 \code
  (width (make-instance `character-picture-class :char #\\Q)
-        :font 'baskerville :pixel-size 10)
-\endcode
+        :font 'baskerville :pixel-size 10) \endcode
 
 \endsubsubsection%{Examples of Keyword Arguments in Generic Functions and Methods}
 
 \endSubsection%{Keyword Arguments in Generic Functions and Methods}
 
-\beginSubsection{Method Selection and Combination}
-\DefineSection{MethodSelectionAndCombination}
+\beginSubsection{Method Selection and Combination} \DefineSection{MethodSelectionAndCombination}
 
-When a //[[CL:Glossary:generic function]]// is called with particular arguments, it must
-determine the code to execute.  This code is called the 
-//[[CL:Glossary:effective method]]// for those //[[CL:Glossary:arguments]]//.
-The //[[CL:Glossary:effective method]]// is a 
-combination of the //[[CL:Glossary:applicable methods]]// in the //[[CL:Glossary:generic function]]//
-that //[[CL:Glossary:calls]]// some or all of the //[[CL:Glossary:methods]]//.
+When a //[[CL:Glossary:generic function]]// is called with particular arguments, it must determine the code to execute.  This code is called the  //[[CL:Glossary:effective method]]// for those //[[CL:Glossary:arguments]]//. The //[[CL:Glossary:effective method]]// is a  combination of the //[[CL:Glossary:applicable methods]]// in the //[[CL:Glossary:generic function]]// that //[[CL:Glossary:calls]]// some or all of the //[[CL:Glossary:methods]]//.
 
 \issue{CLOS-ERROR-CHECKING-ORDER:NO-APPLICABLE-METHOD-FIRST}
 
+If a //[[CL:Glossary:generic function]]// is called and no //[[CL:Glossary:methods]]// are  //[[CL:Glossary:applicable]]//, the //[[CL:Glossary:generic function]]// **[[CL:Functions:no-applicable-method]]** is invoked, with the //[[CL:Glossary:results]]// from that call being used as the //[[CL:Glossary:results]]// of the call to the original //[[CL:Glossary:generic function]]//.  Calling **[[CL:Functions:no-applicable-method]]** takes precedence over checking for acceptable keyword arguments; \seesection\KwdArgsInGFsAndMeths.
 
+When the //[[CL:Glossary:effective method]]// has been determined, it is invoked with the same //[[CL:Glossary:arguments]]// as were passed to the //[[CL:Glossary:generic function]]//.   Whatever //[[CL:Glossary:values]]// it returns are returned as the //[[CL:Glossary:values]]// of the //[[CL:Glossary:generic function]]//.
 
-If a //[[CL:Glossary:generic function]]// is called and no //[[CL:Glossary:methods]]// are 
-//[[CL:Glossary:applicable]]//, the //[[CL:Glossary:generic function]]// **[[CL:Functions:no-applicable-method]]**
-is invoked, with the //[[CL:Glossary:results]]// from that call being used as the
-//[[CL:Glossary:results]]// of the call to the original //[[CL:Glossary:generic function]]//.  Calling
-**[[CL:Functions:no-applicable-method]]** takes precedence over checking for acceptable
-keyword arguments; \seesection\KwdArgsInGFsAndMeths.
-
-
-When the //[[CL:Glossary:effective method]]// has been determined,
-it is invoked with the same //[[CL:Glossary:arguments]]// as were passed to the //[[CL:Glossary:generic function]]//.  
-Whatever //[[CL:Glossary:values]]// it returns are returned as the //[[CL:Glossary:values]]//
-of the //[[CL:Glossary:generic function]]//.
-
-\beginsubsubsection{Determining the Effective Method}
-\DefineSection{DeterminingtheEffectiveMethod}
+\beginsubsubsection{Determining the Effective Method} \DefineSection{DeterminingtheEffectiveMethod}
 
 The effective method is determined by the following three-step procedure:
 
@@ -551,16 +227,13 @@ The effective method is determined by the following three-step procedure:
 
 \itemitem{1.}{Select the applicable methods.}
 
-\itemitem{2.}{Sort the applicable methods by precedence order, putting
-the most specific method first.}
+\itemitem{2.}{Sort the applicable methods by precedence order, putting the most specific method first.}
 
-\itemitem{3.}{Apply method combination to the sorted list of
-applicable methods, producing the effective method.}
+\itemitem{3.}{Apply method combination to the sorted list of applicable methods, producing the effective method.}
 
 \endlist
 
-\beginsubsubsubsection{Selecting the Applicable Methods}
-\DefineSection{SelApplMeth}
+\beginsubsubsubsection{Selecting the Applicable Methods} \DefineSection{SelApplMeth}
 
 This step is described in \secref\IntroToMethods.
 
@@ -568,364 +241,140 @@ This step is described in \secref\IntroToMethods.
 
 \beginsubsubsubsection{Sorting the Applicable Methods by Precedence Order}
 
-To compare the precedence of two methods, their //[[CL:Glossary:parameter specializers]]//
-are examined in order.  The default examination order is from left to
-right, but an alternative order may be specified by the 
-**'':argument-precedence-order''** option to \macref{defgeneric} or to any of
-the other operators that specify generic function options.
+To compare the precedence of two methods, their //[[CL:Glossary:parameter specializers]]// are examined in order.  The default examination order is from left to right, but an alternative order may be specified by the  **'':argument-precedence-order''** option to \macref{defgeneric} or to any of the other operators that specify generic function options.
 
-The corresponding //[[CL:Glossary:parameter specializers]]// from each method are
-compared.  When a pair of //[[CL:Glossary:parameter specializers]]// agree, the next
-pair are compared for agreement.  If all corresponding parameter
-specializers agree, the two methods must have different
-//[[CL:Glossary:qualifiers]]//; in this case, either method can be selected to precede the
-other.  For information about agreement, \seesection\SpecializerQualifierAgreement.
+The corresponding //[[CL:Glossary:parameter specializers]]// from each method are compared.  When a pair of //[[CL:Glossary:parameter specializers]]// agree, the next pair are compared for agreement.  If all corresponding parameter specializers agree, the two methods must have different //[[CL:Glossary:qualifiers]]//; in this case, either method can be selected to precede the other.  For information about agreement, \seesection\SpecializerQualifierAgreement.
 
-If some corresponding //[[CL:Glossary:parameter specializers]]// do not agree, the first
-pair of //[[CL:Glossary:parameter specializers]]// that do not agree determines the
-precedence.  If both //[[CL:Glossary:parameter specializers]]// are classes, the more
-specific of the two methods is the method whose //[[CL:Glossary:parameter specializer]]//
-appears earlier in the //[[CL:Glossary:class precedence list]]// of the corresponding
-argument.  Because of the way in which the set of applicable methods
-is chosen, the //[[CL:Glossary:parameter specializers]]// are guaranteed to be present in
-the class precedence list of the class of the argument.
+If some corresponding //[[CL:Glossary:parameter specializers]]// do not agree, the first pair of //[[CL:Glossary:parameter specializers]]// that do not agree determines the precedence.  If both //[[CL:Glossary:parameter specializers]]// are classes, the more specific of the two methods is the method whose //[[CL:Glossary:parameter specializer]]// appears earlier in the //[[CL:Glossary:class precedence list]]// of the corresponding argument.  Because of the way in which the set of applicable methods is chosen, the //[[CL:Glossary:parameter specializers]]// are guaranteed to be present in the class precedence list of the class of the argument.
 
-If just one of a pair of corresponding //[[CL:Glossary:parameter specializers]]// is {\tt (eql \i{object})},
-the //[[CL:Glossary:method]]// with that //[[CL:Glossary:parameter specializer]]// precedes the
-other //[[CL:Glossary:method]]//.  If both //[[CL:Glossary:parameter specializers]]// are **[[CL:Functions:eql]]**
-//[[CL:Glossary:expressions]]//, the
-specializers must agree (otherwise the two //[[CL:Glossary:methods]]// would
-not both have been applicable to this argument).
+If just one of a pair of corresponding //[[CL:Glossary:parameter specializers]]// is {\tt (eql \i{object})}, the //[[CL:Glossary:method]]// with that //[[CL:Glossary:parameter specializer]]// precedes the other //[[CL:Glossary:method]]//.  If both //[[CL:Glossary:parameter specializers]]// are **[[CL:Functions:eql]]** //[[CL:Glossary:expressions]]//, the specializers must agree (otherwise the two //[[CL:Glossary:methods]]// would not both have been applicable to this argument).
 
-The resulting list of //[[CL:Glossary:applicable methods]]// has the most specific
-//[[CL:Glossary:method]]// first and the least specific //[[CL:Glossary:method]]// last.    
+The resulting list of //[[CL:Glossary:applicable methods]]// has the most specific //[[CL:Glossary:method]]// first and the least specific //[[CL:Glossary:method]]// last.    
 
 \endsubsubsubsection%{Sorting the Applicable Methods by Precedence Order}
 
-\beginsubsubsubsection{Applying method combination to the sorted list of applicable methods}
-\DefineSection{ApplyMethCombToSortedMethods}
+\beginsubsubsubsection{Applying method combination to the sorted list of applicable methods} \DefineSection{ApplyMethCombToSortedMethods}
 
-In the simple case---if standard method combination is used and all
-applicable methods are primary methods---the 
+In the simple case---if standard method combination is used and all applicable methods are primary methods---the 
 
-effective method is the most specific method.
-That method can call the next most specific
-method by using \thefunction{call-next-method}.  The method that
-**[[CL:Functions:call-next-method]]** will call is referred to as the 
-//[[CL:Glossary:next method]]//.  The predicate **[[CL:Functions:next-method-p]]** tests whether a next
-method exists.  If **[[CL:Functions:call-next-method]]** is called and there is no
-next most specific method, the generic function **[[CL:Functions:no-next-method]]**
-is invoked.
+effective method is the most specific method. That method can call the next most specific method by using \thefunction{call-next-method}.  The method that **[[CL:Functions:call-next-method]]** will call is referred to as the  //[[CL:Glossary:next method]]//.  The predicate **[[CL:Functions:next-method-p]]** tests whether a next method exists.  If **[[CL:Functions:call-next-method]]** is called and there is no next most specific method, the generic function **[[CL:Functions:no-next-method]]** is invoked.
 
-In general, the effective method is some combination of the applicable
-methods.  It is described by a //[[CL:Glossary:form]]// that contains calls to some or
-all of the applicable methods, returns the value or values that will
-be returned as the value or values of the generic function, and
-optionally makes some of the methods accessible by means of 
-**[[CL:Functions:call-next-method]]**.
-
-
-
-
+In general, the effective method is some combination of the applicable methods.  It is described by a //[[CL:Glossary:form]]// that contains calls to some or all of the applicable methods, returns the value or values that will be returned as the value or values of the generic function, and optionally makes some of the methods accessible by means of  **[[CL:Functions:call-next-method]]**.
 
 The role of each method in the effective method is determined by its
 
-//[[CL:Glossary:qualifiers]]// and the specificity of the method.  A //[[CL:Glossary:qualifier]]//
-serves to mark a method, and the meaning of a //[[CL:Glossary:qualifier]]// is
-determined by the way that these marks are used by this step
-of the procedure.  If an applicable method has an unrecognized
-//[[CL:Glossary:qualifier]]//, this step signals an error and does not include that method
-in the effective method.
+//[[CL:Glossary:qualifiers]]// and the specificity of the method.  A //[[CL:Glossary:qualifier]]// serves to mark a method, and the meaning of a //[[CL:Glossary:qualifier]]// is determined by the way that these marks are used by this step of the procedure.  If an applicable method has an unrecognized //[[CL:Glossary:qualifier]]//, this step signals an error and does not include that method in the effective method.
 
-When standard method combination is used together with qualified methods, 
-the effective method is produced as described in \secref\StdMethComb.
-                                                                  
-Another type of method combination can be specified by using the
-**'':method-combination''** option of \macref{defgeneric} or
-of any of the other operators that specify generic function options.  In
-this way this step of the procedure can be customized.
+When standard method combination is used together with qualified methods,  the effective method is produced as described in \secref\StdMethComb.
+                                                                   Another type of method combination can be specified by using the **'':method-combination''** option of \macref{defgeneric} or of any of the other operators that specify generic function options.  In this way this step of the procedure can be customized.
 
-New types of method combination can be defined by using 
-\themacro{define-method-combination}. 
+New types of method combination can be defined by using  \themacro{define-method-combination}. 
 
 \endsubsubsubsection%{Applying method combination to the sorted list of applicable methods}
 
 \endsubsubsection%{Determining the Effective Method}
 
-\beginsubsubsection{Standard Method Combination}
-\DefineSection{StdMethComb}
-\idxref{standard}
+\beginsubsubsection{Standard Method Combination} \DefineSection{StdMethComb} \idxref{standard}
                                                        
 
-Standard method combination is supported by \theclass{standard-generic-function}.
-It is used if no other type of method
-combination is specified or if the built-in method combination type
-\misc{standard} is specified. 
+Standard method combination is supported by \theclass{standard-generic-function}. It is used if no other type of method combination is specified or if the built-in method combination type \misc{standard} is specified. 
 
-Primary methods define the main action of the effective method,  
-while auxiliary methods modify that action in one of three ways.
-A primary method has no method //[[CL:Glossary:qualifiers]]//.
-                                                           
-An auxiliary method is a method whose 
+Primary methods define the main action of the effective method,   while auxiliary methods modify that action in one of three ways. A primary method has no method //[[CL:Glossary:qualifiers]]//.
+                                                            An auxiliary method is a method whose 
 
-//[[CL:Glossary:qualifier]]// is **'':before''**, **'':after''**, or **'':around''**.
-Standard method combination
-allows no more than one //[[CL:Glossary:qualifier]]// per method; if a method definition
-specifies more than one //[[CL:Glossary:qualifier]]// per method, an error is signaled.
+//[[CL:Glossary:qualifier]]// is **'':before''**, **'':after''**, or **'':around''**. Standard method combination allows no more than one //[[CL:Glossary:qualifier]]// per method; if a method definition specifies more than one //[[CL:Glossary:qualifier]]// per method, an error is signaled.
 
 \beginlist
 
-\itemitem{\bull}
-A //[[CL:Glossary:before method]]// has the keyword **'':before''** as its only //[[CL:Glossary:qualifier]]//.
-A //[[CL:Glossary:before method]]// specifies //[[CL:Glossary:code]]// that is to be run before any 
-//[[CL:Glossary:primary methods]]//.
+\itemitem{\bull} A //[[CL:Glossary:before method]]// has the keyword **'':before''** as its only //[[CL:Glossary:qualifier]]//. A //[[CL:Glossary:before method]]// specifies //[[CL:Glossary:code]]// that is to be run before any  //[[CL:Glossary:primary methods]]//.
 
-\itemitem{\bull}
-An //[[CL:Glossary:after method]]// has the keyword **'':after''** as its only //[[CL:Glossary:qualifier]]//.
-An //[[CL:Glossary:after method]]// specifies //[[CL:Glossary:code]]// that is to be run after
-//[[CL:Glossary:primary methods]]//.
+\itemitem{\bull} An //[[CL:Glossary:after method]]// has the keyword **'':after''** as its only //[[CL:Glossary:qualifier]]//. An //[[CL:Glossary:after method]]// specifies //[[CL:Glossary:code]]// that is to be run after //[[CL:Glossary:primary methods]]//.
 
-\itemitem{\bull}
-An //[[CL:Glossary:around method]]// has the keyword **'':around''** as its only //[[CL:Glossary:qualifier]]//.
-An //[[CL:Glossary:around method]]// specifies //[[CL:Glossary:code]]// that is to be run instead of other
-//[[CL:Glossary:applicable methods]]//,
+\itemitem{\bull} An //[[CL:Glossary:around method]]// has the keyword **'':around''** as its only //[[CL:Glossary:qualifier]]//. An //[[CL:Glossary:around method]]// specifies //[[CL:Glossary:code]]// that is to be run instead of other //[[CL:Glossary:applicable methods]]//,
 
-
-but which might contain explicit //[[CL:Glossary:code]]//
-which calls some of those //[[CL:Glossary:shadowed]]// //[[CL:Glossary:methods]]//
-(via **[[CL:Functions:call-next-method]]**).
+but which might contain explicit //[[CL:Glossary:code]]// which calls some of those //[[CL:Glossary:shadowed]]// //[[CL:Glossary:methods]]// (via **[[CL:Functions:call-next-method]]**).
 
 \endlist
 
 The semantics of standard method combination is as follows:
 
 \beginlist
-                               
-\itemitem{\bull} If there are any //[[CL:Glossary:around methods]]//, the most specific
-//[[CL:Glossary:around method]]// is called.  It supplies the value or values of the
-generic function.
+                                \itemitem{\bull} If there are any //[[CL:Glossary:around methods]]//, the most specific //[[CL:Glossary:around method]]// is called.  It supplies the value or values of the generic function.
 
-\itemitem{\bull} Inside the body of an //[[CL:Glossary:around method]]//, 
-**[[CL:Functions:call-next-method]]** can be used to call the //[[CL:Glossary:next method]]//.  When the next
-method returns, the //[[CL:Glossary:around method]]// can execute more code,
-perhaps based on the returned value or values.
+\itemitem{\bull} Inside the body of an //[[CL:Glossary:around method]]//,  **[[CL:Functions:call-next-method]]** can be used to call the //[[CL:Glossary:next method]]//.  When the next method returns, the //[[CL:Glossary:around method]]// can execute more code, perhaps based on the returned value or values.
 
+\TheGF{no-next-method} is invoked if **[[CL:Functions:call-next-method]]** is used and there is no //[[CL:Glossary:applicable method]]// to call.  \Thefunction{next-method-p} may be used to determine whether a //[[CL:Glossary:next method]]// exists.
 
+\itemitem{\bull}  If an //[[CL:Glossary:around method]]// invokes **[[CL:Functions:call-next-method]]**, the next most specific //[[CL:Glossary:around method]]// is called, if one is applicable.  If there are no //[[CL:Glossary:around methods]]//  or if **[[CL:Functions:call-next-method]]** is called by the least specific //[[CL:Glossary:around method]]//, the other methods are called as follows: \beginlist \itemitem{--} All the //[[CL:Glossary:before methods]]// are called, in most-specific-first order.  Their values are ignored. An error is signaled if **[[CL:Functions:call-next-method]]** is used in a //[[CL:Glossary:before method]]//.
 
-\TheGF{no-next-method} is invoked if **[[CL:Functions:call-next-method]]** is used and
-there is no //[[CL:Glossary:applicable method]]// to call.  \Thefunction{next-method-p}
-may be used to determine whether a //[[CL:Glossary:next method]]// exists.
+\itemitem{--} The most specific primary method is called.  Inside the body of a primary method, **[[CL:Functions:call-next-method]]** may be used to call the next most specific primary method.  When that method returns, the previous primary method can execute more code, perhaps based on the returned value or values.  The generic function **[[CL:Functions:no-next-method]]** is invoked if **[[CL:Functions:call-next-method]]** is used and there are no more applicable primary methods.  \Thefunction{next-method-p} may be used to determine whether a //[[CL:Glossary:next method]]// exists.  If **[[CL:Functions:call-next-method]]** is not used, only the most specific //[[CL:Glossary:primary method]]// is called.
 
-\itemitem{\bull} 
-If an //[[CL:Glossary:around method]]// invokes **[[CL:Functions:call-next-method]]**,
-the next most specific //[[CL:Glossary:around method]]//
-is called, if one is applicable.  If there are no //[[CL:Glossary:around methods]]// 
-or if **[[CL:Functions:call-next-method]]** is called by the least
-specific //[[CL:Glossary:around method]]//, the other methods are called as
-follows:
-\beginlist
-\itemitem{--} All the //[[CL:Glossary:before methods]]// are called, in
-most-specific-first order.  Their values are ignored.
-An error is signaled if **[[CL:Functions:call-next-method]]** is used in a
-//[[CL:Glossary:before method]]//.
-
-\itemitem{--} The most specific primary method is called.  Inside the
-body of a primary method, **[[CL:Functions:call-next-method]]** may be used to call
-the next most specific primary method.  When that method returns, the
-previous primary method can execute more code, perhaps based on the
-returned value or values.  The generic function **[[CL:Functions:no-next-method]]**
-is invoked if **[[CL:Functions:call-next-method]]** is used and there are no more
-applicable primary methods.  \Thefunction{next-method-p} may be
-used to determine whether a //[[CL:Glossary:next method]]// exists.  If **[[CL:Functions:call-next-method]]**
-is not used, only the most specific //[[CL:Glossary:primary method]]// is called.
-
-\itemitem{--} All the //[[CL:Glossary:after methods]]// are called in
-most-specific-last order.  Their values are ignored.
-An error is signaled if **[[CL:Functions:call-next-method]]** is used in an
-//[[CL:Glossary:after method]]//.
-\endlist
-\itemitem{\bull} If no //[[CL:Glossary:around methods]]// were invoked, the most
-specific primary method supplies the value or values returned by the
-generic function.  The value or values returned by the invocation of
-**[[CL:Functions:call-next-method]]** in the least specific //[[CL:Glossary:around method]]// are
-those returned by the most specific primary method.
+\itemitem{--} All the //[[CL:Glossary:after methods]]// are called in most-specific-last order.  Their values are ignored. An error is signaled if **[[CL:Functions:call-next-method]]** is used in an //[[CL:Glossary:after method]]//. \endlist \itemitem{\bull} If no //[[CL:Glossary:around methods]]// were invoked, the most specific primary method supplies the value or values returned by the generic function.  The value or values returned by the invocation of **[[CL:Functions:call-next-method]]** in the least specific //[[CL:Glossary:around method]]// are those returned by the most specific primary method.
 
 \endlist
 
-In standard method combination, if there is an applicable method
-but no applicable primary method, an error is signaled.
-     
-The //[[CL:Glossary:before methods]]// are run in most-specific-first order while
-the //[[CL:Glossary:after methods]]// are run in least-specific-first order.  The
-design rationale for this difference can be illustrated with an
-example.  Suppose class $C\sub 1$ modifies the behavior of its
-superclass, $C\sub 2$, by adding //[[CL:Glossary:before methods]]// and //[[CL:Glossary:after methods]]//.
-Whether the behavior of the class $C\sub 2$ is defined
-directly by methods on $C\sub 2$ or is inherited from its superclasses
-does not affect the relative order of invocation of methods on
-instances of the class $C\sub 1$.  Class $C\sub 1$'s 
-//[[CL:Glossary:before method]]// runs before all of class $C\sub 2$'s methods.  
-Class $C\sub 1$'s //[[CL:Glossary:after method]]// runs after all of class $C\sub 2$'s methods.
+In standard method combination, if there is an applicable method but no applicable primary method, an error is signaled.
+      The //[[CL:Glossary:before methods]]// are run in most-specific-first order while the //[[CL:Glossary:after methods]]// are run in least-specific-first order.  The design rationale for this difference can be illustrated with an example.  Suppose class $C\sub 1$ modifies the behavior of its superclass, $C\sub 2$, by adding //[[CL:Glossary:before methods]]// and //[[CL:Glossary:after methods]]//. Whether the behavior of the class $C\sub 2$ is defined directly by methods on $C\sub 2$ or is inherited from its superclasses does not affect the relative order of invocation of methods on instances of the class $C\sub 1$.  Class $C\sub 1$'s  //[[CL:Glossary:before method]]// runs before all of class $C\sub 2$'s methods.   Class $C\sub 1$'s //[[CL:Glossary:after method]]// runs after all of class $C\sub 2$'s methods.
 
-By contrast, all //[[CL:Glossary:around methods]]// run before any other methods
-run.  Thus a less specific //[[CL:Glossary:around method]]// runs before a more
-specific primary method.
+By contrast, all //[[CL:Glossary:around methods]]// run before any other methods run.  Thus a less specific //[[CL:Glossary:around method]]// runs before a more specific primary method.
 
-If only primary methods are used and if **[[CL:Functions:call-next-method]]** is not
-used, only the most specific method is invoked; that is, more specific
-methods shadow more general ones. 
+If only primary methods are used and if **[[CL:Functions:call-next-method]]** is not used, only the most specific method is invoked; that is, more specific methods shadow more general ones. 
 
 \endsubsubsection%{Standard Method Combination}
 
 \beginsubsubsection{Declarative Method Combination}
-           
-The macro \macref{define-method-combination} defines new forms of method
-combination.  It provides a mechanism for customizing the production
-of the effective method. The default procedure for producing an
-effective method is described in \secref\DeterminingtheEffectiveMethod.
-There are two forms of
-\macref{define-method-combination}.  The short form is a simple facility while
-the long form is more powerful and more verbose.  The long form
-resembles \macref{defmacro} in that the body is an expression that
-computes a Lisp form; it provides mechanisms for implementing
-arbitrary control structures within method combination and for
-arbitrary processing of method //[[CL:Glossary:qualifiers]]//.  
+            The macro \macref{define-method-combination} defines new forms of method combination.  It provides a mechanism for customizing the production of the effective method. The default procedure for producing an effective method is described in \secref\DeterminingtheEffectiveMethod. There are two forms of \macref{define-method-combination}.  The short form is a simple facility while the long form is more powerful and more verbose.  The long form resembles \macref{defmacro} in that the body is an expression that computes a Lisp form; it provides mechanisms for implementing arbitrary control structures within method combination and for arbitrary processing of method //[[CL:Glossary:qualifiers]]//.  
 
 \endsubsubsection%{Declarative Method Combination}
 
-\beginsubsubsection{Built-in Method Combination Types}
-\DefineSection{BuiltInMethCombTypes}
+\beginsubsubsection{Built-in Method Combination Types} \DefineSection{BuiltInMethCombTypes}
 
-The \CLOS\ provides a set of built-in method combination types.  To
-specify that a generic function is to use one of these method
-combination types, the name of the method combination type is given as
-the argument to the **'':method-combination''** option to 
-\macref{defgeneric} or to the **'':method-combination''** option to any of the
-other operators that specify generic function options.
+The \CLOS\ provides a set of built-in method combination types.  To specify that a generic function is to use one of these method combination types, the name of the method combination type is given as the argument to the **'':method-combination''** option to  \macref{defgeneric} or to the **'':method-combination''** option to any of the other operators that specify generic function options.
 
-The names of the built-in  method combination types are listed in \thenextfigure.
-\idxref{+}%
-\idxref{and}%
-\idxref{append}%
-\idxref{list}%
-\idxref{max}%
-\idxref{min}%
-\idxref{nconc}%
-\idxref{or}%
-\idxref{progn}%
-\idxref{standard}
+The names of the built-in  method combination types are listed in \thenextfigure. \idxref{+}% \idxref{and}% \idxref{append}% \idxref{list}% \idxref{max}% \idxref{min}% \idxref{nconc}% \idxref{or}% \idxref{progn}% \idxref{standard}
 
-\displayfive{Built-in Method Combination Types}{
-+&append&max&nconc&progn\cr
-and&list&min&or&standard\cr
-}
+\displayfive{Built-in Method Combination Types}{ +&append&max&nconc&progn\cr and&list&min&or&standard\cr }
 
-The semantics of the \misc{standard} built-in method combination type is
-described in \secref\StdMethComb.  The other
-built-in method combination types are called simple built-in method
-combination types.
+The semantics of the \misc{standard} built-in method combination type is described in \secref\StdMethComb.  The other built-in method combination types are called simple built-in method combination types.
 
-The simple built-in method combination types act as though they were
-defined by the short form of \macref{define-method-combination}.  
-They recognize two roles for //[[CL:Glossary:methods]]//:
+The simple built-in method combination types act as though they were defined by the short form of \macref{define-method-combination}.   They recognize two roles for //[[CL:Glossary:methods]]//:
 
 \beginlist
-                                                                  
-\itemitem{\bull} An //[[CL:Glossary:around method]]// has the keyword symbol 
-**'':around''** as its sole //[[CL:Glossary:qualifier]]//.  The meaning of 
-**'':around''** //[[CL:Glossary:methods]]// is the same as in standard method combination.
-Use of the functions **[[CL:Functions:call-next-method]]** and **[[CL:Functions:next-method-p]]**
-is supported in //[[CL:Glossary:around methods]]//.
+                                                                   \itemitem{\bull} An //[[CL:Glossary:around method]]// has the keyword symbol  **'':around''** as its sole //[[CL:Glossary:qualifier]]//.  The meaning of  **'':around''** //[[CL:Glossary:methods]]// is the same as in standard method combination. Use of the functions **[[CL:Functions:call-next-method]]** and **[[CL:Functions:next-method-p]]** is supported in //[[CL:Glossary:around methods]]//.
 
-\itemitem{\bull} A primary method has the name of the method combination
-type as its sole //[[CL:Glossary:qualifier]]//.  For example, the built-in method
-combination type {\tt and} recognizes methods whose sole //[[CL:Glossary:qualifier]]// is
-{\tt and}; these are primary methods. Use of the functions 
-**[[CL:Functions:call-next-method]]** and **[[CL:Functions:next-method-p]]** is not supported 
-in //[[CL:Glossary:primary methods]]//.
+\itemitem{\bull} A primary method has the name of the method combination type as its sole //[[CL:Glossary:qualifier]]//.  For example, the built-in method combination type {\tt and} recognizes methods whose sole //[[CL:Glossary:qualifier]]// is {\tt and}; these are primary methods. Use of the functions  **[[CL:Functions:call-next-method]]** and **[[CL:Functions:next-method-p]]** is not supported  in //[[CL:Glossary:primary methods]]//.
 
 \endlist
 
-The semantics of the simple built-in method combination types is as
-follows:
+The semantics of the simple built-in method combination types is as follows:
 
-\beginlist
-\itemitem{\bull}                                                    
-If there are any //[[CL:Glossary:around methods]]//, the most specific //[[CL:Glossary:around method]]//
-is called.   It supplies the value or values of the //[[CL:Glossary:generic function]]//. 
-                                    
-\itemitem{\bull} Inside the body of an //[[CL:Glossary:around method]]//, the function
-**[[CL:Functions:call-next-method]]** can be used to call the //[[CL:Glossary:next method]]//.
+\beginlist \itemitem{\bull}                                                     If there are any //[[CL:Glossary:around methods]]//, the most specific //[[CL:Glossary:around method]]// is called.   It supplies the value or values of the //[[CL:Glossary:generic function]]//. 
+                                     \itemitem{\bull} Inside the body of an //[[CL:Glossary:around method]]//, the function **[[CL:Functions:call-next-method]]** can be used to call the //[[CL:Glossary:next method]]//.
 
-
-
-\TheGF{no-next-method} is invoked if 
-**[[CL:Functions:call-next-method]]** is used and there is no applicable method to call.
-\Thefunction{next-method-p} may be used to determine whether a
-//[[CL:Glossary:next method]]// exists. When the //[[CL:Glossary:next method]]// returns, 
-the //[[CL:Glossary:around method]]// can execute more code,
-perhaps based on the returned value or values.
-                    
-\itemitem{\bull} If an //[[CL:Glossary:around method]]// invokes **[[CL:Functions:call-next-method]]**,
-the next most specific //[[CL:Glossary:around method]]// is
-called, if one is applicable.  If there are no //[[CL:Glossary:around methods]]//
-or if **[[CL:Functions:call-next-method]]** is called by the least specific
-//[[CL:Glossary:around method]]//, a Lisp form derived from the name of the built-in
-method combination type and from the list of applicable primary
-methods is evaluated to produce the value of the generic function.
-Suppose the name of the method combination type is \i{operator}
-and the call to the generic function is of the form
+\TheGF{no-next-method} is invoked if  **[[CL:Functions:call-next-method]]** is used and there is no applicable method to call. \Thefunction{next-method-p} may be used to determine whether a //[[CL:Glossary:next method]]// exists. When the //[[CL:Glossary:next method]]// returns,  the //[[CL:Glossary:around method]]// can execute more code, perhaps based on the returned value or values.
+                     \itemitem{\bull} If an //[[CL:Glossary:around method]]// invokes **[[CL:Functions:call-next-method]]**, the next most specific //[[CL:Glossary:around method]]// is called, if one is applicable.  If there are no //[[CL:Glossary:around methods]]// or if **[[CL:Functions:call-next-method]]** is called by the least specific //[[CL:Glossary:around method]]//, a Lisp form derived from the name of the built-in method combination type and from the list of applicable primary methods is evaluated to produce the value of the generic function. Suppose the name of the method combination type is \i{operator} and the call to the generic function is of the form
 
 $$(\hbox{\i{generic-function}}\ a\sub 1\ldots a\sub n)$$
 
-\itemitem{} Let $M\sub 1,\ldots,M\sub k$ be the applicable primary methods
-in order; then the derived Lisp form is
+\itemitem{} Let $M\sub 1,\ldots,M\sub k$ be the applicable primary methods in order; then the derived Lisp form is
 
-$$(\hbox{\i{operator}}\ \langle M\sub  1%
-\ a\sub 1\ldots a\sub n\rangle\ldots\langle%
-M\sub k\ a\sub 1\ldots a\sub n\rangle)$$
+$$(\hbox{\i{operator}}\ \langle M\sub  1% \ a\sub 1\ldots a\sub n\rangle\ldots\langle% M\sub k\ a\sub 1\ldots a\sub n\rangle)$$
 
-\itemitem{} If the expression $\langle M\sub i \ a\sub 1\ldots a\sub
-n\rangle$ is
-evaluated, the method $M\sub i$ will be applied to the arguments
-$a\sub 1\ldots a\sub n$.  
-For example,
-if \i{operator} is {\tt or},
-the expression $\langle M\sub i \ a\sub 1\ldots a\sub n\rangle$ is
-evaluated only if $\langle M\sub j \ a\sub 1\ldots a\sub n\rangle$,
-$1\leq j<i$, returned {\tt nil}.
-                                                      
-\itemitem{} The default order for the primary methods is 
-**'':most-specific-first''**.  However, the order can be reversed by supplying
-**'':most-specific-last''** as the second argument to the **'':method-combination''** option.
-\endlist
+\itemitem{} If the expression $\langle M\sub i \ a\sub 1\ldots a\sub n\rangle$ is evaluated, the method $M\sub i$ will be applied to the arguments $a\sub 1\ldots a\sub n$.   For example, if \i{operator} is {\tt or}, the expression $\langle M\sub i \ a\sub 1\ldots a\sub n\rangle$ is evaluated only if $\langle M\sub j \ a\sub 1\ldots a\sub n\rangle$, $1\leq j<i$, returned {\tt nil}.
+                                                       \itemitem{} The default order for the primary methods is  **'':most-specific-first''**.  However, the order can be reversed by supplying **'':most-specific-last''** as the second argument to the **'':method-combination''** option. \endlist
 
-The simple built-in method combination types require exactly one
-//[[CL:Glossary:qualifier]]// per method.  An error is signaled if there are applicable
-methods with no //[[CL:Glossary:qualifiers]]// or with //[[CL:Glossary:qualifiers]]// that are not supported
-by the method combination type. An error is signaled if there are
-applicable //[[CL:Glossary:around methods]]// and no applicable primary
-methods.
+The simple built-in method combination types require exactly one //[[CL:Glossary:qualifier]]// per method.  An error is signaled if there are applicable methods with no //[[CL:Glossary:qualifiers]]// or with //[[CL:Glossary:qualifiers]]// that are not supported by the method combination type. An error is signaled if there are applicable //[[CL:Glossary:around methods]]// and no applicable primary methods.
 
 \endsubsubsection%{Built-in Method Combination Types}
 
 \endSubsection%{Method Selection and Combination}
 
-\beginSubsection{Inheritance of Methods}
-\DefineSection{MethodInheritance}
+\beginSubsection{Inheritance of Methods} \DefineSection{MethodInheritance}
 
-A subclass inherits methods in the sense that any method applicable to
-all instances of a class is also applicable to all instances of any
-subclass of that class.
+A subclass inherits methods in the sense that any method applicable to all instances of a class is also applicable to all instances of any subclass of that class.
 
-The inheritance of methods acts the same way regardless of 
-which of the //[[CL:Glossary:method-defining operators]]// created the methods.
+The inheritance of methods acts the same way regardless of  which of the //[[CL:Glossary:method-defining operators]]// created the methods.
 
-
-
-
-
-The inheritance of methods is described in detail in 
-\secref\MethodSelectionAndCombination.
+The inheritance of methods is described in detail in  \secref\MethodSelectionAndCombination.
 
 \endSubsection%{Inheritance of Methods}

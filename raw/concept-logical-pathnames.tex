@@ -1,28 +1,21 @@
 
 
-\beginSubsection{Syntax of Logical Pathname Namestrings}
-\DefineSection{LogPathNamestrings}
+\beginSubsection{Syntax of Logical Pathname Namestrings} \DefineSection{LogPathNamestrings}
 
-\issue{PATHNAME-LOGICAL:ADD}
-The syntax of a //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestring]]// is as follows.
+\issue{PATHNAME-LOGICAL:ADD} The syntax of a //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestring]]// is as follows.
 
 (Note that unlike many notational descriptions in this document,
  this is a syntactic description of character sequences,
  not a structural description of //[[CL:Glossary:objects]]//.)
 
-\auxbnf{logical-pathname}%
-{\brac{\down{host} //host-marker//} \CR
+\auxbnf{logical-pathname}% {\brac{\down{host} //host-marker//} \CR
  \brac{\down{//relative-directory-marker//}}
  \star{\curly{\down{directory} //directory-marker//}} \CR
  \brac{\down{name}} 
  \brac{//type-marker// \down{type} 
  \brac{//version-marker// \down{version}}}}
 
-\auxbnf{host}{\down{word}}
-\auxbnf{directory}{\down{word} | \down{wildcard-word} | \down{wild-inferiors-word}}
-\auxbnf{name}{\down{word} | \down{wildcard-word}}
-\auxbnf{type}{\down{word} | \down{wildcard-word}}
-\auxbnf{version}{\down{pos-int} | //newest-word// | //wildcard-version//}
+\auxbnf{host}{\down{word}} \auxbnf{directory}{\down{word} | \down{wildcard-word} | \down{wild-inferiors-word}} \auxbnf{name}{\down{word} | \down{wildcard-word}} \auxbnf{type}{\down{word} | \down{wildcard-word}} \auxbnf{version}{\down{pos-int} | //newest-word// | //wildcard-version//}
 
 //host-marker//---a //[[CL:Glossary:colon]]//.
 
@@ -36,8 +29,7 @@ The syntax of a //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestring]
 
 //wild-inferiors-word//---The two character sequence ``\f{**}'' (two //[[CL:Glossary:asterisks]]//).
 
-//newest-word//---The six character sequence ``\f{newest}'' 
-		   or the six character sequence ``\f{NEWEST}''.
+//newest-word//---The six character sequence ``\f{newest}''  		   or the six character sequence ``\f{NEWEST}''.
 
 //wildcard-version//---an //[[CL:Glossary:asterisk]]//.
 
@@ -53,85 +45,54 @@ The syntax of a //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestring]
 
 \beginsubsubsubsection{The Host part of a Logical Pathname Namestring}
 
-The //host// must have been defined as a //[[CL:Glossary:logical pathname]]// host;
-this can be done by using \macref{setf} of **[[CL:Functions:logical-pathname-translations]]**.
+The //host// must have been defined as a //[[CL:Glossary:logical pathname]]// host; this can be done by using \macref{setf} of **[[CL:Functions:logical-pathname-translations]]**.
 
-The //[[CL:Glossary:logical pathname]]// host name \f{"SYS"} is reserved for the implementation.
-The existence and meaning of \f{SYS:} //[[CL:Glossary:logical pathnames]]// 
-is //[[CL:Glossary:implementation-defined]]//.
- 
-\endsubsubsubsection%{The Host part of a Logical Pathname Namestring}
+The //[[CL:Glossary:logical pathname]]// host name \f{"SYS"} is reserved for the implementation. The existence and meaning of \f{SYS:} //[[CL:Glossary:logical pathnames]]//  is //[[CL:Glossary:implementation-defined]]//.
+  \endsubsubsubsection%{The Host part of a Logical Pathname Namestring}
 
 \beginsubsubsubsection{The Device part of a Logical Pathname Namestring}
- 
-There is no syntax for a //[[CL:Glossary:logical pathname]]// device since
-the device component of a //[[CL:Glossary:logical pathname]]// is always **'':unspecific''**;
-\seesection\LogicalPathCompUnspecific.
+  There is no syntax for a //[[CL:Glossary:logical pathname]]// device since the device component of a //[[CL:Glossary:logical pathname]]// is always **'':unspecific''**; \seesection\LogicalPathCompUnspecific.
 
 \endsubsubsubsection%{The Device part of a Logical Pathname Namestring}
 
 \beginsubsubsubsection{The Directory part of a Logical Pathname Namestring}
 
-If a //relative-directory-marker// precedes the //directories//,
-the directory component parsed is as //[[CL:Glossary:relative]]//;
-otherwise, the directory component is parsed as //[[CL:Glossary:absolute]]//.
+If a //relative-directory-marker// precedes the //directories//, the directory component parsed is as //[[CL:Glossary:relative]]//; otherwise, the directory component is parsed as //[[CL:Glossary:absolute]]//.
 
-If a //wild-inferiors-marker// is specified,
-it parses into **'':wild-inferiors''**.
- 
-\endsubsubsubsection%{The Directory part of a Logical Pathname Namestring}
+If a //wild-inferiors-marker// is specified, it parses into **'':wild-inferiors''**.
+  \endsubsubsubsection%{The Directory part of a Logical Pathname Namestring}
 
 \beginsubsubsubsection{The Type part of a Logical Pathname Namestring}
 
-The //type// of a //[[CL:Glossary:logical pathname]]// for a //[[CL:Glossary:source file]]//
-is \f{"LISP"}.   This should be translated into whatever type is 
-appropriate in a physical pathname.
- 
-\endsubsubsubsection%{The Type part of a Logical Pathname Namestring}
+The //type// of a //[[CL:Glossary:logical pathname]]// for a //[[CL:Glossary:source file]]// is \f{"LISP"}.   This should be translated into whatever type is  appropriate in a physical pathname.
+  \endsubsubsubsection%{The Type part of a Logical Pathname Namestring}
 
 \beginsubsubsubsection{The Version part of a Logical Pathname Namestring}
 
-Some //[[CL:Glossary:file systems]]// do not have //versions//. 
-//[[CL:Glossary:Logical pathname]]// translation to such a //[[CL:Glossary:file system]]//
-ignores the //version//.
-This implies that a program cannot rely on being able to store
-more than one version of a file named by a //[[CL:Glossary:logical pathname]]//.
+Some //[[CL:Glossary:file systems]]// do not have //versions//.  //[[CL:Glossary:Logical pathname]]// translation to such a //[[CL:Glossary:file system]]// ignores the //version//. This implies that a program cannot rely on being able to store more than one version of a file named by a //[[CL:Glossary:logical pathname]]//.
 
-If a //wildcard-version// is specified,
-it parses into **'':wild''**.
+If a //wildcard-version// is specified, it parses into **'':wild''**.
 
 \endsubsubsubsection%{The Version part of a Logical Pathname Namestring}
 
 \beginsubsubsubsection{Wildcard Words in a Logical Pathname Namestring}
 
-Each //[[CL:Glossary:asterisk]]// in a //wildcard-word// matches a sequence of 
-zero or more characters.  The //wildcard-word// ``\f{*}'' 
-parses into **'':wild''**; other //[[CL:Glossary:wildcard-words]]// parse into //[[CL:Glossary:strings]]//.
- 
-\endsubsubsubsection%{Wildcard Words in a Logical Pathname Namestring}
+Each //[[CL:Glossary:asterisk]]// in a //wildcard-word// matches a sequence of  zero or more characters.  The //wildcard-word// ``\f{*}''  parses into **'':wild''**; other //[[CL:Glossary:wildcard-words]]// parse into //[[CL:Glossary:strings]]//.
+  \endsubsubsubsection%{Wildcard Words in a Logical Pathname Namestring}
 
 \beginsubsubsubsection{Lowercase Letters in a Logical Pathname Namestring}
 
-When parsing //words// and //wildcard-words//,
-lowercase letters are translated to uppercase.
+When parsing //words// and //wildcard-words//, lowercase letters are translated to uppercase.
 
 \endsubsubsubsection%{Lowercase Letters in a Logical Pathname Namestring}
 
 \beginsubsubsubsection{Other Syntax in a Logical Pathname Namestring}
 
-The consequences of using characters other than those specified here
-in a //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestring]]// are unspecified.
+The consequences of using characters other than those specified here in a //[[CL:Glossary:logical pathname]]// //[[CL:Glossary:namestring]]// are unspecified.
 
-
-
-The consequences of using any value not specified here as a 
-//[[CL:Glossary:logical pathname]]// component are unspecified.
+The consequences of using any value not specified here as a  //[[CL:Glossary:logical pathname]]// component are unspecified.
 
 \endsubsubsubsection%{Other Syntax in a Logical Pathname Namestring}
-
-
-
-
 
 \endsubsubsection%{Additional Information about Parsing Logical Pathname Namestrings}
 
@@ -139,30 +100,15 @@ The consequences of using any value not specified here as a
 
 \beginSubsection{Logical Pathname Components}
 
-\beginsubsubsection{Unspecific Components of a Logical Pathname}
-\DefineSection{LogicalPathCompUnspecific}
+\beginsubsubsection{Unspecific Components of a Logical Pathname} \DefineSection{LogicalPathCompUnspecific}
 
-The device component of a //[[CL:Glossary:logical pathname]]// is always **'':unspecific''**;
-no other component of a \term {logical pathname} can be **'':unspecific''**.  
+The device component of a //[[CL:Glossary:logical pathname]]// is always **'':unspecific''**; no other component of a \term {logical pathname} can be **'':unspecific''**.  
 
 \endsubsubsection%{Unspecific Components of a Logical Pathname}
 
 \beginsubsubsection{Null Strings as Components of a Logical Pathname}
 
 The null string, \f{""}, is not a valid value for any component of a //[[CL:Glossary:logical pathname]]//.
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 \endsubsubsection%{Null Strings as Components of a Logical Pathname}
 

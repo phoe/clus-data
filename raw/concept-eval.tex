@@ -1,96 +1,48 @@
 
 
-
-//[[CL:Glossary:Execution]]// of //[[CL:Glossary:code]]// can be accomplished by a variety of means ranging
-from direct interpretation of a //[[CL:Glossary:form]]// representing a //[[CL:Glossary:program]]//
-to invocation of //[[CL:Glossary:compiled code]]// produced by a //[[CL:Glossary:compiler]]//.
- 
-\newtermidx{Evaluation}{evaluation} is the process by which a //[[CL:Glossary:program]]// is //[[CL:Glossary:executed]]// in \clisp.
-The mechanism of //[[CL:Glossary:evaluation]]// is manifested
+//[[CL:Glossary:Execution]]// of //[[CL:Glossary:code]]// can be accomplished by a variety of means ranging from direct interpretation of a //[[CL:Glossary:form]]// representing a //[[CL:Glossary:program]]// to invocation of //[[CL:Glossary:compiled code]]// produced by a //[[CL:Glossary:compiler]]//.
+  \newtermidx{Evaluation}{evaluation} is the process by which a //[[CL:Glossary:program]]// is //[[CL:Glossary:executed]]// in \clisp. The mechanism of //[[CL:Glossary:evaluation]]// is manifested
  both implicitly through the effect of the //[[CL:Glossary:Lisp read-eval-print loop]]//,
  and  explicitly through the presence of the //[[CL:Glossary:functions]]// 
        **[[CL:Functions:eval]]**,
        **[[CL:Functions:compile]]**,
        **[[CL:Functions:compile-file]]**,
-   and **[[CL:Functions:load]]**.
-Any of these facilities might share the same execution strategy, 
-or each might use a different one.
+   and **[[CL:Functions:load]]**. Any of these facilities might share the same execution strategy,  or each might use a different one.
 
-The behavior of a //[[CL:Glossary:conforming program]]// processed by **[[CL:Functions:eval]]**
-and by **[[CL:Functions:compile-file]]** might differ; \seesection\SemanticConstraints.
+The behavior of a //[[CL:Glossary:conforming program]]// processed by **[[CL:Functions:eval]]** and by **[[CL:Functions:compile-file]]** might differ; \seesection\SemanticConstraints.
 
-//[[CL:Glossary:Evaluation]]// can be understood in terms of a model in which an
-interpreter recursively traverses a //[[CL:Glossary:form]]// performing each
-step of the computation as it goes.  
-This model, which describes the semantics of \clisp\ //[[CL:Glossary:programs]]//,
-is described in \secref\EvaluationModel.
+//[[CL:Glossary:Evaluation]]// can be understood in terms of a model in which an interpreter recursively traverses a //[[CL:Glossary:form]]// performing each step of the computation as it goes.   This model, which describes the semantics of \clisp\ //[[CL:Glossary:programs]]//, is described in \secref\EvaluationModel.
 
-\beginsubSection{Introduction to Environments}
-\DefineSection{IntroToEnvs}
+\beginsubSection{Introduction to Environments} \DefineSection{IntroToEnvs}
 
-A //[[CL:Glossary:binding]]// is an association between a //[[CL:Glossary:name]]// and
-that which the name denotes.  //[[CL:Glossary:Bindings]]// are //[[CL:Glossary:established]]//
-in a //[[CL:Glossary:lexical environment]]// or a //[[CL:Glossary:dynamic environment]]//
-by particular //[[CL:Glossary:special operators]]//.
+A //[[CL:Glossary:binding]]// is an association between a //[[CL:Glossary:name]]// and that which the name denotes.  //[[CL:Glossary:Bindings]]// are //[[CL:Glossary:established]]// in a //[[CL:Glossary:lexical environment]]// or a //[[CL:Glossary:dynamic environment]]// by particular //[[CL:Glossary:special operators]]//.
 
-An //[[CL:Glossary:environment]]// is a set of //[[CL:Glossary:bindings]]// and other information
-used during evaluation (\eg to associate meanings with names).
+An //[[CL:Glossary:environment]]// is a set of //[[CL:Glossary:bindings]]// and other information used during evaluation (\eg to associate meanings with names).
 
-//[[CL:Glossary:Bindings]]// in an //[[CL:Glossary:environment]]// are partitioned into \newtermidx{namespaces}{namespace}.
-A single //[[CL:Glossary:name]]// can simultaneously have more than one
-associated //[[CL:Glossary:binding]]// per //[[CL:Glossary:environment]]//,
-but can have only one associated //[[CL:Glossary:binding]]// per //[[CL:Glossary:namespace]]//.
-
-
-
+//[[CL:Glossary:Bindings]]// in an //[[CL:Glossary:environment]]// are partitioned into \newtermidx{namespaces}{namespace}. A single //[[CL:Glossary:name]]// can simultaneously have more than one associated //[[CL:Glossary:binding]]// per //[[CL:Glossary:environment]]//, but can have only one associated //[[CL:Glossary:binding]]// per //[[CL:Glossary:namespace]]//.
 
 \beginsubsubsection{The Global Environment}
 
-The //[[CL:Glossary:global environment]]// is that part of an //[[CL:Glossary:environment]]//
-that contains //[[CL:Glossary:bindings]]// with both //[[CL:Glossary:indefinite scope]]// 
-and //[[CL:Glossary:indefinite extent]]//.
-The //[[CL:Glossary:global environment]]// contains, among other things, the following:
+The //[[CL:Glossary:global environment]]// is that part of an //[[CL:Glossary:environment]]// that contains //[[CL:Glossary:bindings]]// with both //[[CL:Glossary:indefinite scope]]//  and //[[CL:Glossary:indefinite extent]]//. The //[[CL:Glossary:global environment]]// contains, among other things, the following:
 
-\beginlist
-\item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:dynamic variables]]// and //[[CL:Glossary:constant variables]]//.
-\item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:functions]]//, //[[CL:Glossary:macros]]//, and //[[CL:Glossary:special operators]]//.
-\item{\bull}%
-\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}%
+\beginlist \item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:dynamic variables]]// and //[[CL:Glossary:constant variables]]//. \item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:functions]]//, //[[CL:Glossary:macros]]//, and //[[CL:Glossary:special operators]]//. \item{\bull}% \issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}%
  //[[CL:Glossary:bindings]]// of //[[CL:Glossary:compiler macros]]//.
 
-\item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:type]]// and //[[CL:Glossary:class]]// //[[CL:Glossary:names]]//
-\item{\bull} information about //[[CL:Glossary:proclamations]]//.
-\endlist
+\item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:type]]// and //[[CL:Glossary:class]]// //[[CL:Glossary:names]]// \item{\bull} information about //[[CL:Glossary:proclamations]]//. \endlist
 
 \endsubsubsection%{The Global Environment}
 
 \beginsubsubsection{Dynamic Environments}
 
-A //[[CL:Glossary:dynamic environment]]// for //[[CL:Glossary:evaluation]]// is that part of an
-//[[CL:Glossary:environment]]// that contains //[[CL:Glossary:bindings]]// whose duration
-is bounded by points of //[[CL:Glossary:establishment]]// and //[[CL:Glossary:disestablishment]]// 
-within the execution of the //[[CL:Glossary:form]]// that
-established the //[[CL:Glossary:binding]]//.
-A //[[CL:Glossary:dynamic environment]]// contains, among other things, the following:
+A //[[CL:Glossary:dynamic environment]]// for //[[CL:Glossary:evaluation]]// is that part of an //[[CL:Glossary:environment]]// that contains //[[CL:Glossary:bindings]]// whose duration is bounded by points of //[[CL:Glossary:establishment]]// and //[[CL:Glossary:disestablishment]]//  within the execution of the //[[CL:Glossary:form]]// that established the //[[CL:Glossary:binding]]//. A //[[CL:Glossary:dynamic environment]]// contains, among other things, the following:
 
-\beginlist
-\item{\bull} //[[CL:Glossary:bindings]]// for //[[CL:Glossary:dynamic variables]]//.
-\item{\bull} information about //[[CL:Glossary:active]]// //[[CL:Glossary:catch tags]]//.
-\item{\bull} information about //[[CL:Glossary:exit points]]// established by \specref{unwind-protect}.
-\item{\bull} information about //[[CL:Glossary:active]]// //[[CL:Glossary:handlers]]// and //[[CL:Glossary:restarts]]//.
-\endlist
+\beginlist \item{\bull} //[[CL:Glossary:bindings]]// for //[[CL:Glossary:dynamic variables]]//. \item{\bull} information about //[[CL:Glossary:active]]// //[[CL:Glossary:catch tags]]//. \item{\bull} information about //[[CL:Glossary:exit points]]// established by \specref{unwind-protect}. \item{\bull} information about //[[CL:Glossary:active]]// //[[CL:Glossary:handlers]]// and //[[CL:Glossary:restarts]]//. \endlist
 
-The //[[CL:Glossary:dynamic environment]]// that is active at any given point 
-in the //[[CL:Glossary:execution]]// of a //[[CL:Glossary:program]]// is referred to by 
-definite reference as ``the current //[[CL:Glossary:dynamic environment]]//,''
-or sometimes as just ``the //[[CL:Glossary:dynamic environment]]//.''
+The //[[CL:Glossary:dynamic environment]]// that is active at any given point  in the //[[CL:Glossary:execution]]// of a //[[CL:Glossary:program]]// is referred to by  definite reference as ``the current //[[CL:Glossary:dynamic environment]]//,'' or sometimes as just ``the //[[CL:Glossary:dynamic environment]]//.''
 
-Within a given //[[CL:Glossary:namespace]]//,
-a //[[CL:Glossary:name]]// is said to be //[[CL:Glossary:bound]]//
-in a //[[CL:Glossary:dynamic environment]]// if there is a //[[CL:Glossary:binding]]// 
+Within a given //[[CL:Glossary:namespace]]//, a //[[CL:Glossary:name]]// is said to be //[[CL:Glossary:bound]]// in a //[[CL:Glossary:dynamic environment]]// if there is a //[[CL:Glossary:binding]]// 
 
-associated with its //[[CL:Glossary:name]]// in the //[[CL:Glossary:dynamic environment]]// 
-or, if not, there is a //[[CL:Glossary:binding]]// 
+associated with its //[[CL:Glossary:name]]// in the //[[CL:Glossary:dynamic environment]]//  or, if not, there is a //[[CL:Glossary:binding]]// 
 
 associated with its name in the //[[CL:Glossary:global environment]]//.
 
@@ -98,185 +50,89 @@ associated with its name in the //[[CL:Glossary:global environment]]//.
 
 \beginsubsubsection{Lexical Environments}
 
-A //[[CL:Glossary:lexical environment]]// for //[[CL:Glossary:evaluation]]// at some position in a //[[CL:Glossary:program]]//
-is that part of the //[[CL:Glossary:environment]]// that contains information having 
-//[[CL:Glossary:lexical scope]]// within the //[[CL:Glossary:forms]]// containing that position.
-A //[[CL:Glossary:lexical environment]]// contains, among other things, the following:
+A //[[CL:Glossary:lexical environment]]// for //[[CL:Glossary:evaluation]]// at some position in a //[[CL:Glossary:program]]// is that part of the //[[CL:Glossary:environment]]// that contains information having  //[[CL:Glossary:lexical scope]]// within the //[[CL:Glossary:forms]]// containing that position. A //[[CL:Glossary:lexical environment]]// contains, among other things, the following:
 
-\beginlist
-\item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:lexical variables]]// and //[[CL:Glossary:symbol macros]]//.
-\item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:functions]]// and //[[CL:Glossary:macros]]//.
-             (Implicit in this is information about those //[[CL:Glossary:compiler macros]]// 
-	      that are locally disabled.)
+\beginlist \item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:lexical variables]]// and //[[CL:Glossary:symbol macros]]//. \item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:functions]]// and //[[CL:Glossary:macros]]//.
+             (Implicit in this is information about those //[[CL:Glossary:compiler macros]]//  	      that are locally disabled.)
 
+\item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:block tags]]//. \item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:go tags]]//. \item{\bull} information about //[[CL:Glossary:declarations]]//. \endlist
 
+The //[[CL:Glossary:lexical environment]]// that is active at any given position in a //[[CL:Glossary:program]]// being semantically processed is referred to by definite reference as ``the current //[[CL:Glossary:lexical environment]]//,'' or sometimes as just ``the //[[CL:Glossary:lexical environment]]//.''  
 
+Within a given //[[CL:Glossary:namespace]]//, a //[[CL:Glossary:name]]// is said to be //[[CL:Glossary:bound]]// in a //[[CL:Glossary:lexical environment]]// if there is a //[[CL:Glossary:binding]]// 
 
-\item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:block tags]]//.
-\item{\bull} //[[CL:Glossary:bindings]]// of //[[CL:Glossary:go tags]]//.
-\item{\bull} information about //[[CL:Glossary:declarations]]//.
-\endlist
-
-The //[[CL:Glossary:lexical environment]]// that is active at any given position
-in a //[[CL:Glossary:program]]// being semantically processed is referred to by
-definite reference as ``the current //[[CL:Glossary:lexical environment]]//,''
-or sometimes as just ``the //[[CL:Glossary:lexical environment]]//.''  
-
-Within a given //[[CL:Glossary:namespace]]//,
-a //[[CL:Glossary:name]]// is said to be //[[CL:Glossary:bound]]// in a //[[CL:Glossary:lexical environment]]//
-if there is a //[[CL:Glossary:binding]]// 
-
-associated with its //[[CL:Glossary:name]]//
-in the //[[CL:Glossary:lexical environment]]// or, if not, there is a //[[CL:Glossary:binding]]// 
+associated with its //[[CL:Glossary:name]]// in the //[[CL:Glossary:lexical environment]]// or, if not, there is a //[[CL:Glossary:binding]]// 
 
 associated with its name in the //[[CL:Glossary:global environment]]//.
 
-\beginsubsubsubsection{The Null Lexical Environment}
-\DefineSection{NullLexicalEnv}
+\beginsubsubsubsection{The Null Lexical Environment} \DefineSection{NullLexicalEnv}
 
 The //[[CL:Glossary:null lexical environment]]// is equivalent to the //[[CL:Glossary:global environment]]//.
 
-Although in general the representation of an //[[CL:Glossary:environment]]// //[[CL:Glossary:object]]//
-is //[[CL:Glossary:implementation-dependent]]//, \nil\ can be used in any situation where an
-//[[CL:Glossary:environment]]// //[[CL:Glossary:object]]// is called for in order to denote 
-the //[[CL:Glossary:null lexical environment]]//.
+Although in general the representation of an //[[CL:Glossary:environment]]// //[[CL:Glossary:object]]// is //[[CL:Glossary:implementation-dependent]]//, \nil\ can be used in any situation where an //[[CL:Glossary:environment]]// //[[CL:Glossary:object]]// is called for in order to denote  the //[[CL:Glossary:null lexical environment]]//.
 
 \endsubsubsubsection%{The Null Lexical Environment}
 
 \endsubsubsection%{Lexical Environments}
 
-\beginsubsubsection{Environment Objects}
-\DefineSection{EnvObjs}
+\beginsubsubsection{Environment Objects} \DefineSection{EnvObjs}
 
-Some //[[CL:Glossary:operators]]// make use of an //[[CL:Glossary:object]]//, 
-called an //[[CL:Glossary:environment object]]//,
-that represents the set of //[[CL:Glossary:lexical bindings]]// needed to perform
-semantic analysis on a //[[CL:Glossary:form]]// in a given //[[CL:Glossary:lexical environment]]//.
-The set of //[[CL:Glossary:bindings]]// in an //[[CL:Glossary:environment object]]//
-may be a subset of the //[[CL:Glossary:bindings]]// that would be needed to actually 
-perform an //[[CL:Glossary:evaluation]]//; for example, //[[CL:Glossary:values]]// associated with
-//[[CL:Glossary:variable]]// //[[CL:Glossary:names]]// and //[[CL:Glossary:function names]]// in the corresponding
-//[[CL:Glossary:lexical environment]]// might not be available in an //[[CL:Glossary:environment object]]//.
+Some //[[CL:Glossary:operators]]// make use of an //[[CL:Glossary:object]]//,  called an //[[CL:Glossary:environment object]]//, that represents the set of //[[CL:Glossary:lexical bindings]]// needed to perform semantic analysis on a //[[CL:Glossary:form]]// in a given //[[CL:Glossary:lexical environment]]//. The set of //[[CL:Glossary:bindings]]// in an //[[CL:Glossary:environment object]]// may be a subset of the //[[CL:Glossary:bindings]]// that would be needed to actually  perform an //[[CL:Glossary:evaluation]]//; for example, //[[CL:Glossary:values]]// associated with //[[CL:Glossary:variable]]// //[[CL:Glossary:names]]// and //[[CL:Glossary:function names]]// in the corresponding //[[CL:Glossary:lexical environment]]// might not be available in an //[[CL:Glossary:environment object]]//.
 
-The //[[CL:Glossary:type]]// and nature of an //[[CL:Glossary:environment object]]// is //[[CL:Glossary:implementation-dependent]]//.
-The //[[CL:Glossary:values]]// of //[[CL:Glossary:environment parameters]]// to //[[CL:Glossary:macro functions]]//
-are examples of //[[CL:Glossary:environment objects]]//.
+The //[[CL:Glossary:type]]// and nature of an //[[CL:Glossary:environment object]]// is //[[CL:Glossary:implementation-dependent]]//. The //[[CL:Glossary:values]]// of //[[CL:Glossary:environment parameters]]// to //[[CL:Glossary:macro functions]]// are examples of //[[CL:Glossary:environment objects]]//.
 
-The //[[CL:Glossary:object]]// \nil\ when used as an //[[CL:Glossary:environment object]]//
-denotes the //[[CL:Glossary:null lexical environment]]//;
-\seesection\NullLexicalEnv.
+The //[[CL:Glossary:object]]// \nil\ when used as an //[[CL:Glossary:environment object]]// denotes the //[[CL:Glossary:null lexical environment]]//; \seesection\NullLexicalEnv.
 
 \endsubsubsection%{Environment Objects}
 
 \endSubsection%{Introduction to Environments}
 
-\beginSubsection{The Evaluation Model}
-\DefineSection{EvaluationModel}
+\beginSubsection{The Evaluation Model} \DefineSection{EvaluationModel}
 
-A \clisp\ system evaluates //[[CL:Glossary:forms]]// with respect to lexical,
-dynamic, and global //[[CL:Glossary:environments]]//.  The following sections
-describe the components of the \clisp\ evaluation model.
+A \clisp\ system evaluates //[[CL:Glossary:forms]]// with respect to lexical, dynamic, and global //[[CL:Glossary:environments]]//.  The following sections describe the components of the \clisp\ evaluation model.
 
 \beginsubsubsection{Form Evaluation}
 
-
-
 //[[CL:Glossary:Forms]]// fall into three categories:
 
-//[[CL:Glossary:symbols]]//, //[[CL:Glossary:conses]]//, and //[[CL:Glossary:self-evaluating objects]]//.
-The following sections explain these categories.
-                                            
-\beginsubsubsubsection{Symbols as Forms}
-\DefineSection{SymbolsAsForms}
+//[[CL:Glossary:symbols]]//, //[[CL:Glossary:conses]]//, and //[[CL:Glossary:self-evaluating objects]]//. The following sections explain these categories.
+                                             \beginsubsubsubsection{Symbols as Forms} \DefineSection{SymbolsAsForms}
 
-If a //[[CL:Glossary:form]]// is a //[[CL:Glossary:symbol]]//,
-then it is either a //[[CL:Glossary:symbol macro]]// or a //[[CL:Glossary:variable]]//.
+If a //[[CL:Glossary:form]]// is a //[[CL:Glossary:symbol]]//, then it is either a //[[CL:Glossary:symbol macro]]// or a //[[CL:Glossary:variable]]//.
 
-The //[[CL:Glossary:symbol]]// names a //[[CL:Glossary:symbol macro]]// 
-if there is a //[[CL:Glossary:binding]]// of the //[[CL:Glossary:symbol]]// as a //[[CL:Glossary:symbol macro]]//
-in the current //[[CL:Glossary:lexical environment]]// 
-\issue{ISO-COMPATIBILITY:ADD-SUBSTRATE}
+The //[[CL:Glossary:symbol]]// names a //[[CL:Glossary:symbol macro]]//  if there is a //[[CL:Glossary:binding]]// of the //[[CL:Glossary:symbol]]// as a //[[CL:Glossary:symbol macro]]// in the current //[[CL:Glossary:lexical environment]]//  \issue{ISO-COMPATIBILITY:ADD-SUBSTRATE}
  (see \macref{define-symbol-macro} and \specref{symbol-macrolet}).
 
-If the //[[CL:Glossary:symbol]]// is a //[[CL:Glossary:symbol macro]]//,
-its expansion function is obtained.
-The expansion function is a function of two arguments, and is invoked
-by calling the //[[CL:Glossary:macroexpand hook]]// with 
+If the //[[CL:Glossary:symbol]]// is a //[[CL:Glossary:symbol macro]]//, its expansion function is obtained. The expansion function is a function of two arguments, and is invoked by calling the //[[CL:Glossary:macroexpand hook]]// with 
      the expansion function as its first argument,
      the //[[CL:Glossary:symbol]]// as its second argument,
  and an //[[CL:Glossary:environment object]]// (corresponding to the current //[[CL:Glossary:lexical environment]]//)
-      as its third argument.
-The //[[CL:Glossary:macroexpand hook]]//, in turn, calls the expansion function with the
-//[[CL:Glossary:form]]// as its first argument and the //[[CL:Glossary:environment]]// as its second argument.
-The //[[CL:Glossary:value]]// of the expansion function, which is passed through
-by the //[[CL:Glossary:macroexpand hook]]//, is a //[[CL:Glossary:form]]//. 
-This resulting //[[CL:Glossary:form]]// is processed in place of the original //[[CL:Glossary:symbol]]//.
+      as its third argument. The //[[CL:Glossary:macroexpand hook]]//, in turn, calls the expansion function with the //[[CL:Glossary:form]]// as its first argument and the //[[CL:Glossary:environment]]// as its second argument. The //[[CL:Glossary:value]]// of the expansion function, which is passed through by the //[[CL:Glossary:macroexpand hook]]//, is a //[[CL:Glossary:form]]//.  This resulting //[[CL:Glossary:form]]// is processed in place of the original //[[CL:Glossary:symbol]]//.
 
-If a //[[CL:Glossary:form]]// is a //[[CL:Glossary:symbol]]// that is not a //[[CL:Glossary:symbol macro]]//,
-then it is the //[[CL:Glossary:name]]// of a //[[CL:Glossary:variable]]//, and the //[[CL:Glossary:value]]// of that
-//[[CL:Glossary:variable]]// is returned. There are three kinds of variables:
+If a //[[CL:Glossary:form]]// is a //[[CL:Glossary:symbol]]// that is not a //[[CL:Glossary:symbol macro]]//, then it is the //[[CL:Glossary:name]]// of a //[[CL:Glossary:variable]]//, and the //[[CL:Glossary:value]]// of that //[[CL:Glossary:variable]]// is returned. There are three kinds of variables:
  //[[CL:Glossary:lexical variables]]//,
- //[[CL:Glossary:dynamic variables]]//,
-and
+ //[[CL:Glossary:dynamic variables]]//, and
  //[[CL:Glossary:constant variables]]//.
 
-A //[[CL:Glossary:variable]]// can store one //[[CL:Glossary:object]]//.
-The main operations on a //[[CL:Glossary:variable]]// are 
+A //[[CL:Glossary:variable]]// can store one //[[CL:Glossary:object]]//. The main operations on a //[[CL:Glossary:variable]]// are 
  to //[[CL:Glossary:read]]//\meaning{1} and 
- to //[[CL:Glossary:write]]//\meaning{1}
-its //[[CL:Glossary:value]]//.
+ to //[[CL:Glossary:write]]//\meaning{1} its //[[CL:Glossary:value]]//.
 
+An error \oftype{unbound-variable} should be signaled if an //[[CL:Glossary:unbound variable]]// is referenced.
 
+//[[CL:Glossary:Non-constant variables]]// can be //[[CL:Glossary:assigned]]// by using \specref{setq}  or //[[CL:Glossary:bound]]//\meaning{3} by using \specref{let}. \Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that are applicable to assigning, binding, and defining //[[CL:Glossary:variables]]//.
 
-
-
-An error \oftype{unbound-variable} should be signaled if
-an //[[CL:Glossary:unbound variable]]// is referenced.
-
-//[[CL:Glossary:Non-constant variables]]// can be //[[CL:Glossary:assigned]]// by using \specref{setq} 
-or //[[CL:Glossary:bound]]//\meaning{3} by using \specref{let}.
-\Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that
-are applicable to assigning, binding, and defining //[[CL:Glossary:variables]]//.
-
-\displaythree{Some Defined Names Applicable to Variables}{
-boundp&let&progv\cr
-defconstant&let*&psetq\cr
-defparameter&makunbound&set\cr
-defvar&multiple-value-bind&setq\cr
-lambda&multiple-value-setq&symbol-value\cr
-}
+\displaythree{Some Defined Names Applicable to Variables}{ boundp&let&progv\cr defconstant&let*&psetq\cr defparameter&makunbound&set\cr defvar&multiple-value-bind&setq\cr lambda&multiple-value-setq&symbol-value\cr }
 
 The following is a description of each kind of variable.
 
 \beginsubsubsubsubsection{Lexical Variables}
 
+A //[[CL:Glossary:lexical variable]]// is a //[[CL:Glossary:variable]]// that can be referenced only within  the //[[CL:Glossary:lexical scope]]// of the //[[CL:Glossary:form]]// that establishes that //[[CL:Glossary:variable]]//; //[[CL:Glossary:lexical variables]]// have //[[CL:Glossary:lexical scope]]//. Each time a //[[CL:Glossary:form]]// creates a //[[CL:Glossary:lexical binding]]// of a //[[CL:Glossary:variable]]//, a //[[CL:Glossary:fresh]]// //[[CL:Glossary:binding]]// is //[[CL:Glossary:established]]//.
 
+Within the //[[CL:Glossary:scope]]// of a //[[CL:Glossary:binding]]// for a //[[CL:Glossary:lexical variable]]// //[[CL:Glossary:name]]//, uses of that //[[CL:Glossary:name]]// as a //[[CL:Glossary:variable]]// are considered to be references to that //[[CL:Glossary:binding]]// except where the //[[CL:Glossary:variable]]// is //[[CL:Glossary:shadowed]]//\meaning{2}  by a //[[CL:Glossary:form]]// that //[[CL:Glossary:establishes]]// a //[[CL:Glossary:fresh]]// //[[CL:Glossary:binding]]// for that  //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//, or by a //[[CL:Glossary:form]]// that locally //[[CL:Glossary:declares]]// the //[[CL:Glossary:name]]// **[[CL:Declarations:special]]**.
 
-
-
-
-
-
-
-
-
-A //[[CL:Glossary:lexical variable]]// is a //[[CL:Glossary:variable]]// that can be referenced only within 
-the //[[CL:Glossary:lexical scope]]// of the //[[CL:Glossary:form]]// that establishes that //[[CL:Glossary:variable]]//;
-//[[CL:Glossary:lexical variables]]// have //[[CL:Glossary:lexical scope]]//.
-Each time a //[[CL:Glossary:form]]// creates a //[[CL:Glossary:lexical binding]]// of a //[[CL:Glossary:variable]]//,
-a //[[CL:Glossary:fresh]]// //[[CL:Glossary:binding]]// is //[[CL:Glossary:established]]//.
-
-Within the //[[CL:Glossary:scope]]// of a //[[CL:Glossary:binding]]// for a //[[CL:Glossary:lexical variable]]// //[[CL:Glossary:name]]//,
-uses of that //[[CL:Glossary:name]]// as a //[[CL:Glossary:variable]]// are considered to be references
-to that //[[CL:Glossary:binding]]// except where the //[[CL:Glossary:variable]]// is //[[CL:Glossary:shadowed]]//\meaning{2} 
-by a //[[CL:Glossary:form]]// that //[[CL:Glossary:establishes]]// a //[[CL:Glossary:fresh]]// //[[CL:Glossary:binding]]// for that 
-//[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//,
-or by a //[[CL:Glossary:form]]// that locally //[[CL:Glossary:declares]]// the //[[CL:Glossary:name]]// **[[CL:Declarations:special]]**.
-
-A //[[CL:Glossary:lexical variable]]// always has a //[[CL:Glossary:value]]//.
-There is no //[[CL:Glossary:operator]]// that introduces a //[[CL:Glossary:binding]]// for a
-//[[CL:Glossary:lexical variable]]// without giving it an initial //[[CL:Glossary:value]]//, nor
-is there any //[[CL:Glossary:operator]]// that can make a //[[CL:Glossary:lexical variable]]// be //[[CL:Glossary:unbound]]//.
+A //[[CL:Glossary:lexical variable]]// always has a //[[CL:Glossary:value]]//. There is no //[[CL:Glossary:operator]]// that introduces a //[[CL:Glossary:binding]]// for a //[[CL:Glossary:lexical variable]]// without giving it an initial //[[CL:Glossary:value]]//, nor is there any //[[CL:Glossary:operator]]// that can make a //[[CL:Glossary:lexical variable]]// be //[[CL:Glossary:unbound]]//.
 
 //[[CL:Glossary:Bindings]]// of //[[CL:Glossary:lexical variables]]// are found in the //[[CL:Glossary:lexical environment]]//.
 
@@ -284,117 +140,52 @@ is there any //[[CL:Glossary:operator]]// that can make a //[[CL:Glossary:lexica
 
 \beginsubsubsubsubsection{Dynamic Variables}
 
-A //[[CL:Glossary:variable]]// is a //[[CL:Glossary:dynamic variable]]// if one of the following
-conditions hold:
+A //[[CL:Glossary:variable]]// is a //[[CL:Glossary:dynamic variable]]// if one of the following conditions hold:
 
 \beginlist
 
  \item{\bull} It is locally declared or globally proclaimed **[[CL:Declarations:special]]**.
 
- \item{\bull} It occurs textually within a //[[CL:Glossary:form]]// that
-creates a //[[CL:Glossary:dynamic binding]]// for a //[[CL:Glossary:variable]]// of the //[[CL:Glossary:same]]// //[[CL:Glossary:name]]//,
-and the //[[CL:Glossary:binding]]// is not //[[CL:Glossary:shadowed]]//\meaning{2} by a //[[CL:Glossary:form]]//
-that creates a //[[CL:Glossary:lexical binding]]// of the same //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
-
-
-
-
-
-
+ \item{\bull} It occurs textually within a //[[CL:Glossary:form]]// that creates a //[[CL:Glossary:dynamic binding]]// for a //[[CL:Glossary:variable]]// of the //[[CL:Glossary:same]]// //[[CL:Glossary:name]]//, and the //[[CL:Glossary:binding]]// is not //[[CL:Glossary:shadowed]]//\meaning{2} by a //[[CL:Glossary:form]]// that creates a //[[CL:Glossary:lexical binding]]// of the same //[[CL:Glossary:variable]]// //[[CL:Glossary:name]]//.
 
 \endlist
 
+A //[[CL:Glossary:dynamic variable]]// can be referenced at any time in any //[[CL:Glossary:program]]//; there is no textual limitation on references to //[[CL:Glossary:dynamic variables]]//. At any given time, all //[[CL:Glossary:dynamic variables]]// with a given name refer to  exactly one //[[CL:Glossary:binding]]//, either in the //[[CL:Glossary:dynamic environment]]// or in the //[[CL:Glossary:global environment]]//.
 
-A //[[CL:Glossary:dynamic variable]]// can be referenced at any time in any //[[CL:Glossary:program]]//;
-there is no textual limitation on references to //[[CL:Glossary:dynamic variables]]//.
-At any given time, all //[[CL:Glossary:dynamic variables]]// with a given name refer to 
-exactly one //[[CL:Glossary:binding]]//, either in the //[[CL:Glossary:dynamic environment]]//
-or in the //[[CL:Glossary:global environment]]//.
+The //[[CL:Glossary:value]]// part of the //[[CL:Glossary:binding]]// for a //[[CL:Glossary:dynamic variable]]// might be empty; in this case, the //[[CL:Glossary:dynamic variable]]// is said to have no //[[CL:Glossary:value]]//, or to be //[[CL:Glossary:unbound]]//.  A //[[CL:Glossary:dynamic variable]]// can be made //[[CL:Glossary:unbound]]// by using **[[CL:Functions:makunbound]]**.
+            The effect of //[[CL:Glossary:binding]]// a //[[CL:Glossary:dynamic variable]]// is to create a new //[[CL:Glossary:binding]]// to which all references to that //[[CL:Glossary:dynamic variable]]// in any //[[CL:Glossary:program]]// refer for the duration of the //[[CL:Glossary:evaluation]]// of the //[[CL:Glossary:form]]// that creates the //[[CL:Glossary:dynamic binding]]//.
 
+A //[[CL:Glossary:dynamic variable]]// can be referenced outside the //[[CL:Glossary:dynamic extent]]// of a //[[CL:Glossary:form]]// that //[[CL:Glossary:binds]]// it.  Such a //[[CL:Glossary:variable]]// is sometimes called  a ``global variable'' but is still in all respects just a //[[CL:Glossary:dynamic variable]]// whose //[[CL:Glossary:binding]]// happens to exist in the //[[CL:Glossary:global environment]]// rather than in some //[[CL:Glossary:dynamic environment]]//.
 
-The //[[CL:Glossary:value]]// part of the //[[CL:Glossary:binding]]// for a //[[CL:Glossary:dynamic variable]]// might
-be empty; in this case, the //[[CL:Glossary:dynamic variable]]// is said to have no //[[CL:Glossary:value]]//,
-or to be //[[CL:Glossary:unbound]]//.  A //[[CL:Glossary:dynamic variable]]// can be made //[[CL:Glossary:unbound]]//
-by using **[[CL:Functions:makunbound]]**.
-           
-The effect of //[[CL:Glossary:binding]]// a //[[CL:Glossary:dynamic variable]]// is to create
-a new //[[CL:Glossary:binding]]// to which all references to that //[[CL:Glossary:dynamic variable]]//
-in any //[[CL:Glossary:program]]// refer for the duration of the //[[CL:Glossary:evaluation]]// of the //[[CL:Glossary:form]]//
-that creates the //[[CL:Glossary:dynamic binding]]//.
-
-
-
-
-
-
-
-
-
-A //[[CL:Glossary:dynamic variable]]// can be referenced outside the //[[CL:Glossary:dynamic extent]]// of
-a //[[CL:Glossary:form]]// that //[[CL:Glossary:binds]]// it.  Such a //[[CL:Glossary:variable]]// is sometimes called 
-a ``global variable'' but is still in all respects just a //[[CL:Glossary:dynamic variable]]//
-whose //[[CL:Glossary:binding]]// happens to exist in the //[[CL:Glossary:global environment]]// rather than in some
-//[[CL:Glossary:dynamic environment]]//.
-
-
-A //[[CL:Glossary:dynamic variable]]// is //[[CL:Glossary:unbound]]//
-unless and until explicitly assigned a value, except for 
-those variables whose initial value is 
-defined in this specification or by an //[[CL:Glossary:implementation]]//.
-
-
-
-
+A //[[CL:Glossary:dynamic variable]]// is //[[CL:Glossary:unbound]]// unless and until explicitly assigned a value, except for  those variables whose initial value is  defined in this specification or by an //[[CL:Glossary:implementation]]//.
 
 \endsubsubsubsubsection%{Dynamic Variables}
 
-\beginsubsubsubsubsection{Constant Variables}
-\DefineSection{ConstantVars}
+\beginsubsubsubsubsection{Constant Variables} \DefineSection{ConstantVars}
 
-
-
-Certain variables, called //[[CL:Glossary:constant variables]]//, are reserved as ``named constants.''  
-The consequences are undefined if an attempt is made to 
+Certain variables, called //[[CL:Glossary:constant variables]]//, are reserved as ``named constants.''   The consequences are undefined if an attempt is made to 
     assign a value to,
- or create
-a //[[CL:Glossary:binding]]// for a //[[CL:Glossary:constant variable]]//, 
-except that a `compatible' redefinition of a //[[CL:Glossary:constant variable]]//
-using \macref{defconstant} is permitted; \seemac{defconstant}.
+ or create a //[[CL:Glossary:binding]]// for a //[[CL:Glossary:constant variable]]//,  except that a `compatible' redefinition of a //[[CL:Glossary:constant variable]]// using \macref{defconstant} is permitted; \seemac{defconstant}.
 
-//[[CL:Glossary:Keywords]]//, 
-//[[CL:Glossary:symbols]]// defined by \clisp\ or the //[[CL:Glossary:implementation]]//
-  as constant (such as \nil, \t, and \conref{pi}),
-and //[[CL:Glossary:symbols]]// declared as constant using \macref{defconstant}
-are //[[CL:Glossary:constant variables]]//.
+//[[CL:Glossary:Keywords]]//,  //[[CL:Glossary:symbols]]// defined by \clisp\ or the //[[CL:Glossary:implementation]]//
+  as constant (such as \nil, \t, and \conref{pi}), and //[[CL:Glossary:symbols]]// declared as constant using \macref{defconstant} are //[[CL:Glossary:constant variables]]//.
 
 \endsubsubsubsubsection%{Constant Variables}
 
 \beginsubsubsubsubsection{Symbols Naming Both Lexical and Dynamic Variables}
 
-
-
-
-
-
 The same //[[CL:Glossary:symbol]]// can name both 
-    a //[[CL:Glossary:lexical variable]]// 
-and a //[[CL:Glossary:dynamic variable]]//,
-but never in the same //[[CL:Glossary:lexical environment]]//.
+    a //[[CL:Glossary:lexical variable]]//  and a //[[CL:Glossary:dynamic variable]]//, but never in the same //[[CL:Glossary:lexical environment]]//.
 
-In the following example, the //[[CL:Glossary:symbol]]// \f{x} is used,
-at different times, 
-    as the //[[CL:Glossary:name]]// of a //[[CL:Glossary:lexical variable]]//
-and as the //[[CL:Glossary:name]]// of a //[[CL:Glossary:dynamic variable]]//.
- 
-\code
+In the following example, the //[[CL:Glossary:symbol]]// \f{x} is used, at different times, 
+    as the //[[CL:Glossary:name]]// of a //[[CL:Glossary:lexical variable]]// and as the //[[CL:Glossary:name]]// of a //[[CL:Glossary:dynamic variable]]//.
+  \code
  (let ((x 1))            ;Binds a special variable X
    (declare (special x))
    (let ((x 2))          ;Binds a lexical variable X
      (+ x                ;Reads a lexical variable X
         (locally (declare (special x))
-                 x))))   ;Reads a special variable X
-\EV 3
-\endcode
+                 x))))   ;Reads a special variable X \EV 3 \endcode
 
 \endsubsubsubsubsection%{Symbols Naming Both Lexical and Dynamic Variables}
 
@@ -404,294 +195,99 @@ and as the //[[CL:Glossary:name]]// of a //[[CL:Glossary:dynamic variable]]//.
 
 A //[[CL:Glossary:cons]]// that is used as a //[[CL:Glossary:form]]// is called a //[[CL:Glossary:compound form]]//.
 
-If the //[[CL:Glossary:car]]// of that //[[CL:Glossary:compound form]]// is a //[[CL:Glossary:symbol]]//, 
-that //[[CL:Glossary:symbol]]// is the //[[CL:Glossary:name]]// of an //[[CL:Glossary:operator]]//,
-and the //[[CL:Glossary:form]]// is either a //[[CL:Glossary:special form]]//, a //[[CL:Glossary:macro form]]//,
-or a //[[CL:Glossary:function form]]//, depending on the //[[CL:Glossary:function]]// //[[CL:Glossary:binding]]// 
-of the //[[CL:Glossary:operator]]// in the current //[[CL:Glossary:lexical environment]]//.
-If the //[[CL:Glossary:operator]]// is neither a //[[CL:Glossary:special operator]]//
-nor a //[[CL:Glossary:macro name]]//, it is assumed to be a //[[CL:Glossary:function name]]//
-(even if there is no definition for such a //[[CL:Glossary:function]]//).
+If the //[[CL:Glossary:car]]// of that //[[CL:Glossary:compound form]]// is a //[[CL:Glossary:symbol]]//,  that //[[CL:Glossary:symbol]]// is the //[[CL:Glossary:name]]// of an //[[CL:Glossary:operator]]//, and the //[[CL:Glossary:form]]// is either a //[[CL:Glossary:special form]]//, a //[[CL:Glossary:macro form]]//, or a //[[CL:Glossary:function form]]//, depending on the //[[CL:Glossary:function]]// //[[CL:Glossary:binding]]//  of the //[[CL:Glossary:operator]]// in the current //[[CL:Glossary:lexical environment]]//. If the //[[CL:Glossary:operator]]// is neither a //[[CL:Glossary:special operator]]// nor a //[[CL:Glossary:macro name]]//, it is assumed to be a //[[CL:Glossary:function name]]// (even if there is no definition for such a //[[CL:Glossary:function]]//).
 
-If the //[[CL:Glossary:car]]// of the //[[CL:Glossary:compound form]]// is not a //[[CL:Glossary:symbol]]//,
-then that //[[CL:Glossary:car]]// must be a //[[CL:Glossary:lambda expression]]//,
-in which case the //[[CL:Glossary:compound form]]// is a //[[CL:Glossary:lambda form]]//.
+If the //[[CL:Glossary:car]]// of the //[[CL:Glossary:compound form]]// is not a //[[CL:Glossary:symbol]]//, then that //[[CL:Glossary:car]]// must be a //[[CL:Glossary:lambda expression]]//, in which case the //[[CL:Glossary:compound form]]// is a //[[CL:Glossary:lambda form]]//.
 
-How a //[[CL:Glossary:compound form]]// is processed depends on whether it is 
-classified as a //[[CL:Glossary:special form]]//, a //[[CL:Glossary:macro form]]//, 
-a //[[CL:Glossary:function form]]//, or a //[[CL:Glossary:lambda form]]//.
+How a //[[CL:Glossary:compound form]]// is processed depends on whether it is  classified as a //[[CL:Glossary:special form]]//, a //[[CL:Glossary:macro form]]//,  a //[[CL:Glossary:function form]]//, or a //[[CL:Glossary:lambda form]]//.
 
 \beginsubsubsubsubsection{Special Forms}
 
-
-A //[[CL:Glossary:special form]]// is a //[[CL:Glossary:form]]// with special syntax,
-special evaluation rules, or both, possibly manipulating the
-evaluation environment, control flow, or both.
-
-
-
+A //[[CL:Glossary:special form]]// is a //[[CL:Glossary:form]]// with special syntax, special evaluation rules, or both, possibly manipulating the evaluation environment, control flow, or both.
 
 A //[[CL:Glossary:special operator]]// has access to
-    the current //[[CL:Glossary:lexical environment]]// 
-and the current //[[CL:Glossary:dynamic environment]]//.
-Each //[[CL:Glossary:special operator]]// defines the manner in which its //[[CL:Glossary:subexpressions]]//
-are treated---which are //[[CL:Glossary:forms]]//, which are special syntax, \etc.
+    the current //[[CL:Glossary:lexical environment]]//  and the current //[[CL:Glossary:dynamic environment]]//. Each //[[CL:Glossary:special operator]]// defines the manner in which its //[[CL:Glossary:subexpressions]]// are treated---which are //[[CL:Glossary:forms]]//, which are special syntax, \etc.
 
-Some //[[CL:Glossary:special operators]]// create new 
-lexical or dynamic //[[CL:Glossary:environments]]// for use during the 
-//[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subforms]]//
-of the //[[CL:Glossary:special form]]//.  For example, \specref{block} creates a
-new //[[CL:Glossary:lexical environment]]// that is the same as the one in force
-at the point of evaluation of the \specref{block} //[[CL:Glossary:form]]//
-with the addition of a //[[CL:Glossary:binding]]// of the \specref{block} name
-to an //[[CL:Glossary:exit point]]// from the \specref{block}.
+Some //[[CL:Glossary:special operators]]// create new  lexical or dynamic //[[CL:Glossary:environments]]// for use during the  //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:subforms]]// of the //[[CL:Glossary:special form]]//.  For example, \specref{block} creates a new //[[CL:Glossary:lexical environment]]// that is the same as the one in force at the point of evaluation of the \specref{block} //[[CL:Glossary:form]]// with the addition of a //[[CL:Glossary:binding]]// of the \specref{block} name to an //[[CL:Glossary:exit point]]// from the \specref{block}.
 
-
-
-
-
-
-The set of //[[CL:Glossary:special operator]]// //[[CL:Glossary:names]]// is fixed in \clisp; 
-no way is provided for the user to define a //[[CL:Glossary:special operator]]//.
-\Thenextfigure\ lists all of the \clisp\ //[[CL:Glossary:symbols]]//
-that have definitions as //[[CL:Glossary:special operators]]//.
+The set of //[[CL:Glossary:special operator]]// //[[CL:Glossary:names]]// is fixed in \clisp;  no way is provided for the user to define a //[[CL:Glossary:special operator]]//. \Thenextfigure\ lists all of the \clisp\ //[[CL:Glossary:symbols]]// that have definitions as //[[CL:Glossary:special operators]]//.
 
 \DefineFigure{CLSpecialOps}
 
-
-
-
-
-
-
-\issue{COMPILER-LET-CONFUSION:ELIMINATE}
-\issue{WITH-ADDED-METHODS:DELETE}
-\issue{LOAD-TIME-EVAL:R**2-NEW-SPECIAL-FORM}
-\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
-\displaythree{Common Lisp Special Operators}{
-block&let*&return-from\cr
-catch&load-time-value&setq\cr
-eval-when&locally&symbol-macrolet\cr
-flet&macrolet&tagbody\cr
-function&multiple-value-call&the\cr
-go&multiple-value-prog1&throw\cr
-if&progn&unwind-protect\cr
-labels&progv&\cr
-let&quote&\cr
-}
-
-
-
-
-
-
-
-
-
-
+\issue{COMPILER-LET-CONFUSION:ELIMINATE} \issue{WITH-ADDED-METHODS:DELETE} \issue{LOAD-TIME-EVAL:R**2-NEW-SPECIAL-FORM} \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE} \displaythree{Common Lisp Special Operators}{ block&let*&return-from\cr catch&load-time-value&setq\cr eval-when&locally&symbol-macrolet\cr flet&macrolet&tagbody\cr function&multiple-value-call&the\cr go&multiple-value-prog1&throw\cr if&progn&unwind-protect\cr labels&progv&\cr let&quote&\cr }
 
 \endsubsubsubsubsection%{Special Forms}
 
 \beginsubsubsubsubsection{Macro Forms}
 
-If the //[[CL:Glossary:operator]]// names a //[[CL:Glossary:macro]]//,
-its associated //[[CL:Glossary:macro function]]// is applied
-to the entire //[[CL:Glossary:form]]// and the result of that application is
-used in place of the original //[[CL:Glossary:form]]//.
+If the //[[CL:Glossary:operator]]// names a //[[CL:Glossary:macro]]//, its associated //[[CL:Glossary:macro function]]// is applied to the entire //[[CL:Glossary:form]]// and the result of that application is used in place of the original //[[CL:Glossary:form]]//.
 
-Specifically, a //[[CL:Glossary:symbol]]// names a //[[CL:Glossary:macro]]// in a given //[[CL:Glossary:lexical environment]]// if
-**[[CL:Functions:macro-function]]** is //[[CL:Glossary:true]]// of the 
-//[[CL:Glossary:symbol]]// and that //[[CL:Glossary:environment]]//.
-The //[[CL:Glossary:function]]// returned by **[[CL:Functions:macro-function]]**
-is a //[[CL:Glossary:function]]// of two arguments, called the
-expansion function.
-The expansion function is invoked by calling the //[[CL:Glossary:macroexpand hook]]// with
+Specifically, a //[[CL:Glossary:symbol]]// names a //[[CL:Glossary:macro]]// in a given //[[CL:Glossary:lexical environment]]// if **[[CL:Functions:macro-function]]** is //[[CL:Glossary:true]]// of the  //[[CL:Glossary:symbol]]// and that //[[CL:Glossary:environment]]//. The //[[CL:Glossary:function]]// returned by **[[CL:Functions:macro-function]]** is a //[[CL:Glossary:function]]// of two arguments, called the expansion function. The expansion function is invoked by calling the //[[CL:Glossary:macroexpand hook]]// with
       the expansion function as its first argument,
       the entire //[[CL:Glossary:macro form]]// as its second argument,
 
-
-
-
-
     and an //[[CL:Glossary:environment object]]// (corresponding to the current //[[CL:Glossary:lexical environment]]//)
-      as its third argument.
-The //[[CL:Glossary:macroexpand hook]]//, in turn, calls the expansion function with the
-//[[CL:Glossary:form]]// as its first argument and the //[[CL:Glossary:environment]]// as its second argument.
-The //[[CL:Glossary:value]]// of the expansion function, which is passed through
-by the //[[CL:Glossary:macroexpand hook]]//, is a //[[CL:Glossary:form]]//. 
-
-
+      as its third argument. The //[[CL:Glossary:macroexpand hook]]//, in turn, calls the expansion function with the //[[CL:Glossary:form]]// as its first argument and the //[[CL:Glossary:environment]]// as its second argument. The //[[CL:Glossary:value]]// of the expansion function, which is passed through by the //[[CL:Glossary:macroexpand hook]]//, is a //[[CL:Glossary:form]]//. 
 
 The returned //[[CL:Glossary:form]]// is //[[CL:Glossary:evaluated]]// in place of the original //[[CL:Glossary:form]]//.
 
-\issue{SELF-MODIFYING-CODE:FORBID}
-The consequences are undefined if a //[[CL:Glossary:macro function]]// destructively modifies
-any part of its //[[CL:Glossary:form]]// argument.
+\issue{SELF-MODIFYING-CODE:FORBID} The consequences are undefined if a //[[CL:Glossary:macro function]]// destructively modifies any part of its //[[CL:Glossary:form]]// argument.
 
+A //[[CL:Glossary:macro name]]// is not a //[[CL:Glossary:function designator]]//, and cannot be used as the //function// argument to //[[CL:Glossary:functions]]//  such as **[[CL:Functions:apply]]**, **[[CL:Functions:funcall]]**, or **[[CL:Functions:map]]**.
 
+An //[[CL:Glossary:implementation]]// is free to implement a \clisp\ //[[CL:Glossary:special operator]]// as a //[[CL:Glossary:macro]]//.  An //[[CL:Glossary:implementation]]// is free to implement any //[[CL:Glossary:macro]]// //[[CL:Glossary:operator]]// as a //[[CL:Glossary:special operator]]//, but only if an equivalent definition of the //[[CL:Glossary:macro]]// is also provided.
 
-A //[[CL:Glossary:macro name]]// is not a //[[CL:Glossary:function designator]]//,
-and cannot be used as the //function// argument to //[[CL:Glossary:functions]]// 
-such as **[[CL:Functions:apply]]**, **[[CL:Functions:funcall]]**, or **[[CL:Functions:map]]**.
+\Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that are applicable to //[[CL:Glossary:macros]]//.
 
-An //[[CL:Glossary:implementation]]// is free to implement a \clisp\ //[[CL:Glossary:special operator]]//
-as a //[[CL:Glossary:macro]]//.  An //[[CL:Glossary:implementation]]// is free to implement any
-//[[CL:Glossary:macro]]// //[[CL:Glossary:operator]]// as a //[[CL:Glossary:special operator]]//, but only
-if an equivalent definition of the //[[CL:Glossary:macro]]// is also provided.
-
-
-
-
-
-
-
-
-\Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that are applicable
-to //[[CL:Glossary:macros]]//.
-
-\displaythree{Defined names applicable to macros}{
-*macroexpand-hook*&macro-function&macroexpand-1\cr
-defmacro&macroexpand&macrolet\cr
-}
-
+\displaythree{Defined names applicable to macros}{ *macroexpand-hook*&macro-function&macroexpand-1\cr defmacro&macroexpand&macrolet\cr }
 
 \endsubsubsubsubsection%{Macro Forms}
 
-\beginsubsubsubsubsection{Function Forms}
-\DefineSection{FunctionForms}
+\beginsubsubsubsubsection{Function Forms} \DefineSection{FunctionForms}
 
-If the //[[CL:Glossary:operator]]// is a //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:function]]//,
-the //[[CL:Glossary:form]]// represents a //[[CL:Glossary:function form]]//,
-and the //[[CL:Glossary:cdr]]// of the list contains the //[[CL:Glossary:forms]]// 
-which when evaluated will supply the arguments passed to the //[[CL:Glossary:function]]//.
+If the //[[CL:Glossary:operator]]// is a //[[CL:Glossary:symbol]]// naming a //[[CL:Glossary:function]]//, the //[[CL:Glossary:form]]// represents a //[[CL:Glossary:function form]]//, and the //[[CL:Glossary:cdr]]// of the list contains the //[[CL:Glossary:forms]]//  which when evaluated will supply the arguments passed to the //[[CL:Glossary:function]]//.
 
-When a //[[CL:Glossary:function name]]// is not defined, 
-an error \oftype{undefined-function} should be signaled at run time;
-\seesection\SemanticConstraints.
+When a //[[CL:Glossary:function name]]// is not defined,  an error \oftype{undefined-function} should be signaled at run time; \seesection\SemanticConstraints.
 
 A //[[CL:Glossary:function form]]// is evaluated as follows:
 
-The //[[CL:Glossary:subforms]]// in the //[[CL:Glossary:cdr]]// of the original //[[CL:Glossary:form]]//
-are evaluated in left-to-right order in the current lexical and 
-dynamic //[[CL:Glossary:environments]]//.  The //[[CL:Glossary:primary value]]// of each
-such //[[CL:Glossary:evaluation]]// becomes an //[[CL:Glossary:argument]]// to the named //[[CL:Glossary:function]]//;
+The //[[CL:Glossary:subforms]]// in the //[[CL:Glossary:cdr]]// of the original //[[CL:Glossary:form]]// are evaluated in left-to-right order in the current lexical and  dynamic //[[CL:Glossary:environments]]//.  The //[[CL:Glossary:primary value]]// of each such //[[CL:Glossary:evaluation]]// becomes an //[[CL:Glossary:argument]]// to the named //[[CL:Glossary:function]]//;
 
 any additional //[[CL:Glossary:values]]// returned by the //[[CL:Glossary:subforms]]// are discarded.
 
-The //[[CL:Glossary:functional value]]// of the //[[CL:Glossary:operator]]// 
-is retrieved from the //[[CL:Glossary:lexical environment]]//,
-and that //[[CL:Glossary:function]]// is invoked with the indicated arguments.
+The //[[CL:Glossary:functional value]]// of the //[[CL:Glossary:operator]]//  is retrieved from the //[[CL:Glossary:lexical environment]]//, and that //[[CL:Glossary:function]]// is invoked with the indicated arguments.
 
-
-
-
-
-
-
-
-
-
-
-\issue{FUNCTION-CALL-EVALUATION-ORDER:MORE-UNSPECIFIED}
-Although the order of //[[CL:Glossary:evaluation]]// of 
-the //[[CL:Glossary:argument]]// //[[CL:Glossary:subforms]]// themselves is 
-strictly left-to-right, it is not specified whether 
-the definition of the //[[CL:Glossary:operator]]// in a //[[CL:Glossary:function form]]// is looked up 
-before the //[[CL:Glossary:evaluation]]// of the //[[CL:Glossary:argument]]// //[[CL:Glossary:subforms]]//,
-after the //[[CL:Glossary:evaluation]]// of the //[[CL:Glossary:argument]]// //[[CL:Glossary:subforms]]//,
-or between the //[[CL:Glossary:evaluation]]// of any two //[[CL:Glossary:argument]]// //[[CL:Glossary:subforms]]// 
-if there is more than one such //[[CL:Glossary:argument]]// //[[CL:Glossary:subform]]//.  
-For example, the following might return 23 or~24.
+\issue{FUNCTION-CALL-EVALUATION-ORDER:MORE-UNSPECIFIED} Although the order of //[[CL:Glossary:evaluation]]// of  the //[[CL:Glossary:argument]]// //[[CL:Glossary:subforms]]// themselves is  strictly left-to-right, it is not specified whether  the definition of the //[[CL:Glossary:operator]]// in a //[[CL:Glossary:function form]]// is looked up  before the //[[CL:Glossary:evaluation]]// of the //[[CL:Glossary:argument]]// //[[CL:Glossary:subforms]]//, after the //[[CL:Glossary:evaluation]]// of the //[[CL:Glossary:argument]]// //[[CL:Glossary:subforms]]//, or between the //[[CL:Glossary:evaluation]]// of any two //[[CL:Glossary:argument]]// //[[CL:Glossary:subforms]]//  if there is more than one such //[[CL:Glossary:argument]]// //[[CL:Glossary:subform]]//.   For example, the following might return 23 or~24.
 
 \code
  (defun foo (x) (+ x 3))
  (defun bar () (setf (symbol-function 'foo) #'(lambda (x) (+ x 4))))
- (foo (progn (bar) 20))
-\endcode
+ (foo (progn (bar) 20)) \endcode
 
-
-A //[[CL:Glossary:binding]]// for a //[[CL:Glossary:function name]]// can be //[[CL:Glossary:established]]// in 
-one of several ways.  A //[[CL:Glossary:binding]]// for a //[[CL:Glossary:function name]]// in 
-the //[[CL:Glossary:global environment]]// can be //[[CL:Glossary:established]]// by 
+A //[[CL:Glossary:binding]]// for a //[[CL:Glossary:function name]]// can be //[[CL:Glossary:established]]// in  one of several ways.  A //[[CL:Glossary:binding]]// for a //[[CL:Glossary:function name]]// in  the //[[CL:Glossary:global environment]]// can be //[[CL:Glossary:established]]// by 
  \macref{defun},
  \SETFof{fdefinition},
 
  \SETFof{symbol-function},
 
-
-
  **[[CL:Functions:ensure-generic-function]]**,
- \macref{defmethod} (implicitly, due to **[[CL:Functions:ensure-generic-function]]**),
-or
- \macref{defgeneric}.
-A //[[CL:Glossary:binding]]// for a //[[CL:Glossary:function name]]// in the //[[CL:Glossary:lexical environment]]//
-can be //[[CL:Glossary:established]]// by
-   \specref{flet}
-or \specref{labels}.
-\issue{WITH-ADDED-METHODS:DELETE}
-
+ \macref{defmethod} (implicitly, due to **[[CL:Functions:ensure-generic-function]]**), or
+ \macref{defgeneric}. A //[[CL:Glossary:binding]]// for a //[[CL:Glossary:function name]]// in the //[[CL:Glossary:lexical environment]]// can be //[[CL:Glossary:established]]// by
+   \specref{flet} or \specref{labels}. \issue{WITH-ADDED-METHODS:DELETE}
 
 \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 \Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that are applicable to //[[CL:Glossary:functions]]//.
 
-\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
-\issue{WITH-ADDED-METHODS:DELETE}
-\displaythree{Some function-related defined names}{
-apply&fdefinition&mapcan\cr
-call-arguments-limit&flet&mapcar\cr
-complement&fmakunbound&mapcon\cr
-constantly&funcall&mapl\cr
-defgeneric&function&maplist\cr
-defmethod&functionp&multiple-value-call\cr
-defun&labels&reduce\cr
-fboundp&map&symbol-function\cr
-}
-
-
-
-
-
-
-
-
-
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE} \issue{WITH-ADDED-METHODS:DELETE} \displaythree{Some function-related defined names}{ apply&fdefinition&mapcan\cr call-arguments-limit&flet&mapcar\cr complement&fmakunbound&mapcon\cr constantly&funcall&mapl\cr defgeneric&function&maplist\cr defmethod&functionp&multiple-value-call\cr defun&labels&reduce\cr fboundp&map&symbol-function\cr }
 
 \endsubsubsubsubsection%{Function Forms}
 
-\beginsubsubsubsubsection{Lambda Forms}
-\DefineSection{LambdaForms}
+\beginsubsubsubsubsection{Lambda Forms} \DefineSection{LambdaForms}
 
-A //[[CL:Glossary:lambda form]]// is similar to a //[[CL:Glossary:function form]]//, except that
-the //[[CL:Glossary:function name]]// is replaced by a //[[CL:Glossary:lambda expression]]//.
+A //[[CL:Glossary:lambda form]]// is similar to a //[[CL:Glossary:function form]]//, except that the //[[CL:Glossary:function name]]// is replaced by a //[[CL:Glossary:lambda expression]]//.
 
-A //[[CL:Glossary:lambda form]]// is equivalent to using //[[CL:Glossary:funcall]]// of a
-//[[CL:Glossary:lexical closure]]// of the //[[CL:Glossary:lambda expression]]// on the given //[[CL:Glossary:arguments]]//.
-(In practice, some compilers are more likely to produce inline code 
-for a //[[CL:Glossary:lambda form]]// than for an arbitrary named function 
-that has been declared **[[CL:Declarations:inline]]**; however, such a difference
-is not semantic.)
+A //[[CL:Glossary:lambda form]]// is equivalent to using //[[CL:Glossary:funcall]]// of a //[[CL:Glossary:lexical closure]]// of the //[[CL:Glossary:lambda expression]]// on the given //[[CL:Glossary:arguments]]//. (In practice, some compilers are more likely to produce inline code  for a //[[CL:Glossary:lambda form]]// than for an arbitrary named function  that has been declared **[[CL:Declarations:inline]]**; however, such a difference is not semantic.)
 
 For further information, \seesection\LambdaExpressions.
 
@@ -701,35 +297,22 @@ For further information, \seesection\LambdaExpressions.
 
 \beginsubsubsubsection{Self-Evaluating Objects}
 
-\issue{EVAL-OTHER:SELF-EVALUATE}
-A //[[CL:Glossary:form]]// that is neither a //[[CL:Glossary:symbol]]// nor a //[[CL:Glossary:cons]]// is 
-defined to be a //[[CL:Glossary:self-evaluating object]]//.  //[[CL:Glossary:Evaluating]]//
-such an //[[CL:Glossary:object]]// //[[CL:Glossary:yields]]// the //[[CL:Glossary:same]]// //[[CL:Glossary:object]]// 
-as a result.
+\issue{EVAL-OTHER:SELF-EVALUATE} A //[[CL:Glossary:form]]// that is neither a //[[CL:Glossary:symbol]]// nor a //[[CL:Glossary:cons]]// is  defined to be a //[[CL:Glossary:self-evaluating object]]//.  //[[CL:Glossary:Evaluating]]// such an //[[CL:Glossary:object]]// //[[CL:Glossary:yields]]// the //[[CL:Glossary:same]]// //[[CL:Glossary:object]]//  as a result.
 
+Certain specific //[[CL:Glossary:symbols]]// and //[[CL:Glossary:conses]]// might also happen  to be ``self-evaluating'' but only as a special case of a more  general set of rules for the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:symbols]]// and //[[CL:Glossary:conses]]//; such //[[CL:Glossary:objects]]// are not considered to be //[[CL:Glossary:self-evaluating objects]]//.
 
-Certain specific //[[CL:Glossary:symbols]]// and //[[CL:Glossary:conses]]// might also happen 
-to be ``self-evaluating'' but only as a special case of a more 
-general set of rules for the //[[CL:Glossary:evaluation]]// of //[[CL:Glossary:symbols]]// and
-//[[CL:Glossary:conses]]//; such //[[CL:Glossary:objects]]// are not considered to be
-//[[CL:Glossary:self-evaluating objects]]//.
-
-
-The consequences are undefined if //[[CL:Glossary:literal objects]]// (including
-//[[CL:Glossary:self-evaluating objects]]//) are destructively modified.
+The consequences are undefined if //[[CL:Glossary:literal objects]]// (including //[[CL:Glossary:self-evaluating objects]]//) are destructively modified.
 
 \beginsubsubsubsubsection{Examples of Self-Evaluating Objects}
 
-//[[CL:Glossary:Numbers]]//, //[[CL:Glossary:pathnames]]//, and //[[CL:Glossary:arrays]]// are examples of
-//[[CL:Glossary:self-evaluating objects]]//.
+//[[CL:Glossary:Numbers]]//, //[[CL:Glossary:pathnames]]//, and //[[CL:Glossary:arrays]]// are examples of //[[CL:Glossary:self-evaluating objects]]//.
 
 \code
  3 \EV 3
  #c(2/3 5/8) \EV #C(2/3 5/8)
  #p"S:[BILL]OTHELLO.TXT" \EV #P"S:[BILL]OTHELLO.TXT"
  #(a b c) \EV #(A B C)
- "fred smith" \EV "fred smith"
-\endcode
+ "fred smith" \EV "fred smith" \endcode
 
 \endsubsubsubsubsection%{Examples of Self-Evaluating Objects}
 
@@ -739,216 +322,91 @@ The consequences are undefined if //[[CL:Glossary:literal objects]]// (including
 
 \endSubsection%{The Evaluation Model}
 
-\beginsubsection{Lambda Expressions}
-\DefineSection{LambdaExpressions}
+\beginsubsection{Lambda Expressions} \DefineSection{LambdaExpressions}
 
+In a //[[CL:Glossary:lambda expression]]//, the body is evaluated in a lexical //[[CL:Glossary:environment]]// that is formed by adding the //[[CL:Glossary:binding]]// of  each //[[CL:Glossary:parameter]]// in the //[[CL:Glossary:lambda list]]// with the corresponding //[[CL:Glossary:value]]// from the //[[CL:Glossary:arguments]]// to the current lexical //[[CL:Glossary:environment]]//.
 
+For further discussion of how //[[CL:Glossary:bindings]]// are //[[CL:Glossary:established]]//  based on the //[[CL:Glossary:lambda list]]//, \seesection\LambdaLists.
 
-
-
-
-
-
-
-
-
-In a //[[CL:Glossary:lambda expression]]//,
-the body is evaluated in a lexical //[[CL:Glossary:environment]]// that is formed by
-adding the //[[CL:Glossary:binding]]// of 
-each //[[CL:Glossary:parameter]]// in the //[[CL:Glossary:lambda list]]//
-with the corresponding //[[CL:Glossary:value]]// from the //[[CL:Glossary:arguments]]//
-to the current lexical //[[CL:Glossary:environment]]//.
-
-For further discussion of how //[[CL:Glossary:bindings]]// are //[[CL:Glossary:established]]// 
-based on the //[[CL:Glossary:lambda list]]//, \seesection\LambdaLists.
-
-The body of a //[[CL:Glossary:lambda expression]]// is an //[[CL:Glossary:implicit progn]]//;
-the //[[CL:Glossary:values]]// it returns are returned by the //[[CL:Glossary:lambda expression]]//.
-
-
-
-
-
+The body of a //[[CL:Glossary:lambda expression]]// is an //[[CL:Glossary:implicit progn]]//; the //[[CL:Glossary:values]]// it returns are returned by the //[[CL:Glossary:lambda expression]]//.
 
 \endsubsection%{Lambda Expressions}
 
 \beginSubsection{Closures and Lexical Binding}
  
 
-A //[[CL:Glossary:lexical closure]]// is a //[[CL:Glossary:function]]// that can refer to and alter
-the values of //[[CL:Glossary:lexical bindings]]// //[[CL:Glossary:established]]// by //[[CL:Glossary:binding]]// //[[CL:Glossary:forms]]//
-that textually include the function definition.
- 
-Consider this code, where \f{x} is not declared **[[CL:Declarations:special]]**:
- 
-\code
+A //[[CL:Glossary:lexical closure]]// is a //[[CL:Glossary:function]]// that can refer to and alter the values of //[[CL:Glossary:lexical bindings]]// //[[CL:Glossary:established]]// by //[[CL:Glossary:binding]]// //[[CL:Glossary:forms]]// that textually include the function definition.
+  Consider this code, where \f{x} is not declared **[[CL:Declarations:special]]**:
+  \code
  (defun two-funs (x)
    (list (function (lambda () x))
          (function (lambda (y) (setq x y)))))
  (setq funs (two-funs 6))
  (funcall (car funs)) \EV 6
  (funcall (cadr funs) 43) \EV 43
- (funcall (car funs)) \EV 43
-\endcode
+ (funcall (car funs)) \EV 43 \endcode
 
-\Thespecform{function} coerces a 
-//[[CL:Glossary:lambda expression]]// into a //[[CL:Glossary:closure]]// in which the 
-//[[CL:Glossary:lexical environment]]// in effect when the //[[CL:Glossary:special form]]// is
-evaluated is captured along with the //[[CL:Glossary:lambda expression]]//.
+\Thespecform{function} coerces a  //[[CL:Glossary:lambda expression]]// into a //[[CL:Glossary:closure]]// in which the  //[[CL:Glossary:lexical environment]]// in effect when the //[[CL:Glossary:special form]]// is evaluated is captured along with the //[[CL:Glossary:lambda expression]]//.
 
-The function \f{two-funs} returns a //[[CL:Glossary:list]]// of two 
-//[[CL:Glossary:functions]]//, each of which refers to the //[[CL:Glossary:binding]]// of the
-variable \f{x} created on entry to the function \f{two-funs} when it
-was called.
+The function \f{two-funs} returns a //[[CL:Glossary:list]]// of two  //[[CL:Glossary:functions]]//, each of which refers to the //[[CL:Glossary:binding]]// of the variable \f{x} created on entry to the function \f{two-funs} when it was called.
 
+This variable has the value \f{6} initially, but \specref{setq} can alter this //[[CL:Glossary:binding]]//.
 
-This variable has the value \f{6}
-initially, but \specref{setq} can alter this //[[CL:Glossary:binding]]//.
-
-
-
-
-
-
-
-
-The //[[CL:Glossary:lexical closure]]// created for the first 
-//[[CL:Glossary:lambda expression]]// does not ``snapshot'' the //[[CL:Glossary:value]]// \f{6} for \f{x}
-when the //[[CL:Glossary:closure]]// is created; rather it captures the //[[CL:Glossary:binding]]// of \f{x}.
-The second //[[CL:Glossary:function]]// can be used to alter the //[[CL:Glossary:value]]// in the same (captured)
-//[[CL:Glossary:binding]]// (to \f{43}, in the example), and
-this altered variable binding then affects the value returned by the first //[[CL:Glossary:function]]//.
+The //[[CL:Glossary:lexical closure]]// created for the first  //[[CL:Glossary:lambda expression]]// does not ``snapshot'' the //[[CL:Glossary:value]]// \f{6} for \f{x} when the //[[CL:Glossary:closure]]// is created; rather it captures the //[[CL:Glossary:binding]]// of \f{x}. The second //[[CL:Glossary:function]]// can be used to alter the //[[CL:Glossary:value]]// in the same (captured) //[[CL:Glossary:binding]]// (to \f{43}, in the example), and this altered variable binding then affects the value returned by the first //[[CL:Glossary:function]]//.
 
                      
 
-In situations where a //[[CL:Glossary:closure]]// of a 
-//[[CL:Glossary:lambda expression]]// over the same set of //[[CL:Glossary:bindings]]// may be
-produced more than once, the various resulting //[[CL:Glossary:closures]]// may
-or may not be //[[CL:Glossary:identical]]//, at the discretion of the //[[CL:Glossary:implementation]]//.
-That is, two //[[CL:Glossary:functions]]// that are behaviorally
-indistinguishable might or might not be //[[CL:Glossary:identical]]//.
-Two //[[CL:Glossary:functions]]// that are behaviorally distinguishable are //[[CL:Glossary:distinct]]//.
-For example:
- 
-\code
+In situations where a //[[CL:Glossary:closure]]// of a  //[[CL:Glossary:lambda expression]]// over the same set of //[[CL:Glossary:bindings]]// may be produced more than once, the various resulting //[[CL:Glossary:closures]]// may or may not be //[[CL:Glossary:identical]]//, at the discretion of the //[[CL:Glossary:implementation]]//. That is, two //[[CL:Glossary:functions]]// that are behaviorally indistinguishable might or might not be //[[CL:Glossary:identical]]//. Two //[[CL:Glossary:functions]]// that are behaviorally distinguishable are //[[CL:Glossary:distinct]]//. For example:
+  \code
  (let ((x 5) (funs '()))
    (dotimes (j 10)                          
      (push #'(lambda (z)                        
                (if (null z) (setq x 0) (+ x z)))
            funs))
-   funs)
-\endcode
-The result of the above //[[CL:Glossary:form]]// is a //[[CL:Glossary:list]]// of ten //[[CL:Glossary:closures]]//.
-Each requires only the //[[CL:Glossary:binding]]// of \f{x}.
-It is the same //[[CL:Glossary:binding]]// in each case, 
-but the ten //[[CL:Glossary:closure]]// //[[CL:Glossary:objects]]// might or might not be //[[CL:Glossary:identical]]//.
-On the other hand, the result of the //[[CL:Glossary:form]]//
- 
-\code
+   funs) \endcode The result of the above //[[CL:Glossary:form]]// is a //[[CL:Glossary:list]]// of ten //[[CL:Glossary:closures]]//. Each requires only the //[[CL:Glossary:binding]]// of \f{x}. It is the same //[[CL:Glossary:binding]]// in each case,  but the ten //[[CL:Glossary:closure]]// //[[CL:Glossary:objects]]// might or might not be //[[CL:Glossary:identical]]//. On the other hand, the result of the //[[CL:Glossary:form]]//
+  \code
  (let ((funs '()))     
    (dotimes (j 10)
      (let ((x 5))
        (push (function (lambda (z)
                         (if (null z) (setq x 0) (+ x z))))
              funs)))
-  funs)
-\endcode
-is also a //[[CL:Glossary:list]]// of ten //[[CL:Glossary:closures]]//.
-However, in this case no two of the //[[CL:Glossary:closure]]// //[[CL:Glossary:objects]]// can
-be //[[CL:Glossary:identical]]// because each //[[CL:Glossary:closure]]// is closed over a distinct
-//[[CL:Glossary:binding]]// of \f{x}, and these //[[CL:Glossary:bindings]]// can be behaviorally
-distinguished because of the use of \specref{setq}.
+  funs) \endcode is also a //[[CL:Glossary:list]]// of ten //[[CL:Glossary:closures]]//. However, in this case no two of the //[[CL:Glossary:closure]]// //[[CL:Glossary:objects]]// can be //[[CL:Glossary:identical]]// because each //[[CL:Glossary:closure]]// is closed over a distinct //[[CL:Glossary:binding]]// of \f{x}, and these //[[CL:Glossary:bindings]]// can be behaviorally distinguished because of the use of \specref{setq}.
  
 
 The result of the //[[CL:Glossary:form]]//
- 
-\code
+  \code
  (let ((funs '()))
    (dotimes (j 10)
      (let ((x 5))
        (push (function (lambda (z) (+ x z)))
             funs)))
-   funs)
-\endcode
-is a //[[CL:Glossary:list]]// of ten //[[CL:Glossary:closure]]// //[[CL:Glossary:objects]]// that
-might or might not be //[[CL:Glossary:identical]]//.
-A different //[[CL:Glossary:binding]]// of \f{x} is involved for
-each //[[CL:Glossary:closure]]//, but the //[[CL:Glossary:bindings]]// cannot be distinguished
-because their values are the //[[CL:Glossary:same]]// and immutable (there being no occurrence
-of \specref{setq} on \f{x}).  A compiler could internally
-transform the //[[CL:Glossary:form]]// to
- 
-\code
+   funs) \endcode is a //[[CL:Glossary:list]]// of ten //[[CL:Glossary:closure]]// //[[CL:Glossary:objects]]// that might or might not be //[[CL:Glossary:identical]]//. A different //[[CL:Glossary:binding]]// of \f{x} is involved for each //[[CL:Glossary:closure]]//, but the //[[CL:Glossary:bindings]]// cannot be distinguished because their values are the //[[CL:Glossary:same]]// and immutable (there being no occurrence of \specref{setq} on \f{x}).  A compiler could internally transform the //[[CL:Glossary:form]]// to
+  \code
  (let ((funs '()))
    (dotimes (j 10)
      (push (function (lambda (z) (+ 5 z)))
            funs))
-  funs)
-\endcode
-where the //[[CL:Glossary:closures]]// may be //[[CL:Glossary:identical]]//.
-
-
-
-
+  funs) \endcode where the //[[CL:Glossary:closures]]// may be //[[CL:Glossary:identical]]//.
 
  
 
-It is possible that a //[[CL:Glossary:closure]]// does not
-close over any variable bindings.
-In the code fragment
- 
-\code
- (mapcar (function (lambda (x) (+ x 2))) y)
-\endcode
-the function \f{(lambda (x) (+ x 2))} contains no references to any outside
-object. In this case, the same //[[CL:Glossary:closure]]// might be returned
-for all evaluations of the \specref{function} //[[CL:Glossary:form]]//.
+It is possible that a //[[CL:Glossary:closure]]// does not close over any variable bindings. In the code fragment
+  \code
+ (mapcar (function (lambda (x) (+ x 2))) y) \endcode the function \f{(lambda (x) (+ x 2))} contains no references to any outside object. In this case, the same //[[CL:Glossary:closure]]// might be returned for all evaluations of the \specref{function} //[[CL:Glossary:form]]//.
 
 \endSubsection%{Closures and Lexical Binding}
- 
-\beginSubsection{Shadowing}
-\DefineSection{Shadowing}
+  \beginSubsection{Shadowing} \DefineSection{Shadowing}
 
-
-
-
-
-
-
-
-
-
-
-
-If two //[[CL:Glossary:forms]]// that //[[CL:Glossary:establish]]// //[[CL:Glossary:lexical bindings]]// with
-the same //[[CL:Glossary:name]]// $N$ are textually nested, then references to $N$
-within the inner //[[CL:Glossary:form]]// refer to the //[[CL:Glossary:binding]]// established by
-the inner //[[CL:Glossary:form]]//; the inner //[[CL:Glossary:binding]]// for $N$
-\newtermidx{shadows}{shadow} the outer //[[CL:Glossary:binding]]// for $N$.  Outside the inner
-//[[CL:Glossary:form]]// but inside the outer one, references to $N$ refer to the
-//[[CL:Glossary:binding]]// established by the outer //[[CL:Glossary:form]]//.  For example:
-
-
-
+If two //[[CL:Glossary:forms]]// that //[[CL:Glossary:establish]]// //[[CL:Glossary:lexical bindings]]// with the same //[[CL:Glossary:name]]// $N$ are textually nested, then references to $N$ within the inner //[[CL:Glossary:form]]// refer to the //[[CL:Glossary:binding]]// established by the inner //[[CL:Glossary:form]]//; the inner //[[CL:Glossary:binding]]// for $N$ \newtermidx{shadows}{shadow} the outer //[[CL:Glossary:binding]]// for $N$.  Outside the inner //[[CL:Glossary:form]]// but inside the outer one, references to $N$ refer to the //[[CL:Glossary:binding]]// established by the outer //[[CL:Glossary:form]]//.  For example:
 
 \code
  (defun test (x z)
    (let ((z (* x 2)))
      (print z))
-   z)
-\endcode
-The //[[CL:Glossary:binding]]// of the variable \f{z} by
-\specref{let} shadows
-the //[[CL:Glossary:parameter]]// binding for the function \f{test}.  The reference to the
-variable \f{z} in the **[[CL:Functions:print]]** //[[CL:Glossary:form]]// refers to the \specref{let} binding.
-The reference to \f{z} at the end of the function \f{test} 
-refers to the //[[CL:Glossary:parameter]]// named \f{z}.
+   z) \endcode The //[[CL:Glossary:binding]]// of the variable \f{z} by \specref{let} shadows the //[[CL:Glossary:parameter]]// binding for the function \f{test}.  The reference to the variable \f{z} in the **[[CL:Functions:print]]** //[[CL:Glossary:form]]// refers to the \specref{let} binding. The reference to \f{z} at the end of the function \f{test}  refers to the //[[CL:Glossary:parameter]]// named \f{z}.
 
-
-
-Constructs that are lexically scoped act as if new names were
-generated for each //[[CL:Glossary:object]]// on each execution.  Therefore,
-dynamic shadowing cannot occur.  For example:
+Constructs that are lexically scoped act as if new names were generated for each //[[CL:Glossary:object]]// on each execution.  Therefore, dynamic shadowing cannot occur.  For example:
 
 \code
  (defun contorted-example (f g x)
@@ -957,12 +415,7 @@ dynamic shadowing cannot occur.  For example:
        (block here
           (+ 5 (contorted-example g
                                   #'(lambda () (return-from here 4))
-                                  (- x 1))))))
-\endcode
-Consider the call \f{(contorted-example nil nil 2)}.  This produces
-\f{4}.  During the course of execution, there are three
-calls to \f{contorted-example}, interleaved with two 
-blocks:
+                                  (- x 1)))))) \endcode Consider the call \f{(contorted-example nil nil 2)}.  This produces \f{4}.  During the course of execution, there are three calls to \f{contorted-example}, interleaved with two  blocks:
 
 \code
  (contorted-example nil nil 2)
@@ -974,83 +427,23 @@ blocks:
                             0)
              (funcall f)
                     where f \EV #'(lambda () (return-from here\ssso 4))
-                 (return-from here\ssso 4)
-\endcode
-At the time the \f{funcall} is executed
-there are two \specref{block} //[[CL:Glossary:exit points]]// outstanding, each apparently
-named \f{here}.
-The \specref{return-from} //[[CL:Glossary:form]]// executed as a result of the \f{funcall}
-operation
-refers to the outer outstanding //[[CL:Glossary:exit point]]//
-(here\ssso), not the
-inner one (here\ssst).
-It
-refers to that //[[CL:Glossary:exit point]]// textually visible at the point of
-execution of \specref{function}
-(here abbreviated by the \f{\#'} syntax) that resulted
-in creation of the //[[CL:Glossary:function]]// //[[CL:Glossary:object]]// actually invoked by 
-**[[CL:Functions:funcall]]**.                       
+                 (return-from here\ssso 4) \endcode At the time the \f{funcall} is executed there are two \specref{block} //[[CL:Glossary:exit points]]// outstanding, each apparently named \f{here}. The \specref{return-from} //[[CL:Glossary:form]]// executed as a result of the \f{funcall} operation refers to the outer outstanding //[[CL:Glossary:exit point]]// (here\ssso), not the inner one (here\ssst). It refers to that //[[CL:Glossary:exit point]]// textually visible at the point of execution of \specref{function} (here abbreviated by the \f{\#'} syntax) that resulted in creation of the //[[CL:Glossary:function]]// //[[CL:Glossary:object]]// actually invoked by  **[[CL:Functions:funcall]]**.                       
 
-
-If, in this example, one were to change the \f{(funcall f)} to
-\f{(funcall g)}, then the value of the call \f{(contorted-example nil nil 2)}
-would be \f{9}.  The value would change because 
-**[[CL:Functions:funcall]]** would cause the
-execution of \f{(return-from here\ssst\ 4)}, thereby causing
-a return from the inner //[[CL:Glossary:exit point]]// (here\ssst).
-When that occurs, the value \f{4} is returned from the
-middle invocation of \f{contorted-example}, \f{5} is added to that
-to get \f{9}, and that value is returned from the outer block
-and the outermost call to \f{contorted-example}.  The point
-is that the choice of //[[CL:Glossary:exit point]]//
-returned from has nothing to do with its
-being innermost or outermost; rather,
-it depends on the lexical environment
-that is packaged up with a //[[CL:Glossary:lambda expression]]// when
-\specref{function} is executed.
-                                  
-\endSubsection%{Shadowing}
+If, in this example, one were to change the \f{(funcall f)} to \f{(funcall g)}, then the value of the call \f{(contorted-example nil nil 2)} would be \f{9}.  The value would change because  **[[CL:Functions:funcall]]** would cause the execution of \f{(return-from here\ssst\ 4)}, thereby causing a return from the inner //[[CL:Glossary:exit point]]// (here\ssst). When that occurs, the value \f{4} is returned from the middle invocation of \f{contorted-example}, \f{5} is added to that to get \f{9}, and that value is returned from the outer block and the outermost call to \f{contorted-example}.  The point is that the choice of //[[CL:Glossary:exit point]]// returned from has nothing to do with its being innermost or outermost; rather, it depends on the lexical environment that is packaged up with a //[[CL:Glossary:lambda expression]]// when \specref{function} is executed.
+                                   \endSubsection%{Shadowing}
 
 \beginSubsection{Extent}
 
-\f{Contorted-example} works only because the
-//[[CL:Glossary:function]]// named by \f{f} is invoked during the //[[CL:Glossary:extent]]// of the 
-//[[CL:Glossary:exit point]]//.
-Once the flow of execution has left the block,
-the //[[CL:Glossary:exit point]]// is //[[CL:Glossary:disestablished]]//.  For example:
+\f{Contorted-example} works only because the //[[CL:Glossary:function]]// named by \f{f} is invoked during the //[[CL:Glossary:extent]]// of the  //[[CL:Glossary:exit point]]//. Once the flow of execution has left the block, the //[[CL:Glossary:exit point]]// is //[[CL:Glossary:disestablished]]//.  For example:
 
 \code
  (defun invalid-example ()
    (let ((y (block here #'(lambda (z) (return-from here z)))))
-     (if (numberp y) y (funcall y 5))))
-\endcode
-One might expect the call \f{(invalid-example)} to produce \f{5}
-by the following incorrect reasoning:
-\specref{let} binds \f{y} to the
-value of \specref{block}; this value is a //[[CL:Glossary:function]]// resulting
-from the //[[CL:Glossary:lambda expression]]//.  Because \f{y} is not a number, it is
-invoked on the value \f{5}.  The \specref{return-from} should then
-return this value from the                      
-//[[CL:Glossary:exit point]]// named \f{here}, thereby
-exiting from the block again and giving \f{y} the value \f{5}
-which, being a number, is then returned as the value of the call
-to \f{invalid-example}.
+     (if (numberp y) y (funcall y 5)))) \endcode One might expect the call \f{(invalid-example)} to produce \f{5} by the following incorrect reasoning: \specref{let} binds \f{y} to the value of \specref{block}; this value is a //[[CL:Glossary:function]]// resulting from the //[[CL:Glossary:lambda expression]]//.  Because \f{y} is not a number, it is invoked on the value \f{5}.  The \specref{return-from} should then return this value from the                       //[[CL:Glossary:exit point]]// named \f{here}, thereby exiting from the block again and giving \f{y} the value \f{5} which, being a number, is then returned as the value of the call to \f{invalid-example}.
 
+The argument fails only because //[[CL:Glossary:exit points]]// have  //[[CL:Glossary:dynamic extent]]//.  The argument is correct up to the execution of \specref{return-from}.  The execution of \specref{return-from} should signal an error \oftype{control-error}, however, not because it cannot refer to the //[[CL:Glossary:exit point]]//, but because it does correctly refer to an //[[CL:Glossary:exit point]]// and that  //[[CL:Glossary:exit point]]// has been //[[CL:Glossary:disestablished]]//.
 
-The argument fails only because //[[CL:Glossary:exit points]]// have 
-//[[CL:Glossary:dynamic extent]]//.  The argument is correct up to the execution of
-\specref{return-from}.  The execution of \specref{return-from}
-should signal an error \oftype{control-error}, however, not
-because it cannot refer to the //[[CL:Glossary:exit point]]//, but because it
-does correctly refer to an //[[CL:Glossary:exit point]]// and that 
-//[[CL:Glossary:exit point]]// has been //[[CL:Glossary:disestablished]]//.
-
-
-
-A reference by name to a dynamic //[[CL:Glossary:exit point]]// binding such as
-a //[[CL:Glossary:catch tag]]// refers to the most recently 
-//[[CL:Glossary:established]]// //[[CL:Glossary:binding]]// of that name that has not been 
-//[[CL:Glossary:disestablished]]//.  For example:
+A reference by name to a dynamic //[[CL:Glossary:exit point]]// binding such as a //[[CL:Glossary:catch tag]]// refers to the most recently  //[[CL:Glossary:established]]// //[[CL:Glossary:binding]]// of that name that has not been  //[[CL:Glossary:disestablished]]//.  For example:
 
 \code
  (defun fun1 (x)
@@ -1058,217 +451,29 @@ a //[[CL:Glossary:catch tag]]// refers to the most recently
  (defun fun2 (y)
    (catch 'trap (* 5 (fun3 y))))
  (defun fun3 (z)
-   (throw 'trap z))
-\endcode
-Consider the call \f{(fun1 7)}.  The result is \f{10}.  At the time
-the \specref{throw} is executed, there are two outstanding catchers with the
-name \f{trap}: one established within procedure \f{fun1}, and the other
-within procedure \f{fun2}.  The latter is the more recent, and so the
-value \f{7} is returned from \specref{catch} in \f{fun2}.
-Viewed from within \f{fun3}, the \specref{catch} 
-in \f{fun2} shadows the one in \f{fun1}.
-Had \f{fun2} been defined as
+   (throw 'trap z)) \endcode Consider the call \f{(fun1 7)}.  The result is \f{10}.  At the time the \specref{throw} is executed, there are two outstanding catchers with the name \f{trap}: one established within procedure \f{fun1}, and the other within procedure \f{fun2}.  The latter is the more recent, and so the value \f{7} is returned from \specref{catch} in \f{fun2}. Viewed from within \f{fun3}, the \specref{catch}  in \f{fun2} shadows the one in \f{fun1}. Had \f{fun2} been defined as
 
 \code
  (defun fun2 (y)
-   (catch 'snare (* 5 (fun3 y))))
-\endcode
-then the two //[[CL:Glossary:exit points]]// 
-would have different //[[CL:Glossary:names]]//, and therefore the one
-in \f{fun1} would not be shadowed.  The result would then have been \f{7}.
+   (catch 'snare (* 5 (fun3 y)))) \endcode then the two //[[CL:Glossary:exit points]]//  would have different //[[CL:Glossary:names]]//, and therefore the one in \f{fun1} would not be shadowed.  The result would then have been \f{7}.
 
 \endSubsection%{Extent}
 
 \beginSubsection{Return Values}
 
-Ordinarily the result of calling a //[[CL:Glossary:function]]// is a single //[[CL:Glossary:object]]//.
-Sometimes, however, it is convenient for a function to compute several
-//[[CL:Glossary:objects]]// and return them.
+Ordinarily the result of calling a //[[CL:Glossary:function]]// is a single //[[CL:Glossary:object]]//. Sometimes, however, it is convenient for a function to compute several //[[CL:Glossary:objects]]// and return them.
 
+In order to receive other than exactly one value from a //[[CL:Glossary:form]]//, one of several //[[CL:Glossary:special forms]]// or //[[CL:Glossary:macros]]// must be used to request those values.  If a //[[CL:Glossary:form]]// produces //[[CL:Glossary:multiple values]]// which were not requested in this way, then the first value is given to the caller and all others are discarded; if the //[[CL:Glossary:form]]// produces zero values, then the caller receives \nil\ as a value.
 
-In order to receive other than exactly one value from a //[[CL:Glossary:form]]//,
-one of several //[[CL:Glossary:special forms]]// or //[[CL:Glossary:macros]]// must be used to request those
-values.  If a //[[CL:Glossary:form]]// produces //[[CL:Glossary:multiple values]]// which were not
-requested in this way, then the first value is given to the caller and
-all others are discarded; if the //[[CL:Glossary:form]]// produces zero values,
-then the caller receives \nil\ as a value.
+\Thenextfigure\ lists  some //[[CL:Glossary:operators]]// for receiving //[[CL:Glossary:multiple values]]//\meaning{2}. These //[[CL:Glossary:operators]]// can be used to specify 
+    one or more //[[CL:Glossary:forms]]// to //[[CL:Glossary:evaluate]]//  and where to put the //[[CL:Glossary:values]]// returned by those //[[CL:Glossary:forms]]//.
 
-\Thenextfigure\ lists 
-some //[[CL:Glossary:operators]]// for receiving //[[CL:Glossary:multiple values]]//\meaning{2}.
-These //[[CL:Glossary:operators]]// can be used to specify 
-    one or more //[[CL:Glossary:forms]]// to //[[CL:Glossary:evaluate]]// 
-and where to put the //[[CL:Glossary:values]]// returned by those //[[CL:Glossary:forms]]//.
+\displaythree{Some operators applicable to receiving multiple values}{ multiple-value-bind&multiple-value-prog1&return-from\cr multiple-value-call&multiple-value-setq&throw\cr multiple-value-list&return&\cr }
 
-\displaythree{Some operators applicable to receiving multiple values}{
-multiple-value-bind&multiple-value-prog1&return-from\cr
-multiple-value-call&multiple-value-setq&throw\cr
-multiple-value-list&return&\cr
-}
-
-\Thefunction{values} can produce //[[CL:Glossary:multiple values]]//\meaning{2}.
-\f{(values)} returns zero values;
-\f{(values //form//)} returns the //[[CL:Glossary:primary value]]// returned by //form//;
-\f{(values //form1// //form2//)} returns two values,
-    the //[[CL:Glossary:primary value]]// of //form1//
-and the //[[CL:Glossary:primary value]]// of //form2//;
-and so on.
+\Thefunction{values} can produce //[[CL:Glossary:multiple values]]//\meaning{2}. \f{(values)} returns zero values; \f{(values //form//)} returns the //[[CL:Glossary:primary value]]// returned by //form//; \f{(values //form1// //form2//)} returns two values,
+    the //[[CL:Glossary:primary value]]// of //form1// and the //[[CL:Glossary:primary value]]// of //form2//; and so on.
 
 See \conref{multiple-values-limit} and **[[CL:Functions:values-list]]**.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \endSubsection%{Return Values}
-
 

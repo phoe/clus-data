@@ -1,16 +1,6 @@
 
 
-\beginSubsection{Pathname Components}
-\DefineSection{PathnameComponents}
-
-
-
-
-
-
-
-
-
+\beginSubsection{Pathname Components} \DefineSection{PathnameComponents}
 
 A //[[CL:Glossary:pathname]]// has six components:
      a host,
@@ -20,77 +10,41 @@ A //[[CL:Glossary:pathname]]// has six components:
      a type,
  and a version.
 
-
-
-
-
 \beginsubsubsection{The Pathname Host Component}
 
-The name of the file system on which the file resides,
-or the name of a //[[CL:Glossary:logical host]]//.
-
-
+The name of the file system on which the file resides, or the name of a //[[CL:Glossary:logical host]]//.
 
 \endsubsubsection%{The Pathname Host Component}
 
 \beginsubsubsection{The Pathname Device Component}
 
-Corresponds to the ``device'' or ``file structure'' concept in many
-host file systems: the name of a logical or physical device containing files.
-
-
+Corresponds to the ``device'' or ``file structure'' concept in many host file systems: the name of a logical or physical device containing files.
 
 \endsubsubsection%{The Pathname Device Component}
 
-
 \beginsubsubsection{The Pathname Directory Component}
 
-Corresponds to the ``directory'' concept in many host file systems:
-the name of a group of related files.
-
-
+Corresponds to the ``directory'' concept in many host file systems: the name of a group of related files.
 
 \endsubsubsection%{The Pathname Directory Component}
 
-
 \beginsubsubsection{The Pathname Name Component}
 
-The ``name'' part of a group of //[[CL:Glossary:files]]// that can be thought of
-as conceptually related.
-
-
+The ``name'' part of a group of //[[CL:Glossary:files]]// that can be thought of as conceptually related.
 
 \endsubsubsection%{The Pathname Name Component}
 
-
-
 \beginsubsubsection{The Pathname Type Component}
 
-Corresponds to the ``filetype'' or ``extension'' concept in many host
-file systems.  This says what kind of file this is.  
-This component is always a //[[CL:Glossary:string]]//, \nil, **'':wild''**, or **'':unspecific''**.
-
-
+Corresponds to the ``filetype'' or ``extension'' concept in many host file systems.  This says what kind of file this is.   This component is always a //[[CL:Glossary:string]]//, \nil, **'':wild''**, or **'':unspecific''**.
 
 \endsubsubsection%{The Pathname Type Component}
-
-
 
 \beginsubsubsection{The Pathname Version Component}
 
 Corresponds to the ``version number'' concept in many host file systems.
 
-The version is either a positive //[[CL:Glossary:integer]]// 
-or a //[[CL:Glossary:symbol]]// from the following list:
-\nil, **'':wild''**, **'':unspecific''**, or **'':newest''**
-(refers to the largest version number that already exists in 
-the file system when reading a file, or to
-a version number
-greater than any already existing in the file system
-when writing a new file).  Implementations 
-can define other special version //[[CL:Glossary:symbols]]//.
-
-
+The version is either a positive //[[CL:Glossary:integer]]//  or a //[[CL:Glossary:symbol]]// from the following list: \nil, **'':wild''**, **'':unspecific''**, or **'':newest''** (refers to the largest version number that already exists in  the file system when reading a file, or to a version number greater than any already existing in the file system when writing a new file).  Implementations  can define other special version //[[CL:Glossary:symbols]]//.
 
 \endsubsubsection%{The Pathname Version Component}
 
@@ -104,215 +58,96 @@ can define other special version //[[CL:Glossary:symbols]]//.
 
 \beginsubsubsubsection{Special Characters in Pathname Components}
 
-//[[CL:Glossary:Strings]]// in //[[CL:Glossary:pathname]]// component values 
-never contain special //[[CL:Glossary:characters]]// that represent
-separation between //[[CL:Glossary:pathname]]// fields, 
-such as //[[CL:Glossary:slash]]// in \Unix\ //[[CL:Glossary:filenames]]//.
-Whether separator //[[CL:Glossary:characters]]// are permitted as 
-part of a //[[CL:Glossary:string]]// in a //[[CL:Glossary:pathname]]// component
-is //[[CL:Glossary:implementation-defined]]//; 
-however, if the //[[CL:Glossary:implementation]]// does permit it, 
-it must arrange to properly ``quote'' the character for the 
-//[[CL:Glossary:file system]]// when constructing a //[[CL:Glossary:namestring]]//.
-For example,
+//[[CL:Glossary:Strings]]// in //[[CL:Glossary:pathname]]// component values  never contain special //[[CL:Glossary:characters]]// that represent separation between //[[CL:Glossary:pathname]]// fields,  such as //[[CL:Glossary:slash]]// in \Unix\ //[[CL:Glossary:filenames]]//. Whether separator //[[CL:Glossary:characters]]// are permitted as  part of a //[[CL:Glossary:string]]// in a //[[CL:Glossary:pathname]]// component is //[[CL:Glossary:implementation-defined]]//;  however, if the //[[CL:Glossary:implementation]]// does permit it,  it must arrange to properly ``quote'' the character for the  //[[CL:Glossary:file system]]// when constructing a //[[CL:Glossary:namestring]]//. For example,
 
 \code
  ;; In a TOPS-20 implementation, which uses {\hat}V to quote 
- (NAMESTRING (MAKE-PATHNAME :HOST "OZ" :NAME "<TEST>"))
-\EV #P"OZ:PS:{\hat}V<TEST{\hat}V>"
-\NV #P"OZ:PS:<TEST>"
-\endcode
+ (NAMESTRING (MAKE-PATHNAME :HOST "OZ" :NAME "<TEST>")) \EV #P"OZ:PS:{\hat}V<TEST{\hat}V>" \NV #P"OZ:PS:<TEST>" \endcode
 
+  \endsubsubsubsection%{Special Characters in Pathname Components}
 
+\issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT} \beginsubsubsubsection{Case in Pathname Components} \DefineSection{PathnameComponentCase}
 
+//[[CL:Glossary:Namestrings]]// always use local file system //[[CL:Glossary:case]]// conventions,  but \clisp\ //[[CL:Glossary:functions]]// that manipulate //[[CL:Glossary:pathname]]// components allow the caller to select either of two conventions for representing //[[CL:Glossary:case]]// in component values by supplying a value for the **'':case''** keyword argument.
 
+\Thenextfigure\ lists the functions  relating to //[[CL:Glossary:pathnames]]// that permit a **'':case''** argument:
 
- 
-\endsubsubsubsection%{Special Characters in Pathname Components}
-
-
-
-\issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
-\beginsubsubsubsection{Case in Pathname Components}
-\DefineSection{PathnameComponentCase}
-
-//[[CL:Glossary:Namestrings]]// always use local file system //[[CL:Glossary:case]]// conventions, 
-but \clisp\ //[[CL:Glossary:functions]]// that manipulate //[[CL:Glossary:pathname]]// components
-allow the caller to select either of two conventions for representing
-//[[CL:Glossary:case]]// in component values by supplying a value for the
-**'':case''** keyword argument.
-
-\Thenextfigure\ lists the functions 
-relating to //[[CL:Glossary:pathnames]]// that permit a **'':case''** argument:
-
-\DefineFigure{PathnameCaseFuns}
-\displaythree{Pathname functions using a :CASE argument}{
-make-pathname&pathname-directory&pathname-name\cr
-pathname-device&pathname-host&pathname-type\cr
-}
+\DefineFigure{PathnameCaseFuns} \displaythree{Pathname functions using a :CASE argument}{ make-pathname&pathname-directory&pathname-name\cr pathname-device&pathname-host&pathname-type\cr }
 
 \beginsubsubsubsubsection{Local Case in Pathname Components}
 
-For the functions in \figref\PathnameCaseFuns,
-a value of **'':local''**\idxkwd{local} for the **'':case''** argument 
-(the default for these functions)
-indicates that the functions should receive and yield //[[CL:Glossary:strings]]// in component values
-as if they were already represented according to the host //[[CL:Glossary:file system]]//'s 
-convention for //[[CL:Glossary:case]]//.
+For the functions in \figref\PathnameCaseFuns, a value of **'':local''**\idxkwd{local} for the **'':case''** argument  (the default for these functions) indicates that the functions should receive and yield //[[CL:Glossary:strings]]// in component values as if they were already represented according to the host //[[CL:Glossary:file system]]//'s  convention for //[[CL:Glossary:case]]//.
 
-If the //[[CL:Glossary:file system]]// supports both //[[CL:Glossary:cases]]//, //[[CL:Glossary:strings]]// given or received
-as //[[CL:Glossary:pathname]]// component values under this protocol are to be used exactly
-as written.  If the file system only supports one //[[CL:Glossary:case]]//, 
-the //[[CL:Glossary:strings]]// will be translated to that //[[CL:Glossary:case]]//.
+If the //[[CL:Glossary:file system]]// supports both //[[CL:Glossary:cases]]//, //[[CL:Glossary:strings]]// given or received as //[[CL:Glossary:pathname]]// component values under this protocol are to be used exactly as written.  If the file system only supports one //[[CL:Glossary:case]]//,  the //[[CL:Glossary:strings]]// will be translated to that //[[CL:Glossary:case]]//.
 
 \endsubsubsubsubsection%{Local Case in Pathname Components}
 
 \beginsubsubsubsubsection{Common Case in Pathname Components}
 
-For the functions in \figref\PathnameCaseFuns,
-a value of **'':common''**\idxkwd{common} for the **'':case''** argument 
-that these //[[CL:Glossary:functions]]// should receive 
-and yield //[[CL:Glossary:strings]]// in component values according to the following conventions:
+For the functions in \figref\PathnameCaseFuns, a value of **'':common''**\idxkwd{common} for the **'':case''** argument  that these //[[CL:Glossary:functions]]// should receive  and yield //[[CL:Glossary:strings]]// in component values according to the following conventions:
 
-\beginlist
-\itemitem{\bull}
-All //[[CL:Glossary:uppercase]]// means to use a file system's customary //[[CL:Glossary:case]]//.
-\itemitem{\bull}
-All //[[CL:Glossary:lowercase]]// means to use the opposite of the customary //[[CL:Glossary:case]]//.
-\itemitem{\bull}
-Mixed //[[CL:Glossary:case]]// represents itself.
-\endlist
-Note that these conventions have been chosen in such a way that translation
-from **'':local''** to **'':common''** and back to **'':local''** is information-preserving.
- 
-\endsubsubsubsubsection%{Common Case in Pathname Components}
+\beginlist \itemitem{\bull} All //[[CL:Glossary:uppercase]]// means to use a file system's customary //[[CL:Glossary:case]]//. \itemitem{\bull} All //[[CL:Glossary:lowercase]]// means to use the opposite of the customary //[[CL:Glossary:case]]//. \itemitem{\bull} Mixed //[[CL:Glossary:case]]// represents itself. \endlist Note that these conventions have been chosen in such a way that translation from **'':local''** to **'':common''** and back to **'':local''** is information-preserving.
+  \endsubsubsubsubsection%{Common Case in Pathname Components}
 
 \endsubsubsubsection%{Case in Pathname Components}
 
-
 \endsubsubsection%{Strings in Component Values}
 
-\beginsubsubsection{Special Pathname Component Values}
-\DefineSection{SpecialComponentValues}
+\beginsubsubsection{Special Pathname Component Values} \DefineSection{SpecialComponentValues}
 
 \beginsubsubsubsection{NIL as a Component Value}
 
-
-
-
-As a //[[CL:Glossary:pathname]]// component value,
-\nil represents that the component is ``unfilled'';
-\seesection\MergingPathnames.
+As a //[[CL:Glossary:pathname]]// component value, \nil represents that the component is ``unfilled''; \seesection\MergingPathnames.
 
 The value of any //[[CL:Glossary:pathname]]// component can be \nil.
 
-
-When constructing a //[[CL:Glossary:pathname]]//,
-\nil\ in the host component might mean a default host
-rather than an actual \nil\ in some //[[CL:Glossary:implementations]]//.
+When constructing a //[[CL:Glossary:pathname]]//, \nil\ in the host component might mean a default host rather than an actual \nil\ in some //[[CL:Glossary:implementations]]//.
 
 \endsubsubsubsection%{NIL as a Component Value}
 
-\issue{PATHNAME-COMPONENT-VALUE:SPECIFY}
-\beginsubsubsubsection{:WILD as a Component Value}
-\DefineSection{WildComponents}
+\issue{PATHNAME-COMPONENT-VALUE:SPECIFY} \beginsubsubsubsection{:WILD as a Component Value} \DefineSection{WildComponents}
 
-If **'':wild''**\idxkwd{wild} is the value of a //[[CL:Glossary:pathname]]// component,
-that component is considered to be a wildcard, which matches anything.
+If **'':wild''**\idxkwd{wild} is the value of a //[[CL:Glossary:pathname]]// component, that component is considered to be a wildcard, which matches anything.
 
-A //[[CL:Glossary:conforming program]]// must be prepared to encounter a value of **'':wild''**
-as the value of any //[[CL:Glossary:pathname]]// component,
-or as an //[[CL:Glossary:element]]// of a //[[CL:Glossary:list]]// that is the value of the directory component.
+A //[[CL:Glossary:conforming program]]// must be prepared to encounter a value of **'':wild''** as the value of any //[[CL:Glossary:pathname]]// component, or as an //[[CL:Glossary:element]]// of a //[[CL:Glossary:list]]// that is the value of the directory component.
 
-\issue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION}
-When constructing a //[[CL:Glossary:pathname]]//,
-a //[[CL:Glossary:conforming program]]// may use **'':wild''** as the value of any or all of
-the directory, name, type, 
-or version component, but must not use **'':wild''** as the value of the host,
-
-
+\issue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION} When constructing a //[[CL:Glossary:pathname]]//, a //[[CL:Glossary:conforming program]]// may use **'':wild''** as the value of any or all of the directory, name, type,  or version component, but must not use **'':wild''** as the value of the host,
 
 or device component.
 
-If **'':wild''** is used as the value of the directory component in the construction
-of a //[[CL:Glossary:pathname]]//, the effect is equivalent to specifying the list
-\f{(:absolute :wild-inferiors)},
-or the same as \f{(:absolute :wild)} in a //[[CL:Glossary:file system]]// that does not support
-**'':wild-inferiors''**.\idxkwd{wild-inferiors}
-
+If **'':wild''** is used as the value of the directory component in the construction of a //[[CL:Glossary:pathname]]//, the effect is equivalent to specifying the list \f{(:absolute :wild-inferiors)}, or the same as \f{(:absolute :wild)} in a //[[CL:Glossary:file system]]// that does not support **'':wild-inferiors''**.\idxkwd{wild-inferiors}
 
 \endsubsubsubsection%{:WILD as a Component Value}
 
+\issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN} \beginsubsubsubsection{:UNSPECIFIC as a Component Value} \DefineSection{UnspecificComponent}
 
-\issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
-\beginsubsubsubsection{:UNSPECIFIC as a Component Value}
-\DefineSection{UnspecificComponent}
+If **'':unspecific''**\idxkwd{unspecific} is the value of a //[[CL:Glossary:pathname]]// component, the component is considered to be ``absent'' 
 
-If **'':unspecific''**\idxkwd{unspecific} is the value of a //[[CL:Glossary:pathname]]// component,
-the component is considered to be ``absent'' 
+or to ``have no meaning'' in the //[[CL:Glossary:filename]]// being represented by the //[[CL:Glossary:pathname]]//.
 
-or to ``have no meaning''
-in the //[[CL:Glossary:filename]]// being represented by the //[[CL:Glossary:pathname]]//.
-
-Whether a value of **'':unspecific''** is permitted for any component
-on any given //[[CL:Glossary:file system]]// accessible to the //[[CL:Glossary:implementation]]//
-is //[[CL:Glossary:implementation-defined]]//.
-A //[[CL:Glossary:conforming program]]// must never unconditionally use a
-**'':unspecific''** as the value of a //[[CL:Glossary:pathname]]// component because
-such a value is not guaranteed to be permissible in all implementations.
-However, a //[[CL:Glossary:conforming program]]// can, if it is careful, 
-successfully manipulate user-supplied data 
-which contains or refers to non-portable //[[CL:Glossary:pathname]]// components.
-And certainly a //[[CL:Glossary:conforming program]]// should be prepared for the
-possibility that any components of a //[[CL:Glossary:pathname]]// could be **'':unspecific''**.
+Whether a value of **'':unspecific''** is permitted for any component on any given //[[CL:Glossary:file system]]// accessible to the //[[CL:Glossary:implementation]]// is //[[CL:Glossary:implementation-defined]]//. A //[[CL:Glossary:conforming program]]// must never unconditionally use a **'':unspecific''** as the value of a //[[CL:Glossary:pathname]]// component because such a value is not guaranteed to be permissible in all implementations. However, a //[[CL:Glossary:conforming program]]// can, if it is careful,  successfully manipulate user-supplied data  which contains or refers to non-portable //[[CL:Glossary:pathname]]// components. And certainly a //[[CL:Glossary:conforming program]]// should be prepared for the possibility that any components of a //[[CL:Glossary:pathname]]// could be **'':unspecific''**.
 
 \issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
 
-When //[[CL:Glossary:reading]]//\meaning{1} the value of any //[[CL:Glossary:pathname]]// component,
-//[[CL:Glossary:conforming programs]]// should be prepared for the value to be **'':unspecific''**.
+When //[[CL:Glossary:reading]]//\meaning{1} the value of any //[[CL:Glossary:pathname]]// component, //[[CL:Glossary:conforming programs]]// should be prepared for the value to be **'':unspecific''**.
 
-
-\issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
-When //[[CL:Glossary:writing]]//\meaning{1} the value of any //[[CL:Glossary:pathname]]// component,
-the consequences are undefined if **'':unspecific''** is given 
-for a //[[CL:Glossary:pathname]]// in a //[[CL:Glossary:file system]]// for which it does not make sense.
-
+\issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN} When //[[CL:Glossary:writing]]//\meaning{1} the value of any //[[CL:Glossary:pathname]]// component, the consequences are undefined if **'':unspecific''** is given  for a //[[CL:Glossary:pathname]]// in a //[[CL:Glossary:file system]]// for which it does not make sense.
 
 \beginsubsubsubsubsection{Relation between component values NIL and :UNSPECIFIC}
 
+\issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN} If a //[[CL:Glossary:pathname]]// is converted to a //[[CL:Glossary:namestring]]//,  the //[[CL:Glossary:symbols]]// \nil\ and **'':unspecific''** cause the field to be treated as if it were empty. That is, both \nil\ and **'':unspecific''**  cause the component not to appear in the //[[CL:Glossary:namestring]]//.
 
-
-
-
-
-
-\issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
-If a //[[CL:Glossary:pathname]]// is converted to a //[[CL:Glossary:namestring]]//, 
-the //[[CL:Glossary:symbols]]// \nil\ and **'':unspecific''**
-cause the field to be treated as if it were empty.
-That is,
-both \nil\ and **'':unspecific''** 
-cause the component not to appear in the //[[CL:Glossary:namestring]]//.
-
-However, when merging a //[[CL:Glossary:pathname]]// with a set of defaults,
-only a \nil\ value for a component 
-will be replaced with the default for that component, 
-while a value of **'':unspecific''**
-will be left alone as if the field were ``filled'';
-\seefun{merge-pathnames} and \secref\MergingPathnames.
-
+However, when merging a //[[CL:Glossary:pathname]]// with a set of defaults, only a \nil\ value for a component  will be replaced with the default for that component,  while a value of **'':unspecific''** will be left alone as if the field were ``filled''; \seefun{merge-pathnames} and \secref\MergingPathnames.
 
 \endsubsubsubsubsection%{Relation between component values NIL and :UNSPECIFIC}
 
 \endsubsubsubsection%{:UNSPECIFIC as a Component Value}
 
-
 \endsubsubsection%{Special Pathname Component Values}
 
 \endsubsubsection%{Restrictions on Examining Pathname Components}
 
-\beginsubsubsection{Restrictions on Wildcard Pathnames}
-\DefineSection{WildcardRestrictions}
+\beginsubsubsection{Restrictions on Wildcard Pathnames} \DefineSection{WildcardRestrictions}
 
   Wildcard //[[CL:Glossary:pathnames]]// can be used with **[[CL:Functions:directory]]** but not with 
   **[[CL:Functions:open]]**,
@@ -321,16 +156,11 @@ will be left alone as if the field were ``filled'';
   wildcard components of a wildcard //[[CL:Glossary:pathname]]//, conforming programs
   must be prepared to encounter any of the following additional values
   in any component or any element of a //[[CL:Glossary:list]]// that is the directory component:
- 
-\beginlist
+  \beginlist
 
 \itemitem{\bull} The //[[CL:Glossary:symbol]]// **'':wild''**, which matches anything.
- 
-\itemitem{\bull} A //[[CL:Glossary:string]]// containing //[[CL:Glossary:implementation-dependent]]// 
-		 special wildcard //[[CL:Glossary:characters]]//.
- 
-\itemitem{\bull} Any //[[CL:Glossary:object]]//,
-		 representing an //[[CL:Glossary:implementation-dependent]]// wildcard pattern.
+  \itemitem{\bull} A //[[CL:Glossary:string]]// containing //[[CL:Glossary:implementation-dependent]]//  		 special wildcard //[[CL:Glossary:characters]]//.
+  \itemitem{\bull} Any //[[CL:Glossary:object]]//, 		 representing an //[[CL:Glossary:implementation-dependent]]// wildcard pattern.
 
 \endlist 
 
@@ -339,53 +169,13 @@ will be left alone as if the field were ``filled'';
 \issue{PATHNAME-COMPONENT-VALUE:SPECIFY}
 
 \beginsubsubsection{Restrictions on Examining Pathname Components}
-  
-The space of possible //[[CL:Glossary:objects]]// that a //[[CL:Glossary:conforming program]]// 
-must be prepared to //[[CL:Glossary:read]]//\meaning{1} 
-as the value of a //[[CL:Glossary:pathname]]// component
-is substantially larger than the space of possible //[[CL:Glossary:objects]]// 
-that a //[[CL:Glossary:conforming program]]// is permitted to //[[CL:Glossary:write]]//\meaning{1}
-into such a component.
+   The space of possible //[[CL:Glossary:objects]]// that a //[[CL:Glossary:conforming program]]//  must be prepared to //[[CL:Glossary:read]]//\meaning{1}  as the value of a //[[CL:Glossary:pathname]]// component is substantially larger than the space of possible //[[CL:Glossary:objects]]//  that a //[[CL:Glossary:conforming program]]// is permitted to //[[CL:Glossary:write]]//\meaning{1} into such a component.
 
 While the values discussed 
     in the subsections of this section,
-    in {\secref\SpecialComponentValues},
-and in {\secref\WildcardRestrictions} 
-apply to values that might be seen when 
-reading the component values,
-substantially more restrictive rules apply to constructing pathnames;
-\seesection\ConstructingPathnames.
+    in {\secref\SpecialComponentValues}, and in {\secref\WildcardRestrictions}  apply to values that might be seen when  reading the component values, substantially more restrictive rules apply to constructing pathnames; \seesection\ConstructingPathnames.
 
-When examining //[[CL:Glossary:pathname]]// components,
-//[[CL:Glossary:conforming programs]]// should be aware of the following restrictions.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+When examining //[[CL:Glossary:pathname]]// components, //[[CL:Glossary:conforming programs]]// should be aware of the following restrictions.
 
 \beginsubsubsubsection{Restrictions on Examining a Pathname Host Component}
 
@@ -395,37 +185,21 @@ It is //[[CL:Glossary:implementation-dependent]]// what //[[CL:Glossary:object]]
 
 \beginsubsubsubsection{Restrictions on Examining a Pathname Device Component}
 
-
-
 The device might be a //[[CL:Glossary:string]]//,
 
 **'':wild''**, **'':unspecific''**, or \nil.
 
-Note that **'':wild''** might result from an attempt to //[[CL:Glossary:read]]//\meaning{1}
-the //[[CL:Glossary:pathname]]// component, even though portable programs are restricted
-from //[[CL:Glossary:writing]]//\meaning{1} such a component value; 
-\seesection\WildcardRestrictions\ and \secref\ConstructingPathnames.
+Note that **'':wild''** might result from an attempt to //[[CL:Glossary:read]]//\meaning{1} the //[[CL:Glossary:pathname]]// component, even though portable programs are restricted from //[[CL:Glossary:writing]]//\meaning{1} such a component value;  \seesection\WildcardRestrictions\ and \secref\ConstructingPathnames.
 
 \endsubsubsubsection%{Restrictions on Examining a Pathname Device Component}
 
 \beginsubsubsubsection{Restrictions on Examining a Pathname Directory Component}
 
-
-
 The directory might be a //[[CL:Glossary:string]]//,
-
-
-
-
-
-
 
 **'':wild''**, **'':unspecific''**, or \nil.
 
-The directory can be a //[[CL:Glossary:list]]// of //[[CL:Glossary:strings]]// and //[[CL:Glossary:symbols]]//. 
-\issue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION}
-The //[[CL:Glossary:car]]// of the //[[CL:Glossary:list]]// is one of the symbols **'':absolute''**\idxkwd{absolute} or 
-**'':relative''**\idxkwd{relative}, meaning:
+The directory can be a //[[CL:Glossary:list]]// of //[[CL:Glossary:strings]]// and //[[CL:Glossary:symbols]]//.  \issue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION} The //[[CL:Glossary:car]]// of the //[[CL:Glossary:list]]// is one of the symbols **'':absolute''**\idxkwd{absolute} or  **'':relative''**\idxkwd{relative}, meaning:
 
 \beginlist
 
@@ -436,8 +210,7 @@ The //[[CL:Glossary:car]]// of the //[[CL:Glossary:list]]// is one of the symbol
   \f{(:absolute)} represents the root directory.  The list 
   \f{(:absolute "foo" "bar" "baz")} represents the directory called
   \f{"/foo/bar/baz"} in Unix (except possibly for //[[CL:Glossary:case]]//).
- 
-\item{**'':relative''**}
+  \item{**'':relative''**}
 
   A //[[CL:Glossary:list]]// whose //[[CL:Glossary:car]]// is the symbol **'':relative''** represents 
   a directory path starting from a default directory.  
@@ -449,91 +222,42 @@ The //[[CL:Glossary:car]]// of the //[[CL:Glossary:list]]// is one of the symbol
 
 Each remaining element of the //[[CL:Glossary:list]]// is a //[[CL:Glossary:string]]// or a //[[CL:Glossary:symbol]]//.
 
-Each //[[CL:Glossary:string]]// names a single level of directory structure.
-The //[[CL:Glossary:strings]]// should contain only the directory names 
-themselves---no punctuation characters.
+Each //[[CL:Glossary:string]]// names a single level of directory structure. The //[[CL:Glossary:strings]]// should contain only the directory names  themselves---no punctuation characters.
 
-In place of a //[[CL:Glossary:string]]//, at any point in the //[[CL:Glossary:list]]//, //[[CL:Glossary:symbols]]// 
-can occur to indicate special file notations.
-\Thenextfigure\ lists the //[[CL:Glossary:symbols]]// that have standard meanings.
-Implementations are permitted to add additional //[[CL:Glossary:objects]]// 
-of any //[[CL:Glossary:type]]// that is disjoint from \typeref{string}
-if necessary to represent features of their file systems that cannot be
-represented with the standard //[[CL:Glossary:strings]]// and //[[CL:Glossary:symbols]]//.
+In place of a //[[CL:Glossary:string]]//, at any point in the //[[CL:Glossary:list]]//, //[[CL:Glossary:symbols]]//  can occur to indicate special file notations. \Thenextfigure\ lists the //[[CL:Glossary:symbols]]// that have standard meanings. Implementations are permitted to add additional //[[CL:Glossary:objects]]//  of any //[[CL:Glossary:type]]// that is disjoint from \typeref{string} if necessary to represent features of their file systems that cannot be represented with the standard //[[CL:Glossary:strings]]// and //[[CL:Glossary:symbols]]//.
 
-Supplying any non-//[[CL:Glossary:string]]//, including any of the //[[CL:Glossary:symbols]]// listed below, 
-to a file system for which it does not make sense
-signals an error \oftype{file-error}.
-For example, Unix does not support **'':wild-inferiors''** in most implementations.
- 
-\idxkwd{wild}\idxkwd{wild-inferiors}\idxkwd{up}\idxkwd{back}%
-\tablefigtwo{Special Markers In Directory Component}{Symbol}{Meaning}{
-**'':wild''**           & Wildcard match of one level of directory structure \cr
-**'':wild-inferiors''** & Wildcard match of any number of directory levels   \cr
-**'':up''**             & Go upward in directory structure (semantic) \cr
-**'':back''**           & Go upward in directory structure (syntactic) \cr
-}
+Supplying any non-//[[CL:Glossary:string]]//, including any of the //[[CL:Glossary:symbols]]// listed below,  to a file system for which it does not make sense signals an error \oftype{file-error}. For example, Unix does not support **'':wild-inferiors''** in most implementations.
+  \idxkwd{wild}\idxkwd{wild-inferiors}\idxkwd{up}\idxkwd{back}% \tablefigtwo{Special Markers In Directory Component}{Symbol}{Meaning}{ **'':wild''**           & Wildcard match of one level of directory structure \cr **'':wild-inferiors''** & Wildcard match of any number of directory levels   \cr **'':up''**             & Go upward in directory structure (semantic) \cr **'':back''**           & Go upward in directory structure (syntactic) \cr }
 
 The following notes apply to the previous figure:
 
-\beginlist
-\item{Invalid Combinations}
+\beginlist \item{Invalid Combinations}
 
-Using **'':absolute''** or **'':wild-inferiors''** 
-immediately followed by **'':up''** or **'':back''**
-signals an error \oftype{file-error}.
- 
-\item{Syntactic vs Semantic}
+Using **'':absolute''** or **'':wild-inferiors''**  immediately followed by **'':up''** or **'':back''** signals an error \oftype{file-error}.
+  \item{Syntactic vs Semantic}
 
-``Syntactic'' means that the action of **'':back''** 
-depends only on the //[[CL:Glossary:pathname]]//
-and not on the contents of the file system.  
+``Syntactic'' means that the action of **'':back''**  depends only on the //[[CL:Glossary:pathname]]// and not on the contents of the file system.  
 
-``Semantic'' means that the action of **'':up''** 
-depends on the contents of the file system; 
-to resolve a //[[CL:Glossary:pathname]]// containing 
-**'':up''** to a //[[CL:Glossary:pathname]]// whose directory component
-contains only **'':absolute''** and 
-//[[CL:Glossary:strings]]// requires probing the file system.
+``Semantic'' means that the action of **'':up''**  depends on the contents of the file system;  to resolve a //[[CL:Glossary:pathname]]// containing  **'':up''** to a //[[CL:Glossary:pathname]]// whose directory component contains only **'':absolute''** and  //[[CL:Glossary:strings]]// requires probing the file system.
 
-**'':up''** differs from 
-**'':back''** only in file systems that support multiple
+**'':up''** differs from  **'':back''** only in file systems that support multiple
   names for directories, perhaps via symbolic links.  For example,
-  suppose that there is a directory
-\f{(:absolute "X" "Y" "Z")}
-  linked to 
-\f{(:absolute "A" "B" "C")}
-  and there also exist directories
-\f{(:absolute "A" "B" "Q")} and 
-\f{(:absolute "X" "Y" "Q")}.
-Then
-\f{(:absolute "X" "Y" "Z" :up "Q")}
-  designates
-\f{(:absolute "A" "B" "Q")}
-  while
-\f{(:absolute "X" "Y" "Z" :back "Q")}
-  designates
-\f{(:absolute "X" "Y" "Q")}
-\endlist 
-
-
+  suppose that there is a directory \f{(:absolute "X" "Y" "Z")}
+  linked to  \f{(:absolute "A" "B" "C")}
+  and there also exist directories \f{(:absolute "A" "B" "Q")} and  \f{(:absolute "X" "Y" "Q")}. Then \f{(:absolute "X" "Y" "Z" :up "Q")}
+  designates \f{(:absolute "A" "B" "Q")}
+  while \f{(:absolute "X" "Y" "Z" :back "Q")}
+  designates \f{(:absolute "X" "Y" "Q")} \endlist 
 
 \beginsubsubsubsubsection{Directory Components in Non-Hierarchical File Systems}
 
-In non-hierarchical //[[CL:Glossary:file systems]]//,
-the only valid //[[CL:Glossary:list]]// values for the directory component of a //[[CL:Glossary:pathname]]//
-are \f{(:absolute //[[CL:Glossary:string]]//)} and \f{(:absolute :wild)}.
-**'':relative''** directories and the keywords
-**'':wild-inferiors''**, **'':up''**, and **'':back''** are not used 
-in non-hierarchical //[[CL:Glossary:file systems]]//.
+In non-hierarchical //[[CL:Glossary:file systems]]//, the only valid //[[CL:Glossary:list]]// values for the directory component of a //[[CL:Glossary:pathname]]// are \f{(:absolute //[[CL:Glossary:string]]//)} and \f{(:absolute :wild)}. **'':relative''** directories and the keywords **'':wild-inferiors''**, **'':up''**, and **'':back''** are not used  in non-hierarchical //[[CL:Glossary:file systems]]//.
 
 \endsubsubsubsubsection%{Directory Components in Non-Hierarchical File Systems}
 
 \endsubsubsubsection%{Restrictions on Examining a Pathname Directory Component}
 
 \beginsubsubsubsection{Restrictions on Examining a Pathname Name Component}
-
-
 
 The name might be a //[[CL:Glossary:string]]//,
 
@@ -542,8 +266,6 @@ The name might be a //[[CL:Glossary:string]]//,
 \endsubsubsubsection%{Restrictions on Examining a Pathname Name Component}
 
 \beginsubsubsubsection{Restrictions on Examining a Pathname Type Component}
-
-
 
 The type might be a //[[CL:Glossary:string]]//,
 
@@ -555,18 +277,11 @@ The type might be a //[[CL:Glossary:string]]//,
 
 The version can be any //[[CL:Glossary:symbol]]// or any //[[CL:Glossary:integer]]//.  
 
-The symbol **'':newest''** refers to the largest version number 
-that already exists in the //[[CL:Glossary:file system]]//
-when reading, overwriting, appending, superseding, or directory listing 
-an existing //[[CL:Glossary:file]]//.
-The symbol **'':newest''** refers to the smallest version number
-greater than any existing version number when creating a new file.
+The symbol **'':newest''** refers to the largest version number  that already exists in the //[[CL:Glossary:file system]]// when reading, overwriting, appending, superseding, or directory listing  an existing //[[CL:Glossary:file]]//. The symbol **'':newest''** refers to the smallest version number greater than any existing version number when creating a new file.
 
-The symbols \nil, **'':unspecific''**, and **'':wild''** have special meanings and
-restrictions; \seesection\SpecialComponentValues\ and \secref\ConstructingPathnames.
+The symbols \nil, **'':unspecific''**, and **'':wild''** have special meanings and restrictions; \seesection\SpecialComponentValues\ and \secref\ConstructingPathnames.
 
-Other //[[CL:Glossary:symbols]]// and //[[CL:Glossary:integers]]//
-have //[[CL:Glossary:implementation-defined]]// meaning.
+Other //[[CL:Glossary:symbols]]// and //[[CL:Glossary:integers]]// have //[[CL:Glossary:implementation-defined]]// meaning.
 
 \beginsubsubsubsection{Notes about the Pathname Version Component}
 
@@ -576,8 +291,7 @@ It is suggested, but not required, that implementations do the following:
 
 \itemitem{\bull} Use positive //[[CL:Glossary:integers]]// starting at 1 as version numbers.
 
-\itemitem{\bull} Recognize the symbol **'':oldest''**
-		 to designate the smallest existing version number.
+\itemitem{\bull} Recognize the symbol **'':oldest''** 		 to designate the smallest existing version number.
 
 \itemitem{\bull} Use //[[CL:Glossary:keywords]]// for other special versions.
 
@@ -585,34 +299,28 @@ It is suggested, but not required, that implementations do the following:
 
 \endsubsubsubsection%{Notes about the Pathname Version Component}
 
-\beginsubsubsection{Restrictions on Constructing Pathnames}
-\DefineSection{ConstructingPathnames}
+\beginsubsubsection{Restrictions on Constructing Pathnames} \DefineSection{ConstructingPathnames}
 
   When constructing a //[[CL:Glossary:pathname]]// from components, conforming programs
   must follow these rules:
-  
-\beginlist
+   \beginlist
 
 \itemitem{\bull}
   Any component can be \nil.
   \nil\ in the host might mean a default host 
   rather than an actual \nil\ in some implementations.
-           
-\itemitem{\bull}
+            \itemitem{\bull}
 
   The host, device, directory, name, and type can be //[[CL:Glossary:strings]]//.  There
   are //[[CL:Glossary:implementation-dependent]]// limits on the number and type of
   //[[CL:Glossary:characters]]// in these //[[CL:Glossary:strings]]//.
-  
-\itemitem{\bull}
+   \itemitem{\bull}
   The directory can be a //[[CL:Glossary:list]]// of //[[CL:Glossary:strings]]// and //[[CL:Glossary:symbols]]//.
   There are //[[CL:Glossary:implementation-dependent]]// limits on the //[[CL:Glossary:list]]//'s
   length and contents.
-  
-\itemitem{\bull}
+   \itemitem{\bull}
   The version can be **'':newest''**.
- 
-\itemitem{\bull}
+  \itemitem{\bull}
   Any component can be taken 
   from the corresponding component of another //[[CL:Glossary:pathname]]//.
   When the two //[[CL:Glossary:pathnames]]// are for different file systems
@@ -622,71 +330,39 @@ It is suggested, but not required, that implementations do the following:
   an error is signaled.
   The definitions of ``appropriate'' and ``meaningful'' 
   are //[[CL:Glossary:implementation-dependent]]//.
-  
-\itemitem{\bull}
+   \itemitem{\bull}
   An implementation might support other values for some components,
   but a portable program cannot use those values.
   A conforming program can use //[[CL:Glossary:implementation-dependent]]// values
   but this can make it non-portable;
-  for example, it might work only with \Unix\ file systems.
-\endlist                                   
-
-
-
+  for example, it might work only with \Unix\ file systems. \endlist                                   
 
 \endsubsubsection%{Restrictions on Constructing Pathnames}
 
-
-
 \endSubsection%{Interpreting Pathname Component Values}
 
-\beginsubSection{Merging Pathnames}
-\DefineSection{MergingPathnames}
+\beginsubSection{Merging Pathnames} \DefineSection{MergingPathnames}
 
-Merging takes a //[[CL:Glossary:pathname]]// with unfilled components
-and supplies values for those components from a source of defaults.
+Merging takes a //[[CL:Glossary:pathname]]// with unfilled components and supplies values for those components from a source of defaults.
 
-If a component's value is \nil, that component is considered to be unfilled.
-If a component's value is any //[[CL:Glossary:non-nil]]// //[[CL:Glossary:object]]//, 
-including **'':unspecific''**, that component is considered to be filled.
+If a component's value is \nil, that component is considered to be unfilled. If a component's value is any //[[CL:Glossary:non-nil]]// //[[CL:Glossary:object]]//,  including **'':unspecific''**, that component is considered to be filled.
 
-
-
-
-
-
-
-
-Except as explicitly specified otherwise,
-for functions that manipulate or inquire about //[[CL:Glossary:files]]// in the //[[CL:Glossary:file system]]//,
-the pathname argument to such a function
-is merged with **[[CL:Functions:*default-pathname-defaults*]]** before accessing the //[[CL:Glossary:file system]]//
-(as if by **[[CL:Functions:merge-pathnames]]**).
+Except as explicitly specified otherwise, for functions that manipulate or inquire about //[[CL:Glossary:files]]// in the //[[CL:Glossary:file system]]//, the pathname argument to such a function is merged with **[[CL:Functions:*default-pathname-defaults*]]** before accessing the //[[CL:Glossary:file system]]// (as if by **[[CL:Functions:merge-pathnames]]**).
 
 \beginsubsubsection{Examples of Merging Pathnames}
 
-Although the following examples are possible to execute only in
-//[[CL:Glossary:implementations]]// which permit **'':unspecific''** in the indicated
-position andwhich permit four-letter type components, they serve to illustrate
-the basic concept of //[[CL:Glossary:pathname]]// merging.
+Although the following examples are possible to execute only in //[[CL:Glossary:implementations]]// which permit **'':unspecific''** in the indicated position andwhich permit four-letter type components, they serve to illustrate the basic concept of //[[CL:Glossary:pathname]]// merging.
 
-\medbreak
-\code
+\medbreak \code
  (pathname-type 
    (merge-pathnames (make-pathname :type "LISP")
-                    (make-pathname :type "TEXT")))
-\EV "LISP"
-\smallbreak
+                    (make-pathname :type "TEXT"))) \EV "LISP" \smallbreak
  (pathname-type 
    (merge-pathnames (make-pathname :type nil)
-                    (make-pathname :type "LISP")))
-\EV "LISP"
-\smallbreak
+                    (make-pathname :type "LISP"))) \EV "LISP" \smallbreak
  (pathname-type 
    (merge-pathnames (make-pathname :type :unspecific)
-                    (make-pathname :type "LISP")))
-\EV :UNSPECIFIC
-\endcode
+                    (make-pathname :type "LISP"))) \EV :UNSPECIFIC \endcode
 
 \endsubsubsection%{Examples of Merging Pathnames}
 

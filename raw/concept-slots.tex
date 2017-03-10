@@ -1,247 +1,70 @@
 
 
 \beginsubSection{Introduction to Slots}
-                    
-An //[[CL:Glossary:object]]// \ofmetaclass{standard-class} has zero or more named
-//[[CL:Glossary:slots]]//.  The //[[CL:Glossary:slots]]// of an //[[CL:Glossary:object]]// are determined 
-by the //[[CL:Glossary:class]]// of the //[[CL:Glossary:object]]//.  Each //[[CL:Glossary:slot]]// can hold
-one value.
-\reviewer{Barmar: All symbols are valid variable names.  Perhaps this means
-                  to preclude the use of named constants?  We have a terminology
-		  problem to solve.}%!!!
-The //[[CL:Glossary:name]]// of a //[[CL:Glossary:slot]]// is a //[[CL:Glossary:symbol]]// that is syntactically
-valid for use as a variable name.
+                     An //[[CL:Glossary:object]]// \ofmetaclass{standard-class} has zero or more named //[[CL:Glossary:slots]]//.  The //[[CL:Glossary:slots]]// of an //[[CL:Glossary:object]]// are determined  by the //[[CL:Glossary:class]]// of the //[[CL:Glossary:object]]//.  Each //[[CL:Glossary:slot]]// can hold one value. \reviewer{Barmar: All symbols are valid variable names.  Perhaps this means
+                  to preclude the use of named constants?  We have a terminology 		  problem to solve.}%!!! The //[[CL:Glossary:name]]// of a //[[CL:Glossary:slot]]// is a //[[CL:Glossary:symbol]]// that is syntactically valid for use as a variable name.
 
-When a //[[CL:Glossary:slot]]// does not have a value, the //[[CL:Glossary:slot]]// is said to be 
-//[[CL:Glossary:unbound]]//.  When an unbound //[[CL:Glossary:slot]]// is read,
-\reviewer{Barmar: from an object whose metaclass is standard-class?}
-the //[[CL:Glossary:generic function]]// **[[CL:Functions:slot-unbound]]** is invoked. The 
-system-supplied primary //[[CL:Glossary:method]]// 
-for **[[CL:Functions:slot-unbound]]** 
+When a //[[CL:Glossary:slot]]// does not have a value, the //[[CL:Glossary:slot]]// is said to be  //[[CL:Glossary:unbound]]//.  When an unbound //[[CL:Glossary:slot]]// is read, \reviewer{Barmar: from an object whose metaclass is standard-class?} the //[[CL:Glossary:generic function]]// **[[CL:Functions:slot-unbound]]** is invoked. The  system-supplied primary //[[CL:Glossary:method]]//  for **[[CL:Functions:slot-unbound]]** 
 
+on //[[CL:Glossary:class]]// \typeref{t} signals an error. \issue{SLOT-MISSING-VALUES:SPECIFY} If **[[CL:Functions:slot-unbound]]** returns, its //[[CL:Glossary:primary value]]//  is used that time as the //[[CL:Glossary:value]]// of the //[[CL:Glossary:slot]]//.
 
-on //[[CL:Glossary:class]]// \typeref{t} signals an error.
-\issue{SLOT-MISSING-VALUES:SPECIFY}
-If **[[CL:Functions:slot-unbound]]** returns, its //[[CL:Glossary:primary value]]// 
-is used that time as the //[[CL:Glossary:value]]// of the //[[CL:Glossary:slot]]//.
+The default initial value form for a //[[CL:Glossary:slot]]// is defined by the **'':initform''** slot option.  When the **'':initform''** form is used to supply a value, it is evaluated in the lexical environment in which the \macref{defclass} form was evaluated. The **'':initform''** along with the lexical environment in which the \macref{defclass} form was evaluated is called a //[[CL:Glossary:captured initialization form]]//.  For more details, \seesection\ObjectCreationAndInit.
+              A //[[CL:Glossary:local slot]]// is defined to be a //[[CL:Glossary:slot]]// that is
 
+//[[CL:Glossary:accessible]]// to exactly one //[[CL:Glossary:instance]]//,  namely the one in which the //[[CL:Glossary:slot]]// is allocated.   A //[[CL:Glossary:shared slot]]// is defined to be a //[[CL:Glossary:slot]]// that is visible to more than one //[[CL:Glossary:instance]]// of a given //[[CL:Glossary:class]]// and its //[[CL:Glossary:subclasses]]//.
 
-The default initial value form for a //[[CL:Glossary:slot]]// is defined by
-the **'':initform''** slot option.  When the **'':initform''** form is used to
-supply a value, it is evaluated in the lexical environment in which
-the \macref{defclass} form was evaluated. The **'':initform''** along with
-the lexical environment in which the \macref{defclass} form was evaluated
-is called a //[[CL:Glossary:captured initialization form]]//. 
-For more details, \seesection\ObjectCreationAndInit.
-             
-A //[[CL:Glossary:local slot]]// is defined to be a //[[CL:Glossary:slot]]// that is
+A //[[CL:Glossary:class]]// is said to define a //[[CL:Glossary:slot]]// with a given //[[CL:Glossary:name]]// when the \macref{defclass} form for that //[[CL:Glossary:class]]// contains a //[[CL:Glossary:slot specifier]]// with that //[[CL:Glossary:name]]//.  Defining a //[[CL:Glossary:local slot]]// does not immediately create  a //[[CL:Glossary:slot]]//; it causes a //[[CL:Glossary:slot]]// to be created each time  an //[[CL:Glossary:instance]]// of the //[[CL:Glossary:class]]// is created. Defining a //[[CL:Glossary:shared slot]]// immediately creates a //[[CL:Glossary:slot]]//.
+                                                     The **'':allocation''** slot option to \macref{defclass} controls the kind of //[[CL:Glossary:slot]]// that is defined.  If the value of the **'':allocation''** slot option is **'':instance''**, a //[[CL:Glossary:local slot]]// is created.  If the value of **'':allocation''** is **'':class''**, a //[[CL:Glossary:shared slot]]// is created.
 
+A //[[CL:Glossary:slot]]// is said to be //[[CL:Glossary:accessible]]// in an //[[CL:Glossary:instance]]//  of a //[[CL:Glossary:class]]// if the //[[CL:Glossary:slot]]// is defined by the //[[CL:Glossary:class]]//  of the //[[CL:Glossary:instance]]// or is inherited from a //[[CL:Glossary:superclass]]// of that //[[CL:Glossary:class]]//.   At most one //[[CL:Glossary:slot]]// of a given //[[CL:Glossary:name]]// can be //[[CL:Glossary:accessible]]// in an //[[CL:Glossary:instance]]//.   A //[[CL:Glossary:shared slot]]// defined by a //[[CL:Glossary:class]]// is //[[CL:Glossary:accessible]]// in all //[[CL:Glossary:instances]]//  of that //[[CL:Glossary:class]]//.   A detailed explanation of the inheritance of //[[CL:Glossary:slots]]// is given in  \secref\SlotInheritance.
 
+\endsubSection%{Slots} \beginsubSection{Accessing Slots}
 
+//[[CL:Glossary:Slots]]// can be //[[CL:Glossary:accessed]]// in two ways: by use of the primitive function **[[CL:Functions:slot-value]]** and by use of //[[CL:Glossary:generic functions]]// generated by the \macref{defclass} form.
 
-//[[CL:Glossary:accessible]]//
-to exactly one //[[CL:Glossary:instance]]//, 
-namely the one in which the //[[CL:Glossary:slot]]// is allocated.  
-A //[[CL:Glossary:shared slot]]// is defined to be a //[[CL:Glossary:slot]]// that is visible to more than one
-//[[CL:Glossary:instance]]// of a given //[[CL:Glossary:class]]// and its //[[CL:Glossary:subclasses]]//.
+\Thefunction{slot-value} can be used with any of the //[[CL:Glossary:slot]]// names specified in the \macref{defclass} form to //[[CL:Glossary:access]]// a specific //[[CL:Glossary:slot]]// //[[CL:Glossary:accessible]]// in an //[[CL:Glossary:instance]]// of the given //[[CL:Glossary:class]]//.
 
-A //[[CL:Glossary:class]]// is said to define a //[[CL:Glossary:slot]]// with a given //[[CL:Glossary:name]]// when
-the \macref{defclass} form for that //[[CL:Glossary:class]]// contains a //[[CL:Glossary:slot specifier]]// with
-that //[[CL:Glossary:name]]//.  Defining a //[[CL:Glossary:local slot]]// does not immediately create 
-a //[[CL:Glossary:slot]]//; it causes a //[[CL:Glossary:slot]]// to be created each time 
-an //[[CL:Glossary:instance]]// of the //[[CL:Glossary:class]]// is created.
-Defining a //[[CL:Glossary:shared slot]]// immediately creates a //[[CL:Glossary:slot]]//.
-                                                    
-The **'':allocation''** slot option to \macref{defclass} controls the kind
-of //[[CL:Glossary:slot]]// that is defined.  If the value of the **'':allocation''** slot
-option is **'':instance''**, a //[[CL:Glossary:local slot]]// is created.  If the value of
-**'':allocation''** is **'':class''**, a //[[CL:Glossary:shared slot]]// is created.
+The macro \macref{defclass} provides syntax for generating //[[CL:Glossary:methods]]// to read and write //[[CL:Glossary:slots]]//.  If a reader //[[CL:Glossary:method]]// is requested,  a //[[CL:Glossary:method]]// is automatically generated for reading the value of the //[[CL:Glossary:slot]]//, but no //[[CL:Glossary:method]]// for storing a value into it is generated. If a writer //[[CL:Glossary:method]]// is requested, a //[[CL:Glossary:method]]// is automatically  generated for storing a value into the //[[CL:Glossary:slot]]//, but no //[[CL:Glossary:method]]//  for reading its value is generated.  If an accessor //[[CL:Glossary:method]]// is  requested, a //[[CL:Glossary:method]]// for reading the value of the //[[CL:Glossary:slot]]// and a //[[CL:Glossary:method]]// for storing a value into the //[[CL:Glossary:slot]]// are automatically generated.  Reader and writer //[[CL:Glossary:methods]]// are implemented using **[[CL:Functions:slot-value]]**.
 
-A //[[CL:Glossary:slot]]// is said to be //[[CL:Glossary:accessible]]// in an //[[CL:Glossary:instance]]// 
-of a //[[CL:Glossary:class]]// if
-the //[[CL:Glossary:slot]]// is defined by the //[[CL:Glossary:class]]// 
-of the //[[CL:Glossary:instance]]// or is inherited from
-a //[[CL:Glossary:superclass]]// of that //[[CL:Glossary:class]]//.  
-At most one //[[CL:Glossary:slot]]// of a given //[[CL:Glossary:name]]// can be
-//[[CL:Glossary:accessible]]// in an //[[CL:Glossary:instance]]//.  
-A //[[CL:Glossary:shared slot]]// defined by a //[[CL:Glossary:class]]// is
-//[[CL:Glossary:accessible]]// in all //[[CL:Glossary:instances]]// 
-of that //[[CL:Glossary:class]]//.  
-A detailed explanation of the inheritance of //[[CL:Glossary:slots]]// is given in 
-\secref\SlotInheritance.
+When a reader or writer //[[CL:Glossary:method]]// is specified for a //[[CL:Glossary:slot]]//, the name of the //[[CL:Glossary:generic function]]// to which the generated //[[CL:Glossary:method]]// belongs is directly specified.  If the //[[CL:Glossary:name]]// specified for the writer //[[CL:Glossary:method]]// is the symbol \f{name}, the //[[CL:Glossary:name]]// of the //[[CL:Glossary:generic function]]// for writing the //[[CL:Glossary:slot]]// is the symbol \f{name}, and the //[[CL:Glossary:generic function]]// takes two arguments: the new value and the //[[CL:Glossary:instance]]//, in that order.  If the //[[CL:Glossary:name]]// specified for the accessor //[[CL:Glossary:method]]// is the symbol \f{name}, the //[[CL:Glossary:name]]// of the //[[CL:Glossary:generic function]]// for reading the //[[CL:Glossary:slot]]// is the symbol  \f{name}, and the //[[CL:Glossary:name]]// of the //[[CL:Glossary:generic function]]// for writing  the //[[CL:Glossary:slot]]// is the list \f{(setf name)}.
 
-\endsubSection%{Slots}
-\beginsubSection{Accessing Slots}
+A //[[CL:Glossary:generic function]]// created or modified by supplying **'':reader''**, **'':writer''**, or **'':accessor''** //[[CL:Glossary:slot]]// options can be treated exactly as an ordinary //[[CL:Glossary:generic function]]//.
+            Note that **[[CL:Functions:slot-value]]** can be used to read or write the value of a //[[CL:Glossary:slot]]// whether or not reader or writer //[[CL:Glossary:methods]]// exist for that //[[CL:Glossary:slot]]//.  When **[[CL:Functions:slot-value]]** is used, no reader or writer //[[CL:Glossary:methods]]// are invoked.
 
-//[[CL:Glossary:Slots]]// can be //[[CL:Glossary:accessed]]// in two ways: by use of the primitive function
-**[[CL:Functions:slot-value]]** and by use of //[[CL:Glossary:generic functions]]// generated by
-the \macref{defclass} form.
+The macro \macref{with-slots} can be used to establish a  //[[CL:Glossary:lexical environment]]// in which specified //[[CL:Glossary:slots]]// are lexically available as if they were variables.  The macro \macref{with-slots}  invokes \thefunction{slot-value} to //[[CL:Glossary:access]]// the specified //[[CL:Glossary:slots]]//.
 
-\Thefunction{slot-value} can be used with any of the //[[CL:Glossary:slot]]//
-names specified in the \macref{defclass} form to //[[CL:Glossary:access]]// a specific
-//[[CL:Glossary:slot]]// //[[CL:Glossary:accessible]]// in an //[[CL:Glossary:instance]]// of the given //[[CL:Glossary:class]]//.
+The macro \macref{with-accessors} can be used to establish a lexical environment in which specified //[[CL:Glossary:slots]]// are lexically available through their accessors as if they were variables.  The macro \macref{with-accessors} invokes the appropriate accessors to //[[CL:Glossary:access]]// the specified //[[CL:Glossary:slots]]//. 
 
-The macro \macref{defclass} provides syntax for generating //[[CL:Glossary:methods]]// to
-read and write //[[CL:Glossary:slots]]//.  If a reader //[[CL:Glossary:method]]// is requested, 
-a //[[CL:Glossary:method]]// is automatically generated for reading the value of the
-//[[CL:Glossary:slot]]//, but no //[[CL:Glossary:method]]// for storing a value into it is generated.
-If a writer //[[CL:Glossary:method]]// is requested, a //[[CL:Glossary:method]]// is automatically 
-generated for storing a value into the //[[CL:Glossary:slot]]//, but no //[[CL:Glossary:method]]// 
-for reading its value is generated.  If an accessor //[[CL:Glossary:method]]// is 
-requested, a //[[CL:Glossary:method]]// for reading the value of the //[[CL:Glossary:slot]]// and a
-//[[CL:Glossary:method]]// for storing a value into the //[[CL:Glossary:slot]]// are automatically
-generated.  Reader and writer //[[CL:Glossary:methods]]// are implemented using
-**[[CL:Functions:slot-value]]**.
+\endsubSection%{Accessing Slots} \beginsubsection{Inheritance of Slots and Slot Options} \DefineSection{SlotInheritance}
 
-When a reader or writer //[[CL:Glossary:method]]// is specified for a //[[CL:Glossary:slot]]//, the
-name of the //[[CL:Glossary:generic function]]// to which the generated //[[CL:Glossary:method]]//
-belongs is directly specified.  If the //[[CL:Glossary:name]]// specified for the writer
-//[[CL:Glossary:method]]// is the symbol \f{name}, the //[[CL:Glossary:name]]// of the
-//[[CL:Glossary:generic function]]// for writing the //[[CL:Glossary:slot]]// is the symbol
-\f{name}, and the //[[CL:Glossary:generic function]]// takes two arguments: the new
-value and the //[[CL:Glossary:instance]]//, in that order.  If the //[[CL:Glossary:name]]// specified
-for the accessor //[[CL:Glossary:method]]// is the symbol \f{name}, the //[[CL:Glossary:name]]// of
-the //[[CL:Glossary:generic function]]// for reading the //[[CL:Glossary:slot]]// is the symbol 
-\f{name}, and the //[[CL:Glossary:name]]// of the //[[CL:Glossary:generic function]]// for writing 
-the //[[CL:Glossary:slot]]// is the list \f{(setf name)}.
+The set of the //[[CL:Glossary:names]]// of all //[[CL:Glossary:slots]]// //[[CL:Glossary:accessible]]//  in an //[[CL:Glossary:instance]]// of a //[[CL:Glossary:class]]// $C$ is the union of  the sets of //[[CL:Glossary:names]]// of //[[CL:Glossary:slots]]// defined by $C$ and its //[[CL:Glossary:superclasses]]//. The structure of an //[[CL:Glossary:instance]]// is the set of //[[CL:Glossary:names]]// of //[[CL:Glossary:local slots]]// in that //[[CL:Glossary:instance]]//.
 
-A //[[CL:Glossary:generic function]]// created or modified by supplying **'':reader''**,
-**'':writer''**, or **'':accessor''** //[[CL:Glossary:slot]]// options can be treated exactly
-as an ordinary //[[CL:Glossary:generic function]]//.
-           
-Note that **[[CL:Functions:slot-value]]** can be used to read or write the value of a
-//[[CL:Glossary:slot]]// whether or not reader or writer //[[CL:Glossary:methods]]// exist for that
-//[[CL:Glossary:slot]]//.  When **[[CL:Functions:slot-value]]** is used, no reader or writer
-//[[CL:Glossary:methods]]// are invoked.
+In the simplest case, only one //[[CL:Glossary:class]]// among $C$ and its //[[CL:Glossary:superclasses]]// defines a //[[CL:Glossary:slot]]// with a given //[[CL:Glossary:slot]]// name.   If a //[[CL:Glossary:slot]]// is defined by a //[[CL:Glossary:superclass]]// of $C$\negthinspace,  the //[[CL:Glossary:slot]]// is said to be inherited.  The characteristics  of the //[[CL:Glossary:slot]]// are determined by the //[[CL:Glossary:slot specifier]]// of the defining //[[CL:Glossary:class]]//. Consider the defining //[[CL:Glossary:class]]// for a slot $S$\negthinspace.  If the value of the **'':allocation''**  slot option is **'':instance''**, then $S$ is a //[[CL:Glossary:local slot]]// and each  //[[CL:Glossary:instance]]// of $C$ has its own //[[CL:Glossary:slot]]// named $S$ that stores its own value.  If the value of the **'':allocation''** slot  option is **'':class''**, then $S$ is a //[[CL:Glossary:shared slot]]//, the //[[CL:Glossary:class]]//  that defined $S$ stores the value, and all //[[CL:Glossary:instances]]// of $C$ can //[[CL:Glossary:access]]// that single //[[CL:Glossary:slot]]//.   If the **'':allocation''** slot option is omitted, **'':instance''** is used.
 
-The macro \macref{with-slots} can be used to establish a 
-//[[CL:Glossary:lexical environment]]// in which specified //[[CL:Glossary:slots]]// are lexically
-available as if they were variables.  The macro \macref{with-slots} 
-invokes \thefunction{slot-value} to //[[CL:Glossary:access]]// the specified //[[CL:Glossary:slots]]//.
-
-The macro \macref{with-accessors} can be used to establish a lexical
-environment in which specified //[[CL:Glossary:slots]]// are lexically available through
-their accessors as if they were variables.  The macro \macref{with-accessors}
-invokes the appropriate accessors to //[[CL:Glossary:access]]// the specified //[[CL:Glossary:slots]]//. 
-
-
-
-
-\endsubSection%{Accessing Slots}
-\beginsubsection{Inheritance of Slots and Slot Options}
-\DefineSection{SlotInheritance}
-
-The set of the //[[CL:Glossary:names]]// of all //[[CL:Glossary:slots]]// //[[CL:Glossary:accessible]]// 
-in an //[[CL:Glossary:instance]]// of a //[[CL:Glossary:class]]// $C$ is the union of 
-the sets of //[[CL:Glossary:names]]// of //[[CL:Glossary:slots]]// defined by $C$ and its
-//[[CL:Glossary:superclasses]]//. The structure of an //[[CL:Glossary:instance]]// is
-the set of //[[CL:Glossary:names]]// of //[[CL:Glossary:local slots]]// in that //[[CL:Glossary:instance]]//.
-
-In the simplest case, only one //[[CL:Glossary:class]]// among $C$ and its //[[CL:Glossary:superclasses]]//
-defines a //[[CL:Glossary:slot]]// with a given //[[CL:Glossary:slot]]// name.  
-If a //[[CL:Glossary:slot]]// is defined by a //[[CL:Glossary:superclass]]// of $C$\negthinspace, 
-the //[[CL:Glossary:slot]]// is said to be inherited.  The characteristics 
-of the //[[CL:Glossary:slot]]// are determined by the //[[CL:Glossary:slot specifier]]//
-of the defining //[[CL:Glossary:class]]//.
-Consider the defining //[[CL:Glossary:class]]// for
-a slot $S$\negthinspace.  If the value of the **'':allocation''** 
-slot
-option is **'':instance''**, then $S$ is a //[[CL:Glossary:local slot]]// and each 
-//[[CL:Glossary:instance]]//
-of $C$ has its own //[[CL:Glossary:slot]]// named $S$ that stores its own value.  If the
-value of the **'':allocation''** slot 
-option is **'':class''**, then $S$
-is a //[[CL:Glossary:shared slot]]//, the //[[CL:Glossary:class]]// 
-that defined $S$ stores the value, and all
-//[[CL:Glossary:instances]]// of $C$ can //[[CL:Glossary:access]]// that single //[[CL:Glossary:slot]]//.  
-If the **'':allocation''** slot option is omitted, **'':instance''** is used.
-
-In general, more than one //[[CL:Glossary:class]]// among $C$ and its 
-//[[CL:Glossary:superclasses]]// can
-define a //[[CL:Glossary:slot]]// with a given //[[CL:Glossary:name]]//.  
-In such cases, only one //[[CL:Glossary:slot]]// with
-the given name is //[[CL:Glossary:accessible]]// in an //[[CL:Glossary:instance]]// 
-of $C$\negthinspace, and
-the characteristics of that //[[CL:Glossary:slot]]// are 
-a combination of the several //[[CL:Glossary:slot]]//
-specifiers, computed as follows:
+In general, more than one //[[CL:Glossary:class]]// among $C$ and its  //[[CL:Glossary:superclasses]]// can define a //[[CL:Glossary:slot]]// with a given //[[CL:Glossary:name]]//.   In such cases, only one //[[CL:Glossary:slot]]// with the given name is //[[CL:Glossary:accessible]]// in an //[[CL:Glossary:instance]]//  of $C$\negthinspace, and the characteristics of that //[[CL:Glossary:slot]]// are  a combination of the several //[[CL:Glossary:slot]]// specifiers, computed as follows:
 
 \beginlist
 
-\itemitem{\bull} All the //[[CL:Glossary:slot specifiers]]// for a given //[[CL:Glossary:slot]]// name
-are ordered from most specific to least specific, according to the order in $C$'s
-//[[CL:Glossary:class precedence list]]// of the //[[CL:Glossary:classes]]// that define them. All references
-to the specificity of //[[CL:Glossary:slot specifiers]]// immediately below refers to this
-ordering.
+\itemitem{\bull} All the //[[CL:Glossary:slot specifiers]]// for a given //[[CL:Glossary:slot]]// name are ordered from most specific to least specific, according to the order in $C$'s //[[CL:Glossary:class precedence list]]// of the //[[CL:Glossary:classes]]// that define them. All references to the specificity of //[[CL:Glossary:slot specifiers]]// immediately below refers to this ordering.
 
-\itemitem{\bull} The allocation of a //[[CL:Glossary:slot]]// is controlled by the most 
-specific //[[CL:Glossary:slot specifier]]//.  If the most specific //[[CL:Glossary:slot specifier]]// 
-does not contain an **'':allocation''** slot option, **'':instance''** is used.
-Less specific //[[CL:Glossary:slot specifiers]]// do not affect the allocation.
+\itemitem{\bull} The allocation of a //[[CL:Glossary:slot]]// is controlled by the most  specific //[[CL:Glossary:slot specifier]]//.  If the most specific //[[CL:Glossary:slot specifier]]//  does not contain an **'':allocation''** slot option, **'':instance''** is used. Less specific //[[CL:Glossary:slot specifiers]]// do not affect the allocation.
 
-\itemitem{\bull} The default initial value form for a //[[CL:Glossary:slot]]// 
-is the value of the **'':initform''** slot option in the most specific
-//[[CL:Glossary:slot specifier]]// that contains one.  If no //[[CL:Glossary:slot specifier]]//
-contains an **'':initform''** slot option, the //[[CL:Glossary:slot]]// 
-has no default initial value form.
+\itemitem{\bull} The default initial value form for a //[[CL:Glossary:slot]]//  is the value of the **'':initform''** slot option in the most specific //[[CL:Glossary:slot specifier]]// that contains one.  If no //[[CL:Glossary:slot specifier]]// contains an **'':initform''** slot option, the //[[CL:Glossary:slot]]//  has no default initial value form.
 
-\itemitem{\bull} The contents of a //[[CL:Glossary:slot]]// will always be of type 
-\f{(and $T\sub 1$ $\ldots$ $T\sub n$)} where $T\sub 1 \ldots T\sub n$ are
-the values of the **'':type''** slot options contained in all of the
-//[[CL:Glossary:slot specifiers]]//.  If no //[[CL:Glossary:slot specifier]]// contains the
-**'':type''** slot option, the contents of the //[[CL:Glossary:slot]]// will always be 
-\oftype{t}. The consequences of attempting to store in a //[[CL:Glossary:slot]]//
-a value that does not satisfy the //[[CL:Glossary:type]]// of the //[[CL:Glossary:slot]]// are undefined.
+\itemitem{\bull} The contents of a //[[CL:Glossary:slot]]// will always be of type  \f{(and $T\sub 1$ $\ldots$ $T\sub n$)} where $T\sub 1 \ldots T\sub n$ are the values of the **'':type''** slot options contained in all of the //[[CL:Glossary:slot specifiers]]//.  If no //[[CL:Glossary:slot specifier]]// contains the **'':type''** slot option, the contents of the //[[CL:Glossary:slot]]// will always be  \oftype{t}. The consequences of attempting to store in a //[[CL:Glossary:slot]]// a value that does not satisfy the //[[CL:Glossary:type]]// of the //[[CL:Glossary:slot]]// are undefined.
 
-\itemitem{\bull} The set of initialization arguments that initialize a 
-given //[[CL:Glossary:slot]]// is the union of the initialization arguments declared in
-the **'':initarg''** slot options in all the //[[CL:Glossary:slot specifiers]]//.
+\itemitem{\bull} The set of initialization arguments that initialize a  given //[[CL:Glossary:slot]]// is the union of the initialization arguments declared in the **'':initarg''** slot options in all the //[[CL:Glossary:slot specifiers]]//.
 
-\itemitem{\bull} The //[[CL:Glossary:documentation string]]// for a //[[CL:Glossary:slot]]// is the value of
-the **'':documentation''** slot option in the most specific //[[CL:Glossary:slot]]//
-specifier that contains one.  If no //[[CL:Glossary:slot specifier]]// contains a
-**'':documentation''** slot option, the //[[CL:Glossary:slot]]// has no //[[CL:Glossary:documentation string]]//.
+\itemitem{\bull} The //[[CL:Glossary:documentation string]]// for a //[[CL:Glossary:slot]]// is the value of the **'':documentation''** slot option in the most specific //[[CL:Glossary:slot]]// specifier that contains one.  If no //[[CL:Glossary:slot specifier]]// contains a **'':documentation''** slot option, the //[[CL:Glossary:slot]]// has no //[[CL:Glossary:documentation string]]//.
 
 \endlist
 
-A consequence of the allocation rule is that a //[[CL:Glossary:shared slot]]// can be
-//[[CL:Glossary:shadowed]]//.  For example, if a class $C\sub 1$ defines 
-a //[[CL:Glossary:slot]]// named $S$
-whose value for the **'':allocation''** slot option is **'':class''**,
-that //[[CL:Glossary:slot]]// is //[[CL:Glossary:accessible]]// 
-in //[[CL:Glossary:instances]]// of $C\sub 1$ and all of its
-//[[CL:Glossary:subclasses]]//.  However, if $C\sub 2$ is a //[[CL:Glossary:subclass]]// 
-of $C\sub 1$ and also
-defines a //[[CL:Glossary:slot]]// named $S$\negthinspace, $C\sub 1$'s 
-//[[CL:Glossary:slot]]// is not shared
-by //[[CL:Glossary:instances]]// of $C\sub 2$ and its //[[CL:Glossary:subclasses]]//. When a class
-$C\sub 1$ defines a //[[CL:Glossary:shared slot]]//, any subclass $C\sub 2$ of $C\sub
-1$ will share this single //[[CL:Glossary:slot]]// 
-unless the \macref{defclass} form for
-$C\sub 2$ specifies a //[[CL:Glossary:slot]]// of the same 
-//[[CL:Glossary:name]]// or there is a //[[CL:Glossary:superclass]]//
-of $C\sub 2$ that precedes $C\sub 1$ in the //[[CL:Glossary:class precedence list]]// of
-$C\sub 2$ that defines a //[[CL:Glossary:slot]]// of the same name.
+A consequence of the allocation rule is that a //[[CL:Glossary:shared slot]]// can be //[[CL:Glossary:shadowed]]//.  For example, if a class $C\sub 1$ defines  a //[[CL:Glossary:slot]]// named $S$ whose value for the **'':allocation''** slot option is **'':class''**, that //[[CL:Glossary:slot]]// is //[[CL:Glossary:accessible]]//  in //[[CL:Glossary:instances]]// of $C\sub 1$ and all of its //[[CL:Glossary:subclasses]]//.  However, if $C\sub 2$ is a //[[CL:Glossary:subclass]]//  of $C\sub 1$ and also defines a //[[CL:Glossary:slot]]// named $S$\negthinspace, $C\sub 1$'s  //[[CL:Glossary:slot]]// is not shared by //[[CL:Glossary:instances]]// of $C\sub 2$ and its //[[CL:Glossary:subclasses]]//. When a class $C\sub 1$ defines a //[[CL:Glossary:shared slot]]//, any subclass $C\sub 2$ of $C\sub 1$ will share this single //[[CL:Glossary:slot]]//  unless the \macref{defclass} form for $C\sub 2$ specifies a //[[CL:Glossary:slot]]// of the same  //[[CL:Glossary:name]]// or there is a //[[CL:Glossary:superclass]]// of $C\sub 2$ that precedes $C\sub 1$ in the //[[CL:Glossary:class precedence list]]// of $C\sub 2$ that defines a //[[CL:Glossary:slot]]// of the same name.
 
-A consequence of the type rule is that the value of a //[[CL:Glossary:slot]]//
-satisfies the type constraint of each //[[CL:Glossary:slot specifier]]// that
-contributes to that //[[CL:Glossary:slot]]//.  Because the result of attempting to
-store in a //[[CL:Glossary:slot]]// a value that does not satisfy the type
-constraint for the //[[CL:Glossary:slot]]// is undefined, the value in a //[[CL:Glossary:slot]]//
-might fail to satisfy its type constraint.
-     
-The **'':reader''**, **'':writer''**, and **'':accessor''** slot options
-create //[[CL:Glossary:methods]]// rather than define the characteristics of a //[[CL:Glossary:slot]]//.
-Reader and writer //[[CL:Glossary:methods]]// are inherited in the sense described in
-\secref\MethodInheritance.
+A consequence of the type rule is that the value of a //[[CL:Glossary:slot]]// satisfies the type constraint of each //[[CL:Glossary:slot specifier]]// that contributes to that //[[CL:Glossary:slot]]//.  Because the result of attempting to store in a //[[CL:Glossary:slot]]// a value that does not satisfy the type constraint for the //[[CL:Glossary:slot]]// is undefined, the value in a //[[CL:Glossary:slot]]// might fail to satisfy its type constraint.
+      The **'':reader''**, **'':writer''**, and **'':accessor''** slot options create //[[CL:Glossary:methods]]// rather than define the characteristics of a //[[CL:Glossary:slot]]//. Reader and writer //[[CL:Glossary:methods]]// are inherited in the sense described in \secref\MethodInheritance.
 
-//[[CL:Glossary:Methods]]// that //[[CL:Glossary:access]]// //[[CL:Glossary:slots]]// use only the name of the
-//[[CL:Glossary:slot]]// and the //[[CL:Glossary:type]]// of the //[[CL:Glossary:slot]]//'s value.  Suppose
-a //[[CL:Glossary:superclass]]// provides a //[[CL:Glossary:method]]// that expects to //[[CL:Glossary:access]]// a
-//[[CL:Glossary:shared slot]]// of a given //[[CL:Glossary:name]]//, and a //[[CL:Glossary:subclass]]// defines
-a //[[CL:Glossary:local slot]]// with the same //[[CL:Glossary:name]]//.  If the //[[CL:Glossary:method]]// provided 
-by the //[[CL:Glossary:superclass]]// is used on an //[[CL:Glossary:instance]]// of the //[[CL:Glossary:subclass]]//, 
-the //[[CL:Glossary:method]]// //[[CL:Glossary:accesses]]// the //[[CL:Glossary:local slot]]//.
+//[[CL:Glossary:Methods]]// that //[[CL:Glossary:access]]// //[[CL:Glossary:slots]]// use only the name of the //[[CL:Glossary:slot]]// and the //[[CL:Glossary:type]]// of the //[[CL:Glossary:slot]]//'s value.  Suppose a //[[CL:Glossary:superclass]]// provides a //[[CL:Glossary:method]]// that expects to //[[CL:Glossary:access]]// a //[[CL:Glossary:shared slot]]// of a given //[[CL:Glossary:name]]//, and a //[[CL:Glossary:subclass]]// defines a //[[CL:Glossary:local slot]]// with the same //[[CL:Glossary:name]]//.  If the //[[CL:Glossary:method]]// provided  by the //[[CL:Glossary:superclass]]// is used on an //[[CL:Glossary:instance]]// of the //[[CL:Glossary:subclass]]//,  the //[[CL:Glossary:method]]// //[[CL:Glossary:accesses]]// the //[[CL:Glossary:local slot]]//.
 
 \endsubsection%{Inheritance of Slots and Slot Options}
 

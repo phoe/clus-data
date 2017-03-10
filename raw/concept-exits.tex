@@ -1,27 +1,8 @@
 
 
+\issue{EXIT-EXTENT:MINIMAL} When a transfer of control is initiated by \specref{go},  \specref{return-from}, or \specref{throw} the following events occur in order to accomplish the transfer of control. Note that for \specref{go},  the //[[CL:Glossary:exit point]]// is the //[[CL:Glossary:form]]// within the \specref{tagbody} that is being executed at the time the \specref{go} is performed; for \specref{return-from}, the //[[CL:Glossary:exit point]]// is the corresponding  \specref{block} //[[CL:Glossary:form]]//; and for \specref{throw}, the //[[CL:Glossary:exit point]]// is the corresponding  \specref{catch} //[[CL:Glossary:form]]//. 
 
-
-
-
-
-
-\issue{EXIT-EXTENT:MINIMAL}
-When a transfer of control is initiated by \specref{go}, 
-\specref{return-from}, or \specref{throw}
-the following events occur in order to accomplish the transfer of control.
-Note that for \specref{go}, 
-the //[[CL:Glossary:exit point]]// is the //[[CL:Glossary:form]]// within the \specref{tagbody}
-that is being executed at the time the \specref{go} is performed;
-for \specref{return-from},
-the //[[CL:Glossary:exit point]]// is the corresponding 
-\specref{block} //[[CL:Glossary:form]]//;
-and for \specref{throw},
-the //[[CL:Glossary:exit point]]// is the corresponding 
-\specref{catch} //[[CL:Glossary:form]]//. 
-
-\beginlist
-\itemitem{1.} 
+\beginlist \itemitem{1.} 
  Intervening //[[CL:Glossary:exit points]]// are ``abandoned''
  (\ie their //[[CL:Glossary:extent]]// ends 
       and it is no longer valid to attempt to transfer control through them).
@@ -29,33 +10,18 @@ the //[[CL:Glossary:exit point]]// is the corresponding
 \itemitem{2.} 
  The cleanup clauses of any intervening \specref{unwind-protect} clauses
  are evaluated.
- 
-\itemitem{3.} 
+  \itemitem{3.} 
 
  Intervening dynamic //[[CL:Glossary:bindings]]// of **[[CL:Declarations:special]]** variables,
  //[[CL:Glossary:catch tags]]//, //[[CL:Glossary:condition handlers]]//, and //[[CL:Glossary:restarts]]//
  are undone.
- 
-\itemitem{4.} 
+  \itemitem{4.} 
  The //[[CL:Glossary:extent]]// of the //[[CL:Glossary:exit point]]// being invoked ends,
- and control is passed to the target.
-\endlist 
- 
-The extent of an exit being ``abandoned'' because it is being passed over
-ends as soon as the transfer of control is initiated. That is,
-event 1 occurs at the beginning of the initiation of the transfer of
-control. 
-The consequences are undefined if an attempt is made to transfer control 
-to an //[[CL:Glossary:exit point]]// whose //[[CL:Glossary:dynamic extent]]// has ended.
+ and control is passed to the target. \endlist 
+  The extent of an exit being ``abandoned'' because it is being passed over ends as soon as the transfer of control is initiated. That is, event 1 occurs at the beginning of the initiation of the transfer of control.  The consequences are undefined if an attempt is made to transfer control  to an //[[CL:Glossary:exit point]]// whose //[[CL:Glossary:dynamic extent]]// has ended.
  
 
-Events 2 and 3 are actually performed interleaved, in the order
-corresponding to the reverse order in which they were established.
-The effect of this is that the cleanup clauses of an \specref{unwind-protect}
-see the same dynamic //[[CL:Glossary:bindings]]// 
-of variables and //[[CL:Glossary:catch tags]]// as were
-visible when the \specref{unwind-protect} was entered.
- 
-Event 4 occurs at the end of the transfer of control.
+Events 2 and 3 are actually performed interleaved, in the order corresponding to the reverse order in which they were established. The effect of this is that the cleanup clauses of an \specref{unwind-protect} see the same dynamic //[[CL:Glossary:bindings]]//  of variables and //[[CL:Glossary:catch tags]]// as were visible when the \specref{unwind-protect} was entered.
+  Event 4 occurs at the end of the transfer of control.
  
 

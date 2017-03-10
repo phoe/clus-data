@@ -1,127 +1,47 @@
 
 
-
 \issue{ARGUMENT-MISMATCH-ERROR:MORE-CLARIFICATIONS}
 
 \beginsubSection{Argument Mismatch Detection}
 
-\beginsubsubsection{Safe and Unsafe Calls}
-\DefineSection{SafeAndUnsafeCalls}
+\beginsubsubsection{Safe and Unsafe Calls} \DefineSection{SafeAndUnsafeCalls}
 
-A //[[CL:Glossary:call]]// is a //[[CL:Glossary:safe call]]// if each of the following is
-either //[[CL:Glossary:safe]]// //[[CL:Glossary:code]]// or //[[CL:Glossary:system code]]// (other than
-//[[CL:Glossary:system code]]// that results from //[[CL:Glossary:macro expansion]]// of 
-//[[CL:Glossary:programmer code]]//):
-\beginlist
-\itemitem{\bull} the //[[CL:Glossary:call]]//.
-\itemitem{\bull} the definition of the //[[CL:Glossary:function]]// being //[[CL:Glossary:called]]//.
-\itemitem{\bull} the point of //[[CL:Glossary:functional evaluation]]// 
-\endlist
+A //[[CL:Glossary:call]]// is a //[[CL:Glossary:safe call]]// if each of the following is either //[[CL:Glossary:safe]]// //[[CL:Glossary:code]]// or //[[CL:Glossary:system code]]// (other than //[[CL:Glossary:system code]]// that results from //[[CL:Glossary:macro expansion]]// of  //[[CL:Glossary:programmer code]]//): 
+  *  the //[[CL:Glossary:call]]//. 
+  * the definition of the //[[CL:Glossary:function]]// being //[[CL:Glossary:called]]//. 
+  * the point of //[[CL:Glossary:functional evaluation]]//.
 
 The following special cases require some elaboration:
-
-\beginlist
-\itemitem{\bull}
-If the //[[CL:Glossary:function]]// being called is a //[[CL:Glossary:generic function]]//,
-it is considered //[[CL:Glossary:safe]]// if all of the following are
-\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
-
-//[[CL:Glossary:safe code]]// or //[[CL:Glossary:system code]]//:
+  * If the //[[CL:Glossary:function]]// being called is a //[[CL:Glossary:generic function]]//, it is considered //[[CL:Glossary:safe]]// if all of the following are //[[CL:Glossary:safe code]]// or //[[CL:Glossary:system code]]//: 
+    * its definition (if it was defined explicitly). 
+    * the //[[CL:Glossary:method]]// definitions for all //[[CL:Glossary:applicable]]// //[[CL:Glossary:methods]]//. 
+    * the definition of its //[[CL:Glossary:method combination]]//.
+  * For the form \f{([[CL:Functions:coerce]] //x// '[[CL:Types:function]])},  where //x// is a //[[CL:Glossary:lambda expression]]//, the value of the //[[CL:Glossary:optimize quality]]// **[[CL:Declarations:safety]]** in the global environment at the time the **[[CL:Functions:coerce]]** is //[[CL:Glossary:executed]]// applies to the resulting //[[CL:Glossary:function]]//.
 
 
-\beginlist
-\itemitem{--} its definition (if it was defined explicitly).
-\itemitem{--} the //[[CL:Glossary:method]]// definitions for all //[[CL:Glossary:applicable]]// //[[CL:Glossary:methods]]//.
-\itemitem{--} the definition of its //[[CL:Glossary:method combination]]//.
-\endlist
+    \itemitem{\bull} For a call to \thefunction{ensure-generic-function}, the value of the //[[CL:Glossary:optimize quality]]// **[[CL:Declarations:safety]]** in the //[[CL:Glossary:environment]]// //[[CL:Glossary:object]]// passed as the **'':environment''** //[[CL:Glossary:argument]]// applies  to the resulting //[[CL:Glossary:generic function]]//.
 
-\itemitem{\bull}
-For the form \f{(coerce //x// 'function)}, 
-where //x// is a //[[CL:Glossary:lambda expression]]//,
-the value of the //[[CL:Glossary:optimize quality]]// **[[CL:Declarations:safety]]**
-in the global environment at the time the **[[CL:Functions:coerce]]**
-is //[[CL:Glossary:executed]]// applies to the resulting //[[CL:Glossary:function]]//.
+\itemitem{\bull} For a call to **[[CL:Functions:compile]]** with a //[[CL:Glossary:lambda expression]]// as the //[[CL:Glossary:argument]]//, the value of the //[[CL:Glossary:optimize quality]]// **[[CL:Functions:safety]]** in the //[[CL:Glossary:global environment]]// at the time **[[CL:Functions:compile]]** is //[[CL:Glossary:called]]// applies to the resulting //[[CL:Glossary:compiled function]]//.
 
-\issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
+\itemitem{\bull} For a call to **[[CL:Functions:compile]]** with only one argument, if the original definition of the //[[CL:Glossary:function]]// was //[[CL:Glossary:safe]]//, then the resulting //[[CL:Glossary:compiled function]]// must also be //[[CL:Glossary:safe]]//.
 
-
-
-
-
-
-
-
-\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
-
-
-
-
-
-
-
-
-   
-\itemitem{\bull}
-For a call to \thefunction{ensure-generic-function}, the value of the
-//[[CL:Glossary:optimize quality]]// **[[CL:Declarations:safety]]** in the //[[CL:Glossary:environment]]//
-//[[CL:Glossary:object]]// passed as the **'':environment''** //[[CL:Glossary:argument]]// applies 
-to the resulting //[[CL:Glossary:generic function]]//.
-
-\itemitem{\bull}
-For a call to **[[CL:Functions:compile]]** with a //[[CL:Glossary:lambda expression]]// as the
-//[[CL:Glossary:argument]]//, the value of the //[[CL:Glossary:optimize quality]]// **[[CL:Functions:safety]]**
-in the //[[CL:Glossary:global environment]]// at the time **[[CL:Functions:compile]]** is //[[CL:Glossary:called]]//
-applies to the resulting //[[CL:Glossary:compiled function]]//.
-
-\itemitem{\bull}
-For a call to **[[CL:Functions:compile]]** with only one argument, if the original definition
-of the //[[CL:Glossary:function]]// was //[[CL:Glossary:safe]]//, then the resulting //[[CL:Glossary:compiled function]]//
-must also be //[[CL:Glossary:safe]]//.
-
-\itemitem{\bull}
-A //[[CL:Glossary:call]]// to a //[[CL:Glossary:method]]// by **[[CL:Functions:call-next-method]]** must be 
-considered //[[CL:Glossary:safe]]// if each of the following is 
-\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+\itemitem{\bull} A //[[CL:Glossary:call]]// to a //[[CL:Glossary:method]]// by **[[CL:Functions:call-next-method]]** must be  considered //[[CL:Glossary:safe]]// if each of the following is  \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
 
 //[[CL:Glossary:safe code]]// or //[[CL:Glossary:system code]]//:
 
-
 \beginlist
 
-
-
-
-
-\itemitem{--} the definition of the //[[CL:Glossary:generic function]]// (if it was defined explicitly).
-\itemitem{--} the //[[CL:Glossary:method]]// definitions for all //[[CL:Glossary:applicable]]// //[[CL:Glossary:methods]]//.
-\itemitem{--} the definition of the //[[CL:Glossary:method combination]]//.
-\itemitem{--} the point of entry into the body of the //[[CL:Glossary:method defining form]]//,
-	      where the //[[CL:Glossary:binding]]// of **[[CL:Functions:call-next-method]]** is established.
-\itemitem{--} the point of //[[CL:Glossary:functional evaluation]]// of the name **[[CL:Functions:call-next-method]]**.
-\endlist
+\itemitem{--} the definition of the //[[CL:Glossary:generic function]]// (if it was defined explicitly). \itemitem{--} the //[[CL:Glossary:method]]// definitions for all //[[CL:Glossary:applicable]]// //[[CL:Glossary:methods]]//. \itemitem{--} the definition of the //[[CL:Glossary:method combination]]//. \itemitem{--} the point of entry into the body of the //[[CL:Glossary:method defining form]]//, 	      where the //[[CL:Glossary:binding]]// of **[[CL:Functions:call-next-method]]** is established. \itemitem{--} the point of //[[CL:Glossary:functional evaluation]]// of the name **[[CL:Functions:call-next-method]]**. \endlist
 
 \endlist
 
 An //[[CL:Glossary:unsafe call]]// is a //[[CL:Glossary:call]]// that is not a //[[CL:Glossary:safe call]]//.
 
-The informal intent is that the //[[CL:Glossary:programmer]]// can rely on a //[[CL:Glossary:call]]//
-to be //[[CL:Glossary:safe]]//, even when //[[CL:Glossary:system code]]// is involved, if all reasonable
-steps have been taken to ensure that the //[[CL:Glossary:call]]// is //[[CL:Glossary:safe]]//.
-For example, if a //[[CL:Glossary:programmer]]// calls **[[CL:Functions:mapcar]]** from //[[CL:Glossary:safe]]//
-//[[CL:Glossary:code]]// and supplies a //[[CL:Glossary:function]]// that was //[[CL:Glossary:compiled]]// 
-as //[[CL:Glossary:safe]]//, the //[[CL:Glossary:implementation]]// is required to ensure that
-**[[CL:Functions:mapcar]]** makes a //[[CL:Glossary:safe call]]// as well.
+The informal intent is that the //[[CL:Glossary:programmer]]// can rely on a //[[CL:Glossary:call]]// to be //[[CL:Glossary:safe]]//, even when //[[CL:Glossary:system code]]// is involved, if all reasonable steps have been taken to ensure that the //[[CL:Glossary:call]]// is //[[CL:Glossary:safe]]//. For example, if a //[[CL:Glossary:programmer]]// calls **[[CL:Functions:mapcar]]** from //[[CL:Glossary:safe]]// //[[CL:Glossary:code]]// and supplies a //[[CL:Glossary:function]]// that was //[[CL:Glossary:compiled]]//  as //[[CL:Glossary:safe]]//, the //[[CL:Glossary:implementation]]// is required to ensure that **[[CL:Functions:mapcar]]** makes a //[[CL:Glossary:safe call]]// as well.
 
-\beginsubsubsubsection{Error Detection Time in Safe Calls}
-\DefineSection{SafeCallDetectionTime}
+\beginsubsubsubsection{Error Detection Time in Safe Calls} \DefineSection{SafeCallDetectionTime}
 
-If an error is signaled in a //[[CL:Glossary:safe call]]//,
-the exact point of the //[[CL:Glossary:signal]]// is //[[CL:Glossary:implementation-dependent]]//.
-In particular, it might be signaled at compile time or at run time,
-and if signaled at run time, 
-it might be prior to, during, or after //[[CL:Glossary:executing]]// the //[[CL:Glossary:call]]//.
-However, it is always prior to the execution of the body of the //[[CL:Glossary:function]]// 
-being //[[CL:Glossary:called]]//.
+If an error is signaled in a //[[CL:Glossary:safe call]]//, the exact point of the //[[CL:Glossary:signal]]// is //[[CL:Glossary:implementation-dependent]]//. In particular, it might be signaled at compile time or at run time, and if signaled at run time,  it might be prior to, during, or after //[[CL:Glossary:executing]]// the //[[CL:Glossary:call]]//. However, it is always prior to the execution of the body of the //[[CL:Glossary:function]]//  being //[[CL:Glossary:called]]//.
 
 \endsubsubsubsection%{Error Detection Time in Safe Calls}
 
@@ -131,106 +51,61 @@ being //[[CL:Glossary:called]]//.
 
 It is not permitted to supply too few //[[CL:Glossary:arguments]]// to a //[[CL:Glossary:function]]//.
 
-Too few arguments means fewer //[[CL:Glossary:arguments]]// than the number of //[[CL:Glossary:required parameters]]// 
-for the //[[CL:Glossary:function]]//.
+Too few arguments means fewer //[[CL:Glossary:arguments]]// than the number of //[[CL:Glossary:required parameters]]//  for the //[[CL:Glossary:function]]//.
 
 \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
-
 
 If this //[[CL:Glossary:situation]]// occurs in a //[[CL:Glossary:safe call]]//,
 
-an error \oftype{program-error} must be signaled;
-and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
+an error \oftype{program-error} must be signaled; and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
 
 \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
-
-
-
-
-
-
 
 \endsubsubsection%{Too Few Arguments}
 
 \beginsubsubsection{Too Many Arguments}
 
-It is not permitted to supply too many //[[CL:Glossary:arguments]]// to a //[[CL:Glossary:function]]//.
-Too many arguments means more //[[CL:Glossary:arguments]]// than the number of //[[CL:Glossary:required parameters]]//
-plus the number of //[[CL:Glossary:optional parameters]]//; however, if the //[[CL:Glossary:function]]// 
-uses ''&rest'' or ''&key'', it is not possible for it to receive too many arguments.
+It is not permitted to supply too many //[[CL:Glossary:arguments]]// to a //[[CL:Glossary:function]]//. Too many arguments means more //[[CL:Glossary:arguments]]// than the number of //[[CL:Glossary:required parameters]]// plus the number of //[[CL:Glossary:optional parameters]]//; however, if the //[[CL:Glossary:function]]//  uses ''&rest'' or ''&key'', it is not possible for it to receive too many arguments.
 
 \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
-
 
 If this //[[CL:Glossary:situation]]// occurs in a //[[CL:Glossary:safe call]]//,
 
-an error \oftype{program-error} must be signaled;
-and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
+an error \oftype{program-error} must be signaled; and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
 
 \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
-
-
-
-
-
-
 
 \endsubsubsection%{Too Many Arguments}
 
-\beginsubsubsection{Unrecognized Keyword Arguments}
-\DefineSection{UnrecognizedKeyArgs}
+\beginsubsubsection{Unrecognized Keyword Arguments} \DefineSection{UnrecognizedKeyArgs}
 
-It is not permitted to supply a keyword argument to a //[[CL:Glossary:function]]//
-using a name that is not recognized by that //[[CL:Glossary:function]]// 
-unless keyword argument checking is suppressed as described
-in \secref\SuppressingKeyArgChecks.
+It is not permitted to supply a keyword argument to a //[[CL:Glossary:function]]// using a name that is not recognized by that //[[CL:Glossary:function]]//  unless keyword argument checking is suppressed as described in \secref\SuppressingKeyArgChecks.
 
 \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
-
 
 If this //[[CL:Glossary:situation]]// occurs in a //[[CL:Glossary:safe call]]//,
 
-an error \oftype{program-error} must be signaled;
-and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
+an error \oftype{program-error} must be signaled; and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
 
 \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
-
-
-
-
-
-
 
 \endsubsubsection%{Unrecognized Keyword Arguments}
 
-\beginsubsubsection{Invalid Keyword Arguments}
-\DefineSection{InvalidKeyArgs}
+\beginsubsubsection{Invalid Keyword Arguments} \DefineSection{InvalidKeyArgs}
 
-It is not permitted to supply a keyword argument to a //[[CL:Glossary:function]]//
-using a name that is not a //[[CL:Glossary:symbol]]//.
+It is not permitted to supply a keyword argument to a //[[CL:Glossary:function]]// using a name that is not a //[[CL:Glossary:symbol]]//.
 
 \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
-
 
 If this //[[CL:Glossary:situation]]// occurs in a //[[CL:Glossary:safe call]]//,
 
-an error \oftype{program-error} must be signaled 
-unless keyword argument checking is suppressed as described
-in \secref\SuppressingKeyArgChecks;
-and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
+an error \oftype{program-error} must be signaled  unless keyword argument checking is suppressed as described in \secref\SuppressingKeyArgChecks; and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
 
 \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
 
-
-
-
-
-
-
 \endsubsubsection%{Invalid Keyword Arguments}
 
-\beginsubsubsection{Odd Number of Keyword Arguments}
-\DefineSection{OddNumberOfKeyArgs}
+\beginsubsubsection{Odd Number of Keyword Arguments} \DefineSection{OddNumberOfKeyArgs}
 
 \issue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
 
@@ -238,72 +113,37 @@ An odd number of //[[CL:Glossary:arguments]]// must not be supplied for the //[[
 
 \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
 
-
 If this //[[CL:Glossary:situation]]// occurs in a //[[CL:Glossary:safe call]]//,
 
-an error \oftype{program-error} must be signaled
-unless keyword argument checking is suppressed as described
-in \secref\SuppressingKeyArgChecks;
-and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
+an error \oftype{program-error} must be signaled unless keyword argument checking is suppressed as described in \secref\SuppressingKeyArgChecks; and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
 
 \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
-
-
-
-
-
-
-
-
 
 \endsubsubsection%{Odd Number of Keyword Arguments}
 
-\beginsubsubsection{Destructuring Mismatch}
-\DefineSection{DestructuringMismatch}
+\beginsubsubsection{Destructuring Mismatch} \DefineSection{DestructuringMismatch}
 
 \issue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
 
-When matching a //[[CL:Glossary:destructuring lambda list]]// against a //[[CL:Glossary:form]]//,
-the pattern and the //[[CL:Glossary:form]]// must have compatible //[[CL:Glossary:tree structure]]//,
-as described in \secref\ExtraDestructureInfo.
+When matching a //[[CL:Glossary:destructuring lambda list]]// against a //[[CL:Glossary:form]]//, the pattern and the //[[CL:Glossary:form]]// must have compatible //[[CL:Glossary:tree structure]]//, as described in \secref\ExtraDestructureInfo.
 
-Otherwise, in a //[[CL:Glossary:safe call]]//,
-an error \oftype{program-error} must be signaled;
-and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
+Otherwise, in a //[[CL:Glossary:safe call]]//, an error \oftype{program-error} must be signaled; and in an //[[CL:Glossary:unsafe call]]// the //[[CL:Glossary:situation]]// has undefined consequences.
 
 \issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
-
-
-
-
-
-
-
-
 
 \endsubsubsection%{Destructuring Mismatch}
 
 \beginsubsubsection{Errors When Calling a Next Method}
 
-If **[[CL:Functions:call-next-method]]** is called with //[[CL:Glossary:arguments]]//, the ordered
-set of //[[CL:Glossary:applicable]]// //[[CL:Glossary:methods]]// for the changed set of //[[CL:Glossary:arguments]]//
-for **[[CL:Functions:call-next-method]]** must be the same as the ordered set of 
-//[[CL:Glossary:applicable]]// //[[CL:Glossary:methods]]// for the original //[[CL:Glossary:arguments]]// to the
-//[[CL:Glossary:generic function]]//, or else an error should be signaled.
+If **[[CL:Functions:call-next-method]]** is called with //[[CL:Glossary:arguments]]//, the ordered set of //[[CL:Glossary:applicable]]// //[[CL:Glossary:methods]]// for the changed set of //[[CL:Glossary:arguments]]// for **[[CL:Functions:call-next-method]]** must be the same as the ordered set of  //[[CL:Glossary:applicable]]// //[[CL:Glossary:methods]]// for the original //[[CL:Glossary:arguments]]// to the //[[CL:Glossary:generic function]]//, or else an error should be signaled.
 
-The comparison between the set of methods applicable to the
-new arguments and the set applicable to the original arguments is
-insensitive to order differences among methods with the same
-specializers.
- 
-If **[[CL:Functions:call-next-method]]** is called with //[[CL:Glossary:arguments]]// that specify
-a different ordered set of //[[CL:Glossary:applicable]]// methods and there is no 
-//[[CL:Glossary:next method]]// available, the test for different methods and the 
-associated error signaling (when present) takes precedence over calling
-**[[CL:Functions:no-next-method]]**.
+The comparison between the set of methods applicable to the new arguments and the set applicable to the original arguments is insensitive to order differences among methods with the same specializers.
+  If **[[CL:Functions:call-next-method]]** is called with //[[CL:Glossary:arguments]]// that specify a different ordered set of //[[CL:Glossary:applicable]]// methods and there is no  //[[CL:Glossary:next method]]// available, the test for different methods and the  associated error signaling (when present) takes precedence over calling **[[CL:Functions:no-next-method]]**.
 
 \endsubsubsection%{Errors When Calling a Next Method}
 
 \endsubSection%{Argument Mismatch Detection}
 
-
+\issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}

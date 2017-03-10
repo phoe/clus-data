@@ -1,69 +1,20 @@
 
 
-
-
-
 \beginsubSection{Introduction to Packages}
 
+A //[[CL:Glossary:package]]// establishes a mapping from names to //[[CL:Glossary:symbols]]//.  At any given time, one //[[CL:Glossary:package]]// is current. The //[[CL:Glossary:current package]]// is the one that is \thevalueof{*package*}. When using the //[[CL:Glossary:Lisp reader]]//, it is possible to refer to //[[CL:Glossary:symbols]]// in //[[CL:Glossary:packages]]//  other than the current one through the use of //[[CL:Glossary:package prefixes]]// in the  printed representation of the //[[CL:Glossary:symbol]]//.
 
+\Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that are applicable to //[[CL:Glossary:packages]]//.
 
-A //[[CL:Glossary:package]]// establishes a mapping from names to //[[CL:Glossary:symbols]]//. 
-At any given time, one //[[CL:Glossary:package]]// is current.
-The //[[CL:Glossary:current package]]// is the one that is \thevalueof{*package*}.
-When using the //[[CL:Glossary:Lisp reader]]//,
-it is possible to refer to //[[CL:Glossary:symbols]]// in //[[CL:Glossary:packages]]// 
-other than the current one through the use of //[[CL:Glossary:package prefixes]]// in the 
-printed representation of the //[[CL:Glossary:symbol]]//.
+Where an //[[CL:Glossary:operator]]//  takes an argument that is either a //[[CL:Glossary:symbol]]// or a //[[CL:Glossary:list]]//  of //[[CL:Glossary:symbols]]//, an argument of \nil\ is treated as an empty //[[CL:Glossary:list]]// of //[[CL:Glossary:symbols]]//. Any //package// argument may be either a //[[CL:Glossary:string]]//, a //[[CL:Glossary:symbol]]//, or a //[[CL:Glossary:package]]//.  If a //[[CL:Glossary:symbol]]// is supplied, its name will be used as the //[[CL:Glossary:package]]// name. \issue{REQUIRE-PATHNAME-DEFAULTS:ELIMINATE}
 
-
-\Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that are applicable
-to //[[CL:Glossary:packages]]//.
-
-
-
-Where an //[[CL:Glossary:operator]]// 
-takes an argument that is either a //[[CL:Glossary:symbol]]// or a //[[CL:Glossary:list]]// 
-of //[[CL:Glossary:symbols]]//,
-an argument of \nil\ is treated as an empty //[[CL:Glossary:list]]// of //[[CL:Glossary:symbols]]//.
-Any //package// argument may be either a //[[CL:Glossary:string]]//, a //[[CL:Glossary:symbol]]//, or
-a //[[CL:Glossary:package]]//.  If a //[[CL:Glossary:symbol]]// is supplied, its name will be used
-as the //[[CL:Glossary:package]]// name.
-\issue{REQUIRE-PATHNAME-DEFAULTS:ELIMINATE}
-
-
-
-
-\displaythree{Some Defined Names related to Packages}{
-*modules*&import&provide\cr
-*package*&in-package&rename-package\cr
-defpackage&intern&require\cr
-do-all-symbols&list-all-packages&shadow\cr
-do-external-symbols&make-package&shadowing-import\cr
-do-symbols&package-name&unexport\cr
-export&package-nicknames&unintern\cr
-find-all-symbols&package-shadowing-symbols&unuse-package\cr
-find-package&package-use-list&use-package\cr
-find-symbol&package-used-by-list&\cr
-}
-
+\displaythree{Some Defined Names related to Packages}{ *modules*&import&provide\cr *package*&in-package&rename-package\cr defpackage&intern&require\cr do-all-symbols&list-all-packages&shadow\cr do-external-symbols&make-package&shadowing-import\cr do-symbols&package-name&unexport\cr export&package-nicknames&unintern\cr find-all-symbols&package-shadowing-symbols&unuse-package\cr find-package&package-use-list&use-package\cr find-symbol&package-used-by-list&\cr }
 
 \beginsubsubsection{Package Names and Nicknames}
 
+Each //[[CL:Glossary:package]]// has a //[[CL:Glossary:name]]// (a //[[CL:Glossary:string]]//) and perhaps some //[[CL:Glossary:nicknames]]// (also //[[CL:Glossary:strings]]//). These are assigned when the //[[CL:Glossary:package]]// is created and can be changed later.  
 
-Each //[[CL:Glossary:package]]// has a //[[CL:Glossary:name]]// (a //[[CL:Glossary:string]]//) and perhaps some //[[CL:Glossary:nicknames]]//
-(also //[[CL:Glossary:strings]]//).
-These are assigned when the //[[CL:Glossary:package]]// is created and can be changed later.  
-
-
-There is a single namespace for //[[CL:Glossary:packages]]//.  
-\Thefunction{find-package} translates a package
-//[[CL:Glossary:name]]// or //[[CL:Glossary:nickname]]// into the associated //[[CL:Glossary:package]]//.  
-\Thefunction{package-name} returns the //[[CL:Glossary:name]]// of a //[[CL:Glossary:package]]//.  
-\Thefunction{package-nicknames} returns 
-a //[[CL:Glossary:list]]// of all //[[CL:Glossary:nicknames]]// for a //[[CL:Glossary:package]]//.
-**[[CL:Functions:rename-package]]** removes a //[[CL:Glossary:package]]//'s
-current //[[CL:Glossary:name]]// and //[[CL:Glossary:nicknames]]// and replaces them with new ones
-specified by the caller.
+There is a single namespace for //[[CL:Glossary:packages]]//.   \Thefunction{find-package} translates a package //[[CL:Glossary:name]]// or //[[CL:Glossary:nickname]]// into the associated //[[CL:Glossary:package]]//.   \Thefunction{package-name} returns the //[[CL:Glossary:name]]// of a //[[CL:Glossary:package]]//.   \Thefunction{package-nicknames} returns  a //[[CL:Glossary:list]]// of all //[[CL:Glossary:nicknames]]// for a //[[CL:Glossary:package]]//. **[[CL:Functions:rename-package]]** removes a //[[CL:Glossary:package]]//'s current //[[CL:Glossary:name]]// and //[[CL:Glossary:nicknames]]// and replaces them with new ones specified by the caller.
 
 \endsubsubsection%{Package Names and Nicknames}
 
@@ -71,44 +22,19 @@ specified by the caller.
 
 \beginsubsubsubsection{Internal and External Symbols}
 
+The mappings in a //[[CL:Glossary:package]]// are divided into two classes, external and internal. The //[[CL:Glossary:symbols]]// targeted by these different mappings  are called //[[CL:Glossary:external symbols]]// and //[[CL:Glossary:internal symbols]]//\idxterm{internal symbol} of the //[[CL:Glossary:package]]//. Within a //[[CL:Glossary:package]]//, a name refers to one //[[CL:Glossary:symbol]]// or to none; if it does refer to a //[[CL:Glossary:symbol]]//, then it is either external or internal in that //[[CL:Glossary:package]]//, but not both.
 
-The mappings in a //[[CL:Glossary:package]]// are divided into two classes, external and internal.
-The //[[CL:Glossary:symbols]]// targeted by these different mappings 
-are called //[[CL:Glossary:external symbols]]// and //[[CL:Glossary:internal symbols]]//\idxterm{internal symbol} of the
-//[[CL:Glossary:package]]//. Within a //[[CL:Glossary:package]]//, a name refers to one
-//[[CL:Glossary:symbol]]// or to none; if it does refer
-to a //[[CL:Glossary:symbol]]//, then it is either external or internal in that
-//[[CL:Glossary:package]]//, but not both.
+\newtermidx{External symbols}{external symbol} are part of the package's public interface to other //[[CL:Glossary:packages]]//. //[[CL:Glossary:Symbols]]// become //[[CL:Glossary:external symbols]]// of a given //[[CL:Glossary:package]]// if they have been //[[CL:Glossary:exported]]// from that //[[CL:Glossary:package]]//.
 
-\newtermidx{External symbols}{external symbol}
-are part of the package's public interface to other //[[CL:Glossary:packages]]//.
-//[[CL:Glossary:Symbols]]// become //[[CL:Glossary:external symbols]]// of a given
-//[[CL:Glossary:package]]// if they have been //[[CL:Glossary:exported]]// from that //[[CL:Glossary:package]]//.
-
-
-A //[[CL:Glossary:symbol]]// has the same //[[CL:Glossary:name]]// no matter what //[[CL:Glossary:package]]// 
-it is //[[CL:Glossary:present]]// in, but it might be an //[[CL:Glossary:external symbol]]// of some //[[CL:Glossary:packages]]//
-and an //[[CL:Glossary:internal symbol]]// of others. 
+A //[[CL:Glossary:symbol]]// has the same //[[CL:Glossary:name]]// no matter what //[[CL:Glossary:package]]//  it is //[[CL:Glossary:present]]// in, but it might be an //[[CL:Glossary:external symbol]]// of some //[[CL:Glossary:packages]]// and an //[[CL:Glossary:internal symbol]]// of others. 
 
 \endsubsubsubsection%{Internal and External Symbols}
 
 \beginsubsubsubsection{Package Inheritance}
 
+//[[CL:Glossary:Packages]]// can be built up in layers.  From one point of view, a //[[CL:Glossary:package]]// is a single collection of mappings from //[[CL:Glossary:strings]]// into //[[CL:Glossary:internal symbols]]// and  //[[CL:Glossary:external symbols]]//. However, some of these mappings might be established within the //[[CL:Glossary:package]]//  itself, while other mappings are inherited from other //[[CL:Glossary:packages]]//  via **[[CL:Functions:use-package]]**. A //[[CL:Glossary:symbol]]// is said to be //[[CL:Glossary:present]]// in a //[[CL:Glossary:package]]//  if the mapping is in the //[[CL:Glossary:package]]// itself and is not inherited from somewhere else.
 
-//[[CL:Glossary:Packages]]// can be built up in layers.  From one point of view,
-a //[[CL:Glossary:package]]// is a single collection
-of mappings from //[[CL:Glossary:strings]]// into //[[CL:Glossary:internal symbols]]// and 
-//[[CL:Glossary:external symbols]]//.
-However, some of these mappings might be established within the //[[CL:Glossary:package]]// 
-itself, while other mappings are inherited from other //[[CL:Glossary:packages]]// 
-via **[[CL:Functions:use-package]]**.
-A //[[CL:Glossary:symbol]]// is said to be //[[CL:Glossary:present]]// in a //[[CL:Glossary:package]]// 
-if the mapping is in the //[[CL:Glossary:package]]// itself and is
-not inherited from somewhere else.
-
-
-There is no way to inherit the //[[CL:Glossary:internal symbols]]// of another //[[CL:Glossary:package]]//;
-to refer to an //[[CL:Glossary:internal symbol]]// using the //[[CL:Glossary:Lisp reader]]//, 
+There is no way to inherit the //[[CL:Glossary:internal symbols]]// of another //[[CL:Glossary:package]]//; to refer to an //[[CL:Glossary:internal symbol]]// using the //[[CL:Glossary:Lisp reader]]//, 
     a //[[CL:Glossary:package]]// containing the //[[CL:Glossary:symbol]]// 
      must be made to be the //[[CL:Glossary:current package]]//,
     a //[[CL:Glossary:package prefix]]// must be used,
@@ -123,141 +49,54 @@ A //[[CL:Glossary:symbol]]// becomes //[[CL:Glossary:accessible]]// in a //[[CL:
  or if it is //[[CL:Glossary:imported]]// into that //[[CL:Glossary:package]]//,
  or by inheritance via **[[CL:Functions:use-package]]**.
 
-If a //[[CL:Glossary:symbol]]// is //[[CL:Glossary:accessible]]// in a //[[CL:Glossary:package]]//,
-it can be referred to when using the //[[CL:Glossary:Lisp reader]]//
-without a //[[CL:Glossary:package prefix]]// when that //[[CL:Glossary:package]]// is the //[[CL:Glossary:current package]]//,
-regardless of whether it is //[[CL:Glossary:present]]// or inherited.
+If a //[[CL:Glossary:symbol]]// is //[[CL:Glossary:accessible]]// in a //[[CL:Glossary:package]]//, it can be referred to when using the //[[CL:Glossary:Lisp reader]]// without a //[[CL:Glossary:package prefix]]// when that //[[CL:Glossary:package]]// is the //[[CL:Glossary:current package]]//, regardless of whether it is //[[CL:Glossary:present]]// or inherited.
 
+//[[CL:Glossary:Symbols]]// from one //[[CL:Glossary:package]]// can be made //[[CL:Glossary:accessible]]//  in another //[[CL:Glossary:package]]// in two ways.
 
+\beginlist  \itemitem{--} Any individual //[[CL:Glossary:symbol]]// can be added to a //[[CL:Glossary:package]]// by use of **[[CL:Functions:import]]**.  After the call to **[[CL:Functions:import]]** the //[[CL:Glossary:symbol]]// is //[[CL:Glossary:present]]// in the importing //[[CL:Glossary:package]]//. The status of the //[[CL:Glossary:symbol]]// in the //[[CL:Glossary:package]]//  it came from (if any) is unchanged, and the //[[CL:Glossary:home package]]// for this //[[CL:Glossary:symbol]]// is unchanged. Once //[[CL:Glossary:imported]]//, a //[[CL:Glossary:symbol]]// is //[[CL:Glossary:present]]// in the importing //[[CL:Glossary:package]]// and can be removed only by calling **[[CL:Functions:unintern]]**.
 
+A //[[CL:Glossary:symbol]]// is //[[CL:Glossary:shadowed]]//\meaning{3} by another //[[CL:Glossary:symbol]]//  in some //[[CL:Glossary:package]]// if the first //[[CL:Glossary:symbol]]// would be //[[CL:Glossary:accessible]]// by inheritance if not for the presence of the second //[[CL:Glossary:symbol]]//. See **[[CL:Functions:shadowing-import]]**.
 
-
-
-
-//[[CL:Glossary:Symbols]]// from one //[[CL:Glossary:package]]// can be made //[[CL:Glossary:accessible]]// 
-in another //[[CL:Glossary:package]]// in two ways.
-
-
-\beginlist 
-\itemitem{--}
-Any individual //[[CL:Glossary:symbol]]// can be added to a //[[CL:Glossary:package]]// by use
-of **[[CL:Functions:import]]**.  After the call to **[[CL:Functions:import]]** the
-//[[CL:Glossary:symbol]]// is //[[CL:Glossary:present]]// in the importing //[[CL:Glossary:package]]//.
-The status of the //[[CL:Glossary:symbol]]// in the //[[CL:Glossary:package]]// 
-it came from (if any) is unchanged, and the //[[CL:Glossary:home package]]// for
-this //[[CL:Glossary:symbol]]// is unchanged.
-Once //[[CL:Glossary:imported]]//, a //[[CL:Glossary:symbol]]// is //[[CL:Glossary:present]]// in the
-importing //[[CL:Glossary:package]]//
-and can be removed only by calling **[[CL:Functions:unintern]]**.
-
-
-A //[[CL:Glossary:symbol]]// is //[[CL:Glossary:shadowed]]//\meaning{3} by another //[[CL:Glossary:symbol]]// 
-in some //[[CL:Glossary:package]]// if the first //[[CL:Glossary:symbol]]// would be //[[CL:Glossary:accessible]]//
-by inheritance if not for the presence of the second //[[CL:Glossary:symbol]]//.
-See **[[CL:Functions:shadowing-import]]**.
-
-
-
-\itemitem{--}
-The second mechanism for making //[[CL:Glossary:symbols]]// from one //[[CL:Glossary:package]]//
-//[[CL:Glossary:accessible]]// in another is provided by **[[CL:Functions:use-package]]**.  
-All of the //[[CL:Glossary:external symbols]]// of the used //[[CL:Glossary:package]]// are inherited
-by the using //[[CL:Glossary:package]]//.
-\Thefunction{unuse-package} undoes the effects of a previous **[[CL:Functions:use-package]]**.  
-\endlist
+\itemitem{--} The second mechanism for making //[[CL:Glossary:symbols]]// from one //[[CL:Glossary:package]]// //[[CL:Glossary:accessible]]// in another is provided by **[[CL:Functions:use-package]]**.   All of the //[[CL:Glossary:external symbols]]// of the used //[[CL:Glossary:package]]// are inherited by the using //[[CL:Glossary:package]]//. \Thefunction{unuse-package} undoes the effects of a previous **[[CL:Functions:use-package]]**.   \endlist
 
 \endsubsubsubsection%{Accessibility of Symbols in a Package}
 
 \beginsubsubsubsection{Locating a Symbol in a Package}
 
-
-When a //[[CL:Glossary:symbol]]// is to be located in a given //[[CL:Glossary:package]]// 
-the following occurs:
-\beginlist 
-\itemitem{--} The //[[CL:Glossary:external symbols]]// and //[[CL:Glossary:internal symbols]]// of the 
-//[[CL:Glossary:package]]// are searched for the //[[CL:Glossary:symbol]]//.
-\itemitem{--} The //[[CL:Glossary:external symbols]]// of the used //[[CL:Glossary:packages]]// are 
-searched
-in some unspecified order.  The
-order does not matter; see the rules for handling name
-conflicts listed below. 
-\endlist
+When a //[[CL:Glossary:symbol]]// is to be located in a given //[[CL:Glossary:package]]//  the following occurs: \beginlist  \itemitem{--} The //[[CL:Glossary:external symbols]]// and //[[CL:Glossary:internal symbols]]// of the  //[[CL:Glossary:package]]// are searched for the //[[CL:Glossary:symbol]]//. \itemitem{--} The //[[CL:Glossary:external symbols]]// of the used //[[CL:Glossary:packages]]// are  searched in some unspecified order.  The order does not matter; see the rules for handling name conflicts listed below.  \endlist
 
 \endsubsubsubsection%{Locating a Symbol in a Package}
 
 \beginsubsubsubsection{Prevention of Name Conflicts in Packages}
 
-
-Within one //[[CL:Glossary:package]]//, any particular name can refer to at most one
-//[[CL:Glossary:symbol]]//.  A name conflict is said to occur when there would be more than
-one candidate //[[CL:Glossary:symbol]]//.  Any time a name conflict is about to occur,
-a //[[CL:Glossary:correctable]]// //[[CL:Glossary:error]]// is signaled.  
+Within one //[[CL:Glossary:package]]//, any particular name can refer to at most one //[[CL:Glossary:symbol]]//.  A name conflict is said to occur when there would be more than one candidate //[[CL:Glossary:symbol]]//.  Any time a name conflict is about to occur, a //[[CL:Glossary:correctable]]// //[[CL:Glossary:error]]// is signaled.  
 
 The following rules apply to name conflicts:
 
 \beginlist
 
-\itemitem{--}
-Name conflicts are detected when they become possible, that is, when the
-package structure is altered.  Name
-conflicts are not checked during every name lookup.
+\itemitem{--} Name conflicts are detected when they become possible, that is, when the package structure is altered.  Name conflicts are not checked during every name lookup.
 
-\itemitem{--}
-If the //[[CL:Glossary:same]]// //[[CL:Glossary:symbol]]// is //[[CL:Glossary:accessible]]// to a //[[CL:Glossary:package]]// 
-through more than one path, there is no name conflict.
-A //[[CL:Glossary:symbol]]// cannot conflict with itself. 
-Name conflicts occur only between //[[CL:Glossary:distinct]]// //[[CL:Glossary:symbols]]// with
-the same name (under **[[CL:Functions:string=]]**).
+\itemitem{--} If the //[[CL:Glossary:same]]// //[[CL:Glossary:symbol]]// is //[[CL:Glossary:accessible]]// to a //[[CL:Glossary:package]]//  through more than one path, there is no name conflict. A //[[CL:Glossary:symbol]]// cannot conflict with itself.  Name conflicts occur only between //[[CL:Glossary:distinct]]// //[[CL:Glossary:symbols]]// with the same name (under **[[CL:Functions:string=]]**).
 
+\itemitem{--} Every //[[CL:Glossary:package]]// has a list of shadowing //[[CL:Glossary:symbols]]//.   A shadowing //[[CL:Glossary:symbol]]// takes precedence over any other //[[CL:Glossary:symbol]]// of the same name that would otherwise be //[[CL:Glossary:accessible]]// in the //[[CL:Glossary:package]]//.   A name conflict involving a shadowing symbol is always resolved in favor of the shadowing //[[CL:Glossary:symbol]]//, without signaling an error (except for one exception involving **[[CL:Functions:import]]**). See **[[CL:Functions:shadow]]** and **[[CL:Functions:shadowing-import]]**.
 
-\itemitem{--} Every //[[CL:Glossary:package]]// has a list of shadowing //[[CL:Glossary:symbols]]//.  
-A shadowing //[[CL:Glossary:symbol]]// takes precedence over any other //[[CL:Glossary:symbol]]// of
-the same name that would otherwise be //[[CL:Glossary:accessible]]// in the //[[CL:Glossary:package]]//.  
-A name conflict involving a shadowing symbol is always resolved in favor of
-the shadowing //[[CL:Glossary:symbol]]//, without signaling an error (except for one
-exception involving **[[CL:Functions:import]]**).
-See **[[CL:Functions:shadow]]** and **[[CL:Functions:shadowing-import]]**.
+\itemitem{--}  The functions **[[CL:Functions:use-package]]**, **[[CL:Functions:import]]**, and  **[[CL:Functions:export]]** check for name conflicts.  
 
-
-\itemitem{--} 
-The functions **[[CL:Functions:use-package]]**, **[[CL:Functions:import]]**, and 
-**[[CL:Functions:export]]** check for name conflicts.  
-
-
-\itemitem{--} 
-**[[CL:Functions:shadow]]** and **[[CL:Functions:shadowing-import]]** 
-never signal a name-conflict error.
-
+\itemitem{--}  **[[CL:Functions:shadow]]** and **[[CL:Functions:shadowing-import]]**  never signal a name-conflict error.
 
 \itemitem{--} 
 
+**[[CL:Functions:unuse-package]]** and **[[CL:Functions:unexport]]** do not need to do any name-conflict checking. **[[CL:Functions:unintern]]** does name-conflict checking only when a //[[CL:Glossary:symbol]]//  being //[[CL:Glossary:uninterned]]// is a //[[CL:Glossary:shadowing symbol]]//\idxterm{shadowing symbol}.
 
-
-
-**[[CL:Functions:unuse-package]]** and **[[CL:Functions:unexport]]**
-do not need to do any name-conflict checking.
-**[[CL:Functions:unintern]]** does name-conflict checking only when a //[[CL:Glossary:symbol]]// 
-being //[[CL:Glossary:uninterned]]// is a //[[CL:Glossary:shadowing symbol]]//\idxterm{shadowing symbol}.
-
-
-\itemitem{--} 
-Giving a shadowing symbol to **[[CL:Functions:unintern]]** 
-can uncover a name conflict that had
-previously been resolved by the shadowing.  
-
-
-
-
-
+\itemitem{--}  Giving a shadowing symbol to **[[CL:Functions:unintern]]**  can uncover a name conflict that had previously been resolved by the shadowing.  
 
   \itemitem{--} 
   Package functions signal name-conflict errors \oftype{package-error} before making any
   change to the package structure.  When multiple changes are to be made,
   it is
   permissible for the implementation to process each change separately.
-  For example, when **[[CL:Functions:export]]** is given a 
-//[[CL:Glossary:list]]// of 
-//[[CL:Glossary:symbols]]//,
+  For example, when **[[CL:Functions:export]]** is given a  //[[CL:Glossary:list]]// of  //[[CL:Glossary:symbols]]//,
   aborting from a name
   conflict caused by the second //[[CL:Glossary:symbol]]// 
   in the //[[CL:Glossary:list]]// might still export the
@@ -266,36 +105,15 @@ previously been resolved by the shadowing.
   of a single //[[CL:Glossary:symbol]]// will be signaled before
   that //[[CL:Glossary:symbol]]//'s //[[CL:Glossary:accessibility]]// in any //[[CL:Glossary:package]]// is changed.
 
-
-\itemitem{--} 
-Continuing from a name-conflict error must offer the user a chance to
-resolve the name conflict in favor of either of the candidates.  The
-//[[CL:Glossary:package]]// 
-structure should be altered to reflect the resolution of the
-name conflict, via **[[CL:Functions:shadowing-import]]**, 
-**[[CL:Functions:unintern]]**,
+\itemitem{--}  Continuing from a name-conflict error must offer the user a chance to resolve the name conflict in favor of either of the candidates.  The //[[CL:Glossary:package]]//  structure should be altered to reflect the resolution of the name conflict, via **[[CL:Functions:shadowing-import]]**,  **[[CL:Functions:unintern]]**,
 
 or **[[CL:Functions:unexport]]**.
 
+\itemitem{--}  A name conflict in **[[CL:Functions:use-package]]** between a //[[CL:Glossary:symbol]]// 
 
-\itemitem{--} 
-A name conflict in **[[CL:Functions:use-package]]** between a //[[CL:Glossary:symbol]]// 
+//[[CL:Glossary:present]]// in the using //[[CL:Glossary:package]]// and an //[[CL:Glossary:external symbol]]// of the used  //[[CL:Glossary:package]]// is resolved in favor of the first //[[CL:Glossary:symbol]]// by making it a shadowing //[[CL:Glossary:symbol]]//, or in favor of the second //[[CL:Glossary:symbol]]// by uninterning the first //[[CL:Glossary:symbol]]// from the using //[[CL:Glossary:package]]//. 
 
-//[[CL:Glossary:present]]// in the using //[[CL:Glossary:package]]// and an //[[CL:Glossary:external symbol]]// of the used 
-//[[CL:Glossary:package]]// is resolved in favor of the first //[[CL:Glossary:symbol]]// by making it a
-shadowing //[[CL:Glossary:symbol]]//, or in favor of the second //[[CL:Glossary:symbol]]// by uninterning
-the first //[[CL:Glossary:symbol]]// from the using //[[CL:Glossary:package]]//. 
-
-
-\itemitem{--} 
-A name conflict in **[[CL:Functions:export]]** or **[[CL:Functions:unintern]]** 
-due to a //[[CL:Glossary:package]]//'s inheriting two //[[CL:Glossary:distinct]]// //[[CL:Glossary:symbols]]// 
-with the //[[CL:Glossary:same]]// //[[CL:Glossary:name]]// (under **[[CL:Functions:string=]]**)
-from two other //[[CL:Glossary:packages]]// can be resolved in
-favor of either //[[CL:Glossary:symbol]]// by importing it into the using
-//[[CL:Glossary:package]]// and making it a //[[CL:Glossary:shadowing symbol]]//\idxterm{shadowing symbol},
-just as with **[[CL:Functions:use-package]]**.
-\endlist
+\itemitem{--}  A name conflict in **[[CL:Functions:export]]** or **[[CL:Functions:unintern]]**  due to a //[[CL:Glossary:package]]//'s inheriting two //[[CL:Glossary:distinct]]// //[[CL:Glossary:symbols]]//  with the //[[CL:Glossary:same]]// //[[CL:Glossary:name]]// (under **[[CL:Functions:string=]]**) from two other //[[CL:Glossary:packages]]// can be resolved in favor of either //[[CL:Glossary:symbol]]// by importing it into the using //[[CL:Glossary:package]]// and making it a //[[CL:Glossary:shadowing symbol]]//\idxterm{shadowing symbol}, just as with **[[CL:Functions:use-package]]**. \endlist
 
 \endsubsubsubsection%{Prevention of Name Conflicts in Packages}
 
@@ -305,82 +123,41 @@ just as with **[[CL:Functions:use-package]]**.
 
 \beginsubSection{Standardized Packages}
 
+This section describes the //[[CL:Glossary:packages]]// that are available in every //[[CL:Glossary:conforming implementation]]//.  A summary of the //[[CL:Glossary:names]]// and //[[CL:Glossary:nicknames]]// of those //[[CL:Glossary:standardized]]// //[[CL:Glossary:packages]]//  is given in \thenextfigure.
 
-This section describes the //[[CL:Glossary:packages]]// that are available
-in every //[[CL:Glossary:conforming implementation]]//.  A summary of the
-//[[CL:Glossary:names]]// and //[[CL:Glossary:nicknames]]// of those //[[CL:Glossary:standardized]]// //[[CL:Glossary:packages]]// 
-is given in \thenextfigure.
-
-\tablefigtwo{Standardized Package Names}{Name}{Nicknames}{
-\packref{common-lisp}&\packref{cl}\cr
-\packref{common-lisp-user}&\packref{cl-user}\cr
-\packref{keyword}&\i{none}\cr
-}
+\tablefigtwo{Standardized Package Names}{Name}{Nicknames}{ \packref{common-lisp}&\packref{cl}\cr \packref{common-lisp-user}&\packref{cl-user}\cr \packref{keyword}&\i{none}\cr }
 
 \issue{LISP-PACKAGE-NAME:COMMON-LISP}
 
-
-
-
 \issue{PACKAGE-CLUTTER:REDUCE}
 
-
-
-
-\beginsubsubsection{The COMMON-LISP Package} 
-\idxpackref{common-lisp}\idxpackref{cl}
+\beginsubsubsection{The COMMON-LISP Package}  \idxpackref{common-lisp}\idxpackref{cl}
 
 \issue{LISP-PACKAGE-NAME:COMMON-LISP}
- 
-\Thepackage{common-lisp} contains the primitives of the \clisp\ system as
-defined by this specification.  Its //[[CL:Glossary:external]]// //[[CL:Glossary:symbols]]// include
-all of the //[[CL:Glossary:defined names]]// (except for //[[CL:Glossary:defined names]]// in
-\thepackage{keyword}) that are present in the \clisp\ system, 
-such as **[[CL:Functions:car]]**, **[[CL:Functions:cdr]]**,  \varref{*package*}, etc.
-\Thepackage{common-lisp} has the //[[CL:Glossary:nickname]]// \packref{cl}.
- 
-\issue{PACKAGE-CLUTTER:REDUCE}
-\Thepackage{common-lisp} has as //[[CL:Glossary:external]]// //[[CL:Glossary:symbols]]// those 
-symbols enumerated in the figures in \secref\CLsymbols, and no others.
-These //[[CL:Glossary:external]]// //[[CL:Glossary:symbols]]// are //[[CL:Glossary:present]]// in \thepackage{common-lisp}
-but their //[[CL:Glossary:home package]]// need not be \thepackage{common-lisp}.
+  \Thepackage{common-lisp} contains the primitives of the \clisp\ system as defined by this specification.  Its //[[CL:Glossary:external]]// //[[CL:Glossary:symbols]]// include all of the //[[CL:Glossary:defined names]]// (except for //[[CL:Glossary:defined names]]// in \thepackage{keyword}) that are present in the \clisp\ system,  such as **[[CL:Functions:car]]**, **[[CL:Functions:cdr]]**,  \varref{*package*}, etc. \Thepackage{common-lisp} has the //[[CL:Glossary:nickname]]// \packref{cl}.
+  \issue{PACKAGE-CLUTTER:REDUCE} \Thepackage{common-lisp} has as //[[CL:Glossary:external]]// //[[CL:Glossary:symbols]]// those  symbols enumerated in the figures in \secref\CLsymbols, and no others. These //[[CL:Glossary:external]]// //[[CL:Glossary:symbols]]// are //[[CL:Glossary:present]]// in \thepackage{common-lisp} but their //[[CL:Glossary:home package]]// need not be \thepackage{common-lisp}.
 
-For example, the symbol \f{HELP} cannot be an //[[CL:Glossary:external symbol]]// of
-\thepackage{common-lisp} because it is not mentioned in \secref\CLsymbols.
-In contrast, the //[[CL:Glossary:symbol]]// \misc{variable}
-must be an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} 
-even though it has no definition
-because it is listed in that section
-(to support its use as a valid second //[[CL:Glossary:argument]]// to \thefunction{documentation}). 
-
+For example, the symbol \f{HELP} cannot be an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} because it is not mentioned in \secref\CLsymbols. In contrast, the //[[CL:Glossary:symbol]]// \misc{variable} must be an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp}  even though it has no definition because it is listed in that section (to support its use as a valid second //[[CL:Glossary:argument]]// to \thefunction{documentation}). 
 
 \Thepackage{common-lisp} can have additional //[[CL:Glossary:internal symbols]]//.
 
-
 \beginsubsubsubsection{Constraints on the COMMON-LISP Package for Conforming Implementations}
 
-\issue{PACKAGE-CLUTTER:REDUCE}
-In a //[[CL:Glossary:conforming implementation]]//,
-an //[[CL:Glossary:external]]// //[[CL:Glossary:symbol]]// of \thepackage{common-lisp} can have
+\issue{PACKAGE-CLUTTER:REDUCE} In a //[[CL:Glossary:conforming implementation]]//, an //[[CL:Glossary:external]]// //[[CL:Glossary:symbol]]// of \thepackage{common-lisp} can have
    a //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]//, or //[[CL:Glossary:special operator]]// definition, 
 
    a //[[CL:Glossary:global variable]]// definition
    (or other status as a //[[CL:Glossary:dynamic variable]]// 
-    due to a **[[CL:Declarations:special]]** //[[CL:Glossary:proclamation]]//),
-or a //[[CL:Glossary:type]]// definition
-only if explicitly permitted in this standard.
-
+    due to a **[[CL:Declarations:special]]** //[[CL:Glossary:proclamation]]//), or a //[[CL:Glossary:type]]// definition only if explicitly permitted in this standard.
 
 For example,
   **[[CL:Functions:fboundp]]** //[[CL:Glossary:yields]]// //[[CL:Glossary:false]]// 
   for any //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} 
   that is not the //[[CL:Glossary:name]]// of a //[[CL:Glossary:standardized]]// 
-   //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]// or //[[CL:Glossary:special operator]]//,
-and
+   //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]// or //[[CL:Glossary:special operator]]//, and
   **[[CL:Functions:boundp]]** returns //[[CL:Glossary:false]]// 
   for any //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} 
-  that is not the //[[CL:Glossary:name]]// of a //[[CL:Glossary:standardized]]// //[[CL:Glossary:global variable]]//.
-It also follows that
+  that is not the //[[CL:Glossary:name]]// of a //[[CL:Glossary:standardized]]// //[[CL:Glossary:global variable]]//. It also follows that
   //[[CL:Glossary:conforming programs]]// can use //[[CL:Glossary:external symbols]]// of \thepackage{common-lisp} 
   as the //[[CL:Glossary:names]]// of local //[[CL:Glossary:lexical variables]]// 
   with confidence that those //[[CL:Glossary:names]]// have not been //[[CL:Glossary:proclaimed]]// **[[CL:Declarations:special]]** 
@@ -388,171 +165,85 @@ It also follows that
   unless those //[[CL:Glossary:symbols]]// are
     //[[CL:Glossary:names]]// of //[[CL:Glossary:standardized]]// //[[CL:Glossary:global variables]]//.
 
-
-
-
-
-
-
-
-
-A //[[CL:Glossary:conforming implementation]]// must not place any //[[CL:Glossary:property]]// on
-an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} using a //[[CL:Glossary:property indicator]]//
-that is either an //[[CL:Glossary:external symbol]]// of any //[[CL:Glossary:standardized]]// //[[CL:Glossary:package]]//
-or a //[[CL:Glossary:symbol]]// that is otherwise //[[CL:Glossary:accessible]]// in \thepackage{common-lisp-user}.
+A //[[CL:Glossary:conforming implementation]]// must not place any //[[CL:Glossary:property]]// on an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} using a //[[CL:Glossary:property indicator]]// that is either an //[[CL:Glossary:external symbol]]// of any //[[CL:Glossary:standardized]]// //[[CL:Glossary:package]]// or a //[[CL:Glossary:symbol]]// that is otherwise //[[CL:Glossary:accessible]]// in \thepackage{common-lisp-user}.
  
-
-
-
-
-
 
 \endsubsubsubsection%{Constraints on the COMMON-LISP Package for Conforming Implementations}
- 
-\beginsubsubsubsection{Constraints on the COMMON-LISP Package for Conforming Programs}
-\idxtext{redefinition}
-\issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
-Except where explicitly allowed, the consequences are undefined if any
-of the following actions are performed on an //[[CL:Glossary:external symbol]]// 
-of \thepackage{common-lisp}:
+  \beginsubsubsubsection{Constraints on the COMMON-LISP Package for Conforming Programs} \idxtext{redefinition} \issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13} Except where explicitly allowed, the consequences are undefined if any of the following actions are performed on an //[[CL:Glossary:external symbol]]//  of \thepackage{common-lisp}:
 
 \beginlist
 
-\itemitem{1.} //[[CL:Glossary:Binding]]// or altering its value (lexically or dynamically).
-	      (Some exceptions are noted below.)
+\itemitem{1.} //[[CL:Glossary:Binding]]// or altering its value (lexically or dynamically). 	      (Some exceptions are noted below.)
 
-\itemitem{2.} Defining, 
-\issue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
-	      undefining, 
+\itemitem{2.} Defining,  \issue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES} 	      undefining, 
 
-	  or //[[CL:Glossary:binding]]// it as a //[[CL:Glossary:function]]//.
-	      (Some exceptions are noted below.)
+	  or //[[CL:Glossary:binding]]// it as a //[[CL:Glossary:function]]//. 	      (Some exceptions are noted below.)
 
-\itemitem{3.} Defining,
-\issue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
-	      undefining, 
+\itemitem{3.} Defining, \issue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES} 	      undefining, 
 
-	   or //[[CL:Glossary:binding]]// it as a //[[CL:Glossary:macro]]//
-\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
-	      or //[[CL:Glossary:compiler macro]]//.
+	   or //[[CL:Glossary:binding]]// it as a //[[CL:Glossary:macro]]// \issue{DEFINE-COMPILER-MACRO:X3J13-NOV89} 	      or //[[CL:Glossary:compiler macro]]//.
 
 	      (Some exceptions are noted below.)
 
-
-\itemitem{4.} Defining it as a //[[CL:Glossary:type specifier]]// 
-	      (via \macref{defstruct}, 
-		   \macref{defclass},
-		   \macref{deftype},
-		   \macref{define-condition}).
+\itemitem{4.} Defining it as a //[[CL:Glossary:type specifier]]//  	      (via \macref{defstruct},  		   \macref{defclass}, 		   \macref{deftype}, 		   \macref{define-condition}).
 
 \itemitem{5.} Defining it as a structure (via \macref{defstruct}).
 
-\itemitem{6.} Defining it as a //[[CL:Glossary:declaration]]// 
-	      with a **[[CL:Declarations:declaration]]** //[[CL:Glossary:proclamation]]//.
+\itemitem{6.} Defining it as a //[[CL:Glossary:declaration]]//  	      with a **[[CL:Declarations:declaration]]** //[[CL:Glossary:proclamation]]//.
 
 \itemitem{7.} Defining it as a //[[CL:Glossary:symbol macro]]//.
-
-
-
-
 
 \itemitem{8.} Altering its //[[CL:Glossary:home package]]//.
 
 \itemitem{9.} Tracing it  (via \macref{trace}).
 
-
 \itemitem{10.} Declaring or proclaiming it
 
-
-	       **[[CL:Declarations:special]]**
-	       (via \misc{declare},
-\issue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO}
-		    \specref{declaim},
+	       **[[CL:Declarations:special]]** 	       (via \misc{declare}, \issue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO} 		    \specref{declaim},
 
 		 or **[[CL:Functions:proclaim]]**).
 
-\itemitem{11.} Declaring or proclaiming its **[[CL:Declarations:type]]** or **[[CL:Declarations:ftype]]**
-	       (via \misc{declare},
-\issue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO}
-		    \macref{declaim},
+\itemitem{11.} Declaring or proclaiming its **[[CL:Declarations:type]]** or **[[CL:Declarations:ftype]]** 	       (via \misc{declare}, \issue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO} 		    \macref{declaim},
 
-		 or **[[CL:Functions:proclaim]]**).
-	       (Some exceptions are noted below.)
+		 or **[[CL:Functions:proclaim]]**). 	       (Some exceptions are noted below.)
 
 \itemitem{12.} Removing it from \thepackage{common-lisp}.
 
 \issue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
 
-\itemitem{13.} Defining a //[[CL:Glossary:setf expander]]// for it 
-	       (via **[[CL:Functions:defsetf]]** or **[[CL:Functions:define-setf-method]]**).
+\itemitem{13.} Defining a //[[CL:Glossary:setf expander]]// for it  	       (via **[[CL:Functions:defsetf]]** or **[[CL:Functions:define-setf-method]]**).
 
 \itemitem{14.} Defining, undefining, or binding its //[[CL:Glossary:setf function name]]//.
 
-\itemitem{15.} Defining it as a //[[CL:Glossary:method combination]]// type 
-		(via **[[CL:Functions:define-method-combination]]**).
+\itemitem{15.} Defining it as a //[[CL:Glossary:method combination]]// type  		(via **[[CL:Functions:define-method-combination]]**).
 
-\itemitem{16.} Using it as the class-name argument 
-	       to **[[CL:Functions:setf]]** of **[[CL:Functions:find-class]]**.
+\itemitem{16.} Using it as the class-name argument  	       to **[[CL:Functions:setf]]** of **[[CL:Functions:find-class]]**.
 
 \itemitem{17.} Binding it as a //[[CL:Glossary:catch tag]]//.
 
 \itemitem{18.} Binding it as a //[[CL:Glossary:restart]]// //[[CL:Glossary:name]]//.
 
-\itemitem{19.} Defining a //[[CL:Glossary:method]]// 
-	       for a //[[CL:Glossary:standardized]]// //[[CL:Glossary:generic function]]// 
-	       which is //[[CL:Glossary:applicable]]// when all of the //[[CL:Glossary:arguments]]//
+\itemitem{19.} Defining a //[[CL:Glossary:method]]//  	       for a //[[CL:Glossary:standardized]]// //[[CL:Glossary:generic function]]//  	       which is //[[CL:Glossary:applicable]]// when all of the //[[CL:Glossary:arguments]]//
       	       are //[[CL:Glossary:direct instances]]// of //[[CL:Glossary:standardized]]// //[[CL:Glossary:classes]]//.
-
-
 
 \endlist 
 
 \beginsubsubsubsubsection{Some Exceptions to Constraints on the COMMON-LISP Package for Conforming Programs}
 
-If an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp}
-is not globally defined as a //[[CL:Glossary:standardized]]// //[[CL:Glossary:dynamic variable]]// 
-					      or //[[CL:Glossary:constant variable]]//,
-it is allowed to lexically //[[CL:Glossary:bind]]// it 
-          and to declare the **[[CL:Declarations:type]]** of that //[[CL:Glossary:binding]]//, 
-and
-it is allowed to locally //[[CL:Glossary:establish]]// it as a //[[CL:Glossary:symbol macro]]// 
-(\eg with \specref{symbol-macrolet}).
+If an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} is not globally defined as a //[[CL:Glossary:standardized]]// //[[CL:Glossary:dynamic variable]]//  					      or //[[CL:Glossary:constant variable]]//, it is allowed to lexically //[[CL:Glossary:bind]]// it 
+          and to declare the **[[CL:Declarations:type]]** of that //[[CL:Glossary:binding]]//,  and it is allowed to locally //[[CL:Glossary:establish]]// it as a //[[CL:Glossary:symbol macro]]//  (\eg with \specref{symbol-macrolet}).
 
+Unless explicitly specified otherwise, if an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp}  is globally defined as a //[[CL:Glossary:standardized]]// //[[CL:Glossary:dynamic variable]]//, it is permitted to //[[CL:Glossary:bind]]// or //[[CL:Glossary:assign]]// that //[[CL:Glossary:dynamic variable]]// provided that the ``Value Type'' constraints on the //[[CL:Glossary:dynamic variable]]//  are maintained, and that the new //[[CL:Glossary:value]]// of the //[[CL:Glossary:variable]]//  is consistent with the stated purpose of the //[[CL:Glossary:variable]]//.
 
-
-
-Unless explicitly specified otherwise,
-if an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} 
-is globally defined as a //[[CL:Glossary:standardized]]// //[[CL:Glossary:dynamic variable]]//,
-it is permitted to //[[CL:Glossary:bind]]// or //[[CL:Glossary:assign]]// that //[[CL:Glossary:dynamic variable]]//
-provided that the ``Value Type'' constraints on the //[[CL:Glossary:dynamic variable]]// 
-are maintained, and that the new //[[CL:Glossary:value]]// of the //[[CL:Glossary:variable]]// 
-is consistent with the stated purpose of the //[[CL:Glossary:variable]]//.
-
-If an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} is not defined
-as a //[[CL:Glossary:standardized]]// //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]//, or //[[CL:Glossary:special operator]]//,
-it is allowed to lexically //[[CL:Glossary:bind]]// it as a //[[CL:Glossary:function]]// (\eg with \specref{flet}),
+If an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} is not defined as a //[[CL:Glossary:standardized]]// //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]//, or //[[CL:Glossary:special operator]]//, it is allowed to lexically //[[CL:Glossary:bind]]// it as a //[[CL:Glossary:function]]// (\eg with \specref{flet}),
               to declare the **[[CL:Declarations:ftype]]** of that //[[CL:Glossary:binding]]//, 
           and 
 
+              (in //[[CL:Glossary:implementations]]// which provide the ability to do so) 	      to \macref{trace} that //[[CL:Glossary:binding]]//.
 
-              (in //[[CL:Glossary:implementations]]// which provide the ability to do so)
-	      to \macref{trace} that //[[CL:Glossary:binding]]//.
+If an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} is not defined as a //[[CL:Glossary:standardized]]// //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]//, or //[[CL:Glossary:special operator]]//, it is allowed to lexically //[[CL:Glossary:bind]]// it as a //[[CL:Glossary:macro]]// (\eg with \specref{macrolet}).
 
-If an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} is not defined
-as a //[[CL:Glossary:standardized]]// //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]//, or //[[CL:Glossary:special operator]]//,
-it is allowed to lexically //[[CL:Glossary:bind]]// it as a //[[CL:Glossary:macro]]// (\eg with \specref{macrolet}).
-
-
-
-
-\issue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
-If an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} is not defined 
-as a //[[CL:Glossary:standardized]]// //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]//, or //[[CL:Glossary:special operator]]//,
-it is allowed to lexically //[[CL:Glossary:bind]]// its //[[CL:Glossary:setf function name]]//
-as a //[[CL:Glossary:function]]//,
-and to declare the **[[CL:Declarations:ftype]]** of that //[[CL:Glossary:binding]]//.
-
+\issue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES} If an //[[CL:Glossary:external symbol]]// of \thepackage{common-lisp} is not defined  as a //[[CL:Glossary:standardized]]// //[[CL:Glossary:function]]//, //[[CL:Glossary:macro]]//, or //[[CL:Glossary:special operator]]//, it is allowed to lexically //[[CL:Glossary:bind]]// its //[[CL:Glossary:setf function name]]// as a //[[CL:Glossary:function]]//, and to declare the **[[CL:Declarations:ftype]]** of that //[[CL:Glossary:binding]]//.
 
 \endsubsubsubsubsection%{Some Exceptions to Constraints on the COMMON-LISP Package for Conforming Programs}
 
@@ -560,76 +251,32 @@ and to declare the **[[CL:Declarations:ftype]]** of that //[[CL:Glossary:binding
 
 \endsubsubsection%{The COMMON-LISP Package} 
 
-\beginsubsubsection{The COMMON-LISP-USER Package}
-\idxpackref{common-lisp-user}\idxpackref{cl-user}
+\beginsubsubsection{The COMMON-LISP-USER Package} \idxpackref{common-lisp-user}\idxpackref{cl-user}
 
-\Thepackage{common-lisp-user} is the //[[CL:Glossary:current package]]// when 
-a \clisp\ system starts up.  This //[[CL:Glossary:package]]// //[[CL:Glossary:uses]]// \thepackage{common-lisp}.
-\Thepackage{common-lisp-user} has the //[[CL:Glossary:nickname]]// \packref{cl-user}.
-\issue{PACKAGE-CLUTTER:REDUCE}
-\Thepackage{common-lisp-user} can have additional //[[CL:Glossary:symbols]]// //[[CL:Glossary:interned]]// within it;
-it can //[[CL:Glossary:use]]// other //[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:packages]]//.
+\Thepackage{common-lisp-user} is the //[[CL:Glossary:current package]]// when  a \clisp\ system starts up.  This //[[CL:Glossary:package]]// //[[CL:Glossary:uses]]// \thepackage{common-lisp}. \Thepackage{common-lisp-user} has the //[[CL:Glossary:nickname]]// \packref{cl-user}. \issue{PACKAGE-CLUTTER:REDUCE} \Thepackage{common-lisp-user} can have additional //[[CL:Glossary:symbols]]// //[[CL:Glossary:interned]]// within it; it can //[[CL:Glossary:use]]// other //[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:packages]]//.
 
- 
-\endsubsubsection%{The COMMON-LISP-USER Package}
+  \endsubsubsection%{The COMMON-LISP-USER Package}
 
-\beginsubsubsection{The KEYWORD Package}
-\idxpackref{keyword}
+\beginsubsubsection{The KEYWORD Package} \idxpackref{keyword}
 
+\Thepackage{keyword} contains //[[CL:Glossary:symbols]]//, called //[[CL:Glossary:keywords]]//\meaning{1}, that are typically used as special markers in //[[CL:Glossary:programs]]//  and their associated data //[[CL:Glossary:expressions]]//\meaning{1}.
 
-
-
-
-
-
-
-\Thepackage{keyword} contains //[[CL:Glossary:symbols]]//, called //[[CL:Glossary:keywords]]//\meaning{1},
-that are typically used as special markers in //[[CL:Glossary:programs]]// 
-and their associated data //[[CL:Glossary:expressions]]//\meaning{1}.
-
-//[[CL:Glossary:Symbol]]// //[[CL:Glossary:tokens]]// that start with a //[[CL:Glossary:package marker]]// 
-are parsed by the //[[CL:Glossary:Lisp reader]]// as //[[CL:Glossary:symbols]]// 
-in \thepackage{keyword}; \seesection\SymbolTokens.
-This makes it notationally convenient to use //[[CL:Glossary:keywords]]//
-when communicating between programs in different //[[CL:Glossary:packages]]//.  
-For example, the mechanism for passing //[[CL:Glossary:keyword parameters]]// in a //[[CL:Glossary:call]]// uses 
-//[[CL:Glossary:keywords]]//\meaning{1} to name the corresponding //[[CL:Glossary:arguments]]//;
-\seesection\OrdinaryLambdaLists.
+//[[CL:Glossary:Symbol]]// //[[CL:Glossary:tokens]]// that start with a //[[CL:Glossary:package marker]]//  are parsed by the //[[CL:Glossary:Lisp reader]]// as //[[CL:Glossary:symbols]]//  in \thepackage{keyword}; \seesection\SymbolTokens. This makes it notationally convenient to use //[[CL:Glossary:keywords]]// when communicating between programs in different //[[CL:Glossary:packages]]//.   For example, the mechanism for passing //[[CL:Glossary:keyword parameters]]// in a //[[CL:Glossary:call]]// uses  //[[CL:Glossary:keywords]]//\meaning{1} to name the corresponding //[[CL:Glossary:arguments]]//; \seesection\OrdinaryLambdaLists.
 
 //[[CL:Glossary:Symbols]]// in \thepackage{keyword} are, by definition, \oftype{keyword}.
 
 \beginsubsubsubsection{Interning a Symbol in the KEYWORD Package}
 
-\Thepackage{keyword} is treated differently than other //[[CL:Glossary:packages]]//
-in that special actions are taken when a //[[CL:Glossary:symbol]]// is //[[CL:Glossary:interned]]// in it.
-In particular, when a //[[CL:Glossary:symbol]]// is //[[CL:Glossary:interned]]// in \thepackage{keyword},
- it is automatically made to be an //[[CL:Glossary:external symbol]]// 
-and is automatically made to be a //[[CL:Glossary:constant variable]]// with itself as a //[[CL:Glossary:value]]//.
-
-
-
-
+\Thepackage{keyword} is treated differently than other //[[CL:Glossary:packages]]// in that special actions are taken when a //[[CL:Glossary:symbol]]// is //[[CL:Glossary:interned]]// in it. In particular, when a //[[CL:Glossary:symbol]]// is //[[CL:Glossary:interned]]// in \thepackage{keyword},
+ it is automatically made to be an //[[CL:Glossary:external symbol]]//  and is automatically made to be a //[[CL:Glossary:constant variable]]// with itself as a //[[CL:Glossary:value]]//.
 
 \endsubsubsubsection%{Interning a Symbol in the KEYWORD Package}
 
 \beginsubsubsubsection{Notes about The KEYWORD Package}
 
+It is generally best to confine the use of //[[CL:Glossary:keywords]]// to situations in which there are a finitely enumerable set of names to be selected between.  For example, if there were two states of a light switch, they might be called **'':on''** and **'':off''**.
 
-
-
-
-
-It is generally best to confine the use of //[[CL:Glossary:keywords]]// to situations in which
-there are a finitely enumerable set of names to be selected between.  For example,
-if there were two states of a light switch, they might be called **'':on''** and **'':off''**.
-
-In situations where the set of names is not finitely enumerable
-(\ie where name conflicts might arise)
-it is frequently best to use //[[CL:Glossary:symbols]]// in some //[[CL:Glossary:package]]//
-other than \packref{keyword} so that conflicts will be naturally avoided.
-For example, it is generally not wise for a //[[CL:Glossary:program]]// to use a //[[CL:Glossary:keyword]]//\meaning{1} 
-as a //[[CL:Glossary:property indicator]]//, since if there were ever another //[[CL:Glossary:program]]//
-that did the same thing, each would clobber the other's data.
+In situations where the set of names is not finitely enumerable (\ie where name conflicts might arise) it is frequently best to use //[[CL:Glossary:symbols]]// in some //[[CL:Glossary:package]]// other than \packref{keyword} so that conflicts will be naturally avoided. For example, it is generally not wise for a //[[CL:Glossary:program]]// to use a //[[CL:Glossary:keyword]]//\meaning{1}  as a //[[CL:Glossary:property indicator]]//, since if there were ever another //[[CL:Glossary:program]]// that did the same thing, each would clobber the other's data.
 
 \endsubsubsubsection%{Notes about The KEYWORD Package}
 
@@ -637,18 +284,9 @@ that did the same thing, each would clobber the other's data.
 
 \beginsubsubsection{Implementation-Defined Packages} 
 
-\issue{PACKAGE-CLUTTER:REDUCE}
-Other, //[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:packages]]// might be present
-in the initial \clisp\ environment.
+\issue{PACKAGE-CLUTTER:REDUCE} Other, //[[CL:Glossary:implementation-defined]]// //[[CL:Glossary:packages]]// might be present in the initial \clisp\ environment.
 
-
-
-
-
-It is recommended, but not required, that the documentation for a
-//[[CL:Glossary:conforming implementation]]// contain a full list of all //[[CL:Glossary:package]]// names
-initially present in that //[[CL:Glossary:implementation]]// but not specified in this specification.
-(See also the //[[CL:Glossary:function]]// **[[CL:Functions:list-all-packages]]**.)
+It is recommended, but not required, that the documentation for a //[[CL:Glossary:conforming implementation]]// contain a full list of all //[[CL:Glossary:package]]// names initially present in that //[[CL:Glossary:implementation]]// but not specified in this specification. (See also the //[[CL:Glossary:function]]// **[[CL:Functions:list-all-packages]]**.)
 
 \endsubsubsection%{Implementation-Defined Packages} 
 

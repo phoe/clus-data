@@ -2,118 +2,60 @@
 
 \beginsubSection{Introduction to Streams}
 
+A //[[CL:Glossary:stream]]// is an //[[CL:Glossary:object]]// that can be used with an input or output function to identify an appropriate source or sink of //[[CL:Glossary:characters]]// or  //[[CL:Glossary:bytes]]// for that operation.
 
+A //[[CL:Glossary:character]]// //[[CL:Glossary:stream]]// is a source or sink of //[[CL:Glossary:characters]]//. A //[[CL:Glossary:binary]]// //[[CL:Glossary:stream]]// is a source or sink of //[[CL:Glossary:bytes]]//.
 
+Some operations may be performed on any kind of //[[CL:Glossary:stream]]//; \thenextfigure\ provides a list of //[[CL:Glossary:standardized]]// operations that are potentially useful with any kind of //[[CL:Glossary:stream]]//.
 
-A //[[CL:Glossary:stream]]// is an //[[CL:Glossary:object]]// that can be used with an input or output
-function to identify an appropriate source or sink of //[[CL:Glossary:characters]]// or 
-//[[CL:Glossary:bytes]]// for that operation.
+\displaytwo{Some General-Purpose Stream Operations}{ close&stream-element-type\cr input-stream-p&streamp\cr interactive-stream-p&with-open-stream\cr output-stream-p&\cr }
 
-
-A //[[CL:Glossary:character]]// //[[CL:Glossary:stream]]// is a source or sink of //[[CL:Glossary:characters]]//.
-A //[[CL:Glossary:binary]]// //[[CL:Glossary:stream]]// is a source or sink of //[[CL:Glossary:bytes]]//.
-
-Some operations may be performed on any kind of //[[CL:Glossary:stream]]//;
-\thenextfigure\ provides a list of //[[CL:Glossary:standardized]]// operations
-that are potentially useful with any kind of //[[CL:Glossary:stream]]//.
-
-\displaytwo{Some General-Purpose Stream Operations}{
-close&stream-element-type\cr
-input-stream-p&streamp\cr
-interactive-stream-p&with-open-stream\cr
-output-stream-p&\cr
-}
-
-Other operations are only meaningful on certain //[[CL:Glossary:stream]]// //[[CL:Glossary:types]]//.
-For example, **[[CL:Functions:read-char]]** is only defined for //[[CL:Glossary:character]]// //[[CL:Glossary:streams]]//
-and **[[CL:Functions:read-byte]]** is only defined for //[[CL:Glossary:binary]]// //[[CL:Glossary:streams]]//.
+Other operations are only meaningful on certain //[[CL:Glossary:stream]]// //[[CL:Glossary:types]]//. For example, **[[CL:Functions:read-char]]** is only defined for //[[CL:Glossary:character]]// //[[CL:Glossary:streams]]// and **[[CL:Functions:read-byte]]** is only defined for //[[CL:Glossary:binary]]// //[[CL:Glossary:streams]]//.
 
 \beginsubsubsection{Abstract Classifications of Streams}
 
 \beginsubsubsubsection{Input, Output, and Bidirectional Streams}
 
-
-A //[[CL:Glossary:stream]]//, whether a //[[CL:Glossary:character]]// //[[CL:Glossary:stream]]// or a //[[CL:Glossary:binary]]// //[[CL:Glossary:stream]]//,
-can be an //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]// (source of data),
+A //[[CL:Glossary:stream]]//, whether a //[[CL:Glossary:character]]// //[[CL:Glossary:stream]]// or a //[[CL:Glossary:binary]]// //[[CL:Glossary:stream]]//, can be an //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]// (source of data),
        an //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]// (sink for data),
        both, 
     or (\eg when ``\f{:direction :probe}'' is given to **[[CL:Functions:open]]**) neither.
 
-\Thenextfigure\ shows //[[CL:Glossary:operators]]// relating to
-//[[CL:Glossary:input]]// //[[CL:Glossary:streams]]//.
+\Thenextfigure\ shows //[[CL:Glossary:operators]]// relating to //[[CL:Glossary:input]]// //[[CL:Glossary:streams]]//.
 
-\DefineFigure{InputStreamOps}
-\displaythree{Operators relating to Input Streams.}{
-clear-input&read-byte&read-from-string\cr
-listen&read-char&read-line\cr
-peek-char&read-char-no-hang&read-preserving-whitespace\cr
-read&read-delimited-list&unread-char\cr
-}
+\DefineFigure{InputStreamOps} \displaythree{Operators relating to Input Streams.}{ clear-input&read-byte&read-from-string\cr listen&read-char&read-line\cr peek-char&read-char-no-hang&read-preserving-whitespace\cr read&read-delimited-list&unread-char\cr }
 
-\Thenextfigure\ shows //[[CL:Glossary:operators]]// relating to
-//[[CL:Glossary:output]]// //[[CL:Glossary:streams]]//.
+\Thenextfigure\ shows //[[CL:Glossary:operators]]// relating to //[[CL:Glossary:output]]// //[[CL:Glossary:streams]]//.
 
-\DefineFigure{OutputStreamOps}
-\displaythree{Operators relating to Output Streams.}{
-clear-output&prin1&write\cr
-finish-output&prin1-to-string&write-byte\cr
-force-output&princ&write-char\cr
-format&princ-to-string&write-line\cr
-fresh-line&print&write-string\cr
-pprint&terpri&write-to-string\cr
-}
+\DefineFigure{OutputStreamOps} \displaythree{Operators relating to Output Streams.}{ clear-output&prin1&write\cr finish-output&prin1-to-string&write-byte\cr force-output&princ&write-char\cr format&princ-to-string&write-line\cr fresh-line&print&write-string\cr pprint&terpri&write-to-string\cr }
 
-A //[[CL:Glossary:stream]]// that is both an //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]// and an //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]//
-is called a //[[CL:Glossary:bidirectional]]// //[[CL:Glossary:stream]]//.
-\Seefuns{input-stream-p} and **[[CL:Functions:output-stream-p]]**.
+A //[[CL:Glossary:stream]]// that is both an //[[CL:Glossary:input]]// //[[CL:Glossary:stream]]// and an //[[CL:Glossary:output]]// //[[CL:Glossary:stream]]// is called a //[[CL:Glossary:bidirectional]]// //[[CL:Glossary:stream]]//. \Seefuns{input-stream-p} and **[[CL:Functions:output-stream-p]]**.
 
-Any of the //[[CL:Glossary:operators]]// listed in \figref\InputStreamOps\ or \figref\OutputStreamOps\
-can be used with //[[CL:Glossary:bidirectional]]// //[[CL:Glossary:streams]]//.  In addition, \thenextfigure\
-shows a list of //[[CL:Glossary:operators]]// that relate specificaly to 
-//[[CL:Glossary:bidirectional]]// //[[CL:Glossary:streams]]//.
+Any of the //[[CL:Glossary:operators]]// listed in \figref\InputStreamOps\ or \figref\OutputStreamOps\ can be used with //[[CL:Glossary:bidirectional]]// //[[CL:Glossary:streams]]//.  In addition, \thenextfigure\ shows a list of //[[CL:Glossary:operators]]// that relate specificaly to  //[[CL:Glossary:bidirectional]]// //[[CL:Glossary:streams]]//.
 
-\displaythree{Operators relating to Bidirectional Streams.}{
-y-or-n-p&yes-or-no-p&\cr
-}
+\displaythree{Operators relating to Bidirectional Streams.}{ y-or-n-p&yes-or-no-p&\cr }
 
 \endsubsubsubsection%{Input, Output, and Bidirectional Streams}
 
-\beginsubsubsubsection{Open and Closed Streams}
-\DefineSection{OpenAndClosedStreams}
+\beginsubsubsubsection{Open and Closed Streams} \DefineSection{OpenAndClosedStreams}
 
 //[[CL:Glossary:Streams]]// are either //[[CL:Glossary:open]]// or //[[CL:Glossary:closed]]//.  
 
-Except as explicitly specified otherwise,
-operations that create and return //[[CL:Glossary:streams]]// return //[[CL:Glossary:open]]// //[[CL:Glossary:streams]]//.
+Except as explicitly specified otherwise, operations that create and return //[[CL:Glossary:streams]]// return //[[CL:Glossary:open]]// //[[CL:Glossary:streams]]//.
 
-The action of //[[CL:Glossary:closing]]// a //[[CL:Glossary:stream]]// marks the end of its use as a source
-or sink of data, permitting the //[[CL:Glossary:implementation]]// to reclaim its internal data
-structures, and to free any external resources which might have been locked by the
-//[[CL:Glossary:stream]]// when it was opened.
+The action of //[[CL:Glossary:closing]]// a //[[CL:Glossary:stream]]// marks the end of its use as a source or sink of data, permitting the //[[CL:Glossary:implementation]]// to reclaim its internal data structures, and to free any external resources which might have been locked by the //[[CL:Glossary:stream]]// when it was opened.
 
-Except as explicitly specified otherwise,
-the consequences are undefined when a //[[CL:Glossary:closed]]// //[[CL:Glossary:stream]]// 
-is used where a //[[CL:Glossary:stream]]// is called for.
+Except as explicitly specified otherwise, the consequences are undefined when a //[[CL:Glossary:closed]]// //[[CL:Glossary:stream]]//  is used where a //[[CL:Glossary:stream]]// is called for.
 
-Coercion of //[[CL:Glossary:streams]]// to //[[CL:Glossary:pathnames]]// 
-is permissible for //[[CL:Glossary:closed]]// //[[CL:Glossary:streams]]//;
-in some situations, such as for a //[[CL:Glossary:truename]]// computation, 
-the result might be different for an //[[CL:Glossary:open]]// //[[CL:Glossary:stream]]//
-and for that same //[[CL:Glossary:stream]]// once it has been //[[CL:Glossary:closed]]//.
+Coercion of //[[CL:Glossary:streams]]// to //[[CL:Glossary:pathnames]]//  is permissible for //[[CL:Glossary:closed]]// //[[CL:Glossary:streams]]//; in some situations, such as for a //[[CL:Glossary:truename]]// computation,  the result might be different for an //[[CL:Glossary:open]]// //[[CL:Glossary:stream]]// and for that same //[[CL:Glossary:stream]]// once it has been //[[CL:Glossary:closed]]//.
 
 \endsubsubsubsection%{Open and Closed Streams}
 
-\beginsubsubsubsection{Interactive Streams}
-\DefineSection{InteractiveStreams}
+\beginsubsubsubsection{Interactive Streams} \DefineSection{InteractiveStreams}
 
-An //[[CL:Glossary:interactive stream]]// is one on which it makes sense to perform
-interactive querying.
+An //[[CL:Glossary:interactive stream]]// is one on which it makes sense to perform interactive querying.
 
-The precise meaning of an //[[CL:Glossary:interactive stream]]// is
-//[[CL:Glossary:implementation-defined]]//, and may depend on the underlying
-operating system.  Some examples of the things that an
-//[[CL:Glossary:implementation]]// might choose to use as identifying characteristics
-of an //[[CL:Glossary:interactive stream]]// include:
+The precise meaning of an //[[CL:Glossary:interactive stream]]// is //[[CL:Glossary:implementation-defined]]//, and may depend on the underlying operating system.  Some examples of the things that an //[[CL:Glossary:implementation]]// might choose to use as identifying characteristics of an //[[CL:Glossary:interactive stream]]// include:
 
 \beginlist
 
@@ -131,11 +73,7 @@ of an //[[CL:Glossary:interactive stream]]// include:
 
 \endlist 
 
-The general intent of having some //[[CL:Glossary:streams]]// be classified as
-//[[CL:Glossary:interactive streams]]// is to allow them to be distinguished from
-streams containing batch (or background or command-file) input.
-Output to batch streams is typically discarded or saved for later viewing, 
-so interactive queries to such streams might not have the expected effect.
+The general intent of having some //[[CL:Glossary:streams]]// be classified as //[[CL:Glossary:interactive streams]]// is to allow them to be distinguished from streams containing batch (or background or command-file) input. Output to batch streams is typically discarded or saved for later viewing,  so interactive queries to such streams might not have the expected effect.
 
 //[[CL:Glossary:Terminal I/O]]// might or might not be an //[[CL:Glossary:interactive stream]]//.
 
@@ -145,26 +83,15 @@ so interactive queries to such streams might not have the expected effect.
 
 \beginsubsubsubsection{File Streams}
 
+Some //[[CL:Glossary:streams]]//, called \newtermidx{file streams}{file stream}, provide access to //[[CL:Glossary:files]]//. An //[[CL:Glossary:object]]// \ofclass{file-stream} is used to represent a //[[CL:Glossary:file stream]]//.
 
-Some //[[CL:Glossary:streams]]//, called \newtermidx{file streams}{file stream}, provide access to //[[CL:Glossary:files]]//.
-An //[[CL:Glossary:object]]// \ofclass{file-stream} is used to represent a //[[CL:Glossary:file stream]]//.
-
-The basic operation for opening a //[[CL:Glossary:file]]// is **[[CL:Functions:open]]**,
-which typically returns a //[[CL:Glossary:file stream]]// 
-(see its dictionary entry for details).
-The basic operation for closing a //[[CL:Glossary:stream]]// is **[[CL:Functions:close]]**.
-The macro \macref{with-open-file} is useful 
-to express the common idiom of opening a //[[CL:Glossary:file]]// 
-for the duration of a given body of //[[CL:Glossary:code]]//, 
-and assuring that the resulting //[[CL:Glossary:stream]]// is closed upon exit from that body.
+The basic operation for opening a //[[CL:Glossary:file]]// is **[[CL:Functions:open]]**, which typically returns a //[[CL:Glossary:file stream]]//  (see its dictionary entry for details). The basic operation for closing a //[[CL:Glossary:stream]]// is **[[CL:Functions:close]]**. The macro \macref{with-open-file} is useful  to express the common idiom of opening a //[[CL:Glossary:file]]//  for the duration of a given body of //[[CL:Glossary:code]]//,  and assuring that the resulting //[[CL:Glossary:stream]]// is closed upon exit from that body.
 
 \endsubsubsubsection%{File Streams}
 
 \beginsubsubsection{Other Subclasses of Stream}
 
-\Theclass{stream} has a number of //[[CL:Glossary:subclasses]]// defined 
-by this specification.  \Thenextfigure\ shows some information 
-about these subclasses.
+\Theclass{stream} has a number of //[[CL:Glossary:subclasses]]// defined  by this specification.  \Thenextfigure\ shows some information  about these subclasses.
 
 \tablefigtwo{Defined Names related to Specialized Streams}{Class}{Related Operators}{
  \typeref{broadcast-stream}    & **[[CL:Functions:make-broadcast-stream]]**        \cr
@@ -183,8 +110,7 @@ about these subclasses.
                                & **[[CL:Functions:synonym-stream-symbol]]**        \cr
  \typeref{two-way-stream}      & **[[CL:Functions:make-two-way-stream]]**          \cr
                                & **[[CL:Functions:two-way-stream-input-stream]]**  \cr
-                               & **[[CL:Functions:two-way-stream-output-stream]]** \cr
-}
+                               & **[[CL:Functions:two-way-stream-output-stream]]** \cr }
 
 \endsubsubsection%{Other Subclasses of Stream}
 
@@ -192,99 +118,45 @@ about these subclasses.
 
 \beginsubSection{Stream Variables}
 
-//[[CL:Glossary:Variables]]// whose //[[CL:Glossary:values]]// must be //[[CL:Glossary:streams]]// are sometimes called 
-\newtermidx{stream variables}{stream variable}.
+//[[CL:Glossary:Variables]]// whose //[[CL:Glossary:values]]// must be //[[CL:Glossary:streams]]// are sometimes called  \newtermidx{stream variables}{stream variable}.
 
-Certain //[[CL:Glossary:stream variables]]// are defined by this specification 
-to be the proper source of input or output in various //[[CL:Glossary:situations]]// 
-where no specific //[[CL:Glossary:stream]]// has been specified instead.
-A complete list of such //[[CL:Glossary:standardized]]// //[[CL:Glossary:stream variables]]//
-appears in \thenextfigure.  
+Certain //[[CL:Glossary:stream variables]]// are defined by this specification  to be the proper source of input or output in various //[[CL:Glossary:situations]]//  where no specific //[[CL:Glossary:stream]]// has been specified instead. A complete list of such //[[CL:Glossary:standardized]]// //[[CL:Glossary:stream variables]]// appears in \thenextfigure.  
 
-The consequences are undefined if at any time
-the //[[CL:Glossary:value]]// of any of these //[[CL:Glossary:variables]]// is not an //[[CL:Glossary:open]]// //[[CL:Glossary:stream]]//.
+The consequences are undefined if at any time the //[[CL:Glossary:value]]// of any of these //[[CL:Glossary:variables]]// is not an //[[CL:Glossary:open]]// //[[CL:Glossary:stream]]//.
 
-\DefineFigure{StandardizedStreamVars}
-\tablefigtwo{Standardized Stream Variables}{Glossary Term}{Variable Name}{
+\DefineFigure{StandardizedStreamVars} \tablefigtwo{Standardized Stream Variables}{Glossary Term}{Variable Name}{
  //[[CL:Glossary:debug I/O]]//       & \varref{*debug-io*}        \cr
  //[[CL:Glossary:error output]]//    & \varref{*error-output*}    \cr
  //[[CL:Glossary:query I/O]]//       & \varref{*query-io*}        \cr
  //[[CL:Glossary:standard input]]//  & \varref{*standard-input*}  \cr
  //[[CL:Glossary:standard output]]// & \varref{*standard-output*} \cr
  //[[CL:Glossary:terminal I/O]]//    & \varref{*terminal-io*}     \cr
- //[[CL:Glossary:trace output]]//    & \varref{*trace-output*}    \cr
-}
+ //[[CL:Glossary:trace output]]//    & \varref{*trace-output*}    \cr }
 
 Note that, by convention, //[[CL:Glossary:standardized]]// //[[CL:Glossary:stream variables]]// have names 
     ending in ``\f{-input*}''  if they must be //[[CL:Glossary:input]]// //[[CL:Glossary:streams]]//,
     ending in ``\f{-output*}'' if they must be //[[CL:Glossary:output]]// //[[CL:Glossary:streams]]//,
  or ending in ``\f{-io*}''     if they must be //[[CL:Glossary:bidirectional]]// //[[CL:Glossary:streams]]//.
 
-User programs may //[[CL:Glossary:assign]]// or //[[CL:Glossary:bind]]// any //[[CL:Glossary:standardized]]// //[[CL:Glossary:stream variable]]//
-except \varref{*terminal-io*}.
+User programs may //[[CL:Glossary:assign]]// or //[[CL:Glossary:bind]]// any //[[CL:Glossary:standardized]]// //[[CL:Glossary:stream variable]]// except \varref{*terminal-io*}.
 
 \endsubSection%{Stream Variables}
 
-\beginsubSection{Stream Arguments to Standardized Functions}
-\DefineSection{StreamArgsToStandardizedFns}
+\beginsubSection{Stream Arguments to Standardized Functions} \DefineSection{StreamArgsToStandardizedFns}
 
+The //[[CL:Glossary:operators]]// in \thenextfigure\ accept //[[CL:Glossary:stream]]// //[[CL:Glossary:arguments]]// that might be either //[[CL:Glossary:open]]// or //[[CL:Glossary:closed]]// //[[CL:Glossary:streams]]//.
 
-The //[[CL:Glossary:operators]]// in \thenextfigure\ accept //[[CL:Glossary:stream]]// //[[CL:Glossary:arguments]]// that
-might be either //[[CL:Glossary:open]]// or //[[CL:Glossary:closed]]// //[[CL:Glossary:streams]]//.
+\DefineFigure{OpenOrClosedStreamOps} \displaythree{Operators that accept either Open or Closed Streams}{ broadcast-stream-streams&file-author&pathnamep\cr close&file-namestring&probe-file\cr compile-file&file-write-date&rename-file\cr compile-file-pathname&host-namestring&streamp\cr concatenated-stream-streams&load&synonym-stream-symbol\cr delete-file&logical-pathname&translate-logical-pathname\cr directory&merge-pathnames&translate-pathname\cr directory-namestring&namestring&truename\cr dribble&open&two-way-stream-input-stream\cr echo-stream-input-stream&open-stream-p&two-way-stream-output-stream\cr echo-stream-ouput-stream&parse-namestring&wild-pathname-p\cr ed&pathname&with-open-file\cr enough-namestring&pathname-match-p&\cr }
 
-\DefineFigure{OpenOrClosedStreamOps}
-\displaythree{Operators that accept either Open or Closed Streams}{
-broadcast-stream-streams&file-author&pathnamep\cr
-close&file-namestring&probe-file\cr
-compile-file&file-write-date&rename-file\cr
-compile-file-pathname&host-namestring&streamp\cr
-concatenated-stream-streams&load&synonym-stream-symbol\cr
-delete-file&logical-pathname&translate-logical-pathname\cr
-directory&merge-pathnames&translate-pathname\cr
-directory-namestring&namestring&truename\cr
-dribble&open&two-way-stream-input-stream\cr
-echo-stream-input-stream&open-stream-p&two-way-stream-output-stream\cr
-echo-stream-ouput-stream&parse-namestring&wild-pathname-p\cr
-ed&pathname&with-open-file\cr
-enough-namestring&pathname-match-p&\cr
-}
+The //[[CL:Glossary:operators]]// in \thenextfigure\ accept //[[CL:Glossary:stream]]// //[[CL:Glossary:arguments]]// that must be //[[CL:Glossary:open]]// //[[CL:Glossary:streams]]//.
 
-
-The //[[CL:Glossary:operators]]// in \thenextfigure\ accept //[[CL:Glossary:stream]]// //[[CL:Glossary:arguments]]// that
-must be //[[CL:Glossary:open]]// //[[CL:Glossary:streams]]//.
-
-\displaythree{Operators that accept Open Streams only}{
-clear-input&output-stream-p&read-char-no-hang\cr
-clear-output&peek-char&read-delimited-list\cr
-file-length&pprint&read-line\cr
-file-position&pprint-fill&read-preserving-whitespace\cr
-file-string-length&pprint-indent&stream-element-type\cr
-finish-output&pprint-linear&stream-external-format\cr
-force-output&pprint-logical-block&terpri\cr
-format&pprint-newline&unread-char\cr
-fresh-line&pprint-tab&with-open-stream\cr
-get-output-stream-string&pprint-tabular&write\cr
-input-stream-p&prin1&write-byte\cr
-interactive-stream-p&princ&write-char\cr
-listen&print&write-line\cr
-make-broadcast-stream&print-object&write-string\cr
-make-concatenated-stream&print-unreadable-object&y-or-n-p\cr
-make-echo-stream&read&yes-or-no-p\cr
-make-synonym-stream&read-byte&\cr
-make-two-way-stream&read-char&\cr
-}
- 
-\endsubSection%{Stream Arguments to Standardized Functions}
+\displaythree{Operators that accept Open Streams only}{ clear-input&output-stream-p&read-char-no-hang\cr clear-output&peek-char&read-delimited-list\cr file-length&pprint&read-line\cr file-position&pprint-fill&read-preserving-whitespace\cr file-string-length&pprint-indent&stream-element-type\cr finish-output&pprint-linear&stream-external-format\cr force-output&pprint-logical-block&terpri\cr format&pprint-newline&unread-char\cr fresh-line&pprint-tab&with-open-stream\cr get-output-stream-string&pprint-tabular&write\cr input-stream-p&prin1&write-byte\cr interactive-stream-p&princ&write-char\cr listen&print&write-line\cr make-broadcast-stream&print-object&write-string\cr make-concatenated-stream&print-unreadable-object&y-or-n-p\cr make-echo-stream&read&yes-or-no-p\cr make-synonym-stream&read-byte&\cr make-two-way-stream&read-char&\cr }
+  \endsubSection%{Stream Arguments to Standardized Functions}
 
 \beginsubSection{Restrictions on Composite Streams}
 
+The consequences are undefined if any //[[CL:Glossary:component]]// of a //[[CL:Glossary:composite stream]]// is //[[CL:Glossary:closed]]// before the //[[CL:Glossary:composite stream]]// is //[[CL:Glossary:closed]]//.
 
-
-The consequences are undefined if any //[[CL:Glossary:component]]// of a //[[CL:Glossary:composite stream]]//
-is //[[CL:Glossary:closed]]// before the //[[CL:Glossary:composite stream]]// is //[[CL:Glossary:closed]]//.
-
-The consequences are undefined if the //[[CL:Glossary:synonym stream symbol]]// is not //[[CL:Glossary:bound]]//
-to an //[[CL:Glossary:open]]// //[[CL:Glossary:stream]]// from the time of the //[[CL:Glossary:synonym stream]]//'s creation
-until the time it is //[[CL:Glossary:closed]]//.
+The consequences are undefined if the //[[CL:Glossary:synonym stream symbol]]// is not //[[CL:Glossary:bound]]// to an //[[CL:Glossary:open]]// //[[CL:Glossary:stream]]// from the time of the //[[CL:Glossary:synonym stream]]//'s creation until the time it is //[[CL:Glossary:closed]]//.
 
 \endsubSection%{Restrictions on Composite Streams}

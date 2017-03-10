@@ -1,168 +1,48 @@
 
 
+While the \CLOS\ is general enough to describe all //[[CL:Glossary:standardized]]// //[[CL:Glossary:classes]]// (including, for example, \typeref{number}, \typeref{hash-table}, and \typeref{symbol}), \thenextfigure\ contains a list of //[[CL:Glossary:classes]]// that are especially relevant to understanding the \CLOS.
 
-While the \CLOS\ is general enough to describe all //[[CL:Glossary:standardized]]// //[[CL:Glossary:classes]]//
-(including, for example, \typeref{number}, \typeref{hash-table}, and
-\typeref{symbol}), \thenextfigure\ contains a list of //[[CL:Glossary:classes]]// that are
-especially relevant to understanding the \CLOS.
-
-\DefineFigure{ObjectSystemClasses}
-\displaythree{Object System Classes}{
-built-in-class&method-combination&standard-object\cr
-class&standard-class&structure-class\cr
-generic-function&standard-generic-function&structure-object\cr
-method&standard-method&\cr
-}
+\DefineFigure{ObjectSystemClasses} \displaythree{Object System Classes}{ built-in-class&method-combination&standard-object\cr class&standard-class&structure-class\cr generic-function&standard-generic-function&structure-object\cr method&standard-method&\cr }
 
 \beginsubSection{Introduction to Classes}
 
-A //[[CL:Glossary:class]]// is an //[[CL:Glossary:object]]// that determines the structure and behavior 
-of a set of other //[[CL:Glossary:objects]]//, which are called its \newtermidx{instances}{instance}.   
+A //[[CL:Glossary:class]]// is an //[[CL:Glossary:object]]// that determines the structure and behavior  of a set of other //[[CL:Glossary:objects]]//, which are called its \newtermidx{instances}{instance}.   
 
-A //[[CL:Glossary:class]]// can inherit structure and behavior from other //[[CL:Glossary:classes]]//.
-A //[[CL:Glossary:class]]// whose definition refers to other //[[CL:Glossary:classes]]// for the purpose 
-of inheriting from them is said to be a //[[CL:Glossary:subclass]]// of each of
-those //[[CL:Glossary:classes]]//. The //[[CL:Glossary:classes]]// that are designated for purposes of
-inheritance are said to be //[[CL:Glossary:superclasses]]// of the inheriting //[[CL:Glossary:class]]//.
-                                              
-A //[[CL:Glossary:class]]// can have a //[[CL:Glossary:name]]//. The //[[CL:Glossary:function]]// **[[CL:Functions:class-name]]** 
-takes a //[[CL:Glossary:class]]// //[[CL:Glossary:object]]// and returns its //[[CL:Glossary:name]]//. 
-The //[[CL:Glossary:name]]// of an anonymous //[[CL:Glossary:class]]// is \nil.  A //[[CL:Glossary:symbol]]// 
-can //[[CL:Glossary:name]]// a //[[CL:Glossary:class]]//. The //[[CL:Glossary:function]]// **[[CL:Functions:find-class]]** takes a
-//[[CL:Glossary:symbol]]// and returns the //[[CL:Glossary:class]]// that the //[[CL:Glossary:symbol]]// names.
-A //[[CL:Glossary:class]]// has a //[[CL:Glossary:proper name]]// if the //[[CL:Glossary:name]]// is a //[[CL:Glossary:symbol]]//
-and if the //[[CL:Glossary:name]]// of the //[[CL:Glossary:class]]// names that //[[CL:Glossary:class]]//.
-That is, a //[[CL:Glossary:class]]//~$C$ has the //[[CL:Glossary:proper name]]//~$S$ if $S=$
-\f{(class-name $C$)} and $C=$ \f{(find-class $S$)}.
-Notice that it is possible for 
-\f{(find-class $S\sub 1$)} $=$ \f{(find-class $S\sub 2$)}
-and $S\sub 1\neq S\sub 2$.
-If $C=$ \f{(find-class $S$)}, we say that $C$ is the //[[CL:Glossary:class]]// //[[CL:Glossary:named]]// $S$.
+A //[[CL:Glossary:class]]// can inherit structure and behavior from other //[[CL:Glossary:classes]]//. A //[[CL:Glossary:class]]// whose definition refers to other //[[CL:Glossary:classes]]// for the purpose  of inheriting from them is said to be a //[[CL:Glossary:subclass]]// of each of those //[[CL:Glossary:classes]]//. The //[[CL:Glossary:classes]]// that are designated for purposes of inheritance are said to be //[[CL:Glossary:superclasses]]// of the inheriting //[[CL:Glossary:class]]//.
+                                               A //[[CL:Glossary:class]]// can have a //[[CL:Glossary:name]]//. The //[[CL:Glossary:function]]// **[[CL:Functions:class-name]]**  takes a //[[CL:Glossary:class]]// //[[CL:Glossary:object]]// and returns its //[[CL:Glossary:name]]//.  The //[[CL:Glossary:name]]// of an anonymous //[[CL:Glossary:class]]// is \nil.  A //[[CL:Glossary:symbol]]//  can //[[CL:Glossary:name]]// a //[[CL:Glossary:class]]//. The //[[CL:Glossary:function]]// **[[CL:Functions:find-class]]** takes a //[[CL:Glossary:symbol]]// and returns the //[[CL:Glossary:class]]// that the //[[CL:Glossary:symbol]]// names. A //[[CL:Glossary:class]]// has a //[[CL:Glossary:proper name]]// if the //[[CL:Glossary:name]]// is a //[[CL:Glossary:symbol]]// and if the //[[CL:Glossary:name]]// of the //[[CL:Glossary:class]]// names that //[[CL:Glossary:class]]//. That is, a //[[CL:Glossary:class]]//~$C$ has the //[[CL:Glossary:proper name]]//~$S$ if $S=$ \f{(class-name $C$)} and $C=$ \f{(find-class $S$)}. Notice that it is possible for  \f{(find-class $S\sub 1$)} $=$ \f{(find-class $S\sub 2$)} and $S\sub 1\neq S\sub 2$. If $C=$ \f{(find-class $S$)}, we say that $C$ is the //[[CL:Glossary:class]]// //[[CL:Glossary:named]]// $S$.
 
-A //[[CL:Glossary:class]]// $C\sub{1}$ is 
-a //[[CL:Glossary:direct superclass]]// of a //[[CL:Glossary:class]]// $C\sub{2}$
-if $C\sub{2}$ explicitly designates $C\sub{1}$ 
-as a //[[CL:Glossary:superclass]]// in its definition.
-In this case $C\sub{2}$ is a //[[CL:Glossary:direct subclass]]// of $C\sub{1}$.
-A //[[CL:Glossary:class]]// $C\sub{n}$ is a //[[CL:Glossary:superclass]]// of 
-a //[[CL:Glossary:class]]// $C\sub{1}$ if there exists a series of
-//[[CL:Glossary:classes]]// $C\sub{2},\ldots,C\sub{n-1}$ such that 
-$C\sub{i+1}$ is a //[[CL:Glossary:direct superclass]]// of $C\sub{i}$ for $1 \leq i<n$.
-In this case, $C\sub{1}$ is a //[[CL:Glossary:subclass]]// of $C\sub{n}$.
-A //[[CL:Glossary:class]]// is considered neither a //[[CL:Glossary:superclass]]// nor a //[[CL:Glossary:subclass]]// of itself.
-That is, if $C\sub{1}$ is a //[[CL:Glossary:superclass]]// of $C\sub{2}$, 
-then $C\sub{1} \neq C\sub{2}$.
-The set of //[[CL:Glossary:classes]]// consisting of some given //[[CL:Glossary:class]]// $C$ 
-along with all of its //[[CL:Glossary:superclasses]]// is called ``$C$ and its superclasses.''
+A //[[CL:Glossary:class]]// $C\sub{1}$ is  a //[[CL:Glossary:direct superclass]]// of a //[[CL:Glossary:class]]// $C\sub{2}$ if $C\sub{2}$ explicitly designates $C\sub{1}$  as a //[[CL:Glossary:superclass]]// in its definition. In this case $C\sub{2}$ is a //[[CL:Glossary:direct subclass]]// of $C\sub{1}$. A //[[CL:Glossary:class]]// $C\sub{n}$ is a //[[CL:Glossary:superclass]]// of  a //[[CL:Glossary:class]]// $C\sub{1}$ if there exists a series of //[[CL:Glossary:classes]]// $C\sub{2},\ldots,C\sub{n-1}$ such that  $C\sub{i+1}$ is a //[[CL:Glossary:direct superclass]]// of $C\sub{i}$ for $1 \leq i<n$. In this case, $C\sub{1}$ is a //[[CL:Glossary:subclass]]// of $C\sub{n}$. A //[[CL:Glossary:class]]// is considered neither a //[[CL:Glossary:superclass]]// nor a //[[CL:Glossary:subclass]]// of itself. That is, if $C\sub{1}$ is a //[[CL:Glossary:superclass]]// of $C\sub{2}$,  then $C\sub{1} \neq C\sub{2}$. The set of //[[CL:Glossary:classes]]// consisting of some given //[[CL:Glossary:class]]// $C$  along with all of its //[[CL:Glossary:superclasses]]// is called ``$C$ and its superclasses.''
 
-Each //[[CL:Glossary:class]]// has a //[[CL:Glossary:class precedence list]]//,
-which is a total ordering on the set of the given //[[CL:Glossary:class]]// and its //[[CL:Glossary:superclasses]]//.
-The total ordering is expressed as a list ordered from most specific to least specific.
-The //[[CL:Glossary:class precedence list]]// is used in several ways.  In general, more
-specific //[[CL:Glossary:classes]]// can //[[CL:Glossary:shadow]]//\meaning{1} features that would
-otherwise be inherited from less specific //[[CL:Glossary:classes]]//.
-The //[[CL:Glossary:method]]// selection and combination process uses 
-the //[[CL:Glossary:class precedence list]]// to order //[[CL:Glossary:methods]]// 
-from most specific to least specific. 
- 
-When a //[[CL:Glossary:class]]// is defined, the order in which its direct //[[CL:Glossary:superclasses]]//
-are mentioned in the defining form is important.  Each //[[CL:Glossary:class]]// has a
-//[[CL:Glossary:local precedence order]]//, which is a //[[CL:Glossary:list]]// consisting of the
-//[[CL:Glossary:class]]// followed by its //[[CL:Glossary:direct superclasses]]// in the order mentioned
-in the defining //[[CL:Glossary:form]]//.
+Each //[[CL:Glossary:class]]// has a //[[CL:Glossary:class precedence list]]//, which is a total ordering on the set of the given //[[CL:Glossary:class]]// and its //[[CL:Glossary:superclasses]]//. The total ordering is expressed as a list ordered from most specific to least specific. The //[[CL:Glossary:class precedence list]]// is used in several ways.  In general, more specific //[[CL:Glossary:classes]]// can //[[CL:Glossary:shadow]]//\meaning{1} features that would otherwise be inherited from less specific //[[CL:Glossary:classes]]//. The //[[CL:Glossary:method]]// selection and combination process uses  the //[[CL:Glossary:class precedence list]]// to order //[[CL:Glossary:methods]]//  from most specific to least specific. 
+  When a //[[CL:Glossary:class]]// is defined, the order in which its direct //[[CL:Glossary:superclasses]]// are mentioned in the defining form is important.  Each //[[CL:Glossary:class]]// has a //[[CL:Glossary:local precedence order]]//, which is a //[[CL:Glossary:list]]// consisting of the //[[CL:Glossary:class]]// followed by its //[[CL:Glossary:direct superclasses]]// in the order mentioned in the defining //[[CL:Glossary:form]]//.
 
-A //[[CL:Glossary:class precedence list]]// is always consistent with the
-//[[CL:Glossary:local precedence order]]// of each //[[CL:Glossary:class]]// in the list.  
-The //[[CL:Glossary:classes]]// in each //[[CL:Glossary:local precedence order]]// appear
-within the //[[CL:Glossary:class precedence list]]// in the same order.  
-If the //[[CL:Glossary:local precedence orders]]// are inconsistent with each other, 
-no //[[CL:Glossary:class precedence list]]// can be constructed, and an error is signaled.
-The //[[CL:Glossary:class precedence list]]// and its computation is discussed
-in \secref\DeterminingtheCPL.
+A //[[CL:Glossary:class precedence list]]// is always consistent with the //[[CL:Glossary:local precedence order]]// of each //[[CL:Glossary:class]]// in the list.   The //[[CL:Glossary:classes]]// in each //[[CL:Glossary:local precedence order]]// appear within the //[[CL:Glossary:class precedence list]]// in the same order.   If the //[[CL:Glossary:local precedence orders]]// are inconsistent with each other,  no //[[CL:Glossary:class precedence list]]// can be constructed, and an error is signaled. The //[[CL:Glossary:class precedence list]]// and its computation is discussed in \secref\DeterminingtheCPL.
 
-//[[CL:Glossary:classes]]// are organized into a directed acyclic graph.
-There are two distinguished //[[CL:Glossary:classes]]//, named \typeref{t} and \typeref{standard-object}.
-The //[[CL:Glossary:class]]// named \typeref{t} has no //[[CL:Glossary:superclasses]]//. 
-It is a //[[CL:Glossary:superclass]]// of every //[[CL:Glossary:class]]// except itself.  
-The //[[CL:Glossary:class]]// named \typeref{standard-object} is an //[[CL:Glossary:instance]]// of 
-\theclass{standard-class} and is a //[[CL:Glossary:superclass]]// of
-every //[[CL:Glossary:class]]// that is an //[[CL:Glossary:instance]]// of \theclass{standard-class} except itself.
+//[[CL:Glossary:classes]]// are organized into a directed acyclic graph. There are two distinguished //[[CL:Glossary:classes]]//, named \typeref{t} and \typeref{standard-object}. The //[[CL:Glossary:class]]// named \typeref{t} has no //[[CL:Glossary:superclasses]]//.  It is a //[[CL:Glossary:superclass]]// of every //[[CL:Glossary:class]]// except itself.   The //[[CL:Glossary:class]]// named \typeref{standard-object} is an //[[CL:Glossary:instance]]// of  \theclass{standard-class} and is a //[[CL:Glossary:superclass]]// of every //[[CL:Glossary:class]]// that is an //[[CL:Glossary:instance]]// of \theclass{standard-class} except itself.
 
-\reviewer{Barmar: This or something like it needs to be said in the introduction.}%!!!
-There is a mapping from the object system //[[CL:Glossary:class]]// space into
-the //[[CL:Glossary:type]]// space.  Many of the standard //[[CL:Glossary:types]]// specified 
-in this document have a corresponding //[[CL:Glossary:class]]// that has the same 
-//[[CL:Glossary:name]]// as the //[[CL:Glossary:type]]//. Some //[[CL:Glossary:types]]// do not have a
-corresponding //[[CL:Glossary:class]]//. The integration of the //[[CL:Glossary:type]]// and //[[CL:Glossary:class]]//
-systems is discussed in \secref\IntegratingTypesAndClasses.
+\reviewer{Barmar: This or something like it needs to be said in the introduction.}%!!! There is a mapping from the object system //[[CL:Glossary:class]]// space into the //[[CL:Glossary:type]]// space.  Many of the standard //[[CL:Glossary:types]]// specified  in this document have a corresponding //[[CL:Glossary:class]]// that has the same  //[[CL:Glossary:name]]// as the //[[CL:Glossary:type]]//. Some //[[CL:Glossary:types]]// do not have a corresponding //[[CL:Glossary:class]]//. The integration of the //[[CL:Glossary:type]]// and //[[CL:Glossary:class]]// systems is discussed in \secref\IntegratingTypesAndClasses.
 
-//[[CL:Glossary:Classes]]// are represented by //[[CL:Glossary:objects]]// that are themselves
-//[[CL:Glossary:instances]]// of //[[CL:Glossary:classes]]//. 
-The //[[CL:Glossary:class]]// of the //[[CL:Glossary:class]]// of an //[[CL:Glossary:object]]// is termed
-the //[[CL:Glossary:metaclass]]// of that //[[CL:Glossary:object]]//. When no misinterpretation is
-possible, the term //[[CL:Glossary:metaclass]]// is used to refer to a //[[CL:Glossary:class]]//
-that has //[[CL:Glossary:instances]]// that are themselves //[[CL:Glossary:classes]]//. The //[[CL:Glossary:metaclass]]//
-determines the form of inheritance used by the //[[CL:Glossary:classes]]// that are its
-//[[CL:Glossary:instances]]// and the representation of the //[[CL:Glossary:instances]]// of those //[[CL:Glossary:classes]]//.
-The \CLOS\ provides a default //[[CL:Glossary:metaclass]]//, \typeref{standard-class}, that is
-appropriate for most programs.
+//[[CL:Glossary:Classes]]// are represented by //[[CL:Glossary:objects]]// that are themselves //[[CL:Glossary:instances]]// of //[[CL:Glossary:classes]]//.  The //[[CL:Glossary:class]]// of the //[[CL:Glossary:class]]// of an //[[CL:Glossary:object]]// is termed the //[[CL:Glossary:metaclass]]// of that //[[CL:Glossary:object]]//. When no misinterpretation is possible, the term //[[CL:Glossary:metaclass]]// is used to refer to a //[[CL:Glossary:class]]// that has //[[CL:Glossary:instances]]// that are themselves //[[CL:Glossary:classes]]//. The //[[CL:Glossary:metaclass]]// determines the form of inheritance used by the //[[CL:Glossary:classes]]// that are its //[[CL:Glossary:instances]]// and the representation of the //[[CL:Glossary:instances]]// of those //[[CL:Glossary:classes]]//. The \CLOS\ provides a default //[[CL:Glossary:metaclass]]//, \typeref{standard-class}, that is appropriate for most programs.
 
-
-
-Except where otherwise specified, all //[[CL:Glossary:classes]]// mentioned in this
-standard are //[[CL:Glossary:instances]]// of \theclass{standard-class},
-all //[[CL:Glossary:generic functions]]// are //[[CL:Glossary:instances]]// 
-of \theclass{standard-generic-function},
-and all //[[CL:Glossary:methods]]// are //[[CL:Glossary:instances]]// of \theclass{standard-method}.
-
+Except where otherwise specified, all //[[CL:Glossary:classes]]// mentioned in this standard are //[[CL:Glossary:instances]]// of \theclass{standard-class}, all //[[CL:Glossary:generic functions]]// are //[[CL:Glossary:instances]]//  of \theclass{standard-generic-function}, and all //[[CL:Glossary:methods]]// are //[[CL:Glossary:instances]]// of \theclass{standard-method}.
 
 \endsubSection%{Classes}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 \beginsubsubsection{Standard Metaclasses}
 
-The \CLOS\ provides a number of predefined //[[CL:Glossary:metaclasses]]//. 
-These include the //[[CL:Glossary:classes]]// \typeref{standard-class}, 
-\typeref{built-in-class}, and \typeref{structure-class}:
+The \CLOS\ provides a number of predefined //[[CL:Glossary:metaclasses]]//.  These include the //[[CL:Glossary:classes]]// \typeref{standard-class},  \typeref{built-in-class}, and \typeref{structure-class}:
 
 \beginlist
 
-\itemitem{\bull}
-\Theclass{standard-class} is the default //[[CL:Glossary:class]]// of 
-//[[CL:Glossary:classes]]// defined by \macref{defclass}.
-                        
-\itemitem{\bull} \Theclass{built-in-class} is the //[[CL:Glossary:class]]// whose
-//[[CL:Glossary:instances]]// are //[[CL:Glossary:classes]]// that have special implementations with
-restricted capabilities.  Any //[[CL:Glossary:class]]// that corresponds to a standard
-//[[CL:Glossary:type]]// might be an //[[CL:Glossary:instance]]// of \typeref{built-in-class}.
-The predefined //[[CL:Glossary:type]]// specifiers that are required to have
-corresponding //[[CL:Glossary:classes]]// are listed in \figref\ClassTypeCorrespondence.  
-It is //[[CL:Glossary:implementation-dependent]]// whether each of these //[[CL:Glossary:classes]]// 
-is implemented as a //[[CL:Glossary:built-in class]]//.
+\itemitem{\bull} \Theclass{standard-class} is the default //[[CL:Glossary:class]]// of  //[[CL:Glossary:classes]]// defined by \macref{defclass}.
+                         \itemitem{\bull} \Theclass{built-in-class} is the //[[CL:Glossary:class]]// whose //[[CL:Glossary:instances]]// are //[[CL:Glossary:classes]]// that have special implementations with restricted capabilities.  Any //[[CL:Glossary:class]]// that corresponds to a standard //[[CL:Glossary:type]]// might be an //[[CL:Glossary:instance]]// of \typeref{built-in-class}. The predefined //[[CL:Glossary:type]]// specifiers that are required to have corresponding //[[CL:Glossary:classes]]// are listed in \figref\ClassTypeCorrespondence.   It is //[[CL:Glossary:implementation-dependent]]// whether each of these //[[CL:Glossary:classes]]//  is implemented as a //[[CL:Glossary:built-in class]]//.
 
-\itemitem{\bull}                     
-All //[[CL:Glossary:classes]]// defined by means of \macref{defstruct} are
-//[[CL:Glossary:instances]]// of \theclass{structure-class}.
-\endlist
+\itemitem{\bull}                      All //[[CL:Glossary:classes]]// defined by means of \macref{defstruct} are //[[CL:Glossary:instances]]// of \theclass{structure-class}. \endlist
 
 \endsubsubsection%{Standard Metaclasses}
 
 \beginsubSection{Defining Classes}
-           
-The macro \macref{defclass} is used to define a new named //[[CL:Glossary:class]]//.  
-
+            The macro \macref{defclass} is used to define a new named //[[CL:Glossary:class]]//.  
 
 The definition of a //[[CL:Glossary:class]]// includes:
 
@@ -183,36 +63,21 @@ The definition of a //[[CL:Glossary:class]]// includes:
   Each //[[CL:Glossary:class]]// option pertains to the //[[CL:Glossary:class]]// as a whole.  
 
 \endlist
-                                              
-The //[[CL:Glossary:slot]]// options and //[[CL:Glossary:class]]// options of 
-the \macref{defclass} form provide mechanisms for the following:
+                                               The //[[CL:Glossary:slot]]// options and //[[CL:Glossary:class]]// options of  the \macref{defclass} form provide mechanisms for the following:
 
 \beginlist
 
-\itemitem{\bull} Supplying a default initial value //[[CL:Glossary:form]]// 
-for a given //[[CL:Glossary:slot]]//.  
+\itemitem{\bull} Supplying a default initial value //[[CL:Glossary:form]]//  for a given //[[CL:Glossary:slot]]//.  
 
-\itemitem{\bull} Requesting that //[[CL:Glossary:methods]]// for //[[CL:Glossary:generic functions]]//
-be automatically generated for reading or writing //[[CL:Glossary:slots]]//. 
+\itemitem{\bull} Requesting that //[[CL:Glossary:methods]]// for //[[CL:Glossary:generic functions]]// be automatically generated for reading or writing //[[CL:Glossary:slots]]//. 
 
-\itemitem{\bull} Controlling whether a given //[[CL:Glossary:slot]]// is shared by 
-all //[[CL:Glossary:instances]]//
-of the //[[CL:Glossary:class]]// or whether each 
-//[[CL:Glossary:instance]]// of the //[[CL:Glossary:class]]// has its own //[[CL:Glossary:slot]]//.
+\itemitem{\bull} Controlling whether a given //[[CL:Glossary:slot]]// is shared by  all //[[CL:Glossary:instances]]// of the //[[CL:Glossary:class]]// or whether each  //[[CL:Glossary:instance]]// of the //[[CL:Glossary:class]]// has its own //[[CL:Glossary:slot]]//.
 
-\itemitem{\bull} Supplying a set of initialization arguments and initialization
-argument defaults to be used in //[[CL:Glossary:instance]]// creation.
+\itemitem{\bull} Supplying a set of initialization arguments and initialization argument defaults to be used in //[[CL:Glossary:instance]]// creation.
 
+\itemitem{\bull} Indicating that the //[[CL:Glossary:metaclass]]// is to be other  than the default.  The **'':metaclass''** option is reserved for future use;  an implementation can be extended to make use of the **'':metaclass''** option.
 
-
-
-\itemitem{\bull} Indicating that the //[[CL:Glossary:metaclass]]// is to be other 
-than the default.  The **'':metaclass''** option is reserved for future use; 
-an implementation can be extended to make use of the **'':metaclass''**
-option.
-
-\itemitem{\bull} Indicating the expected //[[CL:Glossary:type]]// for the value stored
-in the //[[CL:Glossary:slot]]//.
+\itemitem{\bull} Indicating the expected //[[CL:Glossary:type]]// for the value stored in the //[[CL:Glossary:slot]]//.
 
 \itemitem{\bull} Indicating the //[[CL:Glossary:documentation string]]// for the //[[CL:Glossary:slot]]//.
 
@@ -223,30 +88,12 @@ in the //[[CL:Glossary:slot]]//.
 \goodbreak
 
 \beginsubSection{Creating Instances of Classes}
-                      
-The generic function **[[CL:Functions:make-instance]]** creates and returns a new
-//[[CL:Glossary:instance]]// of a //[[CL:Glossary:class]]//.  
-The \OS\ provides several mechanisms for
-specifying how a new //[[CL:Glossary:instance]]// is to be initialized.  For example, it
-is possible to specify the initial values for //[[CL:Glossary:slots]]// in newly created
-//[[CL:Glossary:instances]]// 
-either by giving arguments to **[[CL:Functions:make-instance]]** or by
-providing default initial values.  Further initialization activities
-can be performed by //[[CL:Glossary:methods]]// written for //[[CL:Glossary:generic functions]]// 
-that are
-part of the initialization protocol.  The complete initialization
-protocol is described in \secref\ObjectCreationAndInit.
+                       The generic function **[[CL:Functions:make-instance]]** creates and returns a new //[[CL:Glossary:instance]]// of a //[[CL:Glossary:class]]//.   The \OS\ provides several mechanisms for specifying how a new //[[CL:Glossary:instance]]// is to be initialized.  For example, it is possible to specify the initial values for //[[CL:Glossary:slots]]// in newly created //[[CL:Glossary:instances]]//  either by giving arguments to **[[CL:Functions:make-instance]]** or by providing default initial values.  Further initialization activities can be performed by //[[CL:Glossary:methods]]// written for //[[CL:Glossary:generic functions]]//  that are part of the initialization protocol.  The complete initialization protocol is described in \secref\ObjectCreationAndInit.
 
 \endsubSection%{Creating Instances of Classes}
 
-\beginsubSection{Inheritance}
-\DefineSection{Inheritance}
-                                              
-A //[[CL:Glossary:class]]// can inherit //[[CL:Glossary:methods]]//, //[[CL:Glossary:slots]]//, 
-and some \macref{defclass} options from its //[[CL:Glossary:superclasses]]//.  
-Other sections describe the inheritance of //[[CL:Glossary:methods]]//, 
-the inheritance of //[[CL:Glossary:slots]]// and //[[CL:Glossary:slot]]// options, 
-and the inheritance of //[[CL:Glossary:class]]// options.
+\beginsubSection{Inheritance} \DefineSection{Inheritance}
+                                               A //[[CL:Glossary:class]]// can inherit //[[CL:Glossary:methods]]//, //[[CL:Glossary:slots]]//,  and some \macref{defclass} options from its //[[CL:Glossary:superclasses]]//.   Other sections describe the inheritance of //[[CL:Glossary:methods]]//,  the inheritance of //[[CL:Glossary:slots]]// and //[[CL:Glossary:slot]]// options,  and the inheritance of //[[CL:Glossary:class]]// options.
  
 
 \beginsubsubsection{Examples of Inheritance}
@@ -259,192 +106,63 @@ and the inheritance of //[[CL:Glossary:class]]// options.
  (defclass C2 (C1) 
      ((S1 :initform 5 :type integer)
       (S2 :allocation :instance)
-      (S3 :accessor C2-S3)))
-\endcode
+      (S3 :accessor C2-S3))) \endcode
 
-//[[CL:Glossary:Instances]]// of the class \f{C1} have a //[[CL:Glossary:local slot]]// named \f{S1},
-whose default initial value is 5.4 and
-whose //[[CL:Glossary:value]]// should always be a //[[CL:Glossary:number]]//.
-The class \f{C1} also has a //[[CL:Glossary:shared slot]]// named \f{S2}.
+//[[CL:Glossary:Instances]]// of the class \f{C1} have a //[[CL:Glossary:local slot]]// named \f{S1}, whose default initial value is 5.4 and whose //[[CL:Glossary:value]]// should always be a //[[CL:Glossary:number]]//. The class \f{C1} also has a //[[CL:Glossary:shared slot]]// named \f{S2}.
 
-There is a //[[CL:Glossary:local slot]]// named \f{S1} in //[[CL:Glossary:instances]]// of \f{C2}.
-The default initial value of \f{S1} is 5.
-The value of \f{S1} should always be of type \f{(and integer number)}.
-There are also //[[CL:Glossary:local slots]]// named \f{S2} and \f{S3} in //[[CL:Glossary:instances]]// of \f{C2}.
-The class \f{C2} has a //[[CL:Glossary:method]]// for \f{C2-S3} for reading the value of slot \f{S3};
-there is also a //[[CL:Glossary:method]]// for \f{(setf C2-S3)} that writes the value of \f{S3}.
+There is a //[[CL:Glossary:local slot]]// named \f{S1} in //[[CL:Glossary:instances]]// of \f{C2}. The default initial value of \f{S1} is 5. The value of \f{S1} should always be of type \f{(and integer number)}. There are also //[[CL:Glossary:local slots]]// named \f{S2} and \f{S3} in //[[CL:Glossary:instances]]// of \f{C2}. The class \f{C2} has a //[[CL:Glossary:method]]// for \f{C2-S3} for reading the value of slot \f{S3}; there is also a //[[CL:Glossary:method]]// for \f{(setf C2-S3)} that writes the value of \f{S3}.
 
 \endsubsubsection%{Examples of Inheritance}
 
 \beginsubsubsection{Inheritance of Class Options}
-     
-The **'':default-initargs''** class option is inherited.  The set of
-defaulted initialization arguments for a //[[CL:Glossary:class]]// is the union of the
-sets of initialization arguments supplied in
-the **'':default-initargs''** class options of the //[[CL:Glossary:class]]// and its //[[CL:Glossary:superclasses]]//.
-When more than one default initial value //[[CL:Glossary:form]]// is supplied for a given
-initialization argument, the default initial value //[[CL:Glossary:form]]// that is used
-is the one supplied by the //[[CL:Glossary:class]]// that is most specific according to
-the //[[CL:Glossary:class precedence list]]//.
+      The **'':default-initargs''** class option is inherited.  The set of defaulted initialization arguments for a //[[CL:Glossary:class]]// is the union of the sets of initialization arguments supplied in the **'':default-initargs''** class options of the //[[CL:Glossary:class]]// and its //[[CL:Glossary:superclasses]]//. When more than one default initial value //[[CL:Glossary:form]]// is supplied for a given initialization argument, the default initial value //[[CL:Glossary:form]]// that is used is the one supplied by the //[[CL:Glossary:class]]// that is most specific according to the //[[CL:Glossary:class precedence list]]//.
 
-
-If a given **'':default-initargs''** class option specifies an
-initialization argument of the same //[[CL:Glossary:name]]// more than once, an
-error \oftype{program-error} is signaled.
+If a given **'':default-initargs''** class option specifies an initialization argument of the same //[[CL:Glossary:name]]// more than once, an error \oftype{program-error} is signaled.
 
 \endsubsubsection%{Inheritance of Class Options}
 
-
 \endsubSection%{Inheritance}
 
+\beginsubSection{Determining the Class Precedence List} \DefineSection{DeterminingtheCPL}
 
-\beginsubSection{Determining the Class Precedence List}
-\DefineSection{DeterminingtheCPL}
+The \macref{defclass} form for a //[[CL:Glossary:class]]// provides a total ordering on that //[[CL:Glossary:class]]// and its direct //[[CL:Glossary:superclasses]]//.  This ordering is called the //[[CL:Glossary:local precedence order]]//.  It is an ordered list of the //[[CL:Glossary:class]]// and its direct //[[CL:Glossary:superclasses]]//. The //[[CL:Glossary:class precedence list]]// for a class $C$ is a total ordering on $C$ and its //[[CL:Glossary:superclasses]]// that is consistent with the //[[CL:Glossary:local precedence orders]]// for each of $C$ and its //[[CL:Glossary:superclasses]]//.
 
-The \macref{defclass} form for a //[[CL:Glossary:class]]// provides a total ordering
-on that //[[CL:Glossary:class]]// and its direct //[[CL:Glossary:superclasses]]//.  This ordering is
-called the //[[CL:Glossary:local precedence order]]//.  It is an ordered list of the
-//[[CL:Glossary:class]]// and its direct //[[CL:Glossary:superclasses]]//. The
-//[[CL:Glossary:class precedence list]]// for a class $C$ is a total ordering on
-$C$ and its //[[CL:Glossary:superclasses]]// that is consistent with the
-//[[CL:Glossary:local precedence orders]]// for each of $C$ and its //[[CL:Glossary:superclasses]]//.
+A //[[CL:Glossary:class]]// precedes its direct //[[CL:Glossary:superclasses]]//,  and a direct //[[CL:Glossary:superclass]]// precedes all other  direct //[[CL:Glossary:superclasses]]// specified to its right  in the //[[CL:Glossary:superclasses]]// list of the \macref{defclass} form.   For every class $C$, define $$R\sub C=\{(C,C\sub 1),(C\sub 1,C\sub 2),\ldots,(C\sub {n-1},C\sub n)\}$$ where $C\sub 1,\ldots,C\sub n$ are the direct //[[CL:Glossary:superclasses]]// of $C$ in the order in which they are mentioned in the \macref{defclass} form. These ordered pairs generate the total ordering on the class $C$ and its direct //[[CL:Glossary:superclasses]]//.
 
-A //[[CL:Glossary:class]]// precedes its direct //[[CL:Glossary:superclasses]]//, 
-and a direct //[[CL:Glossary:superclass]]// precedes all other 
-direct //[[CL:Glossary:superclasses]]// specified to its right 
-in the //[[CL:Glossary:superclasses]]// list of the \macref{defclass} form.  
-For every class $C$, define $$R\sub C=\{(C,C\sub 1),(C\sub 1,C\sub
-2),\ldots,(C\sub {n-1},C\sub n)\}$$ where $C\sub 1,\ldots,C\sub n$ are
-the direct //[[CL:Glossary:superclasses]]// of $C$ in the order in which
-they are mentioned in the \macref{defclass} form. These ordered pairs
-generate the total ordering on the class $C$ and its direct
-//[[CL:Glossary:superclasses]]//.
+Let $S\sub C$ be the set of $C$ and its //[[CL:Glossary:superclasses]]//. Let $R$ be $$R=\bigcup\sub{c\in {S\sub C}}R\sub c$$.
 
-Let $S\sub C$ be the set of $C$ and its //[[CL:Glossary:superclasses]]//. Let $R$ be
-$$R=\bigcup\sub{c\in {S\sub C}}R\sub c$$.
+\reviewer{Barmar: ``Consistent'' needs to be defined, or maybe we should say ``logically consistent''?}%!!!
 
-\reviewer{Barmar: ``Consistent'' needs to be defined, or maybe we should say
-``logically consistent''?}%!!!
+The set $R$ might or might not generate a partial ordering, depending on whether the $R\sub c$, $c\in S\sub C$, are  consistent; it is assumed that they are consistent and that $R$ generates a partial ordering. When the $R\sub c$ are not consistent, it is said that $R$ is inconsistent.
 
-The set $R$ might or might not generate a partial ordering, depending on
-whether the $R\sub c$, $c\in S\sub C$, are 
-consistent; it is assumed
-that they are consistent and that $R$ generates a partial ordering.
-When the $R\sub c$ are not consistent, it is said that $R$ is inconsistent.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-To compute the //[[CL:Glossary:class precedence list]]// for~$C$\negthinspace,
-topologically sort the elements of $S\sub C$ with respect to the
-partial ordering generated by $R$\negthinspace.  When the topological
-sort must select a //[[CL:Glossary:class]]// from a set of two or more 
-//[[CL:Glossary:classes]]//, none of
-which are preceded by other //[[CL:Glossary:classes]]// with respect to~$R$\negthinspace,
-the //[[CL:Glossary:class]]// selected is chosen deterministically, as described below.
+To compute the //[[CL:Glossary:class precedence list]]// for~$C$\negthinspace, topologically sort the elements of $S\sub C$ with respect to the partial ordering generated by $R$\negthinspace.  When the topological sort must select a //[[CL:Glossary:class]]// from a set of two or more  //[[CL:Glossary:classes]]//, none of which are preceded by other //[[CL:Glossary:classes]]// with respect to~$R$\negthinspace, the //[[CL:Glossary:class]]// selected is chosen deterministically, as described below.
 
 If $R$ is inconsistent, an error is signaled.
-
 
 \goodbreak
 
 \beginsubsubsection{Topological Sorting}
 
+Topological sorting proceeds by finding a class $C$ in~$S\sub C$ such that no other //[[CL:Glossary:class]]// precedes that element according to the elements in~$R$\negthinspace.  The class $C$ is placed first in the result. Remove $C$ from $S\sub C$, and remove all pairs of the form $(C,D)$, $D\in S\sub C$, from $R$\negthinspace. Repeat the process, adding //[[CL:Glossary:classes]]// with no predecessors to the end of the result.  Stop when no element can be found that has no predecessor.
 
+If $S\sub C$ is not empty and the process has stopped, the set $R$ is inconsistent. If every //[[CL:Glossary:class]]// in the finite set of  //[[CL:Glossary:classes]]// is preceded by another, then $R$ contains a loop. That is, there is a chain of classes $C\sub 1,\ldots,C\sub n$ such that $C\sub i$ precedes $C\sub{i+1}$, $1\leq i<n$, and $C\sub n$ precedes $C\sub 1$.
 
+Sometimes there are several //[[CL:Glossary:classes]]// from $S\sub C$ with no predecessors.  In this case select the one that has a direct //[[CL:Glossary:subclass]]// rightmost in the //[[CL:Glossary:class precedence list]]// computed so far.
 
+(If there is no such candidate //[[CL:Glossary:class]]//, $R$ does not generate  a partial ordering---the $R\sub c$, $c\in S\sub C$, are inconsistent.)
 
+In more precise terms, let $\{N\sub 1,\ldots,N\sub m\}$, $m\geq 2$, be the //[[CL:Glossary:classes]]// from $S\sub C$ with no predecessors.  Let $(C\sub 1\ldots C\sub n)$, $n\geq 1$, be the //[[CL:Glossary:class precedence list]]// constructed so far.  $C\sub 1$ is the most specific //[[CL:Glossary:class]]//, and $C\sub n$ is the least specific.  Let $1\leq j\leq n$ be the largest number such that there exists an $i$ where $1\leq i\leq m$ and $N\sub i$ is a direct //[[CL:Glossary:superclass]]// of $C\sub j$; $N\sub i$ is placed next.
 
+The effect of this rule for selecting from a set of //[[CL:Glossary:classes]]// with no predecessors is that the //[[CL:Glossary:classes]]// in a simple //[[CL:Glossary:superclass]]// chain are adjacent in the //[[CL:Glossary:class precedence list]]// and that //[[CL:Glossary:classes]]// in each relatively separated subgraph are adjacent in the //[[CL:Glossary:class precedence list]]//. For example, let $T\sub 1$ and $T\sub 2$ be subgraphs whose only element in common is the class $J$\negthinspace.
 
-
-Topological sorting proceeds by finding a class $C$ in~$S\sub C$ such
-that no other //[[CL:Glossary:class]]// precedes that element according to the elements
-in~$R$\negthinspace.  The class $C$ is placed first in the result.
-Remove $C$ from $S\sub C$, and remove all pairs of the form $(C,D)$,
-$D\in S\sub C$, from $R$\negthinspace. Repeat the process, adding
-//[[CL:Glossary:classes]]// with no predecessors to the end of the result.  Stop when no
-element can be found that has no predecessor.
-
-If $S\sub C$ is not empty and the process has stopped, the set $R$ is
-inconsistent. If every //[[CL:Glossary:class]]// in the finite set of 
-//[[CL:Glossary:classes]]// is preceded
-by another, then $R$ contains a loop. That is, there is a chain of
-classes $C\sub 1,\ldots,C\sub n$ such that $C\sub i$ precedes
-$C\sub{i+1}$, $1\leq i<n$, and $C\sub n$ precedes $C\sub 1$.
-
-Sometimes there are several //[[CL:Glossary:classes]]// from $S\sub C$ with no
-predecessors.  In this case select the one that has a direct
-//[[CL:Glossary:subclass]]// rightmost in the //[[CL:Glossary:class precedence list]]// computed so far.
-
-
-
-
-(If there is no such candidate //[[CL:Glossary:class]]//, $R$ does not generate 
-a partial ordering---the $R\sub c$, $c\in S\sub C$, are inconsistent.)
-
-In more precise terms, let $\{N\sub 1,\ldots,N\sub m\}$, $m\geq 2$, be
-the //[[CL:Glossary:classes]]// from $S\sub C$ with no predecessors.  Let $(C\sub
-1\ldots C\sub n)$, $n\geq 1$, be the //[[CL:Glossary:class precedence list]]//
-constructed so far.  $C\sub 1$ is the most specific //[[CL:Glossary:class]]//, and $C\sub
-n$ is the least specific.  Let $1\leq j\leq n$ be the largest number
-such that there exists an $i$ where $1\leq i\leq m$ and $N\sub i$
-is a direct //[[CL:Glossary:superclass]]// of $C\sub j$; $N\sub i$ is placed next.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-The effect of this rule for selecting from a set of //[[CL:Glossary:classes]]// with no
-predecessors is that the //[[CL:Glossary:classes]]// in a simple //[[CL:Glossary:superclass]]// chain are
-adjacent in the //[[CL:Glossary:class precedence list]]// and that //[[CL:Glossary:classes]]// in each
-relatively separated subgraph are adjacent in the //[[CL:Glossary:class precedence list]]//.
-For example, let $T\sub 1$ and $T\sub 2$ be subgraphs whose only
-element in common is the class $J$\negthinspace.
-
-
-
-
-Suppose that no superclass of $J$ appears in either $T\sub 1$ or $T\sub 2$,
-and that $J$ is in the superclass chain of every class in both $T\sub 1$ and $T\sub 2$.
-    Let $C\sub 1$ be the bottom of $T\sub 1$; 
-and let $C\sub 2$ be the bottom of $T\sub 2$.
-Suppose $C$ is a //[[CL:Glossary:class]]// whose direct //[[CL:Glossary:superclasses]]//
-are $C\sub 1$ and $C\sub 2$ in that order, then the //[[CL:Glossary:class precedence list]]//
-for $C$ starts with $C$ and is followed by
-all //[[CL:Glossary:classes]]// in $T\sub 1$ except $J$. 
-All the //[[CL:Glossary:classes]]// of $T\sub 2$ are next.
-The //[[CL:Glossary:class]]// $J$ and its //[[CL:Glossary:superclasses]]// appear last.
+Suppose that no superclass of $J$ appears in either $T\sub 1$ or $T\sub 2$, and that $J$ is in the superclass chain of every class in both $T\sub 1$ and $T\sub 2$.
+    Let $C\sub 1$ be the bottom of $T\sub 1$;  and let $C\sub 2$ be the bottom of $T\sub 2$. Suppose $C$ is a //[[CL:Glossary:class]]// whose direct //[[CL:Glossary:superclasses]]// are $C\sub 1$ and $C\sub 2$ in that order, then the //[[CL:Glossary:class precedence list]]// for $C$ starts with $C$ and is followed by all //[[CL:Glossary:classes]]// in $T\sub 1$ except $J$.  All the //[[CL:Glossary:classes]]// of $T\sub 2$ are next. The //[[CL:Glossary:class]]// $J$ and its //[[CL:Glossary:superclasses]]// appear last.
 
 \endsubsubsection%{Topological Sorting}
 
 \beginsubsubsection{Examples of Class Precedence List Determination}
 
-This example determines a //[[CL:Glossary:class precedence list]]// for the
-class \f{pie}.  The following //[[CL:Glossary:classes]]// are defined:
+This example determines a //[[CL:Glossary:class precedence list]]// for the class \f{pie}.  The following //[[CL:Glossary:classes]]// are defined:
 
 \code
  (defclass pie (apple cinnamon) ())
@@ -457,67 +175,28 @@ class \f{pie}.  The following //[[CL:Glossary:classes]]// are defined:
 
  (defclass spice (food) ())
 
- (defclass food () ())
-\endcode
+ (defclass food () ()) \endcode
 
+The set $S\sub{pie}$~$=$ $\{${\tt pie, apple, cinnamon, fruit, spice, food, standard-object, t}$\}$. The set $R$~$=$ $\{${\tt (pie, apple), (apple, cinnamon), (apple, fruit), (cinnamon, spice), \hfil\break (fruit, food), (spice, food), (food, standard-object), (standard-object, t)}$\}$.
 
-The set $S\sub{pie}$~$=$ $\{${\tt pie, apple, cinnamon, fruit, spice, food,
-standard-object, t}$\}$. The set $R$~$=$ $\{${\tt (pie, apple),
-(apple, cinnamon), (apple, fruit), (cinnamon, spice), \hfil\break
-(fruit, food), (spice, food), (food, standard-object), (standard-object,
-t)}$\}$.
+The class \f{pie} is not preceded by anything, so it comes first; the result so far is {\tt (pie)}.  Remove \f{pie} from $S$ and pairs mentioning \f{pie} from $R$ to get $S$~$=$ $\{${\tt apple, cinnamon, fruit, spice, food, standard-object, t}$\}$ and $R$~$=$~$\{${\tt (apple, cinnamon), (apple, fruit), (cinnamon, spice),\hfil\break (fruit, food), (spice, food), (food, standard-object), (standard-object, t)}$\}$.
 
-The class \f{pie} is not preceded by anything, so it comes first;
-the result so far is {\tt (pie)}.  Remove \f{pie} from $S$ and pairs
-mentioning \f{pie} from $R$ to get $S$~$=$ $\{${\tt apple, cinnamon,
-fruit, spice, food, standard-object, t}$\}$ and $R$~$=$~$\{${\tt
-(apple, cinnamon), (apple, fruit), (cinnamon, spice),\hfil\break (fruit,
-food), (spice, food), (food, standard-object),
-(standard-object, t)}$\}$.
+The class \f{apple} is not preceded by anything, so it is next; the result is {\tt (pie apple)}. Removing \f{apple} and the relevant pairs results in $S$~$=$ $\{${\tt cinnamon, fruit, spice, food, standard-object, t}$\}$ and $R$~$=$ $\{${\tt (cinnamon, spice), (fruit, food), (spice, food), (food, standard-object),\hfil\break (standard-object, t)}$\}$.
 
-The class \f{apple} is not preceded by anything, so it is next; the
-result is {\tt (pie apple)}. Removing \f{apple} and the relevant
-pairs results in $S$~$=$ $\{${\tt cinnamon, fruit, spice, food,
-standard-object, t}$\}$ and $R$~$=$ $\{${\tt (cinnamon, spice),
-(fruit, food), (spice, food), (food, standard-object),\hfil\break
-(standard-object, t)}$\}$.
+The classes \f{cinnamon} and {\tt fruit} are not preceded by anything, so the one with a direct //[[CL:Glossary:subclass]]// rightmost in the  //[[CL:Glossary:class precedence list]]// computed so far goes next.  The class \f{apple} is a direct //[[CL:Glossary:subclass]]// of {\tt fruit}, and the class \f{pie} is a direct //[[CL:Glossary:subclass]]// of \f{cinnamon}.  Because \f{apple} appears to the right of \f{pie} in the //[[CL:Glossary:class precedence list]]//,  {\tt fruit} goes next, and the result so far is {\tt (pie apple fruit)}.  $S$~$=$ $\{${\tt cinnamon, spice, food, standard-object, t}$\}$; $R$~$=$ $\{${\tt (cinnamon, spice), (spice, food),\hfil\break (food, standard-object), (standard-object, t)}$\}$.
 
-The classes \f{cinnamon} and {\tt fruit} are not preceded by
-anything, so the one with a direct //[[CL:Glossary:subclass]]// rightmost in the 
-//[[CL:Glossary:class precedence list]]// computed so far goes next.  The class \f{apple} is a
-direct //[[CL:Glossary:subclass]]// of {\tt fruit}, and the class \f{pie} is a direct
-//[[CL:Glossary:subclass]]// of \f{cinnamon}.  Because \f{apple} appears to the right
-of \f{pie} in the //[[CL:Glossary:class precedence list]]//, 
-{\tt fruit} goes next, and the
-result so far is {\tt (pie apple fruit)}.  $S$~$=$ $\{${\tt cinnamon,
-spice, food, standard-object, t}$\}$; $R$~$=$ $\{${\tt (cinnamon,
-spice), (spice, food),\hfil\break (food, standard-object),
-(standard-object, t)}$\}$.
+The class \f{cinnamon} is next, giving the result so far as {\tt (pie apple fruit cinnamon)}.  At this point $S$~$=$ $\{${\tt spice, food, standard-object, t}$\}$; $R$~$=$ $\{${\tt (spice, food), (food, standard-object), (standard-object, t)}$\}$.
 
-The class \f{cinnamon} is next, giving the result so far as {\tt
-(pie apple fruit cinnamon)}.  At this point $S$~$=$ $\{${\tt spice,
-food, standard-object, t}$\}$; $R$~$=$ $\{${\tt (spice, food), (food,
-standard-object), (standard-object, t)}$\}$.
+The classes \f{spice}, \f{food}, \typeref{standard-object}, and  \typeref{t} are added in that order, and the //[[CL:Glossary:class precedence list]]//  is \f{(pie apple fruit cinnamon spice food standard-object t)}.
 
-The classes \f{spice}, \f{food}, \typeref{standard-object}, and 
-\typeref{t} are added in that order, and the //[[CL:Glossary:class precedence list]]// 
-is \f{(pie apple fruit cinnamon spice food standard-object t)}.
-
-It is possible to write a set of //[[CL:Glossary:class]]// definitions that cannot be 
-ordered.   For example: 
+It is possible to write a set of //[[CL:Glossary:class]]// definitions that cannot be  ordered.   For example: 
 
 \code
  (defclass new-class (fruit apple) ())
  
- (defclass apple (fruit) ())
-\endcode
+ (defclass apple (fruit) ()) \endcode
 
-The class \f{fruit} must precede \f{apple} 
-because the local ordering of //[[CL:Glossary:superclasses]]// must be preserved.
-The class \f{apple} must precede \f{fruit} 
-because a //[[CL:Glossary:class]]// always precedes its own //[[CL:Glossary:superclasses]]//.
-When this situation occurs, an error is signaled, as happens here
-when the system tries to compute the //[[CL:Glossary:class precedence list]]// 
+The class \f{fruit} must precede \f{apple}  because the local ordering of //[[CL:Glossary:superclasses]]// must be preserved. The class \f{apple} must precede \f{fruit}  because a //[[CL:Glossary:class]]// always precedes its own //[[CL:Glossary:superclasses]]//. When this situation occurs, an error is signaled, as happens here when the system tries to compute the //[[CL:Glossary:class precedence list]]// 
 
 of \f{new-class}.
 
@@ -530,391 +209,124 @@ The following might appear to be a conflicting set of definitions:
  
  (defclass apple () ())
  
- (defclass cinnamon () ())
-\endcode
+ (defclass cinnamon () ()) \endcode
 
-The //[[CL:Glossary:class precedence list]]// for \f{pie} is 
-\f{(pie apple cinnamon standard-object t)}.
+The //[[CL:Glossary:class precedence list]]// for \f{pie} is  \f{(pie apple cinnamon standard-object t)}.
 
-The //[[CL:Glossary:class precedence list]]// for \f{pastry} is  
-\f{(pastry cinnamon apple standard-object t)}.
+The //[[CL:Glossary:class precedence list]]// for \f{pastry} is   \f{(pastry cinnamon apple standard-object t)}.
 
-It is not a problem for \f{apple} to precede \f{cinnamon} in the
-ordering of the //[[CL:Glossary:superclasses]]// of \f{pie} but not in the ordering for
-\f{pastry}.  However, it is not possible to build a new //[[CL:Glossary:class]]// that
-has both \f{pie} and \f{pastry} as //[[CL:Glossary:superclasses]]//.
+It is not a problem for \f{apple} to precede \f{cinnamon} in the ordering of the //[[CL:Glossary:superclasses]]// of \f{pie} but not in the ordering for \f{pastry}.  However, it is not possible to build a new //[[CL:Glossary:class]]// that has both \f{pie} and \f{pastry} as //[[CL:Glossary:superclasses]]//.
 
 \endsubsubsection%{Examples of Class Precedence List Determination}
 
-\endsubSection%{Determining the Class Precedence List}
-\beginsubSection{Redefining Classes}  
-\DefineSection{ClassReDef}
+\endsubSection%{Determining the Class Precedence List} \beginsubSection{Redefining Classes}   \DefineSection{ClassReDef}
                                 
 
-A //[[CL:Glossary:class]]// that is a //[[CL:Glossary:direct instance]]// of \typeref{standard-class} can
-be redefined if the new //[[CL:Glossary:class]]// is also
+A //[[CL:Glossary:class]]// that is a //[[CL:Glossary:direct instance]]// of \typeref{standard-class} can be redefined if the new //[[CL:Glossary:class]]// is also
 
-a //[[CL:Glossary:direct instance]]// of \typeref{standard-class}.
-Redefining a //[[CL:Glossary:class]]// modifies the existing
-//[[CL:Glossary:class]]// //[[CL:Glossary:object]]// to reflect the new //[[CL:Glossary:class]]// definition; it does not
-create a new //[[CL:Glossary:class]]// //[[CL:Glossary:object]]// for the //[[CL:Glossary:class]]//.  
-Any //[[CL:Glossary:method]]// //[[CL:Glossary:object]]// created by a **'':reader''**, **'':writer''**, 
-or **'':accessor''** option specified by the old \macref{defclass} form is
-removed from the corresponding //[[CL:Glossary:generic function]]//.
-//[[CL:Glossary:Methods]]// specified by the new \macref{defclass} form are added.
+a //[[CL:Glossary:direct instance]]// of \typeref{standard-class}. Redefining a //[[CL:Glossary:class]]// modifies the existing //[[CL:Glossary:class]]// //[[CL:Glossary:object]]// to reflect the new //[[CL:Glossary:class]]// definition; it does not create a new //[[CL:Glossary:class]]// //[[CL:Glossary:object]]// for the //[[CL:Glossary:class]]//.   Any //[[CL:Glossary:method]]// //[[CL:Glossary:object]]// created by a **'':reader''**, **'':writer''**,  or **'':accessor''** option specified by the old \macref{defclass} form is removed from the corresponding //[[CL:Glossary:generic function]]//. //[[CL:Glossary:Methods]]// specified by the new \macref{defclass} form are added.
 
+When the class $C$ is redefined, changes are propagated to its //[[CL:Glossary:instances]]// and to //[[CL:Glossary:instances]]// of any of its //[[CL:Glossary:subclasses]]//.  Updating such an //[[CL:Glossary:instance]]// occurs at an //[[CL:Glossary:implementation-dependent]]// time, but no later than the next time a //[[CL:Glossary:slot]]//  of that //[[CL:Glossary:instance]]// is read or written.  Updating an //[[CL:Glossary:instance]]//  does not change its identity as defined by \thefunction{eq}. The updating process may change the //[[CL:Glossary:slots]]// of that particular //[[CL:Glossary:instance]]//,  but it does not create a new //[[CL:Glossary:instance]]//.  Whether updating an //[[CL:Glossary:instance]]// consumes storage is //[[CL:Glossary:implementation-dependent]]//.
 
+Note that redefining a //[[CL:Glossary:class]]// may cause //[[CL:Glossary:slots]]// to be added or  deleted.  If a //[[CL:Glossary:class]]// is redefined in a way that changes the set of //[[CL:Glossary:local slots]]// //[[CL:Glossary:accessible]]// in //[[CL:Glossary:instances]]//, the //[[CL:Glossary:instances]]//  are updated.  It is //[[CL:Glossary:implementation-dependent]]// whether //[[CL:Glossary:instances]]//  are updated if a //[[CL:Glossary:class]]// is redefined in a way that does not change  the set of //[[CL:Glossary:local slots]]// //[[CL:Glossary:accessible]]// in //[[CL:Glossary:instances]]//.
 
-
-When the class $C$ is redefined, changes are propagated to its //[[CL:Glossary:instances]]//
-and to //[[CL:Glossary:instances]]// of any of its //[[CL:Glossary:subclasses]]//.  Updating such an
-//[[CL:Glossary:instance]]// occurs at an //[[CL:Glossary:implementation-dependent]]// time, but no later than
-the next time a //[[CL:Glossary:slot]]// 
-of that //[[CL:Glossary:instance]]// is read or written.  Updating an
-//[[CL:Glossary:instance]]// 
-does not change its identity as defined by \thefunction{eq}.
-The updating process may change the //[[CL:Glossary:slots]]// of that
-particular //[[CL:Glossary:instance]]//, 
-but it does not create a new //[[CL:Glossary:instance]]//.  Whether
-updating an //[[CL:Glossary:instance]]// consumes storage is //[[CL:Glossary:implementation-dependent]]//.
-
-Note that redefining a //[[CL:Glossary:class]]// may cause //[[CL:Glossary:slots]]// to be added or 
-deleted.  If a //[[CL:Glossary:class]]// is redefined in a way that changes the set of
-//[[CL:Glossary:local slots]]// //[[CL:Glossary:accessible]]// in //[[CL:Glossary:instances]]//, the //[[CL:Glossary:instances]]// 
-are updated.  It is //[[CL:Glossary:implementation-dependent]]// whether //[[CL:Glossary:instances]]// 
-are updated if a //[[CL:Glossary:class]]// is redefined in a way that does not change 
-the set of //[[CL:Glossary:local slots]]// //[[CL:Glossary:accessible]]// in //[[CL:Glossary:instances]]//.
-
-The value of a //[[CL:Glossary:slot]]// 
-that is specified as shared both in the old //[[CL:Glossary:class]]//
-and in the new //[[CL:Glossary:class]]// is retained.  
-If such a //[[CL:Glossary:shared slot]]// was unbound
-in the old //[[CL:Glossary:class]]//, it is unbound in the new //[[CL:Glossary:class]]//.  
-//[[CL:Glossary:Slots]]// that
-were local in the old //[[CL:Glossary:class]]// and that are shared in the new 
-//[[CL:Glossary:class]]// are
-initialized.  Newly added //[[CL:Glossary:shared slots]]// are initialized.
+The value of a //[[CL:Glossary:slot]]//  that is specified as shared both in the old //[[CL:Glossary:class]]// and in the new //[[CL:Glossary:class]]// is retained.   If such a //[[CL:Glossary:shared slot]]// was unbound in the old //[[CL:Glossary:class]]//, it is unbound in the new //[[CL:Glossary:class]]//.   //[[CL:Glossary:Slots]]// that were local in the old //[[CL:Glossary:class]]// and that are shared in the new  //[[CL:Glossary:class]]// are initialized.  Newly added //[[CL:Glossary:shared slots]]// are initialized.
 
 Each newly added //[[CL:Glossary:shared slot]]// is set to the result of evaluating the
 
-//[[CL:Glossary:captured initialization form]]// for the //[[CL:Glossary:slot]]// that was specified 
-in the \macref{defclass} //[[CL:Glossary:form]]// for the new //[[CL:Glossary:class]]//.  
+//[[CL:Glossary:captured initialization form]]// for the //[[CL:Glossary:slot]]// that was specified  in the \macref{defclass} //[[CL:Glossary:form]]// for the new //[[CL:Glossary:class]]//.  
 
 If there was no //[[CL:Glossary:initialization form]]//, the //[[CL:Glossary:slot]]// is unbound.
 
-If a //[[CL:Glossary:class]]// is redefined in such a way that the set of
-//[[CL:Glossary:local slots]]// //[[CL:Glossary:accessible]]// in an //[[CL:Glossary:instance]]// of the //[[CL:Glossary:class]]// 
-is changed, a two-step process of updating the //[[CL:Glossary:instances]]// of the
-//[[CL:Glossary:class]]// takes place.  The process may be explicitly started by 
-invoking the generic function **[[CL:Functions:make-instances-obsolete]]**.  This
-two-step process can happen in other circumstances in some implementations.
-For example, in some implementations this two-step process is
-triggered if the order of //[[CL:Glossary:slots]]// in storage is changed.
+If a //[[CL:Glossary:class]]// is redefined in such a way that the set of //[[CL:Glossary:local slots]]// //[[CL:Glossary:accessible]]// in an //[[CL:Glossary:instance]]// of the //[[CL:Glossary:class]]//  is changed, a two-step process of updating the //[[CL:Glossary:instances]]// of the //[[CL:Glossary:class]]// takes place.  The process may be explicitly started by  invoking the generic function **[[CL:Functions:make-instances-obsolete]]**.  This two-step process can happen in other circumstances in some implementations. For example, in some implementations this two-step process is triggered if the order of //[[CL:Glossary:slots]]// in storage is changed.
 
-The first step modifies the structure of the //[[CL:Glossary:instance]]// by adding new
-//[[CL:Glossary:local slots]]// and discarding //[[CL:Glossary:local slots]]// that are not
-defined in the new version of the //[[CL:Glossary:class]]//.  The second step
-initializes the newly-added //[[CL:Glossary:local slots]]// and performs any other
-user-defined actions. These two steps are further specified
-in the next two sections.
+The first step modifies the structure of the //[[CL:Glossary:instance]]// by adding new //[[CL:Glossary:local slots]]// and discarding //[[CL:Glossary:local slots]]// that are not defined in the new version of the //[[CL:Glossary:class]]//.  The second step initializes the newly-added //[[CL:Glossary:local slots]]// and performs any other user-defined actions. These two steps are further specified in the next two sections.
 
 \beginsubsubsection{Modifying the Structure of Instances}
 
 \reviewer{Barmar: What about shared slots that are deleted?}%!!!
 
-The first step modifies the structure of //[[CL:Glossary:instances]]// of the redefined
-//[[CL:Glossary:class]]// to conform to its new //[[CL:Glossary:class]]// definition.  
-//[[CL:Glossary:Local slots]]// specified
-by the new //[[CL:Glossary:class]]// definition that are not specified as either local or
-shared by the old //[[CL:Glossary:class]]// are added, and //[[CL:Glossary:slots]]// 
-not specified as either
-local or shared by the new //[[CL:Glossary:class]]// definition that are specified as
-local by the old //[[CL:Glossary:class]]// are discarded. 
-The //[[CL:Glossary:names]]// of these added and discarded
-//[[CL:Glossary:slots]]// are passed as arguments 
-to **[[CL:Functions:update-instance-for-redefined-class]]**
-as described in the next section.
+The first step modifies the structure of //[[CL:Glossary:instances]]// of the redefined //[[CL:Glossary:class]]// to conform to its new //[[CL:Glossary:class]]// definition.   //[[CL:Glossary:Local slots]]// specified by the new //[[CL:Glossary:class]]// definition that are not specified as either local or shared by the old //[[CL:Glossary:class]]// are added, and //[[CL:Glossary:slots]]//  not specified as either local or shared by the new //[[CL:Glossary:class]]// definition that are specified as local by the old //[[CL:Glossary:class]]// are discarded.  The //[[CL:Glossary:names]]// of these added and discarded //[[CL:Glossary:slots]]// are passed as arguments  to **[[CL:Functions:update-instance-for-redefined-class]]** as described in the next section.
 
-The values of //[[CL:Glossary:local slots]]// specified by both the new and old
-//[[CL:Glossary:classes]]// are retained. If such a //[[CL:Glossary:local slot]]// was unbound,
-it remains unbound.
+The values of //[[CL:Glossary:local slots]]// specified by both the new and old //[[CL:Glossary:classes]]// are retained. If such a //[[CL:Glossary:local slot]]// was unbound, it remains unbound.
 
-The value of a //[[CL:Glossary:slot]]// that is specified as shared in the old 
-//[[CL:Glossary:class]]// and as local in the new //[[CL:Glossary:class]]// is retained.  If such 
-a //[[CL:Glossary:shared slot]]// was unbound, the //[[CL:Glossary:local slot]]// is unbound.
+The value of a //[[CL:Glossary:slot]]// that is specified as shared in the old  //[[CL:Glossary:class]]// and as local in the new //[[CL:Glossary:class]]// is retained.  If such  a //[[CL:Glossary:shared slot]]// was unbound, the //[[CL:Glossary:local slot]]// is unbound.
 
 \endsubsubsection%{Modifying the Structure of the Instance}
 
-
 \beginsubsubsection{Initializing Newly Added Local Slots}
 
-The second step initializes the newly added //[[CL:Glossary:local slots]]// and performs
-any other user-defined actions.  This step is implemented by the generic
-function **[[CL:Functions:update-instance-for-redefined-class]]**, which is called after
-completion of the first step of modifying the structure of the
-//[[CL:Glossary:instance]]//.
+The second step initializes the newly added //[[CL:Glossary:local slots]]// and performs any other user-defined actions.  This step is implemented by the generic function **[[CL:Functions:update-instance-for-redefined-class]]**, which is called after completion of the first step of modifying the structure of the //[[CL:Glossary:instance]]//.
 
-The generic function **[[CL:Functions:update-instance-for-redefined-class]]** takes
-four required arguments: the //[[CL:Glossary:instance]]// being updated after it has
-undergone the first step, a list of the names of //[[CL:Glossary:local slots]]// that were
-added, a list of the names of //[[CL:Glossary:local slots]]// that were discarded, and a
-property list containing the //[[CL:Glossary:slot]]// names and values of 
-//[[CL:Glossary:slots]]// that were
-discarded and had values.  Included among the discarded //[[CL:Glossary:slots]]// are
-//[[CL:Glossary:slots]]// that were local in the old //[[CL:Glossary:class]]// and that are shared in the new
-//[[CL:Glossary:class]]//.
-                      
-The generic function **[[CL:Functions:update-instance-for-redefined-class]]** also
-takes any number of initialization arguments.  When it is called by
-the system to update an //[[CL:Glossary:instance]]// whose //[[CL:Glossary:class]]// 
-has been redefined, no
-initialization arguments are provided.
-                                               
-There is a system-supplied primary //[[CL:Glossary:method]]// for 
-**[[CL:Functions:update-instance-for-redefined-class]]** whose //[[CL:Glossary:parameter specializer]]//
-for its //[[CL:Glossary:instance]]// argument is \theclass{standard-object}.  
-First this //[[CL:Glossary:method]]// checks the validity of initialization arguments and signals an
-error if an initialization argument is supplied that is not declared
-as valid.  (For more information, \seesection\DeclaringInitargValidity.)
-Then it calls the generic function
-**[[CL:Functions:shared-initialize]]** with the following arguments: the 
-//[[CL:Glossary:instance]]//,
-the list of //[[CL:Glossary:names]]// of 
-the newly added //[[CL:Glossary:slots]]//, and the initialization
-arguments it received.
+The generic function **[[CL:Functions:update-instance-for-redefined-class]]** takes four required arguments: the //[[CL:Glossary:instance]]// being updated after it has undergone the first step, a list of the names of //[[CL:Glossary:local slots]]// that were added, a list of the names of //[[CL:Glossary:local slots]]// that were discarded, and a property list containing the //[[CL:Glossary:slot]]// names and values of  //[[CL:Glossary:slots]]// that were discarded and had values.  Included among the discarded //[[CL:Glossary:slots]]// are //[[CL:Glossary:slots]]// that were local in the old //[[CL:Glossary:class]]// and that are shared in the new //[[CL:Glossary:class]]//.
+                       The generic function **[[CL:Functions:update-instance-for-redefined-class]]** also takes any number of initialization arguments.  When it is called by the system to update an //[[CL:Glossary:instance]]// whose //[[CL:Glossary:class]]//  has been redefined, no initialization arguments are provided.
+                                                There is a system-supplied primary //[[CL:Glossary:method]]// for  **[[CL:Functions:update-instance-for-redefined-class]]** whose //[[CL:Glossary:parameter specializer]]// for its //[[CL:Glossary:instance]]// argument is \theclass{standard-object}.   First this //[[CL:Glossary:method]]// checks the validity of initialization arguments and signals an error if an initialization argument is supplied that is not declared as valid.  (For more information, \seesection\DeclaringInitargValidity.) Then it calls the generic function **[[CL:Functions:shared-initialize]]** with the following arguments: the  //[[CL:Glossary:instance]]//, the list of //[[CL:Glossary:names]]// of  the newly added //[[CL:Glossary:slots]]//, and the initialization arguments it received.
 
 \endsubsubsection%{Initializing Newly added Local Slots}
 
 \beginsubsubsection{Customizing Class Redefinition}
-             
-\reviewer{Barmar: This description is hard to follow.}%!!!
+              \reviewer{Barmar: This description is hard to follow.}%!!!
 
-//[[CL:Glossary:Methods]]// for **[[CL:Functions:update-instance-for-redefined-class]]** may be 
-defined to specify actions to be taken when an //[[CL:Glossary:instance]]// is updated.
-If only //[[CL:Glossary:after methods]]// for **[[CL:Functions:update-instance-for-redefined-class]]** are
-defined, they will be run after the system-supplied primary //[[CL:Glossary:method]]// for
-initialization and therefore will not interfere with the default
-behavior of **[[CL:Functions:update-instance-for-redefined-class]]**.  Because no
-initialization arguments are passed to **[[CL:Functions:update-instance-for-redefined-class]]**
-when it is called by the system, the 
+//[[CL:Glossary:Methods]]// for **[[CL:Functions:update-instance-for-redefined-class]]** may be  defined to specify actions to be taken when an //[[CL:Glossary:instance]]// is updated. If only //[[CL:Glossary:after methods]]// for **[[CL:Functions:update-instance-for-redefined-class]]** are defined, they will be run after the system-supplied primary //[[CL:Glossary:method]]// for initialization and therefore will not interfere with the default behavior of **[[CL:Functions:update-instance-for-redefined-class]]**.  Because no initialization arguments are passed to **[[CL:Functions:update-instance-for-redefined-class]]** when it is called by the system, the 
 
-//[[CL:Glossary:initialization forms]]// for //[[CL:Glossary:slots]]// 
-that are filled by //[[CL:Glossary:before methods]]// for **[[CL:Functions:update-instance-for-redefined-class]]** 
-will not be evaluated by **[[CL:Functions:shared-initialize]]**.
+//[[CL:Glossary:initialization forms]]// for //[[CL:Glossary:slots]]//  that are filled by //[[CL:Glossary:before methods]]// for **[[CL:Functions:update-instance-for-redefined-class]]**  will not be evaluated by **[[CL:Functions:shared-initialize]]**.
 
-//[[CL:Glossary:Methods]]// for **[[CL:Functions:shared-initialize]]** may be defined to customize
-//[[CL:Glossary:class]]// redefinition.  For more information, \seesection\SharedInitialize.
+//[[CL:Glossary:Methods]]// for **[[CL:Functions:shared-initialize]]** may be defined to customize //[[CL:Glossary:class]]// redefinition.  For more information, \seesection\SharedInitialize.
 
 \endsubsubsection%{Customizing Class Redefinition}
 
+\beginsubSection{Integrating Types and Classes}  \DefineSection{IntegratingTypesAndClasses}
+                                               The \CLOS\ maps the space of //[[CL:Glossary:classes]]// into the space of //[[CL:Glossary:types]]//. Every //[[CL:Glossary:class]]// that has a proper name has a corresponding //[[CL:Glossary:type]]//  with the same //[[CL:Glossary:name]]//.  
 
+The proper name of every //[[CL:Glossary:class]]// is a valid //[[CL:Glossary:type specifier]]//.  In addition, every //[[CL:Glossary:class]]// //[[CL:Glossary:object]]// is a valid //[[CL:Glossary:type specifier]]//.   Thus the expression \f{(typep //object// //class//)} evaluates to  //[[CL:Glossary:true]]// if the //[[CL:Glossary:class]]// of //object// is //class// itself or  a //[[CL:Glossary:subclass]]// of //[[CL:Glossary:class]]//.  The evaluation of the expression \f{(subtypep class1 class2)} returns the values 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\beginsubSection{Integrating Types and Classes} 
-\DefineSection{IntegratingTypesAndClasses}
-                                              
-The \CLOS\ maps the space of //[[CL:Glossary:classes]]// into the space of //[[CL:Glossary:types]]//.
-Every //[[CL:Glossary:class]]// that has a proper name has a corresponding //[[CL:Glossary:type]]// 
-with the same //[[CL:Glossary:name]]//.  
-
-The proper name of every //[[CL:Glossary:class]]// is a valid //[[CL:Glossary:type specifier]]//.  In
-addition, every //[[CL:Glossary:class]]// //[[CL:Glossary:object]]// is a valid //[[CL:Glossary:type specifier]]//.  
-Thus the expression \f{(typep //object// //class//)} evaluates to 
-//[[CL:Glossary:true]]// if the //[[CL:Glossary:class]]// of //object// is //class// itself or 
-a //[[CL:Glossary:subclass]]// of //[[CL:Glossary:class]]//.  The evaluation of the expression
-\f{(subtypep class1 class2)} returns the values 
-
-
-//[[CL:Glossary:true]]// and //[[CL:Glossary:true]]// if \f{class1} is a subclass of \f{class2} or if they are the
-same //[[CL:Glossary:class]]//; otherwise it returns the values 
-
+//[[CL:Glossary:true]]// and //[[CL:Glossary:true]]// if \f{class1} is a subclass of \f{class2} or if they are the same //[[CL:Glossary:class]]//; otherwise it returns the values 
 
 //[[CL:Glossary:false]]// and //[[CL:Glossary:true]]//.
 
+If  $I$ is an //[[CL:Glossary:instance]]// of some //[[CL:Glossary:class]]// $C$ named $S$  and $C$ is an //[[CL:Glossary:instance]]// of \typeref{standard-class},  the evaluation of the expression \f{(type-of $I$\/)} returns $S$  if $S$ is the //[[CL:Glossary:proper name]]// of $C$;  otherwise, it returns $C$.
 
-
-
-
-
-
-
-
-If  $I$ is an //[[CL:Glossary:instance]]// of some //[[CL:Glossary:class]]// $C$ named $S$ 
-and $C$ is an //[[CL:Glossary:instance]]// of \typeref{standard-class}, 
-the evaluation of the expression \f{(type-of $I$\/)} returns $S$ 
-if $S$ is the //[[CL:Glossary:proper name]]// of $C$; 
-otherwise, it returns $C$.
-
-Because the names of //[[CL:Glossary:classes]]// 
-and //[[CL:Glossary:class]]// //[[CL:Glossary:objects]]// are //[[CL:Glossary:type specifiers]]//, they may
-be used in the special form \specref{the} and in type declarations.
-                                   
-Many but not all of the predefined //[[CL:Glossary:type specifiers]]// have a
-corresponding //[[CL:Glossary:class]]// with 
-the same proper name as the //[[CL:Glossary:type]]//.  These type
-specifiers are listed in \figref\ClassTypeCorrespondence.
-For example, \thetype{array} has 
-a corresponding //[[CL:Glossary:class]]// named \typeref{array}.  
-No //[[CL:Glossary:type specifier]]// that is a
-list, such as {\tt (vector double-float 100)}, has a corresponding //[[CL:Glossary:class]]//.
-The //[[CL:Glossary:operator]]// \macref{deftype} does not create any //[[CL:Glossary:classes]]//.
-                                            
-Each //[[CL:Glossary:class]]// that corresponds to a predefined //[[CL:Glossary:type specifier]]// can
-be implemented in one of three ways, at the discretion of each implementation.
-It can be a //[[CL:Glossary:standard class]]//,
-
+Because the names of //[[CL:Glossary:classes]]//  and //[[CL:Glossary:class]]// //[[CL:Glossary:objects]]// are //[[CL:Glossary:type specifiers]]//, they may be used in the special form \specref{the} and in type declarations.
+                                    Many but not all of the predefined //[[CL:Glossary:type specifiers]]// have a corresponding //[[CL:Glossary:class]]// with  the same proper name as the //[[CL:Glossary:type]]//.  These type specifiers are listed in \figref\ClassTypeCorrespondence. For example, \thetype{array} has  a corresponding //[[CL:Glossary:class]]// named \typeref{array}.   No //[[CL:Glossary:type specifier]]// that is a list, such as {\tt (vector double-float 100)}, has a corresponding //[[CL:Glossary:class]]//. The //[[CL:Glossary:operator]]// \macref{deftype} does not create any //[[CL:Glossary:classes]]//.
+                                             Each //[[CL:Glossary:class]]// that corresponds to a predefined //[[CL:Glossary:type specifier]]// can be implemented in one of three ways, at the discretion of each implementation. It can be a //[[CL:Glossary:standard class]]//,
 
 a //[[CL:Glossary:structure class]]//,
-
 
 \issue{METACLASS-OF-SYSTEM-CLASS:UNSPECIFIED}
 
 or a //[[CL:Glossary:system class]]//.
 
+A //[[CL:Glossary:built-in class]]// is one whose //[[CL:Glossary:generalized instances]]// have restricted capabilities  or special representations.  Attempting to use \macref{defclass} to define  //[[CL:Glossary:subclasses]]// of a \typeref{built-in-class} signals an error.
 
+Calling **[[CL:Functions:make-instance]]** to create a //[[CL:Glossary:generalized instance]]// of a  //[[CL:Glossary:built-in class]]// signals an error.  Calling **[[CL:Functions:slot-value]]** on a
 
+//[[CL:Glossary:generalized instance]]// of a //[[CL:Glossary:built-in class]]// signals an error. Redefining a //[[CL:Glossary:built-in class]]// or using **[[CL:Functions:change-class]]** to change
 
-
-A //[[CL:Glossary:built-in class]]// is one whose //[[CL:Glossary:generalized instances]]// have restricted capabilities 
-or special representations.  Attempting to use \macref{defclass} to define 
-//[[CL:Glossary:subclasses]]// of a \typeref{built-in-class} signals an error.
-
-Calling **[[CL:Functions:make-instance]]** to create a //[[CL:Glossary:generalized instance]]// of a 
-//[[CL:Glossary:built-in class]]// signals an error.  Calling **[[CL:Functions:slot-value]]** on a
-
-//[[CL:Glossary:generalized instance]]// of a //[[CL:Glossary:built-in class]]// signals an error.
-Redefining a //[[CL:Glossary:built-in class]]// or using **[[CL:Functions:change-class]]** to change
-
-the //[[CL:Glossary:class]]// of an //[[CL:Glossary:object]]// to or from a //[[CL:Glossary:built-in class]]// signals an error.
-However, //[[CL:Glossary:built-in classes]]// can be used as //[[CL:Glossary:parameter specializers]]// 
-in //[[CL:Glossary:methods]]//.
+the //[[CL:Glossary:class]]// of an //[[CL:Glossary:object]]// to or from a //[[CL:Glossary:built-in class]]// signals an error. However, //[[CL:Glossary:built-in classes]]// can be used as //[[CL:Glossary:parameter specializers]]//  in //[[CL:Glossary:methods]]//.
                                         
 
-
-
-
-
-It is possible to determine whether a //[[CL:Glossary:class]]// is a //[[CL:Glossary:built-in class]]//
-by checking the //[[CL:Glossary:metaclass]]//.
-A //[[CL:Glossary:standard class]]//  is an //[[CL:Glossary:instance]]// of \theclass{standard-class},
-a //[[CL:Glossary:built-in class]]//  is an //[[CL:Glossary:instance]]// of \theclass{built-in-class}, and
-a //[[CL:Glossary:structure class]]// is an //[[CL:Glossary:instance]]// of \theclass{structure-class}.
-                                
-Each //[[CL:Glossary:structure]]// //[[CL:Glossary:type]]// created by \macref{defstruct} without 
-using the **'':type''** option has a corresponding //[[CL:Glossary:class]]//.  
+It is possible to determine whether a //[[CL:Glossary:class]]// is a //[[CL:Glossary:built-in class]]// by checking the //[[CL:Glossary:metaclass]]//. A //[[CL:Glossary:standard class]]//  is an //[[CL:Glossary:instance]]// of \theclass{standard-class}, a //[[CL:Glossary:built-in class]]//  is an //[[CL:Glossary:instance]]// of \theclass{built-in-class}, and a //[[CL:Glossary:structure class]]// is an //[[CL:Glossary:instance]]// of \theclass{structure-class}.
+                                 Each //[[CL:Glossary:structure]]// //[[CL:Glossary:type]]// created by \macref{defstruct} without  using the **'':type''** option has a corresponding //[[CL:Glossary:class]]//.  
 
 This //[[CL:Glossary:class]]// is a //[[CL:Glossary:generalized instance]]// of \theclass{structure-class}.  
 
-
-
-
-
-The **'':include''** option of \macref{defstruct} creates a direct
-//[[CL:Glossary:subclass]]// of the //[[CL:Glossary:class]]// 
-that corresponds to the included //[[CL:Glossary:structure]]// 
+The **'':include''** option of \macref{defstruct} creates a direct //[[CL:Glossary:subclass]]// of the //[[CL:Glossary:class]]//  that corresponds to the included //[[CL:Glossary:structure]]// 
 
 //[[CL:Glossary:type]]//.
 
+\issue{CONDITION-SLOTS:HIDDEN} It is //[[CL:Glossary:implementation-dependent]]// whether //[[CL:Glossary:slots]]// are involved in the operation of //[[CL:Glossary:functions]]// defined in this specification on //[[CL:Glossary:instances]]// of //[[CL:Glossary:classes]]// defined in this specification, except when //[[CL:Glossary:slots]]// are explicitly defined by this specification.
 
+If in a particular //[[CL:Glossary:implementation]]// a //[[CL:Glossary:class]]// defined in this specification has //[[CL:Glossary:slots]]// that are not defined by this specfication, the names of these //[[CL:Glossary:slots]]// must not be //[[CL:Glossary:external symbols]]// of //[[CL:Glossary:packages]]// defined in this specification nor otherwise //[[CL:Glossary:accessible]]// in \thepackage{cl-user}.
 
-\issue{CONDITION-SLOTS:HIDDEN}
-It is //[[CL:Glossary:implementation-dependent]]// whether //[[CL:Glossary:slots]]// are involved in the
-operation of //[[CL:Glossary:functions]]// defined in this specification
-on //[[CL:Glossary:instances]]// of //[[CL:Glossary:classes]]// defined in this specification,
-except when //[[CL:Glossary:slots]]// are explicitly defined by this specification.
+                                                     The purpose of specifying that many of the standard //[[CL:Glossary:type specifiers]]// have a corresponding //[[CL:Glossary:class]]// is to enable users to write //[[CL:Glossary:methods]]// that discriminate on these //[[CL:Glossary:types]]//.  //[[CL:Glossary:Method]]// selection requires that a  //[[CL:Glossary:class precedence list]]// can be determined for each //[[CL:Glossary:class]]//. 
 
-If in a particular //[[CL:Glossary:implementation]]// a //[[CL:Glossary:class]]// defined in this specification
-has //[[CL:Glossary:slots]]// that are not defined by this specfication, the names of these //[[CL:Glossary:slots]]//
-must not be //[[CL:Glossary:external symbols]]// of //[[CL:Glossary:packages]]// defined in this specification nor
-otherwise //[[CL:Glossary:accessible]]// in \thepackage{cl-user}.
+The hierarchical relationships among the //[[CL:Glossary:type specifiers]]// are mirrored by relationships among the //[[CL:Glossary:classes]]// corresponding to those //[[CL:Glossary:types]]//.  
 
+                  \figref\ClassTypeCorrespondence\ lists the set of //[[CL:Glossary:classes]]//  that correspond to predefined //[[CL:Glossary:type specifiers]]//.
 
-                                                    
-The purpose of specifying that many of the standard //[[CL:Glossary:type specifiers]]// have a
-corresponding //[[CL:Glossary:class]]// is to enable users to write //[[CL:Glossary:methods]]// that
-discriminate on these //[[CL:Glossary:types]]//.  //[[CL:Glossary:Method]]// selection requires that a 
-//[[CL:Glossary:class precedence list]]// can be determined for each //[[CL:Glossary:class]]//. 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89} \DefineFigure{ClassTypeCorrespondence} \displaythree{Classes that correspond to pre-defined type specifiers}{ arithmetic-error&generic-function&simple-error\cr array&hash-table&simple-type-error\cr bit-vector&integer&simple-warning\cr broadcast-stream&list&standard-class\cr built-in-class&logical-pathname&standard-generic-function\cr cell-error&method&standard-method\cr character&method-combination&standard-object\cr class&null&storage-condition\cr complex&number&stream\cr concatenated-stream&package&stream-error\cr condition&package-error&string\cr cons&parse-error&string-stream\cr control-error&pathname&structure-class\cr division-by-zero&print-not-readable&structure-object\cr echo-stream&program-error&style-warning\cr end-of-file&random-state&symbol\cr error&ratio&synonym-stream\cr file-error&rational&t\cr file-stream&reader-error&two-way-stream\cr float&readtable&type-error\cr floating-point-inexact&real&unbound-slot\cr floating-point-invalid-operation&restart&unbound-variable\cr floating-point-overflow&sequence&undefined-function\cr floating-point-underflow&serious-condition&vector\cr function&simple-condition&warning\cr }
 
-The hierarchical relationships among the //[[CL:Glossary:type specifiers]]// are mirrored by
-relationships among the //[[CL:Glossary:classes]]// corresponding to those //[[CL:Glossary:types]]//.  
+The //[[CL:Glossary:class precedence list]]// information specified in the entries for each of these //[[CL:Glossary:classes]]// are those that are required by the \OS.
 
-
-
-
-
-
-
-
-
-
-
-                 
-\figref\ClassTypeCorrespondence\ lists the set of //[[CL:Glossary:classes]]// 
-that correspond to predefined //[[CL:Glossary:type specifiers]]//.
-
-\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
-\DefineFigure{ClassTypeCorrespondence}
-\displaythree{Classes that correspond to pre-defined type specifiers}{
-arithmetic-error&generic-function&simple-error\cr
-array&hash-table&simple-type-error\cr
-bit-vector&integer&simple-warning\cr
-broadcast-stream&list&standard-class\cr
-built-in-class&logical-pathname&standard-generic-function\cr
-cell-error&method&standard-method\cr
-character&method-combination&standard-object\cr
-class&null&storage-condition\cr
-complex&number&stream\cr
-concatenated-stream&package&stream-error\cr
-condition&package-error&string\cr
-cons&parse-error&string-stream\cr
-control-error&pathname&structure-class\cr
-division-by-zero&print-not-readable&structure-object\cr
-echo-stream&program-error&style-warning\cr
-end-of-file&random-state&symbol\cr
-error&ratio&synonym-stream\cr
-file-error&rational&t\cr
-file-stream&reader-error&two-way-stream\cr
-float&readtable&type-error\cr
-floating-point-inexact&real&unbound-slot\cr
-floating-point-invalid-operation&restart&unbound-variable\cr
-floating-point-overflow&sequence&undefined-function\cr
-floating-point-underflow&serious-condition&vector\cr
-function&simple-condition&warning\cr
-}
-
-
-The //[[CL:Glossary:class precedence list]]// information specified in the entries for
-each of these //[[CL:Glossary:classes]]// are those that are required by the \OS.
-
-Individual implementations may be extended to define other type
-specifiers to have a corresponding //[[CL:Glossary:class]]//.  Individual implementations
-may be extended to add other //[[CL:Glossary:subclass]]// relationships and to add other
-//[[CL:Glossary:elements]]// to the //[[CL:Glossary:class precedence lists]]// as long as
-they do not violate the type relationships and disjointness
-requirements specified by this standard.
-A standard //[[CL:Glossary:class]]// defined with no direct //[[CL:Glossary:superclasses]]// is guaranteed to
-be disjoint from all of the //[[CL:Glossary:classes]]// in the table, except for the
-class named \typeref{t}.
- 
-\endsubSection%{Integrating Types and Classes}
+Individual implementations may be extended to define other type specifiers to have a corresponding //[[CL:Glossary:class]]//.  Individual implementations may be extended to add other //[[CL:Glossary:subclass]]// relationships and to add other //[[CL:Glossary:elements]]// to the //[[CL:Glossary:class precedence lists]]// as long as they do not violate the type relationships and disjointness requirements specified by this standard. A standard //[[CL:Glossary:class]]// defined with no direct //[[CL:Glossary:superclasses]]// is guaranteed to be disjoint from all of the //[[CL:Glossary:classes]]// in the table, except for the class named \typeref{t}.
+  \endsubSection%{Integrating Types and Classes}

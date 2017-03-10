@@ -2,36 +2,17 @@
 
 \beginsubsection{Hash-Table Operations}
 
-\Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that are applicable 
-to //[[CL:Glossary:hash tables]]//.  The following rules apply to //[[CL:Glossary:hash tables]]//.
+\Thenextfigure\ lists some //[[CL:Glossary:defined names]]// that are applicable  to //[[CL:Glossary:hash tables]]//.  The following rules apply to //[[CL:Glossary:hash tables]]//.
 
+\beginlist \itemitem{--} A //[[CL:Glossary:hash table]]// can only associate one value with a given key. If an attempt is made to add a second value for a given key, the second value will replace the first. Thus, adding a value to a //[[CL:Glossary:hash table]]// is a destructive operation; the //[[CL:Glossary:hash table]]// is modified.  
 
-
-\beginlist
-\itemitem{--}
-A //[[CL:Glossary:hash table]]// can only associate one value with a given
-key. If an attempt is made to add a second value for a given key,
-the second value will replace the first.
-Thus, adding a value to a //[[CL:Glossary:hash table]]// is a destructive operation;
-the //[[CL:Glossary:hash table]]// is modified.  
-
-
-\itemitem{--}
-There are four kinds of //[[CL:Glossary:hash tables]]//:
+\itemitem{--} There are four kinds of //[[CL:Glossary:hash tables]]//:
   those whose keys are compared with **[[CL:Functions:eq]]**,
   those whose keys are compared with **[[CL:Functions:eql]]**,
-  those whose keys are compared with **[[CL:Functions:equal]]**, and
-\issue{HASH-TABLE-TESTS:ADD-EQUALP}
+  those whose keys are compared with **[[CL:Functions:equal]]**, and \issue{HASH-TABLE-TESTS:ADD-EQUALP}
   those whose keys are compared with **[[CL:Functions:equalp]]**.  
 
-
-
-\itemitem{--}
-//[[CL:Glossary:Hash tables]]// are created by **[[CL:Functions:make-hash-table]]**. 
-**[[CL:Functions:gethash]]** is used to look up a key and find the associated value.
-New entries are added to //[[CL:Glossary:hash tables]]// using \macref{setf} with **[[CL:Functions:gethash]]**.
-**[[CL:Functions:remhash]]** is used to remove an entry.
-For example:
+\itemitem{--} //[[CL:Glossary:Hash tables]]// are created by **[[CL:Functions:make-hash-table]]**.  **[[CL:Functions:gethash]]** is used to look up a key and find the associated value. New entries are added to //[[CL:Glossary:hash tables]]// using \macref{setf} with **[[CL:Functions:gethash]]**. **[[CL:Functions:remhash]]** is used to remove an entry. For example:
 
 \code
  (setq a (make-hash-table)) \EV #<HASH-TABLE EQL 0/120 32536573>
@@ -39,229 +20,88 @@ For example:
  (setf (gethash 'name a) 'fred) \EV FRED
  (gethash 'color a) \EV BROWN, //[[CL:Glossary:true]]//
  (gethash 'name a) \EV FRED, //[[CL:Glossary:true]]//
- (gethash 'pointy a) \EV NIL, //[[CL:Glossary:false]]//
-\endcode
+ (gethash 'pointy a) \EV NIL, //[[CL:Glossary:false]]// \endcode
 
+In this example, the symbols \f{color} and \f{name} are being used as keys, and the symbols \f{brown} and \f{fred} are being used as the associated values.  The //[[CL:Glossary:hash table]]//  has two items in it, one of which                               associates from \f{color} to \f{brown}, and the other of which associates from \f{name} to \f{fred}.
 
-In this example, the symbols \f{color} and \f{name} are being used as
-keys, and the symbols \f{brown} and \f{fred} are being used as the
-associated values.  The //[[CL:Glossary:hash table]]// 
-has two items in it, one of which                              
-associates from \f{color} to \f{brown}, and the other of which
-associates from \f{name} to \f{fred}.
-
-
-\itemitem{--}
-A key or a value may be any //[[CL:Glossary:object]]//.
+\itemitem{--} A key or a value may be any //[[CL:Glossary:object]]//.
 
 \issue{HASH-TABLE-SIZE:INTENDED-ENTRIES}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \itemitem{--}
 
+The existence of an entry in the //[[CL:Glossary:hash table]]// can be determined from the //[[CL:Glossary:secondary value]]// returned by **[[CL:Functions:gethash]]**. \endlist               
 
-
-The existence of an entry in the //[[CL:Glossary:hash table]]// can be determined
-from the //[[CL:Glossary:secondary value]]// returned by **[[CL:Functions:gethash]]**.
-\endlist               
-
-\displaythree{Hash-table defined names}{
-clrhash&hash-table-p&remhash\cr
-gethash&make-hash-table&sxhash\cr
-hash-table-count&maphash&\cr
-}
-
+\displaythree{Hash-table defined names}{ clrhash&hash-table-p&remhash\cr gethash&make-hash-table&sxhash\cr hash-table-count&maphash&\cr }
 
 \endsubsection%{Hash-Table Operations}
 
-\beginsubsection{Modifying Hash Table Keys}
-\DefineSection{ModifyingHashKeys}
+\beginsubsection{Modifying Hash Table Keys} \DefineSection{ModifyingHashKeys}
 
 \issue{HASH-TABLE-KEY-MODIFICATION:SPECIFY}
 
-The function supplied as the **'':test''** argument to **[[CL:Functions:make-hash-table]]**
-specifies the `equivalence test' for the //[[CL:Glossary:hash table]]// it creates.
- 
-An //[[CL:Glossary:object]]// is `visibly modified' with regard to an equivalence test
-if there exists some set of //[[CL:Glossary:objects]]// (or potential //[[CL:Glossary:objects]]//)
-which are equivalent to the //[[CL:Glossary:object]]// before the modification but are
-no longer equivalent afterwards.
+The function supplied as the **'':test''** argument to **[[CL:Functions:make-hash-table]]** specifies the `equivalence test' for the //[[CL:Glossary:hash table]]// it creates.
+  An //[[CL:Glossary:object]]// is `visibly modified' with regard to an equivalence test if there exists some set of //[[CL:Glossary:objects]]// (or potential //[[CL:Glossary:objects]]//) which are equivalent to the //[[CL:Glossary:object]]// before the modification but are no longer equivalent afterwards.
 
+If an //[[CL:Glossary:object]]// $O\sub 1$ is used as a key in a //[[CL:Glossary:hash table]]// $H$ and is then visibly modified with regard to the equivalence test of $H$, then the consequences are unspecified if $O\sub 1$, or any //[[CL:Glossary:object]]// $O\sub 2$ equivalent to $O\sub 1$ under the equivalence test (either before or after the modification), is used as a key in further operations on $H$. The consequences of using $O\sub 1$ as a key are unspecified  even if $O\sub 1$ is visibly modified  and then later modified again in such a way as  to undo the visible modification.
+  Following are specifications of the modifications which are visible to the equivalence tests which must be supported by //[[CL:Glossary:hash tables]]//.  The modifications are described in terms of modification of components, and are defined recursively.  Visible modifications of components of the //[[CL:Glossary:object]]// are  visible modifications of the //[[CL:Glossary:object]]//.
 
+\beginsubsubsection{Visible Modification of Objects with respect to EQ and EQL} \DefineSection{VisModEQ} \DefineSection{VisModEQL}
 
-
-
-
-
-
-If an //[[CL:Glossary:object]]// $O\sub 1$ is used as a key in a //[[CL:Glossary:hash table]]// $H$
-and is then visibly modified with regard to the equivalence test of $H$,
-then the consequences are unspecified if $O\sub 1$, or any //[[CL:Glossary:object]]//
-$O\sub 2$ equivalent to $O\sub 1$ under the equivalence test (either before
-or after the modification), is used as a key in further operations on $H$.
-The consequences of using $O\sub 1$ as a key are unspecified 
-even if $O\sub 1$ is visibly modified 
-and then later modified again in such a way as 
-to undo the visible modification.
- 
-Following are specifications of the modifications which are visible to the
-equivalence tests which must be supported by //[[CL:Glossary:hash tables]]//.  The modifications
-are described in terms of modification of components, and are defined
-recursively.  Visible modifications of components of the //[[CL:Glossary:object]]// are 
-visible modifications of the //[[CL:Glossary:object]]//.
-
-\beginsubsubsection{Visible Modification of Objects with respect to EQ and EQL}
-\DefineSection{VisModEQ}
-\DefineSection{VisModEQL}
-
-No //[[CL:Glossary:standardized]]// //[[CL:Glossary:function]]// is provided that is capable of visibly
-modifying an //[[CL:Glossary:object]]// with regard to **[[CL:Functions:eq]]** or **[[CL:Functions:eql]]**.
+No //[[CL:Glossary:standardized]]// //[[CL:Glossary:function]]// is provided that is capable of visibly modifying an //[[CL:Glossary:object]]// with regard to **[[CL:Functions:eq]]** or **[[CL:Functions:eql]]**.
 
 \endsubsubsection%{Visible Modification of Objects with respect to EQ and EQL}
 
-\beginsubsubsection{Visible Modification of Objects with respect to EQUAL}
-\DefineSection{VisModEQUAL}
+\beginsubsubsection{Visible Modification of Objects with respect to EQUAL} \DefineSection{VisModEQUAL}
 
-As a consequence of the behavior for **[[CL:Functions:equal]]**,
-the rules for visible modification of //[[CL:Glossary:objects]]// not explicitly mentioned in this
-section are inherited from those in \secref\VisModEQL.
- 
-\beginsubsubsubsection{Visible Modification of Conses with respect to EQUAL}
+As a consequence of the behavior for **[[CL:Functions:equal]]**, the rules for visible modification of //[[CL:Glossary:objects]]// not explicitly mentioned in this section are inherited from those in \secref\VisModEQL.
+  \beginsubsubsubsection{Visible Modification of Conses with respect to EQUAL}
 
-Any visible change to the //[[CL:Glossary:car]]// or the //[[CL:Glossary:cdr]]// of a //[[CL:Glossary:cons]]//
-is considered a visible modification with regard to **[[CL:Functions:equal]]**.
- 
-\endsubsubsubsection%{Visible Modification of Conses with respect to EQUAL}
+Any visible change to the //[[CL:Glossary:car]]// or the //[[CL:Glossary:cdr]]// of a //[[CL:Glossary:cons]]// is considered a visible modification with regard to **[[CL:Functions:equal]]**.
+  \endsubsubsubsection%{Visible Modification of Conses with respect to EQUAL}
 
 \beginsubsubsubsection{Visible Modification of Bit Vectors and Strings with respect to EQUAL}
 
 For a //[[CL:Glossary:vector]]// \oftype{bit-vector} or \oftype{string}, any visible change
      to an //[[CL:Glossary:active]]// //[[CL:Glossary:element]]// of the //[[CL:Glossary:vector]]//,
-  or to the //[[CL:Glossary:length]]// of the //[[CL:Glossary:vector]]// (if it is //[[CL:Glossary:actually adjustable]]// 
-					           or has a //[[CL:Glossary:fill pointer]]//)
-is considered a visible modification with regard to **[[CL:Functions:equal]]**.
- 
-\endsubsubsubsection%{Visible Modification of Bit Vectors and Strings with respect to EQUAL}
+  or to the //[[CL:Glossary:length]]// of the //[[CL:Glossary:vector]]// (if it is //[[CL:Glossary:actually adjustable]]//  					           or has a //[[CL:Glossary:fill pointer]]//) is considered a visible modification with regard to **[[CL:Functions:equal]]**.
+  \endsubsubsubsection%{Visible Modification of Bit Vectors and Strings with respect to EQUAL}
 
 \endsubsubsection%{Visible Modification of Objects with respect to EQUAL}
 
 \beginsubsubsection{Visible Modification of Objects with respect to EQUALP}
 
-As a consequence of the behavior for **[[CL:Functions:equalp]]**,
-the rules for visible modification of //[[CL:Glossary:objects]]// not explicitly mentioned in this
-section are inherited from those in \secref\VisModEQUAL.
+As a consequence of the behavior for **[[CL:Functions:equalp]]**, the rules for visible modification of //[[CL:Glossary:objects]]// not explicitly mentioned in this section are inherited from those in \secref\VisModEQUAL.
 
 \beginsubsubsubsection{Visible Modification of Structures with respect to EQUALP}
 
-Any visible change to a //[[CL:Glossary:slot]]// of a //[[CL:Glossary:structure]]//
-is considered a visible modification with regard to **[[CL:Functions:equalp]]**.
- 
-\endsubsubsubsection%{Visible Modification of Structures with respect to EQUALP}
- 
-\beginsubsubsubsection{Visible Modification of Arrays with respect to EQUALP}
+Any visible change to a //[[CL:Glossary:slot]]// of a //[[CL:Glossary:structure]]// is considered a visible modification with regard to **[[CL:Functions:equalp]]**.
+  \endsubsubsubsection%{Visible Modification of Structures with respect to EQUALP}
+  \beginsubsubsubsection{Visible Modification of Arrays with respect to EQUALP}
 
 In an //[[CL:Glossary:array]]//, any visible change
      to an //[[CL:Glossary:active]]// //[[CL:Glossary:element]]//,
      to the //[[CL:Glossary:fill pointer]]// (if the //[[CL:Glossary:array]]// can and does have one),
-  or to the //[[CL:Glossary:dimensions]]// (if the //[[CL:Glossary:array]]// is //[[CL:Glossary:actually adjustable]]//)
-is considered a visible modification with regard to **[[CL:Functions:equalp]]**.
+  or to the //[[CL:Glossary:dimensions]]// (if the //[[CL:Glossary:array]]// is //[[CL:Glossary:actually adjustable]]//) is considered a visible modification with regard to **[[CL:Functions:equalp]]**.
 
 \endsubsubsubsection%{Visible Modification of Arrays with respect to EQUALP}
 
 \beginsubsubsubsection{Visible Modification of Hash Tables with respect to EQUALP}
- 
-In a //[[CL:Glossary:hash table]]//, any visible change
+  In a //[[CL:Glossary:hash table]]//, any visible change
      to the count of entries in the //[[CL:Glossary:hash table]]//,
      to the keys,
-  or to the values associated with the keys
-is considered a visible modification with regard to **[[CL:Functions:equalp]]**.
+  or to the values associated with the keys is considered a visible modification with regard to **[[CL:Functions:equalp]]**.
 
-Note that the visibility of modifications to the keys depends on the equivalence test
-of the //[[CL:Glossary:hash table]]//, not on the specification of **[[CL:Functions:equalp]]**.
- 
-\endsubsubsubsection%{Visible Modification of Hash Tables with respect to EQUALP}
+Note that the visibility of modifications to the keys depends on the equivalence test of the //[[CL:Glossary:hash table]]//, not on the specification of **[[CL:Functions:equalp]]**.
+  \endsubsubsubsection%{Visible Modification of Hash Tables with respect to EQUALP}
 
 \endsubsubsection%{Visible Modification of Objects with respect to EQUALP}
 
 \beginsubsubsection{Visible Modifications by Language Extensions}
 
-//[[CL:Glossary:Implementations]]// that extend the language by providing additional mutator
-functions (or additional behavior for existing mutator functions) must
-document how the use of these extensions interacts with equivalence tests and
-//[[CL:Glossary:hash table]]// searches.
- 
-//[[CL:Glossary:Implementations]]// that extend the language by defining additional acceptable
-equivalence tests for //[[CL:Glossary:hash tables]]// (allowing additional values for the **'':test''**
-argument to **[[CL:Functions:make-hash-table]]**) must document the visible components of these
-tests.
+//[[CL:Glossary:Implementations]]// that extend the language by providing additional mutator functions (or additional behavior for existing mutator functions) must document how the use of these extensions interacts with equivalence tests and //[[CL:Glossary:hash table]]// searches.
+  //[[CL:Glossary:Implementations]]// that extend the language by defining additional acceptable equivalence tests for //[[CL:Glossary:hash tables]]// (allowing additional values for the **'':test''** argument to **[[CL:Functions:make-hash-table]]**) must document the visible components of these tests.
 
 \endsubsubsection%{Visible Modifications by Language Extensions}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 \endsubsection%{Modifying Hash Table Keys}
