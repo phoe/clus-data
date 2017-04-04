@@ -1,0 +1,290 @@
+% -*- Mode: TeX -*-
+
+\beginsubSection{Introduction to Streams}
+
+%% 22.0.0 3
+%All input/output operations are performed on \term{streams} of various kinds.
+
+A \newterm{stream} is an \term{object} that can be used with an input or output
+function to identify an appropriate source or sink of \term{characters} or 
+\term{bytes} for that operation.
+%% 21.0.0 3
+%% 21.0.0 4
+A \newterm{character} \newterm{stream} is a source or sink of \term{characters}.
+A \newterm{binary} \newterm{stream} is a source or sink of \term{bytes}.
+
+Some operations may be performed on any kind of \term{stream};
+\thenextfigure\ provides a list of \term{standardized} operations
+that are potentially useful with any kind of \term{stream}.
+
+\displaytwo{Some General-Purpose Stream Operations}{
+close&stream-element-type\cr
+input-stream-p&streamp\cr
+interactive-stream-p&with-open-stream\cr
+output-stream-p&\cr
+}
+
+Other operations are only meaningful on certain \term{stream} \term{types}.
+For example, \funref{read-char} is only defined for \term{character} \term{streams}
+and \funref{read-byte} is only defined for \term{binary} \term{streams}.
+
+\beginsubsubsection{Abstract Classifications of Streams}
+
+\beginsubsubsubsection{Input, Output, and Bidirectional Streams}
+
+%% 21.0.0 3
+A \term{stream}, whether a \term{character} \term{stream} or a \term{binary} \term{stream},
+can be an \newterm{input} \newterm{stream} (source of data),
+       an \newterm{output} \newterm{stream} (sink for data),
+       both, 
+    or (\eg when ``\f{:direction :probe}'' is given to \funref{open}) neither.
+
+\Thenextfigure\ shows \term{operators} relating to
+\term{input} \term{streams}.
+
+\DefineFigure{InputStreamOps}
+\displaythree{Operators relating to Input Streams.}{
+clear-input&read-byte&read-from-string\cr
+listen&read-char&read-line\cr
+peek-char&read-char-no-hang&read-preserving-whitespace\cr
+read&read-delimited-list&unread-char\cr
+}
+
+\Thenextfigure\ shows \term{operators} relating to
+\term{output} \term{streams}.
+
+\DefineFigure{OutputStreamOps}
+\displaythree{Operators relating to Output Streams.}{
+clear-output&prin1&write\cr
+finish-output&prin1-to-string&write-byte\cr
+force-output&princ&write-char\cr
+format&princ-to-string&write-line\cr
+fresh-line&print&write-string\cr
+pprint&terpri&write-to-string\cr
+}
+
+A \term{stream} that is both an \term{input} \term{stream} and an \term{output} \term{stream}
+is called a \newterm{bidirectional} \newterm{stream}.
+\Seefuns{input-stream-p} and \funref{output-stream-p}.
+
+Any of the \term{operators} listed in \figref\InputStreamOps\ or \figref\OutputStreamOps\
+can be used with \term{bidirectional} \term{streams}.  In addition, \thenextfigure\
+shows a list of \term{operators} that relate specificaly to 
+\term{bidirectional} \term{streams}.
+
+\displaythree{Operators relating to Bidirectional Streams.}{
+y-or-n-p&yes-or-no-p&\cr
+}
+
+\endsubsubsubsection%{Input, Output, and Bidirectional Streams}
+
+\beginsubsubsubsection{Open and Closed Streams}
+\DefineSection{OpenAndClosedStreams}
+
+\term{Streams} are either \newterm{open} or \newterm{closed}.  
+
+Except as explicitly specified otherwise,
+operations that create and return \term{streams} return \term{open} \term{streams}.
+
+The action of \term{closing} a \term{stream} marks the end of its use as a source
+or sink of data, permitting the \term{implementation} to reclaim its internal data
+structures, and to free any external resources which might have been locked by the
+\term{stream} when it was opened.
+
+Except as explicitly specified otherwise,
+the consequences are undefined when a \term{closed} \term{stream} 
+is used where a \term{stream} is called for.
+
+Coercion of \term{streams} to \term{pathnames} 
+is permissible for \term{closed} \term{streams};
+in some situations, such as for a \term{truename} computation, 
+the result might be different for an \term{open} \term{stream}
+and for that same \term{stream} once it has been \term{closed}.
+
+\endsubsubsubsection%{Open and Closed Streams}
+
+\beginsubsubsubsection{Interactive Streams}
+\DefineSection{InteractiveStreams}
+
+An \newterm{interactive stream} is one on which it makes sense to perform
+interactive querying.
+
+The precise meaning of an \term{interactive stream} is
+\term{implementation-defined}, and may depend on the underlying
+operating system.  Some examples of the things that an
+\term{implementation} might choose to use as identifying characteristics
+of an \term{interactive stream} include:
+
+\beginlist
+
+\itemitem{\bull} 
+  The \term{stream} is connected to a person (or equivalent) in such a way
+  that the program can prompt for information and expect to receive different
+  input depending on the prompt.
+
+\itemitem{\bull}
+  The program is expected to prompt for input and support ``normal input editing''.
+
+\itemitem{\bull} 
+  \funref{read-char} might wait for the user to type something before returning
+  instead of immediately returning a character or end-of-file. 
+
+\endlist 
+
+The general intent of having some \term{streams} be classified as
+\term{interactive streams} is to allow them to be distinguished from
+streams containing batch (or background or command-file) input.
+Output to batch streams is typically discarded or saved for later viewing, 
+so interactive queries to such streams might not have the expected effect.
+
+\term{Terminal I/O} might or might not be an \term{interactive stream}.
+
+\endsubsubsubsection%{Interactive Streams}
+
+\beginsubsubsection{Abstract Classifications of Streams}
+
+\beginsubsubsubsection{File Streams}
+
+%% 23.2.0 1
+Some \term{streams}, called \newtermidx{file streams}{file stream}, provide access to \term{files}.
+An \term{object} \ofclass{file-stream} is used to represent a \term{file stream}.
+
+The basic operation for opening a \term{file} is \funref{open},
+which typically returns a \term{file stream} 
+(see its dictionary entry for details).
+The basic operation for closing a \term{stream} is \funref{close}.
+The macro \macref{with-open-file} is useful 
+to express the common idiom of opening a \term{file} 
+for the duration of a given body of \term{code}, 
+and assuring that the resulting \term{stream} is closed upon exit from that body.
+
+\endsubsubsubsection%{File Streams}
+
+\beginsubsubsection{Other Subclasses of Stream}
+
+\Theclass{stream} has a number of \term{subclasses} defined 
+by this specification.  \Thenextfigure\ shows some information 
+about these subclasses.
+
+\tablefigtwo{Defined Names related to Specialized Streams}{Class}{Related Operators}{
+ \typeref{broadcast-stream}    & \funref{make-broadcast-stream}        \cr
+                               & \funref{broadcast-stream-streams}     \cr
+ \typeref{concatenated-stream} & \funref{make-concatenated-stream}     \cr
+                               & \funref{concatenated-stream-streams}  \cr
+ \typeref{echo-stream}         & \funref{make-echo-stream}             \cr
+                               & \funref{echo-stream-input-stream}     \cr
+                               & \funref{echo-stream-output-stream}    \cr
+ \typeref{string-stream}       & \funref{make-string-input-stream}     \cr
+                               & \funref{with-input-from-string}       \cr
+                               & \funref{make-string-output-stream}    \cr
+                               & \funref{with-output-to-string}        \cr
+                               & \funref{get-output-stream-string}     \cr
+ \typeref{synonym-stream}      & \funref{make-synonym-stream}          \cr
+                               & \funref{synonym-stream-symbol}        \cr
+ \typeref{two-way-stream}      & \funref{make-two-way-stream}          \cr
+                               & \funref{two-way-stream-input-stream}  \cr
+                               & \funref{two-way-stream-output-stream} \cr
+}
+
+\endsubsubsection%{Other Subclasses of Stream}
+
+\endsubSection%{Introduction to Streams}
+
+\beginsubSection{Stream Variables}
+
+\term{Variables} whose \term{values} must be \term{streams} are sometimes called 
+\newtermidx{stream variables}{stream variable}.
+
+Certain \term{stream variables} are defined by this specification 
+to be the proper source of input or output in various \term{situations} 
+where no specific \term{stream} has been specified instead.
+A complete list of such \term{standardized} \term{stream variables}
+appears in \thenextfigure.  
+%Added by agreement of Barrett, Loosemore, and KMP. -kmp 14-Feb-92
+The consequences are undefined if at any time
+the \term{value} of any of these \term{variables} is not an \term{open} \term{stream}.
+
+\DefineFigure{StandardizedStreamVars}
+\tablefigtwo{Standardized Stream Variables}{Glossary Term}{Variable Name}{
+ \term{debug I/O}       & \varref{*debug-io*}        \cr
+ \term{error output}    & \varref{*error-output*}    \cr
+ \term{query I/O}       & \varref{*query-io*}        \cr
+ \term{standard input}  & \varref{*standard-input*}  \cr
+ \term{standard output} & \varref{*standard-output*} \cr
+ \term{terminal I/O}    & \varref{*terminal-io*}     \cr
+ \term{trace output}    & \varref{*trace-output*}    \cr
+}
+
+Note that, by convention, \term{standardized} \term{stream variables} have names 
+    ending in ``\f{-input*}''  if they must be \term{input} \term{streams},
+    ending in ``\f{-output*}'' if they must be \term{output} \term{streams},
+ or ending in ``\f{-io*}''     if they must be \term{bidirectional} \term{streams}.
+
+User programs may \term{assign} or \term{bind} any \term{standardized} \term{stream variable}
+except \varref{*terminal-io*}.
+
+\endsubSection%{Stream Variables}
+
+\beginsubSection{Stream Arguments to Standardized Functions}
+\DefineSection{StreamArgsToStandardizedFns}
+
+%This list conjured by KMP, Barrett, and Loosemore. -kmp 14-Feb-92
+The \term{operators} in \thenextfigure\ accept \term{stream} \term{arguments} that
+might be either \term{open} or \term{closed} \term{streams}.
+
+\DefineFigure{OpenOrClosedStreamOps}
+\displaythree{Operators that accept either Open or Closed Streams}{
+broadcast-stream-streams&file-author&pathnamep\cr
+close&file-namestring&probe-file\cr
+compile-file&file-write-date&rename-file\cr
+compile-file-pathname&host-namestring&streamp\cr
+concatenated-stream-streams&load&synonym-stream-symbol\cr
+delete-file&logical-pathname&translate-logical-pathname\cr
+directory&merge-pathnames&translate-pathname\cr
+directory-namestring&namestring&truename\cr
+dribble&open&two-way-stream-input-stream\cr
+echo-stream-input-stream&open-stream-p&two-way-stream-output-stream\cr
+echo-stream-ouput-stream&parse-namestring&wild-pathname-p\cr
+ed&pathname&with-open-file\cr
+enough-namestring&pathname-match-p&\cr
+}
+
+%This list conjured by KMP, Barrett, and Loosemore. -kmp 14-Feb-92
+The \term{operators} in \thenextfigure\ accept \term{stream} \term{arguments} that
+must be \term{open} \term{streams}.
+
+\displaythree{Operators that accept Open Streams only}{
+clear-input&output-stream-p&read-char-no-hang\cr
+clear-output&peek-char&read-delimited-list\cr
+file-length&pprint&read-line\cr
+file-position&pprint-fill&read-preserving-whitespace\cr
+file-string-length&pprint-indent&stream-element-type\cr
+finish-output&pprint-linear&stream-external-format\cr
+force-output&pprint-logical-block&terpri\cr
+format&pprint-newline&unread-char\cr
+fresh-line&pprint-tab&with-open-stream\cr
+get-output-stream-string&pprint-tabular&write\cr
+input-stream-p&prin1&write-byte\cr
+interactive-stream-p&princ&write-char\cr
+listen&print&write-line\cr
+make-broadcast-stream&print-object&write-string\cr
+make-concatenated-stream&print-unreadable-object&y-or-n-p\cr
+make-echo-stream&read&yes-or-no-p\cr
+make-synonym-stream&read-byte&\cr
+make-two-way-stream&read-char&\cr
+}
+ 
+\endsubSection%{Stream Arguments to Standardized Functions}
+
+\beginsubSection{Restrictions on Composite Streams}
+
+%KMP, Loosemore, and Barrett thought this stuff should be made explicit. -kmp 14-Feb-92
+
+The consequences are undefined if any \term{component} of a \term{composite stream}
+is \term{closed} before the \term{composite stream} is \term{closed}.
+
+The consequences are undefined if the \term{synonym stream symbol} is not \term{bound}
+to an \term{open} \term{stream} from the time of the \term{synonym stream}'s creation
+until the time it is \term{closed}.
+
+\endsubSection%{Restrictions on Composite Streams}

@@ -1,0 +1,634 @@
+% -*- Mode: TeX -*-
+%%Implementation-defined Features
+
+\editornote{KMP: I have made no effort to keep this up to date.
+		 When the document is nearly complete, I'll search for
+		 occurrences of ``implementation-defined'' and
+		 ``implementation-dependent'' and bring this up to date.
+		 Don't worry about consistency issues here for now; the main document
+		 takes precedence.   But do feel free
+		 to comment on things which are mentioned in the running text
+		 of the main document that are not marked as implementation-defined
+		 but should not be, etc.}
+
+The following sections contain lists of \term{implementation-dependent} 
+language characteristics.
+For more
+information about each of these implementation dependencies, 
+see the dictionary entries for the description of the \term{defined name} being qualified.
+
+\beginsubSection{Values}
+%%\item{2.}
+\beginlist
+\item{1.}
+An implementation determines the initial values of the \term{defined names}
+in \thenextfigure.
+
+\displaytwo{Implementation-defined values}{
+boole-1&boole-nand\cr
+boole-2&boole-nor\cr
+boole-and&boole-orc1\cr
+boole-c1&boole-orc2\cr
+boole-c2&boole-set\cr
+boole-clr&boole-xor\cr
+boole-eqv&\cr
+&\cr
+*features*&char-code-limit\cr
+array-dimension-limit&internal-time-units-per-second\cr
+array-rank-limit&lambda-parameters-limit\cr
+array-total-size-limit&multiple-values-limit\cr
+call-arguments-limit&\cr
+&\cr
+double-float-negative-epsilon&most-negative-fixnum\cr
+least-negative-double-float&most-negative-long-float\cr
+least-negative-long-float&most-negative-short-float\cr
+least-negative-short-float&most-negative-single-float\cr
+least-negative-single-float&most-positive-double-float\cr
+least-positive-double-float&most-positive-fixnum\cr
+least-positive-long-float&most-positive-long-float\cr
+least-positive-short-float&most-positive-short-float\cr
+least-positive-single-float&most-positive-single-float\cr
+long-float-negative-epsilon&short-float-negative-epsilon\cr
+most-negative-double-float&single-float-negative-epsilon\cr
+&\cr
+*load-verbose*&*random-state*\cr
+*print-array*&*read-default-float-format*\cr
+*print-pretty*&\cr
+}
+      
+%%\item{42.}        
+\item{2.} The implementation determines the defaults for the arguments
+to the keywords
+\kwd{rehash-size} and 
+\kwd{rehash-threshold} 
+for \funref{make-hash-table}.
+
+%%\item{44.} 
+\item{3.} The implementation determines the way in which a 
+\term{sequence} is initialized if an \kwd{initial-element} 
+argument is not supplied. See \funref{make-sequence}.
+The implementation determines the way in which a 
+\term{string} is initialized if an \kwd{initial-element} 
+argument is not supplied. See \funref{make-string}.
+Also, the implementation determines the way in which an
+\term{array} is initialized if \kwd{initial-element},
+\kwd{initial-contents}, or \kwd{displaced-to}
+arguments are not supplied. See \funref{make-array}.
+
+%%\item{58.} 
+%\item{4.} Valid values for the argument to
+%\funref{char-bit} and \funref{set-char-bit}
+%are \term{implementation-dependent}.
+
+\endlist
+\endsubSection%{Values}
+
+\beginsubSection{Results}
+\beginlist
+\item{1.}
+%%12.5.2 7
+An implementation may return the result of the absolute value of 
+a \term{complex} number composed of \term{integer} real
+and imaginary parts as either a \term{float} 
+or an \term{integer}. See \funref{abs}.
+
+%%\item{7.}
+\item{2.}
+An implementation determines the result returned from 
+\funref{lisp-implementation-type},
+\funref{type-of},
+ \funref{lisp-implementation-version}, and \funref{software-version}.
+
+%%\item{18.} 
+\item{3.} An implementation determines the result of \funref{digit-char}
+when more than one character object can encode the supplied weight in
+the given radix.
+
+%%\item{20.} 
+\item{4.} An implementation may determine the consequences in 
+\macref{do} and
+\macref{do*} when the index variable is changed within the iteration
+loop.
+
+%%\item{30.} 
+\item{5.}
+The result of \funref{file-position} for a character file
+is \term{implementation-dependent}.
+
+%%\item{34.} 
+\item{6.}
+An implementation determines the order of elements in the results 
+of \funref{intersection},  \funref{set-difference}, and \funref{union}
+%!!! derivatives?? gads. maybe make that a glossary word?  functions dependent
+%   on that function, i guess it means. -kmp 3-Jan-91
+and derivatives of those functions.
+\editornote{KMP: ``derivatives??'' terminology to be worked on.}
+Some element-processing aspects of sorting are \term{implementation-dependent}.
+See \funref{sort}.
+
+%%\item{36.} 
+\item{7.}  
+Whether or not \funref{length} or any sequence operation returns when given 
+a \term{circular list} is \term{implementation-dependent}.
+
+%%\item{39.} 
+\item{8.}
+The implementation determines the \term{type} of the result of \funref{log}
+(\typeref{integer} or \typeref{float}) when its arguments are both
+\term{integers} and the result is a whole number.
+ 
+%%\item{41.} 
+%\item{9.} The implementation determines the result of \funref{make-char}.
+
+%%\item{46.} 
+\item{9.} An implementation determines the result of 
+{\tt (eq (symbol-name (make-symbol x)) x)}.
+                                       
+%%\item{47.} 
+\item{10.} 
+An implementation determines the \term{type} 
+of the result of \funref{max} and \funref{min} in the following cases.
+\beginlist
+\itemitem{a.}
+If the arguments are a mixture of \term{rationals} and \term{floats}
+and the largest argument is a \term{rational}.
+\itemitem{b.} If the largest argument is a \term{float} number of a smaller format
+than the largest format of any \term{float} argument.
+\endlist
+In addition, if one or more of the arguments are equal, then any one
+of them may be chosen as the value to return.
+%%\item{62.} 
+%\issue{SPECIAL-FORM-P-MISNOMER:RENAME}
+%\item{12.} \funref{special-operator-p} can return a \term{non-nil} value,
+%the identity of which is \term{implementation-dependent}.
+%\endissue{SPECIAL-FORM-P-MISNOMER:RENAME}
+
+%%\item{63.} 
+\item{11.} If the argument to \funref{sqrt} is an \term{integer},
+the result may be either an \term{integer} or a \term{float} depending on the
+\term{implementation}.  Also, if the argument to \funref{sqrt}
+is a negative \term{integer}, the result may be either
+a \term{complex} with \term{integer} components or
+a \term{complex} with \term{float} components.
+
+%%\item{64.} 
+\item{12.} If no characters in the argument to \funref{string-trim},
+\funref{string-left-trim}, \funref{string-right-trim}, 
+\funref{string-upcase}, \funref{string-downcase}, and
+\funref{string-capitalize} need to be changed, then the implementation can
+either return the argument itself or a copy of it.
+This is true for all destructive \term{sequence functions}.
+
+%%\item{71.} 
+\item{13.} When the arguments to the mathematical \term{functions}
+in \thenextfigure\ are all \term{rational} and the true mathematical result
+is also (mathematically) rational, then unless otherwise noted
+an implementation is free to return either an accurate result \oftype{rational}
+or a \term{single float} approximation.
+If the arguments are all \term{rational} 
+but the result cannot be expressed
+as a \term{rational} number, then a \term{single float} 
+approximation is always returned.
+
+\displaythree{Irrational and transcendental functions}{
+abs&cis&phase\cr
+acos&cos&signum\cr
+acosh&cosh&sin\cr
+asin&exp&sinh\cr
+asinh&expt&sqrt\cr
+atan&isqrt&tan\cr
+atanh&log&tanh\cr
+}
+
+\endlist
+\endsubSection%{Results}
+
+
+\beginsubSection{Data Representation and Typing}
+\beginlist
+%%\item{5.}
+\item{1.}
+An implementation determines the representation of a byte specifier.
+
+%%\item{9.}
+\item{2.}
+Type upgrading may occur when \funref{coerce} is used.
+%\Seesection\TypeUpgrading.
+%%\item{27.} 
+\item{3.} An implementation determines the structure of the 
+\term{environment}
+object.     
+%%\item{75.} 
+%\item{4.} The existence of 
+%\term{types} that are not \term{subtypes} of \typeref{common}
+%is \term{implementation-dependent}.
+
+\item{4.} Whether or not \thetypes{short-float}, \typeref{long-float},
+\typeref{single-float}, and \typeref{double-float} are
+\term{disjoint} is \term{implementation-dependent}.
+%!!! But subject to certain constraints, no? -kmp 9-May-91
+%\Seesection\TypeUpgrading.
+
+\endlist
+\endsubSection%{Data Representation and Typing}
+
+\beginsubSection{Program and Control Structure}
+\beginlist
+
+%%\item{13.}
+%\item{1.}
+%An implementation 
+%might or might not check for any dynamic \term{bindings}
+%of the first argument to \macref{defconstant} at the time 
+%\macref{defconstant} is executed.
+
+
+
+%%\item{14.}
+\item{1.}
+An implementation determines the way that \macref{defmacro}
+actually installs a macro function.
+
+%%\item{15.}
+\item{2.}
+An implementation determines the code generated by \macref{defsetf}.
+
+%%\item{16.}
+\item{3.}
+The following are \term{implementation-dependent} features of \macref{defstruct}:
+\beginlist
+\itemitem{a.} The initial contents of a slot, when they have not been provided,
+are specified by the implementation.
+\itemitem{b.} The \term{access} \term{functions} may be declared \declref{inline}.
+\itemitem{c.} The incorrect use of \term{access} \term{functions} might or might not be checked
+by an implementation.
+\itemitem{d.} %For included slots, 
+An implementation might or might not enforce the declared \term{type} information
+for a slot.
+%!!! Is this still true under CLOS?? -kmp 9-May-91
+\itemitem{e.} If the \kwd{type} option is not supplied,
+the implementation determines the representation of the \term{structure}. 
+%%(see clean-up issue)
+\endlist
+
+%%\item{35.} 
+\item{4.} The permissibility of non-standard lambda-list
+keywords is \term{implementation-dependent}.
+
+%%\item{40.} 
+\item{5.} 
+An implementation is free to implement as a \term{special operator}
+any \term{operator} described in this standard as a \term{macro},
+if an equivalent macro definition is also provided.
+See \funref{macro-function}.
+
+%%\item{60.} 
+\item{6.} 
+The exact expansion for any particular form given to \macref{setf} 
+may be \term{implementation-dependent}.
+
+%%\item{76.} 
+\item{7.} The internal representation of 
+a backquoted \term{form} is \term{implementation-dependent}.
+
+\endlist
+\endsubSection%{Program and Control Structure}
+
+\beginsubSection{Comparisons}
+%\beginlist
+%%\item{6.}
+%\item{1.}
+%An implementation determines the way font information is compared in the
+%functions \funref{char-equal}, 
+%\funref{char-not-equal}, \funref{char-lessp}, 
+%\funref{char-greaterp},
+%\funref{char-not-greaterp}, and \funref{char-not-lessp}. Where not
+%specified by this standard, the ordering of 
+%characters is \term{implementation-dependent}.
+%\endlist
+\endsubSection%{Comparisons}
+
+
+
+
+\beginsubSection{Numerical Calculations}
+\beginlist
+%%\item{8.} 
+\item{1.} 
+  \funref{minusp}, \funref{eql}, \funref{float-sign}, and \funref{zerop}
+  are affected by the presence of {\tt $-0.0$} in an implementation.
+
+%%\item{24.} 
+\item{2.}
+  Whether or not two \term{numbers} or \term{characters}
+  that are \funref{eql} are \funref{eq} depends on the implementation.
+
+%%%\item{29.} 
+%\item{3.} An implementation may use different algorithms
+%for the cases of a \term{rational} second 
+%argument and a \term{float}
+%second argument to \funref{expt}.
+
+%%\item{55.} 
+\item{3.} Random number generation is \term{implementation-dependent}.
+
+
+%%\item{70.} 
+\item{4.} For the \term{operators} in \thenextfigure,
+an implementation may process the arguments in any manner consistent
+with associative (and possibly commutative) rearrangement.
+
+\displaythree{Mathematically associative operators}{
+*&boole&lognand\cr
++&gcd&lognor\cr
+/=&lcm&logorc1\cr
+<&logand&logorc2\cr
+<=&logandc1&logxor\cr
+=&logandc2&max\cr
+>&logeqv&min\cr
+>=&logior&\cr
+}
+
+Implementations may differ in 
+which automatic coercions are applied because of differing
+orders of argument processing. 
+
+%%\item{72.} 
+\item{5.} 
+The precise definitions of \typeref{short-float},
+\typeref{long-float}, \typeref{single-float}, and 
+\typeref{double-float} are \term{implementation-dependent}
+(but subject to certain constraints imposed by this specification).
+
+\endlist
+\endsubSection%{Numerical Calculations}
+
+
+\beginsubSection{User Interface}
+\beginlist
+%%\item{.}
+\item{1.}
+\Thenextfigure\ shows the names of \term{operators} which have
+an \term{implementation-dependent} user interface.
+
+\displaythree{Operators with Implementation-Dependent User Interfaces}{
+break&ctypecase&step\cr
+ccase&describe&warn\cr
+ccase&disassemble&y-or-n-p\cr
+cerror&error&yes-or-no-p\cr
+check-type&inspect&\cr
+}
+%I removed "Anything that uses CERROR" as unnecessary. In general you don't
+%know what really uses CERROR and what doesn't anyway. -kmp 13-Feb-91
+
+\endlist
+\endsubSection%{User Interface}
+
+
+\beginsubSection{Input/Output}
+\beginlist
+
+%%\item{17.} 
+\item{1.} An implementation determines whether an attempt by 
+\funref{delete-file} to delete a non-existent file is considered to be successful.
+
+%%\item{19.} 
+\item{2.} An implementation may define keywords to be used with
+\funref{directory}.
+
+%%\item{31.} 
+\item{3.} An implementation determines the precise actions of
+\funref{finish-output}, \funref{clear-output}, and
+\funref{force-output}. 
+
+%%\item{31a.} 
+\item{4.} \term{Streams} 
+may be implemented in an asynchronous or buffered manner.
+
+%%\item{32.} 
+\item{5.} \funref{format} has the following \term{implementation-defined}
+features:
+\beginlist
+%% CLean-up item on this
+\itemitem{a.} \f{~C} prints a character in an \term{implementation-dependent}
+abbreviated format.  
+
+\itemitem{b.} The precise output for \f{~:@C} depends 
+on the implementation.
+\itemitem{c.} When rounding up and rounding down would produce printed values
+equidistant from the scaled value of the argument, then the implementation
+is free to use either one.  
+\itemitem{d.} For the \f{~\$} operation, if the magnitude of the argument is so large or small 
+that more than 100 digits would have to
+be printed, then an implementation is free, at its discretion, to print
+the number using exponential notation.
+\itemitem{e.} For the \f{~\$} operation, if 
+the argument is a \term{rational} number, 
+then it is coerced to be a \term{single float}
+or processed by any other method that has essentially the
+same behavior. 
+Only a finite number of digits may be printed.
+\itemitem{f.} The range of numbers and the font of the printed output
+for the \f{~R} operation are \term{implementation-dependent}. 
+The English words printed as a result of the \f{~R} operation are
+\term{implementation-dependent}. 
+\endlist
+%%\item{37.} 
+\item{6.} The means by which a text (character file) 
+is distinguished from an object (binary) file by \funref{load} is
+\term{implementation-dependent}. 
+
+%%\item{38.} 
+\item{7.} The selection by \funref{load} of a file type when there
+is a choice is \term{implementation-dependent}.
+
+%%\item{43.} 
+\item{8.} The implementation determines the internal representation
+of a \term{pathname}. See \funref{make-pathname}.
+
+%%\item{48.} 
+\item{9.} The following aspects of \funref{open}
+are \term{implementation-dependent}:
+\beginlist
+\itemitem{a.} The meaning of the keyword \kwd{supersede}.
+%\itemitem{b.} An implementation is required to recognize all of 
+%the following \kwd{if-exists} keywords
+%and to do something reasonable in the context of the host operating
+%system:
+%\kwd{error},
+%\kwd{new-version},
+%\kwd{rename},
+%\kwd{rename-and-delete},
+%\kwd{overwrite},
+%\kwd{append},
+%\kwd{supersede}, or
+%\nil.       
+
+\itemitem{b.} If it is impossible for an implementation to handle some option
+in a manner close to what is specified in this manual, an error may be
+signaled.
+\endlist                                             
+
+%%\item{50.} 
+\item{10.} \funref{parse-namestring}
+might or might not signal an error if
+the representation of a \term{pathname} 
+is surrounded on either side by
+\term{whitespace}\meaning{1} characters, depending on the \term{implementation}.
+Whether or not \funref{parse-namestring} supplies 
+the
+standard default device as the device component
+of the resulting \term{pathname} depends on the implementation.
+
+%%\item{51.} 
+\item{11.} The \term{pathname} namestring
+syntax is \term{implementation-dependent}.
+The printed representation of a pathname
+typically designates \kwd{wild} by an asterisk; however, this is
+\term{implementation-dependent}.    
+
+%%\item{52.} 
+\item{12.} A \term{character} name or a \term{pathname} that is printed
+is acceptable as input in only the implementation which typed it.  
+Which names for characters are chosen to print is
+\term{implementation-dependent}, although standard names are
+chosen over non-standard names. See \funref{write}.
+        
+%%\item{53.} 
+%\item{13.} The printed representation of a
+%\term{random state} \term{object} is \term{implementation-dependent}.
+
+%%\item{54.} 
+\item{13.} \term{Objects} which do not have a specific syntax
+specified in this manual are printed in an \term{implementation-dependent} manner.  
+
+%%\item{68.} 
+\item{14.} The \param{host} argument to \funref{user-homedir-pathname}
+defaults in an \term{implementation-dependent} manner.
+
+%% Following two are affected by the character set proposal.
+%%\item{77.} 
+\item{15.} Whether the following 
+character names are supported is \term{implementation-dependent}:
+\f{rubout}, \f{page}, \f{tab}, \f{backspace}, \f{return}, and \f{linefeed}.
+%%\item{78.} 
+%\item{17.} Whether 
+%characters with non-zero \param{bits} and \param{font} \term{attributes}
+%syntax
+%descriptions are in the \term{readtable} is \term{implementation-dependent}.
+
+\endlist
+\endsubSection%{Input/Output}
+                           
+
+\beginsubSection{Compiling}
+\beginlist
+%%\item{10.}
+\item{1.}
+An implementation determines the following for \funref{compile-file}:
+\beginlist
+\itemitem{a.} The contents of the file created by \funref{compile-file}.
+\itemitem{b.} The file 
+specification (if one is not supplied)
+for the file created by \funref{compile-file}.
+\endlist
+%%\item{12.}
+\item{2.}
+An implementation's compiler can ignore declaration specifiers
+except for \declref{declaration}, \declref{special}, and \declref{notinline}.
+
+%%\item{25.} 
+\item{3.} An implementation may coalesce constants or portions of constants
+in code to be compiled if they appear to be \funref{eq}
+or \funref{eql} and are \funref{equal}.
+\Seesection\Compilation.
+
+\endlist
+\endsubSection%{Compiling}
+
+
+\beginsubSection{Miscellaneous}
+\beginlist
+%%\item{4.}
+\item{1.}
+An implementation determines the specifics of the
+debugger that \funref{break} enters.
+
+%%\item{74.} 
+\item{2.} Although functions that manipulate \term{packages}
+generally signal
+name conflict errors before making any change to the package structure, an
+implementation may \funref{export} 
+each of a given list of \term{symbols} separately.
+
+%%\item{49.} 
+%\item{3.} The contents of \thepackage{system} are determined by
+%the implementation.
+
+%%\item{57.} 
+\item{3.} 
+ The frequency of execution of \param{test} and \param{key}
+ functions for all \term{sequence functions} is \term{implementation-dependent}. 
+ The implementation of \funref{search} may choose to search the \term{sequence} 
+ in any order.
+\reviewer{Is the order of other things specified??}
+
+%%\item{65.} 
+\item{4.} The manner in which a 
+hash code is computed by \funref{sxhash}
+is \term{implementation-dependent}. 
+
+%% clean-up pending for this
+%%\item{69.} 
+\item{5.} The optional argument \param{extension}
+for \funref{vector-push-extend}
+defaults to a ``reasonable'' \term{implementation-dependent}
+value.
+
+%%\item{73.} 
+\item{6.} A \term{symbol}'s \term{property list} may have defined components.
+
+%%\item{11.}
+\item{7.}
+An implementation can define declaration specifiers other than the ones
+given in the description of \misc{declare}.
+
+\endlist
+\endsubSection%{Miscellaneous}
+
+
+\beginsubSection{Programming Environment}
+\beginlist
+%%\item{22.} 
+\item{1.} An implementation might or might not provide a resident editor.
+See \funref{ed}.
+
+%%\item{23.} 
+\item{2.} An implementation determines the means by which
+function text is obtained when \f{(ed \i{symbol})} is invoked.
+
+%%\item{33.} 
+\item{3.} An implementation determines the units used in representing
+Internal Time.
+See \funref{get-internal-run-time}.
+
+%%\item{56.} 
+\item{4.} The information \funref{room} prints is
+\term{implementation-dependent}.  
+%%\item{66.} 
+\item{5.} The nature and
+format of the information printed by \funref{time} 
+is \term{implementation-dependent}.  
+           
+%%\item{67.} 
+\item{6.} The following are implementation dependencies of
+tracing.
+\beginlist
+\itemitem{a.} \macref{trace} and \macref{untrace} may accept 
+\term{implementation-dependent} argument formats.  
+\itemitem{b.} The format of the \macref{trace}
+output is \term{implementation-dependent}.
+\endlist        
+\endlist        
+\endsubSection%{Programming Environment}
+

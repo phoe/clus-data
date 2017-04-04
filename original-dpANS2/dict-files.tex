@@ -1,0 +1,725 @@
+% -*- Mode: TeX -*-
+
+% Files
+%  Directory
+%   Directory Query
+%    File Properties
+%   Directory Modification
+
+%-------------------- Directory Query --------------------
+
+%%% ========== DIRECTORY
+\begincom{directory}\ftype{Function}
+
+%% 23.5.0 3
+\label Syntax::
+
+\DefunWithValues directory {pathspec {\key}} {pathnames}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\param{pathspec}---a \term{pathname designator},
+		   which may contain \term{wild} components.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\param{pathnames}---a \term{list} of
+\issue{PATHNAME-LOGICAL:ADD}
+\term{physical pathnames}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\label Description::
+
+%% 23.5.0 4
+
+Determines which, if any, \term{files} that are present
+in the file system have names matching \param{pathspec},
+and returns a 
+\issue{RESULT-LISTS-SHARED:SPECIFY}
+\term{fresh}
+\endissue{RESULT-LISTS-SHARED:SPECIFY}
+\term{list} of \term{pathnames} corresponding to the \term{truenames} of
+those \term{files}.
+
+An \term{implementation} may be extended to accept 
+\term{implementation-defined} keyword arguments to \funref{directory}.  
+
+\label Examples:\None.
+
+\label Affected By::
+
+The host computer's file system.
+
+\label Exceptional Situations::
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+If the attempt to obtain a directory listing is not successful,
+an error \oftype{file-error} is signaled.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label See Also::
+
+\typeref{pathname},
+\issue{PATHNAME-LOGICAL:ADD}
+\typeref{logical-pathname},
+\endissue{PATHNAME-LOGICAL:ADD}
+\funref{ensure-directories-exist},
+{\secref\FileSystemConcepts},
+{\secref\OpenAndClosedStreams},
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes::
+
+If the \param{pathspec} is not \term{wild},
+the resulting list will contain either zero or one elements.
+
+\clisp\ specifies ``{\key}'' in the argument list to \funref{directory} 
+even though no \term{standardized} keyword arguments to \funref{directory} are defined.
+``\f{:allow-other-keys t}''
+may be used in \term{conforming programs} in order to quietly ignore any
+additional keywords which are passed by the program but not supported
+by the \term{implementation}.
+
+\endcom
+
+%%% ========== PROBE-FILE
+\begincom{probe-file}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues probe-file {pathspec} {truename}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\param{pathspec}---a \term{pathname designator}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\issue{PATHNAME-LOGICAL:ADD}
+\param{truename}---a \term{physical pathname} or \nil.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\label Description::  
+
+\funref{probe-file} tests whether a file exists.
+
+%% 23.3.0 12
+\funref{probe-file} returns \term{false} if there is no file named \param{pathspec},
+and otherwise returns the \term{truename} of \param{pathspec}.
+
+If the \param{pathspec} \term{designator} is an open \term{stream},
+then \funref{probe-file} produces the \term{truename} of its associated \term{file}.
+%!!! Sandra wonders if the following is implied by "pathname designator":
+\issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+If \param{pathspec} is a \term{stream}, whether open or closed,
+it is coerced to a \term{pathname} as if by \thefunction{pathname}.
+\endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+
+\label Examples:\None.
+
+\label Affected By::
+
+The host computer's file system.
+
+\label Exceptional Situations::
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+An error \oftype{file-error} is signaled if \param{pathspec} is \term{wild}.
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+%% Wording changed per x3j13 (05-Oct-93) -kmp
+% If the probe attempt is not successful,
+% an error \oftype{file-error} is signaled.
+An error \oftype{file-error} is signaled
+if the \term{file system} cannot perform the requested operation.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label See Also::
+
+\funref{truename},
+\funref{open},
+\funref{ensure-directories-exist},
+\typeref{pathname},
+\issue{PATHNAME-LOGICAL:ADD}
+\typeref{logical-pathname},
+\endissue{PATHNAME-LOGICAL:ADD}
+{\secref\FileSystemConcepts},
+{\secref\OpenAndClosedStreams},
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== ENSURE-DIRECTORIES-EXIST
+\begincom{ensure-directories-exist}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues ensure-directories-exist {pathspec {\key} verbose} {pathspec, created}
+
+\label Arguments and Values::
+
+\param{pathspec}---a \term{pathname designator}.
+
+\param{verbose}---a \term{generalized boolean}.
+
+\param{created}---a \term{generalized boolean}.
+
+\label Description::  
+
+Tests whether the directories containing the specified \term{file} actually exist,
+and attempts to create them if they do not.
+
+If the containing directories do not exist and if \param{verbose} is \term{true}, 
+then the \term{implementation} is permitted (but not required) 
+to perform output to \term{standard output} saying what directories were created.
+If the containing directories exist, or if \param{verbose} is \term{false},
+this function performs no output.
+
+The \term{primary value} is the given \term{pathspec} so that this operation can
+be straightforwardly composed with other file manipulation expressions.
+The \term{secondary value}, \param{created}, is \term{true} if any directories were
+created.
+
+\label Examples:\None.
+
+\label Affected By::
+
+The host computer's file system.
+
+\label Exceptional Situations::
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+%% Confusion over type of error signaled resolved by x3j13 05-Oct-93
+%%  (type-error => file-error). -kmp
+An error \oftype{file-error} is signaled if the host, device, or directory
+part of \param{pathspec} is \term{wild}.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+If the directory creation attempt is not successful,
+an error \oftype{file-error} is signaled;
+if this occurs, 
+it might be the case that none, some, or all
+of the requested creations have actually occurred 
+within the \term{file system}.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+%% Removed per X3J13 05-Oct-93.
+%%  See first paragraph of Exceptional Situations above. -kmp
+% \issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+% An error \oftype{file-error} might be signaled if \param{pathspec}
+% is a \term{designator} for a \term{wild} \term{pathname}.
+% \endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label See Also::
+
+\funref{probe-file},
+\funref{open},
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\endcom
+
+
+
+%%% ========== TRUENAME
+\begincom{truename}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues truename {filespec} {truename}
+
+\label Arguments and Values:: 
+
+\issue{PATHNAME-LOGICAL:ADD}
+\param{filespec}---a \term{pathname designator}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\issue{PATHNAME-LOGICAL:ADD}
+\param{truename}---a \term{physical pathname}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\label Description::
+
+\funref{truename} tries to find the \term{file} indicated by 
+\param{filespec} and returns its \term{truename}.
+%!!! Sandra wonders if the following is implied by "pathname designator":
+%% 23.1.2 6
+If the \param{filespec} \term{designator} is an open \term{stream},
+its associated \term{file} is used.
+\issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+If \param{filespec} is a \term{stream},
+\funref{truename} can be used whether the \term{stream}
+is open or closed. It is permissible for \funref{truename} 
+to return more specific information after the \term{stream}
+is closed than when the \term{stream} was open.
+\endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+If \param{filespec} is a \term{pathname} 
+it represents the name used to open the file. This may be, but is
+not required to be, the actual name of the file. 
+
+\label Examples::
+
+\code
+;; An example involving version numbers.  Note that the precise nature of
+;; the truename is implementation-dependent while the file is still open.
+ (with-open-file (stream ">vistor>test.text.newest")
+   (values (pathname stream)
+           (truename stream)))
+\EV #P"S:>vistor>test.text.newest", #P"S:>vistor>test.text.1"
+\OV #P"S:>vistor>test.text.newest", #P"S:>vistor>test.text.newest"
+\OV #P"S:>vistor>test.text.newest", #P"S:>vistor>_temp_._temp_.1"
+
+;; In this case, the file is closed when the truename is tried, so the
+;; truename information is reliable.
+ (with-open-file (stream ">vistor>test.text.newest")
+   (close stream)
+   (values (pathname stream)
+           (truename stream)))
+\EV #P"S:>vistor>test.text.newest", #P"S:>vistor>test.text.1"
+
+;; An example involving TOP-20's implementation-dependent concept 
+;; of logical devices -- in this case, "DOC:" is shorthand for
+;; "PS:<DOCUMENTATION>" ...
+ (with-open-file (stream "CMUC::DOC:DUMPER.HLP")
+   (values (pathname stream)
+           (truename stream)))
+\EV #P"CMUC::DOC:DUMPER.HLP", #P"CMUC::PS:<DOCUMENTATION>DUMPER.HLP.13"
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+An error \oftype{file-error} is signaled if an appropriate \term{file}
+cannot be located within the \term{file system} for the given \param{filespec},
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+%% Additional constraint per x3j13 (05-Oct-93) -kmp
+or if the \term{file system} cannot perform the requested operation.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+An error \oftype{file-error} is signaled if \param{pathname} is \term{wild}.
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes::
+ 
+%% 23.1.2 7
+\funref{truename} may be used to account for any \term{filename} translations 
+performed by the \term{file system}.
+
+\endcom
+
+%-------------------- File Properties --------------------
+
+%%% ========== FILE-AUTHOR
+\begincom{file-author}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues file-author {pathspec} {author}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\param{pathspec}---a \term{pathname designator}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\param{author}---a \term{string} or \nil.
+
+\label Description::
+
+%% 23.3.0 15
+Returns a \term{string} naming the author of the \term{file} specified by \param{pathspec},
+or \nil\ if the author's name cannot be determined.
+
+\label Examples::
+
+\code
+ (with-open-file (stream ">relativity>general.text")
+   (file-author s))
+\EV "albert"
+\endcode
+
+\label Affected By::
+The host computer's file system.
+
+Other users of the \term{file} named by \param{pathspec}.
+\label Exceptional Situations::
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+An error \oftype{file-error} is signaled if \param{pathspec} is \term{wild}.
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+%% Wording changed per x3j13 (05-Oct-93) -kmp
+% If the attempt to obtain authorship information is not successful,
+% an error \oftype{file-error} is signaled.
+An error \oftype{file-error} is signaled
+if the \term{file system} cannot perform the requested operation.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== FILE-WRITE-DATE
+\begincom{file-write-date}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues file-write-date {pathspec} {date}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\param{pathspec}---a \term{pathname designator}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\param{date}---a \term{universal time} or \nil.
+
+\label Description::
+
+%% 23.3.0 14
+Returns a \term{universal time} representing the time at which the \term{file} 
+specified by \param{pathspec} was last written (or created), 
+or returns \nil\ if such a time cannot be determined.
+
+\label Examples::
+
+\code
+ (with-open-file (s "noel.text" 
+                    :direction :output :if-exists :error)
+   (format s "~&Dear Santa,~2%I was good this year.  ~
+                Please leave lots of toys.~2%Love, Sue~
+             ~2%attachments: milk, cookies~%")
+   (truename s))
+\EV #P"CUPID:/susan/noel.text"
+ (with-open-file (s "noel.text")
+   (file-write-date s))
+\EV 2902600800
+\endcode
+
+\label Affected By::
+
+The host computer's file system.
+
+\label Exceptional Situations::
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+An error \oftype{file-error} is signaled if \param{pathspec} is \term{wild}.
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+%% Wording changed per x3j13 (05-Oct-93) -kmp
+% If the attempt to obtain write-date information is not successful,
+% an error \oftype{file-error} is signaled.
+An error \oftype{file-error} is signaled
+if the \term{file system} cannot perform the requested operation.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label See Also::
+
+{\secref\UniversalTime},
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+ 
+\endcom
+
+%-------------------- Directory Modification --------------------
+
+%%% ========== RENAME-FILE
+\begincom{rename-file}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues rename-file 
+	         {filespec new-name}
+		 {defaulted-new-name, old-truename, new-truename}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\param{filespec}---a \term{pathname designator}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\param{new-name}---a \term{pathname designator} 
+%!!! it used to say (or pathname string symbol), so I added this for now ... ??
+other than a \term{stream}.
+
+\param{defaulted-new-name}---a \term{pathname}
+
+\param{old-truename}---a \term{physical pathname}.
+
+\param{new-truename}---a \term{physical pathname}.
+
+\label Description::
+
+%% 23.3.0 3
+\funref{rename-file} modifies the file system in such a way
+that the file indicated by \param{filespec} is renamed to
+%% Per X3J13. -kmp 05-Oct-93
+%\param{new-name}.
+\param{defaulted-new-name}.
+
+%% 23.3.0 6
+%!!! Sandra asks whether this first is a prohition on "filespec" or "new-name" or both?
+It is an error to specify a filename containing a \term{wild} component,
+for \param{filespec} to contain a \nil\ component where the file system does
+not permit a \nil\ component, or for the result of defaulting missing
+components of \param{new-name} from \param{filespec} to contain a \nil\ component
+where the file system does not permit a \nil\ component.
+
+\issue{PATHNAME-LOGICAL:ADD}
+If \param{new-name} is a \term{logical pathname}, 
+\funref{rename-file} returns a \term{logical pathname} as its \term{primary value}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+%% 23.3.0 4
+\funref{rename-file} 
+returns three values if successful.  The \term{primary value}, \param{defaulted-new-name},
+is the resulting name which is composed of
+\param{new-name} with any missing components filled in by performing
+a \funref{merge-pathnames} operation using \param{filespec} as the defaults.
+The \term{secondary value}, \param{old-truename},
+is the \term{truename} of the \term{file} before it was renamed.
+The \term{tertiary value}, \param{new-truename},
+is the \term{truename} of the \term{file} after it was renamed.
+
+If the \param{filespec} \term{designator} is an open \term{stream},
+then the \term{stream} itself and the file associated with it are 
+affected (if the \term{file system} permits).
+
+\label Examples::
+
+\code
+;; An example involving logical pathnames.
+ (with-open-file (stream "sys:chemistry;lead.text"
+                         :direction :output :if-exists :error)
+   (princ "eureka" stream)
+   (values (pathname stream) (truename stream)))
+\EV #P"SYS:CHEMISTRY;LEAD.TEXT.NEWEST", #P"Q:>sys>chem>lead.text.1"
+ (rename-file "sys:chemistry;lead.text" "gold.text")
+\EV #P"SYS:CHEMISTRY;GOLD.TEXT.NEWEST",
+   #P"Q:>sys>chem>lead.text.1",
+   #P"Q:>sys>chem>gold.text.1"
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+%% 23.3.0 5
+If the renaming operation is not successful, an error \oftype{file-error} is signaled.
+
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+An error \oftype{file-error} might be signaled if \param{filespec} is \term{wild}.
+%!!! Sandra asks whether this should extend to  "new-name" as well?
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\funref{truename},
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== DELETE-FILE
+\begincom{delete-file}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues delete-file {filespec} {\t}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\param{filespec}---a \term{pathname designator}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\label Description::
+
+Deletes the \term{file} specified by \param{filespec}.
+
+%!!! Sandra thinks this makes no sense. -kmp 12-Dec-91
+If the \param{filespec} \term{designator} is an open \term{stream},
+then \param{filespec} and the file associated with it are affected 
+(if the file system permits),
+in which case \param{filespec} might be closed immediately,
+and the deletion might be immediate or delayed until \param{filespec} is explicitly closed,
+depending on the requirements of the file system.
+
+It is \term{implementation-dependent} whether an attempt
+to delete a nonexistent file is considered to be successful.
+
+%% 23.3.0 8
+%% 23.3.0 9
+\funref{delete-file} returns \term{true} if it succeeds,
+or signals an error \oftype{file-error} if it does not.
+
+%% 23.3.0 10
+The consequences are undefined 
+    if \param{filespec} has a \term{wild} component,
+ or if \param{filespec} has a \nil\ component 
+     and the file system does not permit a \nil\ component.
+
+\label Examples::
+
+\code
+ (with-open-file (s "delete-me.text" :direction :output :if-exists :error))
+\EV NIL
+ (setq p (probe-file "delete-me.text")) \EV #P"R:>fred>delete-me.text.1"
+ (delete-file p) \EV T
+ (probe-file "delete-me.text") \EV \term{false}
+ (with-open-file (s "delete-me.text" :direction :output :if-exists :error)
+   (delete-file s))
+\EV T
+ (probe-file "delete-me.text") \EV \term{false}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+If the deletion operation is not successful, an error \oftype{file-error} is signaled.
+
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+An error \oftype{file-error} might be signaled if \param{filespec} is \term{wild}.
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+ 
+\endcom
+
+%-------------------- File Errors --------------------
+
+\begincom{file-error}\ftype{Condition Type}
+
+\label Class Precedence List::
+\typeref{file-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{file-error} consists of error conditions that occur during 
+an attempt to open or close a file, or during some low-level transactions 
+with a file system.  The ``offending pathname'' is initialized by 
+\theinitkeyarg{pathname} to \funref{make-condition}, and is \term{accessed}
+by \thefunction{file-error-pathname}.
+
+\label See Also::
+
+\function{file-error-pathname},
+\funref{open},
+\funref{probe-file},
+\funref{directory},
+\funref{ensure-directories-exist}
+
+\endcom%{file-error}\ftype{Condition Type}
+
+%%% ========== FILE-ERROR-PATHNAME
+\begincom{file-error-pathname}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues file-error-pathname {condition} {pathspec}
+
+\label Arguments and Values:: 
+
+\param{condition}---a \term{condition} \oftype{file-error}.
+
+\param{pathspec}---a \term{pathname designator}.
+
+\label Description::
+
+Returns the ``offending pathname'' of a \term{condition} \oftype{file-error}.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+% This might signal an error (probably TYPE-ERROR, but you can't say that
+% because it's not been voted in yet) if argument is not of correct type.
+% (Part of the issue here is whether anyone might define other signatures.)
+
+\label See Also::
+
+\typeref{file-error},
+{\secref\Conditions}
+
+\label Notes:\None.
+
+%% Removed because no primitive is provided to do this! -kmp
+%It is an error to use \macref{setf} with \funref{file-error-pathname}.
+
+\endcom

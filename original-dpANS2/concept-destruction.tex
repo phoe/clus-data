@@ -1,0 +1,176 @@
+% -*- Mode: TeX -*-
+% Destructive Operations
+
+\issue{DESTRUCTIVE-OPERATIONS:SPECIFY}
+\beginsubsection{Modification of Literal Objects}
+
+The consequences are undefined if \term{literal} \term{objects} 
+are destructively modified.  For this purpose, the following operations 
+are considered \term{destructive}:
+
+\beginlist
+
+\itemitem{\typeref{random-state}}
+
+% Using it as an argument to the function RANDOM.
+
+Using it as an \term{argument} to \thefunction{random}.
+
+\itemitem{\typeref{cons}}
+
+% Altering or destructively modifying the CAR or CDR of the cons.
+
+Changing the \term{car}\meaning{1} or \term{cdr}\meaning{1} of the \term{cons},
+or performing a \term{destructive} operation on an \term{object} which is either
+the \term{car}\meaning{2} or the \term{cdr}\meaning{2} of the \term{cons}.
+
+\itemitem{\typeref{array}}
+
+% Altering or destructively modifying any array element;
+% changing the fill pointer, dimensions, or displacement of
+% the array (regardless of whether the array is actually adjustable);
+% or altering the contents of any array that is displaced to this array
+% or that otherwise shares its contents with this array.
+
+Storing a new value into some element of the \term{array},
+or performing a \term{destructive} operation 
+on an \term{object} that is already such an \term{element}.
+
+Changing the \term{fill pointer}, \term{dimensions}, or displacement of
+the \term{array} (regardless of whether the \term{array} is \term{actually adjustable}).
+
+Performing a \term{destructive} operation on another \term{array} 
+that is displaced to the \term{array} or that otherwise shares its contents
+with the \term{array}.
+
+\itemitem{\typeref{hash-table}}
+
+% Altering or destructively modifying any key or its corresponding
+% value, or adding or removing entries from the hash table.
+
+Performing a \term{destructive} operation on any \term{key}.
+
+Storing a new \term{value}\meaning{4} for any \term{key},
+or performing a \term{destructive} operation 
+on any \term{object} that is such a \term{value}.
+
+Adding or removing entries from the \term{hash table}.
+
+\itemitem{\typeref{structure-object}}
+
+% Altering or destructively modifying the contents of any slot.
+
+Storing a new value into any slot,
+or performing a \term{destructive} operation on an \term{object} 
+that is the value of some slot.
+
+\itemitem{\typeref{standard-object}}
+
+% Altering or destructively modifying the contents of any slot, or
+% changing the class of the object.
+
+Storing a new value into any slot,
+or performing a \term{destructive} operation on an \term{object} 
+that is the value of some slot.
+
+Changing the class of the \term{object} (\eg using \thefunction{change-class}).
+
+\itemitem{\typeref{readtable}}
+
+% Altering the readtable-case; altering the syntax type of any
+% character in this readtable; altering the reader macro function
+% associated with any character in this readtable; or altering the
+% reader macro functions associated with characters defined as 
+% dispatching macro characters in this readtable.
+
+Altering the \term{readtable case}.
+
+Altering the syntax type of any character in this readtable.
+
+Altering the \term{reader macro function} associated with any \term{character}
+in the \term{readtable}, or altering the \term{reader macro functions}
+associated with \term{characters} defined as \term{dispatching macro characters}
+in the \term{readtable}.
+
+\itemitem{\typeref{stream}}
+
+% Performing I/O operations on the stream, or closing the stream.
+
+Performing I/O operations on the \term{stream},
+or \term{closing} the \term{stream}.
+
+\itemitem{All other standardized types}
+
+ [This category includes, for example, \typeref{character},
+                                      \typeref{condition},
+                                      \typeref{function},
+                                      \typeref{method-combination},
+                                      \typeref{method},
+                                      \typeref{number},
+                                      \typeref{package},
+                                      \typeref{pathname},
+                                      \typeref{restart},
+                                  and \typeref{symbol}.]
+
+% (including number, character, symbol, package, pathname, function,
+%  method, method-combination, condition, restart)
+% There are no destructive operations defined on these data types.
+
+There are no \term{standardized} \term{destructive} operations
+defined on \term{objects} of these \term{types}.
+
+\endlist
+
+\endsubsection%{Modification of Literal Objects}
+\endissue{DESTRUCTIVE-OPERATIONS:SPECIFY}
+
+\beginsubsection{Transfer of Control during a Destructive Operation}
+
+%%% This text used to just apply to SORT.
+%%% KMP modified it to generalize from errors to arbitrary transfer 
+%%%   of control, since not just errors can cause this. Consider:
+%%%   (prog foo ((a (list 1 2 3 4 5 6 7 8 9 10)))
+%%%     (sort a #'(lambda (x y) 
+%%%                 (if (zerop (random 5)) (return-from foo a) (> x y)))))
+%%% Barrett suggested further generalizing it for other the sake of 
+%%%   application to other destructive operations.
+%%% KMP agreed since it's true that things are ill-defined whether we say 
+%%% it or not, so we might as well say it explicitly.
+%%%
+%%% Original text from SORT:
+%%%  %% 14.4.0 8
+%%%  Should execution of the \param{key} or the \param{predicate} 
+%%%  cause an error,
+%%%  the state of the \param{sequence} being sorted is
+%%%  undefined.  However, if the error is corrected, the sort will
+%%%  proceed correctly. 
+
+Should a transfer of control out of a \term{destructive} operation occur
+(\eg due to an error) the state of the \param{object} being modified is
+\term{implementation-dependent}.
+
+\beginsubsubsection{Examples of Transfer of Control during a Destructive Operation}
+
+The following examples illustrate some of the many ways in which the
+\term{implementation-dependent} nature of the modification can manifest
+itself.
+
+\code
+ (let ((a (list 2 1 4 3 7 6 'five)))
+   (ignore-errors (sort a #'<))
+   a)
+\EV (1 2 3 4 6 7 FIVE)
+\OV (2 1 4 3 7 6 FIVE)
+\OV (2)
+
+ (prog foo ((a (list 1 2 3 4 5 6 7 8 9 10)))
+   (sort a #'(lambda (x y) (if (zerop (random 5)) (return-from foo a) (> x y)))))
+\EV (1 2 3 4 5 6 7 8 9 10)
+\OV (3 4 5 6 2 7 8 9 10 1)
+\OV (1 2 4 3)
+\endcode
+
+\endsubsubsection%{Examples of Transfer of Control during a Destructive Operation}
+
+\endsubsection%{Transfer of Control during a Destructive Operation}
+

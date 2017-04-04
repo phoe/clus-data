@@ -1,0 +1,157 @@
+% -*- Mode: TeX -*-
+%% Rules about Test Functions
+
+\beginsubsection{Satisfying a Two-Argument Test}
+\DefineSection{SatisfyingTheTwoArgTest}
+
+When an \term{object} $O$ is being considered iteratively 
+against each \term{element} $E\sub i$
+of a \term{sequence} $S$
+by an \term{operator} $F$ listed in \thenextfigure,
+it is sometimes useful to control the way in which the presence of $O$ 
+is tested in $S$ is tested by $F$.
+This control is offered on the basis of a \term{function} designated with 
+either a \kwd{test} or \kwd{test-not} \term{argument}.
+
+%!!! Sandra wonders if this table is complete.
+\displaythree{Operators that have Two-Argument Tests to be Satisfied}{
+adjoin&nset-exclusive-or&search\cr
+assoc&nsublis&set-difference\cr
+count&nsubst&set-exclusive-or\cr
+delete&nsubstitute&sublis\cr
+find&nunion&subsetp\cr
+intersection&position&subst\cr
+member&pushnew&substitute\cr
+mismatch&rassoc&tree-equal\cr
+nintersection&remove&union\cr
+nset-difference&remove-duplicates&\cr
+}
+
+The object $O$ might not be compared directly to $E\sub i$.
+If a \kwd{key} \term{argument} is provided,
+it is a \term{designator} for a \term{function} of one \term{argument} 
+to be called with each $E\sub i$ as an \term{argument}, 
+and \term{yielding} an \term{object} $Z\sub i$ to be used for comparison.
+(If there is no \kwd{key} \term{argument}, $Z\sub i$ is $E\sub i$.)
+
+% Added per Barmar. -kmp 16-Feb-92
+The \term{function} designated by \thekeyarg{key} is never called on $O$ itself.
+However, if the function operates on multiple sequences
+(\eg as happens in \funref{set-difference}), $O$
+will be the result of calling the \kwd{key} function on an
+\term{element} of the other sequence.  
+
+A \kwd{test} \term{argument}, if supplied to $F$,
+is a \term{designator} for a  \term{function}
+of two \term{arguments}, $O$ and $Z\sub i$.
+An $E\sub i$ is said (or, sometimes, an $O$ and an $E\sub i$ are said)
+to \newterm{satisfy the test} 
+if this \kwd{test} \term{function} returns a \term{generalized boolean} representing 
+\term{true}.
+
+A \kwd{test-not} \term{argument}, if supplied to $F$, 
+is \term{designator} for a \term{function} 
+of two \term{arguments}, $O$ and $Z\sub i$.
+An $E\sub i$ is said (or, sometimes, an $O$ and an $E\sub i$ are said)
+to \newterm{satisfy the test} 
+if this \kwd{test-not} \term{function}
+returns a \term{generalized boolean} representing \term{false}.
+
+If neither a \kwd{test} nor a \kwd{test-not} \term{argument} is supplied, 
+it is as if a \kwd{test} argument of \f{\#'eql} was supplied.
+
+The consequences are unspecified if both a \kwd{test} and a \kwd{test-not} \term{argument}
+are supplied in the same \term{call} to $F$.
+
+\beginsubsubsection{Examples of Satisfying a Two-Argument Test}
+
+\code
+ (remove "FOO" '(foo bar "FOO" "BAR" "foo" "bar") :test #'equal)
+\EV (foo bar "BAR" "foo" "bar")
+ (remove "FOO" '(foo bar "FOO" "BAR" "foo" "bar") :test #'equalp)
+\EV (foo bar "BAR" "bar")
+ (remove "FOO" '(foo bar "FOO" "BAR" "foo" "bar") :test #'string-equal)
+\EV (bar "BAR" "bar")
+ (remove "FOO" '(foo bar "FOO" "BAR" "foo" "bar") :test #'string=)
+\EV (BAR "BAR" "foo" "bar")
+
+ (remove 1 '(1 1.0 #C(1.0 0.0) 2 2.0 #C(2.0 0.0)) :test-not #'eql)
+\EV (1)
+ (remove 1 '(1 1.0 #C(1.0 0.0) 2 2.0 #C(2.0 0.0)) :test-not #'=)
+\EV (1 1.0 #C(1.0 0.0))
+ (remove 1 '(1 1.0 #C(1.0 0.0) 2 2.0 #C(2.0 0.0)) :test (complement #'=))
+\EV (1 1.0 #C(1.0 0.0))
+
+ (count 1 '((one 1) (uno 1) (two 2) (dos 2)) :key #'cadr) \EV 2
+
+ (count 2.0 '(1 2 3) :test #'eql :key #'float) \EV 1
+
+ (count "FOO" (list (make-pathname :name "FOO" :type "X")  
+                    (make-pathname :name "FOO" :type "Y"))
+        :key #'pathname-name
+        :test #'equal)
+\EV 2
+\endcode
+
+\endsubsubsection%{Examples of Satisfying a Two-Argument Test}
+
+\endsubsection%{Satisfying a Two-Argument Test}
+
+\beginsubsection{Satisfying a One-Argument Test}
+\DefineSection{SatisfyingTheOneArgTest}
+
+When using one of the \term{functions} in \thenextfigure,
+the elements $E$ of a \term{sequence} $S$ are filtered
+not on the basis of the presence or absence of an object $O$ 
+under a two \term{argument} \term{predicate},
+as with the \term{functions} described in \secref\SatisfyingTheTwoArgTest,
+but rather on the basis of a one \term{argument} \term{predicate}.
+
+%!!! KMP wonders if this table is complete.
+\displaythree{Operators that have One-Argument Tests to be Satisfied}{
+assoc-if&member-if&rassoc-if\cr
+assoc-if-not&member-if-not&rassoc-if-not\cr
+count-if&nsubst-if&remove-if\cr
+count-if-not&nsubst-if-not&remove-if-not\cr
+delete-if&nsubstitute-if&subst-if\cr
+delete-if-not&nsubstitute-if-not&subst-if-not\cr
+find-if&position-if&substitute-if\cr
+find-if-not&position-if-not&substitute-if-not\cr
+}
+
+The element $E\sub i$ might not be considered directly.
+If a \kwd{key} \term{argument} is provided,
+it is a \term{designator} for a \term{function} of one \term{argument} 
+to be called with each $E\sub i$ as an \term{argument}, 
+and \term{yielding} an \term{object} $Z\sub i$ to be used for comparison.
+(If there is no \kwd{key} \term{argument}, $Z\sub i$ is $E\sub i$.)
+
+\term{Functions} defined in this specification and having a name that
+ends in ``\f{-if}'' accept a first \term{argument} that is a \term{designator} for a 
+\term{function} of one \term{argument}, $Z\sub i$.
+An $E\sub i$ is said to \newterm{satisfy the test} if this \kwd{test} \term{function}
+returns a \term{generalized boolean} representing \term{true}.
+
+\term{Functions} defined in this specification and having a name that
+ends in ``\f{-if-not}'' accept a first \term{argument} that is a \term{designator} for a 
+\term{function} of one \term{argument}, $Z\sub i$.
+An $E\sub i$ is said to \newterm{satisfy the test} if this \kwd{test} \term{function}
+returns a \term{generalized boolean} representing \term{false}.
+
+\beginsubsubsection{Examples of Satisfying a One-Argument Test}
+
+\code
+ (count-if #'zerop '(1 #C(0.0 0.0) 0 0.0d0 0.0s0 3)) \EV 4
+
+ (remove-if-not #'symbolp '(0 1 2 3 4 5 6 7 8 9 A B C D E F))
+\EV (A B C D E F)
+ (remove-if (complement #'symbolp) '(0 1 2 3 4 5 6 7 8 9 A B C D E F))
+\EV (A B C D E F)
+
+ (count-if #'zerop '("foo" "" "bar" "" "" "baz" "quux") :key #'length)
+\EV 3
+\endcode
+
+\endsubsubsection%{Examples of Satisfying a One-Argument Test}
+
+\endsubsection%{Satisfying a One-Argument Test}

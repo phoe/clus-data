@@ -1,0 +1,209 @@
+% -*- Mode: TeX -*-
+
+\beginsubsection{Dynamic Control of the Lisp Reader}
+
+Various aspects of the \term{Lisp reader} can be controlled dynamically.
+\Seesection\Readtables\ and \secref\ReaderVars.
+
+\endsubsection%{Dynamic Control of the Lisp Reader}
+ 
+\beginsubsection{Effect of Readtable Case on the Lisp Reader}
+\DefineSection{ReadtableCaseReadEffect}
+
+The \term{readtable case} of the \term{current readtable} affects the \term{Lisp reader}
+in the following ways:
+
+\beginlist
+\itemitem{\kwd{upcase}}
+
+ When the \term{readtable case} is \kwd{upcase},
+ unescaped constituent \term{characters} are converted to \term{uppercase},
+ as specified in \secref\ReaderAlgorithm.
+
+\itemitem{\kwd{downcase}}
+
+ When the \term{readtable case} is \kwd{downcase},
+ unescaped constituent \term{characters} are converted to \term{lowercase}.
+
+\itemitem{\kwd{preserve}}
+
+When the \term{readtable case} is \kwd{preserve},
+ the case of all \term{characters} remains unchanged.
+
+\itemitem{\kwd{invert}}
+
+When the \term{readtable case} is \kwd{invert},
+ then if all of the unescaped letters in the extended token are of the same \term{case}, 
+ those (unescaped) letters are converted to the opposite \term{case}.
+
+\endlist
+
+\beginsubsubsection{Examples of Effect of Readtable Case on the Lisp Reader}
+\DefineSection{ReadtableCaseReadExamples}
+
+\code
+ (defun test-readtable-case-reading ()
+   (let ((*readtable* (copy-readtable nil)))
+     (format t "READTABLE-CASE  Input   Symbol-name~
+              ~%-----------------------------------~
+              ~%")
+     (dolist (readtable-case '(:upcase :downcase :preserve :invert))
+       (setf (readtable-case *readtable*) readtable-case)
+       (dolist (input '("ZEBRA" "Zebra" "zebra"))
+         (format t "~&:~A~16T~A~24T~A"
+                 (string-upcase readtable-case)
+                 input
+                 (symbol-name (read-from-string input)))))))
+\endcode
+ 
+The output from \f{(test-readtable-case-reading)} should be as follows:
+
+\code
+ READTABLE-CASE     Input Symbol-name
+ -------------------------------------
+    :UPCASE         ZEBRA   ZEBRA
+    :UPCASE         Zebra   ZEBRA
+    :UPCASE         zebra   ZEBRA
+    :DOWNCASE       ZEBRA   zebra
+    :DOWNCASE       Zebra   zebra
+    :DOWNCASE       zebra   zebra
+    :PRESERVE       ZEBRA   ZEBRA
+    :PRESERVE       Zebra   Zebra
+    :PRESERVE       zebra   zebra
+    :INVERT         ZEBRA   zebra
+    :INVERT         Zebra   Zebra
+    :INVERT         zebra   ZEBRA
+\endcode
+
+\endsubsubsection%{Examples of Effect of Readtable Case on the Lisp Reader}
+
+\endsubsection%{Effect of Readtable Case on the Lisp Reader}
+
+\beginsubsection{Argument Conventions of Some Reader Functions}
+
+\beginsubsubsection{The EOF-ERROR-P argument}
+
+%% 22.2.1 2
+
+\param{Eof-error-p} in input function calls
+controls what happens if input is from a file (or any other
+input source that has a definite end) and the end of the file is reached.
+If \param{eof-error-p} is \term{true} (the default), 
+an error \oftype{end-of-file} is signaled
+at end of file.  If it is \term{false}, then no error is signaled, and instead
+the function returns \param{eof-value}.
+
+Functions such as \funref{read} that read the representation
+of an \term{object} rather than a single
+character always signals an error, regardless of \param{eof-error-p}, if
+the file ends in the middle of an object representation.
+For example, if a file does
+not contain enough right parentheses to balance the left parentheses in
+it, \funref{read} signals an error.  If a file ends in a 
+\term{symbol} or a \term{number}
+immediately followed by end-of-file, \funref{read} reads the 
+\term{symbol} or
+\term{number} 
+successfully and when called again will
+%%Barmar thought this wasn't needed:
+% see the end-of-file and
+% only then
+act according to \param{eof-error-p}.
+Similarly, \thefunction{read-line}
+successfully reads the last line of a file even if that line
+is terminated by end-of-file rather than the newline character.
+Ignorable text, such as lines containing only \term{whitespace}\meaning{2} or comments,
+are not considered to begin an \term{object}; 
+if \funref{read} begins to read an \term{expression} but sees only such
+ignorable text, it does not consider the file to end in the middle of an \term{object}.
+Thus an \param{eof-error-p} argument controls what happens
+when the file ends between \term{objects}.
+
+\endsubsubsection%{The EOF-ERROR-P argument}
+
+\beginsubsubsection{The RECURSIVE-P argument}
+
+%% 22.2.1 4
+
+If \param{recursive-p} is supplied and not \nil, it specifies that
+this function call is not an outermost call to \funref{read} but an 
+embedded call, typically from a \term{reader macro function}.
+It is important to distinguish such recursive calls for three reasons.
+
+%% 22.2.1 5
+\beginlist
+\itemitem{1.}
+An outermost call establishes the context within which the
+\f{\#\param{n}=} and \f{\#\param{n}\#} syntax is scoped.  Consider, for example,
+the expression
+
+\code
+ (cons '#3=(p q r) '(x y . #3#))
+\endcode
+If the \term{single-quote} \term{reader macro} were defined in this way:
+
+\code
+ (set-macro-character #\\'       ;incorrect
+    #'(lambda (stream char)
+         (declare (ignore char))
+         (list 'quote (read stream))))
+\endcode
+
+% then the expression could not be read properly, because there would be no way
+% to know when \funref{read} is called recursively by the first
+% occurrence of \f{'} that the label \f{\#3=} would be referred to
+% later in the containing expression.
+% There would be no way to know because \funref{read}
+% could not determine that it was called by a \term{reader macro function}
+% rather than from an outermost form.
+%% per JonL:
+then each call to the \term{single-quote} \term{reader macro function} would establish
+independent contexts for the scope of \funref{read} information, including the scope of
+identifications between markers like ``\f{\#3=}'' and ``\f{\#3\#}''.  However, for
+this expression, the scope was clearly intended to be determined by the outer set 
+of parentheses, so such a definition would be incorrect.
+The correct way to define the \term{single-quote}
+\term{reader macro} uses \param{recursive-p}: 
+
+\code
+ (set-macro-character #\\'       ;correct
+    #'(lambda (stream char)
+         (declare (ignore char))
+         (list 'quote (read stream t nil t))))
+\endcode
+
+%% 22.2.1 6
+\itemitem{2.}
+A recursive call does not alter whether the reading process
+is to preserve \term{whitespace}\meaning{2} or not (as determined by whether the
+outermost call was to \funref{read} or \funref{read-preserving-whitespace}).
+Suppose again that \term{single-quote} 
+% had the first, incorrect, \term{reader macro}
+% definition shown above.
+%% per JonL:
+were to be defined as shown above in the incorrect definition.
+Then a call to \funref{read-preserving-whitespace}
+that read the expression \f{'foo\SpaceChar} would fail to preserve the space
+character following the symbol \f{foo} because the \term{single-quote}
+\term{reader macro function} calls \funref{read}, 
+not \funref{read-preserving-whitespace},
+to read the following expression (in this case \f{foo}).
+The correct definition, which passes the value \term{true} for \param{recursive-p}
+to \funref{read}, allows the outermost call to determine
+whether \term{whitespace}\meaning{2} is preserved.
+
+%% 22.2.1 8
+\itemitem{3.}
+When end-of-file is encountered and the \param{eof-error-p} argument
+is not \nil, the kind of error that is signaled may depend on the value
+of \param{recursive-p}.  If \param{recursive-p} 
+is \term{true}, then the end-of-file
+is deemed to have occurred within the middle of a printed representation;
+if \param{recursive-p} is \term{false}, then the end-of-file may be deemed to have
+occurred between \term{objects} rather than within the middle of one.
+
+\endlist
+
+\endsubsubsection%{The EOF-ERROR-P argument}
+
+\endsubsection%{Argument Conventions of Some Reader Functions}

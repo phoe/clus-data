@@ -1,0 +1,580 @@
+% -*- Mode: TeX -*-
+
+\beginsubSection{Introduction to Characters}
+\DefineSection{IntroToChars}
+
+A \newterm{character} is an \term{object} that represents a unitary token 
+(\eg a letter, a special symbol, or a ``control character'')
+in an aggregate quantity of text
+(\eg a \term{string} or a text \term{stream}).
+
+\issue{CHARACTER-PROPOSAL:2-6-1}
+\clisp\ allows an implementation to provide support 
+for international language \term{characters} as well
+as \term{characters} used in specialized arenas (\eg mathematics).
+\endissue{CHARACTER-PROPOSAL:2-6-1}
+
+The following figures contain lists of \term{defined names} applicable to 
+\term{characters}.
+
+\Thenextfigure\ lists some \term{defined names} relating to 
+\term{character} \term{attributes} and \term{character} \term{predicates}.
+
+\displaythree{Character defined names -- 1}{
+alpha-char-p&char-not-equal&char>\cr
+alphanumericp&char-not-greaterp&char>=\cr
+both-case-p&char-not-lessp&digit-char-p\cr
+char-code-limit&char/=&graphic-char-p\cr
+char-equal&char<&lower-case-p\cr
+char-greaterp&char<=&standard-char-p\cr
+char-lessp&char=&upper-case-p\cr
+}
+                           
+\Thenextfigure\ lists some \term{character} construction and conversion \term{defined names}.
+
+\displaythree{Character defined names -- 2}{
+char-code&char-name&code-char\cr
+char-downcase&char-upcase&digit-char\cr
+char-int&character&name-char\cr
+}
+
+\endsubSection%{Introduction to Characters}
+
+\beginsubSection{Introduction to Scripts and Repertoires}
+
+\beginsubsubsection{Character Scripts}
+\DefineSection{CharScripts}
+
+A \term{script} is one of possibly several sets that form an \term{exhaustive partition}
+of the type \typeref{character}.
+
+The number of such sets and boundaries between them is \term{implementation-defined}.
+\clisp\ does not require these sets to be \term{types}, but an \term{implementation}
+is permitted to define such \term{types} as an extension.  Since no \term{character}
+from one \term{script} can ever be a member of another \term{script}, it is generally
+more useful to speak about \term{character} \term{repertoires}.
+
+\issue{LINDEN-COMMENTS-ON-CHARACTERS:X3J13-APR-92}
+% For some examples of \term{repertoires}, see the coded character standards
+% ISO 8859/1, ISO 8859/2, and ISO 6937/2.
+% Note, however, that although
+Although
+the term ``\term{script}'' is chosen for 
+%naming
+definitional 
+compatibility with ISO terminology, no \term{conforming implementation} 
+is required to use any particular \term{scripts} standardized by ISO
+or by any other standards organization.
+\endissue{LINDEN-COMMENTS-ON-CHARACTERS:X3J13-APR-92}
+
+\issue{CHARACTER-PROPOSAL:2-4-1}
+Whether and how the \term{script} or \term{scripts} used by any given
+\term{implementation} are named is \term{implementation-dependent}.
+\endissue{CHARACTER-PROPOSAL:2-4-1}
+
+\endsubsubsection%{Character Scripts}
+
+\beginsubsubsection{Character Repertoires}
+\DefineSection{CharRepertoires}
+
+\issue{CHARACTER-PROPOSAL:2-4-3}
+A \newterm{repertoire} is a \term{type specifier} for a \subtypeof{character}.
+\endissue{CHARACTER-PROPOSAL:2-4-3}
+This term is generally used when describing a collection of \term{characters}
+independent of their coding.
+\term{Characters} in \term{repertoires} are only identified
+    by name,
+    by \term{glyph}, or
+    by character description.
+
+A \term{repertoire} can contain \term{characters} from several
+\term{scripts}, and a \term{character} can appear in more than
+one \term{repertoire}.
+
+\issue{LINDEN-COMMENTS-ON-CHARACTERS:X3J13-APR-92}
+For some examples of \term{repertoires}, see the coded character standards
+ISO 8859/1, ISO 8859/2, and ISO 6937/2.
+Note, however, that although
+%Although
+the term ``\term{repertoire}'' is chosen for 
+%naming
+definitional 
+compatibility with ISO terminology, no \term{conforming implementation} 
+is required to use \term{repertoires} standardized by ISO or any other 
+standards organization.
+\endissue{LINDEN-COMMENTS-ON-CHARACTERS:X3J13-APR-92}
+
+\endsubsubsection%{Character Repertoires}
+
+\endsubSection%{Introduction to Repertoires and Scripts}
+
+\beginsubSection{Character Attributes}
+\DefineSection{CharacterAttributes}
+
+%% 13.1.0 1
+\issue{CHARACTER-PROPOSAL:2-1-1}
+\term{Characters} have only one \term{standardized} \term{attribute}:
+a \term{code}.  A \term{character}'s \term{code} is a non-negative \term{integer}.
+This \term{code} is composed from a character \term{script} and a character label
+in an \term{implementation-dependent} way.  \Seefuns{char-code} and \funref{code-char}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+% %% 13.5.0 1
+% Remarks about the bits and font \term{attributes} removed. -kmp
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+Additional, \term{implementation-defined} \term{attributes} of \term{characters}
+are also permitted
+so that, for example, 
+two \term{characters} with the same \term{code} may differ 
+in some other, \term{implementation-defined} way.
+
+For any \term{implementation-defined} \term{attribute}
+there is a distinguished value
+called the \newterm{null} value for that \term{attribute}. 
+A \term{character} for which each \term{implementation-defined} \term{attribute}
+has the null value for that \term{attribute} is called a \term{simple} \term{character}.
+If the \term{implementation} has no \term{implementation-defined} \term{attributes},
+then all \term{characters} are \term{simple} \term{characters}.
+
+\endSubsection%{Character Attributes}
+
+\beginSubsection{Character Categories}
+
+There are several (overlapping) categories of \term{characters} that have no formally
+associated \term{type} but that are nevertheless useful to name. 
+They include
+     \term{graphic} \term{characters}, 
+     \term{alphabetic}\meaning{1} \term{characters},
+     \term{characters} with \term{case} 
+       (\term{uppercase} and \term{lowercase} \term{characters}),
+     \term{numeric} \term{characters},
+     \term{alphanumeric} \term{characters},
+ and \term{digits} (in a given \term{radix}).
+
+For each \term{implementation-defined} \term{attribute} of a \term{character},
+the documentation for that \term{implementation} must specify whether 
+\term{characters} that differ only in that \term{attribute} are permitted to differ
+in whether are not they are members of one of the aforementioned categories.
+
+Note that these terms are defined independently of any special syntax 
+which might have been enabled in the \term{current readtable}.
+
+\beginsubsubsection{Graphic Characters}
+\DefineSection{GraphicChars}
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+\term{Characters} that are classified as \newterm{graphic}, or displayable, are each
+associated with a glyph, a visual representation of the \term{character}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+%% 13.2.0 7
+
+A \term{graphic} \term{character} is one that has a standard textual 
+representation as a single \term{glyph}, such as \f{A} or \f{*} or \f{=}.
+\term{Space}, which effectively has a blank \term{glyph}, is defined
+to be a \term{graphic}.
+
+Of the \term{standard characters},
+     \term{newline} is \term{non-graphic} 
+ and all others are \term{graphic}; \seesection\StandardChars.
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+\term{Characters} that are not \term{graphic} are called \newterm{non-graphic}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+\term{Non-graphic} \term{characters} are sometimes informally called
+    ``formatting characters'' 
+ or ``control characters.''
+
+\f{\#\\Backspace},
+\f{\#\\Tab},
+\f{\#\\Rubout},
+\f{\#\\Linefeed}, 
+\f{\#\\Return}, and
+\f{\#\\Page},
+if they are supported by the \term{implementation},
+are \term{non-graphic}.
+
+%!!! I'm not completely sure it was proper for whoever removed this to have done so.
+%     -kmp 16-Oct-91
+%% 13.2.0 6
+%\term{Graphic characters} of font 0 are all of the same width when printed.
+%Every implementation of \clisp\ must provide some mode of operation
+%in which font 0 is a fixed-pitch font.
+
+%% 13.2.0 7
+%Any character with a non-zero bits \term{attribute} is \term{non-graphic}.
+
+\endsubsubsection%{Graphic Characters}
+
+\beginsubsubsection{Alphabetic Characters}
+
+%% 13.2.0 10
+The \term{alphabetic}\meaning{1} \term{characters} are
+a subset of the \term{graphic} \term{characters}.
+Of the \term{standard characters}, only these are the \term{alphabetic}\meaning{1} \term{characters}:
+
+\f{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
+
+\f{a b c d e f g h i j k l m n o p q r s t u v w x y z}
+
+%% 13.2.0 16
+Any \term{implementation-defined} \term{character} that has \term{case} 
+must be \term{alphabetic}\meaning{1}.
+For each \term{implementation-defined} \term{graphic} \term{character} 
+that has no \term{case},
+it is \term{implementation-defined} whether 
+that \term{character} is \term{alphabetic}\meaning{1}.
+
+\endsubsubsection%{Alphabetic Characters}
+
+\beginsubsubsection{Characters With Case}
+\DefineSection{CharactersWithCase}
+
+The \term{characters} with \term{case} are 
+a subset of the \term{alphabetic}\meaning{1} \term{characters}.
+A \term{character} with \term{case} has the property of being either
+\term{uppercase} or \term{lowercase}.
+Every \term{character} with \term{case} is in one-to-one correspondence
+with some other \term{character} with the opposite \term{case}.
+
+%% 13.2.0 17
+
+\beginsubsubsubsection{Uppercase Characters}
+
+An uppercase \term{character} is one that has a corresponding
+\term{lowercase} \term{character} that is \term{different} 
+(and can be obtained using \funref{char-downcase}).
+
+Of the \term{standard characters}, only these are \term{uppercase} \term{characters}:
+
+\f{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
+
+\endsubsubsubsection%{Uppercase Characters}
+
+\beginsubsubsubsection{Lowercase Characters}
+
+A lowercase \term{character} is one that has a corresponding 
+\term{uppercase} \term{character} that is \term{different} 
+(and can be obtained using \funref{char-upcase}).
+
+Of the \term{standard characters}, only these are \term{lowercase} \term{characters}:
+
+\f{a b c d e f g h i j k l m n o p q r s t u v w x y z}
+
+\endsubsubsubsection%{Lowercase Characters}
+
+\beginsubsubsubsection{Corresponding Characters in the Other Case}
+
+The \term{uppercase} \term{standard characters} \f{A} through \f{Z} mentioned above
+respectively correspond to
+the \term{lowercase} \term{standard characters} \f{a} through \f{z} mentioned above.
+For example, the \term{uppercase} \term{character} \f{E} 
+corresponds to the \term{lowercase} \term{character} \f{e}, and vice versa.
+
+\endsubsubsubsection%{Corresponding Characters in the Other Case}
+
+\beginsubsubsubsection{Case of Implementation-Defined Characters}
+
+An \term{implementation} may define that other \term{implementation-defined}
+\term{graphic} \term{characters} have \term{case}.  Such definitions must always
+be done in pairs---one \term{uppercase} \term{character} in one-to-one 
+\term{correspondence} with one \term{lowercase} \term{character}.
+
+\endsubsubsubsection%{Case of Implementation-Defined Characters}
+
+\endsubsubsection%{Characters With Case}
+
+\beginsubsubsection{Numeric Characters}
+
+The \term{numeric} \term{characters} are
+a subset of the \term{graphic} \term{characters}.
+Of the \term{standard characters}, only these are \term{numeric} \term{characters}:
+
+\f{0 1 2 3 4 5 6 7 8 9}
+
+For each \term{implementation-defined} \term{graphic} \term{character} 
+that has no \term{case}, the \term{implementation} must define whether
+or not it is a \term{numeric} \term{character}.
+
+\endsubsubsection%{Numeric Characters}
+
+\beginsubsubsection{Alphanumeric Characters}
+
+The set of \term{alphanumeric} \term{characters} is the union of 
+    the set of \term{alphabetic}\meaning{1} \term{characters} 
+and the set of \term{numeric} \term{characters}.
+
+\endsubsubsection%{Alphanumeric Characters}
+
+\beginsubsubsection{Digits in a Radix}
+\DefineSection{Digits}
+
+What qualifies as a \term{digit} depends on the \term{radix} 
+(an \term{integer} between \f{2} and \f{36}, inclusive).
+The potential \term{digits} are:
+
+\f{0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
+
+Their respective weights are \f{0}, \f{1}, \f{2}, $\ldots$ \f{35}.
+In any given radix $n$, only the first $n$ potential \term{digits} 
+are considered to be \term{digits}.
+For example,
+the digits in radix \f{2}  are \f{0} and \f{1}, 
+the digits in radix \f{10} are \f{0} through \f{9}, and
+the digits in radix \f{16} are \f{0} through \f{F}.
+
+\term{Case} is not significant in \term{digits}; 
+for example, in radix \f{16}, both \f{F} and \f{f} 
+are \term{digits} with weight \f{15}.
+
+%!!! KMP: I couldn't figure out whether there can be 
+%         implementation-defined digits.  
+%         It doesn't seem like a good idea because the obvious choices
+%         are things like ``\~n'' which comes in the middle of the Spanish
+%         alphabet, not at the end, and hence might confuse people about
+%         the weight of ``o''.  The answer to this has impact on
+%         \funref{digit-char-p} and \funref{digit-weight}.}
+
+\endsubsubsection%{Digits in a Radix}
+
+\endsubSection%{Character Categories}
+
+\beginsubSection{Identity of Characters}
+
+%% 13.0.0 3
+%% 13.0.0 4
+Two \term{characters} that are \funref{eql}, \funref{char=}, or \funref{char-equal} 
+are not necessarily \funref{eq}.
+
+\endsubSection%{Identity of Characters}
+
+\beginsubSection{Ordering of Characters}
+
+The total ordering on \term{characters} is guaranteed to have 
+the following properties: 
+
+\beginlist
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+
+%% 13.2.0 27
+\itemitem{\bull} 
+If two \term{characters} have the same \term{implementation-defined} \term{attributes},
+then their ordering by \funref{char<} is consistent with the numerical
+ordering by the predicate \funref{<} on their code \term{attributes}.
+
+%% 13.2.0 28
+\itemitem{\bull} If two \term{characters} differ in any \term{attribute}, then they
+%are different.
+are not \funref{char=}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\reviewer{Barmar: I wonder if we should say that the ordering may be dependent on the
+	          \term{implementation-defined} \term{attributes}.}
+
+%% 13.2.0 29
+\itemitem{\bull}
+  The total ordering is not necessarily the same as the total ordering
+  on the \term{integers} produced by applying \funref{char-int} to the
+  \term{characters}.
+
+%% 13.2.0 30
+\issue{LINDEN-COMMENTS-ON-CHARACTERS:X3J13-APR-92}
+\itemitem{\bull} 
+  While \term{alphabetic}\meaning{1} \term{standard characters} of a given \term{case}
+  must    
+% be properly ordered, 
+  obey a partial ordering,
+  they need not be contiguous; it is permissible for 
+  \term{uppercase} and \term{lowercase} \term{characters} to be interleaved. 
+  Thus \f{(char<= \#\\a x \#\\z)} 
+  is not a valid way of determining whether or not \f{x} is a
+  \term{lowercase} \term{character}.  
+\endissue{LINDEN-COMMENTS-ON-CHARACTERS:X3J13-APR-92}
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+% Discussion omitted about how the ordering might depend on font information.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\endlist
+
+\issue{LINDEN-COMMENTS-ON-CHARACTERS:X3J13-APR-92}
+%% 13.2.0 25
+%% 13.2.0 26
+%The standard \term{alphanumeric} \term{characters} obey the following partial ordering:
+Of the \term{standard characters}, 
+those which are \term{alphanumeric} obey the following partial ordering:
+\endissue{LINDEN-COMMENTS-ON-CHARACTERS:X3J13-APR-92}
+
+\code
+ A<B<C<D<E<F<G<H<I<J<K<L<M<N<O<P<Q<R<S<T<U<V<W<X<Y<Z
+ a<b<c<d<e<f<g<h<i<j<k<l<m<n<o<p<q<r<s<t<u<v<w<x<y<z
+ 0<1<2<3<4<5<6<7<8<9
+ either 9<A or Z<0
+ either 9<a or z<0                                                      
+\endcode
+\issue{LINDEN-COMMENTS-ON-CHARACTERS:X3J13-APR-92}
+This implies that, for \term{standard characters}, \term{alphabetic}\meaning{1} 
+ordering holds within each \term{case} (\term{uppercase} and \term{lowercase}), 
+and that the \term{numeric} \term{characters} as a group are not interleaved
+with \term{alphabetic} \term{characters}.
+However, the ordering or possible interleaving of \term{uppercase} \term{characters}
+and \term{lowercase} \term{characters} is \term{implementation-defined}.
+\endissue{LINDEN-COMMENTS-ON-CHARACTERS:X3J13-APR-92}
+
+\endsubSection%{Ordering of Characters}
+
+\beginsubsection{Character Names}
+\DefineSection{CharacterNames}
+
+The following \term{character} \term{names} must be present in all 
+\term{conforming implementations}:
+
+%% 22.1.4 9
+\beginlist
+\itemitem{\f{Newline}}
+
+%% 2.2.2 3
+The character that represents the division between lines.
+An implementation must translate between \f{\#\\Newline}, 
+a single-character representation, and whatever external representation(s)
+may be used.
+
+%% 22.1.4 10
+\itemitem{\f{Space}}
+
+The space or blank character.
+\endlist
+
+The following names are \term{semi-standard}; 
+if an \term{implementation} supports them,
+they should be used for the described \term{characters} and no others.
+
+\beginlist         
+\itemitem{\f{Rubout}}
+
+The rubout or delete character.
+
+%% 22.1.4 11
+\itemitem{\f{Page}}
+
+The form-feed or page-separator character.
+
+%% 22.1.4 12
+\itemitem{\f{Tab}}
+
+The tabulate character.
+
+%% 22.1.4 13
+\itemitem{\f{Backspace}}
+
+The backspace character.
+
+%% 22.1.4 14
+\itemitem{\f{Return}}
+
+The carriage return character.
+
+%% 22.1.4 15
+\itemitem{\f{Linefeed}}
+
+The line-feed character.
+\endlist
+
+In some \term{implementations},
+one or more of these \term{character} \term{names} 
+might denote a \term{standard character}; 
+for example,
+\f{\#\\Linefeed} and \f{\#\\Newline} might be the \term{same} \term{character}
+in some \term{implementations}.
+
+
+\endsubsection%{Character Names}
+
+\beginsubSection{Treatment of Newline during Input and Output}
+\DefineSection{TreatmentOfNewline}
+
+%% 2.2.2 6
+When the character \f{\#\\Newline} is written to an output file,
+the implementation must take the appropriate action
+to produce a line division.  This might involve writing out a
+record or translating \f{\#\\Newline} to a CR/LF sequence.
+When reading, a corresponding reverse transformation must take place.
+
+\endsubSection%{Treatment of Newline during Input and Output}
+
+\beginsubSection{Character Encodings}
+\DefineSection{CharEncodings}
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+% \editornote{KMP: This next paragraph is somewhat tentative.
+%  Maybe a glossary term for this would be good if I decide it should stay.
+%  Do reviewers think this concept is worth naming, and is ``encoding'' ok as a name?}%!!!
+A \term{character} is sometimes represented merely by its \term{code}, and sometimes
+by another \term{integer} value which is composed from the \term{code} and all 
+\term{implementation-defined} \term{attributes}
+(in an \term{implementation-defined} way
+that might vary between \term{Lisp images} even in the same \term{implementation}).
+This \term{integer}, returned by the function \funref{char-int}, is called the
+character's ``encoding.''
+There is no corresponding function
+from a character's encoding back to the \term{character}, 
+since its primary intended uses include things like hashing where an inverse operation
+is not really called for.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\endsubSection%{Character Encodings}
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+%% 2.2.5 1
+%Discussion of STRING-CHAR deleted.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\beginsubsection{Documentation of Implementation-Defined Scripts}
+\DefineSection{ImplementationDefinedScripts}
+
+\issue{CHARACTER-PROPOSAL:2-4-2} 
+   An \term{implementation} must document the \term{character} \term{scripts} 
+   it supports. For each \term{character} \term{script} supported,
+   the documentation must describe at least the following:
+\beginlist
+\itemitem{\bull}
+   Character labels, glyphs, and descriptions.
+   Character labels must be uniquely named using only Latin capital letters A--Z,
+   hyphen (-), and digits 0--9.
+\itemitem{\bull}
+   Reader canonicalization.
+   Any mechanisms by which \funref{read} treats
+   \term{different} characters as equivalent must be documented.
+\itemitem{\bull}
+   The impact on \funref{char-upcase},
+		 \funref{char-downcase},
+	     and the case-sensitive \term{format directives}.
+   In particular, for each \term{character} with \term{case},
+   whether it is \term{uppercase} or \term{lowercase},
+   and which \term{character} is its equivalent in the opposite case.
+\itemitem{\bull}
+   The behavior of the case-insensitive \term{functions}
+     \funref{char-equal}, \funref{char-not-equal},
+     \funref{char-lessp}, \funref{char-greaterp}, 
+     \funref{char-not-greaterp}, and \funref{char-not-lessp}.
+\itemitem{\bull}
+   The behavior of any \term{character} \term{predicates};
+   in particular, the effects of
+   \funref{alpha-char-p},
+   \funref{lower-case-p},
+   \funref{upper-case-p},
+   \funref{both-case-p},
+   \funref{graphic-char-p}, 
+   and
+   \funref{alphanumericp}.
+\itemitem{\bull}
+   The interaction with file I/O, in particular,
+   the supported coded character sets (for example, ISO8859/1-1987)
+   and external encoding schemes supported are documented.
+\endlist
+\endissue{CHARACTER-PROPOSAL:2-4-2} 
+
+\endsubsection%{Documentation of Implementation-Defined Scripts}

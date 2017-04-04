@@ -1,0 +1,1222 @@
+% -*- Mode: TeX -*-
+
+% System Construction
+%  System Construction Variables
+
+%-------------------- System Construction --------------------
+
+%%% ========== COMPILE-FILE
+\begincom{compile-file}\ftype{Function}
+
+\label Syntax::
+
+\issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+\DefunWithValuesNewline compile-file 
+		        {input-file {\key} \vtop{\hbox{output-file verbose}
+					         \hbox{print external-format}}}
+		        {output-truename, warnings-p, failure-p}
+\endissue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+
+\label Arguments and Values::
+
+\param{input-file}---a \term{pathname designator}.
+  (Default fillers for unspecified components are taken from
+   \varref{*default-pathname-defaults*}.)
+
+\param{output-file}---a \term{pathname designator}.
+  \Default{\term{implementation-defined}}
+
+\issue{COMPILER-VERBOSITY:LIKE-LOAD}
+\param{verbose}---a \term{generalized boolean}.
+  \Default{\thevalueof{*compile-verbose*}}
+
+\param{print}---a \term{generalized boolean}.
+  \Default{\thevalueof{*compile-print*}}
+\endissue{COMPILER-VERBOSITY:LIKE-LOAD}
+
+\issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+
+\issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+\param{external-format}---an \term{external file format designator}.
+  \Default{\kwd{default}}
+\endissue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+
+\param{output-truename}---a \term{pathname} (the \funref{truename} of the output \term{file}),
+   or \nil.
+
+\param{warnings-p}---a \term{generalized boolean}.
+
+\param{failure-p}---a \term{generalized boolean}.
+
+\endissue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+ 
+
+\label Description::
+
+%% 25.1.0 7
+\funref{compile-file} transforms the contents of the file specified 
+by \param{input-file} into \term{implementation-dependent} binary data 
+which are placed in the file specified by \param{output-file}.
+
+The \term{file} to which \param{input-file} refers should be a \term{source file}.
+%% 25.1.0 8
+\param{output-file} can be used to specify an output \term{pathname};
+\issue{COMPILE-FILE-OUTPUT-FILE-DEFAULTS:INPUT-FILE}
+the actual \term{pathname} of the \term{compiled file} 
+to which \term{compiled code} will be output 
+is computed as if by calling \funref{compile-file-pathname}.
+\endissue{COMPILE-FILE-OUTPUT-FILE-DEFAULTS:INPUT-FILE}
+
+\issue{PATHNAME-LOGICAL:ADD}
+If \param{input-file} or \param{output-file} is a \term{logical pathname},
+it is translated into a \term{physical pathname} as if by calling
+\funref{translate-logical-pathname}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+% !!! This leading semicolon stuff is stupid. -kmp 25-Jan-92
+\issue{COMPILER-VERBOSITY:LIKE-LOAD}
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+If \param{verbose} is \term{true},
+% \funref{compile-file} prints a message with a leading \term{semicolon} (a comment)
+% to \term{standard output} indicating what file is being compiled 
+\funref{compile-file} prints a message in the form of a comment
+(\ie with a leading \term{semicolon})
+to \term{standard output} indicating what \term{file} is being \term{compiled}
+and other useful information.
+If \param{verbose} is \term{false},
+\funref{compile-file} does not print 
+%the informational message.
+this information.
+\endissue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+
+If \param{print} is \term{true},
+information about \term{top level forms} in the file being
+compiled is printed to \term{standard output}.
+Exactly what is printed is \term{implementation-dependent}, 
+but nevertheless some information is printed.
+If \param{print} is \nil, no information is printed.
+\endissue{COMPILER-VERBOSITY:LIKE-LOAD}
+
+\issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+The \param{external-format} specifies the \term{external file format} 
+to be used when opening the \term{file}; \seefun{open}.
+\funref{compile-file} and \funref{load} must cooperate in such a way that
+the resulting \term{compiled file} can be \term{loaded}
+without specifying an \term{external file format} anew; \seefun{load}.
+\endissue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+
+%\funref{compile-file} uses \funref{read} to read \term{forms}
+%from the input file.
+\issue{COMPILE-FILE-PACKAGE}
+\issue{IN-SYNTAX:MINIMAL}
+\funref{compile-file} binds \varref{*readtable*} and \varref{*package*}
+to the values they held before processing the file.
+\endissue{IN-SYNTAX:MINIMAL}
+\endissue{COMPILE-FILE-PACKAGE}
+
+%!!! Can this be said more compactly or not at all?
+\issue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}
+\varref{*compile-file-truename*} is bound by \funref{compile-file} 
+to hold the \term{truename} of the \term{pathname} of the file being compiled.
+\endissue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}
+
+\issue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}
+\varref{*compile-file-pathname*} is bound by \funref{compile-file}
+to hold a \term{pathname} denoted by the first argument to \funref{compile-file},
+merged against the defaults;
+that is, \f{(pathname (merge-pathnames \param{input-file}))}.
+\endissue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}
+
+The compiled \term{functions} contained in the \term{compiled file} become available
+for use when the \term{compiled file} is \term{loaded} into Lisp.
+\issue{COMPILED-FUNCTION-REQUIREMENTS:TIGHTEN}
+Any function definition that is processed by the
+compiler, including \f{\#'(lambda ...)} forms and local function
+definitions made by \specref{flet}, \specref{labels} and \macref{defun} forms, 
+result in an \term{object} \oftype{compiled-function}.  
+\endissue{COMPILED-FUNCTION-REQUIREMENTS:TIGHTEN}
+
+\issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+The \term{primary value} returned by \funref{compile-file}, \param{output-truename},
+is the \funref{truename} of the output file, or \nil\ if the file could not be created.  
+
+% I replaced the language that was here with a copy of what is already said
+% for COMPILE.  --sjl 7 Mar 92
+The \term{secondary value}, \param{warnings-p}, is \term{false}
+% clarify ``compiler diagnostics''  --sjl 7 Mar 92
+%if no compiler diagnostics were issued, and \term{true} otherwise.
+if no \term{conditions} \oftype{error} or \typeref{warning}
+were detected by the compiler, and \term{true} otherwise.
+
+The \term{tertiary value}, \param{failure-p}, is \term{false}
+% clarify ``compiler diagnostics''  --sjl 7 Mar 92
+%if no compiler diagnostics other than \term{style warnings} were issued.
+%A value of \term{true} indicates that there were serious compiler diagnostics
+%issued, or that other \term{conditions} \oftype{error} or \typeref{warning}
+%(but not \oftype{style-warning}) were signaled during compilation.
+if no \term{conditions} \oftype{error} or \typeref{warning}
+(other than \typeref{style-warning})
+were detected by the compiler, and \term{true} otherwise.
+\endissue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+
+For general information about how \term{files} are processed by the \term{file compiler},
+\seesection\FileCompilation.
+
+% This is said below now.  --sjl 7 Mar 92
+%For a description of signaling and handling of errors by the \term{file compiler},
+%\seesection\FileCompilerExceptions.
+ 
+\issue{LOAD-OBJECTS:MAKE-LOAD-FORM}
+\term{Programs} to be compiled by the \term{file compiler} must only contain
+\term{externalizable objects}; for details on such \term{objects},
+\seesection\LiteralsInCompiledFiles.
+For information on how to extend the set of \term{externalizable objects},
+\seefun{make-load-form} and \secref\CallingMakeLoadForm.
+\endissue{LOAD-OBJECTS:MAKE-LOAD-FORM}
+
+\label Examples:\None.
+
+\label Affected By::
+\issue{COMPILER-WARNING-STREAM}
+\varref{*error-output*},
+\endissue{COMPILER-WARNING-STREAM}
+\issue{COMPILER-VERBOSITY:LIKE-LOAD}
+\varref{*standard-output*}, \varref{*compile-verbose*}, \varref{*compile-print*}
+\endissue{COMPILER-VERBOSITY:LIKE-LOAD}
+
+The computer's file system.
+\label Exceptional Situations::
+
+% The following information is mostly redundant with info in the chapter 3
+% concept section, and contains some inconsistencies.  Better to just
+% put in a cross-reference.  --sjl 4 mar 92
+% \issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+% The following list considers only 
+% those conditions signaled by, not within,  the compiler.
+%  
+% An error \oftype{error} might be signaled by the compiler in situations
+% where the compilation cannot proceed without intervention.
+% Examples include file open errors and syntax errors.
+%  
+% A condition \oftype{warning} \editornote{KMP: I guess we should
+% add ``correctable by muffle-warning''.}  might be signaled by the compiler in 
+%         situations where this standard explicitly states that a warning must,
+%         should, or might be signaled.
+% Also, an error \oftype{warning} might be signaled 
+% by the compiler in situations where the compiler can determine 
+%         that a situation with undefined consequences or that would cause
+%         an error to be signaled would result at runtime.
+%         Examples include
+% 	    violation of type declarations,
+% 	    \term{assigning} or \term{binding} a \term{constant variable},
+% 	    calling 
+% a built-in Lisp function with the wrong number of arguments
+% 	        or malformed keyword argument lists,
+% 	    referencing a variable declared \declref{ignore}, and
+% 	    the usage of unrecognized declaration specifiers.
+%  
+% The compiler is permitted to signal errors \oftype{style-warning}
+% about matters of programming style. Although \term{style warnings} might 
+% be signaled in these situations, no implementation is required to signal them.
+% However, if an implementation does choose to signal an condition about matters of
+% programming style, that condition is \oftype{style-warning} and is signaled 
+% by a call to \funref{warn}.
+% Examples include redefinition of a \term{function} with a different argument list,
+% calling a \term{function} with the wrong number of arguments,
+% \term{accessing} unreferenced local variables not declared \declref{ignore}, and
+% usage of declaration specifiers described in this standard but ignored by 
+% the compiler.
+%  
+% \endissue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+
+For information about errors detected during the compilation process, 
+\seesection\FileCompilerExceptions.
+
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+An error \oftype{file-error} might be signaled if
+{\tt (wild-pathname-p \param{input-file})\/} returns true.
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+If either the attempt to open the \term{source file} for input
+       or the attempt to open the \term{compiled file} for output
+fails,
+an error \oftype{file-error} is signaled.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\funref{compile},
+\misc{declare},
+\specref{eval-when},
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+% \issue{PATHNAME-LOGICAL:ADD}
+% Whether \funref{compile-file} recognizes \term{logical pathname} \term{namestrings}
+% (as opposed to \term{logical pathname} \term{objects})
+% is \term{implementation-defined}.
+% \endissue{PATHNAME-LOGICAL:ADD}
+\endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+ 
+\endcom
+
+%%% ========== COMPILE-FILE-PATHNAME
+\begincom{compile-file-pathname}\ftype{Function}
+
+\issue{PATHNAME-LOGICAL:ADD}
+
+\label Syntax:: 
+
+\issue{COMPILE-FILE-PATHNAME-ARGUMENTS:MAKE-CONSISTENT}
+\DefunWithValues compile-file-pathname
+		 {input-file {\key} output-file {\allowotherkeys}}
+	 	 {pathname}
+\endissue{COMPILE-FILE-PATHNAME-ARGUMENTS:MAKE-CONSISTENT}
+
+\label Arguments and Values::
+
+\param{input-file}---a \term{pathname designator}.
+  (Default fillers for unspecified components are taken from
+   \varref{*default-pathname-defaults*}.)
+
+\param{output-file}---a \term{pathname designator}.
+ \Default{\term{implementation-defined}}
+
+\param{pathname}---a \term{pathname}.
+
+\label Description::
+
+Returns the \term{pathname} that \funref{compile-file} would write into,
+if given the same arguments.
+
+\issue{COMPILE-FILE-OUTPUT-FILE-DEFAULTS:INPUT-FILE}
+The defaults for the \param{output-file} 
+are taken from the \term{pathname} 
+that results from merging the \param{input-file} 
+with \thevalueof{*default-pathname-defaults*},
+except that the type component 
+should default to the appropriate
+\term{implementation-defined} default type for \term{compiled files}.
+\endissue{COMPILE-FILE-OUTPUT-FILE-DEFAULTS:INPUT-FILE}
+
+If \param{input-file} is a \term{logical pathname} and \param{output-file} 
+is unsupplied, the result is a \term{logical pathname}.
+\issue{PATHNAME-LOGICAL:ADD}
+If \param{input-file} is a \term{logical pathname}, 
+it is translated into a physical pathname as if by calling 
+\funref{translate-logical-pathname}.
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+If \param{input-file} is a \term{stream}, 
+the \term{stream} can be either open or closed.
+\funref{compile-file-pathname} returns the same \term{pathname} after a
+file is closed as it did when the file was open.
+\endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+\issue{PATHNAME-STREAM}
+It is an error if \param{input-file} is a \term{stream} that is 
+created with \funref{make-two-way-stream}, \funref{make-echo-stream},             
+\funref{make-broadcast-stream}, \funref{make-concatenated-stream},
+\funref{make-string-input-stream}, \funref{make-string-output-stream}.
+\endissue{PATHNAME-STREAM}
+
+If an implementation supports additional keyword arguments to \funref{compile-file}, 
+\funref{compile-file-pathname} must accept the same arguments.
+
+\label Examples::
+
+See \funref{logical-pathname-translations}.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+An error \oftype{file-error} might be signaled if either \param{input-file} or
+\param{output-file} is \term{wild}.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\funref{compile-file},
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+% \issue{PATHNAME-LOGICAL:ADD}
+% Whether \funref{compile-file-pathname} recognizes \term{logical pathname} \term{namestrings}
+% (as opposed to \term{logical pathname} \term{objects})
+% is \term{implementation-defined}.
+% \endissue{PATHNAME-LOGICAL:ADD}
+\endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\endcom
+
+%%% ========== LOAD
+\begincom{load}\ftype{Function}
+
+\label Syntax:: 
+
+\issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+\DefunWithValuesNewline load 
+		        {filespec {\key} \vtop{\hbox{verbose print}
+					       \hbox{if-does-not-exist external-format}}}
+		        {generalized-boolean}
+\endissue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+
+\label Arguments and Values::
+
+%!!! Need to think about "file designator" here.
+\param{filespec}---a \term{stream}, or a \term{pathname designator}.
+%% 23.4.0 4             
+ \Default{taken from \varref{*default-pathname-defaults*}}
+
+\param{verbose}---a \term{generalized boolean}.
+  \Default{\thevalueof{*load-verbose*}}
+
+\param{print}---a \term{generalized boolean}.
+  \Default{\thevalueof{*load-print*}}
+
+%!!! Looks mighty strange to me! -kmp 26-Jun-93
+\param{if-does-not-exist}---a \term{generalized boolean}.
+  \Default{\term{true}}
+
+\issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+\param{external-format}---an \term{external file format designator}.
+  \Default{\kwd{default}}
+\endissue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 23.4.0 3
+\funref{load} \term{loads} the \term{file} named by \param{filespec}
+into the \Lisp\ environment.
+
+The manner in which a \term{source file}
+is distinguished from a \term{compiled file} is \term{implementation-dependent}.
+% If it is not possible to distinguish between a character file and a 
+% compiled file by \param{filespec},
+If the file specification is not complete and both a \term{source file} and a 
+\term{compiled file} exist which might match,
+then which of those files \funref{load} selects is \term{implementation-dependent}.
+
+If \param{filespec} is a \term{stream},
+\funref{load} determines what kind of \term{stream} it is 
+and loads directly from the \term{stream}.
+\issue{PATHNAME-LOGICAL:ADD}
+If \param{filespec} is a \term{logical pathname},
+it is translated into a \term{physical pathname}
+as if by calling \funref{translate-logical-pathname}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\issue{EVAL-TOP-LEVEL:LOAD-LIKE-COMPILE-FILE}
+%% Per X3J13 -kmp 5-Oct-93
+% \funref{load} evaluates each \term{form} it encounters in the file
+% named by \param{filespec}.
+\funref{load} sequentially executes each \term{form} it encounters
+in the \term{file} named by \param{filespec}.
+If the \term{file} is a \term{source file}
+and the \term{implementation} chooses to perform \term{implicit compilation},
+\funref{load} must recognize \term{top level forms} 
+as described in {\secref\TopLevelForms}
+and arrange for each \term{top level form} to be executed 
+before beginning \term{implicit compilation} of the next.
+(Note, however, that processing of \specref{eval-when} \term{forms}
+by \funref{load} is controlled by the \kwd{execute} situation.)
+\endissue{EVAL-TOP-LEVEL:LOAD-LIKE-COMPILE-FILE}
+
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+% If \param{verbose} is \term{true},
+% \funref{load} prints a message 
+% %% KMP: This semicolon thing is environment stuff and not proper here.
+% %%  No portable program can rely on it, so it's stupid to require it.
+% %with a leading \term{semicolon} (a comment)
+% to \term{standard output} indicating what file is being loaded 
+% and other useful information.
+% %% Changed into a `suggestion' in response to gripe above. -kmp 7-Feb-92
+% % I disagree with this change; CLtL doesn't say ``maybe''.  Also look
+% % at the corresponding parameter for COMPILE-FILE.  --sjl 4 Mar 92
+% %Such information might be preceded by a leading \term{semicolon} (\eg as in a comment).
+% Such information is preceded by a leading \term{semicolon} (\eg as in a comment).
+If \param{verbose} is \term{true},
+\funref{load} prints a message in the form of a comment
+(\ie with a leading \term{semicolon})
+to \term{standard output} indicating what \term{file} is being \term{loaded}
+and other useful information.
+\endissue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+%% 23.4.0 5
+If \param{verbose} is \term{false}, 
+\funref{load} does not print this information.
+
+%% Barmar and I puzzled over this for a while and decided that it was best not to
+%% be overly constraining to implementations, since absolute conformance is hard to
+%% do in general if you're too strict. We softened the wording just slightly.
+%% -kmp 7-Feb-92
+If \param{print} is \term{true},
+\funref{load} incrementally prints information to \term{standard output}
+showing the progress of the \term{loading} process.
+For a \term{source file},
+this information might mean printing the \term{values} 
+\term{yielded} by each \term{form} in the \term{file}
+as soon as those \term{values} are returned.
+For a \term{compiled file}, 
+what is printed might not reflect precisely the contents of the \term{source file},
+but some information is generally printed.
+If \param{print} is \term{false},
+\funref{load} does not print this information.
+
+%% 23.4.0 6
+%% 23.4.0 7
+If the file named by \param{filespec} is successfully loaded,
+\funref{load} returns \term{true}.
+%%!!! Removed for now because Sandra's comment below make it clear
+%%    that this is confusing and wrong. -kmp 3-Dec-91
+%otherwise, \nil\ is returned or an error is 
+%signaled, depending upon the value of \param{if-does-not-exist}.
+
+\reviewer{Loosemore: What happens if the file cannot be loaded for some reason other
+than that it doesn't exist?} \editornote{KMP: i.e., can it return NIL? must it?}
+
+If the file does not exist, 
+the specific action taken depends on \param{if-does-not-exist}:
+if it is \nil, \funref{load} returns \nil;
+otherwise, \funref{load} signals an error.
+
+\issue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+The \param{external-format} specifies the \term{external file format} 
+to be used when opening the \term{file} (\seefun{open}),
+except that when the \term{file} named by \param{filespec} is a \term{compiled file},
+the \param{external-format} is ignored.
+\funref{compile-file} and \funref{load} cooperate 
+in an \term{implementation-dependent} way to assure 
+the preservation of the \term{similarity} of \term{characters} 
+referred to in the \term{source file} 
+at the time the \term{source file} was processed by the \term{file compiler} 
+under a given \term{external file format},
+regardless of the value of \param{external-format} 
+at the time the \term{compiled file} is \term{loaded}.
+\endissue{EXTERNAL-FORMAT-FOR-EVERY-FILE-CONNECTION:MINIMUM}
+
+%% 11.2.0 7
+\issue{IN-SYNTAX:MINIMAL}
+\funref{load} binds \varref{*readtable*} and \varref{*package*}
+to the values they held before \term{loading} the file.
+\endissue{IN-SYNTAX:MINIMAL}
+
+\issue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}   
+\varref{*load-truename*} is \term{bound} by \funref{load} to hold 
+the \term{truename} of the \term{pathname} of the file being \term{loaded}.
+ 
+\varref{*load-pathname*} is \term{bound} by \funref{load} to hold 
+a \term{pathname} that represents \param{filespec} merged against the defaults.
+That is, {\tt (pathname (merge-pathnames \param{filespec}))}.
+\endissue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}   
+
+\label Examples::
+
+\code
+;Establish a data file...
+ (with-open-file (str "data.in" :direction :output :if-exists :error)
+   (print 1 str) (print '(setq a 888) str) t)
+\EV T
+ (load "data.in") \EV \term{true}
+ a \EV 888
+ (load (setq p (merge-pathnames "data.in")) :verbose t)
+; Loading contents of file /fred/data.in
+; Finished loading /fred/data.in
+\EV \term{true}
+ (load p :print t) 
+; Loading contents of file /fred/data.in
+;  1
+;  888
+; Finished loading /fred/data.in
+\EV \term{true}
+\endcode
+
+\medbreak
+\issue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}
+\code
+ ;----[Begin file SETUP]----
+ (in-package "MY-STUFF")
+ (defmacro compile-truename () `',*compile-file-truename*)
+ (defvar *my-compile-truename* (compile-truename) "Just for debugging.")
+ (defvar *my-load-pathname* *load-pathname*)
+ (defun load-my-system ()
+   (dolist (module-name '("FOO" "BAR" "BAZ"))
+     (load (merge-pathnames module-name *my-load-pathname*))))
+ ;----[End of file SETUP]----
+
+ 
+ (load "SETUP")
+ (load-my-system)
+\endcode
+\endissue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}
+
+\label Affected By::
+
+The implementation, and the host computer's file system.
+
+\label Exceptional Situations::
+
+If \kwd{if-does-not-exist} is supplied and is \term{true}, or is not supplied,
+\funref{load} signals an error \oftype{file-error} if the file named by
+\param{filespec} does not exist,
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+%% Additional constraint per x3j13 (05-Oct-93) -kmp
+or if the \term{file system} cannot perform the requested operation.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+An error \oftype{file-error} might be signaled if
+\f{(wild-pathname-p \param{filespec})} returns \term{true}.
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\funref{error},
+\funref{merge-pathnames},
+\varref{*load-verbose*},
+\varref{*default-pathname-defaults*},
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+% \issue{PATHNAME-LOGICAL:ADD}
+% Whether \funref{load} recognizes \term{logical pathname} \term{namestrings}
+% (as opposed to \term{logical pathname} \term{objects})
+% is \term{implementation-defined}.
+% \endissue{PATHNAME-LOGICAL:ADD}
+\endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+ 
+\endcom
+
+%%% ========== WITH-COMPILATION-UNIT
+\begincom{with-compilation-unit}\ftype{Macro}
+
+\issue{WITH-COMPILATION-UNIT:NEW-MACRO}
+
+\label Syntax::
+
+\DefmacWithValues with-compilation-unit 
+		  {\paren{\interleave{\down{option}}}
+		   \starparam{form}}
+		  {\starparam{result}}
+
+\auxbnf{option}{\kwd{override} override}
+
+\label Arguments and Values::
+
+\param{override}---a \term{generalized boolean}; \eval.
+ \Default{\nil}
+
+\param{forms}---an \term{implicit progn}.
+                                   
+\param{results}---the \term{values} returned by the \term{forms}.
+
+%!!! This description needs work. -kmp 29-Jul-91
+\label Description::
+
+Executes \param{forms} from left to right.
+Within the \term{dynamic environment} of \macref{with-compilation-unit},
+actions deferred by the compiler until the end of compilation will be
+deferred until the end of the outermost call to \macref{with-compilation-unit}.
+
+The set of \term{options} permitted may be extended by the implementation,
+but the only \term{standardized} keyword is \kwd{override}.
+
+If nested dynamically only the outer call to 
+\macref{with-compilation-unit} has any effect unless the value
+associated with \kwd{override} is \term{true}, in which case warnings are
+deferred only to the end of the innermost call for which \param{override} is \term{true}.
+
+% This was incorrectly transcribed from the cleanup issue.  --sjl 4 mar 92 
+%The functions \funref{compile} and \term{compile-file}
+The function \funref{compile-file} 
+provides the effect of 
+
+\code
+ (with-compilation-unit (:override nil) ...)
+\endcode
+around its \term{code}.
+
+Any \term{implementation-dependent} extensions can only be provided as the
+result of an explicit programmer request by use of an
+\term{implementation-dependent} keyword.  \term{Implementations} are forbidden
+from attaching additional meaning to a use of this macro which involves either
+no keywords or just the keyword \kwd{override}.
+
+\label Examples::
+
+If an \term{implementation} would normally defer certain kinds of warnings,
+such as warnings about undefined functions, to the end of a compilation
+unit (such as a \term{file}), the following example shows how to cause those
+warnings to be deferred to the end of the compilation of several files.
+
+\code
+ (defun compile-files (&rest files)
+   (with-compilation-unit ()
+     (mapcar #'(lambda (file) (compile-file file)) files)))
+
+ (compile-files "A" "B" "C")
+\endcode
+
+Note however that if the implementation does not normally defer any warnings,
+use of \term{with-compilation-unit} might not have any effect.
+ 
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{compile}, \funref{compile-file}
+
+\label Notes:\None.
+ 
+\endissue{WITH-COMPILATION-UNIT:NEW-MACRO}
+
+\endcom
+
+%-------------------- System Construction Variables --------------------
+
+%%% ========== *FEATURES*
+\begincom{*features*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{proper list}.
+
+\label Initial Value::
+
+%A \term{list}, the specific \term{elements} of which are
+\term{implementation-dependent}.
+
+\label Description::
+
+%% 25.4.2 12
+\Thevalueof{*features*} is called the \term{features list}.  
+It is a \term{list} of \term{symbols}, called \term{features}, 
+that correspond to some aspect of the \term{implementation} or \term{environment}.
+
+Most \term{features} have \term{implementation-dependent} meanings;
+The following meanings have been assigned to feature names:
+
+\issue{COMMON-FEATURES:SPECIFY}
+\issue{SHARPSIGN-PLUS-MINUS-PACKAGE:KEYWORD}
+\beginlist
+
+\itemitem{\kwd{cltl1}}
+
+If present, indicates that \thepackage{lisp} \term{purports to conform}
+to the 1984 specification \CLtL.  
+It is possible, but not required, for a \term{conforming implementation} 
+to have this feature because this specification specifies that 
+its \term{symbols} are to be in \thepackage{common-lisp}, 
+not the \packref{lisp} package.
+
+\itemitem{\kwd{cltl2}}
+
+If present, indicates that the implementation \term{purports to conform}
+to \CLtLTwo.
+This feature must not be present in any \term{conforming implementation},
+since conformance to that document is not compatible with conformance
+to this specification.
+The name, however, is reserved by this specification in order to help
+programs distinguish implementations which conform to that document
+from implementations which conform to this specification.
+
+\itemitem{\kwd{ieee-floating-point}}
+
+If present, indicates that the implementation \term{purports to conform}
+to the requirements of \IEEEFloatingPoint.
+
+\itemitem{\kwd{x3j13}}
+
+If present, indicates that the implementation conforms to some
+particular working draft of this specification, 
+or to some subset of features that approximates a belief about
+what this specification might turn out to contain.
+A \term{conforming implementation} might or might not contain
+such a feature.
+(This feature is intended primarily as a stopgap in order to 
+provide implementors something to use prior to the availability
+of a draft standard, in order to discourage them from introducing
+the \kwd{draft-ansi-cl} and \kwd{ansi-cl} \term{features} prematurely.)
+
+\itemitem{\kwd{draft-ansi-cl}}
+
+If present, indicates that the \term{implementation} 
+\term{purports to conform} to the first full draft of this specification,
+which went to public review in 1992.
+A \term{conforming implementation}
+which has the \kwd{draft-ansi-cl-2} or \kwd{ansi-cl} \term{feature}
+is not permitted to retain the \kwd{draft-ansi-cl} \term{feature}
+since incompatible changes were made subsequent to the first draft.
+
+\itemitem{\kwd{draft-ansi-cl-2}}
+
+If present, indicates that a second full draft of this specification
+has gone to public review, and that the \term{implementation} 
+\term{purports to conform} to that specification.
+(If additional public review drafts are produced, this keyword
+ will continue to refer to the second draft, and additional keywords
+ will be added to identify conformance with such later drafts.
+ As such, the meaning of this keyword can be relied upon not to
+ change over time.)
+A \term{conforming implementation} which has the \kwd{ansi-cl}
+\term{feature} is only permitted to retain the \kwd{draft-ansi-cl} 
+\term{feature} if the finally approved standard is not incompatible
+with the draft standard.
+
+\itemitem{\kwd{ansi-cl}}
+
+If present, indicates that this specification has been adopted by ANSI
+as an official standard, and that the \term{implementation} 
+\term{purports to conform}.
+
+\itemitem{\kwd{common-lisp}}
+
+This feature must appear in \varref{*features*} for any implementation that
+has one or more of the features \kwd{x3j13}, \kwd{draft-ansi-cl},
+or \kwd{ansi-cl}.  It is intended that it should also appear in
+implementations which have the features \kwd{cltl1} or \kwd{cltl2},
+but this specification cannot force such behavior.  The intent is 
+that this feature should identify the language family named ``Common Lisp,''
+rather than some specific dialect within that family.
+
+\endlist
+\endissue{SHARPSIGN-PLUS-MINUS-PACKAGE:KEYWORD}
+\endissue{COMMON-FEATURES:SPECIFY}
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label See Also::
+
+{\secref\ReadTimeConditionals},
+{\secref\StandardMacroChars}
+
+\label Notes::
+
+%% 25.4.2 13
+\Thevalueof{*features*} is used by the \f{\#+} and \f{\#-} reader syntax.
+
+\issue{SHARPSIGN-PLUS-MINUS-PACKAGE:KEYWORD}
+\term{Symbols} in the \term{features list} may be in any \term{package},
+but in practice they are generally in \thepackage{keyword}.
+This is because \packref{keyword} is the \term{package} used by default
+when \term{reading}\meaning{2} \term{feature expressions} 
+in the \f{\#+} and \f{\#-} \term{reader macros}.
+\term{Code} that needs to name a \term{feature}\meaning{2} in a
+\term{package} $P$ (other than \packref{keyword}) can do so
+by making explicit use of a \term{package prefix} for $P$,
+but note that such \term{code} must also assure that the \term{package} $P$ 
+exists in order for the \term{feature expression} to be \term{read}\meaning{2}---even
+in cases where the \term{feature expression} is expected to fail.
+\endissue{SHARPSIGN-PLUS-MINUS-PACKAGE:KEYWORD}
+
+It is generally considered wise for an \term{implementation} to include 
+one or more \term{features} identifying the specific \term{implementation},
+so that conditional expressions can be written which distinguish 
+idiosyncrasies of one \term{implementation} from those of another.  
+Since features are normally \term{symbols} in \thepackage{keyword}
+where name collisions might easily result, and since no uniquely defined mechanism
+is designated for deciding who has the right to use which \term{symbol} for
+what reason, a conservative strategy is to prefer names derived from 
+one's own company or product name, since those names are often trademarked
+and are hence less likely to be used unwittingly by another \term{implementation}.
+
+\endcom
+
+%%% ========== *COMPILE-FILE-PATHNAME*
+%%% ========== *COMPILE-FILE-TRUENAME*
+\begincom{*compile-file-pathname*, *compile-file-truename*}\ftype{Variable}
+
+\issue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}
+
+\label Value Type::
+
+\Thevalueof{*compile-file-pathname*} must always be a \term{pathname}          or \nil.
+\Thevalueof{*compile-file-truename*} must always be a \term{physical pathname} or \nil.
+
+\label Initial Value::
+
+\nil.
+
+\label Description::
+
+During a call to \funref{compile-file},
+  \varref{*compile-file-pathname*} is \term{bound} to 
+  the \term{pathname} denoted by the first argument to \funref{compile-file},
+  merged against the defaults;
+  that is, it is \term{bound} to \f{(pathname (merge-pathnames \param{input-file}))}.
+During the same time interval,
+  \varref{*compile-file-truename*} is \term{bound} to
+  the \term{truename} of the \term{file} being \term{compiled}.
+
+At other times, the \term{value} of these \term{variables} is \nil.
+                   
+If a \term{break loop} is entered while \funref{compile-file} is ongoing,
+it is \term{implementation-dependent} whether these \term{variables} retain 
+the \term{values} they had just prior to entering the \term{break loop} 
+or whether they are \term{bound} to \nil.
+
+The consequences are unspecified if 
+an attempt is made to \term{assign} or \term{bind} either of these \term{variables}.
+
+\label Examples:\None.
+
+\label Affected By::
+
+The \term{file system}.
+
+\label See Also::
+
+\funref{compile-file}
+
+\label Notes:\None.
+
+%% This contradicts the "unspecified" above.
+% Except in the unusual situation of trying to simulate a facility similar to
+% \funref{compile-file}, programs are not expected to \term{assign} or \term{bind}
+% this variable.
+
+\endissue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}
+
+\endcom
+
+%%% ========== *LOAD-PATHNAME*
+%%% ========== *LOAD-TRUENAME*
+\begincom{*load-pathname*, *load-truename*}\ftype{Variable}
+\issue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}
+
+\label Value Type::
+
+\Thevalueof{*load-pathname*} must always be a \term{pathname}          or \nil.
+\Thevalueof{*load-truename*} must always be a \term{physical pathname} or \nil.
+
+\label Initial Value::
+
+\nil.
+
+\label Description::
+
+During a call to \funref{load},
+  \varref{*load-pathname*} is \term{bound} to 
+  the \term{pathname} denoted by the the first argument to \funref{load},
+  merged against the defaults; 
+  that is, it is \term{bound} to \f{(pathname (merge-pathnames \param{filespec}))}.
+During the same time interval,
+  \varref{*load-truename*} is \term{bound} to
+  the \term{truename} of the \term{file} being loaded.
+
+At other times, the \term{value} of these \term{variables} is \nil.
+                   
+If a \term{break loop} is entered while \funref{load} is ongoing,
+it is \term{implementation-dependent} whether these \term{variables} retain 
+the \term{values} they had just prior to entering the \term{break loop} 
+or whether they are \term{bound} to \nil.
+
+The consequences are unspecified if 
+an attempt is made to \term{assign} or \term{bind} either of these \term{variables}.
+
+\label Examples:\None.
+
+\label Affected By::
+
+The \term{file system}.
+
+\label See Also::
+
+\funref{load}
+
+\label Notes:\None.
+
+\endissue{LOAD-TRUENAME:NEW-PATHNAME-VARIABLES}
+
+\endcom
+
+%%% ========== *COMPILE-PRINT*
+%%% ========== *COMPILE-VERBOSE*
+\begincom{*compile-print*, *compile-verbose*}\ftype{Variable}
+
+\issue{COMPILER-VERBOSITY:LIKE-LOAD}
+
+\label Value Type::
+
+a \term{generalized boolean}.
+
+\label Initial Value::
+
+\term{implementation-dependent}.
+
+\label Description::
+
+\Thevalueof{*compile-print*}   is the default value of \thekeyarg{print}
+to \funref{compile-file}.
+\Thevalueof{*compile-verbose*} is the default value of \thekeyarg{verbose}
+to \funref{compile-file}.
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label See Also::
+
+\funref{compile-file}
+
+\label Notes:\None.
+
+\endissue{COMPILER-VERBOSITY:LIKE-LOAD}
+
+\endcom
+
+
+%%% ========== *LOAD-PRINT*
+%%% ========== *LOAD-VERBOSE*
+\begincom{*load-print*, *load-verbose*}\ftype{Variable}
+\issue{COMPILER-VERBOSITY:LIKE-LOAD}
+
+\label Value Type::
+
+a \term{generalized boolean}.
+
+\label Initial Value::
+
+The initial \term{value} of \varref{*load-print*}   is \term{false}.
+The initial \term{value} of \varref{*load-verbose*} is \term{implementation-dependent}.
+
+\label Description::
+
+\Thevalueof{*load-print*}   is the default value of \thekeyarg{print}   to \funref{load}.
+%% 23.4.0 8
+\Thevalueof{*load-verbose*} is the default value of \thekeyarg{verbose} to \funref{load}.
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+%The \term{implementation}.
+
+\label See Also::
+
+\funref{load}
+
+\label Notes:\None.
+
+\endissue{COMPILER-VERBOSITY:LIKE-LOAD}
+
+\endcom
+
+%%% ========== *MODULES*
+\begincom{*modules*}\ftype{Variable}
+
+\issue{REQUIRE-PATHNAME-DEFAULTS-AGAIN:X3J13-DEC-91}
+
+\label Value Type::
+
+a \term{list} of \term{strings}.
+
+\label Initial Value::
+
+\term{implementation-dependent}.
+
+\label Description::
+
+%% 11.8.0 2
+
+\Thevalueof{*modules*} is a list of names of the modules
+that have been loaded into the current \term{Lisp image}.
+
+\label Examples:\None.
+
+\label Affected By::
+
+\funref{provide}
+
+\label See Also::
+
+\funref{provide},
+\funref{require}
+
+% deprecation note was missing --sjl 4 Mar 92
+\label Notes::
+
+The variable \varref{*modules*} is deprecated.
+
+\endissue{REQUIRE-PATHNAME-DEFAULTS-AGAIN:X3J13-DEC-91}
+
+\endcom
+
+%%% ========== PROVIDE
+%%% ========== REQUIRE
+\begincom{provide, require}\ftype{Function}
+
+\issue{REQUIRE-PATHNAME-DEFAULTS-AGAIN:X3J13-DEC-91}
+
+\label Syntax::
+
+\DefunWithValues provide {module-name} 		       {\term{implementation-dependent}}
+\issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT}
+%% "pathname" => "pathname list" per X3J13. -kmp 05-Oct-93
+\DefunWithValues require {module-name {\opt} pathname-list} {\term{implementation-dependent}}
+\endissue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT}
+
+\label Arguments and Values::
+
+%KMP: Maybe should be "module name designator"? 
+%     Oh well. This is the only use, so leave it for now.
+\param{module-name}---a \term{\symbolnamedesignator}.
+
+\issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT}
+\param{pathname-list}---\nil, or
+			a \term{designator} 
+			  for a \term{non-empty} \term{list} of \term{pathname designators}.
+ \Default{\nil}
+\endissue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT}
+
+\label Description::
+
+%% 11.8.0 4
+\funref{provide} adds the \param{module-name} to the \term{list} held by
+\varref{*modules*}, if such a name is not already present.
+
+%% 11.8.0 5
+\funref{require} tests for the presence of the \param{module-name} in the
+\term{list} held by \varref{*modules*}.
+If it is present, \funref{require} immediately returns.
+\issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT}
+Otherwise, an attempt is made to load an appropriate set of \term{files} as follows:
+The \param{pathname-list} argument, if \term{non-nil}, 
+ specifies a list of \term{pathnames} to be loaded in order, from left to right.
+If the \param{pathname-list} is \nil,
+an \term{implementation-dependent} mechanism will be invoked in an attempt
+to load the module named \param{module-name};
+if no such module can be loaded, an error \oftype{error} is signaled.
+\endissue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT}
+
+Both functions use \funref{string=} to test for the presence of a \param{module-name}.
+
+\label Examples::
+
+\issue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT}
+% %% 11.8.0 6 (CLtL Table 11-1: An Initialization File)
+% 
+% \code
+%  ;;;; New and improved lisp init file for I. Newton
+% 
+%  ;;; Set up the CL-USER package the way I like it.
+%  (require "CALCULUS")     ; I use CALCULUS a lot. Load it.
+%  (use-package "CALCULUS") ; Get easy access to exported symbols.
+% 
+%  (require "NEWTONIAN-MECHANICS") ;Ditto for NEWTONIAN-MECHANICS
+%  (use-package "NEWTONIAN-MECHANICS")
+% 
+%  ;;; Ignore that Relativity stuff until they've got it debugged better.
+%  ;(require "RELATIVITY")
+% 
+%  ;;; These are worth loading, but I'll use qualified names, such
+%  ;;; as PHLOGISTON:MAKE-FIRE-BOTTLE, to get any symbols I might need.
+%  (require "PHLOGISTON")
+%  (require "ALCHEMY")
+% 
+%  (provide "NEWTON-PERSONAL-PREFERENCES")
+% \endcode
+
+\code
+;;; This illustrates a nonportable use of REQUIRE, because it
+;;; depends on the implementation-dependent file-loading mechanism.
+
+(require "CALCULUS")
+
+;;; This use of REQUIRE is nonportable because of the literal 
+;;; physical pathname.  
+
+(require "CALCULUS" "/usr/lib/lisp/calculus")
+
+;;; One form of portable usage involves supplying a logical pathname,
+;;; with appropriate translations defined elsewhere.
+
+(require "CALCULUS" "lib:calculus")
+
+;;; Another form of portable usage involves using a variable or
+;;; table lookup function to determine the pathname, which again
+;;; must be initialized elsewhere.
+
+(require "CALCULUS" *calculus-module-pathname*)
+\endcode
+\endissue{REQUIRE-PATHNAME-DEFAULTS-YET-AGAIN:RESTORE-ARGUMENT}
+
+\label Side Effects::
+
+\funref{provide} modifies \varref{*modules*}.
+
+\label Affected By::
+
+The specific action taken by \funref{require} is affected by calls to \funref{provide}
+(or, in general, any changes to \thevalueof{*modules*}).
+
+\label Exceptional Situations::
+
+\Shouldchecktype{module-name}{a \term{\symbolnamedesignator}}
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+If \funref{require} fails to perform the requested operation 
+due to a problem while interacting with the \term{file system},
+an error \oftype{file-error} is signaled.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+An error \oftype{file-error} might be signaled if any \term{pathname} 
+in \param{pathname-list} is a \term{designator} for a \term{wild} \term{pathname}.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label See Also::
+
+\varref{*modules*},
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes::
+
+% deprecation note was missing --sjl 4 Mar 92
+The functions \funref{provide} and \funref{require} are deprecated.
+
+%% 11.8.0 3
+If a module consists of a single \term{package},
+it is customary for the package and module names to be the same.
+
+\endissue{REQUIRE-PATHNAME-DEFAULTS-AGAIN:X3J13-DEC-91}
+
+\endcom

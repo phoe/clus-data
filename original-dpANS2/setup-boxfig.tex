@@ -1,0 +1,214 @@
+\def\IgnoreLineBreaks{\catcode'15=9     \catcode'12=9}
+\def\IgnoreWhiteSpace{\catcode'11=9 \catcode'40=9 \IgnoreLineBreaks}
+\def\DontIgnoreWhiteSpace{\catcode'12=\active\catcode'15=5\catcode'11=10\catcode'40=10}
+
+%\font \pipefont= lcirclew10
+\font \pipefont= circle10
+
+\font \foofont = cmr10
+%\font \foofont = amr10
+
+\IgnoreWhiteSpace
+
+\let \adv=\advance
+\def\he{height}
+\def\wi{width}
+\def\de{depth}
+
+\newdimen \stroke       
+\stroke= \fontdimen8\pipefont   % thickness of line in circles
+\newdimen \radius       \radius=6pt     % radius of circles
+
+\newdimen\irad \irad=\radius\advance\irad by -.5\stroke
+\newdimen\orad \orad=\radius\advance\irad by  .5\stroke
+
+\newbox\BStrutbox
+
+\setbox\BStrutbox\hbox{\vrule\wi0pt\he10pt\de10pt}
+\def\BoxStrut{\unhcopy\BStrutbox}
+
+% Arrows
+
+\newdimen\ArrowShift
+\ArrowShift=\fontdimen22\tensy
+\advance\ArrowShift by -0.5\stroke
+
+\def\StrikeOut #1
+{       \setbox0\hbox{#1}
+        \hbox to 1\wd0
+        {       \vrule \he\stroke\de0pt\wi\wd0
+                \hskip-\wd0
+                \unhbox0
+        }
+}
+
+\def\LeftArrow
+{       \hskip 0.5\stroke
+        \StrikeOut{\lower\ArrowShift\hbox to 10pt{\tensy\char'40\hss}}
+}
+
+\def\RightArrow
+{       \StrikeOut{\lower\ArrowShift\hbox to 10pt{\hss\tensy\char'41}}
+        \hskip 0.5\stroke
+}
+
+\def\ArrowLine
+{       \StrikeOut{\hskip 10pt\hskip 0.5\stroke}
+}
+
+\def\LeftToRight
+{       \let\RightSideArrow=\ArrowLine
+        \let\LeftSideArrow=\RightArrow
+}
+
+\def\RightToLeft
+{       \let\LeftSideArrow=\ArrowLine
+        \let\RightSideArrow=\LeftArrow
+}
+
+\def\NoArrows
+{       \let\LeftSideArrow=\ArrowLine
+        \let\RightSideArrow=\ArrowLine
+}
+% boxes around words
+
+\let\NonterminalFont=\tenrm
+
+\newbox\TStrutbox
+\setbox0\hbox{\NonterminalFont{Bg}}
+\setbox\TStrutbox\hbox{\vrule\wi0pt\he\ht0\de\dp0}
+\def\TextStrut{\unhcopy\TStrutbox}
+
+\def\HorzLine{\hrule \he \stroke \de 0pt}
+\def\HFil{\leaders\HorzLine\hfil}
+\def\HFill{\leaders\HorzLine\hfill}
+
+\def\Nonterminal#1
+{\setbox1\vbox to 0pt{
+        \vss
+        \hbox{\TextStrut\NonterminalFont\space#1\space\hskip-\stroke}
+        \vss}
+        \hbox{
+        \BoxStrut
+        \LeftSideArrow
+        \lower\irad\vbox{
+                \TopSquare
+                \copy1
+                \BotSquare}
+        \RightSideArrow}
+}
+
+\def\TopSquare
+{       \hbox{
+        \vrule\he\stroke\de\irad\wi\stroke
+        \vrule\he\stroke\de0pt\wi\wd1
+        \vrule\he\stroke\de\irad\wi\stroke}
+}
+
+\def\BotSquare
+{       \hbox{
+        \vrule\he\orad\de0pt\wi\stroke
+        \vrule\he\stroke\de0pt\wi\wd1
+        \vrule\he\orad\de0pt\wi\stroke}
+}
+
+\def\\#1{\Nonterminal{#1}\HFil}
+\def\last#1{{\def\RightSideArrow{}\Nonterminal{#1}}}
+
+% piping
+
+%\def\foo{\rlap{\foofont\char'40}}
+\def\foo{\null}
+
+\def\FulVert{\vrule             \wi\stroke\foo\hskip-\stroke}
+\def\TopVert{\vrule\de-\irad    \wi\stroke\foo\hskip-\stroke}
+\def\BotVert{\vrule\he-\orad    \wi\stroke\foo\hskip-\stroke}
+
+\def\Center#1,#2.
+{\hskip\radius\foo#1\lower.5\stroke\hbox{\pipefont#2}\hskip\radius}
+
+\def\ru{\char'10\hskip -2\radius}
+\def\rd{\char'11\hskip -2\radius}
+\def\ld{\char'12\hskip -2\radius}
+\def\lu{\char'13\hskip -2\radius}
+\def\thru{\hskip-\radius\vrule\he\stroke\de0pt\wi2\radius\hskip\radius\hskip-2\radius}
+
+\def\Center#1,#2.
+{\foo\hskip\radius#1{\pipefont#2\unskip}\hskip-\radius}
+
+\def\LT{\Center\BotVert,\lu.}
+\def\LU{\Center\FulVert,\lu.}
+\def\LL{\Center\FulVert,\ld.}
+\def\LB{\Center\TopVert,\ld.}
+\def\LMid{\Center\TopVert\BotVert,\rd\ru\thru.}
+\def\LMU{\Center\TopVert,\rd\thru.}
+\def\LML{\Center\BotVert,\ru\thru.}
+\def\LFD{\Center\FulVert,\ru\thru.}
+\def\LS{\Center\TopVert\BotVert,\rd\ru.}
+
+\def\RT{\Center\BotVert,\ru.}
+\def\RU{\Center\FulVert,\ru.}
+\def\RL{\Center\FulVert,\rd.}
+\def\RB{\Center\TopVert,\rd.}
+\def\RMid{\Center\TopVert\BotVert,\ld\lu\thru.}
+\def\RMU{\Center\TopVert,\ld\thru.}
+\def\RML{\Center\BotVert,\lu\thru.}
+
+\def\Cross{\Center\FulVert,\thru.}
+\def\LR{\Center,\thru.}
+\def\TB{\Center\FulVert,.}
+%  ShiftBox
+
+\newbox\x
+\newbox\y
+\newbox\tempy
+\newbox\z
+\newbox\tempz
+
+\def\ShiftBox#1{
+\savemod
+\saverulebox
+\setbox\x
+\vbox{  \everycr{\noalign{{\modifyrulebox\global\setbox\z\hbox{}}}}
+        \halign{&\setbox\x\hbox{##}
+        \global \setbox\z\hbox{\unhbox\z\vrule\he\ht\x\de\dp\x\wi0pt}
+                \unhbox\x
+                \cr
+                #1}}%
+\lower\ht\y\box\x\HFil
+\restoremod
+\restorerulebox
+}
+
+\def\saverulebox{
+        \setbox\tempy\box\y
+\global \setbox\y\vbox{}
+        \setbox\tempz\box\z
+\global \setbox\z\hbox{}
+}
+
+\def\restorerulebox{
+\global \setbox\y\box\tempy
+\global \setbox\z\box\tempz
+}
+
+\def\topmod{}
+
+\def\thisrow{\global\let\modifyrulebox\firstmod}
+
+\def\firstmod{
+        \global\setbox\y\vbox{\hrule\he0pt\wi0pt\de\dp\z}
+        \global\let\modifyrulebox\latermod
+}
+\def\latermod{
+        \global\setbox\y\vbox{\unvbox\y\hrule\he\ht\z\de\dp\z\wi0pt}
+}
+\def\savemod{            
+        \let\tempmod\modifyrulebox
+\global \let\modifyrulebox\topmod
+}
+\def\restoremod{
+\global\let\modifyrulebox\tempmod
+}
+
+\DontIgnoreWhiteSpace

@@ -1,0 +1,1643 @@
+% -*- Mode: TeX -*-
+
+% Reader
+%  Reader Variables
+
+%-------------------- Readtable Type --------------------
+
+%% 2.7.0 1
+%% 22.1.5 2
+\begincom{readtable}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{readtable},
+\typeref{t}
+
+\label Description::
+
+A \term{readtable} maps \term{characters} into \term{syntax types} for 
+the \term{Lisp reader}; \seechapter\Syntax.
+A \term{readtable} also 
+     contains associations between \term{macro characters} 
+		               and their \term{reader macro functions},
+ and records information about the case conversion rules 
+     to be used by the \term{Lisp reader} when parsing \term{symbols}.
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+%% 22.1.5 3
+%It is not required that an implementation have characters with non-zero
+%\param{bits} and \param{font} \term{attributes}
+%syntax descriptions in the \term{readtable}.  
+%!!! The following replacement still isn't unambiguous.
+%    Mail sent to Quinquevirate asking for advice.
+%    -kmp 25-May-91
+Each \term{simple} \term{character} must be representable in the \term{readtable}.
+It is \term{implementation-defined} whether \term{non-simple} \term{characters}
+can have syntax descriptions in the \term{readtable}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\label See Also::
+
+{\secref\Readtables},
+{\secref\PrintingOtherObjects}
+
+\endcom%{readtable}\ftype{System Class}
+
+
+%-------------------- Reader --------------------
+
+%%% ========== COPY-READTABLE
+\begincom{copy-readtable}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {copy-readtable} {{\opt} from-readtable to-readtable} {readtable}
+
+\label Arguments and Values::
+
+\param{from-readtable}---a \term{readtable designator}.
+ \Default{the \term{current readtable}}
+
+\param{to-readtable}---a \term{readtable} or \nil.
+ \Default{\nil}
+
+\param{readtable}---the \param{to-readtable} if it is \term{non-nil},
+  or else a \term{fresh} \term{readtable}.
+
+\label Description::
+
+%% 22.1.5 6
+\funref{copy-readtable} copies \param{from-readtable}.
+
+%% 22.1.5 7
+If \param{to-readtable} is \nil, a new \term{readtable} is created and returned.  
+Otherwise the \term{readtable} specified by \param{to-readtable} is modified and returned.
+
+\issue{READ-CASE-SENSITIVITY:READTABLE-KEYWORDS}
+\funref{copy-readtable} copies the setting of \funref{readtable-case}.
+\endissue{READ-CASE-SENSITIVITY:READTABLE-KEYWORDS}
+
+\label Examples::
+
+%!!! This is an awful example, and relatively unsafe to just try blindly.
+\code
+ (setq zvar 123) \EV 123
+ (set-syntax-from-char #\\z #\\' (setq table2 (copy-readtable))) \EV T
+ zvar \EV 123
+ (copy-readtable table2 *readtable*) \EV #<READTABLE 614000277>
+ zvar \EV VAR
+ (setq *readtable* (copy-readtable)) \EV #<READTABLE 46210223>
+ zvar \EV VAR
+ (setq *readtable* (copy-readtable nil)) \EV #<READTABLE 46302670>
+ zvar \EV 123
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\typeref{readtable},
+\varref{*readtable*}
+
+\label Notes::
+
+\code
+(setq *readtable* (copy-readtable nil))
+\endcode
+restores the input syntax to standard \clisp\ syntax, even if
+the \term{initial readtable} has been clobbered 
+(assuming it is not so badly clobbered that you cannot type in the above expression).
+
+On the other hand,
+
+\code
+(setq *readtable* (copy-readtable))
+\endcode
+replaces the current \term{readtable} with a copy of itself.
+This is useful if you want to save a copy of a readtable for later use,
+protected from alteration in the meantime.  It is also useful if you want to
+locally bind the readtable to a copy of itself, as in:
+
+\code
+(let ((*readtable* (copy-readtable))) ...)
+\endcode
+
+\endcom
+
+%%% ========== MAKE-DISPATCH-MACRO-CHARACTER
+\begincom{make-dispatch-macro-character}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues {make-dispatch-macro-character} 
+		 {char {\opt} non-terminating-p readtable}
+		 {\t}
+
+\label Arguments and Values::
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{char}---a \term{character}.
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\param{non-terminating-p}---a \term{generalized boolean}.
+ \Default{\term{false}}
+
+\param{readtable}---a \term{readtable}.
+ \Default{the \term{current readtable}}
+
+\label Description::
+
+%% 22.1.5 19
+\funref{make-dispatch-macro-character} makes \param{char} 
+be a \term{dispatching macro character} in \param{readtable}.
+
+Initially, every \term{character} in the dispatch table
+associated with the \param{char} has an associated function 
+that signals an error \oftype{reader-error}.
+
+If \param{non-terminating-p} is \term{true}, 
+the \term{dispatching macro character} 
+is made a \term{non-terminating} \term{macro character};
+if \param{non-terminating-p} is \term{false},
+the \term{dispatching macro character} 
+is made a \term{terminating} \term{macro character}.
+
+\label Examples::
+
+\code
+ (get-macro-character #\\\lbr) \EV NIL, \term{false}
+ (make-dispatch-macro-character #\\\lbr) \EV T
+ (not (get-macro-character #\\\lbr)) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+ 
+%% Sandra thinks this is excessive.
+% A \term{pprint dispatch table} is created and initialized.
+
+The \param{readtable} is altered.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\varref{*readtable*}, \funref{set-dispatch-macro-character}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== READ
+%%% ========== READ-PRESERVING-WHITESPACE
+\begincom{read, read-preserving-whitespace}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues read 
+		 {{\opt} input-stream eof-error-p eof-value recursive-p}
+		 {object}
+
+\DefunWithValuesNewline
+		 read-preserving-whitespace
+       	         {{\opt} \vtop{\hbox{input-stream eof-error-p}
+		               \hbox{eof-value recursive-p}}}
+		 {object}
+
+\label Arguments and Values::
+
+\param{input-stream}---an \term{input} \term{stream designator}.
+
+\param{eof-error-p}---a \term{generalized boolean}.
+ \Default{\term{true}}
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{eof-value}---an \term{object}.
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+ \Default{\nil}
+
+\param{recursive-p}---a \term{generalized boolean}.
+ \Default{\term{false}}
+
+\param{object}---an \term{object} (parsed by the \term{Lisp reader})
+		 or the \param{eof-value}.
+
+\label Description::
+
+%% 22.2.1 9  
+\funref{read} parses the printed representation of an \term{object}
+from \param{input-stream} and builds such an \term{object}.
+
+%% 22.2.1 14
+\funref{read-preserving-whitespace} is like \funref{read} but preserves
+any \term{whitespace}\meaning{2} \term{character}
+that delimits the printed representation of the \term{object}.
+%% 22.2.1 17                                          
+\funref{read-preserving-whitespace} is exactly like \funref{read}
+when the \param{recursive-p} \term{argument} to \funref{read-preserving-whitespace}
+is \term{true}.
+
+%% 22.2.1 10
+%% 22.2.1 13
+When \varref{*read-suppress*} is \term{false},
+\funref{read} throws away the delimiting \term{character} required by
+certain printed representations if it is a
+\term{whitespace}\meaning{2} \term{character};
+but \funref{read} preserves the character 
+(using \funref{unread-char}) if it is
+syntactically meaningful, because it could be the start of the next expression.
+%
+%% Already said in discussion of Double-Quote -kmp 25-Jan-92
+% %% 2.5.2 3
+% \funref{read} always constructs
+% a \term{simple string} when it reads the \term{double-quote} syntax.
+%
+%% Moved to discussion of Double-Quote -kmp 25-Jan-92
+% \issue{CHARACTER-PROPOSAL:2-1-1}
+%   It is \term{implementation-dependent} which \term{attributes} are removed
+%   from characters within \term{double-quotes}.
+% \endissue{CHARACTER-PROPOSAL:2-1-1}
+%
+%% Already said in discussion of #* -kmp 25-Jan-92
+%% 2.5.3 2
+% \funref{read} always constructs a \term{simple bit vector} 
+% when it reads the \f{\#*} syntax.
+
+If a file ends in a \term{symbol} or a \term{number}
+immediately followed by an \term{end of file}\meaning{1},
+\funref{read} reads the \term{symbol} or \term{number} successfully;
+when called again, it sees the \term{end of file}\meaning{1} and
+only then acts according to \param{eof-error-p}.
+If a file contains ignorable text at the end, such
+as blank lines and comments, \funref{read} 
+does not consider it to end in the
+middle of an \term{object}.
+% Moved to the discussion of tokenizing symbols. -kmp 25-Jan-92
+% \issue{CHARACTER-PROPOSAL:2-1-1}
+% It is \term{implementation-dependent} which
+%   \term{attributes} are removed from \term{symbol} names.
+% \endissue{CHARACTER-PROPOSAL:2-1-1}
+
+If \param{recursive-p} is \term{true}, the call to \funref{read} is 
+expected to be made
+from within some function that itself
+has been called from \funref{read} or from a similar input function, rather
+than from the top level.  
+                                  
+           
+%% 22.2.1 9
+Both functions return the \term{object} read from \param{input-stream}.
+\param{Eof-value} is returned if \param{eof-error-p} is \term{false} and end of file
+is reached before the beginning of an \term{object}.
+
+\label Examples::
+
+%!!! This example needs work.
+\code
+ (read)
+\OUT \IN{'a}
+\EV (QUOTE A)
+ (with-input-from-string (is " ") (read is nil 'the-end)) \EV THE-END
+ (defun skip-then-read-char (s c n)
+    (if (char= c #\\\{) (read s t nil t) (read-preserving-whitespace s))
+    (read-char-no-hang s)) \EV SKIP-THEN-READ-CHAR
+ (let ((*readtable* (copy-readtable nil)))
+    (set-dispatch-macro-character #\\# #\\\{ #'skip-then-read-char)
+    (set-dispatch-macro-character #\\# #\\\} #'skip-then-read-char)
+    (with-input-from-string (is "#\{123 x #\}123 y")
+      (format t "~S ~S" (read is) (read is)))) \EV #\\x, #\\Space, NIL
+\endcode
+
+%% 22.2.1 15
+As an example, consider this \term{reader macro} definition:
+
+%JonL thinks this is easier to read if LOOP is used.
+%  (defun slash-reader (stream char)
+%    (declare (ignore char))
+%    (do ((path (list (read-preserving-whitespace stream t nil t))
+%               (cons (progn (read-char stream t nil t)
+%                            (read-preserving-whitespace
+%                              stream t nil t))
+%                     path)))
+%        ((not (eql (peek-char nil stream nil nil t) #\\/))
+%         (cons 'path (nreverse path)))))                          
+
+\code
+ (defun slash-reader (stream char)
+   (declare (ignore char))
+   `(path . ,(loop for dir = (read-preserving-whitespace stream t nil t)
+                   then (progn (read-char stream t nil t)
+                               (read-preserving-whitespace stream t nil t))
+                   collect dir
+                   while (eql (peek-char nil stream nil nil t) #\\/))))
+ (set-macro-character #\\/ #'slash-reader)
+\endcode
+
+%% 22.2.1 16
+Consider now calling \funref{read} on this expression:
+
+\code
+ (zyedh /usr/games/zork /usr/games/boggle)
+\endcode
+The \f{/} macro reads objects separated by more \f{/} characters;
+thus \f{/usr/games/zork} is intended to read as \f{(path usr games zork)}.
+The entire example expression should therefore be read as
+
+\code
+ (zyedh (path usr games zork) (path usr games boggle))
+\endcode
+However, if \funref{read} had been used instead of
+\funref{read-preserving-whitespace}, then after the reading of the symbol
+\f{zork}, the following space would be discarded; the next call
+to \funref{peek-char} would see the following \f{/}, and the loop would
+continue, producing this interpretation:
+
+\code
+ (zyedh (path usr games zork usr games boggle))
+\endcode
+There are times when \term{whitespace}\meaning{2} should be discarded.
+If a command interpreter takes single-character commands,
+but occasionally reads an \term{object} then if the \term{whitespace}\meaning{2}
+after a \term{symbol} 
+is not discarded it might be interpreted as a command
+some time later after the \term{symbol} had been read.
+
+
+\label Affected By::
+
+\varref{*standard-input*},
+\varref{*terminal-io*},
+\varref{*readtable*},
+\varref{*read-default-float-format*},
+\varref{*read-base*},
+\varref{*read-suppress*},
+\varref{*package*},
+\varref{*read-eval*}.
+
+\label Exceptional Situations::
+
+%% 22.2.1 3
+\funref{read} signals an error \oftype{end-of-file}, 
+regardless of \param{eof-error-p}, if
+the file ends in the middle of an \term{object} representation.
+For example, if a file does
+not contain enough right parentheses to balance the left parentheses in
+it, \funref{read} signals an error.
+This is detected when \funref{read} or \funref{read-preserving-whitespace}
+is called with \param{recursive-p} and \param{eof-error-p} \term{non-nil}, 
+and end-of-file is reached before the beginning of an \term{object}.
+
+If \param{eof-error-p} is \term{true}, an error \oftype{end-of-file}
+is signaled at the end of file.
+
+\label See Also::
+
+\funref{peek-char},
+\funref{read-char},
+\funref{unread-char},
+\funref{read-from-string},
+\funref{read-delimited-list}, 
+\funref{parse-integer}, 
+{\chapref\Syntax},
+{\chapref\ReaderConcepts}
+
+\label Notes:\None.
+
+%% Sandra: Just cross-reference "Reader Concepts".
+% \param{Recursive-p} should be true if the call to \funref{read} is
+% from within some function that itself
+% has been called from \funref{read} or from a similar input function, rather
+% than from the top level.  For
+% instance, a reader macro function that has to read from the input stream
+% beyond the \term{macro character} should specify \param{recursive-p} as true.  The
+% reasons for this are as follows.  First of all, the scoping of the
+% notations \f{\#\i{n}=} and \f{\#\i{n}\#} occurs within a
+% top-level call, so calls to \funref{read} 
+% from reader macro functions must
+% specify \param{recursive-p} as true to ensure that these notations are
+% interpreted correctly.  Second, for white space to be preserved correctly
+% by low-level calls to \funref{read}  occurring within a call to 
+% \funref{read-preserving-whitespace}, \param{recursive-p} must be true.
+% Otherwise a low-level call to \funref{read} does not know that it needs to
+% preserve white space for the higher-level call.
+% Third, this is necessary to distinguish end-of-file within an \term{object}
+% from end-of-file between \term{objects}.
+\endcom
+
+%%% ========== READ-DELIMITED-LIST
+\begincom{read-delimited-list}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues read-delimited-list
+                 {char {\opt} input-stream recursive-p}
+                 {list}
+
+\label Arguments and Values::
+
+\param{char}---a \term{character}.
+
+\param{input-stream}---an \term{input} \term{stream designator}.
+ \Default{\term{standard input}}
+
+\param{recursive-p}---a \term{generalized boolean}.
+ \Default{\term{false}}
+
+\param{list}---a \term{list} of the \term{objects} read.
+
+\label Description::
+
+%% 22.2.1 18
+\funref{read-delimited-list} reads \term{objects} from \param{input-stream} 
+until the next character after an \term{object}'s
+representation (ignoring \term{whitespace}\meaning{2} characters and comments) is \param{char}.
+
+%% 22.2.1 19
+\funref{read-delimited-list} looks ahead at each step
+for the next non-\term{whitespace}\meaning{2} \term{character}
+and peeks at it as if with \funref{peek-char}.
+If it is \param{char}, 
+then the \term{character} is consumed and the \term{list} of \term{objects} is returned.
+If it is a \term{constituent} or \term{escape} \term{character},
+then \funref{read} is used to read an \term{object},
+which is added to the end of the \term{list}.
+If it is a \term{macro character},
+its \term{reader macro function} is called;
+if the function returns a \term{value},
+that \term{value} is added to the \term{list}.
+The peek-ahead process is then repeated.
+
+If \param{recursive-p} is \term{true},
+this call is expected to be embedded in a higher-level call to \funref{read} 
+or a similar function.
+
+%% 22.2.1 25
+It is an error to reach end-of-file during the operation of
+\funref{read-delimited-list}.
+
+The consequences are undefined
+if \param{char} has a \term{syntax type} of \term{whitespace}\meaning{2}
+in the \term{current readtable}.
+
+\label Examples::
+\code
+ (read-delimited-list #\\\rbracket) 1 2 3 4 5 6 \rbracket
+\EV (1 2 3 4 5 6)
+\endcode
+%% 22.2.1 22
+Suppose you wanted \f{\#\{\i{a} \i{b} \i{c} $\ldots$ \i{z}\}}
+to read as a list of all pairs of the elements \i{a}, \i{b}, \i{c}, 
+$\ldots$, \i{z}, for example.
+
+\code
+ #\{p q z a\}  reads as  ((p q) (p z) (p a) (q z) (q a) (z a))
+\endcode
+This can be done by specifying a macro-character definition for \f{\#\{}
+that does two things: reads in all the items up to the \f{\}},
+and constructs the pairs.  \funref{read-delimited-list} performs
+the first task.
+
+% (
+\code
+ (defun |#\{-reader| (stream char arg)
+   (declare (ignore char arg))
+   (mapcon #'(lambda (x)
+              (mapcar #'(lambda (y) (list (car x) y)) (cdr x)))
+          (read-delimited-list #\\\} stream t))) \EV |#\{-reader|
+
+ (set-dispatch-macro-character #\\# #\\\{ #'|#\{-reader|) \EV T 
+ (set-macro-character #\\\} (get-macro-character #\\) \nil))
+\endcode
+Note that \term{true} is supplied for the \param{recursive-p} argument.
+
+%% 22.2.1 23
+It is necessary here to give a definition to the character \f{\}} as
+well to prevent it from being a constituent.
+If the line
+
+% (
+\code
+ (set-macro-character #\\\} (get-macro-character #\\) \nil))
+\endcode
+shown above were not included, then the \f{\}} in
+
+\code
+ #\{ p q z a\}
+\endcode
+would be considered a constituent character, part of the symbol named
+\f{a\}}.  This could be corrected by putting a space before
+the \f{\}}, but it is better to call
+\funref{set-macro-character}.
+                          
+%% 22.2.1 24
+Giving \f{\}} the same	      % (
+definition as the standard definition of the character \f{)} has the
+twin benefit of making it terminate tokens for use with 
+\funref{read-delimited-list} and also making it invalid for use in any
+other context. Attempting to read a stray \f{\}} will signal an error.
+
+\label Affected By::
+
+\varref{*standard-input*},
+\varref{*readtable*},
+\varref{*terminal-io*}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{read},
+\funref{peek-char},
+\funref{read-char},
+\funref{unread-char}.
+
+\label Notes::
+
+%% 22.2.1 20
+\funref{read-delimited-list} is intended for use in implementing \term{reader macros}.
+Usually it is desirable for \param{char} to be a \term{terminating} \term{macro character}
+so that it can be used to delimit tokens; however, \funref{read-delimited-list}
+makes no attempt to alter the syntax specified for \param{char} by the current
+readtable.  The caller must make any necessary changes to the readtable syntax 
+explicitly.
+
+\endcom
+
+
+%%% ========== READ-FROM-STRING
+\begincom{read-from-string}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValuesNewline
+		 read-from-string
+                 {string \vtop{\hbox{{\opt} eof-error-p eof-value}
+                               \hbox{{\key} start end preserve-whitespace}}}
+                 {object, position}
+
+\label Arguments and Values::
+
+\param{string}---a \term{string}.
+
+\param{eof-error-p}---a \term{generalized boolean}.
+ \Default{\term{true}}
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{eof-value}---an \term{object}.
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+ \Default{\nil}
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{string}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{preserve-whitespace}---a \term{generalized boolean}.
+ \Default{\term{false}}
+
+\param{object}---an \term{object} (parsed by the \term{Lisp reader})
+		 or the \param{eof-value}.
+
+\param{position}---an \term{integer} greater than or equal to zero,
+		   and less than or equal to 
+		   one more than the \term{length} of the \param{string}. 
+
+\label Description::
+
+%% 22.2.1 40
+Parses the printed representation of an \term{object}
+from the subsequence of \param{string} \term{bounded} by \param{start} and \param{end},
+as if \funref{read} had been called on an \term{input} \term{stream} 
+containing those same \term{characters}.
+
+% This seems unnecessary/redundant to me.
+% %% 22.2.1 39
+% The characters of \param{string} are given successively to the \term{Lisp reader},
+% and the \term{object} is built by the reader.
+
+%% 22.2.1 41
+If \param{preserve-whitespace} is \term{true},
+the operation will preserve \term{whitespace}\meaning{2}
+as \funref{read-preserving-whitespace} would do.
+
+%% 22.2.1 43
+If an \term{object} is successfully parsed, the \term{primary value}, \param{object},
+is the \term{object} that was parsed.
+If \param{eof-error-p} is \term{false} and if the end of the \param{substring} is reached,
+\param{eof-value} is returned.
+
+The \term{secondary value}, \param{position}, is the index of the first \term{character}
+in the \term{bounded} \param{string} that was not read.
+The \param{position} may depend upon the value of \param{preserve-whitespace}.
+% Amazing.  CLtL really says this.  I wonder why. -kmp 23-Jan-92
+If the entire \param{string} was read, 
+the \param{position} returned is either the \param{length} of the \param{string} 
+or one greater than the \param{length} of the \param{string}.
+
+\label Examples::
+
+%% 22.2.1 44
+\code
+ (read-from-string " 1 3 5" t nil :start 2) \EV 3, 5
+ (read-from-string "(a b c)") \EV (A B C), 7
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+%% 22.2.1 42
+If the end of the supplied substring
+occurs before an \term{object} can be read, an
+error is signaled if \param{eof-error-p} is \term{true}.
+An error is signaled if the end of the \param{substring} occurs
+in the middle of an incomplete \term{object}.
+
+\label See Also::
+
+\funref{read},
+\funref{read-preserving-whitespace}
+
+\label Notes::
+                                  
+% Moon and Sandra seemed to believe this was the motivation.
+% I felt we should record the fact. -kmp 24-Jan-92
+The reason that \param{position} is allowed to be beyond the
+\term{length} of the \param{string} is to permit (but not require)
+the \term{implementation} to work by simulating the effect of a 
+trailing delimiter at the end of the \term{bounded} \param{string}.
+When \param{preserve-whitespace} is \term{true},
+the \param{position} might count the simulated delimiter.
+
+\endcom
+
+%%% ========== READTABLE-CASE
+\begincom{readtable-case}\ftype{Accessor}
+\issue{READ-CASE-SENSITIVITY:READTABLE-KEYWORDS}
+
+\label Syntax::
+
+\DefunWithValues readtable-case {readtable} {mode}
+
+% Fixed broken syntax.  --sjl 16 Mar 92
+%\Defsetf readtable-case {readtable mode} {mode}
+\Defsetf readtable-case {readtable} {mode}
+
+\label Arguments and Values::
+
+\param{readtable}---a \term{readtable}.
+
+\param{mode}---a \term{case sensitivity mode}.
+
+\label Description::
+
+\term{Accesses} the \term{readtable case} of \param{readtable},
+which affects the way in which the \term{Lisp Reader}  reads  \term{symbols}
+          and the way in which the \term{Lisp Printer} writes \term{symbols}.
+
+\label Examples::
+
+\Seesection\ReadtableCaseReadExamples\ and \secref\ReadtableCasePrintExamples.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{readtable}{a \term{readtable}}
+\Shouldchecktype{mode}{a \term{case sensitivity mode}}
+
+\label See Also::
+
+\varref{*readtable*},
+\varref{*print-escape*},
+{\secref\ReaderAlgorithm},
+{\secref\ReadtableCaseReadEffect},
+{\secref\ReadtableCasePrintEffect}
+
+\label Notes::
+
+\funref{copy-readtable} copies the \term{readtable case} of the \param{readtable}.
+
+\endissue{READ-CASE-SENSITIVITY:READTABLE-KEYWORDS}
+\endcom
+
+%%% ========== READTABLEP
+\begincom{readtablep}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues readtablep {object} {generalized-boolean}
+
+\label Arguments and Values:: 
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 22.1.5 8
+\TypePredicate{object}{readtable}
+
+\label Examples::
+
+\code
+ (readtablep *readtable*) \EV \term{true}
+ (readtablep (copy-readtable)) \EV \term{true}
+ (readtablep '*readtable*) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (readtablep \param{object}) \EQ (typep \param{object} 'readtable) 
+\endcode
+
+\endcom
+
+%%% ========== GET-DISPATCH-MACRO-CHARACTER
+%%% ========== SET-DISPATCH-MACRO-CHARACTER
+\begincom{set-dispatch-macro-character, get-dispatch-macro-character}\ftype{Function}
+
+\label Syntax::
+
+%% 22.1.5 24
+%!!! Name this function1 argument something better. -kmp 15-Oct-91
+\DefunWithValues get-dispatch-macro-character
+		 {disp-char sub-char {\opt} readtable}
+		 {function}
+
+%% 22.1.5 23
+\DefunWithValues set-dispatch-macro-character
+		 {disp-char sub-char new-function {\opt} readtable}
+		 {\t}
+
+\label Arguments and Values::
+
+\param{disp-char}---a \term{character}.
+
+\param{sub-char}---a \term{character}.
+
+\issue{GET-MACRO-CHARACTER-READTABLE:NIL-STANDARD}
+\param{readtable}---a \term{readtable designator}.
+\endissue{GET-MACRO-CHARACTER-READTABLE:NIL-STANDARD}
+ \Default{the \term{current readtable}}
+
+\param{function}---a \term{function designator} or \nil.
+
+%I made this a function designator.  See reasoning for get-macro-character. -kmp 20-Sep-91
+\param{new-function}---a \term{function designator}.
+
+\label Description::
+
+\funref{set-dispatch-macro-character} causes \param{new-function} to be called
+when \param{disp-char} followed by \param{sub-char} is read.  
+%% 22.1.5 22
+If \param{sub-char} is a lowercase letter, 
+it is converted to its uppercase equivalent.
+It is an error if \param{sub-char} is one of the ten decimal digits.
+
+\funref{set-dispatch-macro-character} installs a \param{new-function} to be called
+when a particular \term{dispatching macro character} pair is read.
+\param{New-function} is installed as the dispatch function to be
+called  when \param{readtable} is in use and when \param{disp-char} is followed by 
+\param{sub-char}.
+
+%% This information is now available elsewhere.
+% 
+% %!!! current input stream?  this means the stream on which the char was seen.
+% %    be more specific so people don't think this is standard input or something
+% %    weird like that.
+% The three arguments to \param{new-function} are the current input \term{stream},
+% \param{sub-char}, and
+%  the \term{integer} whose decimal representation appeared between
+%    \param{disp-char} and \param{sub-char},
+%   or \nil\ if no decimal integer appeared there; .
+For more information about how the \param{new-function} is invoked,
+\seesection\MacroChars.
+
+\funref{get-dispatch-macro-character} retrieves
+the dispatch function associated with \param{disp-char} and \param{sub-char}
+in \param{readtable}.
+
+\funref{get-dispatch-macro-character} returns the macro-character function
+for \param{sub-char} under \param{disp-char}, or \nil\ if there is no
+function associated with \param{sub-char}.
+If \param{sub-char} is a decimal digit, \funref{get-dispatch-macro-character}
+returns \nil.
+
+\label Examples::                                        
+
+%!!! The use of (values) here is really questionable! -kmp 1-May-91
+\code
+ (get-dispatch-macro-character #\\# #\\\{) \EV NIL
+ (set-dispatch-macro-character #\\# #\\\{        ;dispatch on #\{
+    #'(lambda(s c n)
+        (let ((list (read s nil (values) t)))  ;list is object after #n\{
+          (when (consp list)                   ;return nth element of list
+            (unless (and n (< 0 n (length list))) (setq n 0))
+            (setq list (nth n list)))
+         list))) \EV T
+ #\{(1 2 3 4) \EV 1
+ #3\{(0 1 2 3) \EV 3
+ #\{123 \EV 123
+\endcode
+%% 22.1.5 27
+If it is desired that \f{\#\$\i{foo}} :
+as if it were \f{(dollars \i{foo})}.
+
+\code
+(defun |#$-reader| (stream subchar arg)
+   (declare (ignore subchar arg))
+   (list 'dollars (read stream t nil t))) \EV |#$-reader|
+ (set-dispatch-macro-character #\\# #\\\$ #'|#\$-reader|) \EV T
+\endcode
+%\code
+% (get-dispatch-macro-character #\\# #\\\{) \EV NIL 
+% (unless (get-dispatch-macro-character #\\# #\\x)
+%      (warn "Hexadecimal input (#x<ddd>) is disabled")) \EV NIL 
+% (let ((previous-fun (get-dispatch-macro-character #\\# #\\\{)))
+%      (when previous-fun
+%        (set-dispatch-macro-character #\\# #\\\{
+%          #'(lambda (stream char arg)
+%               (setq stream *debug-io*)
+%               (when *debug-macro-chars*
+%                  (format *trace-output* 
+%                         "~&Occurrence of ~C~C on stream ~S"
+%                                         #\\# #\\\{ stream))
+%              (list (funcall previous-fun stream char)))))) \EV NIL 
+%\endcode
+
+\label See Also::
+
+{\secref\MacroChars}
+
+\label Side Effects::
+
+The \param{readtable} is modified.
+
+\label Affected By::
+
+\varref{*readtable*}.
+
+\label Exceptional Situations::
+
+%% 22.1.5 26
+For either function, an error is signaled if \param{disp-char} is not 
+a \term{dispatching macro character} in \param{readtable}.  
+
+\label See Also::
+
+\varref{*readtable*}
+
+\label Notes::
+It is necessary
+to use \funref{make-dispatch-macro-character} to set up the
+dispatch character before specifying its sub-characters.
+\endcom
+
+%%% ========== GET-MACRO-CHARACTER
+%%% ========== SET-MACRO-CHARACTER
+\begincom{set-macro-character, get-macro-character}\ftype{Function}
+
+\label Syntax::
+
+%% 22.1.5 13
+\DefunWithValues get-macro-character 
+		 {char {\opt} readtable} 
+		 {function, non-terminating-p}
+
+\DefunWithValues set-macro-character
+		 {char new-function {\opt} non-terminating-p readtable}
+		 {\t}
+
+\label Arguments and Values::
+
+\param{char}---a \term{character}.
+
+\param{non-terminating-p}---a \term{generalized boolean}.
+ \Default{\term{false}}
+
+\issue{GET-MACRO-CHARACTER-READTABLE:NIL-STANDARD}
+\param{readtable}---a \term{readtable designator}.
+\endissue{GET-MACRO-CHARACTER-READTABLE:NIL-STANDARD}
+ \Default{the \term{current readtable}}
+
+\param{function}---\nil, 
+		   or a \term{designator} for a \term{function} of two \term{arguments}.
+
+\param{new-function}---a \term{function designator}.
+
+\label Description::
+
+%%function or function designator? -kmp 29-Apr-91
+%%I made it be a function designator since this is consistent with the CLtL 
+%%treatment of symbols as functions, and since some implementation might consider
+%%it a feature to carry around the name instead of the definition, so the user
+%%could redefine the function and have his new definition take automatically.
+%% -kmp 20-Sep-91
+
+\funref{get-macro-character} returns as its \term{primary value}, \param{function},
+the \term{reader macro function} associated with \param{char} in \param{readtable} (if any),
+or else \nil\ if \param{char} is not a \term{macro character} in \param{readtable}.
+The \term{secondary value}, \param{non-terminating-p}, is \term{true} 
+if \param{char} is a \term{non-terminating} \term{macro character};
+otherwise, it is \term{false}.
+
+\funref{set-macro-character} causes \param{char} to be a \term{macro character}
+associated with the \term{reader macro function} \param{new-function} 
+(or the \term{designator} for \param{new-function}) in \param{readtable}.
+If \param{non-terminating-p} is \term{true},
+\param{char} becomes a \term{non-terminating} \term{macro character};
+otherwise it becomes a     \term{terminating} \term{macro character}.
+
+%% This information can be gotten from the Reader Algorithm. -kmp 23-Jan-92
+% In the simplest case, \param{new-function} may return an \term{object}.
+% This \term{object} is taken to be that whose printed representation
+% was \param{char} and any following characters read by \param{new-function}.
+% %% 22.1.5 15
+% \param{New-function} may choose instead to return zero values.
+% In this case, \param{char} and whatever it may have read
+% contribute nothing to the \term{object} being read.
+% %% 22.1.5 16
+% \param{New-function} should not have any side effects other than on the
+% \term{stream};
+% because of backtracking and restarting of the \funref{read} operation,
+% front ends (such as editors and
+% rubout handlers) to the reader may cause
+% \param{new-function} to be called repeatedly during the
+% reading of a single expression in which \param{char} only appears once.
+
+\label Examples::
+
+\code
+ (get-macro-character #\\\lbr) \EV NIL, \term{false}
+ (not (get-macro-character #\\;)) \EV \term{false}
+\endcode
+
+The following is a possible definition for the \term{single-quote} \term{reader macro} 
+in \term{standard syntax}:
+
+\code
+ (defun single-quote-reader (stream char)
+   (declare (ignore char))
+   (list 'quote (read stream t nil t))) \EV SINGLE-QUOTE-READER
+ (set-macro-character #\\' #'single-quote-reader) \EV T
+\endcode
+
+Here \f{single-quote-reader} reads an \term{object} following the \term{single-quote}
+and returns a \term{list} of \specref{quote} and that \term{object}.
+The \param{char} argument is ignored.
+
+The following is a possible definition for the \term{semicolon} \term{reader macro}
+in \term{standard syntax}:
+
+\code
+ (defun semicolon-reader (stream char)
+   (declare (ignore char))
+   ;; First swallow the rest of the current input line.
+   ;; End-of-file is acceptable for terminating the comment.
+   (do () ((char= (read-char stream nil #\\Newline t) #\\Newline)))
+   ;; Return zero values.
+   (values)) \EV SEMICOLON-READER
+ (set-macro-character #\\; #'semicolon-reader) \EV T
+\endcode
+
+
+\label Side Effects::
+
+The \param{readtable} is modified.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\varref{*readtable*}
+
+\label Notes:\None.
+
+%% Sandra thinks this is useless.  Enough is said in the argument info
+%% above for people to figure it out.  (I agree.) -kmp 23-Jan-92
+% \issue{GET-MACRO-CHARACTER-READTABLE:NIL-STANDARD}
+% \f{(get-macro-character \i{char} nil)} 
+% 
+% is equivalent to 
+% 
+% \f{(get-macro-character \i{char} (copy-readtable))}, 
+% 
+% but without \term{consing}.
+% \endissue{GET-MACRO-CHARACTER-READTABLE:NIL-STANDARD}
+
+\endcom
+
+%%% ========== SET-SYNTAX-FROM-CHAR
+\begincom{set-syntax-from-char}\ftype{Function}
+
+\label Syntax::
+
+\issue{RETURN-VALUES-UNSPECIFIED:SPECIFY}
+\DefunWithValues set-syntax-from-char
+		 {to-char from-char {\opt} to-readtable from-readtable}
+		 {\t}
+\endissue{RETURN-VALUES-UNSPECIFIED:SPECIFY}
+
+\label Arguments and Values::
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{to-char}---a \term{character}.
+
+\param{from-char}---a \term{character}.
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\param{to-readtable}---a \term{readtable}. 
+ \Default{the \term{current readtable}}
+
+\param{from-readtable}---a \term{readtable designator}.
+ \Default{the \term{standard readtable}}
+ 
+\label Description::
+
+%% 22.1.5 9
+\funref{set-syntax-from-char} makes
+the syntax of \param{to-char}   in \param{to-readtable}    be the same as
+the syntax of \param{from-char} in \param{from-readtable}.
+
+%% 22.1.5 10
+\funref{set-syntax-from-char} copies the \term{syntax types} of \param{from-char}.
+If \param{from-char} is a \term{macro character},
+its \term{reader macro function} is copied also.
+If the character is a \term{dispatching macro character}, 
+its entire dispatch table of \term{reader macro functions} is copied.  
+The \term{constituent traits} of \param{from-char} are not copied.
+
+%% 22.1.5 12
+A macro definition from a character such as
+\f{"} can be copied to another character; the standard definition for \f{"}
+looks for another character that is the same as the character that
+invoked it.  The definition of \f{(} can not be meaningfully copied
+to \f{\{}, on the other hand. 
+The result is that \term{lists} are of the form
+\f{\{a b c)}, not \f{\{a b c\}},
+because the definition
+always looks for a closing parenthesis, not a closing brace.  
+
+\label Examples::
+\code
+ (set-syntax-from-char #\\7 #\\;) \EV T
+ 123579 \EV 1235
+\endcode
+                                                             
+\label Side Effects::
+
+The \param{to-readtable} is modified.
+
+\label Affected By::
+
+The existing values in the \param{from-readtable}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{set-macro-character},
+\funref{make-dispatch-macro-character},
+{\secref\CharacterSyntaxTypes}
+
+\label Notes::                                        
+
+The \term{constituent traits} of a \term{character} are ``hard wired'' 
+into the parser for extended \term{tokens}.  For example, if the definition
+of \f{S} is copied to \f{*}, then \f{*} will become a \term{constituent} 
+that is \term{alphabetic}\meaning{2} but that cannot be used as a
+\term{short float} \term{exponent marker}.
+For further information, \seesection\ConstituentTraits.
+
+\endcom
+
+%%% ========== WITH-STANDARD-IO-SYNTAX
+\begincom{with-standard-io-syntax}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValues with-standard-io-syntax 
+		  {\starparam{form}}
+		  {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{forms}---an \term{implicit progn}.
+
+\param{results}---the \term{values} returned by the \term{forms}.
+
+\label Description::
+
+Within the dynamic extent of the body of \param{forms}, all reader/printer control
+variables, including any \term{implementation-defined} ones not specified by
+this standard, are bound to values that produce standard read/print
+behavior.  The values for the variables specified by this standard are listed in 
+\thenextfigure.
+
+\reviewer{Barrett: *print-pprint-dispatch* should probably be mentioned here, too.}%!!!
+%  We've opened issue WITH-STANDARD-IO-SYNTAX-INCOMPLETE to clarify this. -kmp 1-Sep-91
+% I added *print-lines*, *print-miser-width*, *print-pprint-dispatch*, and
+% *print-right-margin* to this table.  --sjl 16 Mar 1992
+
+\tablefigtwo{Values of standard control variables}{Variable}{Value}{
+   \varref{*package*}                   & \Thepackage{cl-user}          \cr
+   \varref{*print-array*}               & \t                            \cr
+   \varref{*print-base*}                & \f{10}                        \cr
+   \varref{*print-case*}                & \kwd{upcase}                  \cr
+   \varref{*print-circle*}              & \nil                          \cr
+   \varref{*print-escape*}              & \t                            \cr
+   \varref{*print-gensym*}              & \t                            \cr
+   \varref{*print-length*}              & \nil                          \cr
+   \varref{*print-level*}               & \nil                          \cr
+   \varref{*print-lines*}               & \nil                          \cr
+   \varref{*print-miser-width*}         & \nil                          \cr
+   \varref{*print-pprint-dispatch*}     & The \term{standard pprint dispatch table} \cr
+   \varref{*print-pretty*}              & \nil                          \cr
+   \varref{*print-radix*}               & \nil                          \cr
+   \varref{*print-readably*}            & \t                            \cr
+   \varref{*print-right-margin*}        & \nil                          \cr
+   \varref{*read-base*}                 & \f{10}                        \cr
+   \varref{*read-default-float-format*} & \typeref{single-float}        \cr
+   \varref{*read-eval*}                 & \t                            \cr
+   \varref{*read-suppress*}             & \nil                          \cr
+   \varref{*readtable*}                 & The \term{standard readtable} \cr
+}
+ 
+\label Examples::
+ 
+\code
+ (with-open-file (file pathname :direction :output)
+   (with-standard-io-syntax
+     (print data file)))
+
+;;; ... Later, in another Lisp:
+
+ (with-open-file (file pathname :direction :input)
+   (with-standard-io-syntax
+     (setq data (read file))))
+\endcode
+
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Reader Variables --------------------
+
+%%% ========== *READ-BASE*
+\begincom{*read-base*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{radix}.
+
+\label Initial Value::
+
+\f{10}.
+
+\label Description::
+
+%% 22.1.2 21
+Controls the interpretation of tokens by \funref{read} as being
+\term{integers} or \term{ratios}.  
+
+\Thevalueof{*read-base*}, called the \newterm{current input base},
+is the radix in which \term{integers} and
+\term{ratios} are to be read by the \term{Lisp reader}.
+The parsing of other numeric \term{types} (\eg \term{floats}) is 
+not affected by this option.
+
+The effect of \varref{*read-base*} on the reading of any particular
+\term{rational} number can be locally overridden by explicit use of the
+\f{\#O}, \f{\#X}, \f{\#B}, or {\tt \#\i{n}R} syntax
+or by a trailing decimal point.
+
+\label Examples::
+
+\code
+ (dotimes (i 6)
+   (let ((*read-base* (+ 10. i)))
+     (let ((object (read-from-string "(\\\\DAD DAD |BEE| BEE 123. 123)")))
+       (print (list *read-base* object)))))
+\OUT (10 (DAD DAD BEE BEE 123 123))
+\OUT (11 (DAD DAD BEE BEE 123 146))
+\OUT (12 (DAD DAD BEE BEE 123 171))
+\OUT (13 (DAD DAD BEE BEE 123 198))
+\OUT (14 (DAD 2701 BEE BEE 123 227))
+\OUT (15 (DAD 3088 BEE 2699 123 258))
+\EV NIL
+\endcode
+
+\label Affected By:\None.
+
+\label See Also:\None.
+
+\label Notes::
+
+%% 22.1.2 22
+Altering the input radix can be useful when reading data files in special formats.
+
+\endcom
+
+
+%%% ========== *READ-DEFAULT-FLOAT-FORMAT*
+\begincom{*read-default-float-format*}\ftype{Variable}
+
+\label Value Type::
+
+%% 22.2.1 11
+one of the \term{atomic type specifiers} 
+    \typeref{short-float},
+    \typeref{single-float},
+    \typeref{double-float},
+ or \typeref{long-float}, 
+ or else some other \term{type specifier} defined 
+    by the \term{implementation} to be acceptable.
+
+\label Initial Value::
+
+The \term{symbol} \typeref{single-float}.
+
+\label Description::
+
+%% 22.2.1 12
+Controls the floating-point format that is to be used when reading a
+floating-point number that has no \term{exponent marker} or that has
+\f{e} or \f{E} for an \term{exponent marker}.  Other \term{exponent markers}
+explicitly prescribe the floating-point format to be used.
+
+The printer uses \varref{*read-default-float-format*} to guide the
+choice of \term{exponent markers} when printing floating-point numbers.
+
+\label Examples::
+
+\code
+ (let ((*read-default-float-format* 'double-float))
+   (read-from-string "(1.0 1.0e0 1.0s0 1.0f0 1.0d0 1.0L0)"))
+\EV (1.0   1.0   1.0   1.0 1.0   1.0)   ;Implementation has float format F.
+\EV (1.0   1.0   1.0s0 1.0 1.0   1.0)   ;Implementation has float formats S and F.
+\EV (1.0d0 1.0d0 1.0   1.0 1.0d0 1.0d0) ;Implementation has float formats F and D.
+\EV (1.0d0 1.0d0 1.0s0 1.0 1.0d0 1.0d0) ;Implementation has float formats S, F, D.
+\EV (1.0d0 1.0d0 1.0   1.0 1.0d0 1.0L0) ;Implementation has float formats F, D, L.
+\EV (1.0d0 1.0d0 1.0s0 1.0 1.0d0 1.0L0) ;Implementation has formats S, F, D, L.
+\endcode
+
+\label Affected By:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== *READ-EVAL*
+\begincom{*read-eval*}\ftype{Variable}
+
+\issue{DATA-IO:ADD-SUPPORT}
+
+\label Value Type::
+
+a \term{generalized boolean}.
+
+\label Initial Value:: 
+
+\term{true}.
+
+\label Description::
+
+If it is \term{true}, the \f{\#.} \term{reader macro} has its normal effect.
+Otherwise, that \term{reader macro} signals an error \oftype{reader-error}.
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label See Also::
+
+\varref{*print-readably*}
+
+\label Notes::
+
+If \varref{*read-eval*} is \term{false} and \varref{*print-readably*} is \term{true}, 
+any \term{method} for \funref{print-object} that would output a reference
+to the \f{\#.} \term{reader macro} either outputs something different
+or signals an error \oftype{print-not-readable}.
+
+\endissue{DATA-IO:ADD-SUPPORT}
+
+\endcom
+
+%%% ========== *READ-SUPPRESS*
+\begincom{*read-suppress*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{generalized boolean}.
+
+\label Initial Value::
+
+\term{false}.
+
+\label Description::
+
+%% 22.1.2 25
+This variable is intended primarily to support the operation of the
+read-time conditional notations \f{\#+} and \f{\#-}. It is important for the
+\term{reader macros} which implement these notations
+to be able to skip over the printed representation of an
+\term{expression} despite the possibility that the syntax of the skipped
+\term{expression} may not be entirely valid for the current implementation,
+since \f{\#+} and \f{\#-} exist in order to allow the same program to be
+shared among several \Lisp\ implementations (including dialects other than \clisp)
+despite small incompatibilities of syntax.
+
+%% 22.1.2 24
+%% 22.1.2 26
+If it is \term{false}, the \term{Lisp reader} operates normally.
+
+\issue{READ-SUPPRESS-CONFUSING:GENERALIZE}
+% Otherwise, many of the normal operations of the \term{Lisp reader}
+% are suppressed; specifically:
+% 
+% %% 22.1.2 27
+% \beginlist
+% \itemitem{Extended tokens}
+% 
+% An extended token is discarded and treated as if it were \nil;
+% that is, reading an extended token when \varref{*read-suppress*} is \term{true} returns \nil.
+% 
+% %% 22.1.2 28
+% \itemitem{\f{\#}}
+% 
+% Any standard \f{\#} \term{dispatching macro character} notation
+% that requires, permits, or disallows an infix numerical argument,
+% such as \f{\#\i{n}R}, does not enforce any constraint on the presence,
+% absence, or value of such an argument.
+% 
+% %% 22.1.2 29
+% \itemitem{\tt \#\\}
+% 
+% The \f{\#\\} notation parses as \nil.
+% It does not signal an error even if an unknown character name is seen.
+% 
+% %% 22.1.2 30
+% \itemitem{\tt \#B, \#O, \#X, \#R}
+% 
+% Each of the \f{\#B}, \f{\#O}, \f{\#X}, and \f{\#R} notations 
+% scans over a following token and produces the value \nil.
+% None of these notations signals an error 
+% even if the token does not have the syntax of a rational number.
+% 
+% %% 22.1.2 31
+% \itemitem{\f{\#*}}
+% 
+% \issue{SHARP-STAR-DELIMITER:NORMAL-DELIMITER}
+% The \f{\#*} notation scans a (possibly null) token until a normal delimiter appears
+% and produces the value \nil.  It does not signal an error even if the token
+% contains characters other of the characters \f{0} and \f{1}, or is of the wrong length.
+% \endissue{SHARP-STAR-DELIMITER:NORMAL-DELIMITER}
+% 
+% %% 22.1.2 32
+% \issue{SHARP-COMMA-CONFUSION:REMOVE}
+% \itemitem{\tt \#.}                                        
+% 
+% The \f{\#.} notation reads the following \term{object} in 
+% suppressed mode but does not evaluate it.
+% The \term{object} is discarded and \nil\ is produced.
+% \endissue{SHARP-COMMA-CONFUSION:REMOVE}
+% 
+% %% 22.1.2 33
+% \itemitem{\tt \#A, \#C, \#S, \#:}
+% 
+% Each of the \f{\#A}, \f{\#C}, \f{\#S}, and \f{\#:} notations reads the following
+% \term{object} in suppressed mode but does not interpret it in any way;
+% it need not even be a \term{list} in the case of \f{\#C} or \f{\#S}, or a 
+% \term{symbol} in the case of \f{\#:}.  The \term{object} is 
+% discarded and \nil\ is produced.
+
+If \thevalueof{*read-suppress*} is \term{true},
+      \funref{read},
+      \funref{read-preserving-whitespace},
+      \funref{read-delimited-list},
+  and \funref{read-from-string}
+all return a \term{primary value} of \nil\ when they complete successfully;
+however, they continue to parse the representation of an \term{object}
+in the normal way, in order to skip over the \term{object},
+and continue to indicate \term{end of file} in the normal way.
+Except as noted below,
+any \term{standardized} \term{reader macro}\meaning{2}
+that is defined to \term{read}\meaning{2} 
+a following \term{object} or \term{token} 
+will do so,
+but not signal an error if the \term{object}
+read is not of an appropriate type or syntax.
+The \term{standard syntax} and its associated \term{reader macros}
+will not construct any new \term{objects} 
+ (\eg when reading the representation of a \term{symbol},
+      no \term{symbol} will be constructed or interned).
+
+%% 22.1.2 27
+\beginlist
+
+%% The cleanup issue did not ask me to put this entry for Extended
+%% Tokens here, but people have complained to me personally that this
+%% passage (present in CLtL1) was omitted in the dpANS and that they
+%% were worried that these items were not guaranteed.  I believe that
+%% issue READ-SUPPRESS-CONFUSING asks to omit this information because
+%% it thinks it is redundant, not because it thinks it is incorrect.
+%% But I disagree on the redundancy issue, so I am ignoring it and
+%% including this data regardless.  Refer to p345 of CLtL1 for
+%% supporting documentation.  -kmp 23-Aug-93
+
+\itemitem{Extended tokens}
+
+All extended tokens are completely uninterpreted.
+Errors such as those that might otherwise be signaled due to
+     detection of invalid \term{potential numbers},
+     invalid patterns of \term{package markers},
+ and invalid uses of the \term{dot} character are suppressed.
+
+\itemitem{Dispatching macro characters (including \term{sharpsign})}
+
+\term{Dispatching macro characters} continue to parse an infix numerical
+argument, and invoke the dispatch function.  The \term{standardized}
+\term{sharpsign} \term{reader macros} do not enforce any constraints
+on either the presence of or the value of the numerical argument.
+
+\endissue{READ-SUPPRESS-CONFUSING:GENERALIZE}
+
+%% 22.1.2 34
+\itemitem{\tt \#=}
+
+The \f{\#=} notation is totally ignored.  It does not read
+a following \term{object}. It produces no \term{object},
+but is treated as \term{whitespace}\meaning{2}.
+
+%% 22.1.2 35
+\itemitem{\tt \#\#}
+
+The \f{\#\#} notation always produces \nil.
+\endlist
+
+No matter what \thevalueof{*read-suppress*},
+parentheses still continue to delimit and construct \term{lists};
+the \f{\#(} notation continues to delimit \term{vectors};
+and comments, \term{strings}, 
+and the \term{single-quote} and \term{backquote} notations continue to be
+interpreted properly.  Such situations as
+\f{')},	\f{\#<}, % (
+\f{\#)}, and \f{\#\SpaceChar} continue to signal errors.
+
+\label Examples::
+
+\issue{READ-SUPPRESS-CONFUSING:GENERALIZE}
+% \code
+%  (let ((*read-suppress* t))
+%    (dotimes (i 4)
+%      (format t "~&input here> ")
+%      (format t "~&parsed as: ~S~%" (read))))
+% \OUT input here> 101
+% \OUT parsed as: NIL
+% \OUT input here> (#\\a :test)
+% \OUT parsed as: (NIL NIL)
+% \OUT input here> '("xyz" #(a b c))
+% \OUT parsed as: (QUOTE ("xyz" #(NIL NIL NIL)))
+% \OUT input here> (list 1 2 '3)
+% \OUT parsed as: (NIL NIL NIL (QUOTE NIL))
+% \EV NIL
+% \endcode
+\code
+ (let ((*read-suppress* t))
+   (mapcar #'read-from-string
+           '("#(foo bar baz)" "#P(:type :lisp)" "#c1.2"
+             "#.(PRINT 'FOO)" "#3AHELLO" "#S(INTEGER)"
+             "#*ABC" "#\\GARBAGE" "#RALPHA" "#3R444")))
+\EV (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL)
+\endcode
+\endissue{READ-SUPPRESS-CONFUSING:GENERALIZE}
+
+\label Affected By:\None.
+
+\label See Also::
+
+\funref{read},
+{\chapref\Syntax}
+
+\label Notes::
+
+\issue{READ-SUPPRESS-CONFUSING:GENERALIZE}
+\term{Programmers} and \term{implementations} that define additional
+\term{macro characters} are strongly encouraged to make them respect
+\varref{*read-suppress*} just as \term{standardized} \term{macro characters} do.
+That is, when \thevalueof{*read-suppress*} is \term{true},
+they should ignore type errors when reading a following \term{object}
+and the \term{functions} that implement \term{dispatching macro characters}
+should tolerate \nil\ as their infix \term{parameter} value even if a numeric
+value would ordinarily be required.
+\endissue{READ-SUPPRESS-CONFUSING:GENERALIZE}
+
+\endcom
+
+%%% ========== *READTABLE*
+\begincom{*readtable*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{readtable}.
+
+\label Initial Value::
+
+A \term{readtable} that conforms to the description of \clisp\ syntax in \chapref\Syntax.
+
+\label Description::
+
+%% 22.1.5 4
+\Thevalueof{*readtable*} is called the \term{current readtable}.
+It controls the parsing behavior of the \term{Lisp reader},
+and can also influence the \term{Lisp printer} (\eg \seefun{readtable-case}).
+
+\label Examples::
+
+%!!! This example needs work.
+\code
+ (readtablep *readtable*) \EV \term{true}
+ (setq zvar 123) \EV 123
+ (set-syntax-from-char #\\z #\\' (setq table2 (copy-readtable))) \EV T
+ zvar \EV 123
+ (setq *readtable* table2) \EV #<READTABLE>
+ zvar \EV VAR
+ (setq *readtable* (copy-readtable nil)) \EV #<READTABLE>
+ zvar \EV 123
+\endcode
+
+\label Affected By::
+
+\funref{compile-file},
+\funref{load}
+
+\label See Also::
+
+\funref{compile-file},
+\funref{load},
+\funref{readtable},
+{\secref\CurrentReadtable}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== READER-ERROR
+\begincom{reader-error}\ftype{Condition Type}
+
+\issue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+
+\label Class Precedence List::
+\typeref{reader-error},
+\typeref{parse-error},
+\typeref{stream-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+\Thetype{reader-error} consists of
+error conditions that are related to tokenization and parsing
+done by the \term{Lisp reader}.
+
+\label See Also::
+
+\funref{read},
+\funref{stream-error-stream},
+{\secref\ReaderConcepts}
+
+\endissue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+
+\endcom%{reader-error}\ftype{Condition Type}

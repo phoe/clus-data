@@ -1,0 +1,49 @@
+% -*- Mode: TeX -*-
+% Traversal Rules and Side Effects
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+ 
+The consequences are undefined 
+% (but in general no error will be signaled) 
+when \term{code} executed during an \term{object-traversing} operation
+%!!! Barmar wants them listed.
+destructively modifies the \term{object} in a way that might affect the
+ongoing traversal operation.
+In particular, the following rules apply.
+\beginlist
+\itemitem{\b{List traversal}}
+ 
+ For \term{list} traversal operations, the \term{cdr} chain of the
+ \term{list} is not allowed to be destructively modified.
+ 
+\itemitem{\b{Array traversal}}
+
+  For \term{array} traversal operations, the \term{array} is not allowed 
+  to be adjusted and its \term{fill pointer}, if any, is not allowed to 
+  be changed.
+ 
+\itemitem{\b{Hash-table traversal}}
+
+  For \term{hash table} traversal operations, new elements may not be added
+  or deleted except that the element corresponding to the current hash key 
+  may be changed or removed.
+ 
+\itemitem{\b{Package traversal}}
+
+%KMP: Isn't this already said in general for object-traversal elsewhere?
+%Barmar: Loop?
+%KMP: With-package-iterator?
+%RPG: Leave it here.
+  For \term{package} traversal operations (\eg \macref{do-symbols}),
+  new \term{symbols} may not be \term{interned} in or \term{uninterned} 
+  from the \term{package} being traversed 
+  or any \term{package} that it uses except that the 
+  current \term{symbol} may be \term{uninterned} from the \term{package} 
+  being traversed.
+
+\endlist 
+%These rules only apply to 
+%\term{object} manipulators that are not inherently
+%  destructive. 
+
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}

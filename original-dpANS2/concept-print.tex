@@ -1,0 +1,1085 @@
+% -*- Mode: TeX -*-
+
+\beginsubsection{Overview of The Lisp Printer}
+
+%% 22.1.0 1
+\clisp\ provides a representation of most \term{objects} in the form 
+of printed text called the printed representation.
+Functions such as \funref{print} take an \term{object} 
+and send the characters of its printed representation to a \term{stream}. 
+The collection of routines that does this is known as the (\clisp) printer.  
+
+%% 22.1.0 2
+Reading a printed representation 
+%Added qualifier, since clearly this is just rule of thumb.
+%e.g., Waters complained that this is mostly only true for `simple things'
+typically
+produces an \term{object} that is \funref{equal} to the
+originally printed \term{object}.
+
+\beginsubsubsection{Multiple Possible Textual Representations}
+
+%% 22.1.0 3
+Most \term{objects} have more than one possible textual representation.
+For example, the positive \term{integer} with a magnitude of twenty-seven
+can be textually expressed in any of these ways:
+
+\code
+ 27    27.    #o33    #x1B    #b11011    #.(* 3 3 3)    81/3
+\endcode
+
+A list containing the two symbols \f{A} and \f{B} can also be textually
+expressed in a variety of ways:
+
+\code
+ (A B)    (a b)    (  a  b )    (\\A |B|) 
+(|\\A|
+  B
+)
+\endcode
+
+In general,
+\issue{PRINTER-WHITESPACE:JUST-ONE-SPACE}
+%% Added extra constraint about reader to make it clear that we aren't 
+%% trying to override other printer behavior specified elsewhere.
+%% -kmp 22-Aug-93
+from the point of view of the \term{Lisp reader},
+\endissue{PRINTER-WHITESPACE:JUST-ONE-SPACE}
+wherever \term{whitespace} is permissible in a textual representation,
+any number of \term{spaces} and \term{newlines} can appear in \term{standard syntax}.
+
+%% 22.1.0 4
+When a function such as \funref{print} produces a printed representation,
+it must choose 
+%% It's not totally arbitrary! -kmp 22-Aug-93
+%arbitrarily
+from among many possible textual representations.
+In most cases, it chooses a 
+%Waters thought this meant human-readable, so I added the qualifier "program",
+%and then some exposition which follows here. -kmp 11-Feb-91
+program readable representation,
+but in certain cases it might use a more compact notation that is not 
+program-readable.
+
+A number of option variables, called
+\newtermidx{printer control variables}{printer control variable},
+are provided to permit control of individual aspects of the 
+printed representation of \term{objects}.
+\Thenextfigure\ shows the \term{standardized} \term{printer control variables};
+there might also be \term{implementation-defined} \term{printer control variables}.
+
+\DefineFigure{StdPrinterControlVars}
+\displaythree{Standardized Printer Control Variables}{
+*print-array*&*print-gensym*&*print-pprint-dispatch*\cr
+*print-base*&*print-length*&*print-pretty*\cr
+*print-case*&*print-level*&*print-radix*\cr
+*print-circle*&*print-lines*&*print-readably*\cr
+*print-escape*&*print-miser-width*&*print-right-margin*\cr
+}
+
+In addition to the \term{printer control variables}, 
+the following additional \term{defined names} 
+relate to or affect the behavior of the \term{Lisp printer}:
+
+\displaythree{Additional Influences on the Lisp printer.}{
+*package*&*read-eval*&readtable-case\cr
+*read-default-float-format*&*readtable*&\cr
+}
+
+\beginsubsubsubsection{Printer Escaping}
+
+\Thevariable{*print-escape*} controls whether the \term{Lisp printer}
+tries to produce notations such as escape characters and package prefixes.
+
+\Thevariable{*print-readably*} can be used to override
+many of the individual aspects controlled by the other 
+\term{printer control variables} when program-readable output
+is especially important.
+
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+One of the many effects of making \thevalueof{*print-readably*} be \term{true}
+is that the \term{Lisp printer} behaves as if \varref{*print-escape*} were also \term{true}.
+For notational convenience, we say that 
+if the value of either \varref{*print-readably*} or \varref{*print-escape*} is \term{true}, 
+then \newterm{printer escaping} is ``enabled'';
+and we say that
+if the values of both \varref{*print-readably*} and \varref{*print-escape*} are \term{false}, 
+then \term{printer escaping} is ``disabled''.
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+
+\endsubsubsubsection%{Printer Escaping}
+
+\endsubsubsection%{Multiple Possible Textual Representations}
+
+\endsubsection%{Overview of The Lisp Printer}
+
+\beginsubsection{Printer Dispatching}
+\DefineSection{PrinterDispatch}
+
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+% The \term{Lisp printer} makes its determination of how to print an
+% \term{object} as follows:
+% 
+% If \thevalueof{*print-pretty*} is \term{true}:
+% 
+% \beginlist 
+%   \item{} Printing is controlled by the \term{pprint dispatch table}
+%           contained in the variable \varref{*print-pprint-dispatch*};
+%           \seesection\PPrintDispatchTables.
+% \endlist
+% 
+% Otherwise (if \thevalueof{*print-pretty*} is \term{false}):
+% 
+% \beginlist
+% \item{} If the \term{object} is a \term{structure} for which a
+%         \kwd{print-function} option is in effect (either directly or by inheritance),
+%         that function is used; \seefun{defstruct}.
+% 
+% \item{} Otherwise (if the \term{object} is not a \term{structure} or
+% 	if it is a \term{structure} but has no \kwd{print-function} option in effect),
+% 	its \funref{print-object} method is used; \seesection\DefaultPrintObjMeths.
+% \endlist
+
+The \term{Lisp printer} makes its determination of how to print an
+\term{object} as follows:
+
+If \thevalueof{*print-pretty*} is \term{true}, 
+printing is controlled by the \term{current pprint dispatch table};
+%contained in the variable \varref{*print-pprint-dispatch*};
+\seesection\PPrintDispatchTables.
+
+Otherwise (if \thevalueof{*print-pretty*} is \term{false}),
+the object's \funref{print-object} method is used;
+\seesection\DefaultPrintObjMeths.
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+
+\endsubsection%{Printer Dispatching}
+
+\beginsubsection{Default Print-Object Methods}
+\DefineSection{DefaultPrintObjMeths}
+
+%% 22.1.6 3
+% How an expression is printed depends on its \term{type},
+% as described in the following sections.
+This section describes the default behavior of 
+\funref{print-object} methods for the \term{standardized} \term{types}.
+
+\beginsubsubsection{Printing Numbers}
+
+\beginsubsubsubsection{Printing Integers}
+\DefineSection{PrintingIntegers}
+%% 22.1.6 4
+
+\term{Integers} are printed in the radix specified by the \term{current output base}
+in positional notation, most significant digit first.
+If appropriate, a radix specifier can be printed; see \varref{*print-radix*}.
+If an \term{integer} is negative, a minus sign is printed and then the
+absolute value of the \term{integer} is printed.
+The \term{integer} zero is represented
+by the single digit \f{0} and never has a sign.
+A decimal point might be printed, 
+depending on \thevalueof{*print-radix*}.
+
+For related information about the syntax of an \term{integer},
+\seesection\SyntaxOfIntegers.
+
+\endsubsubsubsection%{Printing Integers}
+\beginsubsubsubsection{Printing Ratios}
+\DefineSection{PrintingRatios}\idxref{ratio}
+%% 22.1.6 5
+
+\term{Ratios} are printed as follows:
+the absolute value of the numerator is printed, as for an \term{integer};
+then a \f{/}; then the denominator.  The numerator and denominator are
+both printed in the radix specified by the \term{current output base}; 
+they are obtained as if by
+\funref{numerator} and \funref{denominator}, and so \term{ratios}
+are printed in reduced form (lowest terms).
+If appropriate, a radix specifier can be printed; see 
+\varref{*print-radix*}.
+If the ratio is negative, a minus sign is printed before the numerator.
+
+For related information about the syntax of a \term{ratio},
+\seesection\SyntaxOfRatios.
+
+\endsubsubsubsection%{Printing Ratios}
+\beginsubsubsubsection{Printing Floats}
+\DefineSection{PrintingFloats}\idxref{float}
+%% 22.1.6 6
+
+If the magnitude of the \term{float} is either zero or between $10^{-3}$ (inclusive)
+and $10^7$ (exclusive), it is printed as the integer part of the number,
+then a decimal point,
+followed by the fractional part of the number;
+there is always at least one
+digit on each side of the decimal point.    
+If the sign of the number
+(as determined by \funref{float-sign})
+is negative, then a minus sign is printed before the number.
+If the format of the number
+does not match that specified by
+\varref{*read-default-float-format*}, then the \term{exponent marker} for
+that format and the digit \f{0} are also printed.
+For example, the base of the natural logarithms as a \term{short float}
+might be printed as \f{2.71828S0}.
+
+%% 22.1.6 7
+For non-zero magnitudes outside of the range $10^{-3}$ to $10^7$,
+a \term{float} is printed in computerized scientific notation.
+The representation of the number is scaled to be between
+1 (inclusive) and 10 (exclusive) and then printed, with one digit
+before the decimal point and at least one digit after the decimal point.
+Next the \term{exponent marker} for the format is printed,
+except that
+if the format of the number matches that specified by 
+\varref{*read-default-float-format*}, then the \term{exponent marker} \f{E}
+is used.
+Finally, the power of ten by which the fraction must be multiplied
+to equal the original number is printed as a decimal integer.
+For example, Avogadro's number as a \term{short float} 
+is printed as \f{6.02S23}.
+
+For related information about the syntax of a \term{float},
+\seesection\SyntaxOfFloats.
+
+\endsubsubsubsection%{Printing Floats}
+\beginsubsubsubsection{Printing Complexes}
+\DefineSection{PrintingComplexes}\idxref{complex}
+%% 22.1.6 8
+
+A \term{complex} is printed as \f{\#C}, an open parenthesis,
+the printed representation of its real part, a space,
+the printed representation of its imaginary part, and finally
+a close parenthesis.
+
+For related information about the syntax of a \term{complex},
+\seesection\SyntaxOfComplexes\ and \secref\SharpsignC.
+
+\endsubsubsubsection%{Printing Complexes}
+\beginsubsubsubsection{Note about Printing Numbers}
+
+The printed representation of a number must not contain \term{escape} \term{characters};
+\seesection\EscCharsAndPotentialNums.
+
+\endsubsubsubsection%{Note about Printing Numbers}
+\endsubsubsection%{Printing Numbers}
+\beginsubsubsection{Printing Characters}
+\DefineSection{PrintingCharacters}
+%% 22.1.6 9
+
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%When \varref{*print-escape*} is \term{false},
+When \term{printer escaping} is disabled,
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+a \term{character} prints as itself;
+it is sent directly to the output \term{stream}.
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%When \varref{*print-escape*} is \term{true},
+When \term{printer escaping} is enabled,
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+then \f{\#\\} syntax is used.
+
+%% 22.1.4 16
+%% Some wording clarifications here per Loosemore #16 (first public review). -kmp 15-May-93
+When the printer types out the name of a \term{character},
+it uses the same table as the \f{\#\\} \term{reader macro} would use;
+therefore any \term{character} name that is typed out
+is acceptable as input (in that \term{implementation}).
+If a \term{non-graphic} \term{character} has a \term{standardized} \term{name}\meaning{5},
+that \term{name} is preferred over non-standard \term{names}
+for printing in \f{\#\\} notation.
+For the \term{graphic} \term{standard characters},
+the \term{character} itself is always used
+for printing in \f{\#\\} notation---even if 
+the \term{character} also has a \term{name}\meaning{5}.
+
+For details about the \f{\#\\} \term{reader macro}, \seesection\SharpsignBackslash.
+
+\endsubsubsection%{Printing Characters}
+\beginsubsubsection{Printing Symbols}
+\DefineSection{PrintingSymbols}
+%% 22.1.6 10 
+
+%!!! Is this affected by READ-CASE-SENSITIVITY? -kmp 14-May-91
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%When \varref{*print-escape*} is \term{false},
+When \term{printer escaping} is disabled,
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+only the characters of the \term{symbol}'s \term{name} are output 
+% 22.1.6 17
+\issue{PRINT-CASE-BEHAVIOR:CLARIFY}
+%(but the case in which to print any uppercase characters in the \term{name} is 
+%controlled by \thevariable{*print-case*}).
+(but the case in which to print characters in the \term{name} is
+controlled by \varref{*print-case*};
+\seesection\ReadtableCasePrintEffect).
+\endissue{PRINT-CASE-BEHAVIOR:CLARIFY}
+
+%% 22.1.6 11
+The remainder of \thissection\ applies only 
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%when \varref{*print-escape*} is \term{true}.
+when \term{printer escaping} is enabled.
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+
+%% 22.1.6 12
+\issue{SYMBOL-PRINT-ESCAPE-BEHAVIOR:CLARIFY}
+% \term{Backslashes} and \term{vertical-bars} are included as required.  
+% The \term{current output base} at the time of printing might be relevant.
+% For example, if \thevalueof{*print-base*} were \f{16} 
+% when printing the symbol \f{face}, it would have to be printed as
+% \f{\\FACE} or \f{\\Face} or \f{|FACE|}, 
+% because the token \f{face} would be read as a hexadecimal
+% number (decimal value 64206) if \thevalueof{*read-base*} were \f{16}.
+When printing a \term{symbol}, the printer inserts enough 
+\term{single escape} and/or \term{multiple escape}
+characters (\term{backslashes} and/or \term{vertical-bars}) so that if
+\funref{read} were called with the same \varref{*readtable*} and
+with \varref{*read-base*} bound to the \term{current output base}, it
+would return the same \term{symbol} (if it is not 
+\term{apparently uninterned}) or an \term{uninterned} \term{symbol}
+with the same \term{print name} (otherwise).
+
+For example, if \thevalueof{*print-base*} were \f{16} 
+when printing the symbol \f{face}, it would have to be printed as
+\f{\\FACE} or \f{\\Face} or \f{|FACE|}, 
+because the token \f{face} would be read as a hexadecimal
+number (decimal value 64206) if \thevalueof{*read-base*} were \f{16}.
+
+For additional restrictions concerning characters with  nonstandard
+\term{syntax types} in the \term{current readtable}, \seevar{*print-readably*} 
+\endissue{SYMBOL-PRINT-ESCAPE-BEHAVIOR:CLARIFY}
+
+For information about how the \term{Lisp reader} parses \term{symbols},
+\seesection\SymbolTokens\ and \secref\SharpsignColon.
+
+%!!! Somewhat redundant with what's above--also, is this also affected
+%    by READ-CASE-SENSITIVITY? -kmp 14-May-91
+%% 22.1.6 13
+% already said above.  --sjl 16 Mar 92
+%The case in which to print any uppercase characters in the \term{symbol}'s \term{name} is 
+%controlled by \varref{*print-case*}.
+\nil\ might be printed as \f{()} 
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%when \varref{*print-escape*} and \varref{*print-pretty*} are both \term{true}.
+when \varref{*print-pretty*} is \term{true}
+and \term{printer escaping} is enabled.
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+
+\beginsubsubsubsection{Package Prefixes for Symbols}
+
+%% 22.1.6 14
+%% 11.0.0 28
+\term{Package prefixes} are printed if necessary.
+The rules for \term{package prefixes} are as follows.
+When the \term{symbol} is printed, if it is in \thepackage{keyword}, 
+% should this be ``colon'' or ``package marker''?  --sjl 16 Mar 92
+then it is printed with a preceding \term{colon}; otherwise, if
+it is \term{accessible} in the \term{current package}, it is printed without any
+\term{package prefix}; otherwise, it is printed with a \term{package prefix}.
+
+%% 22.1.6 15
+A \term{symbol} that is \term{apparently uninterned} is printed
+preceded by ``\f{\#:}'' 
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+% if \varref{*print-gensym*} and \varref{*print-escape*} are both \term{non-nil};
+% if either is \nil,
+if \varref{*print-gensym*} is \term{true} and \term{printer escaping} is enabled;
+if \varref{*print-gensym*} is \term{false} or \term{printer escaping} is disabled,
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+then the \term{symbol} is printed without a prefix,
+as if it were in the \term{current package}.
+
+%% 22.1.6 16
+Because the \f{\#:} syntax does not intern the
+following symbol, it is necessary to use circular-list syntax
+if \varref{*print-circle*} is \term{true} and
+the same uninterned symbol appears several times in an expression
+to be printed.  For example, the result of
+
+\code
+ (let ((x (make-symbol "FOO"))) (list x x))
+\endcode
+would be printed as \f{(\#:foo \#:foo)} if \varref{*print-circle*}
+were \term{false}, but as \f{(\#1=\#:foo \#1\#)} if \varref{*print-circle*}
+were \term{true}.
+
+A summary of the preceding package prefix rules follows:
+
+\beginlist
+\itemitem{\f{foo:bar}}
+
+\f{foo:bar} is printed when \term{symbol} \f{bar} 
+is external in its \term{home package} \f{foo} 
+and is not \term{accessible} in the \term{current package}.
+         
+\itemitem{\f{foo::bar}}
+
+\f{foo::bar} is printed when \f{bar} is internal in its \term{home package}
+\f{foo} and is not \term{accessible} in the \term{current package}.
+         
+\itemitem{\f{:bar}}
+
+\f{:bar} is printed when the home package of \f{bar} is \thepackage{keyword}.
+                
+\itemitem{\tt \#:bar}  
+
+\f{\#:bar} is printed when \f{bar} is \term{apparently uninterned},
+even in the pathological case that \f{bar} 
+has no \term{home package} but is nevertheless somehow \term{accessible} 
+in the \term{current package}.
+\endlist
+
+% Waters points out that this was already said above.
+% %% 22.1.6 17
+% The case in which symbols are printed is controlled by 
+% \varref{*print-case*}.
+
+\endsubsubsubsection%{Package Prefixes for Symbols}
+
+\beginsubsubsubsection{Effect of Readtable Case on the Lisp Printer}
+\DefineSection{ReadtableCasePrintEffect}
+
+\issue{PRINT-CASE-BEHAVIOR:CLARIFY}
+% When \term{escape} syntax is not being used,
+When 
+%both \varref{*print-escape*} and \varref{*print-readably*} are \term{false},
+\term{printer escaping} is disabled,
+or the characters under consideration are not already 
+quoted specifically by \term{single escape} or \term{multiple escape}
+syntax,
+\endissue{PRINT-CASE-BEHAVIOR:CLARIFY}
+the \term{readtable case} of the \term{current readtable} 
+affects the way the \term{Lisp printer} writes \term{symbols}
+in the following ways:
+ 
+\beginlist
+\itemitem{\kwd{upcase}}
+
+ When the \term{readtable case} is \kwd{upcase},
+ \term{uppercase} \term{characters}
+ are printed in the case specified by \varref{*print-case*}, and
+ \term{lowercase} \term{characters} are printed in their own case.
+ 
+\itemitem{\kwd{downcase}}
+
+ When the \term{readtable case} is \kwd{downcase},
+ \term{uppercase} \term{characters} are printed in their own case, and
+ \term{lowercase} \term{characters}
+ are printed in the case specified by \varref{*print-case*}.
+ 
+\itemitem{\kwd{preserve}}
+
+ When the \term{readtable case} is \kwd{preserve},
+ all \term{alphabetic} \term{characters} are printed in their own case.
+ 
+\itemitem{\kwd{invert}}
+
+ When the \term{readtable case} is \kwd{invert},
+ the case of all \term{alphabetic} \term{characters} 
+ in single case symbol names is inverted.
+ Mixed-case symbol names are printed as is.
+\endlist 
+
+The rules for escaping \term{alphabetic} \term{characters} in symbol names are affected by
+the \funref{readtable-case} 
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%if \varref{*print-escape*} is \term{true}.
+if \term{printer escaping} is enabled.
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+\term{Alphabetic} \term{characters} are escaped as follows:                
+\beginlist
+\itemitem{\kwd{upcase}}
+
+When the \term{readtable case} is \kwd{upcase},
+all \term{lowercase} \term{characters} must be escaped.
+
+\itemitem{\kwd{downcase}}
+
+When the \term{readtable case} is \kwd{downcase},
+all \term{uppercase} \term{characters} must be escaped.
+
+\itemitem{\kwd{preserve}}
+
+When the \term{readtable case} is \kwd{preserve}, 
+no \term{alphabetic} \term{characters} need be escaped.
+
+\itemitem{\kwd{invert}}
+
+When the \term{readtable case} is \kwd{invert},
+no \term{alphabetic} \term{characters} need be escaped.
+
+\endlist    
+
+\beginsubsubsubsubsection{Examples of Effect of Readtable Case on the Lisp Printer}
+\DefineSection{ReadtableCasePrintExamples}
+
+\code
+ (defun test-readtable-case-printing ()
+   (let ((*readtable* (copy-readtable nil))
+         (*print-case* *print-case*))
+     (format t "READTABLE-CASE *PRINT-CASE*  Symbol-name  Output~
+              ~%--------------------------------------------------~
+              ~%")
+     (dolist (readtable-case '(:upcase :downcase :preserve :invert))
+       (setf (readtable-case *readtable*) readtable-case)
+       (dolist (print-case '(:upcase :downcase :capitalize))
+         (dolist (symbol '(|ZEBRA| |Zebra| |zebra|))
+           (setq *print-case* print-case)
+           (format t "~&:~A~15T:~A~29T~A~42T~A"
+                   (string-upcase readtable-case)
+                   (string-upcase print-case)
+                   (symbol-name symbol)
+                   (prin1-to-string symbol)))))))
+\endcode
+  The output from \f{(test-readtable-case-printing)} should be as follows:
+
+\code
+    READTABLE-CASE *PRINT-CASE*  Symbol-name  Output
+    --------------------------------------------------
+    :UPCASE        :UPCASE       ZEBRA        ZEBRA
+    :UPCASE        :UPCASE       Zebra        |Zebra|
+    :UPCASE        :UPCASE       zebra        |zebra|
+    :UPCASE        :DOWNCASE     ZEBRA        zebra
+    :UPCASE        :DOWNCASE     Zebra        |Zebra|
+    :UPCASE        :DOWNCASE     zebra        |zebra|
+    :UPCASE        :CAPITALIZE   ZEBRA        Zebra
+    :UPCASE        :CAPITALIZE   Zebra        |Zebra|
+    :UPCASE        :CAPITALIZE   zebra        |zebra|
+    :DOWNCASE      :UPCASE       ZEBRA        |ZEBRA|
+    :DOWNCASE      :UPCASE       Zebra        |Zebra|
+    :DOWNCASE      :UPCASE       zebra        ZEBRA
+    :DOWNCASE      :DOWNCASE     ZEBRA        |ZEBRA|
+    :DOWNCASE      :DOWNCASE     Zebra        |Zebra|
+    :DOWNCASE      :DOWNCASE     zebra        zebra
+    :DOWNCASE      :CAPITALIZE   ZEBRA        |ZEBRA|
+    :DOWNCASE      :CAPITALIZE   Zebra        |Zebra|
+    :DOWNCASE      :CAPITALIZE   zebra        Zebra
+    :PRESERVE      :UPCASE       ZEBRA        ZEBRA
+    :PRESERVE      :UPCASE       Zebra        Zebra
+    :PRESERVE      :UPCASE       zebra        zebra
+    :PRESERVE      :DOWNCASE     ZEBRA        ZEBRA
+    :PRESERVE      :DOWNCASE     Zebra        Zebra
+    :PRESERVE      :DOWNCASE     zebra        zebra
+    :PRESERVE      :CAPITALIZE   ZEBRA        ZEBRA
+    :PRESERVE      :CAPITALIZE   Zebra        Zebra
+    :PRESERVE      :CAPITALIZE   zebra        zebra
+    :INVERT        :UPCASE       ZEBRA        zebra
+    :INVERT        :UPCASE       Zebra        Zebra
+    :INVERT        :UPCASE       zebra        ZEBRA
+    :INVERT        :DOWNCASE     ZEBRA        zebra
+    :INVERT        :DOWNCASE     Zebra        Zebra
+    :INVERT        :DOWNCASE     zebra        ZEBRA
+    :INVERT        :CAPITALIZE   ZEBRA        zebra
+    :INVERT        :CAPITALIZE   Zebra        Zebra
+    :INVERT        :CAPITALIZE   zebra        ZEBRA
+\endcode
+
+\endsubsubsubsubsection%{Examples of Effect of Readtable Case on the Lisp Printer}
+
+\endsubsubsubsection%{Effect of Readtable Case on the Lisp Printer}
+
+\endsubsubsection%{Printing Symbols}
+\beginsubsubsection{Printing Strings}
+\DefineSection{PrintingStrings}
+%% 22.1.6 18
+
+The characters of the \term{string} are output in order.
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%If \varref{*print-escape*} is \term{true},
+If \term{printer escaping} is enabled,
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+a \term{double-quote} is output before and after, and all
+\term{double-quotes} and \term{single escapes} are preceded by \term{backslash}.
+The printing of \term{strings} is not affected by \varref{*print-array*}.
+Only the \term{active} \term{elements} of the \term{string} are printed.
+
+For information on how the \term{Lisp reader} parses \term{strings},
+\seesection\Doublequote.
+
+\endsubsubsection%{Printing Strings}
+\beginsubsubsection{Printing Lists and Conses}
+\DefineSection{PrintingListsAndConses}
+%% 22.1.6 19
+
+Wherever possible, list notation is preferred over dot notation.  
+Therefore the following algorithm is used to print a \term{cons} $x$:
+
+\goodbreak
+\beginlist
+\item{1.} A \term{left-parenthesis} is printed.
+
+\medbreak
+\item{2.} The \term{car} of $x$ is printed. 
+
+\medbreak
+\item{3.} If the \term{cdr} of $x$ is itself a \term{cons},
+          it is made to be the current \term{cons} 
+	  (\ie $x$ becomes that \term{cons}), 
+\issue{PRINT-WHITESPACE:JUST-ONE-SPACE}
+	  a \term{space}
+%         \term{whitespace}\meaning{1} 
+\endissue{PRINT-WHITESPACE:JUST-ONE-SPACE}
+	  is printed,
+          and step 2 is re-entered.
+
+\medbreak
+\item{4.} If the \term{cdr} of $x$ is not \term{null}, 
+\issue{PRINT-WHITESPACE:JUST-ONE-SPACE}
+	  a \term{space},
+%         \term{whitespace}\meaning{1},
+\endissue{PRINT-WHITESPACE:JUST-ONE-SPACE}
+          a \term{dot},
+\issue{PRINT-WHITESPACE:JUST-ONE-SPACE}
+	  a \term{space},
+%         \term{whitespace}\meaning{1},
+\endissue{PRINT-WHITESPACE:JUST-ONE-SPACE}
+          and the \term{cdr} of $x$ are printed.
+
+\medbreak
+\item{5.} A \term{right-parenthesis} is printed.
+\endlist
+
+\issue{PRINT-WHITESPACE:JUST-ONE-SPACE}
+Actually, the above algorithm is only used when \varref{*print-pretty*}
+is \term{false}.  When \varref{*print-pretty*} is \term{true} (or 
+when \funref{pprint} is used),
+additional \term{whitespace}\meaning{1} 
+may replace the use of a single \term{space},
+and a more elaborate algorithm with similar goals but more presentational 
+flexibility is used; \seesection\PrinterDispatch.
+\endissue{PRINT-WHITESPACE:JUST-ONE-SPACE}
+
+%% 2.4.0 6
+%% 22.1.6 20
+Although the two expressions below are equivalent,
+and the reader accepts
+either one and 
+%% Per X3J13. -kmp 05-Oct-93
+%produce
+produces
+the same \term{cons}, the printer
+always prints such a \term{cons} in the second form.
+
+\code
+ (a . (b . ((c . (d . nil)) . (e . nil))))
+ (a b (c d) e)
+\endcode
+The printing of \term{conses} is affected by \varref{*print-level*},
+\varref{*print-length*}, and \varref{*print-circle*}.
+
+
+\goodbreak         
+Following are examples of printed representations of \term{lists}:
+
+\code
+ (a . b)     ;A dotted pair of a and b
+ (a.b)       ;A list of one element, the symbol named a.b
+ (a. b)      ;A list of two elements a. and b
+ (a .b)      ;A list of two elements a and .b
+ (a b . c)   ;A dotted list of a and b with c at the end; two conses
+ .iot        ;The symbol whose name is .iot
+ (. b)       ;Invalid -- an error is signaled if an attempt is made to read 
+             ;this syntax.
+ (a .)       ;Invalid -- an error is signaled.
+ (a .. b)    ;Invalid -- an error is signaled.
+ (a . . b)   ;Invalid -- an error is signaled.
+ (a b c ...) ;Invalid -- an error is signaled.
+ (a \\. b)    ;A list of three elements a, ., and b
+ (a |.| b)   ;A list of three elements a, ., and b
+ (a \\... b)  ;A list of three elements a, ..., and b
+ (a |...| b) ;A list of three elements a, ..., and b
+\endcode
+
+For information on how the \term{Lisp reader} parses \term{lists} and \term{conses},
+\seesection\LeftParen. 
+     
+\endsubsubsection%{Printing Lists and Conses}
+\beginsubsubsection{Printing Bit Vectors}
+\DefineSection{PrintingBitVectors}
+%% 22.1.6 21
+
+A \term{bit vector} is printed as \f{\#*} followed by the bits of the \term{bit vector}
+in order.  If \varref{*print-array*} is \term{false}, then the \term{bit vector} is
+printed in a format (using \f{\#<}) that is concise but not readable.
+Only the \term{active} \term{elements} of the \term{bit vector} are printed.
+
+\reviewer{Barrett: Need to provide for \f{\#5*0} as an alternate 
+  	  notation for \f{\#*00000}.}%!!!
+
+%% Reworded to avoid awkward line break. -kmp 24-Apr-93
+For information on \term{Lisp reader} parsing of \term{bit vectors},
+\seesection\SharpsignStar.
+
+\endsubsubsection%{Printing Bit Vectors}
+\beginsubsubsection{Printing Other Vectors}
+\DefineSection{PrintingOtherVectors}
+%% 22.1.6 22
+
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%Any
+If \varref{*print-array*} is \term{true} 
+and \varref{*print-readably*} is \term{false},
+any
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+\term{vector} 
+other than a \term{string} or \term{bit vector} is printed using
+general-vector syntax; this means that information
+about specialized vector representations does not appear.
+The printed representation of a zero-length \term{vector} is \f{\#()}.
+The printed representation of a non-zero-length \term{vector} begins with \f{\#(}.
+Following that, the first element of the \term{vector} is printed.  
+\issue{PRINTER-WHITESPACE:JUST-ONE-SPACE}
+If there are any other elements, they are printed in turn, with 
+each such additional element preceded by
+a \term{space} if \varref{*print-pretty*} is \term{false},
+or \term{whitespace}\meaning{1} if \varref{*print-pretty*} is \term{true}.
+\endissue{PRINTER-WHITESPACE:JUST-ONE-SPACE}
+A \term{right-parenthesis} after the last element
+terminates the printed representation of the \term{vector}. 
+The printing of \term{vectors} 
+is affected by \varref{*print-level*} and \varref{*print-length*}.
+If the \term{vector} has a \term{fill pointer}, 
+then only those elements below
+the \term{fill pointer} are printed.
+
+%% 22.1.6 23
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%If \varref{*print-array*} is \term{false}
+If both \varref{*print-array*} and \varref{*print-readably*} are \term{false},
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+the \term{vector} is not printed as described above,
+but in a format (using \f{\#<}) that is concise but not readable.
+
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+If \varref{*print-readably*} is \term{true},
+the \term{vector} prints in an \term{implementation-defined} manner;
+\seevar{*print-readably*}.
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+
+For information on how the \term{Lisp reader} parses these ``other \term{vectors},''
+\seesection\SharpsignLeftParen.
+
+\endsubsubsection%{Printing Other Vectors}
+\beginsubsubsection{Printing Other Arrays}
+\DefineSection{PrintingOtherArrays}
+%% 22.1.6 24 
+
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%Any
+If  \varref{*print-array*} is \term{true} 
+and \varref{*print-readably*} is \term{false},
+any
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+\term{array} other than a \term{vector} is printed
+using \f{\#}\f{n}\f{A} format.
+Let \f{n} be the \term{rank} of the \term{array}.
+Then \f{\#} is printed, then \f{n} as a decimal integer,
+then \f{A}, then \f{n} open parentheses.  
+Next the \term{elements} are scanned in row-major order,
+% Added for Barmar:
+using \funref{write} on each \term{element}, 
+and separating \term{elements} from each other with \term{whitespace}\meaning{1}.
+%% Barrett didn't like the odometer thing (probably for good reason).
+%% I've rewritten it. -kmp 12-Oct-91
+The array's dimensions are numbered 0 to \f{n}-1 from left to right,
+and are enumerated with the rightmost index changing fastest.
+%Imagine the \term{array} indices being enumerated in odometer fashion,
+%recalling that the dimensions are numbered from 0 to \f{n}-1.
+Every time the index for dimension \f{j} is incremented,
+the following actions are taken:
+
+%% 22.1.6 25
+\beginlist
+\itemitem{\bull}
+If \f{j} < \f{n}-1, then a close parenthesis is printed.
+
+%% 22.1.6 26
+\itemitem{\bull}
+If incrementing the index for dimension \f{j} caused it to equal
+dimension \f{j}, that index is reset to zero and the
+index for dimension \f{j}-1 is incremented (thereby performing these three steps recursively),
+unless \f{j}=0, in which case the entire algorithm is terminated.
+If incrementing the index for dimension \f{j} did not cause it to
+equal dimension \f{j}, then a space is printed.
+
+%% 22.1.6 27
+\itemitem{\bull}
+If \f{j} < \f{n}-1, then an open parenthesis is printed.
+\endlist
+
+This causes the contents to be printed in a format suitable for
+\kwd{initial-contents} to \funref{make-array}.
+The lists effectively printed by this procedure are subject to
+truncation by \varref{*print-level*} and \varref{*print-length*}.
+
+%% 22.1.6 28
+If the \term{array} 
+is of a specialized \term{type}, containing bits or characters,
+then the innermost lists generated by the algorithm given above can instead
+be printed using bit-vector or string syntax, provided that these innermost
+lists would not be subject to truncation by \varref{*print-length*}.  
+%For example,
+%a 3-by-2-by-4 \term{array} 
+%of characters that would ordinarily be printed as
+%
+%\code
+% #3A(
+% ((#\\s #\\t #\\o #\\p) (#\\s #\\p #\\o #\\t))
+% ((#\\p #\\o #\\s #\\t) (#\\p #\\o #\\t #\\s))
+% ((#\\t #\\o #\\p #\\s) (#\\o #\\p #\\t #\\s)))
+%\endcode
+%
+%may instead be printed more concisely as
+%                                                                               
+%\code
+% #3A(("stop" "spot") ("post" "pots") ("tops" "opts"))
+%\endcode
+
+%% 22.1.6 29
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%If \varref{*print-array*} is \term{false},
+If both \varref{*print-array*} and \varref{*print-readably*} are \term{false},
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+then the \term{array} is printed
+in a format (using \f{\#<}) that is concise but not readable.
+
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+If \varref{*print-readably*} is \term{true},
+the \term{array} prints in an \term{implementation-defined} manner; 
+\seevar{*print-readably*}.
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%% Per X3J13. -kmp 05-Oct-93
+In particular,
+this may be important for arrays having some dimension \f{0}.
+
+For information on how the \term{Lisp reader} parses these ``other \term{arrays},''
+see \secref\SharpsignA.
+
+\beginsubsubsection{Examples of Printing Arrays}
+
+\code
+ (let ((a (make-array '(3 3)))
+       (*print-pretty* t)
+       (*print-array* t))
+   (dotimes (i 3) (dotimes (j 3) (setf (aref a i j) (format nil "<~D,~D>" i j))))
+   (print a)
+   (print (make-array 9 :displaced-to a)))
+\OUT #2A(("<0,0>" "<0,1>" "<0,2>") 
+\OUT     ("<1,0>" "<1,1>" "<1,2>") 
+\OUT     ("<2,0>" "<2,1>" "<2,2>")) 
+\OUT #("<0,0>" "<0,1>" "<0,2>" "<1,0>" "<1,1>" "<1,2>" "<2,0>" "<2,1>" "<2,2>") 
+\EV #<ARRAY 9 indirect 36363476>
+\endcode
+
+\endsubsubsection%{Examples of Printing Arrays}
+
+\endsubsubsection%{Printing Other Arrays}
+\beginsubsubsection{Printing Random States}
+\DefineSection{PrintingRandomStates}
+%% 12.9.0 18
+%% 22.1.6 30 
+                                                                       
+A specific syntax for printing \term{objects} \oftype{random-state} is
+not specified. However, every \term{implementation}
+must arrange to print a \term{random state} \term{object} in such a way that,
+within the same implementation, \funref{read}
+can construct from the printed representation a copy of the 
+\term{random state}
+object as if the copy had been made by \funref{make-random-state}.
+
+If the type \term{random state} is effectively implemented 
+by using the machinery for \macref{defstruct},
+the usual structure syntax can then be used for printing 
+\term{random state}
+objects; one might look something like
+
+% Use of non-keyword #S keywords is deprecated.  --sjl 16 Mar 92
+%\code
+% #S(RANDOM-STATE DATA #(14 49 98436589 786345 8734658324 ... ))
+%\endcode
+\code
+ #S(RANDOM-STATE :DATA #(14 49 98436589 786345 8734658324 ... ))
+\endcode
+where the components are \term{implementation-dependent}.
+
+\endsubsubsection%{Printing Random States}
+\beginsubsubsection{Printing Pathnames}
+\DefineSection{PrintingPathnames}
+%% 22.1.6 31 
+
+\issue{PATHNAME-PRINT-READ:SHARPSIGN-P}
+ 
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%When \varref{*print-escape*} is \term{true},
+When \term{printer escaping} is enabled,
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+the syntax \f{\#P"..."} is how a
+\term{pathname} is printed by \funref{write} and the other functions herein described.
+%!!! Probably "a" rather than "the" would go better here?? -kmp 11-Feb-91
+The \f{"..."} is the namestring representation of the pathname.
+ 
+%% !!! I'm thinking about adding the following.
+%%     Mail sent to get other opinions. -kmp 11-Feb-92
+%
+% If a suitable \term{namestring} representation for the \term{pathname} cannot be
+% constructed (\eg for pathname that is missing components required by 
+% the \term{file system}), an \term{implementation} is permitted (but not required)
+% to use an alternate (\term{implementation-dependent}) printed representation, 
+% such as \f{\#S(PATHNAME ...)}.
+
+\issue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+%When \varref{*print-escape*} is \term{false},
+When \term{printer escaping} is disabled,
+\endissue{PRINT-READABLY-BEHAVIOR:CLARIFY}
+\funref{write} writes a \term{pathname} \i{P}
+by writing \f{(namestring \i{P})} instead.
+
+% The following will be deleted:
+% 
+% A specific syntax for printing \term{objects} \oftype{pathname} is not specified.
+% However, every implementation must arrange to print a \term{pathname} in such a way that,
+% within the same implementation of \clisp, 
+% \funref{read} can construct from the printed representation an equivalent
+% instance of the \term{pathname} \term{object}.
+% 
+% The printed representation of a pathname
+% typically designates \kwd{wild} by an asterisk; however, this is
+% \term{implementation-dependent}.    
+% 
+% End of deletion.
+
+For information on how the \term{Lisp reader} parses \term{pathnames},
+see \secref\SharpsignP.
+
+\endissue{PATHNAME-PRINT-READ:SHARPSIGN-P}
+
+\endsubsubsection%{Printing Pathnames}
+\beginsubsubsection{Printing Structures}
+\DefineSection{PrintingStructures}
+
+\issue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+%% 19.1.0 10
+%% 22.1.6 32
+% \term{Structures} defined by \macref{defstruct} are printed under the
+% control of the keyword \kwd{print-function} to \macref{defstruct}.
+% A default printing \term{function} is supplied that prints the 
+% \term{structure} using \f{\#S} syntax.
+By default, a \term{structure} of type $S$ is printed using \f{\#S} syntax.
+This behavior can be customized by specifying a \kwd{print-function} 
+or \kwd{print-object} option to the \macref{defstruct} \term{form} that defines $S$,
+or by writing a \funref{print-object} \term{method} 
+that is \term{specialized} for \term{objects} of type $S$.
+\endissue{DEFSTRUCT-PRINT-FUNCTION-AGAIN:X3J13-MAR-93}
+
+\issue{STRUCTURE-READ-PRINT-SYNTAX:KEYWORDS}
+%% 2.12.0 2
+Different structures might print out in different ways;
+the default notation for structures is:
+
+\code
+ #S(\param{structure-name} \star{\curly{\param{slot-key} \param{slot-value}}})
+\endcode
+where \f{\#S} indicates structure syntax,
+\param{structure-name} is a \term{structure name},
+each \param{slot-key} is an initialization argument \term{name}
+for a \term{slot} in the \term{structure},
+and each corresponding \param{slot-value} is a representation
+of the \term{object} in that \term{slot}.
+%The slot names need not be written with \term{package prefixes}.
+\endissue{STRUCTURE-READ-PRINT-SYNTAX:KEYWORDS}
+
+For information on how the \term{Lisp reader} parses \term{structures},
+see \secref\SharpsignS.
+
+\endsubsubsection%{Printing Structures}
+\beginsubsubsection{Printing Other Objects}
+\DefineSection{PrintingOtherObjects}
+
+%% 2.14.0 1
+%% 22.1.6 33
+Other \term{objects} are printed in an \term{implementation-dependent} manner.
+It is not required that an \term{implementation} print those \term{objects}
+\term{readably}.
+
+For example, \term{hash tables}, 
+	     \term{readtables},
+             \term{packages},
+             \term{streams},
+         and \term{functions}
+might not print \term{readably}.
+
+A common notation to use in this circumstance is \f{\#<...>}.
+Since \f{\#<} is not readable by the \term{Lisp reader},
+the precise format of the text which follows is not important,
+but a common format to use is that provided by \themacro{print-unreadable-object}.
+
+For information on how the \term{Lisp reader} treats this notation,
+\seesection\SharpsignLeftAngle.
+For information on how to notate \term{objects} that cannot be printed \term{readably},
+\seesection\SharpsignDot.
+
+\endsubsubsection%{Printing Other Objects}
+
+\endsubsection%{Default Print-Object Methods}
+
+%% 22.1.6 34
+%% this paragraph left out
+
+\beginsubSection{Examples of Printer Behavior}
+
+\code
+ (let ((*print-escape* t)) (fresh-line) (write #\\a))
+\OUT #\\a
+\EV #\\a
+ (let ((*print-escape* nil) (*print-readably* nil))
+   (fresh-line)
+   (write #\\a))
+\OUT a
+\EV #\\a
+ (progn (fresh-line) (prin1 #\\a))
+\OUT #\\a
+\EV #\\a
+ (progn (fresh-line) (print #\\a))
+\OUT 
+\OUT #\\a
+\EV #\\a
+ (progn (fresh-line) (princ #\\a))
+\OUT a
+\EV #\\a
+\medbreak
+ (dolist (val '(t nil))
+   (let ((*print-escape* val) (*print-readably* val))
+     (print '#\\a) 
+     (prin1 #\\a) (write-char #\\Space)
+     (princ #\\a) (write-char #\\Space)
+     (write #\\a)))
+\OUT #\\a #\\a a #\\a
+\OUT #\\a #\\a a a
+\EV NIL
+\medbreak
+ (progn (fresh-line) (write '(let ((a 1) (b 2)) (+ a b))))
+\OUT (LET ((A 1) (B 2)) (+ A B))
+\EV (LET ((A 1) (B 2)) (+ A B))
+\medbreak
+ (progn (fresh-line) (pprint '(let ((a 1) (b 2)) (+ a b))))
+\OUT (LET ((A 1)
+\OUT       (B 2))               
+\OUT   (+ A B))
+\EV (LET ((A 1) (B 2)) (+ A B))
+\medbreak
+ (progn (fresh-line) 
+        (write '(let ((a 1) (b 2)) (+ a b)) :pretty t))
+\OUT (LET ((A 1)
+\OUT       (B 2))
+\OUT   (+ A B))                 
+\EV (LET ((A 1) (B 2)) (+ A B))
+\medbreak
+ (with-output-to-string (s)  
+    (write 'write :stream s)
+    (prin1 'prin1 s))
+\EV "WRITEPRIN1"
+\endcode
+
+\endsubSection%{Examples of Printer Behavior}
+

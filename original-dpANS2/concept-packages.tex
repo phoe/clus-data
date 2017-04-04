@@ -1,0 +1,656 @@
+% -*- Mode: TeX -*-
+
+%!!! Barmar: Tell me why multiple packags are needed. 
+%    e.g., to prevent variable and function conflicts.
+
+\beginsubSection{Introduction to Packages}
+
+%% 10.0.0 7
+%% 11.0.0 4
+A \newterm{package} establishes a mapping from names to \term{symbols}. 
+At any given time, one \term{package} is current.
+The \newterm{current package} is the one that is \thevalueof{*package*}.
+When using the \term{Lisp reader},
+it is possible to refer to \term{symbols} in \term{packages} 
+other than the current one through the use of \term{package prefixes} in the 
+printed representation of the \term{symbol}.
+
+%% 11.2.0 5
+\Thenextfigure\ lists some \term{defined names} that are applicable
+to \term{packages}.
+%Shouldn't be needed.  This info is all explicit now. -kmp 29-Apr-91
+% For the \term{operators} listed here, all optional arguments named 
+% \param{package} default to the \term{current package}.
+Where an \term{operator} 
+takes an argument that is either a \term{symbol} or a \term{list} 
+of \term{symbols},
+an argument of \nil\ is treated as an empty \term{list} of \term{symbols}.
+Any \param{package} argument may be either a \term{string}, a \term{symbol}, or
+a \term{package}.  If a \term{symbol} is supplied, its name will be used
+as the \term{package} name.
+\issue{REQUIRE-PATHNAME-DEFAULTS:ELIMINATE}
+% \funref{provide}, \funref{require}, and \varref{*modules*} will
+% be removed from this table (and the language).
+%PROVIDE and REQUIRE need to be removed, right? -kmp 29-Apr-91
+%Nope! -kmp 13-Feb-92
+\displaythree{Some Defined Names related to Packages}{
+*modules*&import&provide\cr
+*package*&in-package&rename-package\cr
+defpackage&intern&require\cr
+do-all-symbols&list-all-packages&shadow\cr
+do-external-symbols&make-package&shadowing-import\cr
+do-symbols&package-name&unexport\cr
+export&package-nicknames&unintern\cr
+find-all-symbols&package-shadowing-symbols&unuse-package\cr
+find-package&package-use-list&use-package\cr
+find-symbol&package-used-by-list&\cr
+}
+\endissue{REQUIRE-PATHNAME-DEFAULTS:ELIMINATE}
+
+\beginsubsubsection{Package Names and Nicknames}
+
+%% 11.0.0 19
+Each \term{package} has a \term{name} (a \term{string}) and perhaps some \term{nicknames}
+(also \term{strings}).
+These are assigned when the \term{package} is created and can be changed later.  
+
+%% 11.0.0 20
+There is a single namespace for \term{packages}.  
+\Thefunction{find-package} translates a package
+\term{name} or \term{nickname} into the associated \term{package}.  
+\Thefunction{package-name} returns the \term{name} of a \term{package}.  
+\Thefunction{package-nicknames} returns 
+a \term{list} of all \term{nicknames} for a \term{package}.
+\funref{rename-package} removes a \term{package}'s
+current \term{name} and \term{nicknames} and replaces them with new ones
+specified by the caller.
+
+\endsubsubsection%{Package Names and Nicknames}
+
+\beginsubsubsection{Symbols in a Package}
+
+\beginsubsubsubsection{Internal and External Symbols}
+
+%% 11.0.0 5
+The mappings in a \term{package} are divided into two classes, external and internal.
+The \term{symbols} targeted by these different mappings 
+are called \term{external symbols} and \term{internal symbols}\idxterm{internal symbol} of the
+\term{package}. Within a \term{package}, a name refers to one
+\term{symbol} or to none; if it does refer
+to a \term{symbol}, then it is either external or internal in that
+\term{package}, but not both.
+%% 11.0.0 6
+\newtermidx{External symbols}{external symbol}
+are part of the package's public interface to other \term{packages}.
+\term{Symbols} become \term{external symbols} of a given
+\term{package} if they have been \term{exported} from that \term{package}.
+
+%% 11.0.0 7                                 
+A \term{symbol} has the same \term{name} no matter what \term{package} 
+it is \term{present} in, but it might be an \term{external symbol} of some \term{packages}
+and an \term{internal symbol} of others. 
+
+\endsubsubsubsection%{Internal and External Symbols}
+
+\beginsubsubsubsection{Package Inheritance}
+
+%% 11.0.0 9
+\term{Packages} can be built up in layers.  From one point of view,
+a \term{package} is a single collection
+of mappings from \term{strings} into \term{internal symbols} and 
+\term{external symbols}.
+However, some of these mappings might be established within the \term{package} 
+itself, while other mappings are inherited from other \term{packages} 
+via \funref{use-package}.
+A \term{symbol} is said to be \newterm{present} in a \term{package} 
+if the mapping is in the \term{package} itself and is
+not inherited from somewhere else.
+
+%% 11.4.0 
+There is no way to inherit the \term{internal symbols} of another \term{package};
+to refer to an \term{internal symbol} using the \term{Lisp reader}, 
+    a \term{package} containing the \term{symbol} 
+     must be made to be the \term{current package},
+    a \term{package prefix} must be used,
+ or the \term{symbol} must be \term{imported} into the \term{current package}.
+
+\endsubsubsubsection%{Package Inheritance}
+
+\beginsubsubsubsection{Accessibility of Symbols in a Package}
+
+A \term{symbol} becomes \newterm{accessible} in a \term{package} 
+    if that is its \term{home package} when it is created,
+ or if it is \term{imported} into that \term{package},
+ or by inheritance via \funref{use-package}.
+
+If a \term{symbol} is \term{accessible} in a \term{package},
+it can be referred to when using the \term{Lisp reader}
+without a \term{package prefix} when that \term{package} is the \term{current package},
+regardless of whether it is \term{present} or inherited.
+
+%???Move the following to \secref\Syntax???
+%A \term{symbol} will not necessarily always have the same
+%printed representation because the way \term{symbols} are printed
+%depends on whether or not they are \term{accessible} in the \term{current package}.
+
+%% 11.0.0 35
+\term{Symbols} from one \term{package} can be made \term{accessible} 
+in another \term{package} in two ways.
+
+%% 11.0.0 36
+\beginlist 
+\itemitem{--}
+Any individual \term{symbol} can be added to a \term{package} by use
+of \funref{import}.  After the call to \funref{import} the
+\term{symbol} is \term{present} in the importing \term{package}.
+The status of the \term{symbol} in the \term{package} 
+it came from (if any) is unchanged, and the \term{home package} for
+this \term{symbol} is unchanged.
+Once \term{imported}, a \term{symbol} is \term{present} in the
+importing \term{package}
+and can be removed only by calling \funref{unintern}.
+
+%% 11.4.0 4
+A \term{symbol} is \term{shadowed}\meaning{3} by another \term{symbol} 
+in some \term{package} if the first \term{symbol} would be \term{accessible}
+by inheritance if not for the presence of the second \term{symbol}.
+See \funref{shadowing-import}.
+
+%% 11.4.0 39
+%% 11.4.0 40
+\itemitem{--}
+The second mechanism for making \term{symbols} from one \term{package}
+\term{accessible} in another is provided by \funref{use-package}.  
+All of the \term{external symbols} of the used \term{package} are inherited
+by the using \term{package}.
+\Thefunction{unuse-package} undoes the effects of a previous \funref{use-package}.  
+\endlist
+
+\endsubsubsubsection%{Accessibility of Symbols in a Package}
+
+\beginsubsubsubsection{Locating a Symbol in a Package}
+
+%% 11.4.0 8
+When a \term{symbol} is to be located in a given \term{package} 
+the following occurs:
+\beginlist 
+\itemitem{--} The \term{external symbols} and \term{internal symbols} of the 
+\term{package} are searched for the \term{symbol}.
+\itemitem{--} The \term{external symbols} of the used \term{packages} are 
+searched
+in some unspecified order.  The
+order does not matter; see the rules for handling name
+conflicts listed below. 
+\endlist
+
+\endsubsubsubsection%{Locating a Symbol in a Package}
+
+\beginsubsubsubsection{Prevention of Name Conflicts in Packages}
+
+%% 11.0.0 46
+Within one \term{package}, any particular name can refer to at most one
+\term{symbol}.  A name conflict is said to occur when there would be more than
+one candidate \term{symbol}.  Any time a name conflict is about to occur,
+a \term{correctable} \term{error} is signaled.  
+
+The following rules apply to name conflicts:
+%% 11.0.0 47
+\beginlist
+%% 11.0.0 49
+\itemitem{--}
+Name conflicts are detected when they become possible, that is, when the
+package structure is altered.  Name
+conflicts are not checked during every name lookup.
+
+\itemitem{--}
+If the \term{same} \term{symbol} is \term{accessible} to a \term{package} 
+through more than one path, there is no name conflict.
+A \term{symbol} cannot conflict with itself. 
+Name conflicts occur only between \term{distinct} \term{symbols} with
+the same name (under \funref{string=}).
+
+%% 11.0.0 48
+\itemitem{--} Every \term{package} has a list of shadowing \term{symbols}.  
+A shadowing \term{symbol} takes precedence over any other \term{symbol} of
+the same name that would otherwise be \term{accessible} in the \term{package}.  
+A name conflict involving a shadowing symbol is always resolved in favor of
+the shadowing \term{symbol}, without signaling an error (except for one
+exception involving \funref{import}).
+See \funref{shadow} and \funref{shadowing-import}.
+
+%% 11.0.0 50
+\itemitem{--} 
+The functions \funref{use-package}, \funref{import}, and 
+\funref{export} check for name conflicts.  
+
+%% 11.0.0 52
+\itemitem{--} 
+\funref{shadow} and \funref{shadowing-import} 
+never signal a name-conflict error.
+
+%% 11.0.0 53
+\itemitem{--} 
+% \funref{unuse-package}, \funref{unexport}, and \funref{unintern} 
+% (when the \term{symbol} being uninterned is not a \term{shadowing symbol}) 
+% do not need to do any name-conflict checking.
+%% Rewording for JonL:
+\funref{unuse-package} and \funref{unexport}
+do not need to do any name-conflict checking.
+\funref{unintern} does name-conflict checking only when a \term{symbol} 
+being \term{uninterned} is a \term{shadowing symbol}\idxterm{shadowing symbol}.
+
+%% 11.0.0 54
+\itemitem{--} 
+Giving a shadowing symbol to \funref{unintern} 
+can uncover a name conflict that had
+previously been resolved by the shadowing.  
+
+%% 11.0.0 55
+%\itemitem{--} 
+%Aborting from a name-conflict error leaves the original \term{symbol} 
+%\term{accessible}.
+
+  \itemitem{--} 
+  Package functions signal name-conflict errors \oftype{package-error} before making any
+  change to the package structure.  When multiple changes are to be made,
+  it is
+  permissible for the implementation to process each change separately.
+  For example, when \funref{export} is given a 
+\term{list} of 
+\term{symbols},
+  aborting from a name
+  conflict caused by the second \term{symbol} 
+  in the \term{list} might still export the
+  first \term{symbol} in the \term{list}.  
+  However, a name-conflict error caused by \funref{export}
+  of a single \term{symbol} will be signaled before
+  that \term{symbol}'s \term{accessibility} in any \term{package} is changed.
+
+%% 11.0.0 56
+\itemitem{--} 
+Continuing from a name-conflict error must offer the user a chance to
+resolve the name conflict in favor of either of the candidates.  The
+\term{package} 
+structure should be altered to reflect the resolution of the
+name conflict, via \funref{shadowing-import}, 
+\funref{unintern},
+%!!! Barmar: The next two bullets don't mention "unexport".
+or \funref{unexport}.
+
+%% 11.0.0 57
+\itemitem{--} 
+A name conflict in \funref{use-package} between a \term{symbol} 
+%directly 
+\term{present} in the using \term{package} and an \term{external symbol} of the used 
+\term{package} is resolved in favor of the first \term{symbol} by making it a
+shadowing \term{symbol}, or in favor of the second \term{symbol} by uninterning
+the first \term{symbol} from the using \term{package}. 
+
+%% 11.0.0 60
+\itemitem{--} 
+A name conflict in \funref{export} or \funref{unintern} 
+due to a \term{package}'s inheriting two \term{distinct} \term{symbols} 
+with the \term{same} \term{name} (under \funref{string=})
+from two other \term{packages} can be resolved in
+favor of either \term{symbol} by importing it into the using
+\term{package} and making it a \term{shadowing symbol}\idxterm{shadowing symbol},
+just as with \funref{use-package}.
+\endlist
+
+\endsubsubsubsection%{Prevention of Name Conflicts in Packages}
+
+\endsubsubsection%{Symbols in a Package}
+
+\endsubSection%{Introduction to Packages}
+
+\beginsubSection{Standardized Packages}
+
+%% 11.6.0 1
+This section describes the \term{packages} that are available
+in every \term{conforming implementation}.  A summary of the
+\term{names} and \term{nicknames} of those \term{standardized} \term{packages} 
+is given in \thenextfigure.
+
+\tablefigtwo{Standardized Package Names}{Name}{Nicknames}{
+\packref{common-lisp}&\packref{cl}\cr
+\packref{common-lisp-user}&\packref{cl-user}\cr
+\packref{keyword}&\i{none}\cr
+}
+
+\issue{LISP-PACKAGE-NAME:COMMON-LISP}
+%% 11.6.0 2
+% Discussion of package LISP and USER removed. -kmp 15-Feb-92
+\endissue{LISP-PACKAGE-NAME:COMMON-LISP}
+
+\issue{PACKAGE-CLUTTER:REDUCE}
+%% 11.6.0 5
+% Discussion of the CLtL1 package named SYSTEM removed.
+\endissue{PACKAGE-CLUTTER:REDUCE}
+
+\beginsubsubsection{The COMMON-LISP Package} 
+\idxpackref{common-lisp}\idxpackref{cl}
+
+\issue{LISP-PACKAGE-NAME:COMMON-LISP}
+ 
+\Thepackage{common-lisp} contains the primitives of the \clisp\ system as
+defined by this specification.  Its \term{external} \term{symbols} include
+all of the \term{defined names} (except for \term{defined names} in
+\thepackage{keyword}) that are present in the \clisp\ system, 
+such as \funref{car}, \funref{cdr},  \varref{*package*}, etc.
+\Thepackage{common-lisp} has the \term{nickname} \packref{cl}.
+ 
+\issue{PACKAGE-CLUTTER:REDUCE}
+\Thepackage{common-lisp} has as \term{external} \term{symbols} those 
+symbols enumerated in the figures in \secref\CLsymbols, and no others.
+These \term{external} \term{symbols} are \term{present} in \thepackage{common-lisp}
+but their \term{home package} need not be \thepackage{common-lisp}.
+
+For example, the symbol \f{HELP} cannot be an \term{external symbol} of
+\thepackage{common-lisp} because it is not mentioned in \secref\CLsymbols.
+In contrast, the \term{symbol} \misc{variable}
+must be an \term{external symbol} of \thepackage{common-lisp} 
+even though it has no definition
+because it is listed in that section
+(to support its use as a valid second \term{argument} to \thefunction{documentation}). 
+
+% Moved this sentence out of previous paragraph.  --sjl 7 Mar 92
+\Thepackage{common-lisp} can have additional \term{internal symbols}.
+\endissue{PACKAGE-CLUTTER:REDUCE}
+
+\beginsubsubsubsection{Constraints on the COMMON-LISP Package for Conforming Implementations}
+
+\issue{PACKAGE-CLUTTER:REDUCE}
+In a \term{conforming implementation},
+an \term{external} \term{symbol} of \thepackage{common-lisp} can have
+   a \term{function}, \term{macro}, or \term{special operator} definition, 
+%top level value  ???
+   a \term{global variable} definition
+   (or other status as a \term{dynamic variable} 
+    due to a \declref{special} \term{proclamation}),
+or a \term{type} definition
+only if explicitly permitted in this standard.
+%% That's the definition of a conforming implementation. -kmp
+%that is, a \term{conforming program} may assume that this is true.
+For example,
+  \funref{fboundp} \term{yields} \term{false} 
+  for any \term{external symbol} of \thepackage{common-lisp} 
+  that is not the \term{name} of a \term{standardized} 
+   \term{function}, \term{macro} or \term{special operator},
+and
+  \funref{boundp} returns \term{false} 
+  for any \term{external symbol} of \thepackage{common-lisp} 
+  that is not the \term{name} of a \term{standardized} \term{global variable}.
+It also follows that
+  \term{conforming programs} can use \term{external symbols} of \thepackage{common-lisp} 
+  as the \term{names} of local \term{lexical variables} 
+  with confidence that those \term{names} have not been \term{proclaimed} \declref{special} 
+  by the \term{implementation}
+  unless those \term{symbols} are
+    \term{names} of \term{standardized} \term{global variables}.
+
+%%KMP: Initially or for all times? -kmp 2-Jan-91
+%%Sandra: The intent was to cover properties put there by the implementation, not the user.
+%%KMP: I double-checked the issues, and that seems to be right.
+% No \term{external symbols} of \thepackage{common-lisp} 
+% can have \term{properties} with \term{property indicators} 
+% that are either \term{external symbols} of any \term{standardized} \term{packages}
+% or otherwise \term{accessible} in \thepackage{common-lisp-user}.
+%% Rewritten. -kmp 15-Feb-92
+A \term{conforming implementation} must not place any \term{property} on
+an \term{external symbol} of \thepackage{common-lisp} using a \term{property indicator}
+that is either an \term{external symbol} of any \term{standardized} \term{package}
+or a \term{symbol} that is otherwise \term{accessible} in \thepackage{common-lisp-user}.
+ 
+%Valid programs
+%  can assume that the conformal Lisp implementation will not
+%  have prohibited properties.  The proposal LISP-SYMBOL-REDEFINITION
+%  addresses the converse; that is, what user programs are allowed
+%  to do.
+\endissue{PACKAGE-CLUTTER:REDUCE}
+\endsubsubsubsection%{Constraints on the COMMON-LISP Package for Conforming Implementations}
+ 
+\beginsubsubsubsection{Constraints on the COMMON-LISP Package for Conforming Programs}
+\idxtext{redefinition}
+\issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+Except where explicitly allowed, the consequences are undefined if any
+of the following actions are performed on an \term{external symbol} 
+of \thepackage{common-lisp}:
+
+\beginlist
+
+\itemitem{1.} \term{Binding} or altering its value (lexically or dynamically).
+	      (Some exceptions are noted below.)
+
+\itemitem{2.} Defining, 
+\issue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
+	      undefining, 
+\endissue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
+	  or \term{binding} it as a \term{function}.
+	      (Some exceptions are noted below.)
+
+\itemitem{3.} Defining,
+\issue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
+	      undefining, 
+\endissue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
+	   or \term{binding} it as a \term{macro}
+\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+	      or \term{compiler macro}.
+\endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+	      (Some exceptions are noted below.)
+
+% added define-condition --sjl 7 Mar 92
+\itemitem{4.} Defining it as a \term{type specifier} 
+	      (via \macref{defstruct}, 
+		   \macref{defclass},
+		   \macref{deftype},
+		   \macref{define-condition}).
+
+\itemitem{5.} Defining it as a structure (via \macref{defstruct}).
+
+\itemitem{6.} Defining it as a \term{declaration} 
+	      with a \declref{declaration} \term{proclamation}.
+
+\itemitem{7.} Defining it as a \term{symbol macro}.
+
+%%Barmar notes that this can't be done to any symbols.
+%% Sandra complained, too.
+% \itemitem{n.} Altering its name. 
+
+\itemitem{8.} Altering its \term{home package}.
+
+\itemitem{9.} Tracing it  (via \macref{trace}).
+
+%What's this "or lexical" biz? -kmp 13-May-91
+\itemitem{10.} Declaring or proclaiming it
+%% we voted down the lexical declaration proposal.  --sjl 7 Mar 92
+%	       \declref{special} or lexical
+	       \declref{special}
+	       (via \misc{declare},
+\issue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO}
+		    \specref{declaim},
+\endissue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO}
+		 or \funref{proclaim}).
+
+\itemitem{11.} Declaring or proclaiming its \declref{type} or \declref{ftype}
+	       (via \misc{declare},
+\issue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO}
+		    \macref{declaim},
+\endissue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO}
+		 or \funref{proclaim}).
+	       (Some exceptions are noted below.)
+
+\itemitem{12.} Removing it from \thepackage{common-lisp}.
+
+\issue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
+
+\itemitem{13.} Defining a \term{setf expander} for it 
+	       (via \funref{defsetf} or \funref{define-setf-method}).
+
+\itemitem{14.} Defining, undefining, or binding its \term{setf function name}.
+
+\itemitem{15.} Defining it as a \term{method combination} type 
+		(via \funref{define-method-combination}).
+
+\itemitem{16.} Using it as the class-name argument 
+	       to \funref{setf} of \funref{find-class}.
+
+\itemitem{17.} Binding it as a \term{catch tag}.
+
+\itemitem{18.} Binding it as a \term{restart} \term{name}.
+
+\itemitem{19.} Defining a \term{method} 
+	       for a \term{standardized} \term{generic function} 
+	       which is \term{applicable} when all of the \term{arguments}
+      	       are \term{direct instances} of \term{standardized} \term{classes}.
+
+\endissue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
+
+\endlist 
+
+\beginsubsubsubsubsection{Some Exceptions to Constraints on the COMMON-LISP Package for Conforming Programs}
+
+If an \term{external symbol} of \thepackage{common-lisp}
+is not globally defined as a \term{standardized} \term{dynamic variable} 
+					      or \term{constant variable},
+it is allowed to lexically \term{bind} it 
+          and to declare the \declref{type} of that \term{binding}, 
+and
+it is allowed to locally \term{establish} it as a \term{symbol macro} 
+(\eg with \specref{symbol-macrolet}).
+
+%KMP: Maybe clarify that binding CL special variables is ok,
+%     but that their type decls are lexical.  Is that right?
+%%I implemented the first half of that suggestion. -kmp 15-Feb-92
+Unless explicitly specified otherwise,
+if an \term{external symbol} of \thepackage{common-lisp} 
+is globally defined as a \term{standardized} \term{dynamic variable},
+it is permitted to \term{bind} or \term{assign} that \term{dynamic variable}
+provided that the ``Value Type'' constraints on the \term{dynamic variable} 
+are maintained, and that the new \term{value} of the \term{variable} 
+is consistent with the stated purpose of the \term{variable}.
+
+If an \term{external symbol} of \thepackage{common-lisp} is not defined
+as a \term{standardized} \term{function}, \term{macro}, or \term{special operator},
+it is allowed to lexically \term{bind} it as a \term{function} (\eg with \specref{flet}),
+              to declare the \declref{ftype} of that \term{binding}, 
+          and 
+%KMP: Barmar wanted some explication here.  I think it was sandra who had 
+%     asked for this tracing feature just in case the implementation supported it.
+              (in \term{implementations} which provide the ability to do so)
+	      to \macref{trace} that \term{binding}.
+
+If an \term{external symbol} of \thepackage{common-lisp} is not defined
+as a \term{standardized} \term{function}, \term{macro}, or \term{special operator},
+it is allowed to lexically \term{bind} it as a \term{macro} (\eg with \specref{macrolet}).
+\endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+\endissue{LISP-PACKAGE-NAME:COMMON-LISP}
+
+\issue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
+If an \term{external symbol} of \thepackage{common-lisp} is not defined 
+as a \term{standardized} \term{function}, \term{macro}, or \term{special operator},
+it is allowed to lexically \term{bind} its \term{setf function name}
+as a \term{function},
+and to declare the \declref{ftype} of that \term{binding}.
+\endissue{LISP-SYMBOL-REDEFINITION-AGAIN:MORE-FIXES}
+
+\endsubsubsubsubsection%{Some Exceptions to Constraints on the COMMON-LISP Package for Conforming Programs}
+
+\endsubsubsubsection%{Constraints on the COMMON-LISP Package for Conforming Programs}
+
+\endsubsubsection%{The COMMON-LISP Package} 
+
+\beginsubsubsection{The COMMON-LISP-USER Package}
+\idxpackref{common-lisp-user}\idxpackref{cl-user}
+
+\Thepackage{common-lisp-user} is the \term{current package} when 
+a \clisp\ system starts up.  This \term{package} \term{uses} \thepackage{common-lisp}.
+\Thepackage{common-lisp-user} has the \term{nickname} \packref{cl-user}.
+\issue{PACKAGE-CLUTTER:REDUCE}
+\Thepackage{common-lisp-user} can have additional \term{symbols} \term{interned} within it;
+it can \term{use} other \term{implementation-defined} \term{packages}.
+\endissue{PACKAGE-CLUTTER:REDUCE}
+ 
+\endsubsubsection%{The COMMON-LISP-USER Package}
+
+\beginsubsubsection{The KEYWORD Package}
+\idxpackref{keyword}
+
+%% 5.1.2 6
+%% 11.3.0 5
+% % KMP: This isn't a very apt description! 
+% % %% 11.6.0 4
+% \Thepackage{keyword} contains all of the \newterm{keywords}\meaning{1}
+% used by built-in or user-defined \term{functions}.  
+%% Replaced:
+\Thepackage{keyword} contains \term{symbols}, called \term{keywords}\meaning{1},
+that are typically used as special markers in \term{programs} 
+and their associated data \term{expressions}\meaning{1}.
+
+\term{Symbol} \term{tokens} that start with a \term{package marker} 
+are parsed by the \term{Lisp reader} as \term{symbols} 
+in \thepackage{keyword}; \seesection\SymbolTokens.
+This makes it notationally convenient to use \term{keywords}
+when communicating between programs in different \term{packages}.  
+For example, the mechanism for passing \term{keyword parameters} in a \term{call} uses 
+\term{keywords}\meaning{1} to name the corresponding \term{arguments};
+\seesection\OrdinaryLambdaLists.
+
+\term{Symbols} in \thepackage{keyword} are, by definition, \oftype{keyword}.
+
+\beginsubsubsubsection{Interning a Symbol in the KEYWORD Package}
+
+\Thepackage{keyword} is treated differently than other \term{packages}
+in that special actions are taken when a \term{symbol} is \term{interned} in it.
+In particular, when a \term{symbol} is \term{interned} in \thepackage{keyword},
+ it is automatically made to be an \term{external symbol} 
+and is automatically made to be a \term{constant variable} with itself as a \term{value}.
+
+%% Not really needed. This is documented adequately under SYMBOL-VALUE.
+% \Thefunction{symbol-value} can be used to
+% \term{access} the \term{value} of a \term{keyword}\meaning{1}.)
+
+\endsubsubsubsection%{Interning a Symbol in the KEYWORD Package}
+
+\beginsubsubsubsection{Notes about The KEYWORD Package}
+
+% name conflicts are not an issue because these \term{symbols}
+% are used only as labels, not to carry application-specific information.
+%% This isn't really true and is arguably confusing.
+%% I think the following is what it was getting at. -kmp 15-Feb-92
+
+It is generally best to confine the use of \term{keywords} to situations in which
+there are a finitely enumerable set of names to be selected between.  For example,
+if there were two states of a light switch, they might be called \kwd{on} and \kwd{off}.
+
+In situations where the set of names is not finitely enumerable
+(\ie where name conflicts might arise)
+it is frequently best to use \term{symbols} in some \term{package}
+other than \packref{keyword} so that conflicts will be naturally avoided.
+For example, it is generally not wise for a \term{program} to use a \term{keyword}\meaning{1} 
+as a \term{property indicator}, since if there were ever another \term{program}
+that did the same thing, each would clobber the other's data.
+
+\endsubsubsubsection%{Notes about The KEYWORD Package}
+
+\endsubsubsection%{The KEYWORD Package}
+
+\beginsubsubsection{Implementation-Defined Packages} 
+
+\issue{PACKAGE-CLUTTER:REDUCE}
+Other, \term{implementation-defined} \term{packages} might be present
+in the initial \clisp\ environment.
+%If it is appropriate, the standard might contain
+%  as an example that implementations might have a package named
+%  "SYSTEM".
+\endissue{PACKAGE-CLUTTER:REDUCE}
+
+It is recommended, but not required, that the documentation for a
+\term{conforming implementation} contain a full list of all \term{package} names
+initially present in that \term{implementation} but not specified in this specification.
+(See also the \term{function} \funref{list-all-packages}.)
+
+\endsubsubsection%{Implementation-Defined Packages} 
+
+\endsubSection%{Standardized Packages}
+

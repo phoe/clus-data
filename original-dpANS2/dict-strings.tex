@@ -1,0 +1,1005 @@
+% -*- Mode: TeX -*-
+
+% Strings
+
+%-------------------- Strings --------------------
+
+%% 2.5.2 1
+%% 18.0.0 3
+\begincom{string}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{string},
+%% 2.15.0 16
+\typeref{vector},
+\typeref{array},
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+\issue{CHARACTER-PROPOSAL:2-3-2}
+A \term{string} is a \term{specialized} \term{vector} 
+whose \term{elements} are \oftypes{character}.  
+When used as a \term{type specifier} for object creation,
+\typeref{string} means \f{(vector character)}.
+\endissue{CHARACTER-PROPOSAL:2-3-2}
+
+\issue{CHARACTER-PROPOSAL:2-3-3}
+
+\label Compound Type Specifier Kind::
+
+Abbreviating.
+
+\label Compound Type Specifier Syntax::
+
+%% 4.6.0 10
+\Deftype{string}{\ttbrac{size}}
+
+\label Compound Type Specifier Arguments::
+
+\issue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+\param{size}---a non-negative \term{fixnum},
+	    or the \term{symbol} \misc{*}.
+\endissue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+
+\label Compound Type Specifier Description::
+         
+This denotes the union of all \term{types}
+\f{(array \i{c} (\param{size}))}
+for all \term{subtypes} \i{c} of \typeref{character};
+that is, the set of \term{strings} of size \param{size}.
+
+\label See Also::
+
+{\secref\StringConcepts},
+{\secref\Doublequote},
+{\secref\PrintingStrings}
+
+\endcom%{string}\ftype{System Class}
+\begincom{base-string}\ftype{Type}
+
+\issue{CHARACTER-PROPOSAL:2-3-3}
+
+\label Supertypes::
+
+\typeref{base-string},
+\typeref{string},
+\typeref{vector},
+\typeref{array},
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+\Thetype{base-string} is equivalent to 
+\issue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+\f{(vector base-char)}.
+\endissue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+% A \term{base string} is the most efficient \term{string} that can hold
+% %%this next phrase added in answer to Symbolics' concerns that
+% %%otherwise a special representation for certain subsets of standard-char
+% %%might be unintentionally prohibited by the spec.
+% an arbitrary sequence of \term{standard characters}.
+%% Rewritten for Sandra to use "representation" -kmp 13-Jan-92
+%!!! KAB (re: "efficient") I think we never decided what this meant. True?
+%KMP: True.
+The \term{base string} representation is the most efficient \term{string} representation
+that can hold an arbitrary sequence of \term{standard characters}.
+
+\endissue{CHARACTER-PROPOSAL:2-3-3}
+%!!! Should this be said somewhere??
+%
+%\issue{CHARACTER-PROPOSAL:2-3}
+%An implementation can support \term{string} subtypes in addition
+%to the ones defined in this standard.
+%For example, an
+%implementation supporting Arabic and Cyrillic characters
+%might provide as extended characters:
+%\beginlist
+%\itemitem{\typeref{general-string}}
+%
+%Can contain Arabic, Cyrillic or \term{base characters}
+%in any mixture.
+%
+%\itemitem{\typeref{region-specialized-string}}
+%
+%Can contain installation-selected repertoire 
+%(Arabic/Cyrillic) or \term{base characters} in any mixture.
+%
+%\itemitem{\typeref{base-string}}
+%
+%Can contain \term{base characters}.
+%\endlist
+%Though portability of applications using
+%\typeref{region-specialized-string} is limited, a performance
+%advantage might argue for its use.
+% 
+%Alternatively,
+%an implementation
+%supporting a large base character repertoire
+%including, say, Japanese Kanji might define
+%\issue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+%\typeref{base-char}
+%\endissue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+%as equivalent to \term{character}.
+% %We expect that applications sensitive to the performance
+%%of character handling in some host environments will
+%%utilize the string subtypes to provide performance
+%%improvement.  Applications with emphasis on international
+%%portability will likely utilize only {\clkwd general-strings}.
+%\term{Base strings} allow for more compact representation of 
+%\term{strings}
+%of \term{base characters}, which are likely to predominate in any system.
+%Note that in any particular implementation the \term{base characters}
+%need not be the
+%most compactly representable, since others might have
+%a smaller repertoire.
+%However, in most implementations \term{base strings} are
+%likely to be more space efficient than other types of \term{strings}.
+%\endissue{CHARACTER-PROPOSAL:2-3}
+
+\label Compound Type Specifier Kind::
+
+Abbreviating.
+
+\label Compound Type Specifier Syntax::
+
+\issue{JUN90-TRIVIAL-ISSUES:24}
+\Deftype{base-string}{\ttbrac{size}}
+\endissue{JUN90-TRIVIAL-ISSUES:24}
+
+\label Compound Type Specifier Arguments::
+
+\issue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+\param{size}---a non-negative \term{fixnum},
+	    or the \term{symbol} \misc{*}.
+\endissue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+
+\label Compound Type Specifier Description::
+
+This is equivalent to the type \f{(vector base-char \param{size})};
+that is, the set of \term{base strings} of size \param{size}.
+
+\endissue{CHARACTER-PROPOSAL:2-3-3}
+\endcom%{base-string}\ftype{Type}
+\begincom{simple-string}\ftype{Type}
+
+\label Supertypes:: 
+
+\typeref{simple-string},
+%% 2.15.0 23
+\typeref{string},
+\typeref{vector},
+\typeref{simple-array},
+\typeref{array},
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+\issue{CHARACTER-PROPOSAL:2-3-4}
+%A \term{string} that is not displaced to another \term{array},
+%has no \term{fill pointer}, and is not to have its size adjusted 
+%dynamically after creation is a \typeref{simple-string}.
+A \term{simple string} is a specialized one-dimensional
+\term{simple array} whose \term{elements} are \oftypes{character}.
+When used as a \term{type specifier} for object creation,
+\typeref{simple-string} means \f{(simple-array character (\i{size}))}.
+\endissue{CHARACTER-PROPOSAL:2-3-4}
+
+\label Compound Type Specifier Kind::
+
+Abbreviating.
+
+\label Compound Type Specifier Syntax::
+
+\Deftype{simple-string}{\ttbrac{size}}
+
+\label Compound Type Specifier Arguments::
+
+\issue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+\param{size}---a non-negative \term{fixnum},
+	    or the \term{symbol} \misc{*}.
+\endissue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+
+\label Compound Type Specifier Description::
+
+%% 4.6.0 11                                  
+%\itemitem{\tt (simple-string \param{size})}
+
+This denotes the union of all \term{types}
+{\tt (simple-array \i{c} (\param{size}))} for all \term{subtypes} \i{c} of
+\typeref{character}; that is, the set of \term{simple strings} of size \param{size}.
+
+\endcom%{simple-string}\ftype{Type}
+\issue{CHARACTER-PROPOSAL:2-3-5}
+\begincom{simple-base-string}\ftype{Type}
+
+\label Supertypes::
+
+\typeref{simple-base-string},
+\typeref{base-string},
+\typeref{simple-string},
+\typeref{string},
+\typeref{vector},
+\typeref{simple-array},
+\typeref{array},
+\typeref{sequence},
+\typeref{t}
+
+\label Description::
+
+\Thetype{simple-base-string} is equivalent to 
+\issue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+\f{(simple-array base-char (*))}.
+\endissue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+\endissue{CHARACTER-PROPOSAL:2-3-5}
+
+\label Compound Type Specifier Kind::
+
+Abbreviating.
+
+\label Compound Type Specifier Syntax::
+
+\issue{JUN90-TRIVIAL-ISSUES:24}
+\Deftype{simple-base-string}{\ttbrac{size}}
+\endissue{JUN90-TRIVIAL-ISSUES:24}
+
+\label Compound Type Specifier Arguments::
+
+\issue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+\param{size}---a non-negative \term{fixnum},
+	    or the \term{symbol} \misc{*}.
+\endissue{ARRAY-DIMENSION-IMPLICATIONS:ALL-FIXNUM}
+
+\label Compound Type Specifier Description::
+
+This is equivalent to the type \f{(simple-array base-char (\param{size}))};
+that is, the set of \term{simple base strings} of size \param{size}.
+
+\endcom%{simple-base-string}\ftype{Type}
+
+
+%%% ========== SIMPLE-STRING-P
+\begincom{simple-string-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues simple-string-p {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 22
+\TypePredicate{object}{simple-string}
+
+\label Examples::
+\code
+ (simple-string-p "aaaaaa") \EV \term{true}
+ (simple-string-p (make-array 6 
+                              :element-type 'character 
+                              :fill-pointer t)) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:\None.
+
+\label Notes::
+\code
+ (simple-string-p \param{object}) \EQ (typep \param{object} 'simple-string)
+\endcode
+
+\endcom
+
+%%% ========== CHAR
+%%% ========== SCHAR
+\begincom{char, schar}\ftype{Accessor}
+
+\label Syntax::
+
+\DefunMultiWithValues {string index} {character}
+ {\entry{char}
+  \entry{schar}}
+
+\DefsetfMulti {string index} {new-character}
+ {\entry{char}
+  \entry{schar}}
+
+\label Arguments and Values:: 
+
+%% 18.1.0 4
+\param{string}---for \funref{char},  a \term{string};
+		 for \funref{schar}, a \term{simple string}.
+
+\param{index}---a \term{valid array index} for the \param{string}.
+
+\param{character}, \param{new-character}---a \term{character}.
+       
+\label Description::
+
+%% 18.1.0 3
+\funref{char} and \funref{schar} \term{access} the \term{element} of \param{string}
+specified by \param{index}.
+%% This is now said in the concept stuff.
+% \param{Index} is an offset from the beginning
+% of \param{string}; indexing is zero-origin.
+
+\funref{char} ignores \term{fill pointers} when \term{accessing} \term{elements}.
+
+%% KAB: Implied by "access".
+% \macref{setf} can be used with \funref{char} or \funref{schar}
+% to destructively replace an \term{element} of the \param{string}.
+
+\label Examples::
+
+\code
+ (setq my-simple-string (make-string 6 :initial-element #\\A)) \EV "AAAAAA"
+ (schar my-simple-string 4) \EV #\\A
+ (setf (schar my-simple-string 4) #\\B) \EV #\\B
+ my-simple-string \EV "AAAABA"
+ (setq my-filled-string
+       (make-array 6 :element-type 'character
+                     :fill-pointer 5
+                     :initial-contents my-simple-string))
+\EV "AAAAB"
+ (char my-filled-string 4) \EV #\\B
+ (char my-filled-string 5) \EV #\\A
+ (setf (char my-filled-string 3) #\\C) \EV #\\C
+ (setf (char my-filled-string 5) #\\D) \EV #\\D
+ (setf (fill-pointer my-filled-string) 6) \EV 6
+ my-filled-string \EV "AAACBD"
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+%!!! Barrett thinks stuff belongs here.
+
+\label See Also::
+
+\funref{aref},
+\funref{elt},
+\issue{CONSTANT-MODIFICATION:DISALLOW}
+{\secref\ConstantModification}
+\endissue{CONSTANT-MODIFICATION:DISALLOW}
+
+\label Notes::
+
+\code
+ (char s j) \EQ (aref (the string s) j)
+\endcode
+
+\endcom
+
+%%% ========== STRING
+\begincom{string}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues string {x} {string}
+
+\label Arguments and Values::
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+\param{x}---a \term{string}, a \term{symbol}, or a \term{character}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\param{string}---a \term{string}.
+
+\label Description::
+
+Returns a \term{string} described by \param{x}; specifically:
+
+\beginlist
+\item{\bull} If \param{x} is a \term{string}, it is returned.
+\item{\bull} If \param{x} is a \term{symbol}, its \term{name} is returned.
+\item{\bull} 
+\issue{CHARACTER-PROPOSAL:2-1-1}%
+If \param{x} is a \term{character},
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+then a \term{string} containing that one \term{character} is returned.
+\item{\bull}
+\issue{STRING-COERCION:MAKE-CONSISTENT}%
+\funref{string} might perform additional, \term{implementation-defined} conversions.
+\endissue{STRING-COERCION:MAKE-CONSISTENT}
+\endlist
+
+\label Examples::
+
+\code
+ (string "already a string") \EV "already a string"
+ (string 'elm) \EV "ELM"
+ (string #\\c) \EV "c"
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\issue{STRING-COERCION:MAKE-CONSISTENT}
+In the case where a conversion is defined neither by this specification nor
+by the \term{implementation}, an error \oftype{type-error} is signaled.
+\endissue{STRING-COERCION:MAKE-CONSISTENT}
+
+\label See Also::
+
+\funref{coerce},
+\typeref{string} (\term{type}).
+
+\label Notes::
+
+%% 18.3.0 14
+%% KMP (13-Feb-91): Need to make it so that this is apparent and needn't be inferred
+%%    from weird rules of thumb.
+%% Barmar: Do they allow a character argument?
+%% KMP: No! Hmm. Removed for now as misleading.
+% Most of the string functions effectively apply \funref{string}
+% to their arguments that are supposed to be \term{strings}.
+
+%% 18.3.0 15
+\funref{coerce} can be used to convert a \term{sequence} of \term{characters}
+to a \term{string}.
+
+%% 18.3.0 15
+\funref{prin1-to-string}, \funref{princ-to-string}, \funref{write-to-string},
+or \funref{format} (with a first argument of \nil) can be used to get a
+\term{string} representation of a \term{number} or any other \term{object}.
+
+\endcom
+
+%%% ========== NSTRING-CAPITALIZE
+%%% ========== NSTRING-DOWNCASE
+%%% ========== NSTRING-UPCASE
+%%% ========== STRING-CAPITALIZE
+%%% ========== STRING-DOWNCASE
+%%% ========== STRING-UPCASE
+\begincom{string-upcase, string-downcase, string-capitalize, 
+nstring-upcase, nstring-downcase, nstring-capitalize}\ftype{Function}
+
+
+\label Syntax::
+
+\DefunMultiWithValues {string {\key} start end} {cased-string}
+ {\entry{string-upcase}
+  \entry{string-downcase}
+  \entry{string-capitalize}}
+
+\DefunMultiWithValues {string {\key} start end} {string}
+ {\entry{nstring-upcase}
+  \entry{nstring-downcase}
+  \entry{nstring-capitalize}}
+
+\label Arguments and Values:: 
+
+\issue{STRING-COERCION:MAKE-CONSISTENT}
+\param{string}---a \term{string designator}.
+  For \funref{nstring-upcase},
+      \funref{nstring-downcase},
+  and \funref{nstring-capitalize},
+  the \param{string} \term{designator} must be a \term{string}.
+\endissue{STRING-COERCION:MAKE-CONSISTENT}
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}                       
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{string}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+%% 18.3.0 13
+\param{cased-string}---a \term{string}.
+
+\label Description::
+
+\funref{string-upcase},  \funref{string-downcase},  \funref{string-capitalize},
+\funref{nstring-upcase}, \funref{nstring-downcase}, \funref{nstring-capitalize}
+change the case of the subsequence of \param{string} 
+\term{bounded} by \param{start} and \param{end} 
+as follows:
+
+\beginlist
+\itemitem{\bf string-upcase} 
+
+%% 18.3.0 6
+\funref{string-upcase} returns a \term{string} just like \param{string} 
+with all lowercase characters replaced by the corresponding uppercase 
+characters.  More precisely, each character of the result \term{string} 
+is produced by applying \thefunction{char-upcase} to the corresponding
+character of \param{string}.
+
+\itemitem{\bf string-downcase} 
+
+%% 18.3.0 7
+\funref{string-downcase} is like \funref{string-upcase} 
+except that all uppercase characters are replaced by the corresponding 
+lowercase characters (using \funref{char-downcase}).
+
+
+\itemitem{\bf string-capitalize}
+
+%% 18.3.0 10
+\funref{string-capitalize} produces a copy of \param{string} such that,
+for every word in the copy, the first \term{character} of the ``word,''
+if it has \term{case}, is \term{uppercase} and
+any other \term{characters} with \term{case} in the word are \term{lowercase}.
+For the purposes of \funref{string-capitalize},
+a ``word'' is defined to be a
+%% Rewritten on advice of Barmar, with confirmation from Quinquevirate.
+%consecutive subsequence consisting of case-modifiable characters or digits,
+consecutive subsequence consisting of \term{alphanumeric} \term{characters},
+delimited at each end either by a non-\term{alphanumeric} \term{character}
+or by an end of the \term{string}.
+
+%% 18.3.0 12
+\itemitem{\bf nstring-upcase, nstring-downcase, nstring-capitalize }  
+
+%Barrett wondered if these really had to modify the string. CLtL p304 says yes. -kmp 13-Feb-92
+\funref{nstring-upcase}, \funref{nstring-downcase},
+and \funref{nstring-capitalize} are identical to \funref{string-upcase}, 
+\funref{string-downcase}, and \funref{string-capitalize}
+respectively except that they  modify \param{string}.
+\endlist
+
+%% Barrett: Duplication
+% \param{start} marks the beginning position of the substring.
+% \param{end}   marks the position following the last element of the substring.
+
+%% 18.3.0 9
+For \funref{string-upcase}, \funref{string-downcase}, and \funref{string-capitalize},
+\param{string} is not modified.  However, if no characters in \param{string} 
+require conversion, the result may be either \param{string} or a copy of it,
+at the implementation's discretion.
+
+%% Implied by use of "string designator".
+% \issue{STRING-COERCION:MAKE-CONSISTENT}
+% \funref{string-upcase}, \funref{string-downcase}, and \funref{string-capitalize}
+% perform coercion identical to the action of \funref{string}. 
+% \endissue{STRING-COERCION:MAKE-CONSISTENT}
+
+\label Examples::
+\code
+ (string-upcase "abcde") \EV "ABCDE"
+ (string-upcase "Dr. Livingston, I presume?")
+\EV "DR. LIVINGSTON, I PRESUME?"
+ (string-upcase "Dr. Livingston, I presume?" :start 6 :end 10)
+\EV "Dr. LiVINGston, I presume?"
+ (string-downcase "Dr. Livingston, I presume?")
+\EV "dr. livingston, i presume?"
+
+ (string-capitalize "elm 13c arthur;fig don't") \EV "Elm 13c Arthur;Fig Don'T"
+ (string-capitalize " hello ") \EV " Hello "
+ (string-capitalize "occlUDeD cASEmenTs FOreSTAll iNADVertent DEFenestraTION")
+\EV  "Occluded Casements Forestall Inadvertent Defenestration"
+ (string-capitalize 'kludgy-hash-search) \EV "Kludgy-Hash-Search"
+ (string-capitalize "DON'T!") \EV "Don'T!"    ;not "Don't!"
+ (string-capitalize "pipe 13a, foo16c") \EV "Pipe 13a, Foo16c"
+
+ (setq str (copy-seq "0123ABCD890a")) \EV "0123ABCD890a"
+ (nstring-downcase str :start 5 :end 7) \EV "0123AbcD890a"
+ str \EV "0123AbcD890a"
+\endcode
+
+
+\label Side Effects::
+
+    \funref{nstring-upcase},
+    \funref{nstring-downcase}, 
+and \funref{nstring-capitalize} modify \param{string} as appropriate
+rather than constructing a new \term{string}.
+
+\label Affected By:\None.
+
+%% Sandra thinks this is too vague.
+%The \term{implementation}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{char-upcase}, \funref{char-downcase}
+
+\label Notes::
+%% 18.3.0 8
+The result is always of the same length
+as \param{string}.
+
+\endcom
+
+%%% ========== STRING-TRIM
+%%% ========== STRING-LEFT-TRIM
+%%% ========== STRING-RIGHT-TRIM
+\begincom{string-trim, string-left-trim, string-right-trim}\ftype{Function}
+
+\label Syntax::
+\DefunMultiWithValues {character-bag string} {trimmed-string}
+  {\entry{string-trim}
+   \entry{string-left-trim}
+   \entry{string-right-trim}}
+
+\label Arguments and Values::
+
+\param{character-bag}---a \term{sequence} containing \term{characters}.
+
+\issue{STRING-COERCION:MAKE-CONSISTENT}
+\param{string}---a \term{string designator}.
+\endissue{STRING-COERCION:MAKE-CONSISTENT}
+
+\param{trimmed-string}---a \term{string}.
+
+\label Description::
+
+%% 18.3.0 5
+\funref{string-trim} returns a substring of \param{string}, 
+with all characters in \param{character-bag} stripped off the beginning and end.
+\funref{string-left-trim} is similar but strips characters off only the beginning; 
+\funref{string-right-trim} strips off only the end.
+
+If no \term{characters} need to be trimmed from the \param{string},
+then either \param{string} itself or a copy of it may be returned,
+at the discretion of the implementation.
+
+%Added for Barrett.
+All of these \term{functions} observe the \term{fill pointer}.
+
+%% Implied by "string designator".
+% \issue{STRING-COERCION:MAKE-CONSISTENT}
+% The functions herein described perform coercion identical to the action of \funref{string}. 
+% \endissue{STRING-COERCION:MAKE-CONSISTENT}
+
+\label Examples::
+\code
+ (string-trim "abc" "abcaakaaakabcaaa") \EV "kaaak"
+ (string-trim '(#\\Space #\\Tab #\\Newline) " garbanzo beans
+        ") \EV "garbanzo beans"
+ (string-trim " (*)" " ( *three (silly) words* ) ")
+\EV "three (silly) words"
+
+ (string-left-trim "abc" "labcabcabc") \EV "labcabcabc"
+ (string-left-trim " (*)" " ( *three (silly) words* ) ")
+\EV "three (silly) words* ) "
+
+ (string-right-trim " (*)" " ( *three (silly) words* ) ") 
+\EV " ( *three (silly) words"
+\endcode
+\label Side Effects:\None.
+
+\label Affected By::
+
+The \term{implementation}.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== STRING=
+%%% ========== STRING/=
+%%% ========== STRING<
+%%% ========== STRING>
+%%% ========== STRING>=
+%%% ========== STRING<=
+%%% ========== STRING-EQUAL
+%%% ========== STRING-NOT-EQUAL
+%%% ========== STRING-GREATERP
+%%% ========== STRING-LESSP
+%%% ========== STRING-NOT-LESSP
+%%% ========== STRING-NOT-GREATERP
+\begincom{string=, string/=, string<, string>, string<=, string>=, 
+	  string-equal, string-not-equal, string-lessp, 
+	  string-greaterp, string-not-greaterp, string-not-lessp}\ftype{Function}
+
+\label Syntax::
+
+%!!! Need to cross-check the return values here against CLtL for accuracy.
+%    My guess is that something's been corrupted along the way. -kmp 27-May-91
+
+\DefunWithValues {string$=$}
+		 {string1 string2 {\key} start1 end1 start2 end2}
+		 {generalized-boolean}
+
+\DefunMultiWithValues {string1 string2 {\key} start1 end1 start2 end2}
+		      {mismatch-index}
+  {\entry{string/$=$}
+   \entry{string$<$}
+   \entry{string$>$}
+   \entry{string$<=$}
+   \entry{string$>=$}}
+
+\DefunWithValues {string-equal}
+		 {string1 string2 {\key} start1 end1 start2 end2}
+		 {generalized-boolean}
+
+\DefunMultiWithValues {string1 string2 {\key} start1 end1 start2 end2}
+		      {mismatch-index}
+  {\entry{string-not-equal}
+   \entry{string-lessp}
+   \entry{string-greaterp}
+   \entry{string-not-greaterp}
+   \entry{string-not-lessp}}
+
+\label Arguments and Values::
+
+%% 18.2.0 4
+%% 18.2.0 11
+\issue{STRING-COERCION:MAKE-CONSISTENT}
+\param{string1}---a \term{string designator}.
+                
+\param{string2}---a \term{string designator}.
+\endissue{STRING-COERCION:MAKE-CONSISTENT}
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start1}, \param{end1}---\term{bounding index designators} of \param{string1}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+
+\param{start2}, \param{end2}---\term{bounding index designators} of \param{string2}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\param{mismatch-index}---a \term{bounding index} of \param{string1}, or \nil.
+
+\label Description::
+
+%% 18.2.0 9
+These functions perform lexicographic comparisons on \param{string1} and \param{string2}.
+\funref{string=} and \funref{string-equal} are called equality functions;
+the others are called inequality functions.
+The comparison operations these \term{functions} perform are restricted
+     to the subsequence of \param{string1} \term{bounded} by \term{start1} and \param{end1}
+ and to the subsequence of \param{string2} \term{bounded} by \term{start2} and \param{end2}.
+               
+A string \i{a} is equal to a string \i{b} if it contains the same number
+of characters, and the corresponding characters are the \term{same}
+% "char<", "char-lessp" => "char=", "char-equal" in next line thanks to Barmar! -kmp 22-Jan-92
+under \funref{char=} or \funref{char-equal}, as appropriate.
+
+%% 18.2.0 10
+A string \i{a} is less than a string \i{b} if in the first position in
+which they differ the character of \i{a} is less than the corresponding
+character of \i{b} according to \funref{char<} or \funref{char-lessp} 
+as appropriate, or if string \i{a} is a proper prefix of string \i{b}
+(of shorter length and matching in all the characters of \i{a}).
+
+%Sandra is a little uncomfortable with the use of "equal" in the next two paragraphs.
+% -kmp 13-Jan-92
+The equality functions return a \param{generalized boolean} 
+that is \term{true} if the strings are equal, 
+or \term{false} otherwise.
+
+The inequality functions return a \param{mismatch-index}
+that is \term{true} if the strings are not equal,
+or \term{false} otherwise.
+When the \param{mismatch-index} is \term{true},
+it is an \term{integer} representing the first character position at which the 
+two substrings differ, as an offset from the beginning of \param{string1}.
+
+%% This referred only to string= and string-equal, but was confusing and redundant.
+%%   -kmp 25-Jul-91
+% %% 18.2.0 5
+% The equality functions return \term{false} if the substrings being compared are
+% of unequal length; that is, if
+% 
+% \code
+%  (not (= (- end1 start1) (- end2 start2)))
+% \endcode
+% is \term{true}, then the functions return \term{false}.
+
+The comparison has one of the following results:
+
+\beginlist
+     
+\itemitem{\funref{string=}}
+
+\funref{string=} is \term{true} if the supplied substrings are of
+the same length and contain the \term{same} characters in corresponding
+positions; otherwise it is \term{false}.
+
+\itemitem{\funref{string/=}}
+
+\funref{string/=} is \term{true} if the supplied substrings are 
+different; otherwise it is \term{false}.
+
+\itemitem{\funref{string-equal}}
+
+%% 18.2.0 8
+\funref{string-equal} is just like \funref{string=} 
+except that differences in case are ignored; 
+two characters are considered to be the same if \funref{char-equal} is \term{true} of them.
+     
+\itemitem{\funref{string<}}
+
+\funref{string<} is \term{true} if substring1 is less than substring2;
+otherwise it is \term{false}.
+
+\itemitem{\funref{string>}}
+
+\funref{string>} is \term{true} if substring1 is greater than substring2;
+otherwise it is \term{false}.
+
+\itemitem{\funref{string-lessp}, \funref{string-greaterp}}
+
+%% 18.2.0 12
+\funref{string-lessp} and \funref{string-greaterp} 
+are exactly like \funref{string<} and \funref{string>}, respectively,
+except that distinctions between uppercase and lowercase letters are ignored.
+It is as if \funref{char-lessp} were used instead of \funref{char<}
+for comparing characters.
+
+\itemitem{\funref{string<=}}
+
+\funref{string<=} is \term{true} if substring1 is less than or equal to substring2;
+otherwise it is \term{false}.
+
+\itemitem{\funref{string>=}}
+
+\funref{string>=} is \term{true} if substring1 is greater than or equal to substring2;
+otherwise it is \term{false}.
+
+\itemitem{\funref{string-not-greaterp}, \funref{string-not-lessp}}
+
+\funref{string-not-greaterp} and \funref{string-not-lessp}
+are exactly like \funref{string<=} and \funref{string>=}, respectively, 
+except that distinctions between uppercase and lowercase letters are ignored.
+It is as if \funref{char-lessp} were used instead of \funref{char<}
+for comparing characters.
+
+\endlist
+
+%% Barrett: Implied by description of bounding.
+%All of these \term{functions} observe the \term{fill pointer}.
+ 
+\label Examples::
+
+%% 18.2.0 6
+
+\code
+ (string= "foo" "foo") \EV \term{true}
+ (string= "foo" "Foo") \EV \term{false}
+ (string= "foo" "bar") \EV \term{false}
+ (string= "together" "frog" :start1 1 :end1 3 :start2 2) \EV \term{true}
+ (string-equal "foo" "Foo") \EV \term{true}
+ (string= "abcd" "01234abcd9012" :start2 5 :end2 9) \EV \term{true}
+ (string< "aaaa" "aaab") \EV 3
+ (string>= "aaaaa" "aaaa") \EV 4
+ (string-not-greaterp "Abcde" "abcdE") \EV 5
+ (string-lessp "012AAAA789" "01aaab6" :start1 3 :end1 7
+                                      :start2 2 :end2 6) \EV 6
+ (string-not-equal "AAAA" "aaaA") \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{char=}
+
+\label Notes::
+
+%% 18.2.0 3
+\funref{equal} calls \funref{string=} if applied to two \term{strings}.
+
+\endcom
+
+%%% ========== STRINGP
+\begincom{stringp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues stringp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 18
+\TypePredicate{object}{string}
+
+\label Examples::
+
+\code
+ (stringp "aaaaaa") \EV \term{true}
+ (stringp #\\a) \EV \term{false}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{typep},
+\typeref{string} (\term{type})
+
+\label Notes::
+
+\code
+ (stringp \param{object}) \EQ (typep \param{object} 'string)
+\endcode
+
+\endcom
+
+%%% ========== MAKE-STRING
+\begincom{make-string}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues make-string {size {\key} initial-element element-type} {string}
+
+\label Arguments and Values::
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{size}---a \term{valid array dimension}.
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+
+\issue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+\param{initial-element}---a \term{character}.
+\endissue{ARGUMENTS-UNDERSPECIFIED:SPECIFY}
+ \Default{\term{implementation-dependent}}
+
+\issue{CHARACTER-PROPOSAL:2-3-6}
+\param{element-type}---a \term{type specifier}.
+ \Default{\typeref{character}}
+\endissue{CHARACTER-PROPOSAL:2-3-6}
+
+\param{string}---a \term{simple string}.
+
+\label Description::
+
+%% 18.3.0 3
+\funref{make-string} returns a \term{simple string} of length \param{size}
+whose elements have been initialized to \param{initial-element}.
+
+\issue{CHARACTER-PROPOSAL:2-3-6}
+The \param{element-type} names the \term{type} of the \term{elements} of the \term{string};
+a \term{string} is constructed of the most \term{specialized}
+\term{type} that can accommodate \term{elements} of the given \term{type}.  
+\endissue{CHARACTER-PROPOSAL:2-3-6}
+
+\label Examples::
+
+\code
+ (make-string 10 :initial-element #\\5) \EV "5555555555"
+ (length (make-string 10)) \EV 10
+\endcode
+
+\label Affected By::
+
+The \term{implementation}.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.                                                    
+
+\endcom
+
+%% 18.3.0 4
+%% was left out

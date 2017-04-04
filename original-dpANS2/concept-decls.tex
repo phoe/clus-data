@@ -1,0 +1,507 @@
+% -*- Mode: TeX -*-
+
+\newtermidx{Declarations}{declaration} provide a way of specifying information for use by
+program processors, such as the evaluator or the compiler.
+
+\newtermidx{Local declarations}{local declaration}
+can be embedded in executable code using \misc{declare}.
+\newtermidx{Global declarations}{global declaration}, 
+or \newtermidx{proclamations}{proclamation},
+are established by \funref{proclaim} or \macref{declaim}.
+
+%% 9.3.0 1
+\Thespecform{the} provides a shorthand notation for 
+making a \term{local declaration} about the \term{type} of the
+\term{value} of a given \term{form}.
+%% 9.0.0 4
+% This is redundant with the next sentence.  --sjl 3 Mar 92
+% The consequences are undefined if a program violates a type declaration.
+%% 9.2.0 1
+
+%% 9.2.0 6
+The consequences are undefined if a program violates a \term{declaration}
+or a \term{proclamation}.
+
+\beginSubsection{Minimal Declaration Processing Requirements}
+
+In general, an \term{implementation} is free to ignore
+\term{declaration specifiers} except for the
+     \declref{declaration}\idxref{declaration},
+     \declref{notinline}\idxref{notinline},
+     \declref{safety}\idxref{safety},
+ and \declref{special}\idxref{special} \term{declaration specifiers}.
+
+A \declref{declaration} \term{declaration} must suppress warnings
+about unrecognized \term{declarations} of the kind that it declares.
+If an \term{implementation} does not produce warnings about
+unrecognized declarations, it may safely ignore this \term{declaration}.
+
+A \declref{notinline} \term{declaration} must be recognized by any \term{implementation}
+that supports inline functions or \term{compiler macros} in order to disable those facilities.
+An \term{implementation} that does not use inline functions or \term{compiler macros}
+may safely ignore this \term{declaration}.
+
+A \declref{safety} \term{declaration} that increases the current safety level 
+must always be recognized.  An \term{implementation} that always processes 
+code as if safety were high may safely ignore this \term{declaration}.
+
+A \declref{special} \term{declaration} must be processed by all \term{implementations}.
+
+\endSubsection%{Minimal Declaration Processing Requirements}
+
+\beginSubsection{Declaration Specifiers}
+
+A \newterm{declaration specifier} is an \term{expression} that can appear at
+top level of a \misc{declare} expression or a \macref{declaim} form, or as 
+the argument to \funref{proclaim}.
+It is a \term{list} whose \term{car} is a \term{declaration identifier},
+and whose \term{cdr} is data interpreted according to rules specific to
+the \term{declaration identifier}.
+
+\endSubsection%{Declaration Specifiers}
+
+\beginSubsection{Declaration Identifiers}
+
+\Thenextfigure\ shows a list of all 
+\term{declaration identifiers}\idxterm{declaration identifier} 
+defined by this standard.
+
+\issue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}
+\displaythree{Common Lisp Declaration Identifiers}{
+declaration&ignore&special\cr
+dynamic-extent&inline&type\cr
+ftype&notinline&\cr
+ignorable&optimize&\cr
+}
+%FUNCTION removed.
+\endissue{DECLARE-FUNCTION-AMBIGUITY:DELETE-FTYPE-ABBREVIATION}
+
+%% 9.2.0 20
+An implementation is free to support other (\term{implementation-defined})
+\term{declaration identifiers} as well.  
+% Sections 3.2.2.3 and 3.2.5 both classify this as an ordinary warning.
+% --sjl 3 Mar 92
+% A warning \oftype{style-warning} might be issued
+A warning might be issued
+if a \term{declaration identifier} 
+is not among those defined above,
+%Added for Barmar:   -kmp 11-Jan-91
+is not defined by the \term{implementation},
+is not a \term{type} \term{name}, 
+and has not been declared in a \declref{declaration} \term{proclamation}.
+
+% I can't figure out where this paragraph came from, and I'm convinced
+% it's wrong.  Issue DECLARATION-SCOPE was intended to assign consistent
+% scoping rules to all declarations based only on whether they are ``bound''
+% or ``free''.  Allowing random scoping rules will also totally defeat
+% the proposed define-declaration extensions.  --sjl 7 Mar 92
+%For \term{implementation-defined} \term{declaration identifiers},
+%the \term{scope} of \term{free declarations} and \term{bound declarations}
+%is \term{implementation-defined}.
+
+\beginsubsubsection{Shorthand notation for Type Declarations}
+
+%Barrett says class objects are ok here, too.
+A \term{type specifier} can be used as a \term{declaration identifier}.
+\f{(\param{type-specifier} \starparam{var})} is taken as shorthand for
+\f{(type \param{type-specifier} \starparam{var})}.
+
+\endsubsubsection%{Shorthand notation for Type Declarations}
+
+\endSubsection%{Declaration Identifiers}
+
+\beginSubsection{Declaration Scope}
+\DefineSection{DeclScope}
+
+% Declarations can be divided into two kinds: those that concern 
+% the \term{bindings} of variables, and those that do not.
+% The \declref{special} declaration falls into both classes.
+% Declarations that concern \term{variable} \term{bindings} apply
+% only to the \term{bindings} made by the \term{form} at the head of 
+% whose body they appear.  
+% 
+% All declarations introduced with \misc{declare} fall into two classes:
+% \term{bound declarations} and \term{free declarations}.
+% \term{Bound declarations} affect both a binding and any references;
+% \term{free declarations} affect only references.
+% Some declarations may be used in either way, depending on context.
+%
+%% The above rewritten with help from Sandra and Moon. -kmp 22-Aug-91
+
+\term{Declarations} can be divided into two kinds: those that apply to the
+\term{bindings} of \term{variables} or \term{functions}; and those that
+do not apply to \term{bindings}.
+
+A \term{declaration} that appears at the head of a binding \term{form} 
+and applies to a \term{variable} or \term{function} \term{binding} 
+made by that \term{form} is called a \newterm{bound declaration}; 
+such a \term{declaration} affects both the \term{binding} and
+any references within the \term{scope} of the \term{declaration}.  
+
+\term{Declarations} that are not \term{bound declarations} are called
+\newtermidx{free declarations}{free declaration}.
+
+% \term{Free declarations} that apply to
+% \term{bindings} affect only references to those \term{bindings}.  
+A \term{free declaration} in a \term{form} $F1$ that applies to a \term{binding}
+for a \term{name} $N$ \term{established} by some \term{form} $F2$
+of which $F1$ is a \term{subform}
+affects only references to $N$ within $F1$; it does not to apply to
+other references to $N$ outside of $F1$, nor does it affect the manner
+in which the \term{binding} of $N$ by $F2$ is \term{established}.
+
+\term{Declarations} that do not apply to \term{bindings} can only appear 
+as \term{free declarations}.
+
+% Common Lisp prohibits binding the same name twice in the same binding form.
+% It has been proposed that multiple bindings be permitted for LET*, DO*, PROG* 
+% forms and for &AUX variables in lambda expressions, but never approved. 
+% In an implementation which permits multiple bindings, `bound' declarations
+% should probably be treated as if there were a separate `bound' declaration 
+% for each of the bindings, but for us to say so would really go beyond the
+% scope of this document.  As such, we'll just not say anything and leave it to
+% any implementation which defines that circumstance to also define the relationship
+% to bound declarations. -kmp 22-Aug-91
+
+%% Rewritten by Sandra in response to Margolin #7, Dalton #3, Moon #7 (First Public Review)
+% %% 9.1
+% Some \term{forms} contain pieces of code that, properly speaking,
+% are not part of the body of the \term{form}.  Examples of this
+% are initialization forms that provide values for bound variables,
+% and the result forms of iteration \term{forms}.
+% 
+% \issue{DECLARATION-SCOPE:NO-HOISTING}
+%  
+% The \term{scope} of a \term{declaration} located at the head of 
+% a \term{special form}, \term{macro form}, or \term{lambda expression} is as follows:
+% \beginlist
+% \itemitem{1.}
+% It always includes the body forms as well as any \term{step} or exit \term{forms}.
+% \itemitem{2.}
+% It also includes the \term{scope} of the name binding, if any, to which 
+% it applies (\specref{let}, \misc{lambda},  \specref{flet},  \macref{do}, etc. 
+% introduce name bindings; \specref{locally} does not).
+% \endlist
+% 
+% %!!!! RPG: I'm tired but this doesn't make sense to me at all.
+% This prescription depends on the fact that the \term{scope} of name bindings
+% is already well-defined.
+% Whether or not a particular declaration affects an initialization form 
+% (such as for \specref{let} or \specref{let*}) 
+% depends solely on whether it is
+% applied to a variable or function name being bound whose \term{scope}
+% includes such \term{forms}.  
+% In this sense, the above specification limits the
+% \term{scope} of declarations for name bindings to be exactly the 
+% \term{scope} of the
+% name binding itself. 
+% There is no ``hoisting'' for declarations in \term{special forms} or 
+% \term{lambda expressions}; 
+% the only initialization forms affected by a declaration 
+% are those included indirectly, by the effect, if any, that a 
+% declaration has on a name binding. 
+% Thus there is no
+% ``hoisting'' of the special declarations in the following example:
+% 
+% % \code
+% %  (defun bar (x y)           ;[1] 1st occurrence of x
+% %    (let ((old-x x)          ;[2] 2nd occurrence of x 
+% %          (x y))             ;[3] 3rd occurrence of x
+% %      (declare (special x))
+% %      (list old-x x)))
+% % \endcode
+% % 
+% % Laubsch: ?
+% % Barmar: Say what [the above] example is supposed to return.
+% % RPG: Also, say explicitly which bindings and references are special.
+% 
+% \code
+%  (let ((x 1))                ;[1] 1st occurrence of x
+%    (declare (special x))     ;[2] 2nd occurrence of x
+%    (let ((x 2))              ;[3] 3rd occurrence of x
+%      (let ((old-x x)         ;[4] 4th occurrence of x
+%            (x 3))            ;[5] 5th occurrence of x
+%        (declare (special x)) ;[6] 6th occurrence of x
+%        (list old-x x))))     ;[7] 7th occurrence of x
+% \EV (2 3)
+% \endcode
+% 
+% The first occurrence of \f{x} \term{establishes} a \term{dynamic binding}
+% of \f{x} because of the \declref{special} \term{declaration} for \f{x}
+% in the second line.  The third occurrence of \f{x} \term{establishes} a
+% \term{lexical binding} of \f{x} (because there is no \declref{special}
+% \term{declaration} in the corresponding \macref{let} \term{form}).
+% The fourth occurrence of \f{x} \term{x} is a reference to the
+% \term{lexical binding} of \f{x} established in the third line.
+% The fifth occurrence of \f{x} \term{establishes} a \term{dynamic binding}
+% of \term{x} for the body of the \macref{let} \term{form} that begins on
+% that line because of the \declref{special} \term{declaration} for \f{x}
+% in the sixth line. The reference to \f{x} in the fourth line is not
+% affected by the \declref{special} \term{declaration} in the sixth line 
+% because that reference is not within the ``would-be \term{lexical scope}''
+% of the \term{variable} \f{x} in the fifth line.  The reference to \f{x}
+% in the seventh line is a reference to the \term{dynamic binding} of \term{x}
+% \term{established} in the fifth line.
+% 
+% Those declarations not correlated with any name \term{binding} do
+% not cover any of the initialization forms; their \term{scope} only
+% includes the body as well as any ``stepper'' or result forms.  In a
+% sense, the above specification limits the \term{scope} of these
+% kinds of declarations to be the same as an arbitrary name 
+% \term{binding} in a \specref{let}, \specref{flet}, 
+% \issue{WITH-ADDED-METHODS:DELETE}
+% %\macref{with-added-methods},
+% \endissue{WITH-ADDED-METHODS:DELETE}
+% \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+% %\specref{generic-flet},
+% %\specref{generic-labels},
+% \endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+% and \specref{labels}
+% \term{form}.
+% %[See also the issue DECLARE-TYPE-FREE.]
+% 
+% In the following:\idxref{notinline}
+% 
+% \code
+%  (lambda (&optional (x (foo 1))) ;[1]
+%    (declare (notinline foo))     ;[2]
+%    (foo x))                      ;[3]
+% \endcode
+% 
+% the \term{call} to \f{foo} in the first line might be 
+% compiled inline even though the \term{call} to \f{foo} in
+% the third line must not be.  This is because
+% the \declref{notinline} \term{declaration}
+% for \f{foo} in the second line applies only to the body on the
+% third line.  In order to suppress inlining for both \term{calls}, 
+% one might write:\idxref{notinline}
+% 
+% \code
+%  (locally (declare (notinline foo)) ;[1]
+%    (lambda (&optional (x (foo 1)))  ;[2]
+%      (foo x)))                      ;[3]
+% \endcode
+% 
+% or, alternatively:\idxref{notinline}
+% 
+% \code
+%  (lambda (&optional                               ;[1]
+%             (x (locally (declare (notinline foo)) ;[2]
+%                  (foo 1))))                       ;[3]
+%    (declare (notinline foo))                      ;[4]
+%    (foo x))                                       ;[5]
+% \endcode
+% 
+% In the following:\idxterm{type declaration}
+% 
+% \code
+%  (defun foo (x)                               ;[1]
+%    (if (typep x 'integer)                     ;[2]
+%        (list (let ((y (+ x 42)))              ;[3]
+%                (declare (fixnum x y))         ;[4]
+%                y)                             ;[5]
+%              (+ x 42))                        ;[6]
+%        `(foo ,x)))                            ;[7]
+% \endcode
+% 
+% \f{x} is not initially (\eg in the first line) known to be a \term{fixnum} 
+% since the scope of the \declref{fixnum} \term{declaration} for \f{x} in the fourth line
+% covers only the body of the \macref{let} form in the fifth line, but not the
+% \term{initialization form} for \f{y} in the third line.  The compiler can assume that
+% \f{x} is not greater than the value of \f{(- most-positive-fixnum 42)} because \f{y}
+% has been declared to be a \term{fixnum} in the fourth line.
+% Even so, neither the \term{call} to \funref{+} in the third line 
+%              nor the one in the sixth line 
+% may be optimized into \term{calls} to \term{implementation-dependent} 
+% \term{fixnum}-only arithmetic operators,
+% just in case the call to \f{foo} looks something like:
+% 
+% \code
+%  (foo (- most-negative-fixnum 1))
+% \endcode
+% 
+% In following:\idxterm{type declaration}
+% 
+% \code
+%  (defun foo (x)                               ;[1]
+%    (if (typep x 'integer)                     ;[2]
+%        (list (let ((y (+ x 42)))              ;[3]
+%                (declare (fixnum x))           ;[4]
+%                x                              ;[5]
+%                y)                             ;[6]
+%              (+ x 42))                        ;[7]
+%        `(foo ,x)))                            ;[8]
+% \endcode
+% 
+% \f{x} can be determined to be a \term{fixnum} throughout 
+% the third through seventh lines, but only by inference
+% from the fact that the reference to \f{x} in the fifth line
+% (the only reference to which the \declref{fixnum} \term{declaration}
+% in the fourth line applies) 
+% is known to be a \term{fixnum}.  Since the compiler is capable of detecting that
+% there are no \term{assignments} to \f{x}, it may reason that \f{x} is a \term{fixnum}
+% throughout even though there is no explicit \term{declaration}.
+% However, since there is no \declref{fixnum} \term{declaration} for \f{y} (as there
+% was in the previous example), the compiler may not assume that the result of the
+% addition in the third line is a \term{fixnum}.  Therefore, 
+% neither \term{call} to \funref{+} (one the third and seventh lines) 
+% may be optimized into \term{calls} to \term{implementation-dependent} 
+% \term{fixnum}-only arithmetic operators,
+% just in case the call to \term{foo} looks something like:
+% 
+% \code
+%  (foo most-positive-fixnum)
+% \endcode
+% 
+% However, in the following:\idxterm{type declaration}
+% 
+% \code
+%  (defun foo (x)                               ;[1]
+%    (if (typep x 'integer)                     ;[2]
+%        (list (let ((y (the fixnum (+ x 42)))) ;[3]
+%                (declare (fixnum x y))         ;[4]
+%                x                              ;[5]
+%                y)                             ;[6]
+%              (+ x 42))                        ;[7]
+%        `(foo ,x)))                            ;[8]
+% \endcode
+% 
+% the compiler can infer that \f{x} is a \term{fixnum} throughout 
+% the third through seventh lines by reasoning similar
+% to that for the previous example.  Further, it can infer that the result of the 
+% call to \funref{+} in the third line is a \term{fixnum} because of the \declref{fixnum}
+% \term{declaration} in the fourth line.  Consequently, that \term{call} to \funref{+}
+% may be optimized into a \term{call} to an \term{implementation-dependent} 
+% \term{fixnum}-only arithmetic operator.  Further, the \term{call} to \funref{+}
+% in the seventh line may be similarly optimized because the compiler can prove that
+% the \f{x} in that line has the same \term{value}.
+% 
+% \endissue{DECLARATION-SCOPE:NO-HOISTING}
+
+\issue{DECLARATION-SCOPE:NO-HOISTING}
+\issue{WITH-ADDED-METHODS:DELETE}
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+The \term{scope} of a \term{bound declaration} is the same as the
+%% Per X3J13. -kmp 5-Oct-93
+%\term{scope}
+\term{lexical scope}
+of the \term{binding} to which it applies;
+%% Added per X3J13. -kmp 5-Oct-93
+for \term{special variables},
+this means the \term{scope} that the \term{binding} 
+would have had had it been a \term{lexical binding}.
+
+Unless explicitly stated otherwise, the \term{scope} of a 
+\term{free declaration} includes only the body \term{subforms} of 
+the \term{form} at whose head it appears, and no other \term{subforms}.
+The \term{scope} of \term{free declarations} specifically does not
+include \term{initialization forms} for \term{bindings} established
+by the \term{form} containing the \term{declarations}.
+
+Some \term{iteration forms} include step, end-test, or result 
+\term{subforms} that are also included in the \term{scope}
+of \term{declarations} that appear in the \term{iteration form}.
+Specifically, the \term{iteration forms} and \term{subforms} involved
+are:
+
+\beginlist
+\item{\bull} \macref{do}, \macref{do*}:  
+  \param{step-forms}, \param{end-test-form}, and \param{result-forms}.
+\item{\bull} \macref{dolist}, \macref{dotimes}:
+  \param{result-form}
+\item{\bull} \macref{do-all-symbols}, \macref{do-external-symbols}, \macref{do-symbols}:
+  \param{result-form}
+\endlist
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\endissue{WITH-ADDED-METHODS:DELETE}
+
+\beginsubsubsection{Examples of Declaration Scope}
+
+Here is an example illustrating the \term{scope} of \term{bound declarations}.
+
+\code
+ (let ((x 1))                ;[1] 1st occurrence of x
+   (declare (special x))     ;[2] 2nd occurrence of x
+   (let ((x 2))              ;[3] 3rd occurrence of x
+     (let ((old-x x)         ;[4] 4th occurrence of x
+           (x 3))            ;[5] 5th occurrence of x
+       (declare (special x)) ;[6] 6th occurrence of x
+       (list old-x x))))     ;[7] 7th occurrence of x
+\EV (2 3)
+\endcode
+
+The first occurrence of \f{x} \term{establishes} a \term{dynamic binding}
+of \f{x} because of the \declref{special} \term{declaration} for \f{x}
+in the second line.  The third occurrence of \f{x} \term{establishes} a
+\term{lexical binding} of \f{x} (because there is no \declref{special}
+\term{declaration} in the corresponding \macref{let} \term{form}).
+The fourth occurrence of \f{x} \term{x} is a reference to the
+\term{lexical binding} of \f{x} established in the third line.
+The fifth occurrence of \f{x} \term{establishes} a \term{dynamic binding}
+of \term{x} for the body of the \macref{let} \term{form} that begins on
+that line because of the \declref{special} \term{declaration} for \f{x}
+in the sixth line. The reference to \f{x} in the fourth line is not
+affected by the \declref{special} \term{declaration} in the sixth line 
+because that reference is not within the ``would-be \term{lexical scope}''
+of the \term{variable} \f{x} in the fifth line.  The reference to \f{x}
+in the seventh line is a reference to the \term{dynamic binding} of \term{x}
+\term{established} in the fifth line.
+
+
+Here is another example, to illustrate the \term{scope} of a
+\term{free declaration}.  In the following:
+
+\code
+ (lambda (&optional (x (foo 1))) ;[1]
+   (declare (notinline foo))     ;[2]
+   (foo x))                      ;[3]
+\endcode
+
+the \term{call} to \f{foo} in the first line might be 
+compiled inline even though the \term{call} to \f{foo} in
+the third line must not be.  This is because
+the \declref{notinline} \term{declaration}
+for \f{foo} in the second line applies only to the body on the
+third line.  In order to suppress inlining for both \term{calls}, 
+one might write:
+
+\code
+ (locally (declare (notinline foo)) ;[1]
+   (lambda (&optional (x (foo 1)))  ;[2]
+     (foo x)))                      ;[3]
+\endcode
+
+or, alternatively:
+
+\code
+ (lambda (&optional                               ;[1]
+            (x (locally (declare (notinline foo)) ;[2]
+                 (foo 1))))                       ;[3]
+   (declare (notinline foo))                      ;[4]
+   (foo x))                                       ;[5]
+\endcode
+
+
+Finally, here is an example that shows the \term{scope} of
+\term{declarations} in an \term{iteration form}.
+
+\code
+ (let ((x  1))                     ;[1]
+   (declare (special x))           ;[2]
+     (let ((x 2))                  ;[3]
+       (dotimes (i x x)            ;[4]
+         (declare (special x)))))  ;[5]
+\EV 1
+\endcode
+
+In this example, the first reference to \f{x} on the fourth line is to
+the \term{lexical binding} of \f{x} established on the third line.
+However, the second occurrence of \f{x} on the fourth line lies within
+the \term{scope} of the \term{free declaration} on the fifth line
+(because this is the \param{result-form} of the \macref{dotimes})
+and therefore refers to the \term{dynamic binding} of \f{x}.
+\endissue{DECLARATION-SCOPE:NO-HOISTING}
+
+\endsubsubsection%{Examples of Declaration Scope}
+
+\endSubsection%{Declaration Scope}

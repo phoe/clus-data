@@ -1,0 +1,225 @@
+%-*- Mode: TeX -*-
+%% Reader Algorithm
+
+%% 22.1.1 5
+This section describes the algorithm used by the \term{Lisp reader}
+to parse \term{objects} from an \term{input} \term{character} \term{stream},
+including how the \term{Lisp reader} processes \term{macro characters}.
+
+When dealing with \term{tokens}, the reader's basic function is to distinguish
+representations of \term{symbols} from those of \term{numbers}.
+%%Barmar didn't like the double negatives:
+% When a \term{token} is
+% accumulated, it is assumed to be a \term{number} unless it does
+% not satisfy the Syntax for Numbers listed in \figref\SyntaxForNumericTokens.
+When a \term{token} is accumulated, it is assumed to represent a \term{number} if it
+satisfies the syntax for numbers listed in \figref\SyntaxForNumericTokens.
+%%Ditto:
+% If it is not a \term{number}, it is then assumed to be a potential
+% number unless it does not satisfy the rules governing the syntax for a
+% \term{potential number}.
+If it does not represent a \term{number},
+it is then assumed to be a \term{potential number} 
+if it satisfies the rules governing the syntax for a \term{potential number}.
+If a valid \term{token} is neither a representation of a \term{number} 
+			       nor a \term{potential number},
+it represents a \term{symbol}.
+
+The algorithm performed by the \term{Lisp reader} is as follows:
+
+%% 22.1.1 6
+\beginlist
+\item{1.}            
+If at end of file, end-of-file processing is performed as specified
+in \funref{read}.
+Otherwise,
+one \term{character}, \param{x},  is read from the \term{input} \term{stream}, and
+dispatched according to the \term{syntax type} of \param{x} to one
+of steps 2 to 7.
+
+%% 22.1.1 7
+\item{2.}                                          
+If \param{x} is an \term{invalid} \term{character},
+an error \oftype{reader-error} is signaled.
+
+%% 22.1.1 8
+\item{3.}
+If \param{x} is a \term{whitespace}\meaning{2} \term{character},
+then it is discarded and step 1 is re-entered.
+
+%% 22.1.1 9
+\item{4.}
+If \param{x} is a \term{terminating} or \term{non-terminating} \term{macro character}
+then its associated \term{reader macro function} is called with two \term{arguments},
+the \term{input} \term{stream} and \param{x}.
+
+%% 22.1.1 10
+The \term{reader macro function} may read \term{characters} 
+from the \term{input} \term{stream}; 
+if it does, it will see those \term{characters} following the \term{macro character}.
+The \term{Lisp reader} may be invoked recursively from the \term{reader macro function}.
+
+%% 22.1.5 16
+The \term{reader macro function} must not have any side effects other than on the
+\term{input} \term{stream};
+because of backtracking and restarting of the \funref{read} operation,
+front ends to the \term{Lisp reader} (\eg ``editors'' and ``rubout handlers'') 
+may cause the \term{reader macro function} to be called repeatedly during the
+reading of a single \term{expression} in which \param{x} only appears once.
+
+%% 22.1.1 11
+The \term{reader macro function} may return zero values or one value.
+If one value is returned,
+then that value is returned as the result of the read operation;
+the algorithm is done.
+If zero values are returned, then step 1 is re-entered.
+
+%% 22.1.1 12
+\item{5.}
+If \param{x} is a \term{single escape} \term{character}
+then the next \term{character}, \param{y}, is read, or an error \oftype{end-of-file} 
+is signaled if at the end of file.
+\param{y} is treated as if it is a \term{constituent} 
+whose only \term{constituent trait} is \term{alphabetic}\meaning{2}.
+\param{y} is used to begin a \term{token}, and step 8 is entered.
+
+%% 22.1.1 13
+\item{6.}
+If \param{x} is a \term{multiple escape} \term{character}
+then a \term{token} (initially
+containing no \term{characters}) is  begun and step 9 is entered.
+
+%% 22.1.1 14
+\item{7.}
+If \param{x} is a \term{constituent} \term{character}, then it begins a \term{token}.
+After the \term{token} is read in, it will be interpreted
+either as a \Lisp\ \term{object} or as being of invalid syntax.
+If the \term{token} represents an \term{object},
+that \term{object} is returned as the result of the read operation.
+If the \term{token} is of invalid syntax, an error is signaled.
+% If \param{x} is a \term{lowercase} \term{character},
+% it is replaced with the corresponding \term{uppercase} \term{character}.
+%% Tentatively replaced with the following to satisfy Sandra:
+If \param{x} is a \term{character} with \term{case},
+it might be replaced with the corresponding \term{character} of the opposite \term{case}, 
+depending on the \term{readtable case} of the \term{current readtable},
+as outlined in \secref\ReadtableCaseReadEffect.
+\param{X} is used to begin a \term{token}, and step 8 is entered.
+
+%% 22.1.1 15
+%% 22.1.1 16
+%% 22.1.1 17
+\item{8.}
+At this point a \term{token} is being accumulated, and an even number
+of \term{multiple escape} \term{characters} have been encountered.
+If at end of file, step 10 is entered.
+Otherwise, a \term{character}, \param{y}, is read, and
+one of the following actions is performed according to its \term{syntax type}:
+
+\beginlist
+\itemitem{\bull}
+If \param{y} is a \term{constituent} or \term{non-terminating} \term{macro character}:
+\beginlist
+\itemitem{--}
+% If \param{y} is a \term{lowercase} \term{character}, it is replaced with the
+% corresponding \term{uppercase} \term{character}.
+%% Tentatively replaced with the following to satisfy Sandra:
+If \param{y} is a \term{character} with \term{case},
+it might be replaced with the corresponding \term{character} of the opposite \term{case}, 
+depending on the \term{readtable case} of the \term{current readtable},
+as outlined in \secref\ReadtableCaseReadEffect.
+\itemitem{--}
+\param{Y} is appended to the \term{token} being built.
+\itemitem{--}
+Step 8 is repeated.
+\endlist
+
+%% 22.1.1 18
+\itemitem{\bull}
+If \param{y} is a \term{single escape} \term{character}, then the next \term{character},
+\param{z}, is read, or an error \oftype{end-of-file} is signaled if at end of file.
+\param{Z} is treated as if it is a \term{constituent} 
+whose only \term{constituent trait} is \term{alphabetic}\meaning{2}.
+\param{Z} is appended to the \term{token} being built,
+and step 8 is repeated.
+
+%% 22.1.1 19
+\itemitem{\bull}
+If \param{y} is a \term{multiple escape} \term{character},
+then step 9 is entered.
+
+%% 22.1.1 20
+\itemitem{\bull}
+If \param{y} is an \term{invalid} \term{character},
+an error \oftype{reader-error} is signaled.
+
+%% 22.1.1 21
+\itemitem{\bull}
+If \param{y} is a \term{terminating} \term{macro character},
+then it terminates the \term{token}.
+First the \term{character} \param{y} is unread (see \funref{unread-char}),
+and then step 10 is entered.
+
+%% 22.1.1 22
+\itemitem{\bull}
+If \param{y} is a \term{whitespace}\meaning{2} \term{character}, then it terminates
+the \term{token}.  First the \term{character} \param{y} is unread
+if appropriate (see \funref{read-preserving-whitespace}),
+and then step 10 is entered.
+\endlist
+
+%% 22.1.1 23
+%% 22.1.1 24
+\item{9.}
+At this point a \term{token} is being accumulated, and an odd number
+of \term{multiple escape} \term{characters} have been encountered.
+If at end of file, an error \oftype{end-of-file} is signaled.
+Otherwise, a \term{character}, \param{y}, is read, and
+one of the following actions is performed according to its \term{syntax type}:
+
+%% 22.1.1 25
+\beginlist
+\itemitem{\bull}
+If \param{y} is a \term{constituent}, macro, or \term{whitespace}\meaning{2} \term{character},
+\param{y} is treated as a \term{constituent} 
+whose only \term{constituent trait} is \term{alphabetic}\meaning{2}.             
+\param{Y} is appended to the \term{token} being built, and step 9 is repeated.
+
+%% 22.1.1 26
+\itemitem{\bull}
+If \param{y} is a \term{single escape} \term{character}, then the next \term{character},
+\param{z}, is read, or an error \oftype{end-of-file} is signaled if at end of file.
+\param{Z} is treated as a \term{constituent}
+whose only \term{constituent trait} is \term{alphabetic}\meaning{2}.
+\param{Z} is appended to the \term{token} being built,
+and step 9 is repeated.
+
+%% 22.1.1 27
+\itemitem{\bull}
+If \param{y} is a \term{multiple escape} \term{character},
+then step 8 is entered.
+
+%% 22.1.1 28
+\itemitem{\bull}
+If \param{y} is an \term{invalid} \term{character},
+an error \oftype{reader-error} is signaled.
+\endlist
+
+%% 22.1.1 29
+\item{10.}
+An entire \term{token} has been accumulated.
+The \term{object} represented by the \term{token} is returned 
+as the result of the read operation,
+or an error \oftype{reader-error} is signaled if the \term{token} is not of valid syntax.
+\endlist
+
+%% 22.1.1 30
+%% 22.1.1 31
+%%Barmar observes that this is said elsewhere, and in any case is
+%%implied by the algorithm above:
+% \term{Single escape} and \term{multiple escape} \term{characters}
+% can be included in a \term{token} when
+% preceded by another \term{single escape} \term{character}.
+
+
+

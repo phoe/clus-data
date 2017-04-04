@@ -1,0 +1,1418 @@
+% -*- Mode: TeX -*-
+%% Compilation
+
+% Rob MacLachlan wants some general discussion of inlining...
+%
+%   The most general statement of what I think that NOTINLINE does is:
+%   NOTINLINE inhibits any special-casing of calls to the named function.
+%   NOTINLINE requires that the call be done as though there was a run-time
+%   indirection through the SYMBOL-FUNCTION.
+%   
+%   In particular:
+%   NOTINLINE inhibits the (otherwise legal) compile-time resolution of
+%   function calls to the same DEFUN or defined in the same file.  [This is
+%   indeed explicitly allowed in the semantics of compilation.]
+%
+%   Implementations should also be encouraged to suppress any sort of inline
+%   coding when a function (+, CAR, whatever) is declared NOTINLINE.  Although
+%   users can't portably exploit this (due to the illegality of redefinition),
+%   some facilities such as TRACE may benefit from this capability.
+%
+%   Of course, it is possible that any of these actions are considered "inline
+%   expansion".  If so, there should at the very least be a glossary entry for
+%   inline expansion explaining this rather odd interpretation.
+
+\def\sim#1#2#3{{\cal S}\sub{#1}(#2,#3)}
+
+%The nature of the processing performed during compilation is discussed
+%in \secref\CompilationSemantics.  Following \secref\CompilationSemantics\ is
+%a discussion of the behavior of \funref{compile-file} and the
+%interface between \funref{compile-file} and \funref{load}.
+
+\beginsubSection{Compiler Terminology}
+\DefineSection{CompilationTerms}
+
+% Reference:  Issue CONSTANT-COMPILABLE-TYPES
+ 
+The following terminology is used in this section.
+ 
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The \newterm{compiler} is a utility that translates code into an
+\term{implementation-dependent} form that might be represented or
+executed efficiently.
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The term \newterm{compiler} refers to both of the \term{functions}
+\funref{compile} and \funref{compile-file}.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+%In this section,
+The term \newterm{compiled code} refers to 
+\term{objects} representing compiled programs, such as \term{objects} constructed
+by \funref{compile} or by \funref{load} when \term{loading} a \term{compiled file}.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The term \newterm{implicit compilation} refers to \term{compilation}
+performed during \term{evaluation}.
+
+\DefineSection{ConstantModification}
+%!!! This needs to be revisited. -kmp 12-Mar-91
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The term \newterm{literal object} refers to 
+     a quoted \term{object} 
+  or a \term{self-evaluating object} 
+  or an \term{object} that is a substructure of such an \term{object}.
+%% The following info is not in the glossary. -kmp 27-Jul-93
+A \term{constant variable} is not itself a \term{literal object}.
+%% I believe this discussion belongs somewhere other than in this terminology
+%% section.  I have added notes to the discussion of self-evaluating objects
+%% and QUOTE.  --sjl 3 Mar 92
+% \issue{CONSTANT-MODIFICATION:DISALLOW}
+% The consequences are undefined if \term{literal objects} are destructively modified.  
+% \endissue{CONSTANT-MODIFICATION:DISALLOW}
+%% \editornote{KMP: I don't think this is really right.  I think that we said that
+%%  it's ok to modify literal objects in code processed by COMPILE and EVAL. It's only
+%%  literal objects in file compilation that are suspect, no?}
+%% \editornote{SJL: No, it's an error to modify any literal constant.}
+ 
+%% "constants" => "literal constants" per Moon#4(first public review) -kmp 5-May-93
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+%% Note that there is more specific verbiage here than in Glossary.
+%% (The Glossary cross-references this section.)
+The term \newterm{coalesce} is defined as follows.
+Suppose \f{A} and \f{B} are two \term{literal constants} in the \term{source code},
+and that \f{A'} and \f{B'} are the corresponding \term{objects} in the \term{compiled code}.
+If \f{A'} and \f{B'} are \funref{eql} but
+\f{A} and \f{B} are not \funref{eql}, then it is said
+that \f{A} and \f{B} have been coalesced by the compiler.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The term \newterm{minimal compilation} refers to actions the compiler
+must take at \term{compile time}. These actions are specified in 
+\secref\CompilationSemantics.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The verb \newterm{process} refers to performing \term{minimal compilation},
+determining the time of evaluation for a \term{form},
+and possibly \term{evaluating} that \term{form} (if required).
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The term \newterm{further compilation} refers to
+\term{implementation-dependent} compilation beyond \term{minimal compilation}.
+%% The next sentence doesn't appear in the Glossary. -kmp 27-Jul-93
+That is, \term{processing} does not imply complete compilation.
+Block compilation and generation of machine-specific instructions are 
+examples of further compilation.
+Further compilation is permitted to take place at \term{run time}.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+Four different \term{environments} relevant to compilation are
+distinguished:
+  the \term{startup environment},
+  the \term{compilation environment},
+  the \term{evaluation environment}, and
+  the \term{run-time environment}.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The \newterm{startup environment} is
+the \term{environment} of the \term{Lisp image} 
+from which the \term{compiler} was invoked.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+%% This text is, however, much more verbose/detailed.
+The \newterm{compilation environment} is maintained by the compiler
+and is used to hold definitions and declarations to be used internally
+by the compiler.  Only those parts of a definition needed for correct
+compilation are saved. The \term{compilation environment} is used
+as the \term{environment} \term{argument} to macro expanders called by
+the compiler. It is unspecified whether a definition available in the
+\term{compilation environment} can be used in an \term{evaluation}
+initiated in the \term{startup environment} or \term{evaluation environment}.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The \newterm{evaluation environment} is a \term{run-time environment}
+in which macro expanders and code specified by \specref{eval-when}
+to be evaluated are evaluated.  All evaluations initiated by the
+\term{compiler} take place in the \term{evaluation environment}.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The \newterm{run-time environment} is the 
+\term{environment} in which the program being compiled will be executed.
+
+%% This text is missing from, but not inconsistent with, the Glossary. -kmp 27-Jul-93
+The \term{compilation environment} inherits from
+the \term{evaluation environment},
+and the \term{compilation environment} and \term{evaluation environment} 
+might be \term{identical}.
+The \term{evaluation environment} inherits from
+the \term{startup environment}, 
+and the \term{startup environment} and \term{evaluation environment} 
+might be \term{identical}.
+
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The term \newterm{compile time} refers to the duration of time that
+the compiler is processing \term{source code}.
+At \term{compile time},
+only the \term{compilation environment} 
+and  the \term{evaluation environment}
+are available.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The term \newterm{compile-time definition} refers to a definition in
+the \term{compilation environment}.
+For example, when compiling a file, 
+the definition of a function might be retained in the \term{compilation environment} 
+if it is declared \declref{inline}. 
+This definition might not be available in the \term{evaluation environment}.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The term \newterm{run time} refers to the duration of time that the
+loader is loading compiled code or compiled code is being executed.
+%% The following info is not in the glossary. -kmp 27-Jul-93
+At run time, only the \term{run-time environment} is available.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The term \newterm{run-time definition} refers to a definition in the
+\term{run-time environment}.
+
+%% Checked to be consistent with glossary. -kmp 27-Jul-93
+The term \newterm{run-time compiler} refers to \thefunction{compile}
+or \term{implicit compilation}, for which the compilation and run-time 
+\term{environments} are maintained in the same \term{Lisp image}.
+%% The following info is not in the glossary. -kmp 27-Jul-93
+Note that when the \term{run-time compiler} is used,
+the \term{run-time environment} 
+and \term{startup environment} 
+are the same.
+
+\endsubSection%{Compiler Terminology}
+ 
+\beginsubSection{Compilation Semantics}
+\DefineSection{CompilationSemantics}
+ 
+Conceptually, compilation is a process that traverses code, performs
+certain kinds of syntactic and semantic analyses using information
+(such as proclamations and \term{macro} definitions) present in the
+\term{compilation environment}, and produces equivalent, possibly
+more efficient code.
+
+\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+
+\beginsubsubsection{Compiler Macros}
+\DefineSection{CompilerMacros}
+
+A \term{compiler macro} can be defined for a \term{name}
+that also names a \term{function} or \term{macro}.
+%Given that we have to allow macros, it's too bad we can't just 
+%say "any operator" in the previous. Why exclude special forms? -Barrett 13-Oct-91
+% Changed symbol => function name below; --sjl 3 Mar 92
+That is, it is possible for a
+\term{function name} to name both a \term{function} and a \term{compiler macro}.
+
+A \term{function name} names a \term{compiler macro} if \funref{compiler-macro-function}
+is \term{true} of the \term{function name} in the \term{lexical environment} in which
+it appears.  Creating a \term{lexical binding} for the \term{function name}
+not only creates a new local \term{function} or
+\term{macro} definition, but also \term{shadows}\meaning{2} the \term{compiler macro}.
+
+The \term{function} returned by \funref{compiler-macro-function}
+is a \term{function} of two arguments, called the
+expansion function.  To expand a \term{compiler macro},
+the expansion function is invoked by calling the \term{macroexpand hook} with
+      the expansion function as its first argument,
+      the entire compiler macro \term{form} as its second argument,
+  and the current compilation \term{environment} 
+       (or with the current lexical \term{environment},
+ 	 if the \term{form} is being processed by something
+	 other than \funref{compile-file}) 
+       as its third argument.
+The \term{macroexpand hook}, in turn, calls the expansion function with the
+\term{form} as its first argument and the \term{environment} as its second argument.
+The return value from the expansion function, which is passed through
+by the \term{macroexpand hook}, might either be the \term{same} \term{form}, 
+or else a form that can, at the discretion of the \term{code} doing the expansion, 
+be used in place of the original \term{form}.
+
+\displaythree{Defined names applicable to compiler macros}{
+*macroexpand-hook*&compiler-macro-function&define-compiler-macro\cr
+}
+
+\beginsubsubsubsection{Purpose of Compiler Macros}
+
+The purpose of the \term{compiler macro} facility is to permit 
+selective source code transformations as optimization advice 
+to the \term{compiler}.  When a \term{compound form} is being
+processed (as by the compiler), if the \term{operator} names a
+\term{compiler macro} then the \term{compiler macro function} may be
+invoked on the form, and the resulting expansion recursively processed
+in preference to performing the usual processing on the original \term{form}
+according to its normal interpretation as a \term{function form} or
+\term{macro form}.
+ 
+A \term{compiler macro function}, like a \term{macro function},
+is a \term{function} of two \term{arguments}: the entire call \term{form}
+and the \term{environment}. Unlike an ordinary \term{macro function}, a 
+\term{compiler macro function} can decline to provide an expansion merely by
+returning a value that is the \term{same} as the original \term{form}.
+The consequences are undefined if a \term{compiler macro function}
+destructively modifies any part of its \term{form} argument.
+ 
+The \term{form} passed to the compiler macro function can either be a \term{list}
+whose \term{car} is the function name, or a \term{list} whose \term{car} is
+\funref{funcall} and whose \term{cadr} is a list \f{(function \param{name})};
+note that this affects destructuring of the form argument by the 
+\term{compiler macro function}.
+\macref{define-compiler-macro} arranges for destructuring of arguments to be
+performed correctly for both possible formats.
+
+% Already explained in more detail in the previous section. -- sjl 3 Mar 92
+% When a \term{compiler macro function} is called as part of processing by the
+% evaluator or compiler, it is invoked by calling the \term{macroexpand hook}.
+
+When \funref{compile-file} chooses to expand a \term{top level form} that is
+a \term{compiler macro} \term{form}, the expansion is also treated as a \term{top level form}
+for the purposes of \specref{eval-when} processing; \seesection\TopLevelForms.
+%% Superfluous. -kmp
+%(just as would happen for the expansion of a \term{macro form}).
+
+\endsubsubsubsection%{Purpose of Compiler Macros}
+
+\beginsubsubsubsection{Naming of Compiler Macros}
+ 
+\term{Compiler macros} may be defined for \term{function names} that name
+\term{macros} as well as \term{functions}.  
+%!!! Isn't this said elsewhere? Does it need to be repeated here? -kmp 1-Jun-91
+% Yes, it's in the packages chapter.  --sjl 5 Mar 92
+% (It is not permitted to define
+% a \term{compiler macro} for a \term{name} that is an \term{external symbol} of 
+% \thepackage{common-lisp}.)
+
+\term{Compiler macro} definitions are strictly global.  There is no provision
+for defining local \term{compiler macros} in the way that \specref{macrolet}
+defines local \term{macros}.  Lexical bindings of a function name shadow any
+compiler macro definition associated with the name as well as its 
+global \term{function} or \term{macro} definition.
+ 
+Note that the presence of a compiler macro definition does not affect
+the values returned by
+\issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
+%by \macref{function-information}, or other accessors [sic]
+\endissue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
+functions that access \term{function} definitions (\eg \funref{fboundp})
+or \term{macro} definitions (\eg \funref{macroexpand}).
+Compiler macros are global, and the function
+\funref{compiler-macro-function} is sufficient to resolve their interaction
+with other lexical and global definitions.
+
+\endsubsubsubsection%{Naming of Compiler Macros}
+
+\beginsubsubsubsection{When Compiler Macros Are Used}
+
+The presence of a \term{compiler macro} definition for a \term{function} or \term{macro}
+indicates that it is desirable for the \term{compiler} to use the expansion
+of the \term{compiler macro} instead of the original \term{function form} or
+\term{macro form}.  However, no language processor
+(compiler, evaluator, or other code walker) is ever required to actually
+invoke \term{compiler macro functions}, or to 
+make use of the resulting expansion if it does invoke 
+a \term{compiler macro function}.
+
+When the \term{compiler} encounters a \term{form} during processing that represents
+a call to a \term{compiler macro} \term{name} (that is not declared \declref{notinline}),
+the \term{compiler} might expand the \term{compiler macro}, 
+and might use the expansion in place of the original \term{form}.
+
+When \funref{eval} encounters a \term{form} during processing that represents 
+a call to a \term{compiler macro} \term{name} (that is not declared \declref{notinline}),
+\funref{eval} might expand the \term{compiler macro},
+and might use the expansion in place of the original \term{form}.
+
+There are two situations in which a \term{compiler macro} definition must not be
+applied by any language processor:
+
+\beginlist
+\itemitem{\bull}
+ The global function name binding associated with the compiler
+ macro is shadowed by a lexical binding of the function name.
+
+\itemitem{\bull}
+ The function name has been declared or proclaimed \declref{notinline} and
+ the call form appears within the scope of the declaration.
+\endlist
+
+It is unspecified whether \term{compiler macros} are expanded or used in any other
+situations.
+
+\beginsubsubsubsubsection{Notes about the Implementation of Compiler Macros}
+
+Although it is technically permissible, as described above,
+for \funref{eval} to treat \term{compiler macros} in the same situations
+as \term{compiler} might, this is not necessarily a good idea in
+\term{interpreted implementations}.
+
+\term{Compiler macros} exist for the purpose of trading compile-time speed
+for run-time speed.  Programmers who write \term{compiler macros} tend to
+assume that the \term{compiler macros} can take more time than normal \term{functions}
+and \term{macros} in order to produce code which is especially optimal for use
+at run time.  Since \funref{eval} in an \term{interpreted implementation}
+might perform semantic analysis of the same form multiple times, it might be 
+inefficient in general for the \term{implementation} to choose to call
+\term{compiler macros} on every such \term{evaluation}.
+
+Nevertheless, the decision about what to do in these situations is left to
+each \term{implementation}.
+
+\endsubsubsubsubsection%{Notes about the Implementation of Compiler Macros}
+
+\endsubsubsubsection%{When Compiler Macros Are Used}
+
+\endsubsubsection%{Compiler Macros}
+
+\endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+
+\beginsubsubsection{Minimal Compilation}
+\DefineSection{MinimalCompilation}
+
+% Fixed major problems in this section.
+% See proposal COMPILED-FUNCTION-REQUIREMENTS:TIGHTEN, item (1).
+% -- sjl 3 Mar 92
+
+\term{Minimal compilation} is defined as follows:
+
+\beginlist 
+\issue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+%!!! This looks questionable. -kmp 11-Mar-91
+% This item is definitely wrong.  I commented it out.  -- sjl 3 Mar 92
+% \issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+%  \itemitem{\bull} All \term{compiler macro} calls appearing in the
+% source code being compiled are expanded at compile time in such a way
+% that they will not be expanded again at run time. 
+% \endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+%% Reinstated per X3J13 vote, with some clarifications. -kmp 7-Apr-92
+\itemitem{\bull} All \term{compiler macro}\idxterm{compiler macro} calls appearing in the
+\term{source code} being compiled are expanded, if at all, at compile time;
+they will not be expanded at run time.
+\endissue{KMP-COMMENTS-ON-SANDRA-COMMENTS:X3J13-MAR-92}
+
+% I made some minor wording changes to this paragraph.  -- sjl 3 Mar 92
+ \itemitem{\bull} All \term{macro}\idxterm{macro} and 
+\term{symbol macro}\idxterm{symbol macro} calls
+appearing in the source code being compiled are expanded at compile time
+in such a way that they will not be expanded again at run time.
+\specref{macrolet}\idxref{macrolet}
+and
+\specref{symbol-macrolet}\idxref{symbol-macrolet}
+are effectively replaced by
+\term{forms} corresponding to their bodies in which calls to 
+\term{macros} are replaced by their expansions.
+ 
+% I made some minor wording changes to this paragraph.  -- sjl 3 Mar 92
+\itemitem{\bull} 
+The first \term{argument} in a \specref{load-time-value}\idxref{load-time-value}
+\term{form} 
+in \term{source code} processed by \funref{compile}\idxref{compile}
+is \term{evaluated} at \term{compile time};
+in \term{source code} processed by \funref{compile-file}\idxref{compile-file}, 
+the compiler arranges for it to be \term{evaluated} at \term{load time}.
+In either case, the result of the \term{evaluation}
+is remembered and used later as the value of the 
+\specref{load-time-value} \term{form} at \term{execution time}.
+
+% I think the previous paragraph was supposed to replace this one, not
+% augment it.  It adds nothing but confusion.  -- sjl 3 Mar 92
+% \specref{load-time-value} forms in the source code will be evaluated
+% at compile time when compiled by \funref{compile} or at load time
+% when compiled by \funref{compile-file}, and the result of
+% evaluation will be used as a constant at run time.
+\endlist
+ 
+\endsubsubsection%{Minimal Compilation}
+
+\beginsubsubsection{Semantic Constraints}
+\DefineSection{SemanticConstraints}
+
+%% Removed per Dalton #1 (first public review). -kmp 10-May-93
+% % Fixed some garbled language in this section.
+% % See proposal COMPILE-ENVIRONMENT-CONSISTENCY:CLARIFY.
+% % -- sjl 3 Mar 92
+% 
+% Conforming code must be structured so that its results and observable
+% side effects are the same whether or not compilation takes place.
+%
+% Additional constraints about the consistency of the compilation and
+% run-time \term{environments} imply additional semantic constraints on
+% conforming programs.  Conforming programs obeying these constraints
+% have the same behavior whether evaluated or compiled.
+% 
+% The following are the semantic constraints:
+%% and replaced with:
+
+All \term{conforming programs} must obey the following constraints,
+which are designed to minimize the observable differences 
+between compiled and interpreted programs:
+
+\beginlist
+% This entire item seems to have gotten totally garbled.  See replacement
+% text below.  -- sjl 3 Mar 92
+%  \itemitem{\bull} Any \term{form} that is a \term{list}
+% beginning with a \term{symbol} that does not name a 
+% \term{special form}, 
+% %%This is questionable. -kmp 11-Mar-91
+% %%Moon and Barrett thought so, too. Removed. -kmp 13-Oct-91
+% % \issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+% % a \term{compiler macro},
+% % \endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+% or a \term{macro}
+% defined in the compilation environment is a function call.
+% \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+% (This implies that \term{setf expanders} must be available at compile time.)
+% \endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS} 
+ \itemitem{\bull} Definitions of any referenced \term{macros}
+must be present in the \term{compilation environment}.  
+Any \term{form} that is a \term{list}
+beginning with a \term{symbol} that does not name a
+\term{special operator} or a \term{macro} defined in the 
+\term{compilation environment} is treated by the compiler as a 
+function call.
+
+% This garbled item also replaced.  -- sjl 3 Mar 92
+%  \itemitem{\bull} Any binding of a \term{variable} not declared
+% \declref{special} is a lexical binding.
+ \itemitem{\bull} \declref{Special} proclamations for \term{dynamic variables}
+must be made in the \term{compilation environment}.  Any \term{binding}
+for which there is no \declref{special} declaration or proclamation in
+the \term{compilation environment} is treated by the compiler as
+a \term{lexical binding}.
+
+
+% Minor rewording.  -- sjl 3 Mar 92.
+ \itemitem{\bull} The definition of a function that is defined and
+declared \declref{inline} in the \term{compilation environment} must be
+the same at run time.
+ 
+%% Barrett didn't like this.  The paragraph that follows is a negotiated rewrite to clarify.
+%% -kmp 13-Oct-91
+%  \itemitem{\bull} Within a named function $F$, a recursive call to $F$
+% refers to $F$, unless that function has been declared \declref{notinline}.
+  
+ \itemitem{\bull} Within a \term{function} named $F$, the compiler may
+(but is not required to)
+assume that an apparent recursive call to a \term{function} named $F$ 
+refers to the same definition of $F$,
+unless that function has been declared \declref{notinline}.
+The consequences of redefining such a recursively defined \term{function} $F$ 
+while it is executing are undefined.
+
+ \itemitem{\bull} A call within a file to a named function that is
+defined in the same file refers to that function, unless that function
+has been declared \declref{notinline}.  The consequences are unspecified
+if functions are redefined individually at run time or multiply
+defined in the same file.
+
+% I believe this item has been made unnecessary by issue
+% LISP-SYMBOL-REDEFINITION.  -- sjl 3 Mar 92
+% \itemitem{\bull} A call to a built-in Common Lisp function refers to
+%that function.  Any built-in \clisp\ function might be proclaimed \declref{inline}.
+  
+ \itemitem{\bull} The argument syntax and number of return values for
+all functions whose \declref{ftype} is declared at compile time must
+remain the same at run time.
+ 
+% Reference:  CLtL page 69
+%"same" => "similar" per Moon
+ \itemitem{\bull} \term{Constant variables} defined in
+the \term{compilation environment} must have a \term{similar} value at
+run time.  A reference to 
+%the name of a constant
+a \term{constant variable} 
+in \term{source code} is equivalent to a reference to 
+%an \term{object} \funref{eql} to
+a \term{literal} \term{object} that is the \term{value} of the \term{constant variable}.
+ 
+% The following paragraph from issue COMPILE-ENVIRONMENT-CONSISTENCY
+%    seems likely to change:
+% No, we later voted down the proposal to change it. -- sjl 3 Mar 92
+ \itemitem{\bull} Type definitions made with \macref{deftype} or
+\macref{defstruct} in the \term{compilation environment} must
+retain the same definition at run time.  Classes defined by \macref{defclass}
+in the \term{compilation environment} must be defined
+at run time to have the same \term{superclasses} and same 
+\term{metaclass}.
+
+This implies that \term{subtype}/\term{supertype} relationships of 
+\term{type specifiers} must not change between \term{compile time} and \term{run time}.  
+ 
+% Ref:  CLtL page 153
+ \itemitem{\bull} Type declarations present in the compilation 
+\term{environment} must accurately describe the corresponding values at run time;
+otherwise, the consequences are undefined.  It is permissible
+for an unknown \term{type} to appear in a declaration at 
+compile time, though a warning might be signaled in such a case.
+
+ \itemitem{\bull} Except in the situations explicitly listed above, a
+\term{function} defined in the \term{evaluation environment}
+is permitted to have a different definition or a different \term{signature}
+at run time, and the run-time definition prevails.
+
+\endlist 
+
+\term{Conforming programs} should not be written using any additional
+assumptions about consistency between the run-time 
+\term{environment} and the startup, evaluation, and compilation 
+\term{environments}.
+
+Except where noted, when a compile-time and a run-time definition are
+different, one of the following occurs at run time:
+
+\beginlist
+                                                          
+\item{\bull} an error \oftype{error} is signaled
+\item{\bull} the compile-time definition prevails
+\item{\bull} the run-time definition prevails
+
+\endlist
+ 
+If the \term{compiler} processes a \term{function form} whose \term{operator} 
+is not defined at compile time, no error is signaled at compile time.
+
+\endsubsubsection%{Semantic Constraints}
+\endsubSection%{Compilation Semantics}
+\beginsubSection{File Compilation}
+\DefineSection{FileCompilation}
+ 
+\Thefunction{compile-file} performs compilation of 
+\term{forms} in a file following the rules specified in \secref\CompilationSemantics,
+and produces an output file that can be loaded by using \funref{load}.
+ 
+Normally, the \term{top level forms} appearing in a file compiled with
+\funref{compile-file} are evaluated only when the resulting
+compiled file is loaded, and not when the file is compiled.  However,
+% the use of ``must'' is problematic here  --sjl 7 Mar 92
+%some forms in the file must be evaluated at compile time so the
+it is typically the case that some forms in the file need to be evaluated
+at compile time so the
+remainder of the file can be read and compiled correctly.
+
+\Thespecform{eval-when} can be used to control
+whether a \term{top level form} is evaluated at compile time, load
+time, or both.  It is possible to specify any of three situations with
+\specref{eval-when}, denoted by the symbols \kwd{compile-toplevel},
+\kwd{load-toplevel}, and \kwd{execute}.  For top level 
+\specref{eval-when} forms, \kwd{compile-toplevel} specifies that the
+compiler must evaluate the body at compile time, and {\tt
+:load-toplevel} specifies that the compiler must arrange to evaluate
+the body at load time. For non-top level \specref{eval-when} forms,
+\kwd{execute} specifies that the body must be executed in the run-time
+\term{environment}.
+
+The behavior of this \term{form} can be more precisely understood in
+terms of a model of how \funref{compile-file} processes forms in
+a file to be compiled. There are two processing modes, called
+``not-compile-time'' and ``compile-time-too''.
+ 
+Successive forms are read from the file by \funref{compile-file}
+and processed in not-compile-time mode; in this mode, 
+\funref{compile-file} arranges for forms to be evaluated only at load time
+and not at compile time.  When \funref{compile-file} is in
+compile-time-too mode, forms are evaluated both at compile time and
+load time.
+
+\beginsubsubsection{Processing of Top Level Forms}
+\DefineSection{TopLevelForms}
+
+Processing of \term{top level forms} in the file compiler is defined
+as follows:
+
+\beginlist
+\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+ \itemitem{1.} If the \term{form} is a \term{compiler macro form}
+(not disabled by a \declref{notinline} \term{declaration}),
+% Not clear what ``expand'' means here.  --sjl 7 Mar 92
+%the \term{implementation} might or might not choose to expand the \term{form} and,
+the \term{implementation} might or might not choose to compute
+the \term{compiler macro expansion} of the \term{form} and,
+having performed the expansion, might or might not choose to process the result
+as a \term{top level form} in the same processing mode
+(compile-time-too or not-compile-time).
+%% Added for Moon. -kmp 16-Feb-92
+If it declines to obtain or use the expansion, it must process the original \term{form}.
+\endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+ 
+ \itemitem{2.} If the form is a \term{macro form},
+%% Probably better to do without this. -kmp,kab 13-Oct-91
+% \issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+% (and was not processed as a \term{compiler macro}),
+% \endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+% Not clear what ``expand'' means here.  --sjl 7 Mar 92
+%it is expanded and the result is processed as a \term{top level form} in
+its \term{macro expansion} is computed and processed as a 
+\term{top level form} in
+the same processing mode (compile-time-too or not-compile-time).
+ 
+ \itemitem{3.} If the form is a \specref{progn} form, each of its
+body \term{forms} is sequentially processed as a 
+\term{top level form} in the same processing mode.
+ 
+ \itemitem{4.} If the form is a \specref{locally}, 
+\specref{macrolet}, or \specref{symbol-macrolet}, 
+\funref{compile-file} establishes the appropriate bindings and processes the
+body forms as \term{top level forms} with those bindings in effect
+in the same processing mode.  (Note that this implies that the lexical
+\term{environment} in which \term{top level forms} are processed
+is not necessarily the \term{null lexical environment}.)
+ 
+ \itemitem{5.} If the form is an \specref{eval-when}\idxref{eval-when} form, it is
+handled according to \thenextfigure.
+
+\boxfig
+{\dimen0=.75pc
+\tabskip \dimen0 plus .5 fil
+\offinterlineskip
+\halign to \hsize {\strut#\hfil\tabskip \dimen0 plus 1fil&#\hfil\tabskip 
+\dimen0 plus .5 fil&#\hfil\tabskip \dimen0 plus 1fil&#\hfil\tabskip \dimen0 plus 1fil
+&#\hfil&#\hfil&#\hfil\cr 
+\noalign{\vskip -11pt}
+\hfil\b{CT} &\hfil\b{LT} &\hfil\b{E} &\hfil\b{Mode}&\hfil\b{Action}&\hfil\b{New Mode}\cr
+\noalign{\hrule}
+Yes&Yes&\hfil---&\hfil---&Process&compile-time-too\cr
+No&Yes&Yes&\hfil CTT&Process&compile-time-too\cr
+No&Yes&Yes&\hfil NCT&Process&not-compile-time\cr
+No&Yes&No&\hfil---&Process&not-compile-time\cr
+Yes&No&\hfil---&\hfil---&Evaluate&\hfil---\cr
+No&No&Yes&\hfil CTT&Evaluate&\hfil---\cr
+No&No&Yes&\hfil NCT&Discard&\hfil---\cr
+No&No&No&\hfil---&Discard&\hfil---\cr
+\noalign{\vskip -9pt}
+}}
+\caption{EVAL-WHEN processing}
+\endfig
+
+Column \b{CT}   indicates whether \kwd{compile-toplevel} is specified.
+Column \b{LT}   indicates whether \kwd{load-toplevel} is specified.
+Column \b{E}    indicates whether \kwd{execute} is specified.  
+Column \b{Mode} indicates the processing mode; 
+		a dash (---) indicates that the processing mode is not relevant.
+   
+The \b{Action} column specifies one of three actions:
+
+\beginlist
+
+ \item{}\b{Process:} process the body as \term{top level forms} in the
+specified mode.
+ 
+ \item{}\b{Evaluate:} evaluate the body in the dynamic execution
+context of the compiler, using the \term{evaluation environment} as
+the global environment and the \term{lexical environment} in which
+the \specref{eval-when} appears.
+ 
+\item{}\b{Discard:} ignore the \term{form}.
+\endlist
+
+The \b{New Mode} column indicates the new processing mode. 
+A dash (---) indicates the compiler remains in its current mode.
+
+ \itemitem{6.} Otherwise, the form is a \term{top level form} that
+is not one of the special cases.  In compile-time-too mode, the
+compiler first evaluates the form in the evaluation 
+\term{environment} and then minimally compiles it.  In not-compile-time
+mode, the \term{form} is simply minimally compiled.  All \term{subforms}
+are treated as \term{non-top-level forms}.
+
+Note that \term{top level forms} are processed in the order in
+which they textually appear in the file and that each 
+\term{top level form} read by the compiler is processed before the next is
+read.  However, the order of processing (including macro expansion) of
+\term{subforms} that are not \term{top level forms} and the order of
+further compilation is unspecified as long as Common Lisp semantics
+are preserved.
+
+\endlist 
+ 
+\specref{eval-when} forms cause compile-time evaluation only at
+top level.  Both \kwd{compile-toplevel} and \kwd{load-toplevel} situation specifications
+are ignored for \term{non-top-level forms}. For \term{non-top-level forms}, 
+an \specref{eval-when}
+specifying the \kwd{execute} situation is treated as an \term{implicit progn}
+including the \term{forms} in the body of the \specref{eval-when} \term{form};
+otherwise, the \term{forms} in the body are ignored.
+
+\beginsubsubsubsection{Processing of Defining Macros}
+\DefineSection{DefiningMacros}
+
+% The material below was in its own section (3.2.6), but I think it
+% logically belongs here.  --sjl 3 Mar 92
+
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+
+Defining \term{macros} (such as \macref{defmacro} or \macref{defvar})
+appearing within a file being processed by \funref{compile-file}
+normally have compile-time side effects which affect how subsequent \term{forms}
+in the same \term{file} are compiled.  A convenient model for explaining how these
+side effects happen is that the defining macro expands into one or
+more \specref{eval-when} \term{forms}, and that the calls which cause the compile-time
+side effects to happen appear 
+in the body of an \f{(eval-when (:compile-toplevel) ...)} \term{form}.
+
+%RPG: What does this mean and is it worth saying?
+%Sandra: I think it's fairly important for this information to remain,
+%  since it's what licenses implementations to use what we've been calling 
+%  "remote environments" to keep track of compile-time definitions.
+%KAB: I agree.
+The compile-time side effects may cause information about the definition to
+be stored differently than if the defining macro had been processed in the
+`normal' way (either interpretively or by loading the compiled file).
+
+In particular, the information stored by the defining \term{macros} at compile time
+might or might not be available to the interpreter (either during or after compilation),
+or during subsequent calls to the \term{compiler}.  For example,
+the following code is nonportable because it assumes that the \term{compiler}
+stores the macro definition of \f{foo} where it is available to the interpreter:
+    
+\code
+ (defmacro foo (x) `(car ,x))
+ (eval-when (:execute :compile-toplevel :load-toplevel)
+   (print (foo '(a b c))))
+\endcode
+    
+A portable way to do the same thing would be to include the macro
+definition inside the \specref{eval-when} \term{form}, as in:
+    
+\code
+ (eval-when (:execute :compile-toplevel :load-toplevel)
+   (defmacro foo (x) `(car ,x))
+   (print (foo '(a b c))))
+\endcode
+
+\endissue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+
+% end of moved material.
+
+\Thenextfigure\ lists macros that make definitions
+available both in the compilation and run-time \term{environments}.
+It is not specified whether definitions made available in the
+\term{compilation environment} are available in the evaluation
+\term{environment}, nor is it specified whether they are available
+in subsequent compilation units or subsequent invocations of the
+compiler.  As with \specref{eval-when}, these compile-time side
+effects happen only when the defining macros appear at 
+top level.
+ 
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\issue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO}
+\issue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+\issue{CLOS-MACRO-COMPILATION:MINIMAL}
+% Removed DEFGENERIC, DEFINE-METHOD-COMBINATION, and DEFMETHOD for KAB.
+% He says they "might" but don't have to. -kmp 8-Feb-92
+\displaythree{Defining Macros That Affect the Compile-Time Environment}{
+declaim&define-modify-macro&defsetf\cr
+defclass&define-setf-expander&defstruct\cr
+defconstant&defmacro&deftype\cr
+define-compiler-macro&defpackage&defvar\cr
+define-condition&defparameter&\cr
+}
+
+\endissue{CLOS-MACRO-COMPILATION:MINIMAL}
+\endissue{DEFINE-COMPILER-MACRO:X3J13-NOV89}
+\endissue{PROCLAIM-ETC-IN-COMPILE-FILE:NEW-MACRO}
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+
+\endsubsubsubsection%{Processing of Defining Macros}
+
+\beginsubsubsubsection{Constraints on Macros and Compiler Macros}
+\DefineSection{ConstraintsOnMacros}
+
+% Fixed major omission -- issue MACRO-SUBFORMS-TOP-LEVEL-P had not
+% been incorporated into the document yet.   --sjl 3 Mar 92
+\issue{MACRO-SUBFORMS-TOP-LEVEL-P:ADD-CONSTRAINTS}
+
+Except where explicitly stated otherwise, no \term{macro} defined in
+the \clisp\ standard produces an expansion that could cause any of the
+\term{subforms} of the \term{macro form} to be treated as 
+\term{top level forms}.  If an \term{implementation} also provides a
+\term{special operator} definition of a \clisp\ \term{macro}, 
+the \term{special operator} definition must be semantically equivalent
+in this respect.
+
+\term{Compiler macro} expansions must also have the same
+top level evaluation semantics as the \term{form} which they replace.
+This is of concern both to \term{conforming implementations} and to
+\term{conforming programs}.
+
+\endissue{MACRO-SUBFORMS-TOP-LEVEL-P:ADD-CONSTRAINTS}
+\endsubsubsubsection%{Constraints on Macros and Compiler Macros}
+
+\endsubsubsection%{Processing of Top Level Forms}
+
+\endsubSection%{File Compilation}
+
+%% Moon thought this section was stupid and wanted it moved into next section.
+% \beginsubSection{Compiler/Loader Interface}
+% % Reference: Issue QUOTE-SEMANTICS
+%  
+%  
+% \endsubSection%{Compiler/Loader Interface}
+
+\beginsubSection{Literal Objects in Compiled Files}
+\DefineSection{LiteralsInCompiledFiles}
+
+% Reference: Issue QUOTE-SEMANTICS
+
+%"constants" => "literal objects" per Moon #4(first public review) --kmp 5-May-93
+
+The functions \funref{eval} and \funref{compile} are
+required to ensure that \term{literal objects} referenced within the resulting
+interpreted or compiled code objects are the \term{same} as the
+corresponding \term{objects} in the \term{source code}.
+\funref{compile-file}, on the other hand, 
+must produce a \term{compiled file} that, when loaded with
+\funref{load}, constructs the \term{objects} defined by the
+\term{source code} and produces references to them.
+ 
+In the case of \funref{compile-file}, \term{objects}
+constructed by \funref{load} of the \term{compiled file} cannot be spoken
+of as being the \term{same} as the \term{objects} constructed at
+compile time, because the \term{compiled file} may be loaded into a different
+\term{Lisp image} than the one in which it was compiled.  This section
+defines the concept of \term{similarity} which relates
+\term{objects} in the \term{evaluation environment} to the
+corresponding \term{objects} in the \term{run-time environment}.
+ 
+The constraints on \term{literal objects} described in this section
+apply only to \funref{compile-file};
+\funref{eval} and \funref{compile} do not copy or coalesce constants.
+
+\beginsubsubsection{Externalizable Objects}
+\DefineSection{ExternalizableObjects}
+
+\issue{CONSTANT-COMPILABLE-TYPES:SPECIFY}
+The fact that the \term{file compiler} represents \term{literal} \term{objects} 
+externally in a \term{compiled file} and must later reconstruct suitable 
+equivalents of those \term{objects} when that \term{file} is loaded
+imposes a need for constraints on the nature of the \term{objects} that can be 
+used as \term{literal} \term{objects} in \term{code} to be processed 
+by the \term{file compiler}.
+
+An \term{object} that can be used as a \term{literal} \term{object} 
+in \term{code} to be processed by the \term{file compiler} is called an
+\newterm{externalizable object}.
+
+We define that two \term{objects} are \newterm{similar} if they satisfy
+a two-place conceptual equivalence predicate (defined below), which is
+independent of the \term{Lisp image} so that the two \term{objects} in
+different \term{Lisp images} can be understood to be equivalent under
+this predicate.  Further, by inspecting the definition of this conceptual
+predicate, the programmer can anticipate what aspects of an \term{object}
+are reliably preserved by \term{file compilation}.
+
+The \term{file compiler} must cooperate with the \term{loader} in order to
+assure that in each case where an \term{externalizable object} is processed
+as a \term{literal object}, the \term{loader} will construct a \term{similar}
+\term{object}.
+
+The set of \term{objects} that are \newtermidx{externalizable objects}{externalizable object} are those
+for which the new conceptual term ``\term{similar}'' is defined, such that
+when a \term{compiled file} is \term{loaded}, an \term{object} can be constructed
+which can be shown to be \term{similar} to the original \term{object} which
+existed at the time the \term{file compiler} was operating.
+\endissue{CONSTANT-COMPILABLE-TYPES:SPECIFY}
+
+\endsubsubsection%{Externalizable Objects}
+
+\beginsubsubsection{Similarity of Literal Objects}
+\DefineSection{Similarity}
+
+\beginsubsubsubsection{Similarity of Aggregate Objects}
+%Moon thinks this section is unnecessary.
+
+Of the \term{types} over which \term{similarity} is defined, 
+some are treated as aggregate objects.  For these types, 
+\term{similarity} is defined recursively.  
+We say that an \term{object} of these types has certain ``basic qualities''
+and to satisfy the \term{similarity} relationship, the values of the
+corresponding qualities of the two \term{objects} must also be similar.
+ 
+\endsubsubsubsection%{Similarity of Aggregate Objects}
+
+% What was left of this section made no sense at all, so I removed
+% the whole thing.  --sjl 3 Mar 92
+% \beginsubsubsubsection{Similarity of Circular Objects}
+% %Moon: I think this section is BS and should be deleted, but RPG might disagree.
+% 
+% %!!! This discussion needs to be reworked since we're not doing "depth-limited gunk" anymore.
+% This kind of definition has problems with any circular or ``infinitely
+% recursive'' object such as a list that is an element of itself.  
+% %% !!!! RPG thinks we should flush this part.  But that leaves the previous sentence
+% %% in a precarious situation.  I see no reason really why circular objects are
+% %% a problem.  Can't we just use the same tricks that make printing circular objects work?
+% %% And if that's right, how do I express it??
+% %% -kmp 26-Jan-92
+% % We use
+% % the idea of depth-limited comparison, and say that two objects are
+% % \term{similar} if they are \term{similar} at all finite levels.  This
+% % idea is implicit in the definitions below, and applies in all the
+% % places where qualities of two \term{objects} are required to be \term{similar}.
+%  
+% \endsubsubsubsection%{Similarity of Circular Objects}
+
+% The following terms are used throughout this proposal:
+% 
+%   The term "constant" [now "literal object" -kmp 8-Oct-91]
+%   refers to a quoted object or self-evaluating object,
+%   not a constant variable.
+% 
+%   The term "source code" is used to refer to the objects constructed
+%   when COMPILE-FILE calls READ, and additional objects constructed by
+%   macroexpansion during COMPILE-FILE.
+% 
+%   The term "compiled code" is used to refer to objects constructed by 
+%   LOAD.
+% 
+
+\beginsubsubsubsection{Definition of Similarity}
+
+Two \term{objects} $S$ (in \term{source code}) and $C$ (in \term{compiled code})
+     are defined to be \term{similar} if and only if 
+     they are both of one of the \term{types} listed here
+      (or defined by the \term{implementation}) 
+ and they both satisfy all additional requirements of \term{similarity} 
+      indicated for that \term{type}.
+
+\beginlist
+
+\itemitem{\typeref{number}}
+ 
+Two \term{numbers} $S$ and $C$ are \term{similar} if they are of the same \term{type}
+and represent the same mathematical value.
+
+\itemitem{\typeref{character}}
+ 
+% Two \term{characters} $S$ and $C$ are \term{similar} if they both 
+% represent the same \term{character}.
+%% Tentatively replaced. Mail sent to Quinquevirate to confirm. -kmp 29-Jan-92
+%% Lots of mail ensued ("Similarity of characters"), but this looks like it'll do for now.
+%% We should maybe return to it later in Public Review when there's more time. -kmp 4-Feb-92
+
+Two \term{simple} \term{characters} $S$ and $C$ are \term{similar} 
+if they have \term{similar} \term{code} \term{attributes}.
+
+\term{Implementations} providing additional, \term{implementation-defined} 
+\term{attributes} must define whether and how \term{non-simple} \term{characters} 
+can be regarded as \term{similar}.
+
+\itemitem{\typeref{symbol}}
+
+Two \term{apparently uninterned} \term{symbols} $S$ and $C$ are \term{similar}
+if their
+%% Per Moon#6 (first public review). -kmp 5-May-93
+%\term{print names}
+\term{names}
+are \term{similar}.
+
+\issue{COMPILE-FILE-SYMBOL-HANDLING:NEW-REQUIRE-CONSISTENCY}
+Two \term{interned} symbols $S$ and $C$ are \term{similar} 
+if their \term{names} are \term{similar},
+and if either $S$ is accessible in the \term{current package} at compile time
+          and $C$ is accessible in the \term{current package} at load time,
+       or $C$ is accessible in the \term{package} that is \term{similar} to
+          the \term{home package} of $S$.
+
+(Note that \term{similarity} of
+%% Per Moon#6 (first public review). -kmp 5-May-93
+%\term{interned}
+\term{symbols} is dependent
+on neither the \term{current readtable} nor how \thefunction{read} would
+parse the \term{characters} in the \term{name} of the \term{symbol}.)
+\endissue{COMPILE-FILE-SYMBOL-HANDLING:NEW-REQUIRE-CONSISTENCY}
+
+\itemitem{\typeref{package}}
+
+Two \term{packages} $S$ and $C$ are \term{similar} if their \term{names} are \term{similar}.
+
+Note that although a \term{package} \term{object} is an \term{externalizable object},
+the programmer is responsible for ensuring that the corresponding \term{package} is
+already in existence when code referencing it as a \term{literal} \term{object} 
+is \term{loaded}.  The \term{loader} finds the corresponding \term{package} \term{object}
+as if by calling \funref{find-package} with that \term{name} as an \term{argument}.
+An error is signaled by the \term{loader} if no \term{package} exists at load time.
+
+\itemitem{\typeref{random-state}}
+ 
+Two \term{random states} $S$ and $C$ are \term{similar} if $S$
+would always produce the same sequence of pseudo-random numbers 
+as a \term{copy}\meaning{5} of $C$
+when given as the \param{random-state} \term{argument} to \thefunction{random}, 
+assuming equivalent \param{limit} \term{arguments} in each case.
+
+(Note that since $C$ has been processed by the \term{file compiler},
+it cannot be used directly as an \term{argument} to \funref{random}
+because \funref{random} would perform a side effect.)
+
+\itemitem{\typeref{cons}} 
+
+Two \term{conses}, $S$ and $C$, are \term{similar} if
+    the \term{car}\meaning{2} of $S$ is \term{similar} to the \term{car}\meaning{2} of $C$,
+and the \term{cdr}\meaning{2} of $S$ is \term{similar} to the \term{cdr}\meaning{2} of $C$.
+
+\itemitem{\typeref{array}}
+
+Two one-dimensional \term{arrays}, $S$ and $C$, are \term{similar} if
+     the \term{length} of $S$ is \term{similar} to the \term{length} of $C$,
+     the \term{actual array element type} of $S$ is \term{similar} to
+     the \term{actual array element type} of $C$,
+ and each \term{active} \term{element} of $S$ is \term{similar} to
+      the corresponding \term{element} of $C$.
+
+Two \term{arrays} of \term{rank} other than one, $S$ and $C$, are \term{similar} if
+     the \term{rank} of $S$ is \term{similar} to the \term{rank} of $C$,
+     each \term{dimension}\meaning{1} of $S$ is \term{similar} to 
+      the corresponding \term{dimension}\meaning{1} of $C$,
+     the \term{actual array element type} of $S$ is \term{similar} to
+     the \term{actual array element type} of $C$,
+ and each \term{element} of $S$ is \term{similar} to
+      the corresponding \term{element} of $C$.
+
+In addition,
+if $S$ is a \term{simple array}, then $C$ must also be a \term{simple array}.
+If $S$ is a \term{displaced array},
+       has a \term{fill pointer},
+    or is \term{actually adjustable}, 
+$C$ is permitted to lack any or all of these qualities.
+
+\itemitem{\typeref{hash-table}}
+
+Two \term{hash tables} $S$ and $C$ are \term{similar} if they meet the following
+three requirements:
+ 
+\beginlist
+\item{1.}  They both have the same test 
+ 	    (\eg they are both \funref{eql} \term{hash tables}).
+ 
+\item{2.}  There is a unique one-to-one correspondence between the keys of
+           the two \term{hash tables}, such that the corresponding keys are 
+	   \term{similar}.
+
+\item{3.}  For all keys, the values associated with two corresponding keys
+           are \term{similar}.
+\endlist
+ 
+If there is more than one possible one-to-one correspondence between
+the keys of $S$ and $C$, the consequences are unspecified.  
+A \term{conforming program} cannot use a table such as $S$ as an
+\term{externalizable constant}.
+ 
+\itemitem{\typeref{pathname}}
+ 
+Two \term{pathnames} $S$ and $C$ are \term{similar} if all corresponding 
+\term{pathname components} are \term{similar}.
+
+\itemitem{\typeref{function}}
+ 
+\issue{CONSTANT-FUNCTION-COMPILATION:NO}
+\term{Functions} are not \term{externalizable objects}.
+\endissue{CONSTANT-FUNCTION-COMPILATION:NO}
+
+\itemitem{\typeref{structure-object} and \typeref{standard-object}}
+
+\issue{LOAD-OBJECTS:MAKE-LOAD-FORM}
+A general-purpose concept of \term{similarity} does not exist for \term{structures}
+and \term{standard objects}.
+However, a \term{conforming program} is permitted to define a \funref{make-load-form}
+\term{method} for any \term{class} $K$ defined by that \term{program} that is
+a \term{subclass} of either \typeref{structure-object} or \typeref{standard-object}.
+The effect of such a \term{method} is to define that an \term{object} $S$ of \term{type} $K$
+in \term{source code} is \term{similar} to an \term{object} $C$ of \term{type} $K$
+in \term{compiled code} if $C$ was constructed from \term{code} produced by 
+calling \funref{make-load-form} on $S$.
+\endissue{LOAD-OBJECTS:MAKE-LOAD-FORM}
+
+\endlist
+
+\endsubsubsection%{Similarity of Literal Objects}
+
+\beginsubsubsection{Extensions to Similarity Rules}
+
+Some \term{objects}, such as \term{streams}, \typeref{readtables}, and \typeref{methods}
+are not \term{externalizable objects} under the definition of similarity given above.
+That is, such \term{objects} may not portably appear as \term{literal} \term{objects} 
+in \term{code} to be processed by the \term{file compiler}. 
+
+An \term{implementation} is permitted to extend the rules of similarity, 
+so that other kinds of \term{objects} are \term{externalizable objects}
+for that \term{implementation}.
+
+If for some kind of \term{object}, \term{similarity} is
+neither defined by this specification 
+	    nor by the \term{implementation}, 
+then the \term{file compiler} must signal an error upon encountering such 
+an \term{object} as a \term{literal constant}.
+
+\endsubsubsection%{Extensions to Similarity Rules}
+  
+\beginsubsubsection{Additional Constraints on Externalizable Objects}
+
+% What was left of this paragraph didn't add anything to what was
+% already stated above, so I removed the whole thing.  --sjl 3 Mar 92
+% %% Moon wanted this removed because it was redundant 
+% %% and also because EQ isn't the only problem.
+% % Note that some \term{hash tables} that use
+% % \funref{eq} as test function may not be similar to themselves.  
+% %% KMP thinks this phrase is both superfluous and clumsy.
+% % One consequence of the restrictions on constants
+% % and the definition of similarity is that 
+% A \term{hash table} 
+% %cannot be used as a constant
+% is not an \term{externalizable object}
+% if it contains two \term{similar} keys
+% %% Moon thinks this is superfluous.
+% %where the values associated with those keys are also similar.
+
+If two \term{literal objects} appearing in the source code for a single file
+processed with
+%\funref{compile-file}
+the \term{file compiler} 
+are the \term{identical},
+the corresponding \term{objects} in the \term{compiled code} 
+must also be the \term{identical}.
+\issue{CONSTANT-COLLAPSING:GENERALIZE}
+% However, if two \term{objects} are \funref{eql} in the
+% compiled code, the corresponding \term{objects} in the source code
+% might not have been \funref{eql}.  
+% \term{Objects} \oftype{array}, \typeref{character}, \typeref{cons}, 
+% \typeref{hash-table}, \typeref{number}, \typeref{pathname}, 
+% \typeref{random-state}, and \typeref{string} may be coalesced
+% if they are similar.
+With the exception of \term{symbols} and \term{packages}, any two
+%constants
+\term{literal objects}
+in \term{code} being processed by
+%\funref{compile-file}
+the \term{file compiler}
+may be \term{coalesced} 
+if and only if they are \term{similar}; 
+if they are either both \term{symbols} or both \term{packages},
+they may only be \term{coalesced} if and only if they are \term{identical}.
+\endissue{CONSTANT-COLLAPSING:GENERALIZE}
+
+\issue{CONSTANT-CIRCULAR-COMPILATION:YES}
+\term{Objects} containing circular references can 
+%legitimately appear as constants to be compiled.
+be \term{externalizable objects}.
+The \term{file compiler} is required to preserve \funref{eql}ness of 
+substructures within a \term{file}.
+%compiled with \funref{compile-file}.
+Preserving \funref{eql}ness means that subobjects that are
+%\funref{eql} 
+the \term{same}
+in the \term{source code} must 
+%remain 
+be
+%\funref{eql}
+the \term{same}
+%after being compiled.
+in the corresponding \term{compiled code}.
+%that is, things don't get "less EQL" after compilation.
+%(Note that coalescing of constants implies that things may get "more
+%EQL".)
+\endissue{CONSTANT-CIRCULAR-COMPILATION:YES}
+
+In addition, the following are constraints on the handling of
+\term{literal objects} by the \term{file compiler}:
+ 
+\beginlist
+
+ \item{}\b{array:} If an \term{array} in the source code is a
+\term{simple array}, then the corresponding \term{array}
+in the compiled code will also be a \term{simple array}.  If
+an \term{array} in the source code is displaced, has a 
+\term{fill pointer}, or is \term{actually adjustable}, the corresponding 
+\term{array} in the compiled code might lack any or all of these
+qualities. If an \term{array} in the source code has a fill
+pointer, then the corresponding \term{array} in the compiled
+code might be only the size implied by the fill pointer.
+
+ \item{}\b{packages:} The loader is required to find the
+corresponding \term{package} \term{object} as if by calling 
+\funref{find-package} with the package name as an argument.  
+An error \oftype{package-error} is signaled if no 
+\term{package} of that name exists at load time.
+
+%!!! Barmar notes that this is not a constraint on the compiler (as list heading suggests)
+ \item{}\b{random-state:} A constant \term{random state}
+object cannot be used as the state argument 
+to \thefunction{random} because \funref{random} modifies this data structure.
+ 
+\item{}\b{structure, standard-object:}
+\term{Objects} of \term{type} \typeref{structure-object} and \typeref{standard-object}
+may appear in compiled constants if there is an
+appropriate \funref{make-load-form} method defined for that
+\term{type}.
+ 
+\issue{LOAD-OBJECTS:MAKE-LOAD-FORM}
+\DefineSection{CallingMakeLoadForm}
+% %\funref{compile-file} 
+% The \term{file compiler}
+% calls \funref{make-load-form} on any \term{object}
+% that is referenced as a \term{literal object}
+% if the \term{object}'s \term{metaclass} is
+%      \typeref{standard-class}, \typeref{structure-class}, 
+% %   any user-defined \term{metaclass} 
+% %    \editornote{KMP: Do we want to talk about user-defined metaclasses?}
+% %    that is not a \term{subclass} of \typeref{built-in-class},
+%   or any of a possibly empty \term{implementation-defined} set
+%       of other \term{metaclasses}.
+% %\funref{compile-file} 
+% The \term{file compiler}
+% will call \funref{make-load-form} 
+% once for any given \term{object} within a single \term{file}.
+% Barrett: Commented out the above, replacing it with appropriately
+%          massaged text from newer issue.
+\issue{MAKE-LOAD-FORM-CONFUSION:REWRITE}
+The \term{file compiler} calls \funref{make-load-form} on any \term{object}
+that is referenced as a \term{literal object} if the \term{object} is a
+\term{generalized instance} of \typeref{standard-object},
+\typeref{structure-object}, \typeref{condition}, or any of a 
+(possibly empty) \term{implementation-dependent} set of other \term{classes}.
+The \term{file compiler} only calls \funref{make-load-form} once for
+any given \term{object} within a single \term{file}.
+\endissue{MAKE-LOAD-FORM-CONFUSION:REWRITE}
+\endissue{LOAD-OBJECTS:MAKE-LOAD-FORM} 
+
+\issue{COMPILE-FILE-SYMBOL-HANDLING:NEW-REQUIRE-CONSISTENCY}
+ \item{}\b{symbol:} In order to guarantee that \term{compiled files} can be \term{loaded}
+  correctly, users must ensure that the \term{packages} referenced in those \term{files}
+  are defined consistently at compile time and load time.  \term{Conforming programs}
+  must satisfy the following requirements:
+  
+\beginlist
+\itemitem{1.} The \term{current package} when a \term{top level form} in the \term{file}
+      is processed by \funref{compile-file} must be the same as the \term{current package}
+      when the \term{code} corresponding to that \term{top level form} in the
+      \term{compiled file} is executed by \funref{load}.  In particular:
+
+\beginlist
+
+\itemitem{a.} Any \term{top level form} in a \term{file} that alters
+	  the \term{current package} must change it to a \term{package}
+	  of the same \term{name} both at compile time and at load time.
+
+\itemitem{b.} If the first \term{non-atomic} \term{top level form} in the \term{file}
+	  is not an \macref{in-package} \term{form}, then the \term{current package}
+	  at the time \funref{load} is called must be a \term{package} with the 
+	  same \term{name} as the package that was the \term{current package}
+	  at the time \funref{compile-file} was called.
+\endlist
+
+\itemitem{2.} For all \term{symbols} 
+      appearing lexically within a \term{top level form} that
+      were \term{accessible} in the \term{package} that was the \term{current package}
+      during processing of that \term{top level form} at compile time, but
+      whose \term{home package} was another \term{package}, at load time there must
+      be a \term{symbol} with the same \term{name} that is \term{accessible} in both the
+      load-time \term{current package} and in the \term{package}
+      with the same \term{name} as the
+      compile-time \term{home package}. 
+  
+\itemitem{3.} For all \term{symbols} represented in the \term{compiled file} 
+      that were \term{external symbols} in
+      their \term{home package} at compile time, there must be a \term{symbol} with the
+      same \term{name} that is an \term{external symbol} in the \term{package} 
+      with the same \term{name} at load time.
+\endlist
+        
+  If any of these conditions do not hold, the \term{package} in which the \term{loader} looks
+  for the affected \term{symbols} is unspecified.  \term{Implementations} are permitted 
+  to signal an error or to define this behavior.
+\endissue{COMPILE-FILE-SYMBOL-HANDLING:NEW-REQUIRE-CONSISTENCY}
+
+\endlist
+
+\endsubsubsection%{Additional Constraints on Externalizable Objects}
+
+\endsubSection%{Literal Objects in Compiled Files}
+
+\beginsubsection{Exceptional Situations in the Compiler}
+\DefineSection{FileCompilerExceptions}
+
+\issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+%% The following text was added by COMPILER-DIAGNOSTICS and then later removed.
+%\funref{compile-file} is required to handle the \misc{abort} restart by
+%aborting the smallest feasible part of the compilation.
+%\funref{compile-file} is allowed to establish a default
+%condition handler.  If such a condition handler is established,
+%however, it must first resignal the \term{condition} to give any
+%user-established handlers a chance to \term{handle} it.  If all user error
+%handlers decline, the default handler \term{handles} the 
+%\term{condition} in an implementation-specific way; for example, it might turn 
+%errors into warnings.
+\endissue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+
+\issue{COMPILER-WARNING-STREAM}
+\issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+%\funref{compile-file} is permitted to issue warnings through \term{error output}.
+\endissue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+\endissue{COMPILER-WARNING-STREAM}
+
+% Reference:  Issue COMPILER-DIAGNOSTICS
+% The STYLE-WARNING condition needs to be integrated into the section
+%     describing the hierarchy of condition types.
+
+\funref{compile} and \funref{compile-file} are permitted to
+signal errors and warnings, including errors due to compile-time
+processing of \f{(eval-when (:compile-toplevel) ...)} forms,
+macro expansion, and conditions signaled by the compiler itself.
+                                                
+\term{Conditions} \oftype{error} might be signaled by the compiler
+in situations where the compilation cannot proceed without intervention.  
+ 
+In addition to situations for which the standard specifies that
+\term{conditions} \oftype{warning} must or might be signaled,
+warnings might be signaled in situations where the compiler can
+determine that the consequences are undefined or that a run-time
+error will be signaled.  Examples of this situation are as follows: 
+    violating type declarations,
+    altering or assigning the value of a constant defined with \macref{defconstant},
+    calling built-in Lisp functions with a wrong number of arguments or malformed keyword
+      argument lists, 
+and using unrecognized declaration specifiers.
+ 
+The compiler is permitted to issue warnings about matters of
+programming style as conditions \oftype{style-warning}.
+Examples of this situation are as follows:
+      redefining a function using a different argument list,
+      calling a function with a wrong number of arguments,
+      not declaring \declref{ignore} of a local variable that is not referenced,
+  and referencing a variable declared \declref{ignore}.
+%% KAB didn't think this one was very convincing. KMP was not sure but figured
+%% it wouldn't hurt anything to remove it.
+%   and using \term{declaration specifiers} 
+% 	described in the standard but ignored by the compiler.
+
+Both \funref{compile} and \funref{compile-file} are permitted
+(but not required) to \term{establish} a \term{handler}
+for \term{conditions} \oftype{error}.  For example, they
+might signal a warning, and restart compilation from some
+\term{implementation-dependent} point in order to let the 
+compilation proceed without manual intervention.
+
+Both \funref{compile} and \funref{compile-file} return three
+values, the second two indicating whether the source code being compiled
+contained errors and whether style warnings were issued.
+ 
+% Reference:  issue WITH-COMPILATION-UNIT
+ 
+Some warnings might be deferred until the end of compilation. 
+See \macref{with-compilation-unit}.
+
+% This paragraph is redundant, so I removed it.  --sjl 3 Mar 92
+% \issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+% \funref{compile-file} is permitted, but not required, to establish a \term{handler}
+% for \typeref{error} \term{conditions}.  For example, such a \term{handler} might issue
+% a warning and restart compilation from some \term{implementation-dependent} 
+% point in order to let the compilation proceed without manual intervention.
+% \endissue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+
+\endsubSection%{Exceptional Situations in the Compiler}
+
+
+% merged section "File Compilation of Top Level Forms" with
+% section "Processing of Defining Macros", above.  --sjl  3 Mar 92

@@ -1,0 +1,2104 @@
+% -*- Mode: TeX -*-
+
+% Environment
+%  Time
+%  Debugging/Tuning
+%  Storage System
+%  Browsing/Editing
+%  Read-Eval-Print Loop
+%  External Environment Queries
+
+%-------------------- Time --------------------
+
+%%% ========== DECODE-UNIVERSAL-TIME
+\begincom{decode-universal-time}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValuesNewline decode-universal-time
+			{universal-time {\opt} time-zone}
+			{second, minute, hour, date, month, year, day, daylight-p, zone}
+
+\label Arguments and Values::
+
+\param{universal-time}---a \term{universal time}.
+
+\issue{TIME-ZONE-NON-INTEGER:ALLOW}
+\param{time-zone}---a \term{time zone}.
+\endissue{TIME-ZONE-NON-INTEGER:ALLOW}
+
+\param{second}, \param{minute}, \param{hour}, \param{date}, \param{month},
+\param{year}, \param{day}, \param{daylight-p}, \param{zone}---a \term{decoded time}.
+
+\label Description::
+
+%% 25.4.1 18
+Returns the \term{decoded time} represented by the given \term{universal time}.
+
+If \param{time-zone} is not supplied,
+it defaults to the current time zone adjusted for daylight saving time.  
+\issue{DECODE-UNIVERSAL-TIME-DAYLIGHT:LIKE-ENCODE}
+If \param{time-zone} is supplied, daylight saving time information is ignored.
+The daylight saving time flag is \nil\ if \param{time-zone} is supplied.
+\endissue{DECODE-UNIVERSAL-TIME-DAYLIGHT:LIKE-ENCODE}
+
+\label Examples::
+
+\issue{DECODE-UNIVERSAL-TIME-DAYLIGHT:LIKE-ENCODE}
+\code
+ (decode-universal-time 0 0) \EV 0, 0, 0, 1, 1, 1900, 0, \term{false}, 0
+
+;; The next two examples assume Eastern Daylight Time.
+ (decode-universal-time 2414296800 5) \EV 0, 0, 1, 4, 7, 1976, 6, \term{false}, 5
+ (decode-universal-time 2414293200) \EV 0, 0, 1, 4, 7, 1976, 6, \term{true}, 5
+
+;; This example assumes that the time zone is Eastern Daylight Time
+;; (and that the time zone is constant throughout the example).
+ (let* ((here (nth 8 (multiple-value-list (get-decoded-time)))) ;Time zone
+        (recently (get-universal-time))
+        (a (nthcdr 7 (multiple-value-list (decode-universal-time recently))))
+        (b (nthcdr 7 (multiple-value-list (decode-universal-time recently here)))))
+   (list a b (equal a b))) \EV ((T 5) (NIL 5) NIL)
+\endcode
+\endissue{DECODE-UNIVERSAL-TIME-DAYLIGHT:LIKE-ENCODE}
+
+\label Affected By::
+
+\term{Implementation-dependent} mechanisms for calculating when or if daylight
+savings time is in effect for any given session.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{encode-universal-time}, \funref{get-universal-time}, 
+%5.3
+{\secref\Time}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== ENCODE-UNIVERSAL-TIME
+\begincom{encode-universal-time}\ftype{function}
+                                             
+\label Syntax::
+
+\DefunWithValuesNewline encode-universal-time
+		        {\vtop{\hbox{second minute hour date month year}
+                               \hbox{{\opt} time-zone}}}
+			{universal-time}
+
+\label Arguments and Values::
+
+\param{second}, \param{minute}, \param{hour}, 
+\param{date}, \param{month}, \param{year}, 
+\param{time-zone}---the corresponding parts of a \term{decoded time}.
+ (Note that some of the nine values in a full \term{decoded time} are redundant,
+  and so are not used as inputs to this function.)
+
+\param{universal-time}---a \term{universal time}.
+
+\label Description::
+
+%% 25.4.1 20
+%!!! Actually, the args are only part of a decoded time
+\funref{encode-universal-time} converts a time from Decoded Time format
+to a \term{universal time}.
+
+If \param{time-zone} is supplied, no adjustment for daylight savings time is performed.
+
+\label Examples::
+
+\code
+ (encode-universal-time 0 0 0 1 1 1900 0) \EV 0
+ (encode-universal-time 0 0 1 4 7 1976 5) \EV 2414296800
+;; The next example assumes Eastern Daylight Time.
+ (encode-universal-time 0 0 1 4 7 1976) \EV 2414293200
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{decode-universal-time}, \funref{get-decoded-time}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== GET-DECODED-TIME
+%%% ========== GET-UNIVERSAL-TIME
+\begincom{get-universal-time, get-decoded-time}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues get-universal-time {\noargs} {universal-time}
+
+\DefunWithValuesNewline get-decoded-time {\noargs}
+		        {second, minute, hour, date, month, year, day, daylight-p, zone}
+
+\label Arguments and Values::
+
+\param{universal-time}---a \term{universal time}.
+
+\param{second}, \param{minute}, \param{hour},
+\param{date}, \param{month}, \param{year},
+\param{day}, \param{daylight-p}, \param{zone}---a \term{decoded time}.
+
+\label Description::
+
+%% 25.4.1 17
+\funref{get-universal-time} returns the current time, represented as a \term{universal time}.
+
+%% 25.4.1 15
+\funref{get-decoded-time} returns the current time, represented as a \term{decoded time}.
+
+\label Examples::
+
+\code
+;; At noon on July 4, 1976 in Eastern Daylight Time.
+ (get-decoded-time) \EV 0, 0, 12, 4, 7, 1976, 6, \term{true}, 5
+;; At exactly the same instant.
+ (get-universal-time) \EV 2414332800
+;; Exactly five minutes later.
+ (get-universal-time) \EV 2414333100
+;; The difference is 300 seconds (five minutes)
+ (- * **) \EV 300
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The time of day (\ie the passage of time),
+the system clock's ability to keep accurate time,
+and the accuracy of the system clock's initial setting.
+
+\label Exceptional Situations::
+
+An error \oftype{error} might be signaled if the current time cannot be determined.
+
+\label See Also::
+
+\funref{decode-universal-time},
+\funref{encode-universal-time},
+{\secref\Time}
+
+\label Notes::
+
+\code
+ (get-decoded-time) \EQ (decode-universal-time (get-universal-time))
+\endcode
+
+No \term{implementation} is required to have a way to verify that the
+time returned is correct.  However, if an \term{implementation} provides
+a validity check (\eg the failure to have properly initialized the system
+clock can be reliably detected) and that validity check fails, 
+the \term{implementation} is strongly encouraged (but not required)
+to signal an error \oftype{error} (rather than, for example, returning a
+known-to-be-wrong value) that is \term{correctable} by allowing the user
+to interactively set the correct time.
+
+\endcom
+
+%%% ========== SLEEP
+\begincom{sleep}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues sleep {seconds} {\nil}
+
+\label Arguments and Values::
+
+\param{seconds}---a non-negative \term{real}.
+
+\label Description::
+
+%% 25.4.1 24
+Causes execution to cease and become dormant for approximately the
+seconds of real time indicated by \param{seconds}, 
+whereupon execution is resumed.
+
+\label Examples::
+
+\code
+ (sleep 1) \EV NIL 
+
+;; Actually, since SLEEP is permitted to use approximate timing, 
+;; this might not always yield true, but it will often enough that
+;; we felt it to be a productive example of the intent.
+ (let ((then (get-universal-time))
+       (now  (progn (sleep 10) (get-universal-time))))
+   (>= (- now then) 10))
+\EV \term{true}
+\endcode
+
+\label Side Effects::
+
+Causes processing to pause.
+
+\label Affected By::
+
+The granularity of the scheduler.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{seconds}{a non-negative \term{real}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Debugging Tuning --------------------
+
+%%% ========== APROPOS
+%%% ========== APROPOS-LIST
+
+\begincom{apropos, apropos-list}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues apropos      {string {\opt} package} {\novalues}
+
+\DefunWithValues apropos-list {string {\opt} package} {symbols}
+
+\label Arguments and Values::
+
+\param{string}---a \term{\symbolnamedesignator}.
+
+\param{package}---a \term{package designator} or \nil.
+ \Default{\nil}
+
+\param{symbols}---a \term{list} of \term{symbols}.
+
+\label Description::
+
+%% 25.3.0 23
+These functions search for \term{interned} \term{symbols} 
+whose \term{names} contain the substring \param{string}.
+
+For \funref{apropos}, as each such \term{symbol} is found,
+its name is printed on \term{standard output}.
+In addition,
+if such a \term{symbol} is defined as a \term{function} or \term{dynamic variable},
+information about those definitions might also be printed.
+
+%% 25.3.0 23
+For \funref{apropos-list},
+no output occurs as the search proceeds;
+instead a list of the matching \term{symbols} is returned when the search is complete.
+
+If \param{package} is \term{non-nil},
+only the \term{symbols} \term{accessible} in that \param{package} are searched;
+otherwise all \term{symbols} \term{accessible} in any \term{package} are searched.
+
+Because a \term{symbol} might be available 
+by way of more than one inheritance path,
+\funref{apropos} might print information about the \term{same} \term{symbol} more than once,
+%What about APROPOS-LIST? Can its result contain duplicates? -kmp 24-Apr-91
+%I added this next since it was implicitly vague; makes it explicitly vague. -kmp 1-Feb-92
+or \funref{apropos-list} might return a \term{list} containing duplicate \term{symbols}.
+
+%!!! This really wants a technical issue in order to resolve it.
+Whether or not the search is case-sensitive is \term{implementation-defined}.
+
+\label Examples:\None.
+
+\label Affected By::
+
+The set of \term{symbols} which are currently \term{interned}
+in any \term{packages} being searched.
+
+\funref{apropos} is also affected by \varref{*standard-output*}.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== DESCRIBE
+\begincom{describe}\ftype{Function}
+
+%% 25.3.0 12
+\label Syntax::
+
+\DefunWithValues describe {object {\opt} stream} {\novalues}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\issue{DESCRIBE-UNDERSPECIFIED:DESCRIBE-OBJECT}
+\param{stream}---an \term{output} \term{stream designator}.
+ \Default{\term{standard output}}
+\endissue{DESCRIBE-UNDERSPECIFIED:DESCRIBE-OBJECT}
+
+\label Description::
+
+\funref{describe} displays information about \param{object}
+\issue{DESCRIBE-UNDERSPECIFIED:DESCRIBE-OBJECT}
+to \param{stream}.
+\endissue{DESCRIBE-UNDERSPECIFIED:DESCRIBE-OBJECT}
+
+%This used to be worded in a way which required these two behaviors in seeming
+%contradiction to the remark about output being implementation-dependent.
+%Barmar flagged this and I fixed it in a way that is hopefully non-controversial.
+%  -kmp 29-Dec-90
+For example, \funref{describe} of a \term{symbol} might show the
+\term{symbol}'s value, its definition, and each of its properties. 
+\funref{describe} of a \term{float} might show the number's
+internal representation in a way that is useful for tracking
+down round-off errors.  In all cases, however, the nature and format of the
+output of \funref{describe} is \term{implementation-dependent}.
+
+%% 25.3.0 13
+\funref{describe} can describe something that it finds inside the \param{object};
+in such cases, a notational device such as increased indentation or positioning in a
+table is typically used in order to visually distinguish such recursive descriptions 
+from descriptions of the argument \param{object}.
+
+\issue{DESCRIBE-UNDERSPECIFIED:DESCRIBE-OBJECT}
+The actual act of describing the object is implemented by \funref{describe-object}.
+\funref{describe} exists as an interface primarily to manage argument defaulting (including
+conversion of arguments \t\ and \nil\ into \term{stream} \term{objects}) and to inhibit
+any return values from \funref{describe-object}.
+\endissue{DESCRIBE-UNDERSPECIFIED:DESCRIBE-OBJECT}
+
+\issue{DESCRIBE-INTERACTIVE:NO}
+\funref{describe} is not intended to be an interactive function.  In a 
+\term{conforming implementation}, \funref{describe} must not, by default, 
+prompt for user input.  User-defined methods for \funref{describe-object}
+are likewise restricted.  
+\endissue{DESCRIBE-INTERACTIVE:NO}
+
+\label Examples:\None.
+
+\label Side Effects::
+
+Output to \term{standard output} or \term{terminal I/O}.
+
+\label Affected By::
+
+\varref{*standard-output*} and \varref{*terminal-io*},
+methods on \funref{describe-object} and \funref{print-object}
+for \term{objects} having user-defined \term{classes}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{inspect}, \funref{describe-object}
+
+\label Notes:\None.
+
+%% There are argument congruence problems with this stuff, so it's just not worth
+%% keeping.  A discussion among Quinquevirate left us with no good way out. -kmp 30-Jan-92
+%\issue{DESCRIBE-INTERACTIVE:NO}
+% An \term{implementation} may be extended to permit additional, non-portable keyword arguments to \funref{describe} 
+% which, if used, might cause \funref{describe} to behave in an interactive way.
+% 
+% An implementations may be extended to permit additional, non-portable keyword
+% arguments would prompt for or require
+% user input as long as the default action if no keyword arguments are supplied does not
+% prompt for or
+%     require user input.
+% For example, the following kind of interaction would be permissible in
+% implementations which chose to do it:
+% 
+% \code
+%  (defvar *my-table* (make-hash-table))
+%  (setf (gethash 'foo *my-table*) 1)
+%  (setf (gethash 'bar *my-table*) 2)
+%  (setf (gethash 'foobar *my-table*) 3)
+%  (describe *my-table* :interactive t)
+% #<EQ-HASH-TABLE 259> has 3 entries.
+% Do you want to see its contents? (Yes or No) Yes
+% \endcode
+%\endissue{DESCRIBE-INTERACTIVE:NO}
+
+\endcom
+
+%%% ========== DESCRIBE-OBJECT
+\begincom{describe-object}\ftype{Standard Generic Function}
+ 
+\issue{DESCRIBE-UNDERSPECIFIED:DESCRIBE-OBJECT}
+
+\label Syntax::
+ 
+\DefgenWithValues {describe-object} {object stream} {\term{implementation-dependent}}
+ 
+\label Method Signatures::
+ 
+\Defmeth {describe-object} {(\param{object} standard-object) \param{stream}}
+ 
+\label Arguments and Values::
+ 
+\param{object}---an \term{object}.
+ 
+\param{stream}---a \term{stream}.
+ 
+\label Description::
+ 
+The generic function \funref{describe-object} prints a description of
+\param{object} to a \param{stream}.  \funref{describe-object} is called 
+by \funref{describe}; it must not be called by the user.
+%I changed should -> must in the above.  An implementation can always defined
+%the consequences in order to lift this restriction.
+ 
+Each implementation is required to provide a \term{method} on 
+\theclass{standard-object} and \term{methods} on enough other
+\term{classes} so as to ensure that there is always an applicable \term{method}.  
+Implementations are free to add \term{methods} for other \term{classes}.
+Users can write \term{methods} for \funref{describe-object} for their
+own \term{classes} if they do not wish to inherit an implementation-supplied
+\term{method}.
+ 
+\term{Methods} on \funref{describe-object} can recursively call
+\funref{describe}.  Indentation, depth limits, and circularity detection
+are all taken care of automatically, provided that each \term{method} 
+handles exactly one level of structure and calls \funref{describe} 
+recursively if there are more structural levels.  The consequences are 
+undefined if this rule is not obeyed.
+ 
+In some implementations the \param{stream} argument passed to a
+\funref{describe-object} method is not the original \param{stream}, but is
+an intermediate \term{stream} that implements parts of \funref{describe}.
+\term{Methods} should therefore not depend on the identity of this
+\term{stream}.
+
+%Output is sent to \param{stream}. 
+ 
+\label Examples::
+
+\code
+ (defclass spaceship ()
+   ((captain :initarg :captain :accessor spaceship-captain)
+    (serial# :initarg :serial-number :accessor spaceship-serial-number)))
+
+ (defclass federation-starship (spaceship) ())
+
+ (defmethod describe-object ((s spaceship) stream)
+   (with-slots (captain serial#) s
+     (format stream "~&~S is a spaceship of type ~S,~
+                     ~%with ~A at the helm ~
+                       and with serial number ~D.~%"
+             s (type-of s) captain serial#)))
+
+ (make-instance 'federation-starship
+                :captain "Rachel Garrett"
+                :serial-number "NCC-1701-C")
+\EV #<FEDERATION-STARSHIP 26312465>
+
+ (describe *)
+\OUT #<FEDERATION-STARSHIP 26312465> is a spaceship of type FEDERATION-STARSHIP,
+\OUT with Rachel Garrett at the helm and with serial number NCC-1701-C.
+\EV \novalues
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+
+\funref{describe}
+
+\label Notes::
+
+The same implementation techniques that are applicable to \funref{print-object} are
+applicable to \funref{describe-object}.
+
+The reason for making the return values for \funref{describe-object}
+unspecified is to  avoid forcing users to include explicit \f{(values)}
+in all of their \term{methods}.  \funref{describe} takes care of that.
+ 
+\endissue{DESCRIBE-UNDERSPECIFIED:DESCRIBE-OBJECT}
+
+\endcom
+
+%%% ========== TRACE
+%%% ========== UNTRACE
+\begincom{trace, untrace}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValues trace   {\starparam{function-name}} {trace-result}
+\DefmacWithValues untrace {\starparam{function-name}} {untrace-result}
+
+\label Arguments and Values::
+
+\issue{FUNCTION-NAME:LARGE}
+\param{function-name}---a \term{function name}.
+\endissue{FUNCTION-NAME:LARGE}
+
+\param{trace-result}---\term{implementation-dependent},
+  unless no \term{function-names} are supplied, 
+%% 25.3.0 6
+  in which case \param{trace-result} is a \term{list} of \term{function names}.
+
+\param{untrace-result}---\term{implementation-dependent}.
+
+\label Description::
+
+\macref{trace} and \macref{untrace} control the invocation of the trace facility.  
+
+Invoking \macref{trace} with one or more \param{function-names} causes
+the denoted \term{functions} to be ``traced.''
+Whenever a traced \term{function} is invoked, information
+     about the call,
+     about the arguments passed,
+ and about any eventually returned values
+is printed to \term{trace output}.
+If \macref{trace} is used with no \param{function-names},
+no tracing action is performed; 
+instead, a list of the \term{functions} currently being traced is returned.
+
+%% 25.3.0 4
+Invoking \macref{untrace} with one or more function names causes those
+functions to be ``untraced'' (\ie no longer traced).
+%% 25.3.0 7
+If \macref{untrace} is used with no \param{function-names},
+all \term{functions} currently being traced are untraced.
+
+If a \term{function} to be traced has been open-coded
+(\eg because it was declared \declref{inline}),
+a call to that \term{function} might not produce trace output.
+
+\label Examples::
+
+\code
+ (defun fact (n) (if (zerop n) 1 (* n (fact (- n 1)))))
+\EV FACT
+ (trace fact)
+\EV (FACT)
+;; Of course, the format of traced output is implementation-dependent.
+ (fact 3)
+\OUT 1 Enter FACT 3
+\OUT | 2 Enter FACT 2
+\OUT |   3 Enter FACT 1
+\OUT |   | 4 Enter FACT 0
+\OUT |   | 4 Exit FACT 1
+\OUT |   3 Exit FACT 1
+\OUT | 2 Exit FACT 2
+\OUT 1 Exit FACT 6
+\EV 6
+\endcode
+
+\label Side Effects::
+
+Might change the definitions of the \term{functions} named by \param{function-names}.
+
+\label Affected By::
+
+Whether the functions named are defined or already being traced.
+
+\label Exceptional Situations::
+
+% addressed in the packages chapter.  --sjl 5 Mar 92
+%\issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+% The consequences are undefined if an \term{external symbol} of
+% \thepackage{common-lisp} is
+% used as a \param{function-name} argument.
+%\endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+
+%% 25.3.0 5
+   Tracing an already traced function,
+or untracing a function not currently being traced,
+should produce no harmful effects, but might signal a warning.
+
+\label See Also::
+
+\varref{*trace-output*},
+\macref{step}
+
+\label Notes::
+
+%% 25.3.0 8
+\macref{trace} and \macref{untrace} may also accept additional
+\term{implementation-dependent} argument formats.  The format of the trace
+output is \term{implementation-dependent}.
+
+Although \macref{trace} can be extended to permit non-standard options,
+\term{implementations} are nevertheless encouraged (but not required)
+to warn about the use of syntax or options 
+that are neither specified by this standard 
+nor added as an extension by the \term{implementation},
+since they could be symptomatic of typographical errors
+or of reliance on features supported in \term{implementations} 
+other than the current \term{implementation}.
+
+\endcom
+
+%%% ========== STEP
+\begincom{step}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValues step {form} {\starparam{result}}
+
+\label Arguments and Values:: 
+
+\param{form}---a \term{form}; \evalspecial.
+
+\param{results}---the \term{values} returned by the \param{form}.
+
+\label Description::
+
+\macref{step} implements a debugging paradigm wherein the programmer
+is allowed to \term{step} through the \term{evaluation} of a \term{form}.
+The specific nature of the interaction,
+\issue{EVALHOOK-STEP-CONFUSION:X3J13-NOV-89}
+including which I/O streams are used and
+whether the stepping has lexical or dynamic scope,
+\endissue{EVALHOOK-STEP-CONFUSION:X3J13-NOV-89}
+is \term{implementation-defined}.
+
+%% 25.3.0 9
+\issue{STEP-ENVIRONMENT:CURRENT}
+\macref{step} evaluates \param{form} in the current \term{environment}.
+A call to \macref{step} can be compiled, but it is acceptable for an
+implementation to interactively step through only those parts of the computation
+that are interpreted.
+\endissue{STEP-ENVIRONMENT:CURRENT}
+
+\issue{STEP-MINIMAL:PERMIT-PROGN}
+It is technically permissible for a \term{conforming implementation} 
+to take no action at all other than normal \term{execution} of the \param{form}.
+In such a situation, 
+\f{(step \i{form})}
+is equivalent to, for example,
+\f{(let () \i{form})}. 
+In implementations where this is the case, the associated documentation
+should mention that fact.
+\endissue{STEP-MINIMAL:PERMIT-PROGN}
+
+\label Examples:\None.
+
+\label Affected By:\None?
+%% clean-up item in progress here.
+%% Could be bindings of streams to which i/o occurs, current
+%% dynamic environment, lexical too?
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{trace}
+
+\issue{EVALHOOK-STEP-CONFUSION:X3J13-NOV-89}
+%\varref{*evalhook*}, \varref{*applyhook*}.
+\endissue{EVALHOOK-STEP-CONFUSION:X3J13-NOV-89}
+
+\label Notes::
+
+\term{Implementations} are encouraged to respond to the typing of \f{?} 
+or the pressing of a ``help key'' by providing help including a list of
+commands.
+
+\issue{EVALHOOK-STEP-CONFUSION:X3J13-NOV-89}
+% %% 20.1.0 9
+% The \macref{step} facility can be implemented using the \varref{*evalhook*}
+% and \varref{*applyhook*} features.
+\endissue{EVALHOOK-STEP-CONFUSION:X3J13-NOV-89}
+
+\endcom
+
+%%% ========== TIME
+\begincom{time}\ftype{Macro}
+
+\label Syntax::
+
+\DefmacWithValues time {form} {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{form}---a \term{form}; \evalspecial.
+
+\param{results}---the \term{values} returned by the \param{form}.
+
+\label Description::
+
+\issue{STEP-ENVIRONMENT:CURRENT}
+\funref{time} evaluates \param{form} in the current \term{environment} (lexical and dynamic).
+A call to \funref{time} can be compiled.
+\endissue{STEP-ENVIRONMENT:CURRENT}
+
+\funref{time} prints various timing data and other information to \term{trace output}.
+The nature and format of the printed information is \term{implementation-defined}.
+Implementations are encouraged to provide such information as 
+     elapsed real time,
+     machine run time,
+ and storage management statistics.
+
+%%% 25.3.0 10
+%\funref{time} evaluates \param{form}.
+
+\label Examples:\None.
+
+\label Affected By::
+
+The accuracy of the results depends, among other things, on the accuracy
+of the corresponding functions provided by the underlying operating system.
+
+The magnitude of the results may depend on 
+  the hardware,
+  the operating system,
+  the lisp implementation,
+ and the state of the global environment.
+Some specific issues which frequently affect the outcome are
+  hardware speed,
+  nature of the scheduler (if any),
+  number of competing processes (if any),
+  system paging,
+  whether the call is interpreted or compiled,
+  whether functions called are compiled,
+  the kind of garbage collector involved and whether it runs,
+  whether internal data structures (e.g., hash tables) are implicitly reorganized,
+  \etc.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{get-internal-real-time},
+\funref{get-internal-run-time}
+
+\label Notes::
+
+In general, these timings are not guaranteed to be reliable enough for
+marketing comparisons. Their value is primarily heuristic, for tuning
+purposes.
+
+For useful background information on the complicated issues involved in
+interpreting timing results, see {\GabrielBenchmarks}.
+
+\endcom
+
+%%% ========== INTERNAL-TIME-UNITS-PER-SECOND
+\begincom{internal-time-units-per-second}\ftype{Constant Variable}
+
+\label Constant Value::
+
+A positive \term{integer}, the magnitude of which is \term{implementation-dependent}.
+
+\label Description::
+
+The number of \term{internal time units} in one second.
+
+\label Examples:\None.
+
+\label See Also::
+
+\funref{get-internal-run-time}, \funref{get-internal-real-time}
+
+\label Notes::
+
+%Shouldn't this be in the glossary with the definition of internal time unit? -kmp
+These units form the basis of the Internal Time format representation.
+
+\endcom
+
+%%% ========== GET-INTERNAL-REAL-TIME
+\begincom{get-internal-real-time}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues get-internal-real-time {\noargs} {internal-time}
+
+\label Arguments and Values::
+
+\param{internal-time}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 25.4.1 23
+\funref{get-internal-real-time} returns as an \term{integer} the 
+current time in \term{internal time units}, relative to an arbitrary 
+time base.  The difference between the values of two calls to this
+function is the amount of elapsed real time (\ie clock time) between the two calls. 
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+Time of day (\ie the passage of time).
+The time base affects the result magnitude.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\conref{internal-time-units-per-second}
+
+\label Notes:\None.
+
+\endcom 
+
+%%% ========== GET-INTERNAL-RUN-TIME
+\begincom{get-internal-run-time}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues get-internal-run-time {\noargs} {internal-time}
+
+\label Arguments and Values::
+
+\param{internal-time}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 25.4.1 22
+Returns as an \term{integer} the current 
+run time in \term{internal time units}.  The precise meaning of this quantity is
+\term{implementation-defined};  it may measure real time, run time, CPU cycles, or some
+other quantity.  The intent is that the difference between the values of two calls
+to this function be the amount of time between the two calls during which 
+computational effort was expended on behalf of the executing program.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The \term{implementation},
+the time of day (\ie the passage of time).
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\conref{internal-time-units-per-second}
+
+\label Notes::
+
+Depending on the \term{implementation}, paging time and garbage
+collection time might be included in this measurement.  Also, in a
+multitasking environment, it might not be possible to show the time for
+just the running process, so in some \term{implementations}, time taken
+by other processes during the same time interval might be included in
+this measurement as well.
+
+\endcom 
+
+%%% ========== DISASSEMBLE
+\begincom{disassemble}\ftype{Function}
+
+%% 25.1.0 9
+\label Syntax::
+
+\DefunWithValues disassemble {fn} {\nil}
+
+\label Arguments and Values::
+
+\issue{FUNCTION-NAME:LARGE}
+\param{fn}---an \term{extended function designator}
+	  or a \term{lambda expression}.
+\endissue{FUNCTION-NAME:LARGE}
+
+\label Description::
+
+\Thefunction{disassemble} is a debugging aid that composes symbolic 
+instructions or expressions in some \term{implementation-dependent} 
+language which represent the code used to produce the \term{function}
+which is or is named by the argument \param{fn}.  The result is displayed
+to \term{standard output} in an \term{implementation-dependent} format.
+
+If \param{fn} is a \term{lambda expression} or \term{interpreted function},
+it is compiled first and the result is disassembled.
+
+If the \param{fn} \term{designator} is a \term{function name},
+the \term{function} that it \term{names} is disassembled.
+\issue{DISASSEMBLE-SIDE-EFFECT:DO-NOT-INSTALL}
+(If that \term{function} is an \term{interpreted function},
+it is first compiled but the result of this implicit compilation is not installed.)
+\endissue{DISASSEMBLE-SIDE-EFFECT:DO-NOT-INSTALL}
+
+\label Examples::
+\issue{DISASSEMBLE-SIDE-EFFECT:DO-NOT-INSTALL}
+\code
+ (defun f (a) (1+ a)) \EV F
+ (eq (symbol-function 'f)
+     (progn (disassemble 'f)
+            (symbol-function 'f))) \EV \term{true}
+\endcode
+\endissue{DISASSEMBLE-SIDE-EFFECT:DO-NOT-INSTALL}
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+\varref{*standard-output*}.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{fn}{an \term{extended function designator}
+		  or a \term{lambda expression}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+\issue{DOCUMENTATION-FUNCTION-TANGLED:REQUIRE-ARGUMENT}
+
+%%% ========== COMPILER-MACRO
+%%% ========== FUNCTION
+%%% ========== METHOD-COMBINATION
+%%% ========== SETF
+%%% ========== STRUCTURE
+%%% ========== TYPE
+%%% ========== VARIABLE
+%%% ========== DOCUMENTATION
+%%% ========== (SETF DOCUMENTATION)
+\begincom{documentation, (setf documentation)}\ftype{Standard Generic Function}
+ 
+%Note that the CLtL function \funref{documentation} is replaced by a generic function.
+
+\label Syntax::
+ 
+\DefgenWithValues documentation {x doc-type} {documentation}
+
+\DefgenWithValues {(setf documentation)} {new-value x doc-type} {new-value}
+
+\label Argument Precedence Order::
+
+\param{doc-type}, \param{object}
+
+\label Method Signatures::
+
+\def\DocMethods#1#2{{%
+{\bf #1:}\par
+\def\Meth##1##2{\Defmeth{documentation} {\specparam{x}{##1} \specparam{doc-type}{\f{(eql '##2)}}}\idxref{##2}\par}%
+#2\par%
+\def\Meth##1##2{\Defmeth{(setf documentation)} {\param{new-value} \specparam{x}{##1} \specparam{doc-type}{\f{(eql '##2)}}}\idxref{##2}\par}%
+#2\par}}
+
+% I fixed a bunch of font-o's and formatting inconsistencies, and reordered
+% all the methods into something a little less confusing.  --sjl 7 Mar 92
+ 
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+%Signature for STANDARD-SLOT-DESCRIPTION removed.
+
+\DocMethods{Functions, Macros, and Special Forms}{%
+\Meth{function}{t}%
+\Meth{function}{function}%
+\Meth{list}{function}%
+\Meth{list}{compiler-macro}%
+\Meth{symbol}{function}%
+\Meth{symbol}{compiler-macro}%
+\Meth{symbol}{setf}}
+
+\DocMethods{Method Combinations}{%
+\Meth{method-combination}{t}%
+\Meth{method-combination}{method-combination}%
+\Meth{symbol}{method-combination}}
+
+\DocMethods{Methods}{%
+\Meth{standard-method}{t}}
+
+\DocMethods{Packages}{%
+\Meth{package}{t}}
+
+\DocMethods{Types, Classes, and Structure Names}{%
+\Meth{standard-class}{t}%
+\Meth{standard-class}{type}%
+\Meth{structure-class}{t}%
+\Meth{structure-class}{type}%
+\Meth{symbol}{type}%
+\Meth{symbol}{structure}}
+
+\DocMethods{Variables}{%
+\Meth{symbol}{variable}}
+
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}%
+
+\label Arguments and Values::
+ 
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+\param{x}---an \term{object}.
+%% Removed the detail here because it is implied by the signatures above.
+%  This leaves room more naturally for implementation-defined extension. -kmp 2-Sep-91
+%           a \term{symbol},
+% 	    a \term{list}, 
+% 	    a \term{method},
+% 	    a \term{class}, 
+% 	    a \term{package},
+% 	    a \term{function}, 
+% 	 or a \term{method combination} \term{object}.
+% %	 or a slot-description \term{object}.
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+
+\param{doc-type}---a \term{symbol}.
+%% Per issue DOCUMENTATION-FUNCTION-TANGLED, this has been simplified.
+% If \param{x} is a \term{symbol} or a \term{list},
+%  \param{doc-type} must be one of
+%  \issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+%         \misc{compiler-macro},
+%  \endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+%         \misc{function},
+%         \misc{method-combination},
+%         \misc{setf}, 
+%         \misc{structure},
+%         \misc{type},
+%      or \misc{variable};
+%  otherwise, \param{doc-type} must not be supplied.
+ 
+\param{documentation}---a \term{string}, or \nil.
+ 
+\param{new-value}---a \term{string}.
+
+\label Description::
+ 
+\TheGF{documentation} returns the \term{documentation string}
+associated with the given \term{object} if it is available;
+otherwise it returns \nil.
+
+The \term{generic function} \f{(setf documentation)} updates the 
+\term{documentation string} associated with \param{x} to \param{new-value}.
+If \param{x} is a \term{list},
+it must be of the form \f{(setf \param{symbol})}.
+
+\term{Documentation strings} are made available for debugging purposes.
+\term{Conforming programs} are permitted to use \term{documentation strings}
+when they are present, but should not depend for their correct behavior on 
+the presence of those \term{documentation strings}.
+An \term{implementation} is permitted to discard \term{documentation strings} 
+at any time for \term{implementation-defined} reasons.
+
+% For those situations where a \param{doc-type} argument is permitted,
+The nature of the \term{documentation string} returned depends on the
+\param{doc-type}, as follows:
+
+% I alphabetized this list.  --sjl 7 Mar 92
+
+\beginlist
+
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+\itemitem{\misc{compiler-macro}}
+
+Returns the \term{documentation string} of the \term{compiler macro}
+whose \term{name} is the \term{function name} \param{x}.
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+
+\itemitem{\misc{function}}
+
+If \param{x} is a \term{function name},
+returns the \term{documentation string} of 
+the \term{function}, \term{macro}, or \term{special operator} 
+whose \term{name} is \param{x}.
+
+If \param{x} is a \term{function},
+returns the \term{documentation string} associated with \param{x}.
+ 
+\itemitem{\misc{method-combination}}
+
+If \param{x} is a \term{symbol},
+returns the \term{documentation string} of
+the \term{method combination}
+whose \term{name} is \param{x}.
+
+If \param{x} is a \term{method combination},
+returns the \term{documentation string} associated with \param{x}.
+
+\itemitem{\misc{setf}}
+
+Returns the \term{documentation string} of 
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+the \term{setf expander}
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+whose \term{name} is the \term{symbol} \param{x}.
+
+\itemitem{\misc{structure}}
+
+%!!! wording??
+Returns the \term{documentation string} 
+associated with the \term{structure name} \param{x}.
+
+\itemitem{\misc{t}}
+
+% added introductory text for this next list  --sjl 7 Mar 92
+Returns a \term{documentation string} specialized on the \term{class} of
+the argument \param{x} itself.
+For example, if \param{x} is a \term{function},
+the \term{documentation string} associated with the \term{function} \param{x} is returned.
+
+% \beginlist
+% 
+% \itemitem{\typeref{function}}
+% 
+% Returns the \term{documentation string} associated with
+% the \term{function} \param{x}.
+% 
+% \itemitem{\typeref{method-combination}}
+% 
+% Returns the \term{documentation string} associated with
+% the \term{method combination} \param{x}.
+% 
+% \itemitem{\typeref{package}}
+% 
+% Returns the \term{documentation string} associated with
+% the \term{package} \param{x}.
+% 
+% \itemitem{\typeref{standard-class} or \typeref{structure-class}}
+% 
+% Returns the \term{documentation string} associated with
+% the \term{class} \param{x}.
+% 
+% \itemitem{\typeref{standard-method}}
+% 
+% Returns the \term{documentation string} associated with
+% the \term{method} \param{x}.
+% 
+% \endlist 
+
+\itemitem{\misc{type}}
+
+If \param{x} is a \term{symbol},
+returns the \term{documentation string} of the \term{class}
+whose \term{name} is the \term{symbol} \param{x},
+if there is such a \term{class}.
+Otherwise, it returns the \term{documentation string} of the \term{type} 
+which is the \term{type specifier} \term{symbol} \param{x}.
+
+If \param{x} is a \term{structure class} or \term{standard class},
+returns the \term{documentation string} associated with
+the \term{class} \param{x}.
+
+\itemitem{\misc{variable}}
+
+Returns the \term{documentation string} of
+the \term{dynamic variable} or \term{constant variable}
+whose \term{name} is the \term{symbol} \param{x}.
+ 
+\endlist
+
+% An implementation may extend the set of \term{symbols} 
+% that are acceptable as the \param{doc-type}.
+% If a \term{symbol} is not recognized as an acceptable \param{doc-type}
+% by the \term{implementation}, an error must be signaled.
+% \editornote{KMP: Can't the user extend this, too, via methods?}%!!!
+%% Rewrite per Moon's instructions:
+A \term{conforming implementation} or a \term{conforming program}
+may extend the set of \term{symbols} that are acceptable as the \param{doc-type}.
+%% This info should follow from the normal rules of method dispatching.
+%% No need to risk making it more complicated. -kmp 21-Aug-93
+%If \param{doc-type} is not recognized, an error is signaled.
+
+% %Moon: This is useless and should be removed.
+% %KMP: Done. 1-Feb-92
+% For those situations where a \param{doc-type} argument is not permitted,
+% the nature of the \term{documentation string} returned depends on the
+% \term{type} of the \term{object} \param{x}.
+
+\label Examples:\None.
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+ 
+%% All of this should follow from normal method dispatch now.  Let's not beat
+%% people over the head with a restatement of what should already be apparent,
+%% and also risk that we've said it in some way that's hard to implement. -kmp 21-Aug-93
+%
+% If \param{x} is
+%      a \term{method} \term{object}, 
+%      a \term{class} \term{object},
+% \issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+%      a \term{package} \term{object},
+%      a \term{function} \term{object}, 
+% \endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+%   or a \term{method combination} \term{object},
+% \issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+% % or a slot description \term{object},
+% \endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+% the second argument must not be supplied, 
+% or else an error \oftype{program-error} is signaled.
+%  
+% If a \term{symbol} is not recognized as an acceptable \param{doc-type} argument by the
+% \term{implementation}, an error \oftype{error} is signaled.
+ 
+\label See Also:\None.
+ 
+\label Notes::
+
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+This standard prescribes no means to retrieve the \term{documentation strings}
+for individual slots specified in a \macref{defclass} form, but 
+\term{implementations} might still provide debugging tools and/or
+programming language extensions which manipulate this information.
+Implementors wishing to provide such support are encouraged to consult the
+\term{Metaobject Protocol} for suggestions about how this might be done.
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+
+\endcom
+
+\endissue{DOCUMENTATION-FUNCTION-TANGLED:REQUIRE-ARGUMENT}
+
+%-------------------- Storage System --------------------
+
+%%% ========== ROOM
+\begincom{room}\ftype{Function}
+
+\label Syntax:: 
+
+\DefunWithValues room {{\opt} x} {\term{implementation-dependent}}
+
+\label Arguments and Values:: 
+
+\param{x}---one of \t, \nil, or \kwd{default}.
+
+\label Description::
+
+%% 25.3.0 15
+\funref{room} prints, to \term{standard output},
+information about the state of internal storage and its management.
+This might include descriptions of the amount of memory in use and 
+the degree of memory compaction, possibly broken down by internal data type if that
+is appropriate.  The nature and format of the printed information is
+\term{implementation-dependent}.
+The intent is to provide information that a \term{programmer}
+might use to tune a \term{program} for a particular \term{implementation}.
+
+%% 25.3.0 16
+\f{(room nil)} prints out a minimal amount of information.
+\f{(room t)} prints out a maximal amount of information.
+\issue{ROOM-DEFAULT-ARGUMENT:NEW-VALUE}
+\f{(room)} or \f{(room :default)} prints out an intermediate amount
+of information that is likely to be useful.
+\endissue{ROOM-DEFAULT-ARGUMENT:NEW-VALUE}
+
+\label Examples:\None.
+
+\label Side Effects::
+
+Output to \term{standard output}.
+
+\label Affected By::
+
+\varref{*standard-output*}.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Browsing Editing --------------------
+
+%%% ========== ED
+\begincom{ed}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues ed {{\opt} x} {\term{implementation-dependent}}
+
+\label Arguments and Values::
+
+\issue{FUNCTION-NAME:LARGE}
+\param{x}---\nil, a \term{pathname}, a \term{string}, or a \term{function name}.
+\endissue{FUNCTION-NAME:LARGE}
+ \Default{\nil}
+
+\label Description::
+
+%% 25.3.0 17
+\funref{ed} invokes the editor if the \term{implementation} provides a resident editor.
+
+%% 25.3.0 18
+If \param{x} is \nil, the editor is entered.
+If the editor had been previously entered, its prior state is resumed, if possible.
+
+%% 25.3.0 19
+If \param{x} is a \term{pathname} or \term{string}, 
+it is taken as the \term{pathname designator} for a \term{file} to be edited.
+
+%% 25.3.0 20                       
+If \param{x} is a \term{function name}, the text of its definition is edited.
+The means by which the function text is obtained is \term{implementation-defined}.
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+% I changed this from "implicitly vague" to "explicitly vauge" since CLtL doesn't
+% say and since Sandra felt this should be explicit. -kmp 9-Jan-92
+The consequences are undefined if the \term{implementation} does not provide a resident editor.
+
+Might signal \typeref{type-error} if its argument is supplied but is not
+a \term{symbol}, a \term{pathname}, or \nil. 
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+If a failure occurs when performing some operation on the \term{file system}
+while attempting to edit a \term{file},
+an error \oftype{file-error} is signaled.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+An error \oftype{file-error} might be signaled if \param{x}
+is a \term{designator} for a \term{wild} \term{pathname}.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\term{Implementation-dependent} additional conditions might be signaled as well.
+
+\label See Also::
+
+\typeref{pathname},
+\issue{PATHNAME-LOGICAL:ADD}
+\typeref{logical-pathname},
+\endissue{PATHNAME-LOGICAL:ADD}
+\funref{compile-file},
+\funref{load},
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+% \issue{PATHNAME-LOGICAL:ADD}
+% Whether \funref{ed} recognizes \term{logical pathname} \term{namestrings}
+% is \term{implementation-defined}.
+% \endissue{PATHNAME-LOGICAL:ADD}
+\endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+
+\endcom    
+
+%%% ========== INSPECT
+\begincom{inspect}\ftype{Function}
+
+\label Syntax::
+
+\issue{RETURN-VALUES-UNSPECIFIED:SPECIFY}
+\DefunWithValues inspect {object} {\term{implementation-dependent}}
+\endissue{RETURN-VALUES-UNSPECIFIED:SPECIFY}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\label Description::
+
+%% 25.3.0 14
+\funref{inspect} is an interactive version of \funref{describe}.
+The nature of the interaction is \term{implementation-dependent},
+but the purpose of \funref{inspect} is to make it easy to wander
+through a data structure, examining and modifying parts of it.
+
+\label Examples:\None.
+
+\label Side Effects::
+
+\term{implementation-dependent}.
+
+\label Affected By::
+
+\term{implementation-dependent}.
+
+\label Exceptional Situations::
+
+\term{implementation-dependent}.
+
+\label See Also::
+
+\funref{describe}
+
+\label Notes::
+
+Implementations are encouraged to respond to the typing
+of \f{?} or a ``help key'' by providing help, including a list
+of commands.
+
+\endcom
+
+%-------------------- Read-Eval-Print Loop --------------------
+
+%%% ========== DRIBBLE
+\begincom{dribble}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues dribble {{\opt} pathname} {\term{implementation-dependent}}
+
+\label Arguments and Values::
+
+\param{pathname}---a \term{pathname designator}.
+
+\label Description::
+
+%% 25.3.0 21
+
+Either \term{binds} \varref{*standard-input*} and \varref{*standard-output*} 
+or takes other appropriate action, 
+so as to send a record of the input/output interaction to a file 
+named by \param{pathname}.  \funref{dribble} is intended to create
+a readable record of an interactive session.
+
+\issue{PATHNAME-LOGICAL:ADD}
+If \param{pathname} is a \term{logical pathname}, it is translated
+into a physical pathname as if by calling \funref{translate-logical-pathname}.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+%% 25.3.0 22
+\f{(dribble)} terminates the recording of input and output 
+and closes the dribble file.
+
+\issue{JUN90-TRIVIAL-ISSUES:25}
+%Actually, the cleanup said "consequences are unspecified", but I wasn't happy with that,
+%so I made the implementation have to tell you what would happen.
+If \funref{dribble} is \term{called} while a \term{stream} to a ``dribble file'' 
+is still open from a previous \term{call} to \funref{dribble},
+the effect is \term{implementation-defined}.  For example, 
+    the already-\term{open} \term{stream} might be \term{closed}, 
+ or dribbling might occur both to the old \term{stream} and to a new one,
+ or the old \term{stream} might stay open but not receive any further output,
+ or the new request might be ignored,
+ or some other action might be taken.
+\endissue{JUN90-TRIVIAL-ISSUES:25}
+
+\label Examples:\None.
+
+\label Affected By::
+
+The \term{implementation}.
+
+\label Exceptional Situations::
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+If a failure occurs when performing some operation on the \term{file system}
+while creating the dribble file, 
+an error \oftype{file-error} is signaled.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+An error \oftype{file-error} might be signaled if \param{pathname}
+is a \term{designator} for a \term{wild} \term{pathname}.
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label See Also::
+
+% This used to say the following, but Sandra thought it was bogus.
+% I tend to agree.  People can cross-reference through "pathname designator". -kmp 9-Jan-92
+% \typeref{pathname},
+% \issue{PATHNAME-LOGICAL:ADD}
+% \typeref{logical-pathname}
+% \endissue{PATHNAME-LOGICAL:ADD}
+
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes::
+
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+% \issue{PATHNAME-LOGICAL:ADD}
+% Whether \funref{dribble} recognizes \term{logical pathname} \term{namestrings}
+% is \term{implementation-defined}.
+% \endissue{PATHNAME-LOGICAL:ADD}
+\endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+
+\funref{dribble} can return before subsequent 
+\term{forms} are executed. It also
+can enter a recursive interaction loop, 
+returning only when \f{(dribble)} is done.
+
+\issue{DRIBBLE-TECHNIQUE}
+\funref{dribble} is intended primarily for interactive debugging;
+its effect cannot be relied upon when used in a program.
+\endissue{DRIBBLE-TECHNIQUE}
+\endcom
+
+%%% ========== - (Variable)
+\begincom{$-$}\ftype{Variable}
+
+\label Value Type::
+
+a \term{form}.
+
+\label Initial Value::
+
+\term{implementation-dependent}.
+
+\label Description::
+
+%% 20.2.0 6
+
+\Thevalueof{-} is the \term{form} that is currently being evaluated by
+the \term{Lisp read-eval-print loop}.
+
+\label Examples::
+
+\code
+(format t "~&Evaluating ~S~%" -)
+\OUT Evaluating (FORMAT T "~&Evaluating ~S~%" -)
+\EV NIL
+\endcode
+
+\label Affected By::
+
+\term{Lisp read-eval-print loop}.
+
+\label See Also::
+
+\funref{+} (\term{variable}),
+\funref{*} (\term{variable}),
+\funref{/} (\term{variable}), 
+{\secref\TopLevelLoop}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== + (Variable)
+%%% ========== ++ (Variable)
+%%% ========== +++ (Variable)
+\begincom{+, ++, +++}\ftype{Variable}
+
+\label Value Type::
+
+an \term{object}.
+
+\label Initial Value::
+
+\term{implementation-dependent}.
+
+\label Description::
+
+%% 20.2.0 5
+\Thevariables{+}, \misc{++}, and \misc{+++} are maintained by the
+\term{Lisp read-eval-print loop} to save \term{forms} that were
+recently \term{evaluated}.
+
+\Thevalueof{+}   is the last \term{form} that was \term{evaluated},
+\thevalueof{++}  is the previous value of \misc{+}, and
+\thevalueof{+++} is the previous value of \misc{++}.
+%% 20.2.0 8
+
+%If the evaluation of the variable \misc{+} is aborted for some reason,
+%then the values associated with \misc{++}, 
+%and \misc{+++} are updated ???
+
+\label Examples::
+\code
+(+ 0 1) \EV 1
+(- 4 2) \EV 2
+(/ 9 3) \EV 3
+(list + ++ +++) \EV ((/ 9 3) (- 4 2) (+ 0 1))
+(setq a 1 b 2 c 3 d (list a b c)) \EV (1 2 3)
+(setq a 4 b 5 c 6 d (list a b c)) \EV (4 5 6)
+(list a b c) \EV (4 5 6)
+(eval +++) \EV (1 2 3)
+#.`(,@++ d) \EV (1 2 3 (1 2 3))
+\endcode
+
+\label Affected By:: 
+
+\term{Lisp read-eval-print loop}.
+
+\label See Also::
+
+\funref{-} (\term{variable}),
+\funref{*} (\term{variable}),
+\funref{/} (\term{variable}), 
+{\secref\TopLevelLoop}
+
+\label Notes:\None.
+
+\endcom
+
+
+%%% ========== * (Variable)
+%%% ========== ** (Variable)
+%%% ========== *** (Variable)
+\begincom{*, **, ***}\ftype{Variable}
+
+\label Value Type::
+
+an \term{object}.
+
+\label Initial Value::
+
+\term{implementation-dependent}.
+
+\label Description::
+
+%% 20.2.0 7
+\Thevariables{*}, \misc{**}, and \misc{***} are 
+maintained by the \term{Lisp read-eval-print loop} to save the 
+values of results that are printed each time through the loop.
+
+\Thevalueof{*}   is the most recent \term{primary value} that was printed,
+\thevalueof{**}  is the previous value of \misc{*}, and 
+\thevalueof{***} is the previous value of \misc{**}.
+
+%The values of these variables are not updated when the evaluation of
+%a form is aborted.
+
+If several values are produced, \misc{*} contains the first value only;
+\misc{*} contains \nil\ if zero values are produced.
+
+%%This is very muddled. -kmp 17-Dec-90
+% If the evaluation of the variable \misc{+} is aborted for some reason,
+% then the values associated with \misc{*}, \misc{**}, and \misc{***} are not updated;
+% they are updated only if the printing of values is at least begun (though not
+% necessarily completed).
+
+The \term{values} of \misc{*}, \misc{**}, and \misc{***} are updated immediately
+prior to printing the \term{return value} of a top-level \term{form} by the
+\term{Lisp read-eval-print loop}.  If the \term{evaluation} of such a \term{form}
+is aborted prior to its normal return, the values of \misc{*}, \misc{**}, and \misc{***} 
+are not updated.
+
+\label Examples::
+\code
+(values 'a1 'a2) \EV A1, A2
+'b \EV B
+(values 'c1 'c2 'c3) \EV C1, C2, C3
+(list * ** ***) \EV (C1 B A1)
+
+(defun cube-root (x) (expt x 1/3)) \EV CUBE-ROOT
+(compile *) \EV CUBE-ROOT
+(setq a (cube-root 27.0)) \EV 3.0
+(* * 9.0) \EV 27.0
+\endcode
+
+\label Affected By::
+
+\term{Lisp read-eval-print loop}.
+
+\label See Also::
+
+\funref{-} (\term{variable}),
+\funref{+} (\term{variable}),
+\funref{/} (\term{variable}), 
+{\secref\TopLevelLoop}
+
+\label Notes::
+
+\code
+ *   \EQ (car /)
+ **  \EQ (car //)
+ *** \EQ (car ///)
+\endcode
+
+\endcom
+
+%%% ========== / (Variable)
+%%% ========== // (Variable)
+%%% ========== /// (Variable)
+\begincom{/, //, ///}\ftype{Variable}
+
+\label Value Type::
+
+a \term{proper list}.
+
+\label Initial Value::
+
+\term{implementation-dependent}.
+
+\label Description::
+
+%% 20.2.0 9
+\Thevariables{/}, \misc{//}, and \misc{///} are maintained by
+the \term{Lisp read-eval-print loop} to save the values of results that
+were printed at the end of the loop.
+
+\Thevalueof{/}   is a \term{list} of the most recent \term{values} that were printed,
+\thevalueof{//}  is the previous value of \misc{/}, and
+\thevalueof{///} is the previous value of \misc{//}.
+
+%% 20.2.0 10
+
+%% This is pretty muddled. -kmp 17-Dec-90
+% If the evaluation of the \term{form} associated
+% with the variable \misc{+} is aborted for some reason,
+% then the values associated with 
+% \misc{/}, \misc{//}, and \misc{///} are not updated;
+% they are updated only if the printing of values is at least begun (though not
+% necessarily completed).
+
+The \term{values} of \misc{/}, \misc{//}, and \misc{///} are updated immediately
+prior to printing the \term{return value} of a top-level \term{form} by the
+\term{Lisp read-eval-print loop}.  If the \term{evaluation} of such a \term{form}
+is aborted prior to its normal return, the values of \misc{/}, \misc{//}, and \misc{///} 
+are not updated.
+
+\label Examples::
+\code
+ (floor 22 7) \EV 3, 1
+ (+ (* (car /) 7) (cadr /)) \EV 22
+\endcode
+
+\label Affected By::
+
+\term{Lisp read-eval-print loop}.
+
+\label See Also::
+
+\funref{-} (\term{variable}),
+\funref{+} (\term{variable}),
+\funref{*} (\term{variable}),
+{\secref\TopLevelLoop}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- External Environment Queries --------------------
+
+%%% ========== LISP-IMPLEMENTATION-TYPE
+%%% ========== LISP-IMPLEMENTATION-VERSION
+\begincom{lisp-implementation-type,
+          lisp-implementation-version}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues lisp-implementation-type    {\noargs} {description}
+
+\DefunWithValues lisp-implementation-version {\noargs} {description}
+
+\label Arguments and Values::
+
+\param{description}---a \term{string} or \nil.
+
+\label Description::
+
+\funref{lisp-implementation-type} and \funref{lisp-implementation-version} 
+identify the current implementation of \clisp.
+
+%% 25.4.2 2
+\funref{lisp-implementation-type} returns a \term{string} 
+that identifies the generic name of
+the particular \clisp\ implementation.
+
+%% 25.4.2 3
+\funref{lisp-implementation-version} 
+returns a \term{string} that identifies the version of
+the particular \clisp\ implementation.
+
+%% 25.4.2 1
+If no appropriate
+and relevant result can be produced, \nil\ is returned instead
+of a \term{string}.
+
+
+\label Examples::
+
+\code
+ (lisp-implementation-type)
+\EV "ACME Lisp"
+\OV "Joe's Common Lisp"
+ (lisp-implementation-version)
+\EV "1.3a"
+\EV "V2"
+\OV "Release 17.3, ECO #6"
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== SHORT-SITE-NAME
+%%% ========== LONG-SITE-NAME
+\begincom{short-site-name, long-site-name}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues short-site-name {\noargs} {description}
+
+\DefunWithValues long-site-name {\noargs} {description}
+
+\label Arguments and Values:: 
+
+\param{description}---a \term{string} or \nil.
+
+\label Description::
+
+%% 25.4.2 11
+\funref{short-site-name} and \funref{long-site-name} return
+a \term{string} that identifies the physical location 
+of the computer hardware, 
+or \nil\ if no appropriate \param{description} can be produced.
+
+\label Examples::
+
+\code
+ (short-site-name)
+\EV "MIT AI Lab"
+\OV "CMU-CSD"
+ (long-site-name)
+\EV "MIT Artificial Intelligence Laboratory"
+\OV "CMU Computer Science Department"
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The implementation,
+the location of the computer hardware,
+and the installation/configuration process.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== MACHINE-INSTANCE
+\begincom{machine-instance}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues machine-instance {\noargs} {description}
+
+\label Arguments and Values::
+
+\param{description}---a \term{string} or \nil.
+
+\label Description::
+
+%% 25.4.2 6
+Returns a \term{string} that identifies the particular instance of
+the computer hardware on which \clisp\ is running, 
+or \nil\ if no such \term{string} can be computed.
+
+\label Examples::
+
+\code
+ (machine-instance)
+\EV "ACME.COM"
+\OV "S/N 123231"
+\OV "18.26.0.179"
+\OV "AA-00-04-00-A7-A4"
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The machine instance,
+and the \term{implementation}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{machine-type}, \funref{machine-version}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== MACHINE-TYPE
+\begincom{machine-type}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues machine-type {\noargs} {description}
+
+\label Arguments and Values::
+
+\param{description}---a \term{string} or \nil.
+
+\label Description::
+
+%% 25.4.2 4
+Returns a \term{string} that identifies the generic name of
+the computer hardware on which \clisp\ is running.
+
+\label Examples::
+
+\code
+ (machine-type)
+\EV "DEC PDP-10"
+\OV "Symbolics LM-2"
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The machine type.
+The implementation.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{machine-version}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== MACHINE-VERSION
+\begincom{machine-version}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues machine-version {\noargs} {description}
+
+\label Arguments and Values::
+
+\param{description}---a \term{string} or \nil.
+
+\label Description::
+
+%% 25.4.2 5
+Returns a \term{string} that identifies the version of the computer hardware
+on which \clisp\ is running, or \nil\ if no such value can be computed.
+
+\label Examples::
+
+\code
+ (machine-version) \EV "KL-10, microcode 9"
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The machine version, 
+and the \term{implementation}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{machine-type}, \funref{machine-instance}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== SOFTWARE-TYPE
+%%% ========== SOFTWARE-VERSION
+\begincom{software-type, software-version}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues software-type    {\noargs} {description}
+\DefunWithValues software-version {\noargs} {description}
+
+\label Arguments and Values:: 
+
+\param{description}---a \term{string} or \nil.
+
+\label Description::
+
+%% 25.4.2 7
+\funref{software-type} returns a \term{string} that identifies the
+generic name of any relevant supporting software, or \nil\ if no
+appropriate or relevant result can be produced.          
+
+%% 25.4.2 8
+\funref{software-version} returns a \term{string} that identifies 
+the version of any relevant supporting software, or \nil\ if no 
+appropriate or relevant result can be produced.          
+
+\label Examples::
+
+\code
+ (software-type) \EV "Multics"
+ (software-version) \EV "1.3x"
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+Operating system environment.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes::
+
+This information should be of use to maintainers of the \term{implementation}.
+
+\endcom
+
+%%% ========== USER-HOMEDIR-PATHNAME
+\begincom{user-homedir-pathname}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues user-homedir-pathname {{\opt} host} {pathname}
+
+\label Arguments and Values::
+
+\param{host}---a \term{string}, a \term{list} of \term{strings}, or \kwd{unspecific}.
+%!!! Barmar: What does a list of strings denote??
+
+\param{pathname}---a \term{pathname}, or \nil.
+
+\label Description::
+
+%% 23.1.2 36
+\funref{user-homedir-pathname} determines the \term{pathname} that corresponds
+to the user's home directory on \param{host}.  
+If \param{host} is not supplied, its value is \term{implementation-dependent}.
+\issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
+For a description of \kwd{unspecific}, \seesection\PathnameComponents.
+\endissue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
+
+The definition of home directory is \term{implementation-dependent}, 
+but defined in \clisp\ to mean the directory where the user
+keeps personal files such as initialization files and mail.  
+
+\funref{user-homedir-pathname} returns a \term{pathname} without any name, 
+type, or version component (those components are all \nil)
+for the user's home directory on \param{host}.
+
+If it is impossible to determine the user's home directory on \param{host},
+then \nil\ is returned.
+\funref{user-homedir-pathname} never returns \nil\ if \param{host} is not supplied.
+
+
+\label Examples::
+
+\code
+ (pathnamep (user-homedir-pathname)) \EV \term{true}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By::
+
+The host computer's file system,
+and the \term{implementation}.
+
+\label Exceptional Situations:\None.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom

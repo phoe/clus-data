@@ -1,0 +1,453 @@
+% -*- Mode: TeX -*-
+
+%%%% ===== Fonts, etc. =====
+
+% Concrete
+
+\def\b#1{{\bf #1}}            	      % b = bold
+\def\i#1{{\it #1}}            	      % i = italic
+\def\j#1{{\it #1\/}}           	      % j = italic + kerning
+\def\f#1{{\dummy}\hbox{{\tt #1}}}     % f = fixed
+
+\def\ff#1{\hbox{{\tt #1} }}   % ff = fixed box w/ trailing space (for use in math mode)
+
+
+\def\ital#1{{\it #1\/}}
+\def\bold#1{{\bf #1}}
+
+\def\ang#1{{$\langle$}{\it #1\/}{$\rangle$\/}}
+\def\flr#1{{$\lfloor$}{\it #1\/}{$\rfloor$\/}}
+
+\def\underlined#1{{$\underline{\hbox{#1}}$}}
+
+\def\metavar#1{{$\langle\!\langle$}{\it #1\/}{$\rangle\!\rangle$\/}}
+\def\metaparam#1{{$\langle\!\langle$}\param{#1}{$\rangle\!\rangle$\/}}
+
+% Abstract
+
+%!!! Barmar: Code font needs a bigger consing dot.
+
+\def\dummy{{$ $}}
+
+%% Couldn't figure out what's keeping this from working.
+%% For now I guess we'll just do without. -kmp 9-Sep-91
+%
+% \def\TTamp{{\tt\char'046}} % &
+% \def\TTpls{{\tt\char'053}} % +
+% \def\TTmin{{\tt\char'055}} % -
+% \def\TTstr{{\tt\char'052}} % *
+% \def\TTsls{{\tt\char`057}} % /
+% \def\TTeql{{\tt\char`075}} % =
+% 
+% {\catcode'046=\active%
+% \catcode'053=\active\catcode'055=\active%
+% \catcode'052=\active\catcode'057=\active%
+% %\catcode'075=\active%
+% \gdef\clref{\bgroup%
+% \catcode'046=\active%
+% \catcode'053=\active\catcode'055=\active%
+% \catcode'052=\active\catcode'057=\active%
+% \catcode'075=\active%
+% \let&\TTamp%
+% \let+\TTpls%
+% \let-\TTmin%
+% \let*\TTstr%
+% \let/\TTsls%
+% \let\=\TTeql%
+% \xclref}}
+% 
+% \def\xclref#1{\function #1\egroup}
+
+\def\clref#1{{\dummy}\hbox{{\function #1\/}}}
+\def\ttref#1{{\dummy}\hbox{{\tt       #1\/}}}
+
+\def\kwd#1{\ttref{:#1}}
+\def\kwdref#1{\ttref{:#1}}
+\def\packref#1{\ttref{\uppercase{#1}}}
+\def\loopref{\ttref}
+
+\def\keyref#1{\clref{\&#1}}
+
+\def\typeref {\clref}
+\def\misc {\clref}
+\def\miscref {\clref}
+\def\declref {\clref}
+\def\funref {\clref}
+\def\macref {\clref}
+\def\specref {\clref}
+\def\conref {\clref}
+\def\varref {\clref}
+
+%\def\bogusterm#1{{\word $\underline{\hbox{#1\/}}$}}
+\def\bogusterm#1{#1}
+\def\newterm #1{{\bit #1\/}\idxterm{#1}}
+\def\newtermidx #1#2{{\bit #1\/}\idxterm{#2}}
+\def\term #1{{\word #1\/}}
+\def\param #1{{\arg #1\/}}
+
+%%%% ===== Sections =====
+
+\let\vv=\vtop
+
+\def\NoReturn{\EV\vrule height 8pt depth 2pt width 1pt}
+
+\def\Vtop #1{\setbox0=\vbox{#1}\dimen2=\ht0\setbox2=\null\dp2=\dp0\setbox0=\vv
+{\unvbox0}\advance\dimen1 by -\ht0\ht2=\dimen2\vadjust
+{\penalty 10000\box2}\dp0=0pt\box0}
+
+\def\Defmac #1 #2{{\let\vtop\Vtop\function #1 {\arg #2} \hfill}
+\Vskip\normalparskip!}
+
+\def\DefmacNoReturn #1 #2{{\let\vtop=\Vtop\function #1 {\arg #2}\quad\NoReturn\hfill}
+\Vskip\normalparskip!}
+
+\def\DefmacWithValuesNewline
+#1 #2 #3{{\let\vtop\Vtop\function #1 {\arg #2}\hfill\break
+\indent\quad\EV\ {\arg #3}}
+\Vskip\normalparskip!}
+
+\def\DefmacWithValues
+#1 #2 #3{{\let\vtop\Vtop\function #1 {\arg #2}\quad\EV\ {\arg #3}\hfill}
+\Vskip\normalparskip!}
+
+\def\Defun #1 #2{{\let\vtop=\Vtop\function #1 {\arg #2}\hfill}
+\Vskip\normalparskip!}
+
+\def\DefunWithValues
+#1 #2 #3{{\let\vtop=\Vtop\function #1 {\arg #2}\quad\EV\ {\arg #3}\hfill}
+\Vskip\normalparskip!}
+
+\def\DefunWithValuesNewline
+#1 #2 #3{{\let\vtop=\Vtop\function #1 {\arg #2}\hfill\break
+\indent\quad\EV\ {\arg #3}}
+\Vskip\normalparskip!}
+
+\def\DefunNoReturn
+#1 #2{{\let\vtop=\Vtop\function #1 {\arg #2}\quad
+       \NoReturn\hfill}
+\Vskip\normalparskip!}
+
+\def\DefunMultiWithValues
+#1 #2 #3{{\let\vtop=\Vtop
+\def\entry##1{##1&\cr}
+\def\blankline{\vksip 5pt}
+\halign{\hskip\leftskip\function ## {\arg #1}\hfil&\quad\EV\ {\arg #2}##\cr#3}}
+\Vskip\normalparskip!}
+
+\def\DefunMultiAccessorWithValues
+#1 #2 #3 #4{{\let\vtop=\Vtop
+\def\blankline{\noalign{\vskip 5pt}}
+\hskip\leftskip\hbox{{\def\entry##1{##1&\cr}%
+\vbox{\halign{\function ## {\arg #1}\hfil&\quad\EV\ {\arg #2}##\cr#4}}}\qquad\vrule\qquad
+{\def\entry##1{##1\cr}%
+\vbox{\halign{\function (setf (## {\arg #1}) {\arg #3})\cr#4}}}}\hfill}
+\Vskip\normalparskip!}
+
+\def\Defsetf
+#1 #2 #3{{\let\vtop=\Vtop\function (setf (#1 {\arg #2}) {\arg #3})\hfill\break}
+\Vskip\normalparskip!}
+
+\def\DefsetfMulti
+#1 #2 #3{{\let\vtop=\Vtop
+\def\entry##1{##1\cr}
+\def\blankline{\vksip 5pt}
+\halign{\hskip\leftskip\function (setf (## {\arg #1}) {\arg #2})\hfil\cr#3}}
+\Vskip\normalparskip!}
+
+\def\Defgen
+#1 #2{{\let\vtop=\Vtop\function #1 {\arg #2}}
+\Vskip\normalparskip!}
+
+\def\DefgenWithValues
+#1 #2 #3{{\let\vtop=\Vtop\function #1 {\arg #2}\quad\EV\ {\arg #3}\hfill}
+\Vskip\normalparskip!}
+
+\def\DefgenWithValuesNewline
+#1 #2 #3{{\let\vtop=\Vtop\function #1 {\arg #2}}\hfill\break
+\indent\quad\EV\ {\arg #3}
+\Vskip\normalparskip!}
+
+\def\specparam#1#2{\paren{\param{#1} \typeref{#2}}}
+
+\def\Defmeth
+#1 #2{{\let\vtop=\Vtop\function #1 {\arg #2}}
+\Vskip\normalparskip!}
+
+\def\Defvar
+#1   {{\let\vtop=\Vtop\tt \ST#1\ST}
+\Vskip\normalparskip!}
+
+\def\Defvarnoast
+#1   {{\let\vtop=\Vtop\function #1}
+\Vskip\normalparskip!}
+
+\def\Defcon
+#1 {{\let\vtop=\Vtop\function #1}
+\Vskip\normalparskip!}
+
+\def\Defspec
+#1 #2 {{\let\vtop=\Vtop\function #1 {\arg #2} \hfill}
+\Vskip\normalparskip!}    
+
+\def\DefspecNoReturn
+#1 #2 {{\let\vtop=\Vtop\function #1 {\arg #2}\quad
+        \NoReturn\hfill}
+\Vskip\normalparskip!}
+
+\def\DefspecWithValues
+#1 #2 #3{{\let\vtop\Vtop\function #1 {\arg #2}\quad\EV\ {\arg #3}\hfill}
+\Vskip\normalparskip!}
+
+\def\DefspecWithValuesNewline
+#1 #2 #3{{\let\vtop\Vtop\function #1 {\arg #2}\hfill\break
+\indent\quad\EV\ {\arg #3}}
+\Vskip\normalparskip!}
+
+% \def\Deftype
+% #1 #2 {{\let\vtop=\Vtop\vbox{\halign{\hskip\leftskip{\tt ##}\hfil\cr#1}
+% \ifx{##}\empty\else\halign{\hskip\leftskip\hfil\i{##} ::$=$ &##\hfil\cr#2}}\fi}%\hfill\fi
+% \Vskip\normalparskip!}
+
+\def\Deftype#1#2{{\let\vtop=\Vtop%
+\halign{\hskip\leftskip{\tt (#1} {\arg ##\/}{\tt)}\hfil\cr#2\cr}\hfill}
+\Vskip\normalparskip!}
+
+\def\defFormat{\begingroup\catothers\catcode`\$=12\relax\doformat}
+\def\doformat
+#1 (#2) #3{\Vskip2pc!{#1}\hskip 2pc{\rm ({#2})}\hfill{#3}\par
+\endgroup
+\Vskip\normalparskip!}
+
+%%%% ===== Special Symbols =====
+
+% Subscripts
+
+\def\ssso{{${}\sub 1$}}       % Sub  1
+\def\ssst{{${}\sub 2$}}       % Sub  2
+\def\ssse{{${}\sub 8$}}       % Sub  8
+\def\ssss{{${}\sub{16}$}}     % Sub 16
+
+\def\sssi{{${}\sub i$}}       % Sub i
+\def\sssk{{${}\sub k$}}       % Sub k
+\def\sssn{{${}\sub n$}}       % Sub n
+\def\sssx{{${}\sub x$}}       % Sub x
+\def\sssy{{${}\sub y$}}       % Sub y
+\def\sssz{{${}\sub z$}}       % Sub z
+
+% Relations
+
+\def\EV{{\penalty20000}{$\rightarrow$}{\penalty20000}}
+\def\OV{{\penalty20000}{$\buildrel{or}\over\rightarrow$}{\penalty20000}}
+\def\NV{{\penalty20000}{$\buildrel{not}\over\rightarrow$}{\penalty20000}}
+\def\EQ{{\penalty20000}{$\equiv$}{\penalty20000}}
+
+% Contexts
+
+\def\OUT{{$\triangleright$}}
+\def\IN#1{{$\underline{\hbox{#1}}$}}
+
+% Characters
+
+\def\CRLF{{$\hookleftarrow$}}
+
+\def\NewlineChar{\ang{Newline}}
+\def\SpaceChar{\ang{Space}}
+\def\TabChar{\ang{Tab}}
+\def\ReturnChar{\ang{Return}}
+\def\LinefeedChar{\ang{Linefeed}}
+\def\BackspaceChar{\ang{Backspace}}
+\def\PageChar{\ang{Page}}
+\def\RuboutChar{\ang{Rubout}}
+\def\WhitespaceChar{\ang{Whitespace}}
+
+\def\bq{`}
+
+\def\ampersand{{\&}}
+\def\tilde{{$\sim$}}
+\def\bsl{{\tt {\char '134}}}
+\def\hat{{\setbox0\hbox{{\tt {\char '136}}}\hbox to \wd0{\lower 4pt\hbox{$^{^\wedge}$}}}}
+\def\lbr{{\tt {\char '173}}}
+\def\rbr{{\tt {\char '175}}}
+\def\dot{{\tt {\char '056}}}
+\def\surd{{\tt $\surd$}}
+\def\vert{{\tt {\char '174}}}
+\def\centerdot{{$\cdot$}}
+\def\underscore{{\\_}}
+\def\lbracket{{$\lbrack$}}
+\def\rbracket{{$\rbrack$}}
+\def\minussign{$-$}
+
+%%%% ===== BNF Notation =====
+
+\def\more#1{{\setbox0=\hbox{#1}\hbox to \wd0{\hfil}}}
+\def\star #1{#1{\rm *}}
+%\def\form {\curly{form}}   % No longer used. -kmp 7-Feb-92
+%\def\place{\curly{place}}  % No longer used. -kmp 7-Feb-92
+\def\paren #1{{\rm(}#1\/{\rm)}}
+\def\lparen{{\rm (}}
+\def\xparen{\more\lparen}
+\def\rparen{\/{\rm )}}
+\def\brac #1{{\rm[}#1\/{\rm]}}
+\def\lbrac{{\rm [}}
+\def\xbrac{\more\lbrac}
+\def\rbrac{\/{\rm ]}}
+\def\bbrac #1{\lower1pt\hbox{{\brfl[}\raise1pt\hbox{#1\/}{\brfl]}}}
+\def\ttbrac #1{{\tt[}#1\/{\tt]}}
+\def\lttbrac{{\tt [}}
+\def\xttbrac{\more\lttbrac}
+\def\rttbrac{\/{\tt ]}}
+\def\curly #1{{$\{$}#1\/{$\}$}}
+\def\lcurly{{$\{$}}
+\def\xcurly{\more\lcurly}
+\def\rcurly{\/{$\}$}}
+\def\plus #1{$\hbox{#1}^+$}
+\def\prevplus{$^+$}
+\def\upstar #1{$\hbox{#1}^*$}
+\def\one #1{$\hbox{#1}^1$}
+\def\placeplus{\plus{\curly{\param{place}}}}
+\def\begininterleave{{$\lbrack\!\lbrack\,$}}
+\def\extrainterleave{\more\begininterleave}
+\def\endinterleave{\/{$\,\rbrack\!\rbrack$}}
+\def\interleave#1{\begininterleave #1\/\endinterleave}
+%\def\DeclsAndDoc{\star{\curly{declaration $\vert$ documentation}}}
+\def\DeclsAndDoc{\interleave{\starparam{declaration} $\vert$ \param{documentation}}}
+\def\LocalDeclsAndDoc{\interleave{\starparam{local-declaration} 
+				  $\vert$ \param{local-documentation}}}
+\def\down#1{$\downarrow$\param{#1}}
+\def\plusdown#1{\plus{\curly{\down{#1}}}}
+\def\plusparam#1{\plus{\curly{\param{#1}}}}
+\def\plusparen#1{\plus{\curly{\paren{#1}}}}
+\def\stardown#1{\star{\curly{\down{#1}}}}
+\def\starparam#1{\star{\curly{\param{#1}}}}
+\def\starparen#1{\star{\curly{\paren{#1}}}}
+\def\auxbnf#1#2{{\medbreak\vskip 4pt\def\CR{\cr\noalign{\penalty1000\vskip 4pt\penalty1000}&&}\arg
+\halign to \hsize{\hskip\leftskip\quad##&\hfil##& ##\hfil\cr
+&\param{#1}::$=$& #2\cr}}}
+
+%%%% ===== BNF Shorthand =====
+
+% var
+%
+% This exists so that some local contexts can override its definition.
+% TVar is mnemonic for Terminal Variable, and occurs only a place where
+% a list cannot be substituted.
+
+\def\GTVar{\param{var}}
+\def\GstarTVar{\starparam{var}}
+\let\TVar=\GTVar
+\let\starTVar=\GstarTVar
+
+% var | (var [specializer])
+
+\def\SpecializedVar{\curly{\param{var} | \paren{{\TVar} \brac{\param{specializer}}}}}
+
+% var | (var)
+
+\def\JustVar{\curly{\param{var} | \paren{\TVar}}}
+
+% var | (var [value])
+\def\VarValue{\curly{\param{var} | \paren{{\TVar} \brac{\param{init-form}}}}}
+
+% var | (var [init [supplied-p]])
+\def\VarValueSuppliedP{\curly{\param{var} |
+		       \paren{{\TVar} \brac{init-form \brac{supplied-p-parameter}}}}}
+
+% var | ({var | (keyword-name var)} [init [supplied-p]])
+\def\KeyVarValueSuppliedP{\curly{\param{var} |
+		          	 \paren{\curly{\param{var} | 
+					       \paren{\param{keyword-name} {\TVar}}}
+				 	\brac{init-form \brac{supplied-p-parameter}}}}}
+
+% var | ({var | (keyword-name var)} [init [supplied-p]])
+\def\JustKey{\curly{\param{var} | \paren{\curly{\param{var} | 
+					       \paren{\param{keyword-name} {\TVar}}}}}}
+
+% var | (var [init [step]])
+\def\VarInitStep{\curly{\param{var} | \paren{{\TVar} \brac{init-form \brac{step-form}}}}}
+
+%%%% ==== Document-related Shorthand =====
+
+\def\Seefun #1{See the \term{function} \funref{#1}}
+\def\seefun #1{see the \term{function} \funref{#1}}
+\def\Seefuns #1{See the \term{functions} \funref{#1}}
+\def\seefuns #1{see the \term{functions} \funref{#1}}
+\def\Seespec #1{See the \term{special operator} \specref{#1}}
+\def\seespec #1{see the \term{special operator} \specref{#1}}
+\def\Seemac #1{See the \term{macro} \macref{#1}}
+\def\seemac #1{see the \term{macro} \macref{#1}}
+\def\Seevar #1{See the \term{variable} \varref{#1}}
+\def\seevar #1{see the \term{variable} \varref{#1}}
+\def\Seetype #1{See the \term{type} \typeref{#1}}
+\def\seetype #1{see the \term{type} \typeref{#1}}
+
+\def\Seemisc #1{See \miscref{#1}}
+\def\seemisc #1{see \miscref{#1}}
+
+\def\Seesection#1{See \secref#1}
+\def\seesection#1{see \secref#1}
+
+\def\Seechapter#1{See \chapref#1}
+\def\seechapter#1{see \chapref#1}
+
+\def\Seefigure#1{See \figref#1}
+\def\seefigure#1{see \figref#1}
+
+\def\Seeterm#1{See \term{#1}}
+\def\seeterm#1{see \term{#1}}
+
+\def\SeetermAlso#1{See also \term{#1}}
+\def\seetermAlso#1{see also \term{#1}}
+
+\def\noargs{\ang{no \term{arguments}}}
+\def\novalues{\ang{no \term{values}}}
+
+\def\eval{evaluated}
+\def\noeval{not evaluated}
+\def\evalspecial{evaluated as described below}
+
+\def\Thenextfigure{Figure {\chapno--\the\capno}}
+\def\thenextfigure{Figure {\chapno--\the\capno}}
+
+%% Apparently not used. -kmp 25-Apr-93
+%\def\index #1{{\tt #1}}
+
+\def\code{\screen!}
+\def\endcode{\endscreen!}
+
+\newif \ifeditornotes  \editornotestrue % might be overridden in setup-options
+
+\def\editornote#1{\ifeditornotes{\bf\lbr{#1}\rbr}\fi\ignorespaces}
+\def\reviewer#1{\ifeditornotes{\bf\lbr{#1}\rbr}\fi\ignorespaces}
+
+%%%%% ===== Glossary =====
+
+% Webster's pronunciation support 
+\def\miscaccent{{\vrule width 1pt height 2pt depth 2pt}}
+\def\loaccent{{$\,$\miscaccent$\,$}}
+\def\hiaccent{{$\,$\raise 6pt\hbox{\loaccent}$\,$}}
+\def\medaccent{{$\,$\miscaccent\kern -1pt\raise 6pt\hbox{\miscaccent}$\,$}}
+\def\maybeStress#1{{\medaccent}#1}
+\def\Stress#1{{\hiaccent}#1}
+\def\stress#1{{\loaccent}#1}
+
+\def\harda{\=a}
+\def\nasala{\^a}
+\def\softa{\"a}
+\def\harde{\=e}
+\def\hardi{\=\dotlessi}
+\def\hardo{\=o}
+\def\hardp{\=p}
+\def\nasalo{\^o}
+\def\th{$\rlap{th}/$}
+\def\softoo{{\edef\next{\the\font}\setbox0=\hbox{\the\mifive\accent"5E}\setbox1=\hbox{\next oo}\dimen255=.5\wd1\advance\dimen255 by -.5\wd0\vbox{\moveright\dimen255\hbox{\lower 30pt\copy0}\copy1}}}
+\def\hardoo{{\edef\next{\the\font}\setbox0=\hbox{\the\textfont0\accent"7B}\setbox1=\hbox{\next oo}\dimen255=.5\wd1\advance\dimen255 by -.65\wd0\vbox{\moveright\dimen255\hbox{\lower 20pt\copy0}\copy1}}}
+\def\reducede{{$\epsilon$}}
+\def\lightaccent{{\rm '}}
+\def\schwa{{$\epsilon$}}
+\def\TypographyCaveats{,
+  except that ``{\schwa}'' is used to notate the schwa (upside-down ``e'') character}
+
+\def\pronounced#1{$\lbrack\thinspace\hbox{\b{#1}}\thinspace\rbrack$}
+
+\def\meaning#1{$\sub{#1}$}
+

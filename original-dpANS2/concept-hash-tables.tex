@@ -1,0 +1,267 @@
+% -*- Mode: TeX -*-
+
+\beginsubsection{Hash-Table Operations}
+
+\Thenextfigure\ lists some \term{defined names} that are applicable 
+to \term{hash tables}.  The following rules apply to \term{hash tables}.
+
+%% 16.0.0 2
+%% 16.0.0 4
+\beginlist
+\itemitem{--}
+A \term{hash table} can only associate one value with a given
+key. If an attempt is made to add a second value for a given key,
+the second value will replace the first.
+Thus, adding a value to a \term{hash table} is a destructive operation;
+the \term{hash table} is modified.  
+
+%% 16.0.0 5
+\itemitem{--}
+There are four kinds of \term{hash tables}:
+  those whose keys are compared with \funref{eq},
+  those whose keys are compared with \funref{eql},
+  those whose keys are compared with \funref{equal}, and
+\issue{HASH-TABLE-TESTS:ADD-EQUALP}
+  those whose keys are compared with \funref{equalp}.  
+\endissue{HASH-TABLE-TESTS:ADD-EQUALP}
+
+%% 16.0.0 6
+\itemitem{--}
+\term{Hash tables} are created by \funref{make-hash-table}. 
+\funref{gethash} is used to look up a key and find the associated value.
+New entries are added to \term{hash tables} using \macref{setf} with \funref{gethash}.
+\funref{remhash} is used to remove an entry.
+For example:
+
+\code
+ (setq a (make-hash-table)) \EV #<HASH-TABLE EQL 0/120 32536573>
+ (setf (gethash 'color a) 'brown) \EV BROWN
+ (setf (gethash 'name a) 'fred) \EV FRED
+ (gethash 'color a) \EV BROWN, \term{true}
+ (gethash 'name a) \EV FRED, \term{true}
+ (gethash 'pointy a) \EV NIL, \term{false}
+\endcode
+
+%% 16.0.0 7             
+In this example, the symbols \f{color} and \f{name} are being used as
+keys, and the symbols \f{brown} and \f{fred} are being used as the
+associated values.  The \term{hash table} 
+has two items in it, one of which                              
+associates from \f{color} to \f{brown}, and the other of which
+associates from \f{name} to \f{fred}.
+
+%% 16.0.0 8
+\itemitem{--}
+A key or a value may be any \term{object}.
+
+\issue{HASH-TABLE-SIZE:INTENDED-ENTRIES}
+% The following will be deleted.
+% 
+% %% 16.0.0 9
+% \itemitem{--}
+% A \term{hash table}'s size is the maximum number of entries
+% it can hold without collisions. Usually the actual capacity of
+% the table is somewhat less, since the hashing is not perfectly
+% collision-free.  If so many entries are
+% added that the capacity is exceeded, the \term{hash table} 
+% will automatically
+% grow, and the entries will be rehashed (new hash values will be
+% recomputed, and everything will be rearranged so that the fast hash
+% lookup still works).  This is transparent to the caller; it all happens
+% automatically.
+\endissue{HASH-TABLE-SIZE:INTENDED-ENTRIES}
+
+%% 16.0.0 10
+\itemitem{--}
+% The cases of \f{nil} as a value and no entry in the \term{hash table} 
+% can be distinguished by the second value returned by \funref{gethash}.
+%% Reworded per Barmar:
+The existence of an entry in the \term{hash table} can be determined
+from the \term{secondary value} returned by \funref{gethash}.
+\endlist               
+
+\displaythree{Hash-table defined names}{
+clrhash&hash-table-p&remhash\cr
+gethash&make-hash-table&sxhash\cr
+hash-table-count&maphash&\cr
+}
+
+
+\endsubsection%{Hash-Table Operations}
+
+\beginsubsection{Modifying Hash Table Keys}
+\DefineSection{ModifyingHashKeys}
+
+\issue{HASH-TABLE-KEY-MODIFICATION:SPECIFY}
+
+The function supplied as the \kwd{test} argument to \funref{make-hash-table}
+specifies the `equivalence test' for the \term{hash table} it creates.
+ 
+An \term{object} is `visibly modified' with regard to an equivalence test
+if there exists some set of \term{objects} (or potential \term{objects})
+which are equivalent to the \term{object} before the modification but are
+no longer equivalent afterwards.
+
+% If an \term{object} is used as a key in a \term{hash table} and is then visibly 
+% modified with regard to the equivalence test of the \term{hash table}, then
+% using the \term{object} as a key in further operations on the \term{hash table}
+% has unspecified consequences.  Moreover, this applies for other \term{objects}
+% which either are or were equivalent to the key object.  Further, undoing the 
+% modification does not remove this effect.
+
+If an \term{object} $O\sub 1$ is used as a key in a \term{hash table} $H$
+and is then visibly modified with regard to the equivalence test of $H$,
+then the consequences are unspecified if $O\sub 1$, or any \term{object}
+$O\sub 2$ equivalent to $O\sub 1$ under the equivalence test (either before
+or after the modification), is used as a key in further operations on $H$.
+The consequences of using $O\sub 1$ as a key are unspecified 
+even if $O\sub 1$ is visibly modified 
+and then later modified again in such a way as 
+to undo the visible modification.
+ 
+Following are specifications of the modifications which are visible to the
+equivalence tests which must be supported by \term{hash tables}.  The modifications
+are described in terms of modification of components, and are defined
+recursively.  Visible modifications of components of the \term{object} are 
+visible modifications of the \term{object}.
+
+\beginsubsubsection{Visible Modification of Objects with respect to EQ and EQL}
+\DefineSection{VisModEQ}
+\DefineSection{VisModEQL}
+
+No \term{standardized} \term{function} is provided that is capable of visibly
+modifying an \term{object} with regard to \funref{eq} or \funref{eql}.
+
+\endsubsubsection%{Visible Modification of Objects with respect to EQ and EQL}
+
+\beginsubsubsection{Visible Modification of Objects with respect to EQUAL}
+\DefineSection{VisModEQUAL}
+
+As a consequence of the behavior for \funref{equal},
+the rules for visible modification of \term{objects} not explicitly mentioned in this
+section are inherited from those in \secref\VisModEQL.
+ 
+\beginsubsubsubsection{Visible Modification of Conses with respect to EQUAL}
+
+Any visible change to the \term{car} or the \term{cdr} of a \term{cons}
+is considered a visible modification with regard to \funref{equal}.
+ 
+\endsubsubsubsection%{Visible Modification of Conses with respect to EQUAL}
+
+\beginsubsubsubsection{Visible Modification of Bit Vectors and Strings with respect to EQUAL}
+
+For a \term{vector} \oftype{bit-vector} or \oftype{string}, any visible change
+     to an \term{active} \term{element} of the \term{vector},
+  or to the \term{length} of the \term{vector} (if it is \term{actually adjustable} 
+					           or has a \term{fill pointer})
+is considered a visible modification with regard to \funref{equal}.
+ 
+\endsubsubsubsection%{Visible Modification of Bit Vectors and Strings with respect to EQUAL}
+
+\endsubsubsection%{Visible Modification of Objects with respect to EQUAL}
+
+\beginsubsubsection{Visible Modification of Objects with respect to EQUALP}
+
+As a consequence of the behavior for \funref{equalp},
+the rules for visible modification of \term{objects} not explicitly mentioned in this
+section are inherited from those in \secref\VisModEQUAL.
+
+\beginsubsubsubsection{Visible Modification of Structures with respect to EQUALP}
+
+Any visible change to a \term{slot} of a \term{structure}
+is considered a visible modification with regard to \funref{equalp}.
+ 
+\endsubsubsubsection%{Visible Modification of Structures with respect to EQUALP}
+ 
+\beginsubsubsubsection{Visible Modification of Arrays with respect to EQUALP}
+
+In an \term{array}, any visible change
+     to an \term{active} \term{element},
+     to the \term{fill pointer} (if the \term{array} can and does have one),
+  or to the \term{dimensions} (if the \term{array} is \term{actually adjustable})
+is considered a visible modification with regard to \funref{equalp}.
+
+\endsubsubsubsection%{Visible Modification of Arrays with respect to EQUALP}
+
+\beginsubsubsubsection{Visible Modification of Hash Tables with respect to EQUALP}
+ 
+In a \term{hash table}, any visible change
+     to the count of entries in the \term{hash table},
+     to the keys,
+  or to the values associated with the keys
+is considered a visible modification with regard to \funref{equalp}.
+
+Note that the visibility of modifications to the keys depends on the equivalence test
+of the \term{hash table}, not on the specification of \funref{equalp}.
+ 
+\endsubsubsubsection%{Visible Modification of Hash Tables with respect to EQUALP}
+
+\endsubsubsection%{Visible Modification of Objects with respect to EQUALP}
+
+\beginsubsubsection{Visible Modifications by Language Extensions}
+
+\term{Implementations} that extend the language by providing additional mutator
+functions (or additional behavior for existing mutator functions) must
+document how the use of these extensions interacts with equivalence tests and
+\term{hash table} searches.
+ 
+\term{Implementations} that extend the language by defining additional acceptable
+equivalence tests for \term{hash tables} (allowing additional values for the \kwd{test}
+argument to \funref{make-hash-table}) must document the visible components of these
+tests.
+
+\endsubsubsection%{Visible Modifications by Language Extensions}
+
+% !!! Maybe consider making these things visible...
+%
+% Test Cases/Examples:
+% 
+%  (setf ht (make-hash-table :test #'eq))
+%  (setf a (cons 1 2))
+%  (setf (gethash a ht) 'win)
+%  (setf (cdr a) 3)
+%  (gethash a ht 'lose) => win t
+% 
+%  The same example with :test #'equal in the first line would be an error.
+% 
+%  The following example is not an error, because EQUAL does not examine the
+%  components of general vectors:
+% 
+%  (setf ht (make-hash-table :test #'equal))
+%  (setf a (vector 1 2))
+%  (setf (gethash a ht) 'win)
+%  (setf (aref a 1) 3)
+%  (gethash a ht 'lose) => win t
+% 
+%  The following example is not an error, because EQUALP is limited by the
+%  fill-pointer when examining the elements of a vector:
+% 
+%  (setf ht (make-hash-table :test #'equalp))
+%  (setf a (make-array 3 :fill-pointer 2 :initial-contents '(1 2 3)))
+%  (setf (gethash a ht) 'win)
+%  (setf (aref a 2) 4)
+%  (gethash a ht 'lose) => win t
+% 
+%  The following example is an error, because EQUALP may examine the dimensions
+%  of arrays:
+% 
+%  (setf ht (make-hash-table :test #'equalp))
+%  (setf a (make-array '(2 3) :adjustable t))
+%  (setf (gethash a ht) 'win)
+%  (setf a (adjust-array a '(3 2)))
+%  (gethash a ht 'lose) => `unspecified'
+% 
+%  The following example is not an error, because EQUALP is case insensitive:
+% 
+%  (setf ht (make-hash-table :test #'equalp))
+%  (setf a "ABC")
+%  (setf (gethash a ht) 'win)
+%  (setf (char a 0) #\a)
+%  (gethash a ht 'lose) => win t
+% 
+%  The same example with :test #'equal in the first line would be an error.
+% 
+
+\endissue{HASH-TABLE-KEY-MODIFICATION:SPECIFY}
+
+\endsubsection%{Modifying Hash Table Keys}

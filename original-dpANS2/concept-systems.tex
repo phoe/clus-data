@@ -1,0 +1,130 @@
+% -*- Mode: TeX -*-
+
+\beginsubsection{Loading}
+
+%% 23.4.0 1
+To \funref{load} a \term{file} is to treat its contents as \term{code}
+and \term{execute} that \term{code}.
+The \term{file} may contain \newterm{source code} or \newterm{compiled code}.
+
+A \term{file} containing \term{source code} is called a \newterm{source file}.
+\term{Loading} a \term{source file} is accomplished essentially 
+by sequentially \term{reading}\meaning{2} the \term{forms} in the file,
+\term{evaluating} each immediately after it is \term{read}.
+
+%% 23.4.0 2
+A \term{file} containing \term{compiled code} is called a \newterm{compiled file}.
+\term{Loading} a \term{compiled file} is similar to \term{loading} a \term{source file},
+except that the \term{file} does not contain text but rather an
+\term{implementation-dependent} representation of pre-digested \term{expressions}
+created by the \term{compiler}.  Often, a \term{compiled file} can be \term{loaded}
+more quickly than a \term{source file}.
+\Seesection\Compilation.
+
+The way in which a \term{source file} is distinguished from a \term{compiled file} 
+is \term{implementation-dependent}.
+
+\endsubsection%{Loading}
+
+\beginsubsection{Features}
+\DefineSection{Features}
+
+A \newterm{feature} is an aspect or attribute
+     of \clisp, 
+     of the \term{implementation},
+  or of the \term{environment}.
+A \term{feature} is identified by a \term{symbol}.
+
+A \term{feature} is said to be \newterm{present} in a \term{Lisp image}
+if and only if the \term{symbol} naming it is an \term{element} of the
+\term{list} held by \thevariable{*features*}, 
+which is called the \newterm{features list}.
+
+\beginsubsubsection{Feature Expressions}
+\DefineSection{FeatureExpressions}
+
+Boolean combinations of \term{features}, called \newtermidx{feature expressions}{feature expression},
+are used by the \f{\#+} and \f{\#-} \term{reader macros} in order to
+direct conditional \term{reading} of \term{expressions} by the \term{Lisp reader}.
+
+The rules for interpreting a \term{feature expression} are as follows:
+
+\beginlist
+
+\itemitem{\term{feature}}
+
+If a \term{symbol} naming a \term{feature} is used as a \term{feature expression},
+the \term{feature expression} succeeds if that \term{feature} is \term{present};
+otherwise it fails.
+
+\itemitem{\f{(not \param{feature-conditional})}}
+
+A \misc{not} \term{feature expression} succeeds 
+if its argument \param{feature-conditional} fails;
+otherwise, it succeeds.
+
+\itemitem{\f{(and \starparam{feature-conditional})}}
+
+An \misc{and} \term{feature expression} succeeds 
+if all of its argument \param{feature-conditionals} succeed;
+otherwise, it fails.
+
+\itemitem{\f{(or \starparam{feature-conditional})}}
+
+An \misc{or} \term{feature expression} succeeds 
+if any of its argument \param{feature-conditionals} succeed;
+otherwise, it fails.
+
+\endlist
+
+\beginsubsubsubsection{Examples of Feature Expressions}
+\DefineSection{FeatureExpExamples}
+%% 22.1.4 40
+For example, suppose that
+ in \term{implementation} A, the \term{features} \f{spice} and \f{perq} are \term{present},
+			     but the \term{feature} \f{lispm} is not \term{present};
+ in \term{implementation} B, the feature \f{lispm} is \term{present},
+			     but the \term{features} \f{spice} and \f{perq} are
+			      not \term{present};
+ and 
+ in \term{implementation} C, none of the features \f{spice}, \term{lispm}, or \f{perq} are
+			     \term{present}.
+\Thenextfigure\ shows some sample \term{expressions}, and how they would be 
+\term{read}\meaning{2} in these \term{implementations}.
+
+\showtwo{Features examples}{
+\f{(cons \#+spice "Spice" \#-spice "Lispm" x)} \span \cr
+\noalign{\vskip 2pt}
+\quad in \term{implementation} A $\ldots$ & \f{(CONS "Spice" X)} \cr
+\quad in \term{implementation} B $\ldots$ & \f{(CONS "Lispm" X)} \cr
+\quad in \term{implementation} C $\ldots$ & \f{(CONS "Lispm" X)} \cr
+\noalign{\vskip 5pt}
+\f{(cons \#+spice "Spice" \#+LispM "Lispm" x)} \span \cr
+\noalign{\vskip 2pt}
+\quad in \term{implementation} A $\ldots$ & \f{(CONS "Spice" X)} \cr
+\quad in \term{implementation} B $\ldots$ & \f{(CONS "Lispm" X)} \cr
+\quad in \term{implementation} C $\ldots$ & \f{(CONS X)} \cr
+\noalign{\vskip 5pt}
+\f{(setq a '(1 2 \#+perq 43 \#+(not perq) 27))} \span \cr
+\noalign{\vskip 2pt}
+\quad in \term{implementation} A $\ldots$ & \f{(SETQ A '(1 2 43))} \cr
+\quad in \term{implementation} B $\ldots$ & \f{(SETQ A '(1 2 27))} \cr
+\quad in \term{implementation} C $\ldots$ & \f{(SETQ A '(1 2 27))} \cr
+\noalign{\vskip 5pt}
+\f{(let ((a 3) \#+(or spice lispm) (b 3)) (foo a))} \span \cr
+\noalign{\vskip 2pt}
+\quad in \term{implementation} A $\ldots$ & \f{(LET ((A 3) (B 3)) (FOO A))} \cr
+\quad in \term{implementation} B $\ldots$ & \f{(LET ((A 3) (B 3)) (FOO A))} \cr
+\quad in \term{implementation} C $\ldots$ & \f{(LET ((A 3)) (FOO A))} \cr
+\noalign{\vskip 5pt}
+\f{(cons \#+Lispm "\#+Spice" \#+Spice "foo" \#-(or Lispm Spice) 7 x)} \span \cr
+\noalign{\vskip 2pt}
+\quad in \term{implementation} A $\ldots$ & \f{(CONS "foo" X)}      \cr
+\quad in \term{implementation} B $\ldots$ & \f{(CONS "\#+Spice" X)} \cr
+\quad in \term{implementation} C $\ldots$ & \f{(CONS 7 X)}          \cr
+}
+\endsubsubsubsection%{Examples of Feature Expressions}
+
+\endsubsubsection%{Feature Expressions}
+
+\endsubsection%{Features}

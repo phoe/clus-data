@@ -1,0 +1,1121 @@
+% -*- Mode: TeX -*-
+\overfullrule 0pt
+\let\sub_		%subscripts
+% fonts
+\def\Font#1{\def\next{\fixfont#1}\afterassignment\next\font#1}
+\def\fixfont#1{\fontdimen3#1=0pt\fontdimen4#1=0pt}
+\def\sc {scaled}
+
+\let\mh	 \magstephalf		\def\mi	  {\magstep1}
+\def\mii {\magstep2}		\def\miii {\magstep3}
+
+\def\beginImplNote
+{\begingroup\advance\rightskip 3pc\advance\leftskip 3pc
+{\bf Implementation Note: }\vrule width0pt depth 5pt\hfil\break}
+\def\endImplNote{\par\endgroup}
+
+\def\beginTermNote
+{\begingroup\advance\rightskip 2pc\advance\leftskip 2pc
+{\bf Terminology Note: }\hfil\break}                       
+\def\endTermNote{\par\endgroup}
+
+\input setup-cmfont
+%\input setup-amfont
+
+\newif \iftt
+\newif \ifbf
+\newif \ifsphy \sphyfalse
+
+\def\tenpoint
+{\let\bit\prbiten
+\let\bbf\prbeleven
+\def\bbfl{\prbtwelve}%
+\def\brfl{\prmtwelve}%
+%%
+    \def\arg{\ssiten}%%
+    \def\keyword{\tt}%%
+    \def\function{\bbfnine}%%
+   %\def\datatype{\bslten}%%
+%!!! No longer used. -kmp 9-May-91
+%    \def\datatype{\it}%%
+    \def\word{\it}%%
+% Experimentally removed.  This is defined by \let above, and I see no reason to override it.
+% -kmp 6-Sep-91
+%   \def\bit{\it}%%
+    \def\constant{\ssqeight}%%
+    \def\cltl{\bscten}%%
+    \def\andarg{\bslten}%%
+    \def\argument{\ssiten}%%
+%    \def\cal{\calten}%%
+%\def\rm{\fam0\prmten\textfont7\miten \textfont8\syten \ttfalse\bffalse}%
+\def\bf{\fam4\prbten\textfont7\bmiten\textfont8\bsyten\ttfalse\bftrue}%
+\def\it{\fam5\priten\textfont7\miten \textfont8\syten \ttfalse\bffalse}%
+\def\tt{\catothers\fam6\lgnine\textfont7\miten\textfont8\syten\tttrue\bffalse}%
+\textfont0=\prmten \scriptfont0=\prmseven \scriptscriptfont0=\prmfive
+\textfont1=\miten  \scriptfont1=\miseven  \scriptscriptfont1=\mifive
+\textfont2=\syten  \scriptfont2=\syseven  \scriptscriptfont2=\syfive
+\textfont4=\prbten \scriptfont4=\prbseven	
+\textfont5=\priten \scriptfont5=\priseven
+\textfont6=\lgnine
+\baselineskip 11pt\rm
+}
+
+\def\elevenpoint
+{\let\bit\prbieleven
+\let\bbf\prbtwelve
+%\def\rm{%
+%\fam0\prmeleven\textfont7\mieleven \textfont8\syeleven \ttfalse\bffalse}%
+\def\bf{%
+\fam4\prbeleven\textfont7\bmieleven\textfont8\bsyeleven\ttfalse\bftrue}%
+\def\it{%
+\fam5\prieleven\textfont7\mieleven \textfont8\syeleven \ttfalse\bffalse}%
+\def\tt{\catothers
+\fam6\lgnine   \textfont7\mieleven \textfont8\syeleven \tttrue \bffalse}%
+\textfont0=\prmeleven \scriptfont0=\prmeight \scriptscriptfont0=\prmfive
+\textfont1=\mieleven  \scriptfont1=\mieight  \scriptscriptfont1=\mifive
+\textfont2=\syeleven  \scriptfont2=\syeight  \scriptscriptfont2=\syfive
+\textfont4=\prbeleven \scriptfont4=\prbeight
+\textfont5=\prieleven \scriptfont5=\prieight
+\textfont6=\lgnine
+\baselineskip 12pt\rm
+}
+
+\def\twelvepoint
+{\let\rm\prmtwelve
+\let\bf\prbtwelve
+\baselineskip 13pt
+\rm
+}
+
+\def\bften
+{\fam4\prbten  \textfont7\bmiten  \textfont8\bsyten  \bftrue\ttfalse}
+\def\bfeleven
+{\fam4\prbeleven  \textfont7\bmieleven  \textfont8\bsyeleven  \bftrue\ttfalse}
+\def\bftwelve
+{\fam4\prbtwelve  \textfont7\bmitwelve  \textfont8\bsytwelve  \bftrue\ttfalse}
+\def\bffourteen
+{\fam4\prbfourteen\textfont7\bmifourteen\textfont8\bsyfourteen\bftrue\ttfalse}
+\def\bfsixteen
+{\fam4\prbsixteen \textfont7\bmisixteen \textfont8\bsysixteen \bftrue\ttfalse}
+\def\bfeighteen
+{\fam4\prbeighteen\textfont7\bmieighteen\textfont8\bsyeighteen\bftrue\ttfalse}
+
+\let\normaltype=\elevenpoint
+\normaltype
+\def\marginstyle{\ttfalse\bffalse\vrule height6pt depth2pt width0pt\prmseven}
+\let\df\tt
+
+% page layout
+
+\newskip  \normalleftskip	\normalleftskip   = 10pc
+\newskip  \comleftskip		\comleftskip      = 6pc
+\newskip  \hcomleftskip		\hcomleftskip     = 3pc
+\newskip  \normalparskip	\normalparskip    = 1pc
+\newdimen \combarht		\combarht         = 1pt
+
+\hsize    40pc			\vsize    43pc
+\topskip   2pc
+\leftskip \normalleftskip	\rightskip 0pc plus 3pc
+\parindent 0pc
+\parskip  \normalparskip
+
+\let\NIS=\nointerlineskip
+\def\NIPS{\NIS\parskip 0pc\relax}
+\def\removedepth{\ifdim \prevdepth>-1000pt \vskip -\prevdepth\fi}
+
+\def\Vskip #1!{\endgraf
+\removedepth
+\ifdim \lastskip<#1 \ifdim \lastskip>0pc \removelastskip\fi \vskip#1\NIPS\fi}
+\def\VPskip #1 plus #2!{\endgraf
+\removedepth
+\ifdim \lastskip<#1 \ifdim \lastskip>0pc \removelastskip\fi \vskip#1 plus #2\NIPS\fi}
+
+\def\par{\ifvmode\else\endgraf
+\removedepth
+\NIS\parskip \normalparskip\relax\fi}
+
+\let\normpar=\par
+
+\def\shortpar{\begingroup\def\par{\endgraf\endgroup\normpar}
+\advance\rightskip\leftskip}
+
+\newdimen \fullhsize	\fullhsize=40pc
+\def\fullline{\hbox to \fullhsize}
+
+\newtoks \headline		\newtoks \footline
+\countdef\pageno=0	\pageno=-1
+\let\chapno = \empty
+
+\newskip\iskip  \newskip\iiskip \newskip\iiiskip
+\newbox \firstcolbox    	\newbox \othercolbox
+
+\newwrite \tocfile		%\openout \tocfile \jobname.toc
+\newwrite \figfile	      	%\openout \figfile \jobname.fig
+\newwrite \idxfile		%\openout \idxfile \jobname.idx
+\newwrite \issfile		%\openout \issfile \jobname.iss
+\newwrite \reffile		%\openout \reffile \jobname.ref
+\newwrite \secfile		%\openout \secfile \jobname.sec
+
+% \write\issfile{}
+% \write\idxfile{}
+
+\newcount\capno			\capno=1
+
+\newcount\secn			\secn=1
+\newcount\ssecn			\ssecn=1
+\newcount\sssecn		\sssecn=1
+\newcount\ssssecn		\ssssecn=1
+\newcount\sssssecn		\sssssecn=1
+\newcount\ssssssecn		\ssssssecn=1
+
+\newbox\comline
+
+%% Used to say "Working Draft American National Standard for Information Systems---xxx"
+%% but now we avoid mentioning the status since it might change overnight.  Say this
+%% longer info only on the cover page.
+\def\beginchapter#1#2#3#4{\xbeginchapter{#1}{\bookline}{#2}{#2}{#3}{#4}\par
+\endTitlePage}
+
+\def\xbeginchapter #1#2#3#4#5#6{%Open data files 
+\immediate\openout \tocfile \jobname.toc
+\immediate\openout \figfile \jobname.fig
+\immediate\openout \idxfile \jobname.idx
+\immediate\openout \issfile \jobname.iss
+\immediate\openout \reffile \jobname.ref
+\immediate\openout \secfile \jobname.sec
+\write\issfile{}
+\write\idxfile{}
+\toctrue
+%\toc4{}
+\DefineChapter{#5}{#6}{#1}{#3}
+\capno=1\ssecn=0\sssecn=0\ssssecn=0\sssssecn=0\ssssssecn=0\relax
+\def\chapno{#1}\def\chapline{#4}\setbox\comline\null
+\Head {#2}
+\HeadI {#1. #3}
+\begingroup 
+\leftskip \normalleftskip \rightskip 6pc plus 2pc
+\vfill}
+
+\def\endTitlePage
+{\par\endgroup\vskip 2pc\break\eject
+\ifshowtoc\else{$ $}\vfill\eject\fi
+\normaltype
+\pageno=1}
+
+\newinsert \idxins
+\dimen\idxins=\maxdimen
+\count\idxins=0
+\skip\idxins = 0pt
+
+\newif  \ifsilent
+\newif  \ifbold
+
+% output routines
+
+
+\newif \iffooter        % if there a footer
+\newif \ifticks         % positioning lines for output
+\newif \ifcomfirst      % header in command chapter
+
+%\hoffset 1.0in
+%\voffset 1.0in  
+
+\def\llbrac{\lbrack\!\lbrack\,}
+\def\rrbrac{\,\rbrack\!\rbrack}
+
+\newif \ifincom \incomfalse
+
+\def\makepagerule{\hrule height1.5pt width \fullhsize}
+
+% The reason this doesn't show you the name at the top of the first page
+% is that TeX has already processed the next entry (the one that didn't fit)
+% when it does the pagination.  So if Foo,Bar,Baz is the sequence, but only Foo
+% and Bar would fit, the headline will be Baz even though only Foo and Bar fit.
+%  --kmp 8-Apr-92
+\def\makeheadline{\setbox0=\fullline{\the\headline}\ht0=1pc\dp0=4.5pt\box0}
+\headline={\prbfourteen\ifcomfirst\else
+\ifodd\pageno\hss\copy\comline\else\copy\comline\hss\fi\fi}
+
+\def\makefootline{\iffooter\setbox0=\fullline{\the\footline}\dp0=.5pc\box0\fi}
+\footline={\normaltype
+\ifodd\pageno\hss\chapline\quad\folio\else\folio\quad\bookline\hss\fi}
+%Was:
+%\ifodd\pageno\hss\chapline\ \ \folio\else\folio\ \ \bookline\hss\fi
+%but the "\ \ " seems to work poorly when in a \code...\endcode context,
+%where "\ " has a locally bizarre meaning.
+
+\def\folio{{\bf\pagenumber}}
+\def\pagenumber
+{\ifnum\pageno>0 \chapno--\the\pageno\else\romannumeral-\pageno\fi}
+
+\def\advancepageno{\ifnum\pageno<0 \global\advance\pageno -1
+  \else\global\advance\pageno 1\fi} 
+                                          
+\def\normalpage{\unvbox255\relax}
+
+\def\onecolumnReally{\output{\closout\normalpage}}
+\let\onecolumn=\onecolumnReally
+
+\def\thedraftcomment{}
+\def\draftcomment#1{\def\thedraftcomment{, #1}}
+
+\def\closout#1{\shipout\vbox
+{\ifdraft
+\vbox to 0pt {\vss\baselineskip 12pt
+\hbox{\prmeleven Draft \rev\thedraftcomment}\hbox{\prmeleven \timestamp}
+\vskip 2pc}
+\fi
+\offinterlineskip
+\ifticks\topticks\fi
+\makeheadline
+\makepagerule
+\vbox to 47pc {#1\vss\makefootline} %was 45pc -kmp 8-Apr-92
+\ifticks\botticks\fi
+}
+\advancepageno
+\global\comfirstfalse
+\ifincom\else\global\setbox\comline\null\fi
+}
+
+%% This stuff is taken with modification from the TeX manual (8th printing, Aug86), p257 -kmp
+\let\lr=L
+
+\newbox\leftcolumn
+
+\def\columnbox{\leftline{\pagebody}}
+\def\twocolumn{\hsize 18pc\output{%
+\if L\lr
+  \global\setbox\leftcolumn=\columnbox \global\let\lr=R
+\else
+  \doubleformat
+  \global\let\lr=L\fi
+\ifnum\outputpenalty>-20000 \else\dosupereject\fi}%
+\def\onecolumn{\hsize 40pc%
+\if R\lr\doubleformat\global\let\lr=L\fi
+\global\let\onecolumn=\onecolumnReally
+\onecolumnReally}}
+
+\def\doubleformat{\shipout\vbox
+{\ifdraft
+\vbox to 0pt {\vss\baselineskip 12pt
+\hbox{\prmeleven Draft \rev\thedraftcomment}\hbox{\prmeleven \timestamp}
+\vskip 2pc}
+\fi
+\offinterlineskip
+\ifticks\topticks\fi
+\makeheadline
+\makepagerule
+\vbox to 47pc {\hbox to 40pc{\vbox to 43pc{\box\leftcolumn\vfil}\hfil\vbox{\columnbox\vfil}}\vss\makefootline} %was 45pc -kmp 8-Apr-92
+\ifticks\botticks\fi
+}
+\advancepageno
+\global\comfirstfalse
+\ifincom\else\global\setbox\comline\null\fi
+}
+
+\onecolumn
+%% This gets defined in setup-version, so it will be consistent across all chapters.
+%
+% {
+% \count0=\time
+% \count2=\time\divide\count2 by 60\multiply\count2by60\advance\count0by-\count2
+% \count2=\time\divide\count2 by 60
+% 
+% \xdef\timestamp{\ifcase\month\or
+% Jan\or Feb\or Mar\or Apr\or May\or Jun\or Jul\or Aug\or
+% Sep\or Oct\or Nov\or Dec\fi\space\number\day, \number\year\space\space
+% \the\count2:\ifnum\count0<10\relax0\fi\the\count0}
+% }
+
+\def\topticks
+{\setbox0=\fullline{\hskip-1pc\vrule height .2pt width 1pc\relax
+\hskip -.2pt\vrule height 1pc width .2pt\hfil
+\vrule height 1pc width .2pt\hskip -.2pt\relax
+\vrule height .2pt width 1pc\hskip -1pc}\ht0=0pc\box0}
+
+\def\botticks
+{\setbox0=\fullline{\hskip-1pc\vrule height 0pt depth .2pt width 1pc\relax
+\hskip -.2pt\vrule height 0pt depth 1pc width .2pt\hfil
+\vrule height 0pt depth 1pc width .2pt\hskip -.2pt\relax
+\vrule height 0pt depth .2pt width 1pc\hskip -1pc}\dp0=0pc\box0}
+
+\def\pageticks{\tickstrue}
+\def\nopageticks{\ticksfalse}
+\def\footers{\footertrue}
+\def\nofooters{\footerfalse}
+
+
+\setbox\comline \null   \let\chapline\empty
+\footers		\nopageticks
+
+% Tables of Contents
+
+\def\dotleader{\leaders\hbox to 6pt {\hfil\prmfive.\hfil}\hfill}
+
+% start \numitem
+\def\numhangsize{25pt}
+\def\yskip{\penalty-50\vskip 3pt plus 3pt minus 2pt}
+\def\numtextindent#1{\noindent\hbox to \numhangsize{\hskip 0pt plus 1000pt minus 1000pt#1\ }}
+\def\numhang{\hangindent \numhangsize}
+\def\numitem#1{\yskip\numhang\numtextindent{#1}}
+% end \numitem
+
+% {\obeylines
+% \gdef\Czero#1
+% {\Vskip1pc!\bbf #1\par}
+% \gdef\Cone#1\!#2
+% {\Vskip1pc!\bbf #1\dotleader#2\hskip-5pc\null\par}
+% \gdef\Ctwo#1\!#2
+% {\hangindent1pc\rm #1\dotleader#2\hskip-5pc\null\par}
+% \gdef\Cthree#1
+% {}
+% \global\let\Cfour\Cthree
+% \global\let\Pzero\Cthree
+% \global\let\Pone \Cthree
+% \gdef\Ptwo#1\!#2
+% {\leftskip 0pt\hangindent 1pc\rm#1\dotleader#2\hskip-5pc\null\par}
+% \gdef\Pthree#1\!#2
+% {\leftskip 1pc\rm#1\dotleader#2\hskip-5pc\null\par}
+% \global\let\Pfour\Cthree
+% \gdef\Pfive#1\!#2
+% {\leftskip 1pc\rm#1\dotleader#2\hskip-5pc\null\par}
+% \gdef\Psix#1\!#2
+% {\leftskip 1pc\rm#1\dotleader#2\hskip-5pc\null\par}
+% }
+
+{\obeylines
+\gdef\Czero#1
+{\Vskip1pc!\bbf #1\par}
+\gdef\Cone#1\!#2
+{\Vskip1pc!\bbf #1\dotleader#2\hskip-5pc\null\par}
+\gdef\Ctwo#1\!#2
+{\hangindent1pc\rm #1\dotleader#2\hskip-5pc\null\par}
+\global\let\Cthree\Ctwo
+\global\let\Cfour\Ctwo
+\global\let\Cfive\Ctwo
+\global\let\Csix\Ctwo
+\gdef\Pempty#1
+{}
+\global\let\Pzero\Pempty
+\global\let\Pone \Pempty
+% \gdef\Ptwo#1\!#2
+% {\leftskip 0pt\hangindent 1pc\rm#1\dotleader#2\hskip-5pc\null\par}
+% \gdef\Pthree#1\!#2
+% {\leftskip 1pc\rm#1\dotleader#2\hskip-5pc\null\par}
+\gdef\Ptwo#1\!#2
+{\leftskip 0pt\rm #1\dotleader#2\hskip-5pc\null\par}
+\gdef\Pthree#1\!#2
+{\leftskip 0pt\hangindent1pc\rm #1\dotleader#2\hskip-5pc\null\par}
+\global\let\Pfour\Pthree
+\global\let\Pfive\Pthree
+\global\let\Psix\Pthree
+\gdef\Pnine#1:#2\!#3
+{\leftskip 0pt\rightskip 0pt\hangindent 1pc%
+\ifx#1R{\clref{#2}}\else
+\ifx#1C{\f{#2}}\else
+\ifx#1K{\kwd{#2}}\else
+\ifx#1T{{\rm #2}}\else
+\ifx#1G{\term{#2}}\else
+\ifx#1E{\f{#2}{\rm example}}\else
+\ifx#1P{\packref{#2} \term{package}}\fi\fi\fi\fi\fi\fi\fi\quad#3\hfil\null\par}
+}
+%\tracingcommands=1
+
+% These are new in an attempt to allow us to make index entries
+% not just for function names, but for other things as well. -kmp 25-Apr-93
+\def\idxref#1{\logidx{R}{#1}}
+\def\idxkeyref#1{\logidx{R}{\&#1}}
+\def\idxcode#1{\logidx{C}{#1}}
+\def\idxkwd#1{\logidx{K}{#1}}
+\def\idxtext#1{\logidx{T}{#1}}
+\def\idxterm#1{\logidx{G}{#1}}          % G = Glossary
+\def\idxexample#1{\logidx{E}{#1}}
+\def\idxpackref#1{\logidx{P}{#1}}
+
+\newif \iftoc \tocfalse
+\newif \ifshowtoc \showtoctrue
+
+\def\ThisSection{$mm$.$nn$}
+
+\def\toc#1#2{\gdef\ThisSection{#2}\iftoc{\let\break=\empty
+\xdef\writeit{\write\tocfile{!#1#2 !!\noexpand\pagenumber}}\writeit}\fi}
+
+%Was \PTOC
+\def\ShowContents{\ifshowtoc\iftoc\immediate\closeout\tocfile\global\tocfalse\fi\def\chapline{Contents}%
+\Head{Table of Contents}%\HeadII{ CONTENTS}
+{\let\0\Pzero\let\1\Pone\let\2\Ptwo\let\3\Pthree\let\4\Pfour\let\5\Pfive\let\6\Psix
+\let\par=\endgraf\parskip 0pt\parfillskip 0pt
+\rightskip 5pc plus 15pc\hangindent1pc
+\obeylines\catcode`\!=0\relax\input\jobname.toc\relax}
+\vfil\break\ifodd\pageno\else\null\vfil\break\fi\fi
+}
+
+\def\ShowIndex#1{\iftoc\immediate\closeout\idxfile\fi\def\chapline{#1}\Head{#1}%\HeadII{ INDEX}
+{\let\0\Pzero\let\1\Pone\let\2\Ptwo\let\3\Pthree\let\4\Pfour\let\5\Pfive\let\6\Psix
+\let\par=\endgraf\parskip 0pt\parfillskip 0pt
+\rightskip 5pc plus 15pc\hangindent1pc
+\obeylines\catcode`\!=0\relax\input\jobname.idx\relax}
+\vfil\break\ifodd\pageno\else\null\vfil\break\fi
+}
+
+
+% Headers
+
+% note: Head Levels 0 and  1 should appear only at the top of a page.
+% note: same for \altHeadII
+% \endSection does the page breaking, not \beginSection
+
+\def\afterheaderbreak{\penalty100000 }
+\def\beforeheaderbreak#1{\par\vskip 0pt plus #1pt minus 8pt\penalty-1000 }
+
+\def\Head #1{\toc0{#1}{\bfeighteen\beforeheaderbreak{18}
+\baselineskip 20pt\leftskip  0pt plus 1fill \rightskip 0pt
+\vglue -10pt\null #1\par}%
+\afterheaderbreak\Vskip 5pc!\afterheaderbreak}
+
+\def\HeadI #1{\toc1{#1}{\bfeighteen\beforeheaderbreak{18}
+\baselineskip 20pt\leftskip  0pt plus 1fill \rightskip 0pt
+\vglue -10pt\null #1\par}%
+\afterheaderbreak\Vskip 5pc!\afterheaderbreak}
+
+\def\HeadIL #1{\toc1{#1}{\bfeighteen\beforeheaderbreak{18}
+\baselineskip 20pt\leftskip  0pt \rightskip 0pt
+\vglue -10pt\null#1\hfil\par}%
+\afterheaderbreak\Vskip 5pc!\afterheaderbreak}
+
+% Used to skip 3pc before, 2pc afterward!
+\def\HeadII #1{\Vskip 2.5pc!%
+\toc2{\chapno.\the\ssecn #1}{\bfsixteen\beforeheaderbreak{16}
+\baselineskip 18pt\leftskip 0pt \rightskip 0pt plus 1fil
+\setbox0=\hbox{\chapno.\the\ssecn\ }\hangindent\wd0{$ $}\box0\ignorespaces #1\par}
+%\chapno.\the\ssecn \relax #1\par}%
+\afterheaderbreak\Vskip 1pc!\afterheaderbreak}
+
+% Used to skip 2pc before!
+\def\HeadIII #1{\Vskip 1.5pc!%
+\toc3{\chapno.\the\ssecn.\the\sssecn #1}{\bffourteen\beforeheaderbreak{14}
+\baselineskip 16pt\leftskip 0pt \rightskip 0pt plus 1fil
+\setbox0=\hbox{\chapno.\the\ssecn.\the\sssecn\ }\hangindent\wd0{$ $}\box0\ignorespaces #1\par}
+%\chapno.\the\ssecn.\the\sssecn \relax #1\par}%
+\afterheaderbreak\Vskip 1pc!\afterheaderbreak}
+
+% Used to skip 2pc before!
+\def\HeadIV #1{\Vskip 1.5pc!%
+\toc4{\chapno.\the\ssecn.\the\sssecn.\the\ssssecn #1}{\bftwelve\beforeheaderbreak{12}
+\baselineskip 13pt \leftskip 0pt \rightskip 0pt plus 1fil
+\setbox0=\hbox{\chapno.\the\ssecn.\the\sssecn.\the\ssssecn\ }\hangindent\wd0{$ $}\box0\ignorespaces #1\par}
+%\chapno.\the\ssecn.\the\sssecn.\the\ssssecn \relax #1\par}%
+\afterheaderbreak\Vskip 1pc!\afterheaderbreak}
+
+% Used to skip 1.5pc before!
+\def\HeadV #1{\Vskip 1.25pc!%
+\toc5{\chapno.\the\ssecn.\the\sssecn.\the\ssssecn.\the\sssssecn #1}%
+{\bfeleven\beforeheaderbreak{11}
+\baselineskip 12pt \leftskip 0pt \rightskip 0pt plus 1fil
+\setbox0=\hbox{\chapno.\the\ssecn.\the\sssecn.\the\ssssecn.\the\sssssecn\ }\hangindent\wd0{$ $}\box0\ignorespaces #1\par}
+%\chapno.\the\ssecn.\the\sssecn.\the\ssssecn.\the\sssssecn \relax #1\par}%
+\afterheaderbreak\Vskip 1pc!\afterheaderbreak}
+
+% Used to skip 1.2pc before!
+\def\HeadVI #1{\Vskip 1pc!%
+\toc6{\chapno.\the\ssecn.\the\sssecn.\the\ssssecn.\the\sssssecn.\the\ssssssecn #1}%
+{\bften\beforeheaderbreak{10}
+\baselineskip 11pt \leftskip 0pt \rightskip 0pt plus 1fil
+\setbox0=\hbox{\chapno.\the\ssecn.\the\sssecn.\the\ssssecn.\the\sssssecn.\the\ssssssecn\ }\hangindent\wd0{$ $}\box0\ignorespaces #1\par}
+%\chapno.\the\ssecn.\the\sssecn.\the\ssssecn.\the\sssssecn.\the\ssssssecn \relax #1\par}%
+\afterheaderbreak\Vskip 1pc!\afterheaderbreak}
+
+%\def\HeadVI  #1{\Vskip1.5pc!{\elevenpoint\bf\beforeheaderbreak{11}
+%\leftskip 4pc \rightskip 0pt plus 1fil
+%\relax #1\par}%
+%\afterheaderbreak\Vskip 1pc!\afterheaderbreak}
+
+%% This is apparently not used. -kmp 9-Oct-91
+% \def\altHeadII #1{\refalt\toc2{\chapno.\the\ssecn #1}{\bfsixteen\beforeheaderbreak{16}
+% \baselineskip 18pt \leftskip \normalleftskip \rightskip 0pt plus 1fil
+% \chapno.\the\ssecn \relax #1\par}%
+% \afterheaderbreak\Vskip 4pc!\afterheaderbreak}
+%
+% Ditto for this. -kmp 24-Oct-91
+% \let\refalt\empty
+% 
+% \def\refHeadIV #1{\Vskip 1pc!
+% \toc4{\chapno.\the\ssecn.\the\sssecn.\the\ssssecn #1}{\bftwelve\beforeheaderbreak{12}
+% \baselineskip 13pt \leftskip 0pt \rightskip 0pt plus 1fil
+% \chapno.\the\ssecn.\the\sssecn.\the\ssssecn \relax #1\par}%
+% \afterheaderbreak\Vskip \normalparskip!\afterheaderbreak}
+
+% Lists
+
+\def\bull
+{\ifmmode\bullet\else{$\bullet$}\fi}
+
+\def\listlabel
+#1{\noindent\hbox to 0pc{\hskip -1.5pc #1\hss}{\penalty20000}\ignorespaces}
+
+% \def\item		#1{\par\leftskip\iskip  \listlabel{#1}}
+% \def\itemitem		#1{\par\leftskip\iiskip \listlabel{#1}}
+% \def\itemitemitem	#1{\par\leftskip\iiiskip\listlabel{#1}}
+
+% These used to do \bigbreak,\medbreak,\smallbreak instead of \itemskip.
+\def\itemskip#1#2#3{\endgraf\penalty #1\vskip #2 plus #3 minus #3}
+
+\def\item		#1{\itemskip{-200}{5pt}{3pt}\leftskip\iskip  \listlabel{#1}}
+\def\itemitem		#1{\itemskip{-100}{4pt}{2pt}\leftskip\iiskip \listlabel{#1}}
+\def\itemitemitem	#1{\itemskip{ -50}{3pt}{1pt}\leftskip\iiiskip\listlabel{#1}}
+
+\def\beginlist
+{\begingroup\iiiskip=\leftskip	\advance\iiiskip 1.5pc\iskip  =\iiiskip
+\advance\iiiskip 1.5pc\iiskip =\iiiskip		\advance\iiiskip 1.5pc
+\Vskip 1pc!}
+
+\def\endlist
+{\par\endgroup\Vskip 1pc!}
+
+% screen text examples
+
+{\obeylines\gdef\eatcr#1
+{}}
+
+\chardef\bslash=`\\
+\def\prompt{>}
+
+\chardef\other=12
+{\obeyspaces\global\let =\ }
+
+\def\catothers
+{\catcode`\&=\other	\catcode`\#=\other
+%\catcode`\^=\other	\catcode`\^^A=\other
+%\catcode`\^^X=\other
+\catcode`\%=\other}                
+            
+\def\screen!{\ifvmode\Vskip\normalparskip!\fi\begingroup
+\baselineskip 11pt\tt
+\parfillskip 0pt plus1fil
+\parskip 0pt
+\def\par{\leavevmode\endgraf}%
+\def\ {{}}
+\catcode`\$=\other
+\let\>=\prompt
+%!!! Experimentally making { and } have their normal TeX meaning here. -kmp 7-May-91
+%\catcode `\{=\other	\catcode`\}=\other
+%!!! Experimentally making [ and ] normal alphabetic. -kmp 7-May-91
+%\catcode `\[=\other	\catcode`\]=\other
+\obeyspaces\obeylines\eatcr}
+
+\def\endscreen!{\endgraf\endgroup\Vskip\normalparskip!}
+
+\def\widescreen{\Vskip \normalparskip!\begingroup
+\leftskip 0pc
+\baselineskip 11pt\tt
+\parfillskip 0pt plus1fil
+\parskip 0pt
+\def\par{\leavevmode\endgraf}
+\catcode`\$=\other
+\let\>=\prompt
+\catcode `\{=\other	\catcode`\}=\other
+\obeyspaces\obeylines\eatcr}
+
+% notes
+
+\def\note{\Vskip 1pc!{\bf Note:} }
+
+\def\longnote{\Vskip 1pc!\begingroup \advance\leftskip 1.5pc {\bf Note:} }
+
+\def\notes{\Vskip 1pc!{\bf Notes:}\par\beginlist}
+
+\let\endlongnote=\endlist \let\endnotes =\endlist
+
+% Figures
+
+%Syntax:
+%       \boxfig (or \cboxfig) (or \rulefig)   (or \fig)
+%       { }
+%       \caption{ }
+%       \endfig
+
+\gdef\figtype{0}
+
+\def\fig
+{\gdef\figtype{0}
+\begingroup\leftskip0pt
+\global\setbox1=\vbox}
+
+\def\finishfig
+{\endgroup
+\Vskip1pc!
+\moveright\leftskip\box1
+{\penalty20000}
+\vskip 1pc
+{\penalty20000}
+\docaption
+\smallbreak
+\Vskip1pc!
+}
+
+\def\rulefig
+{\gdef\figtype{1}
+\begingroup\leftskip0pt
+\global\setbox1=\vbox}
+
+\def\finishrulefig
+{\endgroup
+\Vskip1pc!
+\fullline{\hskip\leftskip\leaders\hrule height1pt depth0pt\hfil}
+\Vskip1.5pc!
+\moveright\leftskip\box1
+{\penalty20000}
+\Vskip1pc!
+{\penalty20000}
+\docaption
+\smallbreak
+\Vskip1pc!
+\fullline{\hskip\leftskip\leaders\hrule height1pt depth0pt\hfil}
+\Vskip1pc!}
+
+\def\boxfig
+{\gdef\figtype{2}
+\begingroup
+\advance\hsize by -\leftskip\advance\hsize by -\rightskip
+\advance\hsize -2pt
+\leftskip 1pc
+\rightskip 1pc plus 2pc
+\global\setbox1=\vbox}
+
+\def\kcnocboxfig
+{\gdef\figtype{2}
+\begingroup
+\advance\hsize by -2\leftskip
+\advance\hsize -2pt
+\leftskip 2pc
+\rightskip 2pc plus 2pc
+\global\setbox1=\vbox}
+
+\def\kcfinishboxfig
+{\wd1=\hsize
+\endgroup
+\Vskip1pc!
+\vglue 0pt
+\moveright\leftskip\vbox
+\Vskip1pc!
+\Vskip1pc!
+}
+\def\kcendfig
+{\ifcase\figtype\relax\finishfig\or\finishrulefig\or\finishboxfig\fi}
+
+\def\caption#1{\gdef\captext{\chapno--\the\capno. #1}}
+
+\def\cboxfig
+{\gdef\figtype{2}
+\begingroup
+\advance\hsize by -2\leftskip
+\advance\hsize -2pt
+\leftskip 2pc
+\rightskip 2pc plus 2pc
+\global\setbox1=\vbox}
+
+\def\finishboxfig
+{\wd1=\hsize
+\endgroup
+\Vskip1pc!
+\vglue 0pt
+\moveright\leftskip\vbox{\hrule height1pt
+\hbox{\vrule width 1pt
+  \vbox{\hrule height0pt width \wd1\vskip1pc\unvbox1\Vskip1pc!}\vrule width1pt}
+\NIS\hrule height1pt}
+{\penalty20000}
+\Vskip1pc!
+{\penalty20000}
+\docaption
+\smallbreak
+\Vskip1pc!
+}
+
+\def\endfig
+{\ifcase\figtype\relax\finishfig\or\finishrulefig\or\finishboxfig\fi}
+
+\def\caption#1{\gdef\captext{\chapno--\the\capno. #1}}
+
+\let\captext=\empty
+
+\def\makecapline
+{\vbox{\leftskip 0pt\noindent\prbnine Figure \captext}\figlist2\global\advance\capno 1\relax}
+
+\def\docaption
+{\ifx\captext\empty
+\else\moveright\leftskip\makecapline\smallbreak\fi\global\let\captext\empty}
+
+\def\figlist
+#1{\xdef\writeit{\write\figfile{!#1\captext!!\noexpand\pagenumber}}\writeit}
+
+%\figlist4
+
+% \simplecaption lets you put captions on things that are not 
+% set up formally as figures.
+
+\def\simplecaption#1{\caption{#1}
+\vskip 1pc
+\docaption
+\Vskip1pc!}
+
+\def\startSection{\advance\ssecn 1\sssecn=0\ssssecn=0\sssssecn=0\ssssssecn=0}
+\def\beginSection #1{\startSection\leftskip\normalleftskip\HeadII{\ #1}}
+%Dictionary sections don't start with a banner line announcing their section name.
+\def\includeDictionary #1{\startSection\toc2{\chapno.\the\ssecn\ {\chapline} Dictionary}
+\input #1
+\endSection}
+    
+\def\startSubsection{\advance\sssecn 1\ssssecn=0\sssssecn=0\ssssssecn=0}
+\def\beginSubsection #1{\startSubsection\HeadIII{\ #1}}
+
+\def\startsubsubsection{\advance\ssssecn 1\sssssecn=0\ssssssecn=0}
+\def\beginsubsubsection #1{\startsubsubsection\HeadIV{\ #1}}
+
+\def\startsubsubsubsection{\advance\sssssecn 1\ssssssecn=0}
+\def\beginsubsubsubsection #1{\startsubsubsubsection\HeadV{\ #1}}
+
+\def\startsubsubsubsubsection{\advance\ssssssecn 1}
+\def\beginsubsubsubsubsection #1{\advance\ssssssecn 1\HeadVI{\ #1}}
+
+\let\beginsection\beginSection
+\let\endsection\endSection
+\let\endSubsection\empty
+\let\endsubsubsection\empty
+\let\endsubsubsubsection\empty
+\let\endsubsubsubsubsection\empty
+\let\beginSubSection=\beginSubsection
+\let\beginsubSection=\beginSubsection
+\let\beginsubsection=\beginSubsection
+\let\endSubSection=\endSubsection
+\let\endsubSection=\endSubsection
+\let\endsubsection=\endSubsection
+\def\endchapter{\endSimpleChapter
+\normaltype
+\pageno=-2
+\ShowContents}%was \PTOC
+\def\beginSimpleChapter#1{\HeadI{#1}
+\pageno=-1
+\def\chapline{#1}}
+\def\beginSimpleChapterLeft#1{\HeadIL{#1}
+\pageno=-1
+\def\chapline{#1}}
+\def\endSimpleChapter
+{\endSection\ifodd\pageno\else\global\setbox\comline\null\null\vfil\break\fi}
+\let\endAppendix\endchapter
+
+%Switch these to get Sections on new pages
+\def\endSection{\ifdim \pagetotal>0pc \vfil\break\fi}
+%\let\endSection\empty
+\let\endsection=\endSection
+
+%\def\endcom{\global\incomfalse\Vskip 1pc!\hrule\hrule\hrule\hrule}
+\def\endcom{\global\incomfalse\penalty20000\VPskip 1pc plus 3pc!\penalty20000\hrule\hrule\hrule\hrule\goodbreak}
+
+% \def\label
+% #1:{\bigbreak
+% \noindent\hbox to 0pc{\bf\hskip-\comleftskip #1:\hss}
+% \penalty20000
+% \vskip 2pt
+% \penalty20000
+% \ignorespaces}
+% \def\methodlabel
+% #1:{\bigbreak
+% \noindent\hbox to 0pc{\bf\hskip-\hcomleftskip #1:\hss}
+% \penalty20000
+% \vskip 2pt
+% \penalty20000
+% \ignorespaces}
+% \def\methodrule{\bigbreak
+% \Vskip 1pc!
+% \penalty20000
+% \line{\hbox to \hcomleftskip{}\leaders\hrule\hfill\hbox to \hcomleftskip{}}
+% \penalty20000
+% \Vskip 1pc!
+% \penalty20000{}}
+    
+%!!! Sandra complained that this sometimes lets names get hyphenated even
+%    in a code-font context. e.g., see the entry for SUBSTITUTE, which gets typeset as:
+%
+%  substitute, substitute-if, substitute-if-not, nsubsti-
+%  tute, nsubstitute-if, nsubstitute-if-not	 Function
+    
+\def\begincom
+{\begingroup\catcode`\,=\active\catcode`\-=\active\dobegincom}
+
+\def\obegincom
+{\begingroup\catcode`\,=\active\catcode`\-=\active\doobegincom}
+
+\newdimen \dotw
+\setbox0=\hbox{\prbfourteen, $\ldots$}
+\global\dotw=\wd0
+
+\def\hyphen{-}
+\def\comma{,}
+\def\specialcomma
+{\discretionary{\kern\dotw\vrule width0pt}{}{,\kern\fontdimen2
+\prbfourteen}\ignorespaces}
+
+{\catcode`\,\active\catcode`\-=\active
+\gdef\dospecialcomma{\let,\specialcomma\sphytrue}
+\gdef\donormalcomma{\let,\comma}
+\gdef\begincomindex#1{\global\let\NEXT\bcindex\bcindex #1, \endit, \relax}
+\gdef\bcindex#1, {\ifx\endit#1\global\let\NEXT\empty
+\else\silenttrue\boldtrue\xref{#1}\fi\NEXT}}
+
+\donormalcomma
+
+\def\dobegincom
+#1\ftype #2{\leftskip0pc\rightskip0pc plus10pc\bfsixteen
+\baselineskip 16pt
+\dospecialcomma\let\break=\ignorespaces
+\global\setbox1=\vbox{\hsize 40pc\lowercase{#1}}
+\vbadness 10000
+\setbox0=\vsplit1 to 16pt
+\setbox0=\vbox{\unvbox0\global\setbox3\lastbox}
+\global\setbox1\hbox{\unhbox3\relax\ifdim\ht1>0pt\llap{, $\ldots$}\fi}
+\global\incomtrue
+\global\setbox\comline\box1
+\endgroup
+\comfirsttrue
+\leftskip \comleftskip
+\Vskip 1pc!
+\goodbreak
+\idxref{#1}%\toc2{#1} 
+%!!! ACW is bugged that sometimes a carriage return is generated in the
+%    middle of arg2 (the \ftype).  Maybe change "\pritwelve #2" to be in "\hbox{...}"
+{\raggedright\catcode`\-=\active\bfsixteen #1 
+\hfill\pritwelve #2}
+\penalty20000
+\Vskip 1pc!			
+\penalty20000
+\hrule height \combarht
+\penalty20000
+\parskip \normalparskip
+\penalty20000
+\vbox to 0pc{}
+}
+\def\doobegincom
+#1{\leftskip0pc\rightskip0pc plus10pc\bffourteen
+\baselineskip 16pt
+\dospecialcomma\let\break=\ignorespaces
+\global\setbox1=\vbox{\hsize 40pc\lowercase{#1}}
+\vbadness 10000
+\setbox0=\vsplit1 to 16pt
+\setbox0=\vbox{\unvbox0\global\setbox3\lastbox}
+\global\setbox1\hbox{\unhbox3\relax\ifdim\ht1>0pt\llap{, $\ldots$}\fi}
+\global\incomtrue
+\global\setbox\comline\box1
+\endgroup
+\comfirsttrue
+\goodbreak
+\leftskip \comleftskip
+\penalty20000
+\Vskip 3pc!
+\penalty20000
+\hbox to \fullhsize{\idxref{#1}%\toc2{#1}
+\bfsixteen #1\hfil}
+\penalty20000
+\Vskip 2pc!			
+\penalty20000
+\hrule height \combarht
+\penalty20000
+\parskip \normalparskip
+\penalty20000
+\vbox to 0pc{}
+\penalty20000
+}
+
+
+\normaltype
+
+\newdimen \changedepth
+\changedepth=0.15\baselineskip
+
+% character hacks
+
+\let\barunderaccent=\b  %So that \b is free for other things (e.g., bold)
+\let\dotlessi=\i        %So that \i is free for other things (e.g., italic)
+
+\mathchardef \spLT "373C % < 
+\mathchardef \spGT "373E % >
+\mathchardef \spST "2803 % *
+\mathchardef \spBS "086E % \
+\mathchardef \spMI "2800 % -
+\mathchardef \spVB "386A % |
+\mathchardef \spTI "3818 % ~
+\def\LT{\ifmmode\spLT\else\iftt<\else{$\spLT$}\fi\fi}
+\def\GT{\ifmmode\spGT\else\iftt>\else{$\spGT$}\fi\fi}
+\def\ST{\ifmmode\spST\else\ifbf{$\spST$}\else*\fi\fi}
+\def\BSlash{\ifmmode\spBS\else\iftt\bslash\else{$\spBS$}\fi\fi}
+%\def\VB{\ifmmode\spVB\else\iftt|\else{$\spVB$}\fi\fi}
+\def\VB{\ifmmode\spVB\else\iftt|\else{$\vert$}\fi\fi}
+\def\US{\iftt\_\fi}         
+\def\MI{\ifbf\ifmmode\spMI\else\ifsphy\hbox{-}\else-\fi\fi\else-\fi}
+% !!! Disabled again. -kmp 7-May-91
+% %!!! Experimentally making @ normal alphabetic. -kmp 7-May-91 (was commented out)
+% \def\AT{\iftt\hbox to.5em{\hss\prmseven@\hskip.5pt\hss}\else@\fi}
+\def\TI{\iftt\char'176\relax\else\penalty10000\ \fi}
+\let\LB=\{
+\let\RB=\}
+\def\{{\iftt\char'173\relax\else\LB\fi}
+\def\}{\iftt\char'175\relax\else\RB\fi}
+\def\ngt{>}
+\def\nlt{<}
+\def\nst{*}
+
+\let\\=\BSlash
+
+\catcode `\_=9\relax
+\def\tilde{\ifbf$\spTI$\else{\tt\char126\relax}\fi}
+
+
+\catcode `\<=\active	\global\let<=\LT
+\catcode `\>=\active	\global\let>=\GT
+\catcode `\|=\active	\global\let|=\VB
+\catcode `\*=\active	\global\let*=\ST
+% !!! Disabled again. -kmp 7-May-91
+% %!!! Experimentally making @ normal alphabetic. -kmp 7-May-91 (was commented out)
+% \catcode `\@=\active	\global\let@=\AT
+\catcode `\_=\active 	\global\let_=\US
+\catcode `\-=\active	\global\let-=\MI
+			\global\let~=\TI
+
+\gdef\setspecialdefs
+{\let-=\hyphen	\let>=\ngt	\let<=\nlt	\let*=\nst
+\def\bf{\string\bf}\def\\{\string\\}\def\it{\string\it}\def\tt{\string\tt}}
+
+%\catcode `\^ = \active
+           
+\def\uspace{{\tentt\char'40}}
+
+\normalleftskip=  4pc
+\comleftskip   =  4pc
+\hcomleftskip  =  2pc
+\let\normaltype=\tenpoint
+\normaltype
+
+%!!! The idea here is to let the user write either:
+%
+%    \label Foo Bar::
+%
+%    This is text for the "Foo Bar" section.
+%
+% or else
+%
+%    \label Foo Bar:\None.
+% or \label Foo Bar:\None!
+% or \label Foo Bar:\None?
+%
+% Currently the punctuation is not managed formally, but the intent is to provide
+% a level of confidence that the absence of information is purposeful.
+%   "?" means unsure or questionable.
+%   "." is neutral--no information content.
+%   "!" means pretty sure this is right.
+% 
+% In the latter case, no text will appear.
+
+\newif \ifnullabel  \nullabelfalse % might be overridden in setup-options
+
+\def\None{None.}
+
+\def\EatPunc #1{} % Takes care of eating a trailing "." or "!"
+
+\def\label #1:#2{\ifx#2:\truelabel{#1}\else\labelNone{#1}\fi}
+
+\def\labelNone#1{\ifnullabel\nullabel{#1}\fi\expandafter\EatPunc}
+
+\newif \ifsmallab \smallabfalse
+
+\long\def\ignorepar #1{#1}
+
+\def\truelabel#1{\rm\Vskip \normalparskip!
+\bigbreak
+\ifsmallab
+\noindent\hskip -4pc \hbox to 4pc{{\prbseven #1 }\hss}\expandafter\ignorepar
+\else
+\hbox{\prbtwelve #1:}
+\penalty20000
+\vskip 2pt plus 2pt
+\penalty20000
+\fi}
+
+\def\nullabel#1{\rm\Vskip \normalparskip!
+\bigbreak
+\hbox{{\tenpoint\bf (#1: \rm None.)}}
+\bigbreak
+}
+
+\newif \ifexamples  \examplestrue  % might be overridden in setup-options
+\newif \ifnotes     \notestrue     % might be overridden in setup-options
+
+% This implementation had some problems, but I'd like to do something like this. -kmp  
+%
+% \def\Examples{\ifexamples\label Examples::\else\expandafter\eatExamples\fi}
+% \def\Notes{\ifnotes\label Notes::\else\expandafter\eatNotes\fi}
+% 
+% \long\def\eatExamples #1\label{\label}
+% \long\def\eatNotes #1\endcom{\endcom}
+
+%% I'm having troubles with \HeadIV.  Could this have been the problem?
+%% Removed experimentally. -kmp 9-Oct-91
+% \let\HeadIV=\refHeadIV
+% \def\refalt{\vglue -8pt\null}
+
+%\hoffset 1in
+
+\advance\voffset by .5in
+
+\newif \ifdraft  % put \drafttrue at beginning of a draft
+
+%!!! Moon notes his concern about the introduction of extra whitespace
+%    in the vicinity of issue markers.
+%    I experimentally added "\ignorespaces" here. Did that fix it? -kmp 18-Dec-91
+\newif \ifissdisp
+\newif \ifisslog
+\def\issue #1{\ifisslog\logissue1{#1}\fi
+\ifissdisp\par\leftskip\iskip {\bf The following is from issue: } #1\par\fi
+\ignorespaces}
+\def\endissue #1{\ifisslog\logissue0{#1}\fi
+\ifissdisp\par\leftskip\iskip {\bf End of issue: } #1\par\fi
+\ignorespaces}
+% \def\issue #1{\logissue1{#1}}
+% \def\endissue #1{\logissue0{#1}}
+% % \def\issue #1{\par\leftskip\iskip {\bf The following is from issue: } #1\par}
+% % \def\endissue #1{\par\leftskip\iskip {\bf End of issue: } #1\par}%\indent
+
+% Use \logissue1 to start an issue, or \logissue0 to end one.
+% Puts in the file:
+%  !1<issue> !!<page> for start of issue
+%  !0<issue> !!<page> for end   of issue
+\def\logissue
+#1#2{{\let\break=\empty
+\xdef\writeit{\write\issfile{!#1#2 !!\noexpand\pagenumber}}\writeit}}
+
+\def\logidx#1#2{{\let\break=\empty
+\xdef\writeit{\write\idxfile{!2#1:#2!!\noexpand\pagenumber}}\writeit}}
+
+\def\DefineFigure#1{{\let\break=\empty
+\xdef\writeit{\write\reffile{!#1 \chapno--\the\capno}}\writeit}}
+
+\def\deffigrefs#1{\def\figref##1{{\def##1{\message{Figure ``\string##1'' is not defined.}%
+Figure $nn$--$mm$ (\string##1)}#1##1}}}
+% Stylistically, ``\Figref'' goes at start of sentence or ``\figref'' in middle,
+% but since "Figure xxx" always comes out capitalized, they're implementationally
+% just synonyms.
+\def\Figref#1{\figref#1}
+
+\def\DefineSection#1{{\let\break=\empty
+\xdef\writeit{\write\secfile{!#1 Section \ThisSection}}\writeit}}
+
+%Maybe replace with more complicated self-reference one day.
+\def\Thissection{This section}
+\def\thissection{this section}
+
+\def\DefineChapter#1#2#3#4{{\let\break=\empty
+\xdef\writeit{\write\secfile{!#1 Chapter #3 #4}}\writeit
+\xdef\writeit{\write\secfile{!#2 Chapter #3 #4}}\writeit}}
+
+\def\defsecrefs#1{\def\secref##1{{\def##1{\message{Section ``\string##1'' is not defined.}%
+Section $mm$.$nn$ (\string##1)}#1##1}}\let\chapref=\secref}
+
+\tolerance=2500
