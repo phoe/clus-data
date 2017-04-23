@@ -1,0 +1,920 @@
+% -*- Mode: TeX -*-
+%% Classes
+
+While the \CLOS\ is general enough to describe all \term{standardized} \term{classes}
+(including, for example, \typeref{number}, \typeref{hash-table}, and
+\typeref{symbol}), \thenextfigure\ contains a list of \term{classes} that are
+especially relevant to understanding the \CLOS.
+
+\DefineFigure{ObjectSystemClasses}
+\displaythree{Object System Classes}{
+built-in-class&method-combination&standard-object\cr
+class&standard-class&structure-class\cr
+generic-function&standard-generic-function&structure-object\cr
+method&standard-method&\cr
+}
+
+\beginsubSection{Introduction to Classes}
+
+A \newterm{class} is an \term{object} that determines the structure and behavior 
+of a set of other \term{objects}, which are called its \newtermidx{instances}{instance}.   
+
+A \term{class} can inherit structure and behavior from other \term{classes}.
+A \term{class} whose definition refers to other \term{classes} for the purpose 
+of inheriting from them is said to be a \term{subclass} of each of
+those \term{classes}. The \term{classes} that are designated for purposes of
+inheritance are said to be \term{superclasses} of the inheriting \term{class}.
+                                              
+A \term{class} can have a \term{name}. The \term{function} \funref{class-name} 
+takes a \term{class} \term{object} and returns its \term{name}. 
+The \term{name} of an anonymous \term{class} is \nil.  A \term{symbol} 
+can \term{name} a \term{class}. The \term{function} \funref{find-class} takes a
+\term{symbol} and returns the \term{class} that the \term{symbol} names.
+A \term{class} has a \term{proper name} if the \term{name} is a \term{symbol}
+and if the \term{name} of the \term{class} names that \term{class}.
+That is, a \term{class}~$C$ has the \term{proper name}~$S$ if $S=$
+\f{(class-name $C$)} and $C=$ \f{(find-class $S$)}.
+Notice that it is possible for 
+\f{(find-class $S\sub 1$)} $=$ \f{(find-class $S\sub 2$)}
+and $S\sub 1\neq S\sub 2$.
+If $C=$ \f{(find-class $S$)}, we say that $C$ is the \term{class} \term{named} $S$.
+
+A \term{class} $C\sub{1}$ is 
+a \newterm{direct superclass} of a \term{class} $C\sub{2}$
+if $C\sub{2}$ explicitly designates $C\sub{1}$ 
+as a \term{superclass} in its definition.
+In this case $C\sub{2}$ is a \newterm{direct subclass} of $C\sub{1}$.
+A \term{class} $C\sub{n}$ is a \newterm{superclass} of 
+a \term{class} $C\sub{1}$ if there exists a series of
+\term{classes} $C\sub{2},\ldots,C\sub{n-1}$ such that 
+$C\sub{i+1}$ is a \term{direct superclass} of $C\sub{i}$ for $1 \leq i<n$.
+In this case, $C\sub{1}$ is a \newterm{subclass} of $C\sub{n}$.
+A \term{class} is considered neither a \term{superclass} nor a \term{subclass} of itself.
+That is, if $C\sub{1}$ is a \term{superclass} of $C\sub{2}$, 
+then $C\sub{1} \neq C\sub{2}$.
+The set of \term{classes} consisting of some given \term{class} $C$ 
+along with all of its \term{superclasses} is called ``$C$ and its superclasses.''
+
+Each \term{class} has a \newterm{class precedence list},
+which is a total ordering on the set of the given \term{class} and its \term{superclasses}.
+The total ordering is expressed as a list ordered from most specific to least specific.
+The \term{class precedence list} is used in several ways.  In general, more
+specific \term{classes} can \newterm{shadow}\meaning{1} features that would
+otherwise be inherited from less specific \term{classes}.
+The \term{method} selection and combination process uses 
+the \term{class precedence list} to order \term{methods} 
+from most specific to least specific. 
+ 
+When a \term{class} is defined, the order in which its direct \term{superclasses}
+are mentioned in the defining form is important.  Each \term{class} has a
+\newterm{local precedence order}, which is a \term{list} consisting of the
+\term{class} followed by its \term{direct superclasses} in the order mentioned
+in the defining \term{form}.
+
+A \term{class precedence list} is always consistent with the
+\term{local precedence order} of each \term{class} in the list.  
+The \term{classes} in each \term{local precedence order} appear
+within the \term{class precedence list} in the same order.  
+If the \term{local precedence orders} are inconsistent with each other, 
+no \term{class precedence list} can be constructed, and an error is signaled.
+The \term{class precedence list} and its computation is discussed
+in \secref\DeterminingtheCPL.
+
+\term{classes} are organized into a directed acyclic graph.
+There are two distinguished \term{classes}, named \typeref{t} and \typeref{standard-object}.
+The \term{class} named \typeref{t} has no \term{superclasses}. 
+It is a \term{superclass} of every \term{class} except itself.  
+The \term{class} named \typeref{standard-object} is an \term{instance} of 
+\theclass{standard-class} and is a \term{superclass} of
+every \term{class} that is an \term{instance} of \theclass{standard-class} except itself.
+
+\reviewer{Barmar: This or something like it needs to be said in the introduction.}%!!!
+There is a mapping from the object system \term{class} space into
+the \term{type} space.  Many of the standard \term{types} specified 
+in this document have a corresponding \term{class} that has the same 
+\term{name} as the \term{type}. Some \term{types} do not have a
+corresponding \term{class}. The integration of the \term{type} and \term{class}
+systems is discussed in \secref\IntegratingTypesAndClasses.
+
+\term{Classes} are represented by \term{objects} that are themselves
+\term{instances} of \term{classes}. 
+The \term{class} of the \term{class} of an \term{object} is termed
+the \newterm{metaclass} of that \term{object}. When no misinterpretation is
+possible, the term \term{metaclass} is used to refer to a \term{class}
+that has \term{instances} that are themselves \term{classes}. The \term{metaclass}
+determines the form of inheritance used by the \term{classes} that are its
+\term{instances} and the representation of the \term{instances} of those \term{classes}.
+The \CLOS\ provides a default \term{metaclass}, \typeref{standard-class}, that is
+appropriate for most programs.
+%The meta-object protocol provides
+%mechanisms for defining and using new metaclasses.
+
+Except where otherwise specified, all \term{classes} mentioned in this
+standard are \term{instances} of \theclass{standard-class},
+all \term{generic functions} are \term{instances} 
+of \theclass{standard-generic-function},
+and all \term{methods} are \term{instances} of \theclass{standard-method}.
+
+
+\endsubSection%{Classes}
+%\beginsubsubsection{Metaclasses}
+%??? Is the following paragraph necessary in this specification???
+%
+%The \newterm{metaclass} of an object is the class of its class.  The
+%metaclass determines the representation of instances of its instances and
+%the forms of inheritance used by its instances for slot descriptions and
+%method inheritance.  The metaclass mechanism can be used to provide
+%particular forms of optimization or to tailor the \CLOS\ for particular
+%uses.  
+%The protocol for defining metaclasses is discussed in the chapter
+%``The \CLOS\ Meta-Object Protocol.''
+
+%\endsubsubsection%{Metaclasses}
+
+\beginsubsubsection{Standard Metaclasses}
+
+The \CLOS\ provides a number of predefined \term{metaclasses}. 
+These include the \term{classes} \typeref{standard-class}, 
+\typeref{built-in-class}, and \typeref{structure-class}:
+
+\beginlist
+
+\itemitem{\bull}
+\Theclass{standard-class} is the default \term{class} of 
+\term{classes} defined by \macref{defclass}.
+                        
+\itemitem{\bull} \Theclass{built-in-class} is the \term{class} whose
+\term{instances} are \term{classes} that have special implementations with
+restricted capabilities.  Any \term{class} that corresponds to a standard
+\term{type} might be an \term{instance} of \typeref{built-in-class}.
+The predefined \term{type} specifiers that are required to have
+corresponding \term{classes} are listed in \figref\ClassTypeCorrespondence.  
+It is \term{implementation-dependent} whether each of these \term{classes} 
+is implemented as a \term{built-in class}.
+
+\itemitem{\bull}                     
+All \term{classes} defined by means of \macref{defstruct} are
+\term{instances} of \theclass{structure-class}.
+\endlist
+
+\endsubsubsection%{Standard Metaclasses}
+
+\beginsubSection{Defining Classes}
+           
+The macro \macref{defclass} is used to define a new named \term{class}.  
+%The syntax for \macref{defclass} is given in Figure ??
+
+The definition of a \term{class} includes:
+
+\beginlist
+
+\itemitem{\bull} The \term{name} of the new \term{class}. 
+  For newly-defined \term{classes} this \term{name} is a \term{proper name}.
+
+\itemitem{\bull} The list of the direct \term{superclasses} of the new \term{class}. 
+
+\itemitem{\bull} A set of \newtermidx{slot specifiers}{slot specifier}.
+  Each \term{slot specifier} includes the \term{name} of the \term{slot} 
+  and zero or more \term{slot} options.  A \term{slot} option pertains 
+  only to a single \term{slot}.  If a \term{class} definition contains
+  two \term{slot specifiers} with the same \term{name}, an error is signaled.
+
+\itemitem{\bull} A set of \term{class} options.  
+  Each \term{class} option pertains to the \term{class} as a whole.  
+
+\endlist
+                                              
+The \term{slot} options and \term{class} options of 
+the \macref{defclass} form provide mechanisms for the following:
+
+\beginlist
+
+\itemitem{\bull} Supplying a default initial value \term{form} 
+for a given \term{slot}.  
+
+\itemitem{\bull} Requesting that \term{methods} for \term{generic functions}
+be automatically generated for reading or writing \term{slots}. 
+
+\itemitem{\bull} Controlling whether a given \term{slot} is shared by 
+all \term{instances}
+of the \term{class} or whether each 
+\term{instance} of the \term{class} has its own \term{slot}.
+
+\itemitem{\bull} Supplying a set of initialization arguments and initialization
+argument defaults to be used in \term{instance} creation.
+
+%\itemitem{\bull} Requesting that a constructor function be automatically
+%generated for making instances of the new class.
+
+\itemitem{\bull} Indicating that the \term{metaclass} is to be other 
+than the default.  The \kwd{metaclass} option is reserved for future use; 
+an implementation can be extended to make use of the \kwd{metaclass}
+option.
+
+\itemitem{\bull} Indicating the expected \term{type} for the value stored
+in the \term{slot}.
+
+\itemitem{\bull} Indicating the \term{documentation string} for the \term{slot}.
+
+\endlist 
+
+\endsubSection%{Defining Classes}
+
+\goodbreak
+
+\beginsubSection{Creating Instances of Classes}
+                      
+The generic function \funref{make-instance} creates and returns a new
+\term{instance} of a \term{class}.  
+The \OS\ provides several mechanisms for
+specifying how a new \term{instance} is to be initialized.  For example, it
+is possible to specify the initial values for \term{slots} in newly created
+\term{instances} 
+either by giving arguments to \funref{make-instance} or by
+providing default initial values.  Further initialization activities
+can be performed by \term{methods} written for \term{generic functions} 
+that are
+part of the initialization protocol.  The complete initialization
+protocol is described in \secref\ObjectCreationAndInit.
+
+\endsubSection%{Creating Instances of Classes}
+
+\beginsubSection{Inheritance}
+\DefineSection{Inheritance}
+                                              
+A \term{class} can inherit \term{methods}, \term{slots}, 
+and some \macref{defclass} options from its \term{superclasses}.  
+Other sections describe the inheritance of \term{methods}, 
+the inheritance of \term{slots} and \term{slot} options, 
+and the inheritance of \term{class} options.
+ 
+
+\beginsubsubsection{Examples of Inheritance}
+
+\code
+ (defclass C1 () 
+     ((S1 :initform 5.4 :type number) 
+      (S2 :allocation :class)))
+ 
+ (defclass C2 (C1) 
+     ((S1 :initform 5 :type integer)
+      (S2 :allocation :instance)
+      (S3 :accessor C2-S3)))
+\endcode
+
+\term{Instances} of the class \f{C1} have a \term{local slot} named \f{S1},
+whose default initial value is 5.4 and
+whose \term{value} should always be a \term{number}.
+The class \f{C1} also has a \term{shared slot} named \f{S2}.
+
+There is a \term{local slot} named \f{S1} in \term{instances} of \f{C2}.
+The default initial value of \f{S1} is 5.
+The value of \f{S1} should always be of type \f{(and integer number)}.
+There are also \term{local slots} named \f{S2} and \f{S3} in \term{instances} of \f{C2}.
+The class \f{C2} has a \term{method} for \f{C2-S3} for reading the value of slot \f{S3};
+there is also a \term{method} for \f{(setf C2-S3)} that writes the value of \f{S3}.
+
+\endsubsubsection%{Examples of Inheritance}
+
+\beginsubsubsection{Inheritance of Class Options}
+     
+The \kwd{default-initargs} class option is inherited.  The set of
+defaulted initialization arguments for a \term{class} is the union of the
+sets of initialization arguments supplied in
+the \kwd{default-initargs} class options of the \term{class} and its \term{superclasses}.
+When more than one default initial value \term{form} is supplied for a given
+initialization argument, the default initial value \term{form} that is used
+is the one supplied by the \term{class} that is most specific according to
+the \term{class precedence list}.
+
+
+If a given \kwd{default-initargs} class option specifies an
+initialization argument of the same \term{name} more than once, an
+error \oftype{program-error} is signaled.
+
+\endsubsubsection%{Inheritance of Class Options}
+
+
+\endsubSection%{Inheritance}
+
+
+\beginsubSection{Determining the Class Precedence List}
+\DefineSection{DeterminingtheCPL}
+
+The \macref{defclass} form for a \term{class} provides a total ordering
+on that \term{class} and its direct \term{superclasses}.  This ordering is
+called the \newterm{local precedence order}.  It is an ordered list of the
+\term{class} and its direct \term{superclasses}. The
+\newterm{class precedence list} for a class $C$ is a total ordering on
+$C$ and its \term{superclasses} that is consistent with the
+\term{local precedence orders} for each of $C$ and its \term{superclasses}.
+
+A \term{class} precedes its direct \term{superclasses}, 
+and a direct \term{superclass} precedes all other 
+direct \term{superclasses} specified to its right 
+in the \term{superclasses} list of the \macref{defclass} form.  
+For every class $C$, define $$R\sub C=\{(C,C\sub 1),(C\sub 1,C\sub
+2),\ldots,(C\sub {n-1},C\sub n)\}$$ where $C\sub 1,\ldots,C\sub n$ are
+the direct \term{superclasses} of $C$ in the order in which
+they are mentioned in the \macref{defclass} form. These ordered pairs
+generate the total ordering on the class $C$ and its direct
+\term{superclasses}.
+
+Let $S\sub C$ be the set of $C$ and its \term{superclasses}. Let $R$ be
+$$R=\bigcup\sub{c\in {S\sub C}}R\sub c$$.
+
+\reviewer{Barmar: ``Consistent'' needs to be defined, or maybe we should say
+``logically consistent''?}%!!!
+
+The set $R$ might or might not generate a partial ordering, depending on
+whether the $R\sub c$, $c\in S\sub C$, are 
+consistent; it is assumed
+that they are consistent and that $R$ generates a partial ordering.
+When the $R\sub c$ are not consistent, it is said that $R$ is inconsistent.
+
+%This partial ordering is generated by taking the the transitive
+%closure of the set $R\cup \{(c,c) \vert c\in {S\sub C}\}$.  When
+%$(C\sub 1,C\sub 2)\in R$\negthinspace, it is said that $C\sub 1$ 
+%{\bit precedes or equals} $C\sub 2$.  Intuitively, $C\sub 1$ precedes
+%or equals $C\sub 2$ when $C\sub 1=C\sub 2$ or $C\sub 2$ is a
+%superclass of $C\sub 1$.  
+%
+%Recall that a partial ordering of the set $S$ is a relation between 
+%objects of $S$ that is transitive, reflexive, and antisymmetric. The 
+%set $\{(c,c) \vert c\in {S\subC}\}$ was added to the transitive 
+%closure of the set $R$ in order to make the relation reflexive.  In 
+%the remainder of this section the set of precedence relations $R$ and 
+%not the partial ordering will be used.
+
+To compute the \term{class precedence list} for~$C$\negthinspace,
+topologically sort the elements of $S\sub C$ with respect to the
+partial ordering generated by $R$\negthinspace.  When the topological
+sort must select a \term{class} from a set of two or more 
+\term{classes}, none of
+which are preceded by other \term{classes} with respect to~$R$\negthinspace,
+the \term{class} selected is chosen deterministically, as described below.
+
+If $R$ is inconsistent, an error is signaled.
+
+
+\goodbreak
+
+\beginsubsubsection{Topological Sorting}
+
+% !!!
+% Barmar: Sometimes $C$ refers  to the original class and sometimes it refers
+%         to an element of $S\sub C$.
+% KAB: Really? Where?  I don't see any.
+
+%I didn't have time to figure out this comment but maybe someone will another time.
+% -kmp 11-Oct-90
+Topological sorting proceeds by finding a class $C$ in~$S\sub C$ such
+that no other \term{class} precedes that element according to the elements
+in~$R$\negthinspace.  The class $C$ is placed first in the result.
+Remove $C$ from $S\sub C$, and remove all pairs of the form $(C,D)$,
+$D\in S\sub C$, from $R$\negthinspace. Repeat the process, adding
+\term{classes} with no predecessors to the end of the result.  Stop when no
+element can be found that has no predecessor.
+
+If $S\sub C$ is not empty and the process has stopped, the set $R$ is
+inconsistent. If every \term{class} in the finite set of 
+\term{classes} is preceded
+by another, then $R$ contains a loop. That is, there is a chain of
+classes $C\sub 1,\ldots,C\sub n$ such that $C\sub i$ precedes
+$C\sub{i+1}$, $1\leq i<n$, and $C\sub n$ precedes $C\sub 1$.
+
+Sometimes there are several \term{classes} from $S\sub C$ with no
+predecessors.  In this case select the one that has a direct
+\term{subclass} rightmost in the \term{class precedence list} computed so far.
+%Because a direct superclass precedes all other direct superclasses to
+%its right, there can be only one such candidate class. 
+%%Barmar thinks the next sentence is redundant with previous paragraph,
+%but I think it's useful for emphasis. I put it in parens to deemphasize it. -kmp 11-Oct-90
+(If there is no such candidate \term{class}, $R$ does not generate 
+a partial ordering---the $R\sub c$, $c\in S\sub C$, are inconsistent.)
+
+In more precise terms, let $\{N\sub 1,\ldots,N\sub m\}$, $m\geq 2$, be
+the \term{classes} from $S\sub C$ with no predecessors.  Let $(C\sub
+1\ldots C\sub n)$, $n\geq 1$, be the \term{class precedence list}
+constructed so far.  $C\sub 1$ is the most specific \term{class}, and $C\sub
+n$ is the least specific.  Let $1\leq j\leq n$ be the largest number
+such that there exists an $i$ where $1\leq i\leq m$ and $N\sub i$
+is a direct \term{superclass} of $C\sub j$; $N\sub i$ is placed next.
+
+% The effect of this rule for selecting from a set of \term{classes} with no
+% predecessors is that the \term{classes} in a simple \term{superclass} chain are
+% adjacent in the \term{class precedence list} and that \term{classes} in each
+% relatively separated subgraph are adjacent in the \term{class precedence list}.
+% For example, let $T\sub 1$ and $T\sub 2$ be subgraphs
+% whose only element in common is the class $J$\negthinspace. Suppose
+% that no \term{superclass} of $J$ appears in either $T\sub 1$ or $T\sub 2$.
+% Let $C\sub 1$ be the bottom of $T\sub 1$; and let $C\sub 2$ be the
+% bottom of $T\sub 2$.  Suppose $C$ is a \term{class} whose direct \term{superclasses}
+% are $C\sub 1$ and $C\sub 2$ in that order, then the 
+% \term{class precedence list}
+% for $C$ will start with $C$ and will be followed by all \term{classes}
+% in $T\sub 1$ except $J$. All the \term{classes} of $T\sub 2$ will be next.
+% The class $J$ and its \term{superclasses} will appear last.
+%
+%% Replaced as follows per RPG. -kmp 13-Jan-92
+
+The effect of this rule for selecting from a set of \term{classes} with no
+predecessors is that the \term{classes} in a simple \term{superclass} chain are
+adjacent in the \term{class precedence list} and that \term{classes} in each
+relatively separated subgraph are adjacent in the \term{class precedence list}.
+For example, let $T\sub 1$ and $T\sub 2$ be subgraphs whose only
+element in common is the class $J$\negthinspace.
+% Suppose that no \term{superclass} of $J$ appears in 
+% either $T\sub 1$ or $T\sub 2$ and that $J$ 
+% is an indirect superclass of every class in both $T\sub 1$ and $T\sub 2$.
+%% Rewritten by RPG to avoid use of "indirect superclass". -kmp 13-Jan-92
+Suppose that no superclass of $J$ appears in either $T\sub 1$ or $T\sub 2$,
+and that $J$ is in the superclass chain of every class in both $T\sub 1$ and $T\sub 2$.
+    Let $C\sub 1$ be the bottom of $T\sub 1$; 
+and let $C\sub 2$ be the bottom of $T\sub 2$.
+Suppose $C$ is a \term{class} whose direct \term{superclasses}
+are $C\sub 1$ and $C\sub 2$ in that order, then the \term{class precedence list}
+for $C$ starts with $C$ and is followed by
+all \term{classes} in $T\sub 1$ except $J$. 
+All the \term{classes} of $T\sub 2$ are next.
+The \term{class} $J$ and its \term{superclasses} appear last.
+
+\endsubsubsection%{Topological Sorting}
+
+\beginsubsubsection{Examples of Class Precedence List Determination}
+
+This example determines a \term{class precedence list} for the
+class \f{pie}.  The following \term{classes} are defined:
+
+\code
+ (defclass pie (apple cinnamon) ())
+ 
+ (defclass apple (fruit) ())
+ 
+ (defclass cinnamon (spice) ())
+ 
+ (defclass fruit (food) ())
+
+ (defclass spice (food) ())
+
+ (defclass food () ())
+\endcode
+
+% $S$ => "$S\sub{pie}$ per Barmar and Laubsch.
+The set $S\sub{pie}$~$=$ $\{${\tt pie, apple, cinnamon, fruit, spice, food,
+standard-object, t}$\}$. The set $R$~$=$ $\{${\tt (pie, apple),
+(apple, cinnamon), (apple, fruit), (cinnamon, spice), \hfil\break
+(fruit, food), (spice, food), (food, standard-object), (standard-object,
+t)}$\}$.
+
+The class \f{pie} is not preceded by anything, so it comes first;
+the result so far is {\tt (pie)}.  Remove \f{pie} from $S$ and pairs
+mentioning \f{pie} from $R$ to get $S$~$=$ $\{${\tt apple, cinnamon,
+fruit, spice, food, standard-object, t}$\}$ and $R$~$=$~$\{${\tt
+(apple, cinnamon), (apple, fruit), (cinnamon, spice),\hfil\break (fruit,
+food), (spice, food), (food, standard-object),
+(standard-object, t)}$\}$.
+
+The class \f{apple} is not preceded by anything, so it is next; the
+result is {\tt (pie apple)}. Removing \f{apple} and the relevant
+pairs results in $S$~$=$ $\{${\tt cinnamon, fruit, spice, food,
+standard-object, t}$\}$ and $R$~$=$ $\{${\tt (cinnamon, spice),
+(fruit, food), (spice, food), (food, standard-object),\hfil\break
+(standard-object, t)}$\}$.
+
+The classes \f{cinnamon} and {\tt fruit} are not preceded by
+anything, so the one with a direct \term{subclass} rightmost in the 
+\term{class precedence list} computed so far goes next.  The class \f{apple} is a
+direct \term{subclass} of {\tt fruit}, and the class \f{pie} is a direct
+\term{subclass} of \f{cinnamon}.  Because \f{apple} appears to the right
+of \f{pie} in the \term{class precedence list}, 
+{\tt fruit} goes next, and the
+result so far is {\tt (pie apple fruit)}.  $S$~$=$ $\{${\tt cinnamon,
+spice, food, standard-object, t}$\}$; $R$~$=$ $\{${\tt (cinnamon,
+spice), (spice, food),\hfil\break (food, standard-object),
+(standard-object, t)}$\}$.
+
+The class \f{cinnamon} is next, giving the result so far as {\tt
+(pie apple fruit cinnamon)}.  At this point $S$~$=$ $\{${\tt spice,
+food, standard-object, t}$\}$; $R$~$=$ $\{${\tt (spice, food), (food,
+standard-object), (standard-object, t)}$\}$.
+
+The classes \f{spice}, \f{food}, \typeref{standard-object}, and 
+\typeref{t} are added in that order, and the \term{class precedence list} 
+is \f{(pie apple fruit cinnamon spice food standard-object t)}.
+
+It is possible to write a set of \term{class} definitions that cannot be 
+ordered.   For example: 
+
+\code
+ (defclass new-class (fruit apple) ())
+ 
+ (defclass apple (fruit) ())
+\endcode
+
+The class \f{fruit} must precede \f{apple} 
+because the local ordering of \term{superclasses} must be preserved.
+The class \f{apple} must precede \f{fruit} 
+because a \term{class} always precedes its own \term{superclasses}.
+When this situation occurs, an error is signaled, as happens here
+when the system tries to compute the \term{class precedence list} 
+%Barmar suggested we add:
+of \f{new-class}.
+
+The following might appear to be a conflicting set of definitions:
+
+\code
+ (defclass pie (apple cinnamon) ())
+ 
+ (defclass pastry (cinnamon apple) ())
+ 
+ (defclass apple () ())
+ 
+ (defclass cinnamon () ())
+\endcode
+
+The \term{class precedence list} for \f{pie} is 
+\f{(pie apple cinnamon standard-object t)}.
+
+The \term{class precedence list} for \f{pastry} is  
+\f{(pastry cinnamon apple standard-object t)}.
+
+It is not a problem for \f{apple} to precede \f{cinnamon} in the
+ordering of the \term{superclasses} of \f{pie} but not in the ordering for
+\f{pastry}.  However, it is not possible to build a new \term{class} that
+has both \f{pie} and \f{pastry} as \term{superclasses}.
+
+\endsubsubsection%{Examples of Class Precedence List Determination}
+
+\endsubSection%{Determining the Class Precedence List}
+\beginsubSection{Redefining Classes}  
+\DefineSection{ClassReDef}
+                                
+%"instance" => "direct instance" per Barrett,Barmar,Moon.
+A \term{class} that is a \term{direct instance} of \typeref{standard-class} can
+be redefined if the new \term{class} is also
+%"instance" => "direct instance" per Barrett,Barmar,Moon.
+a \term{direct instance} of \typeref{standard-class}.
+Redefining a \term{class} modifies the existing
+\term{class} \term{object} to reflect the new \term{class} definition; it does not
+create a new \term{class} \term{object} for the \term{class}.  
+Any \term{method} \term{object} created by a \kwd{reader}, \kwd{writer}, 
+or \kwd{accessor} option specified by the old \macref{defclass} form is
+removed from the corresponding \term{generic function}.
+\term{Methods} specified by the new \macref{defclass} form are added.
+
+% any function specified by the \kwd{constructor} option of the
+% old \macref{defclass} form is removed from the corresponding symbol function cell.
+
+When the class $C$ is redefined, changes are propagated to its \term{instances}
+and to \term{instances} of any of its \term{subclasses}.  Updating such an
+\term{instance} occurs at an \term{implementation-dependent} time, but no later than
+the next time a \term{slot} 
+of that \term{instance} is read or written.  Updating an
+\term{instance} 
+does not change its identity as defined by \thefunction{eq}.
+The updating process may change the \term{slots} of that
+particular \term{instance}, 
+but it does not create a new \term{instance}.  Whether
+updating an \term{instance} consumes storage is \term{implementation-dependent}.
+
+Note that redefining a \term{class} may cause \term{slots} to be added or 
+deleted.  If a \term{class} is redefined in a way that changes the set of
+\term{local slots} \term{accessible} in \term{instances}, the \term{instances} 
+are updated.  It is \term{implementation-dependent} whether \term{instances} 
+are updated if a \term{class} is redefined in a way that does not change 
+the set of \term{local slots} \term{accessible} in \term{instances}.
+
+The value of a \term{slot} 
+that is specified as shared both in the old \term{class}
+and in the new \term{class} is retained.  
+If such a \term{shared slot} was unbound
+in the old \term{class}, it is unbound in the new \term{class}.  
+\term{Slots} that
+were local in the old \term{class} and that are shared in the new 
+\term{class} are
+initialized.  Newly added \term{shared slots} are initialized.
+
+Each newly added \term{shared slot} is set to the result of evaluating the
+%captured \kwd{initform} form
+\term{captured initialization form} for the \term{slot} that was specified 
+in the \macref{defclass} \term{form} for the new \term{class}.  
+%If there is no \kwd{initform} form,
+If there was no \term{initialization form}, the \term{slot} is unbound.
+
+If a \term{class} is redefined in such a way that the set of
+\term{local slots} \term{accessible} in an \term{instance} of the \term{class} 
+is changed, a two-step process of updating the \term{instances} of the
+\term{class} takes place.  The process may be explicitly started by 
+invoking the generic function \funref{make-instances-obsolete}.  This
+two-step process can happen in other circumstances in some implementations.
+For example, in some implementations this two-step process is
+triggered if the order of \term{slots} in storage is changed.
+
+The first step modifies the structure of the \term{instance} by adding new
+\term{local slots} and discarding \term{local slots} that are not
+defined in the new version of the \term{class}.  The second step
+initializes the newly-added \term{local slots} and performs any other
+user-defined actions. These two steps are further specified
+in the next two sections.
+
+\beginsubsubsection{Modifying the Structure of Instances}
+
+\reviewer{Barmar: What about shared slots that are deleted?}%!!!
+
+The first step modifies the structure of \term{instances} of the redefined
+\term{class} to conform to its new \term{class} definition.  
+\term{Local slots} specified
+by the new \term{class} definition that are not specified as either local or
+shared by the old \term{class} are added, and \term{slots} 
+not specified as either
+local or shared by the new \term{class} definition that are specified as
+local by the old \term{class} are discarded. 
+The \term{names} of these added and discarded
+\term{slots} are passed as arguments 
+to \funref{update-instance-for-redefined-class}
+as described in the next section.
+
+The values of \term{local slots} specified by both the new and old
+\term{classes} are retained. If such a \term{local slot} was unbound,
+it remains unbound.
+
+The value of a \term{slot} that is specified as shared in the old 
+\term{class} and as local in the new \term{class} is retained.  If such 
+a \term{shared slot} was unbound, the \term{local slot} is unbound.
+
+\endsubsubsection%{Modifying the Structure of the Instance}
+
+
+\beginsubsubsection{Initializing Newly Added Local Slots}
+
+The second step initializes the newly added \term{local slots} and performs
+any other user-defined actions.  This step is implemented by the generic
+function \funref{update-instance-for-redefined-class}, which is called after
+completion of the first step of modifying the structure of the
+\term{instance}.
+
+The generic function \funref{update-instance-for-redefined-class} takes
+four required arguments: the \term{instance} being updated after it has
+undergone the first step, a list of the names of \term{local slots} that were
+added, a list of the names of \term{local slots} that were discarded, and a
+property list containing the \term{slot} names and values of 
+\term{slots} that were
+discarded and had values.  Included among the discarded \term{slots} are
+\term{slots} that were local in the old \term{class} and that are shared in the new
+\term{class}.
+                      
+The generic function \funref{update-instance-for-redefined-class} also
+takes any number of initialization arguments.  When it is called by
+the system to update an \term{instance} whose \term{class} 
+has been redefined, no
+initialization arguments are provided.
+                                               
+There is a system-supplied primary \term{method} for 
+\funref{update-instance-for-redefined-class} whose \term{parameter specializer}
+for its \term{instance} argument is \theclass{standard-object}.  
+First this \term{method} checks the validity of initialization arguments and signals an
+error if an initialization argument is supplied that is not declared
+as valid.  (For more information, \seesection\DeclaringInitargValidity.)
+Then it calls the generic function
+\funref{shared-initialize} with the following arguments: the 
+\term{instance},
+the list of \term{names} of 
+the newly added \term{slots}, and the initialization
+arguments it received.
+
+\endsubsubsection%{Initializing Newly added Local Slots}
+
+\beginsubsubsection{Customizing Class Redefinition}
+             
+\reviewer{Barmar: This description is hard to follow.}%!!!
+
+\term{Methods} for \funref{update-instance-for-redefined-class} may be 
+defined to specify actions to be taken when an \term{instance} is updated.
+If only \term{after methods} for \funref{update-instance-for-redefined-class} are
+defined, they will be run after the system-supplied primary \term{method} for
+initialization and therefore will not interfere with the default
+behavior of \funref{update-instance-for-redefined-class}.  Because no
+initialization arguments are passed to \funref{update-instance-for-redefined-class}
+when it is called by the system, the 
+%\kwd{initform} forms 
+\term{initialization forms} for \term{slots} 
+that are filled by \term{before methods} for \funref{update-instance-for-redefined-class} 
+will not be evaluated by \funref{shared-initialize}.
+
+\term{Methods} for \funref{shared-initialize} may be defined to customize
+\term{class} redefinition.  For more information, \seesection\SharedInitialize.
+
+\endsubsubsection%{Customizing Class Redefinition}
+
+%% The following was removed by request of Symbolics, who point out that other 
+%% extensions may well be permitted too, and there's no reason to give special
+%% advertising to these. -kmp 9-Oct-90
+%
+% \beginsubsubsection{Extensions}
+% 
+% There are two allowed extensions to \term{class} redefinition: 
+% 
+% \beginlist
+% 
+% \itemitem{\bull} The \OS\ may be extended to permit the new \term{class}
+% to be an \term{instance} of a \term{metaclass} 
+% other than the \term{metaclass} of the
+% old \term{class}.
+% 
+% \itemitem{\bull} The \OS\ may be extended to support an updating process
+% when either the old or the new \term{class} is an \term{instance} of a
+% \term{class} 
+% other than \typeref{standard-class} that is not a \term{built-in class}.
+% 
+% \endlist
+% 
+% \endsubsubsection%{Extensions}
+
+\beginsubSection{Integrating Types and Classes} 
+\DefineSection{IntegratingTypesAndClasses}
+                                              
+The \CLOS\ maps the space of \term{classes} into the space of \term{types}.
+Every \term{class} that has a proper name has a corresponding \term{type} 
+with the same \term{name}.  
+
+The proper name of every \term{class} is a valid \term{type specifier}.  In
+addition, every \term{class} \term{object} is a valid \term{type specifier}.  
+Thus the expression \f{(typep \param{object} \param{class})} evaluates to 
+\term{true} if the \term{class} of \param{object} is \param{class} itself or 
+a \term{subclass} of \term{class}.  The evaluation of the expression
+\f{(subtypep class1 class2)} returns the values 
+%was {\tt t~t} but came out as "t~t" in formatted form. -kmp 10-Oct-90
+%\t~\t\ if \f{class1} is a subclass of \f{class2} or if they are the
+\term{true} and \term{true} if \f{class1} is a subclass of \f{class2} or if they are the
+same \term{class}; otherwise it returns the values 
+%was {\tt nil~t}
+%\nil~\t.
+\term{false} and \term{true}.
+% If $I$ is an \term{instance} of some \term{class}
+% $C$ named $S$ and $C$ is an \term{instance} of \typeref{standard-class}, 
+% the evaluation of the expression \f{(type-of $I$\/)} will return $S$ if
+% $S$ is the proper name of $C$\negthinspace; if $S$ is not the proper
+% name of $C$\negthinspace, the expression \f{(type-of $I$\/)} will
+% return $C$\negthinspace.
+%% Barmar thought the above was too complicated.
+%% This is a partial simplification, not quite what he wanted, but hopefully
+%% an improvement.
+If  $I$ is an \term{instance} of some \term{class} $C$ named $S$ 
+and $C$ is an \term{instance} of \typeref{standard-class}, 
+the evaluation of the expression \f{(type-of $I$\/)} returns $S$ 
+if $S$ is the \term{proper name} of $C$; 
+otherwise, it returns $C$.
+
+Because the names of \term{classes} 
+and \term{class} \term{objects} are \term{type specifiers}, they may
+be used in the special form \specref{the} and in type declarations.
+                                   
+Many but not all of the predefined \term{type specifiers} have a
+corresponding \term{class} with 
+the same proper name as the \term{type}.  These type
+specifiers are listed in \figref\ClassTypeCorrespondence.
+For example, \thetype{array} has 
+a corresponding \term{class} named \typeref{array}.  
+No \term{type specifier} that is a
+list, such as {\tt (vector double-float 100)}, has a corresponding \term{class}.
+The \term{operator} \macref{deftype} does not create any \term{classes}.
+                                            
+Each \term{class} that corresponds to a predefined \term{type specifier} can
+be implemented in one of three ways, at the discretion of each implementation.
+It can be a \term{standard class},
+%% Not necessary. -kmp 12-Feb-92
+% (of the kind defined by \macref{defclass}), 
+a \term{structure class},
+%% Not necessary. -kmp 12-Feb-92
+% (defined by \macref{defstruct}), 
+\issue{METACLASS-OF-SYSTEM-CLASS:UNSPECIFIED}
+%or a \term{built-in class}.
+or a \term{system class}.
+\endissue{METACLASS-OF-SYSTEM-CLASS:UNSPECIFIED}
+%% Not necessary. -kmp 12-Feb-92
+% (implemented in a special, non-extensible way).
+
+%"instances" => "generalized instances" per Barmar,Moon.
+A \term{built-in class} is one whose \term{generalized instances} have restricted capabilities 
+or special representations.  Attempting to use \macref{defclass} to define 
+\term{subclasses} of a \typeref{built-in-class} signals an error.
+%"instance" => "generalized instance" per Barmar,Moon.
+Calling \funref{make-instance} to create a \term{generalized instance} of a 
+\term{built-in class} signals an error.  Calling \funref{slot-value} on a
+%"instance" => "generalized instance" per Barmar,Moon.
+\term{generalized instance} of a \term{built-in class} signals an error.
+Redefining a \term{built-in class} or using \funref{change-class} to change
+%"instance" => "object" per Barmar,Moon.
+the \term{class} of an \term{object} to or from a \term{built-in class} signals an error.
+However, \term{built-in classes} can be used as \term{parameter specializers} 
+in \term{methods}.
+                                        
+%The \OS\ specifies that all predefined \term{type specifiers}
+%listed in \figref\ClassTypeCorrespondence\ are built-in classes, but a particular
+%implementation is allowed to extend the \OS\ to define some of them as
+%standard classes or as structure classes.
+
+It is possible to determine whether a \term{class} is a \term{built-in class}
+by checking the \term{metaclass}.
+A \term{standard class}  is an \term{instance} of \theclass{standard-class},
+a \term{built-in class}  is an \term{instance} of \theclass{built-in-class}, and
+a \term{structure class} is an \term{instance} of \theclass{structure-class}.
+                                
+Each \term{structure} \term{type} created by \macref{defstruct} without 
+using the \kwd{type} option has a corresponding \term{class}.  
+%"instance" => "generalized instance" per Barmar,Moon.
+This \term{class} is a \term{generalized instance} of \theclass{structure-class}.  
+%A portable program must assume that
+%\typeref{structure-class} is a subclass of \typeref{built-in-class} and has the
+%same restrictions as built-in classes.  Whether \theclass{structure-class}
+%in fact is a subclass of \typeref{built-in-class} is
+%\term{implementation-dependent}. 
+The \kwd{include} option of \macref{defstruct} creates a direct
+\term{subclass} of the \term{class} 
+that corresponds to the included \term{structure} 
+%Added "type" -kmp
+\term{type}.
+
+% I moved the following two paragraphs here from the dictionary entry
+% for CLASS.  --sjl 7 Mar 92
+\issue{CONDITION-SLOTS:HIDDEN}
+It is \term{implementation-dependent} whether \term{slots} are involved in the
+operation of \term{functions} defined in this specification
+on \term{instances} of \term{classes} defined in this specification,
+except when \term{slots} are explicitly defined by this specification.
+
+If in a particular \term{implementation} a \term{class} defined in this specification
+has \term{slots} that are not defined by this specfication, the names of these \term{slots}
+must not be \term{external symbols} of \term{packages} defined in this specification nor
+otherwise \term{accessible} in \thepackage{cl-user}.
+\endissue{CONDITION-SLOTS:HIDDEN}
+
+                                                    
+The purpose of specifying that many of the standard \term{type specifiers} have a
+corresponding \term{class} is to enable users to write \term{methods} that
+discriminate on these \term{types}.  \term{Method} selection requires that a 
+\term{class precedence list} can be determined for each \term{class}. 
+
+The hierarchical relationships among the \term{type specifiers} are mirrored by
+relationships among the \term{classes} corresponding to those \term{types}.  
+%The existing type hierarchy is used for determining the
+%\term{class precedence list} 
+%for each \term{class} that corresponds to a predefined
+%\term{type}.  In some cases, 
+%a \term{local precedence order} is not specifiied for two \term{supertypes} 
+%of a
+%given \term{type specifier}.  For example, \typeref{null} is a \term{subtype} 
+%of both \typeref{symbol} and \typeref{list}, but it is not specified
+%whether \typeref{symbol} is more specific or less
+%specific than \typeref{list}.  The \CLOS\ defines those
+%relationships for all such \term{classes}.
+                 
+\figref\ClassTypeCorrespondence\ lists the set of \term{classes} 
+that correspond to predefined \term{type specifiers}.
+
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\DefineFigure{ClassTypeCorrespondence}
+\displaythree{Classes that correspond to pre-defined type specifiers}{
+arithmetic-error&generic-function&simple-error\cr
+array&hash-table&simple-type-error\cr
+bit-vector&integer&simple-warning\cr
+broadcast-stream&list&standard-class\cr
+built-in-class&logical-pathname&standard-generic-function\cr
+cell-error&method&standard-method\cr
+character&method-combination&standard-object\cr
+class&null&storage-condition\cr
+complex&number&stream\cr
+concatenated-stream&package&stream-error\cr
+condition&package-error&string\cr
+cons&parse-error&string-stream\cr
+control-error&pathname&structure-class\cr
+division-by-zero&print-not-readable&structure-object\cr
+echo-stream&program-error&style-warning\cr
+end-of-file&random-state&symbol\cr
+error&ratio&synonym-stream\cr
+file-error&rational&t\cr
+file-stream&reader-error&two-way-stream\cr
+float&readtable&type-error\cr
+floating-point-inexact&real&unbound-slot\cr
+floating-point-invalid-operation&restart&unbound-variable\cr
+floating-point-overflow&sequence&undefined-function\cr
+floating-point-underflow&serious-condition&vector\cr
+function&simple-condition&warning\cr
+}
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+
+The \term{class precedence list} information specified in the entries for
+each of these \term{classes} are those that are required by the \OS.
+
+Individual implementations may be extended to define other type
+specifiers to have a corresponding \term{class}.  Individual implementations
+may be extended to add other \term{subclass} relationships and to add other
+\term{elements} to the \term{class precedence lists} as long as
+they do not violate the type relationships and disjointness
+requirements specified by this standard.
+A standard \term{class} defined with no direct \term{superclasses} is guaranteed to
+be disjoint from all of the \term{classes} in the table, except for the
+class named \typeref{t}.
+ 
+\endsubSection%{Integrating Types and Classes}

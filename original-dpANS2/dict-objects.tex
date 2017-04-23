@@ -1,0 +1,5010 @@
+% -*- Mode: TeX -*-
+
+\def\GFauxOptionsAndMethDesc{
+\auxbnf{option}{\paren{\kwd{argument-precedence-order} \plusparam{parameter-name}} | \CR
+		\paren{\misc{declare} \plusparam{declaration}}                     | \CR
+		\paren{\kwd{documentation} \i{string}}                             | \CR
+	        \paren{\kwd{method-combination} \i{symbol} \starparam{arg}}	   | \CR
+		\paren{\kwd{generic-function-class} \i{class-name}}		   | \CR
+		\paren{\kwd{method-class} \i{class-name}}}
+\auxbnf{method-description}{\lparen\kwd{method} \CR
+                            \ \starparam{method-qualifier} specialized-lambda-list \CR
+                            \ {\DeclsAndDoc} \CR
+                            \ \starparam{form}\rparen}
+}
+
+%%% ========== FUNCTION-KEYWORDS
+\begincom{function-keywords}\ftype{Standard Generic Function}
+ 
+%Barmar: This function should have been called ``method-keywords.''
+
+\label Syntax::
+ 
+\DefgenWithValues {function-keywords} {method} {keys, allow-other-keys-p}
+
+\label Method Signatures::
+ 
+\Defmeth {function-keywords} {\specparam{method}{standard-method}}
+ 
+\label Arguments and Values::
+ 
+\param{method}---a \term{method}.
+ 
+\param{keys}---a \term{list}.
+
+\param{allow-other-keys-p}---a \term{generalized boolean}.
+
+\label Description::
+ 
+Returns the keyword parameter specifiers for a \param{method}.
+
+Two values are returned: 
+ a \term{list} of the explicitly named keywords 
+ and a \term{generalized boolean} that states whether \keyref{allow-other-keys}
+  had been specified in the \param{method} definition.
+
+\label Examples::
+
+\code
+ (defmethod gf1 ((a integer) &optional (b 2)
+                 &key (c 3) ((:dee d) 4) e ((eff f)))
+   (list a b c d e f))
+\EV #<STANDARD-METHOD GF1 (INTEGER) 36324653>
+ (find-method #'gf1 '() (list (find-class 'integer))) 
+\EV #<STANDARD-METHOD GF1 (INTEGER) 36324653>
+ (function-keywords *)
+\EV (:C :DEE :E EFF), \term{false}
+ (defmethod gf2 ((a integer))
+   (list a b c d e f))
+\EV #<STANDARD-METHOD GF2 (INTEGER) 42701775>
+ (function-keywords (find-method #'gf1 '() (list (find-class 'integer))))
+\EV (), \term{false}
+ (defmethod gf3 ((a integer) &key b c d &allow-other-keys)
+   (list a b c d e f))
+ (function-keywords *)
+\EV (:B :C :D), \term{true}
+\endcode
+ 
+\label Affected By::
+
+\macref{defmethod}
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+ 
+\macref{defmethod}
+
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== ENSURE-GENERIC-FUNCTION
+\begincom{ensure-generic-function}\ftype{Function}
+ 
+\label Syntax::
+ 
+\DefunWithValuesNewline ensure-generic-function
+			{function-name {\key}
+			 \vtop{\hbox{argument-precedence-order declare}
+                               \hbox{documentation environment}
+                               \hbox{generic-function-class lambda-list}
+                               \hbox{method-class method-combination}}}
+			{generic-function}
+
+\label Arguments and Values::
+ 
+\param{function-name}---a \term{function name}.
+ 
+The keyword arguments correspond to the \param{option} arguments of
+\macref{defgeneric}, except that the \kwd{method-class} and
+\kwd{generic-function-class} arguments can be \term{class} \term{object}s
+as well as names.
+ 
+%!!! What's a method combination object??
+{\keyword Method-combination} -- method combination object.
+ 
+{\keyword Environment} -- the same as the \keyref{environment} argument
+to macro expansion functions and is used to distinguish between compile-time
+and run-time environments.
+%Barmar said (and I agree) that this just doesn't belong here.
+% \issue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC}
+% The \keyref{environment} argument has 
+% \term{dynamic extent}; the consequences are undefined if 
+% the \keyref{environment} argument is 
+% referred to outside the \term{dynamic extent} 
+% of the macro expansion function.
+% \endissue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC}
+ 
+\editornote{KMP: What about documentation. Missing from this arguments enumeration,
+  and confusing in description below.}%!!!
+
+\param{generic-function}---a \term{generic function} \term{object}.
+ 
+\label Description::
+ 
+\Thefunction{ensure-generic-function} is used to define 
+a globally named \term{generic function} with no \term{methods} 
+or to specify or modify options and declarations that pertain to 
+a globally named \term{generic function} as a whole.
+ 
+%!!! This used to refer to FBOUNDP but I changed it to use "fbound".
+%    The question is, why is it looking in the global env if an environment
+%    argument was passed.
+If \param{function-name} is not \term{fbound} in the \term{global environment},
+a new
+\term{generic function} is created.  
+%!!! Rewrite in terms of function cell contents?
+If 
+\issue{FUNCTION-NAME:LARGE}
+\f{(fdefinition \param{function-name})} 
+\endissue{FUNCTION-NAME:LARGE}
+is an \term{ordinary function}, 
+a \term{macro}, 
+or a \term{special operator},
+an error is signaled.
+ 
+If \param{function-name} 
+is a \term{list}, it must be of the
+form \f{(setf \param{symbol})}.
+If \param{function-name} specifies a \term{generic function} that has a
+different value for any of the following arguments,
+the \term{generic function} is modified to have the new value: 
+\kwd{argument-precedence-order}, \kwd{declare}, \kwd{documentation},
+\kwd{method-combination}.
+ 
+If \param{function-name} specifies a \term{generic function} that has a
+different value for the \kwd{lambda-list} argument, and the new value
+is congruent with the \term{lambda lists} of all existing 
+\term{methods} or there
+are no \term{methods}, the value is changed; otherwise an error is signaled.
+ 
+%!!! Barmar: What does this part about
+%     "new generic function class is compatible with the old" mean?
+If \param{function-name} specifies a \term{generic function} that has a
+different value for the \kwd{generic-function-class} argument and if
+the new generic function class is compatible with the old,
+\funref{change-class} is called to change the \term{class} of the 
+\term{generic function};
+otherwise an error is signaled.
+ 
+If \param{function-name} specifies a \term{generic function} that has a
+different value for the \kwd{method-class} argument, the value is
+changed, but any existing \term{methods} are not changed.
+ 
+\label Examples:\None.
+
+\label Affected By::
+
+Existing function binding of \param{function-name}.
+ 
+\label Exceptional Situations::
+ 
+If 
+\issue{FUNCTION-NAME:LARGE}
+\f{(fdefinition \param{function-name})}
+\endissue{FUNCTION-NAME:LARGE}
+is an \term{ordinary function}, a \term{macro}, or a \term{special operator}, 
+an error \oftype{error} is signaled.
+ 
+If \param{function-name} specifies a 
+\term{generic function} that has a
+different value for the \kwd{lambda-list} argument, and the new value
+is not congruent with the \term{lambda list} of any existing 
+\term{method},
+an error \oftype{error} is signaled.
+ 
+If \param{function-name} specifies a 
+\term{generic function} that has a
+different value for the \kwd{generic-function-class} argument and if
+the new generic function class not is compatible with the old,
+an error \oftype{error} is signaled.
+ 
+ 
+\label See Also::
+ 
+\macref{defgeneric}
+ 
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== ALLOCATE-INSTANCE
+\begincom{allocate-instance}\ftype{Standard Generic Function}
+ 
+\issue{ALLOCATE-INSTANCE:ADD}
+
+\label Syntax::
+
+\issue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+\DefgenWithValues allocate-instance 
+		  {class {\rest} initargs {\key} {\allowotherkeys}}
+	          {new-instance}
+\endissue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+
+\label Method Signatures::
+ 
+\Defmeth {allocate-instance} {\specparam{class}{standard-class} {\rest} initargs}
+
+\Defmeth {allocate-instance} {\specparam{class}{structure-class} {\rest} initargs}
+
+\label Arguments and Values::
+ 
+\param{class}---a \term{class}.
+ 
+\param{initargs}---a \term{list} of \term{keyword/value pairs} 
+		   (initialization argument \term{names} and \term{values}).
+ 
+\param{new-instance}---an \term{object} whose \term{class} is \param{class}.
+
+\label Description::
+ 
+The generic function \funref{allocate-instance} creates and returns
+a new instance of the \param{class}, without initializing it.
+When the \param{class} is a \term{standard class}, this means that
+the \term{slots} are \term{unbound}; when the \term{class} is a
+\term{structure class}, this means the \term{slots}' \term{values}
+are unspecified.
+ 
+The caller of \funref{allocate-instance} is expected to have
+already checked the initialization arguments.
+ 
+The \term{generic function} \funref{allocate-instance} is called by
+\funref{make-instance}, as described in
+\secref\ObjectCreationAndInit.
+
+\label Affected By:\None. % ????
+
+\label Exceptional Situations:\None. % ????
+
+\label See Also::
+ 
+\macref{defclass}, \funref{make-instance}, \funref{class-of},
+{\secref\ObjectCreationAndInit}
+ 
+\label Notes::
+
+The consequences of adding \term{methods} to \funref{allocate-instance} is unspecified.
+This capability might be added by the \term{Metaobject Protocol}.
+
+% kmp: This section was copied with minor changes from
+%  \funref{make-instance}, and then reviewed by Moon.
+
+\endissue{ALLOCATE-INSTANCE:ADD}
+
+\endcom
+
+%%% ========== REINITIALIZE-INSTANCE
+\begincom{reinitialize-instance}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\issue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+\DefgenWithValues reinitialize-instance
+		  {instance {\rest} initargs {\key} {\allowotherkeys}}
+		  {instance}
+\endissue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+
+\label Method Signatures::
+ 
+\Defmeth reinitialize-instance {\specparam{instance}{standard-object} {\rest} initargs} 
+
+\label Arguments and Values::
+
+\param{instance}---an \term{object}.
+ 
+\param{initargs}---an \term{initialization argument list}.
+ 
+\label Description::
+ 
+The \term{generic function} \funref{reinitialize-instance} can be used to change
+the values of \term{local slots} of an \param{instance} according to 
+\param{initargs}.
+%This generic function is called by the Meta-Object
+%Protocol.  
+This \term{generic function} can be called by users.
+ 
+The system-supplied primary \term{method} for \funref{reinitialize-instance}
+checks the validity of \param{initargs} and signals an error if
+an \param{initarg} is supplied that is not declared as valid.
+The \term{method} then calls the generic function \funref{shared-initialize}
+with the following arguments:  the \param{instance}, 
+\nil\ (which means no \term{slots}
+should be initialized according to their initforms), and the
+\param{initargs} it received.
+ 
+\label Examples:\None.
+
+\label Side Effects::
+
+\TheGF{reinitialize-instance} changes the values of \term{local slots}.
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+
+The system-supplied primary \term{method} for \funref{reinitialize-instance}
+signals an error if an \param{initarg} is supplied that is not declared as valid.
+ 
+\label See Also::
+ 
+\funref{initialize-instance},
+\funref{shared-initialize},
+\funref{update-instance-for-redefined-class},
+\funref{update-instance-for-different-class},
+\funref{slot-boundp},
+\funref{slot-makunbound},
+{\secref\InstanceReInit},
+{\secref\InitargRules},
+{\secref\DeclaringInitargValidity}
+ 
+\label Notes::
+                                                         
+\param{Initargs} are declared as valid by using the
+\kwd{initarg} option to \macref{defclass}, or by defining 
+\term{methods} for \funref{reinitialize-instance}
+or \funref{shared-initialize}.  The keyword name
+of each keyword parameter specifier in the \term{lambda list} of any 
+\term{method}
+defined on \funref{reinitialize-instance} or \funref{shared-initialize} is
+declared as a valid initialization argument name for all 
+\term{classes} for
+which that \term{method} is applicable.
+ 
+\endcom
+
+%%% ========== SHARED-INITIALIZE
+\begincom{shared-initialize}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\issue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+\DefgenWithValues shared-initialize 
+		  {instance slot-names {\rest} initargs {\key} {\allowotherkeys}}
+		  {instance}
+\endissue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+ 
+\label Method Signatures::
+ 
+\Defmeth shared-initialize {\specparam{instance}{standard-object} slot-names {\rest} initargs}
+ 
+\label Arguments and Values::
+ 
+\param{instance}---an \term{object}.
+ 
+\param{slot-names}---a \term{list} or \t.
+ 
+\param{initargs}---a \term{list} of \term{keyword/value pairs}
+		   (of initialization argument \term{names} and \term{values}).
+ 
+\label Description::
+ 
+The generic function \funref{shared-initialize} is used to fill the 
+\term{slots}                        
+of an \param{instance} 
+using \param{initargs} and \kwd{initform}
+forms.  It is called when an instance is created, when an instance is
+re-initialized, when an instance is updated to conform to a redefined
+\term{class}, and when an instance is updated to conform to a different
+\term{class}. The generic function \funref{shared-initialize} is called by the
+system-supplied primary \term{method} for \funref{initialize-instance},
+\funref{reinitialize-instance}, \funref{update-instance-for-redefined-class}, and
+\funref{update-instance-for-different-class}.
+ 
+The generic function \funref{shared-initialize} takes the following
+arguments: the \param{instance} to be initialized, a specification of a set of
+\param{slot-names} \term{accessible} in that \param{instance}, 
+and any number of \param{initargs}.
+The arguments after the first two must form an 
+\term{initialization argument list}.  The system-supplied primary \term{method} on 
+\funref{shared-initialize} initializes the \term{slots} with values according to the
+\param{initargs} and supplied \kwd{initform} forms.  \param{Slot-names}
+indicates which \term{slots} should be initialized according
+to their \kwd{initform} forms if no \param{initargs} are
+provided for those \term{slots}. 
+ 
+The system-supplied primary \term{method} behaves as follows, 
+regardless of whether the \term{slots} are local or shared: 
+ 
+\beginlist
+ 
+\itemitem{\bull}
+ If an \param{initarg} in the \term{initialization argument list} 
+ specifies a value for that \term{slot}, that
+ value is stored into the \term{slot}, even if a value has
+ already been stored in the \term{slot} before the \term{method} is run.
+ 
+\itemitem{\bull}
+ Any \term{slots} indicated by \param{slot-names} that are still unbound
+ at this point are initialized according to their \kwd{initform} forms.
+ For any such \term{slot} that has an \kwd{initform} form,
+ that \term{form} is evaluated in the lexical environment of its defining 
+ \macref{defclass} \term{form} and the result is stored into the \term{slot}.
+ For example, if a \term{before method} stores a value in the \term{slot}, 
+ the \kwd{initform} form will not be used to supply a value for the \term{slot}.
+ 
+\itemitem{\bull} 
+ The rules mentioned in {\secref\InitargRules} are obeyed.
+ 
+\endlist
+ 
+The \param{slots-names} argument specifies the \term{slots} that are to be
+initialized according to their \kwd{initform} forms if no
+initialization arguments apply.  It can be a \term{list} of slot \term{names}, 
+which specifies the set of those slot \term{names}; or it can be the \term{symbol} \t, 
+which specifies the set of all of the \term{slots}.
+
+%The generic function \funref{shared-initialize} fills the \term{slots}
+%of \param{instance}.
+ 
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+
+%% Removed per X3J13. -kmp 5-Oct-93
+% An error \oftype{error} is signaled if an \param{initarg} 
+% is supplied that is not declared as valid.
+
+ 
+\label See Also::
+ 
+\funref{initialize-instance},
+\funref{reinitialize-instance},
+\funref{update-instance-for-redefined-class},
+\funref{update-instance-for-different-class},
+\funref{slot-boundp},
+\funref{slot-makunbound},
+{\secref\ObjectCreationAndInit},
+{\secref\InitargRules},
+{\secref\DeclaringInitargValidity}
+ 
+\label Notes::
+ 
+\param{Initargs} are declared as valid by using the \kwd{initarg}
+option to \macref{defclass}, or by defining 
+\term{methods} for \funref{shared-initialize}. 
+The keyword name of each keyword parameter
+specifier in the \term{lambda list} of any \term{method} defined on 
+\funref{shared-initialize} is declared as a valid \param{initarg}
+name for all \term{classes} for which that \term{method} is applicable.
+ 
+Implementations are permitted to optimize \kwd{initform} forms that 
+neither produce nor depend on side effects, by evaluating these \term{forms}
+and storing them into slots before running any 
+\funref{initialize-instance} methods, rather than by handling them in the
+primary \funref{initialize-instance} method.  (This optimization might
+be implemented by having the \funref{allocate-instance} method copy a
+prototype instance.)
+ 
+Implementations are permitted to optimize default initial value forms
+for \param{initargs} associated with slots by not actually
+creating the complete initialization argument 
+\term{list} when the only \term{method}
+that would receive the complete \term{list} is the 
+\term{method} on \typeref{standard-object}.
+In this case default initial value forms can be 
+treated like \kwd{initform} forms.  This optimization has no visible
+effects other than a performance improvement.
+ 
+\endcom
+
+%%% ========== UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
+\begincom{update-instance-for-different-class}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\issue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+\DefgenWithValues update-instance-for-different-class
+		  {previous current 
+		   {\rest} initargs
+		   {\key} {\allowotherkeys}}
+		  {\term{implementation-dependent}}
+\endissue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+ 
+\label Method Signatures::
+ 
+\Defmeth {update-instance-for-different-class}
+	 {\vtop{\hbox{\specparam{previous}{standard-object}}
+	        \hbox{\specparam{current}{standard-object}}
+	        \hbox{{\rest} initargs}}}
+ 
+\label Arguments and Values::
+ 
+\param{previous}---a copy of the original \term{instance}.
+ 
+\param{current}---the original \term{instance} (altered).
+ 
+\param{initargs}---an \term{initialization argument list}.
+ 
+\label Description::
+ 
+The generic function \funref{update-instance-for-different-class} is not
+intended to be called by programmers.  Programmers may write
+\term{methods} for it.  \Thefunction{update-instance-for-different-class}
+is called only by \thefunction{change-class}.
+ 
+The system-supplied primary \term{method} on 
+\funref{update-instance-for-different-class} checks the validity of
+\param{initargs} and signals an error if an \param{initarg}
+is supplied that is not declared as valid.  This \term{method} then
+initializes \term{slots} with values according to the \param{initargs},
+and initializes the newly added \term{slots} with values according
+to their \kwd{initform} forms.  It does this by calling the generic
+function \funref{shared-initialize} with the following arguments: the 
+instance (\param{current}),
+a list of \term{names} of the newly added \term{slots}, and the \param{initargs}
+it received.  Newly added \term{slots} are those \term{local slots} for which
+no \term{slot} of the same name exists in the \param{previous} class.
+ 
+\term{Methods} for \funref{update-instance-for-different-class} can be defined to
+specify actions to be taken when an \term{instance} is updated.  If only 
+\term{after methods} for \funref{update-instance-for-different-class} are
+defined, they will be run after the system-supplied primary \term{method} for
+initialization and therefore will not interfere with the default
+behavior of \funref{update-instance-for-different-class}.
+ 
+\term{Methods} on \funref{update-instance-for-different-class} can be defined to
+initialize \term{slots} differently from \funref{change-class}.  The default
+behavior of \funref{change-class} is described in 
+\secref\ChangingInstanceClass.
+ 
+The arguments to \funref{update-instance-for-different-class} are
+computed by \funref{change-class}.  When \funref{change-class} is invoked on
+an \term{instance}, a copy of that \term{instance} is made; \funref{change-class} then
+destructively alters the original \term{instance}. The first argument to
+\funref{update-instance-for-different-class}, \param{previous}, is that
+copy; it holds the old \term{slot} values temporarily.  This argument has
+dynamic extent within \funref{change-class}; if it is referenced in any
+way once \funref{update-instance-for-different-class} returns, the
+results are undefined.  The second argument to
+\funref{update-instance-for-different-class}, \param{current}, is the altered
+original \term{instance}.
+The intended use of \param{previous} is to extract old \term{slot} values by using
+\funref{slot-value} or \macref{with-slots} or by invoking 
+a reader generic function, or to run other \term{methods} that were applicable to 
+\term{instances} of
+the original \term{class}.
+ 
+%The system-supplied primary \term{method} on
+%\funref{update-instance-for-different-class}
+%initializes \term{slots} with values according to the initialization
+%arguments, and initializes the newly added \term{slots} with values according
+%to their \kwd{initform} forms.
+ 
+\label Examples::
+ 
+See the example for \thefunction{change-class}.
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+The system-supplied primary \term{method} on
+\funref{update-instance-for-different-class} signals an error if an
+initialization argument is supplied that is not declared as valid.
+ 
+\label See Also::
+                            
+\funref{change-class},
+\funref{shared-initialize},
+{\secref\ChangingInstanceClass},
+{\secref\InitargRules},
+{\secref\DeclaringInitargValidity}
+ 
+\label Notes::
+ 
+\param{Initargs} are declared as valid by using the \kwd{initarg}
+option to \macref{defclass}, or by defining \term{methods}
+for \funref{update-instance-for-different-class} or \funref{shared-initialize}.
+The keyword name of each keyword parameter specifier in the \term{lambda list} of
+any \term{method} defined on \funref{update-instance-for-different-class}
+or \funref{shared-initialize} is declared as a valid \param{initarg} name
+for all \term{classes} for which that \term{method} is applicable.
+
+The value returned by \funref{update-instance-for-different-class} is
+ignored by \funref{change-class}.
+ 
+\endcom
+
+%%% ========== UPDATE-INSTANCE-FOR-REDEFINED-CLASS
+\begincom{update-instance-for-redefined-class}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\issue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+\DefgenWithValuesNewline update-instance-for-redefined-class
+                         {\vtop{\hbox{instance}
+                                \hbox{added-slots discarded-slots}
+                                \hbox{property-list}
+                                \hbox{{\rest} initargs {\key} {\allowotherkeys}}}}
+			 {\starparam{result}}
+\endissue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+
+\label Method Signatures::
+ 
+\Defmeth {update-instance-for-redefined-class} 
+	 {\vtop{\hbox{\specparam{instance}{standard-object}}
+		\hbox{added-slots discarded-slots}
+		\hbox{property-list}
+		\hbox{{\rest} initargs}}}
+ 
+\label Arguments and Values::
+
+\param{instance}---an \term{object}.
+ 
+\param{added-slots}---a \term{list}.
+ 
+\param{discarded-slots}---a \term{list}.
+ 
+\param{property-list}---a \term{list}.
+ 
+\param{initargs}---an \term{initialization argument list}.
+ 
+\param{result}---an \term{object}.
+ 
+\label Description::
+ 
+The \term{generic function} \funref{update-instance-for-redefined-class} 
+is not intended to be called by programmers. Programmers may write
+\term{methods} for it.  The \term{generic function} 
+\funref{update-instance-for-redefined-class} is called by the mechanism
+activated by \funref{make-instances-obsolete}.
+ 
+The system-supplied primary \term{method} on 
+\funref{update-instance-for-redefined-class} checks the validity of
+\param{initargs} and signals an error if an \param{initarg}
+is supplied that is not declared as valid.  This \term{method} then
+initializes \term{slots} with values according to the \param{initargs},
+and initializes the newly \param{added-slots} with values according
+to their \kwd{initform} forms.  It does this by calling the generic
+function \funref{shared-initialize} with the following arguments: 
+the \param{instance},
+a list of names of the newly \param{added-slots} to \param{instance},
+and the \param{initargs}
+it received.  Newly \param{added-slots} are those \term{local slots} for which
+no \term{slot} of the same name exists in the old version of the \term{class}.
+                                                                 
+When \funref{make-instances-obsolete} is invoked or when a \term{class} has been
+redefined and an \term{instance} is being updated, a \param{property-list} is created
+that captures the slot names and values of all the \param{discarded-slots} with
+values in the original \param{instance}.  The structure of the 
+\param{instance} is
+transformed so that it conforms to the current class definition.  The
+arguments to \funref{update-instance-for-redefined-class} are this
+transformed \param{instance}, a list of \param{added-slots} to the
+\param{instance}, a list \param{discarded-slots} from the
+\param{instance}, and the \param{property-list} 
+containing the slot names and values for
+\term{slots} that were discarded and had values.  Included in this list of
+discarded \term{slots} are \term{slots} that were local in the old \term{class} and are
+shared in the new \term{class}.
+ 
+%The system-supplied primary \term{method} on 
+%\funref{update-instance-for-redefined-class} 
+%initializes \term{slots} with values according to the \param{initargs},
+%and initializes the newly \param{added-slots} with values according
+%to their \kwd{initform} forms.  It does this by calling the generic
+%function \funref{shared-initialize}. 
+
+%!!! So?
+The value returned by \funref{update-instance-for-redefined-class} is ignored.
+
+\label Examples::
+ 
+\code
+  
+ (defclass position () ())
+ 
+ (defclass x-y-position (position)
+     ((x :initform 0 :accessor position-x)
+      (y :initform 0 :accessor position-y)))
+ 
+;;; It turns out polar coordinates are used more than Cartesian 
+;;; coordinates, so the representation is altered and some new
+;;; accessor methods are added.
+ 
+ (defmethod update-instance-for-redefined-class :before
+    ((pos x-y-position) added deleted plist &key)
+   ;; Transform the x-y coordinates to polar coordinates
+   ;; and store into the new slots.
+   (let ((x (getf plist 'x))
+         (y (getf plist 'y)))
+     (setf (position-rho pos) (sqrt (+ (* x x) (* y y)))
+           (position-theta pos) (atan y x))))
+  
+ (defclass x-y-position (position)
+     ((rho :initform 0 :accessor position-rho)
+      (theta :initform 0 :accessor position-theta)))
+  
+;;; All instances of the old x-y-position class will be updated
+;;; automatically.
+ 
+;;; The new representation is given the look and feel of the old one.
+ 
+ (defmethod position-x ((pos x-y-position))  
+    (with-slots (rho theta) pos (* rho (cos theta))))
+ 
+ (defmethod (setf position-x) (new-x (pos x-y-position))
+    (with-slots (rho theta) pos
+      (let ((y (position-y pos)))
+        (setq rho (sqrt (+ (* new-x new-x) (* y y)))
+              theta (atan y new-x))
+        new-x)))
+ 
+ (defmethod position-y ((pos x-y-position))
+    (with-slots (rho theta) pos (* rho (sin theta))))
+ 
+ (defmethod (setf position-y) (new-y (pos x-y-position))
+    (with-slots (rho theta) pos
+      (let ((x (position-x pos)))
+        (setq rho (sqrt (+ (* x x) (* new-y new-y)))
+              theta (atan new-y x))
+        new-y)))
+ 
+\endcode
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+The system-supplied primary \term{method} on 
+\funref{update-instance-for-redefined-class} signals an error if an
+\param{initarg} is supplied that is not declared as valid.
+ 
+\label See Also::
+ 
+\funref{make-instances-obsolete},
+\funref{shared-initialize},
+{\secref\ClassReDef},
+{\secref\InitargRules},
+{\secref\DeclaringInitargValidity}
+ 
+\label Notes::
+ 
+\param{Initargs} are declared as valid by using the \kwd{initarg}
+option to \macref{defclass}, or by defining \term{methods} for
+\funref{update-instance-for-redefined-class} or \funref{shared-initialize}.
+The keyword name of each keyword parameter specifier in the \term{lambda list} of
+any \term{method} defined on 
+\funref{update-instance-for-redefined-class} or 
+\funref{shared-initialize} is declared as a valid \param{initarg} name
+for all \term{classes} for which that \term{method} is applicable.
+ 
+\endcom
+
+%%% ========== CHANGE-CLASS
+\begincom{change-class}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\issue{CHANGE-CLASS-INITARGS:PERMIT}
+\DefgenWithValues change-class
+		  {instance new-class {\key} {\allowotherkeys}}
+		  {instance}
+\endissue{CHANGE-CLASS-INITARGS:PERMIT}
+
+\label Method Signatures::
+ 
+\issue{CHANGE-CLASS-INITARGS:PERMIT}
+\Defmeth {change-class} {\specparam{instance}{standard-object}
+			 \specparam{new-class}{standard-class}
+			 {\rest} initargs}
+ 
+\Defmeth {change-class} {\specparam{instance}{t}
+		         \specparam{new-class}{symbol}
+			 {\rest} initargs}
+\endissue{CHANGE-CLASS-INITARGS:PERMIT}
+
+\label Arguments and Values::
+ 
+\param{instance}---an \term{object}.
+                                            
+\param{new-class}---a \term{class designator}.
+ 
+\issue{CHANGE-CLASS-INITARGS:PERMIT}
+\param{initargs}---an \term{initialization argument list}.
+\endissue{CHANGE-CLASS-INITARGS:PERMIT}
+
+\label Description::
+                                      
+The \term{generic function} \funref{change-class} changes the 
+\term{class} of an \param{instance} to \param{new-class}.  
+It destructively modifies and returns the \param{instance}.
+ 
+If in the old \term{class} there is any \term{slot} of the 
+same name as a local \term{slot} in the \param{new-class}, 
+the value of that \term{slot} is retained.  This means that if 
+the \term{slot} has a value, the value returned by \funref{slot-value}
+after \funref{change-class} is invoked is \funref{eql} to the
+value returned by \funref{slot-value} before \funref{change-class} is
+invoked.  Similarly, if the \term{slot} was unbound, it remains
+unbound.  The other \term{slots} are initialized as described in 
+\secref\ChangingInstanceClass.
+ 
+After completing all other actions, \funref{change-class} invokes
+\funref{update-instance-for-different-class}.  The
+generic function \funref{update-instance-for-different-class} can be used
+to assign values to slots in the transformed instance.
+\issue{CHANGE-CLASS-INITARGS:PERMIT}
+\Seesection\InitNewLocalSlots.
+\endissue{CHANGE-CLASS-INITARGS:PERMIT}
+ 
+\issue{CHANGE-CLASS-INITARGS:PERMIT}
+If the second of the above \term{methods} is selected, 
+that \term{method} invokes \funref{change-class} 
+on \param{instance}, \f{(find-class \param{new-class})},
+and the \param{initargs}.
+\endissue{CHANGE-CLASS-INITARGS:PERMIT}
+ 
+\label Examples::
+ 
+\code
+ 
+ (defclass position () ())
+  
+ (defclass x-y-position (position)
+     ((x :initform 0 :initarg :x)
+      (y :initform 0 :initarg :y)))
+  
+ (defclass rho-theta-position (position)
+     ((rho :initform 0)
+      (theta :initform 0)))
+  
+ (defmethod update-instance-for-different-class :before ((old x-y-position) 
+                                                         (new rho-theta-position)
+                                                         &key)
+   ;; Copy the position information from old to new to make new
+   ;; be a rho-theta-position at the same position as old.
+   (let ((x (slot-value old 'x))
+         (y (slot-value old 'y)))
+     (setf (slot-value new 'rho) (sqrt (+ (* x x) (* y y)))
+           (slot-value new 'theta) (atan y x))))
+  
+;;; At this point an instance of the class x-y-position can be
+;;; changed to be an instance of the class rho-theta-position using
+;;; change-class:
+ 
+ (setq p1 (make-instance 'x-y-position :x 2 :y 0))
+  
+ (change-class p1 'rho-theta-position)
+  
+;;; The result is that the instance bound to p1 is now an instance of
+;;; the class rho-theta-position.   The update-instance-for-different-class
+;;; method performed the initialization of the rho and theta slots based
+;;; on the value of the x and y slots, which were maintained by
+;;; the old instance.
+ 
+\endcode
+ 
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+ 
+\funref{update-instance-for-different-class},
+{\secref\ChangingInstanceClass}
+ 
+\label Notes::
+ 
+The generic function \funref{change-class} has several semantic
+difficulties.  First, it performs a destructive operation that can be
+invoked within a \term{method} on an \term{instance} that was used to select that
+\term{method}. 
+When multiple \term{methods} are involved because \term{methods} are being
+combined, the \term{methods} currently executing or about to be executed may
+no longer be applicable.  Second, some implementations might use
+compiler optimizations of slot \term{access}, and when the \term{class} of an
+\term{instance} is changed the assumptions the compiler made might be
+violated.  This implies that a programmer must not use
+\funref{change-class} inside a \term{method} if any 
+\term{methods} for that \term{generic function}
+\term{access} any \term{slots}, or the results are undefined.
+ 
+\endcom
+
+%%% ========== SLOT-BOUNDP
+\begincom{slot-boundp}\ftype{Function}
+ 
+%!!! Barmar: 88-002R says this is generic.  I should check on this. -kmp 27-Aug-91
+
+\label Syntax::
+ 
+\DefunWithValues slot-boundp {instance slot-name} {generalized-boolean}
+ 
+\label Arguments and Values::
+               
+\param{instance}---an \term{object}.
+                                 
+\param{slot-name}---a \term{symbol} naming a \term{slot} of \param{instance}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+ 
+Returns \term{true} if the \term{slot} named \param{slot-name} in \param{instance} is bound;
+otherwise, returns \term{false}.
+
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+
+If no \term{slot} of the \term{name} \param{slot-name} exists in the 
+\param{instance}, \funref{slot-missing} is called as follows:
+
+\code
+ (slot-missing (class-of \i{instance})
+               \i{instance}
+               \i{slot-name}
+               'slot-boundp)
+\endcode
+
+\issue{SLOT-MISSING-VALUES:SPECIFY}
+(If \funref{slot-missing} is invoked and returns a value,
+a \term{boolean equivalent} to its \term{primary value} 
+is returned by \funref{slot-boundp}.)
+\endissue{SLOT-MISSING-VALUES:SPECIFY}
+
+\issue{SLOT-VALUE-METACLASSES:LESS-MINIMAL}
+The specific behavior depends on \param{instance}'s \term{metaclass}.
+An error is never signaled if \param{instance} has \term{metaclass} \typeref{standard-class}.
+An error is always signaled if \param{instance} has \term{metaclass} \typeref{built-in-class}.
+The consequences are undefined if \param{instance} has any other \term{metaclass}--an error
+might or might not be signaled in this situation.  Note in particular that the behavior
+for \term{conditions} and \term{structures} is not specified.
+\endissue{SLOT-VALUE-METACLASSES:LESS-MINIMAL}
+ 
+\label See Also::
+ 
+\funref{slot-makunbound},
+\funref{slot-missing}
+ 
+\label Notes::
+            
+\Thefunction{slot-boundp} allows for writing 
+\term{after methods} on \funref{initialize-instance} in order to initialize only
+those \term{slots} that have not already been bound.
+ 
+\MentionMetaObjects{slot-boundp}{slot-boundp-using-class}
+
+\endcom
+
+%%% ========== SLOT-EXISTS-P
+\begincom{slot-exists-p}\ftype{Function}
+
+%!!! Barmar: 88-002R says this is generic.  I should check on this. -kmp 27-Aug-91
+
+\label Syntax::
+ 
+\DefunWithValues {slot-exists-p} {object slot-name} {generalized-boolean}
+
+\label Arguments and Values::
+ 
+\issue{SLOT-VALUE-METACLASSES:LESS-MINIMAL}
+\param{object}---an \term{object}.
+\endissue{SLOT-VALUE-METACLASSES:LESS-MINIMAL}
+ 
+\param{slot-name}---a \term{symbol}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+ 
+\label Description::
+ 
+% \Thefunction{slot-exists-p} tests whether the \param{object} has
+% a \term{slot} of the given \term{name}.
+ 
+Returns \term{true} if the \param{object} has
+a \term{slot} named \param{slot-name}.
+
+\label Examples:\None.
+
+\label Affected By::
+
+\macref{defclass},
+\macref{defstruct}
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+ 
+\macref{defclass},
+\funref{slot-missing}
+
+\label Notes::
+ 
+\MentionMetaObjects{slot-exists-p}{slot-exists-p-using-class}
+ 
+\endcom
+
+%%% ========== SLOT-MAKUNBOUND
+\begincom{slot-makunbound}\ftype{Function}
+
+%!!! Barmar: 88-002R says this is generic.  I should check on this. -kmp 27-Aug-91
+
+\label Syntax::
+ 
+\DefunWithValues {slot-makunbound} {instance slot-name} {instance}
+ 
+\label Arguments and Values::
+ 
+\param{instance} -- instance.
+ 
+\param{Slot-name}---a \term{symbol}.
+ 
+\label Description::
+ 
+\Thefunction{slot-makunbound} restores a \term{slot} 
+of the name \param{slot-name} in an \param{instance} to
+the unbound state.
+
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+
+If no \term{slot} of the name \param{slot-name} exists in the 
+\param{instance}, \funref{slot-missing} is called as follows:
+
+\code
+(slot-missing (class-of \i{instance})
+              \i{instance}
+              \i{slot-name}
+              'slot-makunbound)
+\endcode
+
+\issue{SLOT-MISSING-VALUES:SPECIFY}
+(Any values returned by \funref{slot-missing} in this case are
+ignored by \funref{slot-makunbound}.)
+\endissue{SLOT-MISSING-VALUES:SPECIFY}
+ 
+\issue{SLOT-VALUE-METACLASSES:LESS-MINIMAL}
+The specific behavior depends on \param{instance}'s \term{metaclass}.
+An error is never signaled if \param{instance} has \term{metaclass} \typeref{standard-class}.
+An error is always signaled if \param{instance} has \term{metaclass} \typeref{built-in-class}.
+The consequences are undefined if \param{instance} has any other \term{metaclass}--an error
+might or might not be signaled in this situation.  Note in particular that the behavior
+for \term{conditions} and \term{structures} is not specified.
+\endissue{SLOT-VALUE-METACLASSES:LESS-MINIMAL}
+ 
+\label See Also::
+ 
+\funref{slot-boundp},
+\funref{slot-missing}
+ 
+\label Notes::
+ 
+\MentionMetaObjects{slot-makunbound}{slot-makunbound-using-class}
+ 
+\endcom
+
+%%% ========== SLOT-MISSING
+\begincom{slot-missing}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\DefgenWithValues slot-missing
+		  {class object slot-name operation {\opt} new-value}
+		  {\starparam{result}}
+ 
+\label Method Signatures::
+ 
+\Defmeth slot-missing {\vtop{\hbox{\specparam{class}{t}
+				   object slot-name}
+			     \hbox{operation {\opt} new-value}}}
+ 
+\label Arguments and Values::
+ 
+\param{class}---the \term{class} of \param{object}.
+ 
+\param{object}---an \term{object}.
+ 
+\param{slot-name}---a \term{symbol} (the \term{name} of a would-be \term{slot}).
+ 
+\param{operation}---one of the \term{symbols}
+		    \funref{setf},
+		    \funref{slot-boundp},
+		    \funref{slot-makunbound},
+		 or \funref{slot-value}.
+ 
+\param{new-value}---an \term{object}.
+ 
+\param{result}---an \term{object}.
+
+\label Description::
+ 
+The generic function \funref{slot-missing} is invoked when an attempt is
+made to \term{access} a \term{slot} in an \param{object} whose 
+\term{metaclass} is \typeref{standard-class}
+and the \term{slot} of the name \param{slot-name}
+is not a \term{name} of a
+\term{slot} in that \term{class}. 
+The default \term{method} signals an error.
+ 
+The generic function \funref{slot-missing} is not intended to be called by
+programmers.  Programmers may write \term{methods} for it.
+ 
+The generic function \funref{slot-missing} may be called during
+evaluation of \funref{slot-value}, \f{(setf slot-value)}, 
+\funref{slot-boundp}, and \funref{slot-makunbound}.  For each
+of these operations the corresponding \term{symbol} 
+for the \param{operation}
+argument is \misc{slot-value}, \misc{setf}, \misc{slot-boundp},
+and \misc{slot-makunbound} respectively.
+ 
+The optional \param{new-value} argument to \funref{slot-missing} is used
+when the operation is attempting to set the value of the \term{slot}.
+ 
+\issue{SLOT-MISSING-VALUES:SPECIFY}
+If \funref{slot-missing} returns, its values will be treated as follows:
+
+\beginlist
+\item{\bull}
+If the \param{operation} is \misc{setf} or \misc{slot-makunbound},
+any \term{values} will be ignored by the caller.
+
+\item{\bull}
+If the \param{operation} is \misc{slot-value},
+only the \term{primary value} will be used by the caller,
+and all other values will be ignored.
+
+\item{\bull}
+If the \param{operation} is \misc{slot-boundp},
+any \term{boolean equivalent} of the \term{primary value}
+of the \term{method} might be is used,
+and all other values will be ignored.
+\endlist
+\endissue{SLOT-MISSING-VALUES:SPECIFY}
+
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+
+The default \term{method} on \funref{slot-missing} 
+signals an error \oftype{error}.
+ 
+\label See Also::
+ 
+\macref{defclass},
+\funref{slot-exists-p},
+\funref{slot-value}
+
+\label Notes::
+ 
+The set of arguments (including the \term{class} of the instance) facilitates
+defining methods on the metaclass for \funref{slot-missing}.
+
+\endcom
+
+%%% ========== SLOT-UNBOUND
+\begincom{slot-unbound}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+                                
+\DefgenWithValues {slot-unbound} {class instance slot-name} {\starparam{result}}
+ 
+\label Method Signatures::
+ 
+\Defmeth slot-unbound {\specparam{class}{t}
+		       instance slot-name}
+ 
+\label Arguments and Values::
+ 
+\param{class}---the \term{class} of the \param{instance}.
+ 
+\param{instance}---the \param{instance} in which an attempt
+		   was made to \term{read} the \term{unbound} \term{slot}.
+ 
+\param{slot-name}---the \term{name} of the \term{unbound} \term{slot}.
+ 
+\param{result}---an \term{object}.
+
+\label Description::
+ 
+The generic function \funref{slot-unbound} is called when an
+unbound \term{slot} is read in
+an \param{instance} whose metaclass is \typeref{standard-class}.
+The default \term{method} signals an error 
+\issue{UNDEFINED-VARIABLES-AND-FUNCTIONS:COMPROMISE} 
+\oftype{unbound-slot}.
+The name slot of the 
+\typeref{unbound-slot} \term{condition} is initialized
+  to the name of the offending variable, and the instance slot
+  of the \typeref{unbound-slot} \term{condition} is initialized to the offending instance.
+\endissue{UNDEFINED-VARIABLES-AND-FUNCTIONS:COMPROMISE} 
+
+ 
+The generic function \funref{slot-unbound} is not intended to be called
+by programmers.  Programmers may write \term{methods} for it.
+\Thefunction{slot-unbound} is called only 
+%%Looks like metaobjects to me. -kmp 15-Jan-91
+%by \thefunction{slot-value-using-class} and thus 
+indirectly by \funref{slot-value}.
+ 
+\issue{SLOT-MISSING-VALUES:SPECIFY}
+%% Per X3J13. -kmp 05-Oct-93
+% If \funref{slot-unbound} returns, its values will be treated as follows:
+% 
+% \beginlist
+% \item{\bull}
+% If the \param{operation} is \misc{setf} or \misc{slot-makunbound},
+% any \term{values} will be ignored by the caller.
+% 
+% \item{\bull}
+% If the \param{operation} is \misc{slot-value},
+% only the \term{primary value} will be used by the caller,
+% and all other values will be ignored.
+% 
+% \item{\bull}
+% If the \param{operation} is \misc{slot-boundp},
+% any \term{boolean equivalent} of the \term{primary value}
+% of the \term{method} might be is used,
+% and all other values will be ignored.
+% \endlist
+If \funref{slot-unbound} returns, 
+only the \term{primary value} will be used by the caller,
+and all other values will be ignored.
+\endissue{SLOT-MISSING-VALUES:SPECIFY}
+
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+\issue{UNDEFINED-VARIABLES-AND-FUNCTIONS:COMPROMISE} 
+The default \term{method} on \funref{slot-unbound}
+signals an error \oftype{unbound-slot}.
+\endissue{UNDEFINED-VARIABLES-AND-FUNCTIONS:COMPROMISE} 
+ 
+\label See Also::
+ 
+\funref{slot-makunbound}
+ 
+\label Notes::
+                                                                               
+An unbound \term{slot} may occur if no \kwd{initform} form was
+specified for the \term{slot} and the \term{slot} value has not been set,
+or if \funref{slot-makunbound} has been called on the \term{slot}.
+ 
+\endcom
+
+%%% ========== SLOT-VALUE
+\begincom{slot-value}\ftype{Function}
+ 
+\label Syntax::
+ 
+\DefunWithValues {slot-value} {object slot-name} {value}
+ 
+\label Arguments and Values::
+ 
+\param{object}---an \term{object}.
+ 
+\param{name}---a \term{symbol}.
+ 
+\param{value}---an \term{object}.
+ 
+\label Description::
+ 
+\Thefunction{slot-value} returns the \term{value} of the \term{slot}
+named \param{slot-name} in the \param{object}.
+If there is no \term{slot} named \param{slot-name}, \funref{slot-missing} is called.
+If the \term{slot} is unbound, \funref{slot-unbound} is called.
+ 
+%!!! Reflect this in the Syntax above? Or is (SETF SLOT-VALUE) described somewhere?
+The macro \macref{setf} can be used with \funref{slot-value} 
+to change the value of a \term{slot}. 
+
+\label Examples::
+ 
+\code
+ (defclass foo () 
+   ((a :accessor foo-a :initarg :a :initform 1)
+    (b :accessor foo-b :initarg :b)
+    (c :accessor foo-c :initform 3)))
+\EV #<STANDARD-CLASS FOO 244020371>
+ (setq foo1 (make-instance 'foo :a 'one :b 'two))
+\EV #<FOO 36325624>
+ (slot-value foo1 'a) \EV ONE
+ (slot-value foo1 'b) \EV TWO
+ (slot-value foo1 'c) \EV 3
+ (setf (slot-value foo1 'a) 'uno) \EV UNO
+ (slot-value foo1 'a) \EV UNO
+ (defmethod foo-method ((x foo))
+   (slot-value x 'a))
+\EV #<STANDARD-METHOD FOO-METHOD (FOO) 42720573>
+ (foo-method foo1) \EV UNO
+\endcode
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+ 
+If an attempt is made to read a \term{slot} and no \term{slot} of
+the name \param{slot-name} exists in the \param{object}, 
+\funref{slot-missing} is called as follows:
+
+\code
+ (slot-missing (class-of \i{instance})
+               \i{instance}
+               \i{slot-name}
+               'slot-value)
+\endcode
+ 
+\issue{SLOT-MISSING-VALUES:SPECIFY}
+(If \funref{slot-missing} is invoked, its \term{primary value} 
+ is returned by \funref{slot-value}.)
+\endissue{SLOT-MISSING-VALUES:SPECIFY}
+
+If an attempt is made to write a \term{slot} and no \term{slot} of
+the name \param{slot-name} exists in the \param{object},
+\funref{slot-missing} is called as follows:
+
+\code
+ (slot-missing (class-of \i{instance})
+               \i{instance}
+               \i{slot-name}
+               'setf
+               \i{new-value})
+\endcode
+
+\issue{SLOT-MISSING-VALUES:SPECIFY}
+(If \funref{slot-missing} returns in this case, any \term{values} are ignored.)
+\endissue{SLOT-MISSING-VALUES:SPECIFY}
+
+\issue{SLOT-VALUE-METACLASSES:LESS-MINIMAL}
+The specific behavior depends on \param{object}'s \term{metaclass}.
+An error is never signaled if \param{object} has \term{metaclass} \typeref{standard-class}.
+An error is always signaled if \param{object} has \term{metaclass} \typeref{built-in-class}.
+The consequences are 
+%% Per X3J13. -kmp 05-Oct-93
+%undefined
+unspecified
+if \param{object} has any other \term{metaclass}--an error
+might or might not be signaled in this situation.  Note in particular that the behavior
+for \term{conditions} and \term{structures} is not specified.
+\endissue{SLOT-VALUE-METACLASSES:LESS-MINIMAL}
+
+\label See Also::
+ 
+\funref{slot-missing},
+\funref{slot-unbound},
+\macref{with-slots}
+ 
+\label Notes::
+ 
+\MentionMetaObjects{slot-value}{slot-value-using-class}
+ 
+Implementations may optimize \funref{slot-value} by compiling it inline.
+ 
+\endcom
+
+%%% ========== METHOD-QUALIFIERS
+\begincom{method-qualifiers}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\DefgenWithValues method-qualifiers {method} {qualifiers}
+ 
+\label Method Signatures::
+ 
+\Defmeth method-qualifiers {\specparam{method}{standard-method}}
+ 
+\label Arguments and Values::
+ 
+\param{method}---a \term{method}.
+ 
+\param{qualifiers}---a \term{proper list}.
+ 
+\label Description::
+ 
+Returns a \term{list} of the \term{qualifiers} of the \param{method}.
+ 
+\label Examples::
+ 
+\code
+ (defmethod some-gf :before ((a integer)) a)
+\EV #<STANDARD-METHOD SOME-GF (:BEFORE) (INTEGER) 42736540>
+ (method-qualifiers *) \EV (:BEFORE)
+\endcode
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also:: 
+ 
+\macref{define-method-combination}
+ 
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== NO-APPLICABLE-METHOD
+\begincom{no-applicable-method}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\DefgenWithValues no-applicable-method 
+		  {generic-function {\rest} function-arguments}
+		  {\starparam{result}}
+ 
+\label Method Signatures::
+ 
+\Defmeth no-applicable-method {\vtop{\hbox{\specparam{generic-function}{t}}
+				     \hbox{{\rest} function-arguments}}}
+ 
+\label Arguments and Values::
+ 
+%!!! But the signature above says T, not STANDARD-GENERIC-FUNCTION ...? -kmp 9-May-91
+\param{generic-function}---a \term{generic function} 
+%% Per X3J13. -kmp 05-Oct-93
+%			   of the class \typeref{standard-generic-function}
+			   on which no \term{applicable method} was found.  
+ 
+\param{function-arguments}---\term{arguments} to the \param{generic-function}.
+ 
+\param{result}---an \term{object}.
+
+\label Description::
+ 
+The generic function \funref{no-applicable-method} is called when a
+\term{generic function} 
+%% Per X3J13. -kmp 05-Oct-93
+%of \theclass{standard-generic-function} 
+is invoked
+and no \term{method} on that \term{generic function} is applicable.
+% "default \term{method}" => "\term{default method}" per X3J13. -kmp 05-Oct-93
+The \term{default method} signals an error.
+ 
+The generic function \funref{no-applicable-method} is not intended
+to be called by programmers.  Programmers may write \term{methods} for it.
+ 
+\label Examples:\None.
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+
+The default \term{method} signals an error \oftype{error}.
+ 
+\label See Also::
+ 
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== NO-NEXT-METHOD
+\begincom{no-next-method}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\DefgenWithValues no-next-method
+		  {generic-function method {\rest} args}
+		  {\starparam{result}}
+ 
+\label Method Signatures::
+ 
+\Defmeth no-next-method {\vtop{\hbox{\specparam{generic-function}{standard-generic-function}}
+			       \hbox{\specparam{method}{standard-method}}
+			       \hbox{{\rest} args}}}
+ 
+\label Arguments and Values::
+ 
+\param{generic-function} -- \term{generic function} to which \param{method} belongs.
+ 
+\param{method} -- \term{method} that contained the call to
+		  \funref{call-next-method} for which there is no next \term{method}.
+ 
+\param{args} -- arguments to \funref{call-next-method}.
+ 
+\param{result}---an \term{object}.
+
+\label Description::
+ 
+\TheGF{no-next-method} is called by \funref{call-next-method} 
+when there is no \term{next method}.
+ 
+\TheGF{no-next-method} is not intended to be called by programmers.
+Programmers may write \term{methods} for it.
+ 
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+
+The system-supplied \term{method} on \funref{no-next-method} 
+signals an error \oftype{error}. \editornote{KMP: perhaps control-error??}
+ 
+\label See Also::
+ 
+\funref{call-next-method}
+ 
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== REMOVE-METHOD
+\begincom{remove-method}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\DefgenWithValues remove-method {generic-function method} {generic-function}
+ 
+\label Method Signatures::
+ 
+\Defmeth remove-method {\vtop{\hbox{\specparam{generic-function}{standard-generic-function}}
+			      \hbox{method}}}
+ 
+\label Arguments and Values::
+ 
+\param{generic-function}---a \term{generic function}.
+ 
+\param{method}---a \term{method}.
+
+\label Description::
+ 
+\TheGF{remove-method} removes a \term{method} from \param{generic-function}
+by modifying the \param{generic-function} (if necessary).
+ 
+\funref{remove-method} must not signal an error if the \term{method} 
+is not one of the \term{methods} on the \param{generic-function}.
+ 
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+ 
+\funref{find-method}
+ 
+\label Notes:\None.
+ 
+\endcom
+
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+% %%% ========== GENERIC-FLET
+% %%% ========== GENERIC-LABELS
+% 
+% \begincom{generic-flet, generic-labels}\ftype{Special Operator}
+%  
+% \label Syntax::
+%  
+% \DefspecWithValuesNewline generic-flet
+%        {\vtop{\hbox{\paren{\starparen{function-name 
+% 			   	      lambda-list
+%                                       \interleave{\down{option} |
+%                                                   \stardown{method-description}}}}}
+%               \hbox{\starparam{form}}}}
+%        {\starparam{result}}
+% 
+% \DefspecWithValuesNewline generic-labels
+%        {\vtop{\hbox{\paren{\starparen{function-name 
+% 			   	      lambda-list
+%                                       \interleave{\down{option} |
+%                                                   \stardown{method-description}}}}}
+%               \hbox{\starparam{form}}}}
+%        {\starparam{result}}
+% 
+% {\GFauxOptionsAndMethDesc}
+%  
+% \label Arguments and Values::
+%  
+% \editornote{KMP: Treatment of documentation?}%!!!
+% 
+% \param{function-name}, \param{lambda-list}, \param{option}, \param{method-qualifier},
+% \param{specialized-lambda-list}---the same as for \macref{defgeneric}.
+% 
+% \param{method-definition}---the same as for \macref{defmethod}.
+%  
+% \param{forms}---an \term{implicit progn}.
+% 
+% \param{results}---the \term{values} returned by the \param{forms}.
+%  
+% \label Description::
+%  
+% \Thespecop{generic-flet} is analogous to \thespecop{flet}, and
+% \thespecop{generic-labels} is analogous to \thespecop{labels}.
+% 
+% The \term{forms} are \term{evaluated} in a \term{lexical environment}
+% in which \term{function} \term{bindings} for the \param{function-names} have
+% been \term{established}.
+% The \term{value} of each \term{binding} is a \term{fresh} \term{generic function},
+% with \term{methods} as specified by the corresponding \param{method-description}.
+% The \term{bindings} of the \term{function-names} have \term{lexical scope}, 
+% and the \term{generic functions} (and their \term{methods}) have \term{indefinite extent}.
+% 
+% For \specref{generic-flet},
+% the \term{scope} of the \term{bindings} for the \param{function-names}
+% includes only the \param{forms},
+% not the bodies of the local definitions of the \term{methods}.
+% Within the method bodies, references to any of the \param{function-names}
+% refer to global \term{functions} with coincidentally similar names,
+% not to the \term{generic functions} established for use by the \param{forms}.
+% It is thus not possible to define recursive \term{functions} 
+% with \specref{generic-flet}.
+%  
+% For \specref{generic-labels},
+% the \term{scope} of the \term{bindings} for the \param{function-names}
+% includes the entire \specref{generic-labels} \term{form},
+% including not only the \param{forms}, 
+% but also the bodies of the local definitions of the \term{methods}.
+% It is thus possible to define recursive \term{functions} 
+% with \specref{generic-labels}.
+% 
+% The body of each \term{method} is enclosed in an \term{implicit block}.  
+% If \param{function-name} is a \term{symbol}, 
+% the \term{implicit block} has that \term{name}.
+% If \param{function-name} is a \term{list} of the form \f{(setf \param{sym})},
+% the \term{name} of the \term{implicit block} is \param{sym}.
+%  
+% \label Examples:\None.
+% 
+% \label Affected By:\None.
+%  
+% \label Exceptional Situations:\None.
+%  
+% \label See Also::
+% 
+% \specref{flet}, 
+% \specref{labels}, 
+% \macref{defmethod},
+% \macref{defgeneric},
+% \macref{generic-function}
+%  
+% \label Notes:\None.
+%  
+% \endcom
+% 
+% 
+% %%% ========== GENERIC-FUNCTION
+% \begincom{generic-function}\ftype{Macro}
+%  
+% \label Syntax::
+%  
+% \DefmacWithValues generic-function
+% 		  {lambda-list \interleave{\down{option} | \starparam{method-description}}}
+% 		  {generic-function}
+% 
+% {\GFauxOptionsAndMethDesc}
+% 
+% \label Arguments and Values::
+%  
+% \editornote{KMP: Treatment of documentation?}%!!!
+% 
+% \param{Option}, \param{method-qualifier}, 
+% and \param{specialized-lambda-list} are the same as for
+% \macref{defgeneric}.
+%  
+% \param{generic-function}---a \term{generic function} \term{object}.
+%  
+% \label Description::
+%  
+% Creates an \term{anonymous} \term{generic function} with the
+% set of \term{methods} specified by its \param{method-descriptions}.
+%  
+% %%I don't think this is really needed. -kmp 15-Jan-91
+% % If no \param{method-descriptions} are supplied,
+% % an \term{anonymous} \term{generic function} with no \term{methods} is created.
+%  
+% \label Examples:\None.
+% 
+% \label Affected By:\None.
+%  
+% \label Exceptional Situations:\None.
+%  
+% \label See Also::
+%  
+% \macref{defgeneric},
+% \specref{generic-flet},
+% \specref{generic-labels},
+% \macref{defmethod}
+%  
+% \label Notes:\None.
+%  
+% \endcom
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+
+%%% ========== MAKE-INSTANCE
+\begincom{make-instance}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\issue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+\DefgenWithValues make-instance
+		  {class {\rest} initargs {\key} {\allowotherkeys}}
+		  {instance}
+\endissue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+ 
+\label Method Signatures::
+ 
+\Defmeth make-instance {\specparam{class}{standard-class} {\rest} initargs}
+ 
+\Defmeth make-instance {\specparam{class}{symbol} {\rest} initargs}
+
+\label Arguments and Values::
+ 
+%!!! I'd rather this were called class-name. -kmp 15-Jan-91
+%!!! Or maybe class designator? -kmp 18-Feb-91
+\param{class}---a \term{class},
+	     or a \term{symbol} that names a \term{class}.
+ 
+\param{initargs}---an \term{initialization argument list}.
+ 
+\param{instance}---a \term{fresh} \term{instance} of \term{class} \param{class}.
+ 
+\label Description::
+ 
+The \term{generic function} \funref{make-instance} 
+creates and returns a new \term{instance} of the given \param{class}.
+ 
+If the second of the above \term{methods} is selected, 
+that \term{method} invokes \funref{make-instance} on the arguments
+\f{(find-class \param{class})} and \param{initargs}.
+ 
+The initialization arguments are checked within \funref{make-instance}.
+ 
+The \term{generic function} \funref{make-instance} 
+may be used as described in \secref\ObjectCreationAndInit.
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+ 
+If any of the initialization arguments has not
+been declared as valid, an error \oftype{error} is signaled.
+ 
+\label See Also::
+ 
+\macref{defclass},
+\funref{class-of},
+\funref{allocate-instance},
+\funref{initialize-instance},
+{\secref\ObjectCreationAndInit}
+ 
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.
+ 
+%The meta-object protocol can be used to define new methods on
+%\funref{make-instance} to replace the object-creation protocol.
+ 
+\endcom
+
+%%% ========== MAKE-INSTANCES-OBSOLETE
+\begincom{make-instances-obsolete}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\DefgenWithValues make-instances-obsolete {class} {class}
+ 
+\label Method Signatures::
+ 
+\Defmeth make-instances-obsolete {\specparam{class}{standard-class}}
+ 
+\Defmeth make-instances-obsolete {\specparam{class}{symbol}}
+ 
+\label Arguments and Values::
+ 
+\param{class}---a \term{class designator}.
+ 
+\label Description::
+ 
+\Thefunction{make-instances-obsolete} has the effect of
+initiating the process of updating the instances of the
+\term{class}. During updating, the generic function
+\funref{update-instance-for-redefined-class} will be invoked.
+ 
+The generic function \funref{make-instances-obsolete} is invoked
+automatically by the system when \macref{defclass} has been used to
+redefine an existing standard class and the set of local 
+\term{slots} \term{accessible} in an
+instance is changed or the order of \term{slots} in storage is changed.  It
+can also be explicitly invoked by the user.
+ 
+If the second of the above \term{methods} is selected, that 
+\term{method} invokes
+\funref{make-instances-obsolete} on \f{(find-class \param{class})}.
+ 
+\label Examples::
+ 
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+ 
+\funref{update-instance-for-redefined-class},
+{\secref\ClassReDef}
+ 
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== MAKE-LOAD-FORM
+\begincom{make-load-form}\ftype{Standard Generic Function}
+\issue{MAKE-LOAD-FORM-CONFUSION:REWRITE}
+\issue{LOAD-OBJECTS:MAKE-LOAD-FORM}
+ 
+\label Syntax::
+ 
+\DefgenWithValues {make-load-form}
+        	  {object {\opt} environment}
+        	  {creation-form\brac{, initialization-form}}
+ 
+\label Method Signatures::
+ 
+\Defmeth make-load-form {\specparam{object}{standard-object}  {\opt} environment}
+\Defmeth make-load-form {\specparam{object}{structure-object} {\opt} environment}
+\Defmeth make-load-form {\specparam{object}{condition}        {\opt} environment}
+\Defmeth make-load-form {\specparam{object}{class}            {\opt} environment}
+
+\label Arguments and Values::
+ 
+\param{object}---an \term{object}.
+ 
+% Barrett: Moved up from end, so arguments first, then values.
+\param{environment}---an \term{environment object}.
+
+\param{creation-form}---a \term{form}.
+
+\param{initialization-form}---a \term{form}.
+ 
+\label Description::
+          
+\TheGF{make-load-form} creates and returns 
+one or two \term{forms},
+     a \param{creation-form}
+ and an \param{initialization-form},
+that enable \funref{load} to construct an \term{object}
+equivalent to \param{object}.
+%% Added per item 1 of MAKE-LOAD-FORM-CONFUSION:
+\param{Environment} is an \term{environment object} 
+corresponding to the \term{lexical environment} 
+in which the \term{forms} will be processed.
+
+% %% Added with rewrites per item 1.1 of MAKE-LOAD-FORM-CONFUSION.
+% %% I had to do some minor fooling with the wording to make it read
+% %% better using `modern' terminology. -kmp 11-Feb-92
+% \funref{make-load-form} is called by the \term{file compiler} when
+% \param{object} is referenced as a \term{literal object}
+% in a \term{file} being compiled
+% %by \funref{compile-file}
+% if the \term{object} is a \term{generalized instance}
+% of \typeref{standard-object}, \typeref{structure-object},
+% \typeref{condition}, or any of a (possibly empty) \term{implementation-dependent}
+% %list
+% set of other \term{classes}.
+% The \term{file compiler} will only call \funref{make-load-form} once for the \term{same}
+% \term{object} within a single \term{file}.
+% Barrett: Commented out the above, instead referencing the appropriate
+%          section describing how the compiler performs constant processing.
+The \term{file compiler} calls \funref{make-load-form} to process certain
+\term{classes} of \term{literal objects}; \seesection\CallingMakeLoadForm.
+
+%% Added per item 1.2 of MAKE-LOAD-FORM-CONFUSION:
+\term{Conforming programs} may call \funref{make-load-form} directly,
+providing \param{object} is a \term{generalized instance} of
+% Barrett: Fix dangling reference, now that list has been moved.
+% one of the
+% explicitly named \term{classes} mentioned previously.
+\typeref{standard-object}, \typeref{structure-object}, 
+or \typeref{condition}.
+
+The creation form is a \term{form} that, when evaluated at
+\funref{load} time, should return an \term{object} that 
+is equivalent to \param{object}.  The exact meaning of
+equivalent depends on the \term{type} of \term{object} 
+and is up to the programmer who defines a \term{method} for
+\funref{make-load-form};
+\seesection\LiteralsInCompiledFiles.
+%This is the same type of equivalence discussed
+%  in issue CONSTANT-COMPILABLE-TYPES.
+ 
+The initialization form is a \term{form} that, when evaluated at \funref{load} time, 
+should perform further initialization of the \term{object}.  
+The value returned by the initialization form is ignored.
+% Barrett: Flush "method" -- its the value returned by the function that's
+%          being talked about.
+%If the \funref{make-load-form} method
+If \funref{make-load-form}
+returns only one value, 
+the initialization form is \nil, which has no effect.
+If \param{object} appears as a constant in the initialization form,
+at \funref{load} time it will be replaced by the equivalent \term{object} 
+constructed by the creation form;
+this is how the further initialization gains access to the \term{object}.
+ 
+% Both the creation and initialization forms can contain references to \term{objects} 
+% of user-defined \term{types} (defined precisely below).
+%% Rewritten per item 1.4 of MAKE-LOAD-FORM-CONFUSION:
+Both the \param{creation-form} and the \param{initialization-form} may contain references
+to any \term{externalizable object}.
+However, there must not be any circular dependencies in creation forms.
+An example of a circular dependency is when the creation form for the
+object \f{X} contains a reference to the object \f{Y},
+and the creation form for the object \f{Y} contains a reference to the object \f{X}.  
+%A simpler
+%  example would be when the creation form for the object X contains
+%  a reference to X itself.  
+Initialization forms are not subject to any restriction against circular dependencies, 
+which is the reason that initialization forms exist; 
+see the example of circular data structures below.
+ 
+%   The creation form for an \term{object} is always evaluated before the
+%   initialization form for that \term{object}.  
+% When either the creation form or
+%   the initialization form references other \term{objects} 
+% of user-defined \term{types}
+%   that have not been referenced earlier in the 
+% \funref{compile-file}, the
+%   compiler collects all of the creation and initialization forms.  Each
+%   initialization form is evaluated as soon as possible after its
+%   creation form, as determined by data flow.  If the initialization form
+%   for an \term{object} does not reference any other 
+% \term{objects} of user-defined
+%   \term{types} 
+% that have not been referenced earlier in the \funref{compile-file}, the
+%   initialization form is evaluated immediately after the creation form.
+%   If a creation or initialization form \f{F} references other 
+% \term{objects} of
+%   user-defined \term{types} that have not been referenced earlier in the
+%   \funref{compile-file}, 
+% the creation forms for those other \term{objects} are evaluated
+%   before \f{F}, and the initialization forms for those other 
+% \term{objects} are
+%   also evaluated before \f{F} whenever they do not depend on the 
+% \term{object}
+%   created or initialized by 
+% \f{F}.  Where the above rules do not uniquely
+%   determine an order of evaluation, which of the possible orders of
+%   evaluation is chosen is \term{implementation-dependent}.
+%   \idxtext{order of evaluation}\idxtext{evaluation order}
+%% Rewritten per item 1.5 of MAKE-LOAD-FORM-CONFUSION:
+
+The creation form for an \term{object} is always \term{evaluated} before the
+initialization form for that \term{object}.  When either the creation form or
+the initialization form references other \term{objects} that have not been
+referenced earlier in the \term{file} being \term{compiled}, the \term{compiler} ensures
+that all of the referenced \term{objects} have been created before \term{evaluating}
+the referencing \term{form}.  When the referenced \term{object} is of a \term{type} which
+%\funref{compile-file}
+the \term{file compiler} processes using \funref{make-load-form},
+this involves \term{evaluating}
+the creation form returned for it.  (This is the reason for the
+prohibition against circular references among creation forms).
+
+Each initialization form is \term{evaluated} as soon as possible after its
+associated creation form, as determined by data flow.  If the
+initialization form for an \term{object} does not reference any other \term{objects}
+not referenced earlier in the \term{file} and processed by 
+%\funref{compile-file} 
+the \term{file compiler}
+using
+\funref{make-load-form}, the initialization form is evaluated immediately after
+the creation form.  If a creation or initialization form $F$ does contain
+references to such \term{objects}, the creation forms for those other objects
+are evaluated before $F$, and the initialization forms for those other
+\term{objects} are also evaluated before $F$ whenever they do not depend on the
+\term{object} created or initialized by $F$.  Where these rules do not uniquely
+determine an order of \term{evaluation} between two creation/initialization
+forms, the order of \term{evaluation} is unspecified.
+ 
+  While these creation and initialization forms are being evaluated, the
+  \term{objects} are possibly in an uninitialized state, 
+analogous to the state
+  of an \term{object} 
+between the time it has been created by \funref{allocate-instance}
+  and it has been processed fully by 
+\funref{initialize-instance}.  Programmers
+  writing \term{methods} for 
+\funref{make-load-form} must take care in manipulating
+  \term{objects} not to depend on 
+\term{slots} that have not yet been initialized.
+ 
+  It is \term{implementation-dependent}
+whether \funref{load} calls \funref{eval} on the 
+\term{forms} or does some
+  other operation that has an equivalent effect.  For example, the
+  \term{forms} might be translated into different but equivalent 
+\term{forms} and
+  then evaluated, they might be compiled and the resulting functions
+  called by \funref{load}, 
+or they might be interpreted by a special-purpose
+function different from \funref{eval}.  
+All that is required is that the
+  effect be equivalent to evaluating the \term{forms}.
+
+% Barrett: Add method descriptions, per make-load-form-confusion.
+The \term{method} \term{specialized} on \typeref{class} returns a creation
+\term{form} using the \term{name} of the \term{class} if the \term{class} has
+a \term{proper name} in \param{environment}, signaling an error \oftype{error}
+if it does not have a \term{proper name}.  \term{Evaluation} of the creation
+\term{form} uses the \term{name} to find the \term{class} with that
+\term{name}, as if by \term{calling} \funref{find-class}.  If a \term{class}
+with that \term{name} has not been defined, then a \term{class} may be
+computed in an \term{implementation-defined} manner.  If a \term{class}
+cannot be returned as the result of \term{evaluating} the creation
+\term{form}, then an error \oftype{error} is signaled.
+
+%!!! Barrett: MAKE-LOAD-FORM-CONFUSION sayed "... may define additional
+%             \term{conforming methods} ...", but we never actually came up
+%             with a definition for that term.  That whole issue is not
+%             currently addressed by the standard, so I'm not going to try
+%             to fix it just here.
+Both \term{conforming implementations} and \term{conforming programs} may
+further \term{specialize} \funref{make-load-form}.
+ 
+\label Examples::
+
+\code
+ (defclass obj ()
+    ((x :initarg :x :reader obj-x)
+     (y :initarg :y :reader obj-y)
+     (dist :accessor obj-dist)))
+\EV #<STANDARD-CLASS OBJ 250020030>
+ (defmethod shared-initialize :after ((self obj) slot-names &rest keys)
+   (declare (ignore slot-names keys))
+   (unless (slot-boundp self 'dist)
+     (setf (obj-dist self)
+           (sqrt (+ (expt (obj-x self) 2) (expt (obj-y self) 2))))))
+\EV #<STANDARD-METHOD SHARED-INITIALIZE (:AFTER) (OBJ T) 26266714>
+ (defmethod make-load-form ((self obj) &optional environment)
+   (declare (ignore environment))
+   ;; Note that this definition only works because X and Y do not
+   ;; contain information which refers back to the object itself.
+   ;; For a more general solution to this problem, see revised example below.
+   `(make-instance ',(class-of self)
+                   :x ',(obj-x self) :y ',(obj-y self)))
+\EV #<STANDARD-METHOD MAKE-LOAD-FORM (OBJ) 26267532>
+ (setq obj1 (make-instance 'obj :x 3.0 :y 4.0)) \EV #<OBJ 26274136>
+ (obj-dist obj1) \EV 5.0
+ (make-load-form obj1) \EV (MAKE-INSTANCE 'OBJ :X '3.0 :Y '4.0)
+\endcode
+
+In the above example, an equivalent \term{instance} of \f{obj} is
+reconstructed by using the values of two of its \term{slots}.  
+The value of the third \term{slot} is derived from those two values.
+
+\medbreak
+Another way to write the \funref{make-load-form} \term{method}
+in that example is to use \funref{make-load-form-saving-slots}.
+The code it generates might yield a slightly different result 
+from the \funref{make-load-form} \term{method} shown above,
+but the operational effect will be the same.  For example:
+ 
+\smallbreak
+\code
+ ;; Redefine method defined above.
+ (defmethod make-load-form ((self obj) &optional environment)
+    (make-load-form-saving-slots self
+                                 :slot-names '(x y)
+                                 :environment environment))
+\EV #<STANDARD-METHOD MAKE-LOAD-FORM (OBJ) 42755655>
+ ;; Try MAKE-LOAD-FORM on object created above.
+ (make-load-form obj1)
+\EV (ALLOCATE-INSTANCE '#<STANDARD-CLASS OBJ 250020030>),
+    (PROGN
+      (SETF (SLOT-VALUE '#<OBJ 26274136> 'X) '3.0)
+      (SETF (SLOT-VALUE '#<OBJ 26274136> 'Y) '4.0)
+      (INITIALIZE-INSTANCE '#<OBJ 26274136>))
+\endcode
+
+\medbreak
+In the following example, \term{instances} of \f{my-frob} are ``interned'' 
+in some way.  An equivalent \term{instance} is reconstructed by using the 
+value of the name slot as a key for searching existing \term{objects}.
+In this case the programmer has chosen to create a new \term{object} 
+if no existing \term{object} is found; alternatively an error could 
+have been signaled in that case.
+
+\smallbreak
+\code
+ (defclass my-frob ()
+    ((name :initarg :name :reader my-name)))
+ (defmethod make-load-form ((self my-frob) &optional environment)
+   (declare (ignore environment))
+   `(find-my-frob ',(my-name self) :if-does-not-exist :create))
+\endcode
+
+\medbreak
+In the following example, the data structure to be dumped is circular, 
+because each parent has a list of its children and each child has a reference
+back to its parent.  If \funref{make-load-form} is called on one   
+\term{object} in such a structure,  the creation form creates an equivalent 
+\term{object} and fills in the children slot, which forces creation of equivalent
+\term{objects} for all of its children, grandchildren, etc.  At this point
+none of the parent \term{slots} have been filled in.  
+The initialization form fills in the parent \term{slot}, which forces creation 
+of an equivalent \term{object} for the parent if it was not already created.
+Thus the entire tree is recreated at \funref{load} time.  
+At compile time, \funref{make-load-form} is called once for each \term{object} 
+in the tree.  
+All of the creation forms are evaluated,
+in \term{implementation-dependent} order,
+and then all of the initialization forms are evaluated, 
+also in \term{implementation-dependent} order.
+ 
+\smallbreak
+\code
+ (defclass tree-with-parent () ((parent :accessor tree-parent)
+                                (children :initarg :children)))
+ (defmethod make-load-form ((x tree-with-parent) &optional environment)
+   (declare (ignore environment))
+   (values
+     ;; creation form
+     `(make-instance ',(class-of x) :children ',(slot-value x 'children))
+     ;; initialization form
+     `(setf (tree-parent ',x) ',(slot-value x 'parent))))
+\endcode
+
+\medbreak
+In the following example, the data structure to be dumped has no special
+properties and an equivalent structure can be reconstructed
+simply by reconstructing the \term{slots}' contents.
+ 
+\smallbreak
+\code
+ (defstruct my-struct a b c)
+ (defmethod make-load-form ((s my-struct) &optional environment)
+    (make-load-form-saving-slots s :environment environment))
+\endcode
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+
+% \funref{make-load-form} of an \term{object}
+% of \term{metaclass} \typeref{standard-class} or \typeref{structure-class}
+% for which no user-defined \term{method} is applicable
+% signals an error \oftype{error}.  
+% It is valid to implement this either by defining default
+% methods on \typeref{standard-object} and \typeref{structure-object}
+% that signal an error \oftype{error}
+% or by having no \term{applicable method} for those \term{classes}.
+%% Rewritten per item 1.3 of MAKE-LOAD-FORM-CONFUSION:
+The \term{methods} \term{specialized} on 
+     \typeref{standard-object},
+     \typeref{structure-object},
+ and \typeref{condition}
+all signal an error \oftype{error}.
+ 
+% Barrett: Add per make-load-form-confusion.
+It is \term{implementation-dependent} whether \term{calling}
+\funref{make-load-form} on a \term{generalized instance} of a
+\term{system class} signals an error or returns creation and
+initialization \term{forms}.
+
+\label See Also::
+
+\funref{compile-file}, 
+\funref{make-load-form-saving-slots},
+{\secref\CallingMakeLoadForm}
+{\secref\Evaluation},
+{\secref\Compilation}
+ 
+\label Notes::
+ 
+The \term{file compiler}
+%\funref{compile-file}
+calls \funref{make-load-form} in specific circumstances
+detailed in \secref\CallingMakeLoadForm.
+%% Removed per item 1.2 of MAKE-LOAD-FORM-CONFUSION:
+% It is valid for user programs to 
+% call \funref{make-load-form} in other circumstances, providing \param{object}'s
+% \term{metaclass} is neither \typeref{built-in-class} 
+% nor a \term{subclass} of \typeref{built-in-class}.
+
+% Barrett: Add per make-load-form-confusion.
+Some \term{implementations} may provide facilities for defining new
+\term{subclasses} of \term{classes} which are specified as
+\term{system classes}.  (Some likely candidates include
+\typeref{generic-function}, \typeref{method}, and \typeref{stream}).  Such
+\term{implementations} should document how the \term{file compiler} processes
+\term{instances} of such \term{classes} when encountered as
+\term{literal objects}, and should document any relevant \term{methods}
+for \funref{make-load-form}.
+
+\endissue{LOAD-OBJECTS:MAKE-LOAD-FORM}
+\endissue{MAKE-LOAD-FORM-CONFUSION:REWRITE}
+\endcom
+
+%%% ========== MAKE-LOAD-FORM-SAVING-SLOTS
+\begincom{make-load-form-saving-slots}\ftype{Function}
+
+\issue{MAKE-LOAD-FORM-CONFUSION:REWRITE}
+% Barrett: Issue reference for LOAD-OBJECTS was missing.
+\issue{LOAD-OBJECTS:MAKE-LOAD-FORM}
+
+\label Syntax::
+
+\DefunWithValuesNewline make-load-form-saving-slots 
+        	        {object {\key} slot-names environment}
+        	        {creation-form, initialization-form}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{slot-names}---a \term{list}.
+
+\param{environment}---an \term{environment object}.
+
+\param{creation-form}---a \term{form}.
+
+\param{initialization-form}---a \term{form}.
+
+\label Description::
+
+\issue{MAKE-LOAD-FORM-SAVING-SLOTS:NO-INITFORMS}
+% Returns \term{forms} that, when \term{evaluated}, will construct an
+% \term{object} equivalent to \param{object} using \funref{make-instance}
+% and \macref{setf} of \funref{slot-value} for \term{slots} with values, 
+% or \funref{slot-makunbound} for \term{slots} without values, 
+% or using other \term{functions} of equivalent effect.
+% \funref{make-load-form-saving-slots} works for any \term{object}
+% of \term{metaclass} \typeref{standard-class} or \typeref{structure-class}.  
+Returns \term{forms} that, when \term{evaluated}, will construct an
+\term{object} equivalent to \param{object}, without \term{executing}
+\term{initialization forms}.  The \term{slots} in the new \term{object}
+that correspond to initialized \term{slots} in \param{object} are
+initialized using the values from \param{object}.  Uninitialized \term{slots}
+in \param{object} are not initialized in the new \term{object}.
+\funref{make-load-form-saving-slots} works for any \term{instance} of
+\typeref{standard-object} or \typeref{structure-object}.
+\endissue{MAKE-LOAD-FORM-SAVING-SLOTS:NO-INITFORMS}
+
+%Barmar: What does it return if object is a structure?
+%  MAKE-INSTANCE can't be used on structure classes, can it?
+%KMP: I think that's what "functions of equivalent effect" is supposed to answer.
+
+\param{Slot-names} is a \term{list} of the names of the 
+\term{slots} to preserve. If \param{slot-names} is not
+supplied, its value is all of the \term{local slots}.  
+
+\funref{make-load-form-saving-slots} returns two values,
+thus it can deal with circular structures.
+Whether the result is useful in an application depends on
+whether the \param{object}'s \term{type} and slot contents
+fully capture the application's idea of the \param{object}'s state.
+
+\param{Environment} is the environment in which the forms will be processed.
+
+\label Examples:\None.
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{make-load-form},
+\funref{make-instance},
+\macref{setf},
+\funref{slot-value},
+\funref{slot-makunbound}
+
+\label Notes::
+
+\funref{make-load-form-saving-slots} can be useful in user-written
+\funref{make-load-form} methods.
+
+% Barrett: Remember to put in end marker.
+\endissue{LOAD-OBJECTS:MAKE-LOAD-FORM}
+\endissue{MAKE-LOAD-FORM-CONFUSION:REWRITE}
+
+\issue{MAKE-LOAD-FORM-SAVING-SLOTS:NO-INITFORMS}
+When the \term{object} is an \term{instance} of \typeref{standard-object},
+\funref{make-load-form-saving-slots} could return a creation form that
+\term{calls} \funref{allocate-instance} and an initialization form that
+contains \term{calls} to \macref{setf} of \funref{slot-value} and
+\funref{slot-makunbound}, though other \term{functions} of similar effect
+might actually be used.
+\endissue{MAKE-LOAD-FORM-SAVING-SLOTS:NO-INITFORMS}
+
+\endcom
+
+
+
+%%% ========== WITH-ACCESSORS
+\begincom{with-accessors}\ftype{Macro}
+ 
+\issue{DECLS-AND-DOC}
+
+\label Syntax::  
+ 
+\DefmacWithValuesNewline with-accessors
+		  {{\paren{\starparam{slot-entry}}} 
+		   instance-form
+ 		   \starparam{declaration} \starparam{form}}
+		  {\starparam{result}}
+
+\auxbnf{slot-entry}{\paren{variable-name accessor-name}}
+ 
+\label Arguments and Values::
+ 
+\param{variable-name}---a \term{variable name}; \noeval.
+
+\param{accessor-name}---a \term{function name}; \noeval.
+ 
+\param{instance-form}---a \term{form}; \eval.
+                                                                  
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{forms}---an \term{implicit progn}.
+ 
+\param{results}---the \term{values} returned by the \param{forms}.
+ 
+\label Description::
+ 
+Creates a lexical environment in which
+the slots specified by
+\param{slot-entry} are lexically available through their accessors as if
+they were variables.  The macro \macref{with-accessors} invokes the
+appropriate accessors to \param{access} the \term{slots} specified
+by \param{slot-entry}.  Both \macref{setf}
+and \specref{setq} can be used to set the value of the \term{slot}.
+ 
+\label Examples::
+ 
+\code
+ (defclass thing ()
+           ((x :initarg :x :accessor thing-x)
+            (y :initarg :y :accessor thing-y)))
+\EV #<STANDARD-CLASS THING 250020173>
+ (defmethod (setf thing-x) :before (new-x (thing thing))
+   (format t "~&Changing X from ~D to ~D in ~S.~%"
+           (thing-x thing) new-x thing))
+ (setq thing1 (make-instance 'thing :x 1 :y 2)) \EV #<THING 43135676>
+ (setq thing2 (make-instance 'thing :x 7 :y 8)) \EV #<THING 43147374>
+ (with-accessors ((x1 thing-x) (y1 thing-y))
+                 thing1
+   (with-accessors ((x2 thing-x) (y2 thing-y))
+                   thing2
+     (list (list x1 (thing-x thing1) y1 (thing-y thing1)
+                 x2 (thing-x thing2) y2 (thing-y thing2))
+           (setq x1 (+ y1 x2))
+           (list x1 (thing-x thing1) y1 (thing-y thing1)
+                 x2 (thing-x thing2) y2 (thing-y thing2))
+           (setf (thing-x thing2) (list x1))
+           (list x1 (thing-x thing1) y1 (thing-y thing1)
+                 x2 (thing-x thing2) y2 (thing-y thing2)))))
+\OUT Changing X from 1 to 9 in #<THING 43135676>.
+\OUT Changing X from 7 to (9) in #<THING 43147374>.
+\EV ((1 1 2 2 7 7 8 8)
+     9
+     (9 9 2 2 7 7 8 8) 
+     (9)
+     (9 9 2 2 (9) (9) 8 8))
+\endcode
+ 
+\label Affected By::
+
+\macref{defclass}
+ 
+\label Exceptional Situations::
+
+The consequences are undefined if any \param{accessor-name} is not the name
+of an accessor for the \param{instance}.
+
+\label See Also::
+ 
+\macref{with-slots},
+\specref{symbol-macrolet}
+ 
+\label Notes::
+ 
+A \macref{with-accessors} expression of the form:
+ 
+$$\openup1\jot\vbox{\settabs\+\cr
+\+{\tt (with-accessors} (${\hbox{\i{slot-entry}}}\sub 1%
+\ldots{\hbox{\i{slot-entry}}}\sub n$) \i{instance-form}
+${\hbox{\i{form}}}\sub 1%
+\ldots{\hbox{\i{form}}}\sub k$)\cr}$$
+ 
+\noindent expands into the equivalent of
+ 
+$$\openup1\jot\vbox{\settabs\+\cr
+\+{\tt (}&{\tt let ((}$in$ \i{instance-form}{\tt ))}\cr
+\+&{\tt (symbol-macrolet (}${\hbox{\i{Q}}}\sub 1\ldots%
+{\hbox{\i{Q}}}\sub n${\tt )} ${\hbox{\i{form}}}\sub 1%
+\ldots{\hbox{\i{form}}}\sub k${\tt ))}\cr}$$
+ 
+\noindent where ${\hbox{\i{Q}}}\sub i$ is 
+ 
+$${\vbox{\hbox{{\tt (}${\hbox{\i{variable-name}}}\sub i$ () %
+{\tt (${\hbox{\i{accessor-name}}}\sub{i}\ in$))}}}}$$
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== WITH-SLOTS
+\begincom{with-slots}\ftype{Macro}
+ 
+\issue{DECLS-AND-DOC}
+
+\label Syntax::  
+ 
+\DefmacWithValuesNewline with-slots
+		  	 {\paren{\starparam{slot-entry}}
+		          instance-form 
+                          \starparam{declaration} \starparam{form}}
+			 {\starparam{result}}
+ 
+\auxbnf{slot-entry}{slot-name | \paren{variable-name slot-name}}
+                     
+\label Arguments and Values::
+
+\param{slot-name}---a \term{slot} \term{name}; \noeval.
+ 
+\param{variable-name}---a \term{variable name}; \noeval.
+
+\param{instance-form}---a \term{form}; evaluted to produce \param{instance}.
+ 
+\param{instance}---an \term{object}.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{forms}---an \term{implicit progn}.
+ 
+\param{results}---the \term{values} returned by the \param{forms}.
+ 
+\label Description::
+ 
+The macro \macref{with-slots} \term{establishes} a
+%lexical context
+\term{lexical environment}
+for referring to the \term{slots} in the \param{instance} 
+named by the given \param{slot-names} 
+as though they were \term{variables}.  Within such a context
+the value of the \term{slot} can be specified by using its slot name, as if
+it were a lexically bound variable.  Both \macref{setf} and \specref{setq}
+can be used to set the value of the \term{slot}.
+ 
+The macro \macref{with-slots} translates an appearance of the slot 
+name as a \term{variable} into a call to \funref{slot-value}.
+ 
+\label Examples::
+                             
+\code
+ (defclass thing ()
+           ((x :initarg :x :accessor thing-x)
+            (y :initarg :y :accessor thing-y)))
+\EV #<STANDARD-CLASS THING 250020173>
+ (defmethod (setf thing-x) :before (new-x (thing thing))
+   (format t "~&Changing X from ~D to ~D in ~S.~%"
+           (thing-x thing) new-x thing))
+ (setq thing (make-instance 'thing :x 0 :y 1)) \EV #<THING 62310540>
+ (with-slots (x y) thing (incf x) (incf y)) \EV 2
+ (values (thing-x thing) (thing-y thing)) \EV 1, 2
+ (setq thing1 (make-instance 'thing :x 1 :y 2)) \EV #<THING 43135676>
+ (setq thing2 (make-instance 'thing :x 7 :y 8)) \EV #<THING 43147374>
+ (with-slots ((x1 x) (y1 y))
+             thing1
+   (with-slots ((x2 x) (y2 y))
+               thing2
+     (list (list x1 (thing-x thing1) y1 (thing-y thing1)
+                 x2 (thing-x thing2) y2 (thing-y thing2))
+           (setq x1 (+ y1 x2))
+           (list x1 (thing-x thing1) y1 (thing-y thing1)
+                 x2 (thing-x thing2) y2 (thing-y thing2))
+           (setf (thing-x thing2) (list x1))
+           (list x1 (thing-x thing1) y1 (thing-y thing1)
+                 x2 (thing-x thing2) y2 (thing-y thing2)))))
+\OUT Changing X from 7 to (9) in #<THING 43147374>.
+\EV ((1 1 2 2 7 7 8 8)
+     9
+     (9 9 2 2 7 7 8 8) 
+     (9)
+     (9 9 2 2 (9) (9) 8 8))
+\endcode
+ 
+\label Affected By::
+
+\macref{defclass}
+ 
+\label Exceptional Situations::
+
+The consequences are undefined if any \param{slot-name} is not the name
+of a \term{slot} in the \param{instance}.
+ 
+\label See Also::
+ 
+\macref{with-accessors},
+\funref{slot-value},
+\specref{symbol-macrolet}
+ 
+\label Notes::
+ 
+A \macref{with-slots} expression of the form:
+ 
+$$\openup1\jot\vbox{\settabs\+\cr
+\+{\tt (with-slots} (${\hbox{\i{slot-entry}}}\sub 1%
+\ldots{\hbox{\i{slot-entry}}}\sub n$) \i{instance-form}
+${\hbox{\i{form}}}\sub 1%
+\ldots{\hbox{\i{form}}}\sub k$)\cr}$$
+ 
+\noindent expands into the equivalent of
+ 
+$$\openup1\jot\vbox{\settabs\+\cr
+\+{\tt (}&{\tt let ((}$in$ \i{instance-form}{\tt ))}\cr
+\+&{\tt (symbol-macrolet (}${\hbox{\i{Q}}}\sub 1\ldots%
+{\hbox{\i{Q}}}\sub n${\tt )} ${\hbox{\i{form}}}\sub 1%
+\ldots{\hbox{\i{form}}}\sub k${\tt ))}\cr}$$
+ 
+\noindent where ${\hbox{\i{Q}}}\sub i$ is 
+ 
+$$\vbox{\hbox{{\tt (}${\hbox{\i{slot-entry}}}\sub i$ () %
+{\tt (slot-value }$in$ '${\hbox{\i{slot-entry}}}\sub i${\tt ))}}}$$
+ 
+\noindent if ${\hbox{\i{slot-entry}}}\sub i$ is a \term{symbol}
+and is
+ 
+$${\vbox{\hbox{{\tt (}${\hbox{\i{variable-name}}}\sub i$ () %
+{\tt (slot-value }$in$ '${\hbox{\i{slot-name}}}\sub i${\tt ))}}}}$$
+ 
+\noindent if ${\hbox{\i{slot-entry}}}\sub i$
+is of the form 
+ 
+$$\vbox{\hbox{{\tt (}${\hbox{\i{variable-name}}}\sub i$ %
+${\hbox{\i{slot-name}}}\sub i${\tt )}}}$$
+
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== DEFCLASS
+\begincom{defclass}\ftype{Macro}
+ 
+\label Syntax::
+ 
+%%Syntax fixed per X3J13. -kmp 05-Oct-93
+\DefmacWithValuesNewline defclass
+        {\param{class-name} \paren{\star{\curly{\param{superclass-name}}}}
+\paren{\star{\curly{\i{slot-specifier}}}}
+ $\lbrack\!\lbrack\downarrow\!\hbox{\i{class-option}}\,\rbrack\!\rbrack$}
+	{new-class}
+ 
+\settabs\+\hskip\leftskip&\cr
+\+&\cleartabs\i{slot-specifier}::$=$ &\i{slot-name} $\vert$ 
+(\i{slot-name}  
+$\lbrack\!\lbrack\downarrow\!\hbox{\i{slot-option}}\,\rbrack\!\rbrack$)\cr
+\Vskip 1pc!
+\+&\i{slot-name}::$=$ \term{symbol}\cr
+\Vskip 1pc!
+\+&\cleartabs\i{slot-option}::$=$ &\star{\curly{\kwd{reader} 
+\param{reader-function-name}}} $\vert$ \cr
+\+&&\star{\curly{\kwd{writer} \param{writer-function-name}}} $\vert$ \cr
+\+&&\star{\curly{\kwd{accessor} \param{reader-function-name}}} $\vert$ \cr
+\+&&\curly{\kwd{allocation} \param{allocation-type}} $\vert$ \cr
+\+&&\star{\curly{\kwd{initarg} \param{initarg-name}}} $\vert$ \cr
+\+&&\curly{\kwd{initform} \param{form}} $\vert$ \cr
+\+&&\curly{\kwd{type} \param{type-specifier}} $\vert$ \cr
+\+&&\curly{\kwd{documentation} \term{string}} \cr
+\Vskip 1pc!                                        
+\+&\i{function-name}::$=$ \curly{\term{symbol} 
+$\vert$ {\tt (setf \term{symbol})}}\cr
+\Vskip 1pc!
+\+&\cleartabs\param{class-option}::$=$ &(\kwd{default-initargs} \f{.}
+\param{initarg-list}) $\vert$ \cr
+\+&&(\kwd{documentation} \term{string}) $\vert$ \cr
+\+&&(\kwd{metaclass} \param{class-name}) \cr
+\Vskip 1pc!
+ 
+\label Arguments and Values::
+ 
+%!!! Treatment of documentation?
+
+\param{Class-name}---a \term{non-nil} \term{symbol}.
+                                                    
+\param{Superclass-name}--a \term{non-nil} \term{symbol}.
+ 
+\param{Slot-name}--a \term{symbol}.
+  The \param{slot-name} argument is 
+%!!! Isn't there a more concise way to say this?
+  a \term{symbol} that is syntactically valid for use as a variable name.
+ 
+\param{Reader-function-name}---a \term{non-nil} \term{symbol}.
+ \kwd{reader} can be supplied more than once for a given \term{slot}.
+          
+\param{Writer-function-name}---a \term{generic function} name.
+ \kwd{writer} can be supplied more than once for a given \term{slot}.
+ 
+\param{Reader-function-name}---a \term{non-nil} \term{symbol}.
+ \kwd{accessor} can be supplied more than once for a given \term{slot}.
+ 
+\param{Allocation-type}---(member \kwd{instance} \kwd{class}).
+ \kwd{allocation} can be supplied once at most for a given \term{slot}.
+ 
+\param{Initarg-name}---a \term{symbol}.
+ \kwd{initarg} can be supplied more than once for a given \term{slot}.  
+ 
+\param{Form}---a \term{form}. 
+ \kwd{init-form} can be supplied once at most for a given \term{slot}.  
+ 
+\param{Type-specifier}---a \term{type specifier}.
+ \kwd{type} can be supplied once at most for a given \term{slot}. 
+ 
+\param{Class-option}--- refers to the \term{class} as a whole or to all class \term{slots}.
+
+\param{Initarg-list}---a \term{list} of alternating initialization argument
+		        \term{names} and default initial value \term{forms}.
+ \kwd{default-initargs} can be supplied at most once.
+
+\param{Class-name}---a \term{non-nil} \term{symbol}.
+ \kwd{metaclass} can be supplied once at most.
+ 
+%The \i{class-name} argument is a \term{non-nil} symbol.
+ 
+%Each \i{superclass-name} argument is a \term{non-nil} symbol.  
+ 
+%Each \i{slot-specifier} argument is the name of the slot or a list
+%consisting of the slot name followed by zero or more slot options.
+ 
+ 
+%The \i{reader-function-name} argument is a \term{non-nil} symbol.
+ 
+%The \i{writer-function-name} argument is a function specifier.
+ 
+%The \i{initarg-name} argument is a symbol.
+ 
+%!!! Ugh. Surely this should not be so. -kmp 24-Apr-91
+\param{new-class}---the new \term{class} \term{object}.
+ 
+\label Description::
+                                        
+The macro \macref{defclass} defines a new named \term{class}.  It returns
+the new \term{class} \term{object} as its result.
+ 
+The syntax of \macref{defclass} provides options for specifying
+initialization arguments for \term{slots}, for specifying default
+initialization values for \term{slots}, and for requesting that 
+\term{methods} on specified \term{generic functions} be automatically 
+generated for reading and writing the values of \term{slots}.  
+No reader or writer functions are defined by default; 
+their generation must be explicitly requested.  However,
+\term{slots} can always be \term{accessed} using \funref{slot-value}.
+ 
+Defining a new \term{class} also causes a \term{type} of the same name to be
+defined.  The predicate \f{(typep \param{object} \param{class-name})} returns
+true if the \term{class} of the given \param{object} is 
+the \term{class} named by \param{class-name} itself or
+a subclass of the class \param{class-name}.  A \term{class} \term{object} 
+can be used as a \term{type specifier}.  
+Thus \f{(typep \param{object} \param{class})} returns \term{true}
+if the \term{class} of the \param{object} is 
+\param{class} itself or a subclass of \param{class}.   
+                            
+The \param{class-name} argument specifies the \term{proper name} 
+of the new \term{class}.  
+%If a \term{class} 
+%with the same proper name already exists and that
+%\term{class} is an \term{instance} of \typeref{standard-class}, and if the
+%\macref{defclass} form for the definition of the new \term{class}
+%specifies a \term{class} of class \typeref{standard-class}, the
+%definition of the existing \term{class} is replaced.
+If a \term{class} with the same \term{proper name} already exists 
+ and that \term{class} is an \term{instance} of \typeref{standard-class}, 
+ and if the \macref{defclass} form for the definition of the new \term{class}
+      specifies a \term{class} of \term{class} \typeref{standard-class},
+the existing \term{class} is redefined,
+and instances of it (and its \term{subclasses}) are updated 
+ to the new definition at the time that they are next \term{accessed}.
+For details, \seesection\ClassReDef.
+
+% addressed in the packages chapter.  --sjl 5 Mar 92 
+%\issue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+%The consequences are undefined if a \term{symbol} in \thepackage{common-lisp}
+%is used as the \param{class-name} argument.
+%\endissue{LISP-SYMBOL-REDEFINITION:MAR89-X3J13}
+ 
+Each \param{superclass-name} argument 
+specifies a direct \term{superclass} of the new \term{class}.  
+%% gray addition
+If the \term{superclass} list is empty, then the \term{superclass}
+defaults depending on the \term{metaclass}, 
+with \typeref{standard-object} being the
+default for \typeref{standard-class}.
+
+The new \term{class} will
+inherit \term{slots} and \term{methods} 
+from each of its direct \term{superclasses}, from
+their direct \term{superclasses}, and so on.  
+For a discussion of how \term{slots} and \term{methods} are inherited,
+\seesection\Inheritance.
+ 
+%Each \i{slot-specifier} argument is the \term{name} of the slot or a list
+%consisting of the slot name followed by zero or more slot options.
+%The \i{slot-name} argument is a symbol that is syntactically valid
+%for use as a Common Lisp variable name.  If there are any duplicate
+%slot names, an error is signaled.
+ 
+The following slot options are available:
+ 
+\beginlist
+ 
+\itemitem{\bull}
+The \kwd{reader} slot option specifies that an \term{unqualified method} is
+to be defined on the \term{generic function} named \param{reader-function-name}
+to read the value of the given \term{slot}.
+ 
+\itemitem{\bull} 
+The \kwd{writer} slot option specifies that an \term{unqualified method} is
+to be defined on the \term{generic function} named \param{writer-function-name}
+to write the value of the \term{slot}.
+ 
+\itemitem{\bull} 
+The \kwd{accessor} slot option specifies that an \term{unqualified method}
+is to be defined on the generic function named \param{reader-function-name}
+to read the value of the given \term{slot}
+and that an \term{unqualified method} is to be defined on the 
+\term{generic function} named \f{(setf \param{reader-function-name})} to be
+used with \macref{setf} to modify the value of the \term{slot}.
+ 
+\itemitem{\bull} 
+The \kwd{allocation} slot option is used to specify where storage is
+to be allocated for the given \term{slot}.  Storage for a 
+\term{slot} can be located
+in each instance or in the \term{class} \term{object} itself.
+The value of the \param{allocation-type} argument can be 
+either the keyword \kwd{instance}
+or the keyword \kwd{class}.    If the \kwd{allocation}
+slot option is not specified, the effect is the same as specifying
+\f{:allocation :instance}.
+\beginlist 
+\itemitem{--}                   
+If \param{allocation-type} is \kwd{instance}, a \term{local slot} of
+the name \param{slot-name} is allocated in each instance of the 
+\term{class}.
+ 
+\itemitem{--}                   
+If \param{allocation-type} is \kwd{class}, a shared 
+\term{slot} of the given                                      
+name is allocated in the \term{class} \term{object} created by this \macref{defclass}
+form.  The value of the \term{slot} is shared by all 
+\term{instances} of the \term{class}.
+If a class $C\sub1$ defines such a \term{shared slot}, any 
+subclass $C\sub2$ of
+$C\sub1$ will share this single \term{slot} unless the \macref{defclass} form
+for $C\sub2$ specifies a \term{slot} of the same \term{name} or there is a
+superclass of $C\sub2$ that precedes $C\sub1$ in the class precedence
+list of $C\sub2$ and that defines a \term{slot} of the same \term{name}.
+\endlist              
+\itemitem{\bull} The \kwd{initform} slot option is used to provide a default
+initial value form to be used in the initialization of the \term{slot}.  This
+\term{form} is evaluated every time it is used to initialize the 
+\term{slot}.  The
+lexical environment in which this \term{form} is evaluated is the lexical
+environment in which the \macref{defclass} form was evaluated.
+Note that the lexical environment refers both to variables and to
+functions.  For \term{local slots}, the dynamic environment is the dynamic
+environment in which \funref{make-instance} is called; for shared
+\term{slots}, the dynamic environment is the dynamic environment in which the
+\macref{defclass} form was evaluated.  
+\Seesection\ObjectCreationAndInit.
+ 
+No implementation is permitted to extend the syntax of \macref{defclass}
+to allow \f{(\param{slot-name} \param{form})} as an abbreviation for 
+\f{(\param{slot-name} :initform \param{form})}.
+\reviewer{Barmar: Can you extend this to mean something else?}
+ 
+\itemitem{\bull}
+The \kwd{initarg} slot option declares an initialization
+argument named \param{initarg-name} and specifies that this
+initialization argument initializes the given \term{slot}.  If the
+initialization argument has a value in the call to
+\funref{initialize-instance}, the value will be stored into the given \term{slot},
+and the slot's \kwd{initform} slot option, if any, is not
+evaluated.  If none of the initialization arguments specified for a
+given \term{slot} has a value, the \term{slot} is initialized according to the
+\kwd{initform} slot option, if specified.  
+ 
+\itemitem{\bull}
+The \kwd{type} slot option specifies that the contents of the
+\term{slot} will always be of the specified data type.  It effectively
+declares the result type of the reader generic function when applied
+to an \term{object} of this \term{class}.  The consequences of attempting to store in a
+\term{slot} a value that does not satisfy the type of the \term{slot} are undefined.
+The \kwd{type} slot option is further discussed in 
+\secref\SlotInheritance.
+ 
+\itemitem{\bull}
+The \kwd{documentation} slot option provides a \term{documentation string}
+for the \term{slot}.  \kwd{documentation} can be supplied once at most 
+for a given \term{slot}. \reviewer{Barmar: How is this retrieved?}
+\endlist
+ 
+Each class option is an option that refers to the \term{class} as a whole.
+%!!! Barmar alleges that there are none of these:
+%or to all class \term{slots}.
+The following class options are available:
+ 
+\beginlist
+\itemitem{\bull}
+The \kwd{default-initargs} class option is followed by a list of
+alternating initialization argument \term{names} and default initial value
+forms.  If any of these initialization arguments does not appear in
+the initialization argument list supplied to \funref{make-instance}, the
+corresponding default initial value form is evaluated, and the
+initialization argument \term{name} and the \term{form}'s value are added to the end
+of the initialization argument list before the instance is created;
+\seesection\ObjectCreationAndInit.
+The default initial value form is evaluated each time it is used.  The lexical
+environment in which this \term{form} is evaluated is the lexical environment
+in which the \macref{defclass} form was evaluated.  The dynamic
+environment is the dynamic environment in which \funref{make-instance}
+was called.  If an initialization argument \term{name} appears more than once
+in a \kwd{default-initargs} class option, an error is signaled.
+ 
+ 
+\itemitem{\bull} 
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+The \kwd{documentation} class option causes a \term{documentation string} 
+to be attached with the \term{class} \term{object},
+and attached with kind \misc{type} to the \param{class-name}.
+\kwd{documentation} can be supplied once at most.
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+ 
+\itemitem{\bull}
+The \kwd{metaclass} class option is used to specify that
+instances of the \term{class} being defined are to have a different metaclass
+than the default provided by the system (\theclass{standard-class}).
+ 
+\endlist
+                             
+Note the following rules of \macref{defclass} for \term{standard classes}:
+ 
+\beginlist
+ 
+\itemitem{\bull}
+It is not required that the \term{superclasses} of a \term{class} be defined before
+the \macref{defclass} form for that \term{class} is evaluated.
+ 
+\itemitem{\bull}
+All the \term{superclasses} of a \term{class} must be defined before 
+an \term{instance} of the \term{class} can be made.
+ 
+\itemitem{\bull}
+A \term{class} must be defined before it can be used as a parameter
+specializer in a \macref{defmethod} form.
+ 
+\endlist
+ 
+The \OS\ can be extended to cover situations where these rules are not
+obeyed.
+ 
+Some slot options are inherited by a \term{class} from its 
+\term{superclasses}, and
+some can be shadowed or altered by providing a local slot description.
+No class options except \kwd{default-initargs} are inherited.  For a
+detailed description of how \term{slots} and slot options are inherited, 
+\seesection\SlotInheritance.
+ 
+The options to \macref{defclass} can be extended.  It is required that
+all implementations signal an error if they observe a class option or
+a slot option that is not implemented locally.
+ 
+It is valid to specify more than one reader, writer, accessor, or
+initialization argument for a \term{slot}.  No other slot option can
+appear
+more than once in a single slot description, or an error is
+signaled.
+ 
+If no reader, writer, or accessor is specified for a \term{slot}, 
+the \term{slot} can only be \term{accessed} by \thefunction{slot-value}.
+ 
+%The macro \macref{defclass} defines a new named \term{class}.
+ 
+%Defining a new \term{class} also causes a 
+%\term{type} of the same \term{name} to be defined.
+      
+%The \kwd{reader} slot option causes an \term{unqualified method} 
+%to be defined on the \term{generic function} named 
+%\param{reader-function-name} to read the value of the given \term{slot}.
+      
+%The \kwd{writer} slot option causes an \term{unqualified method}
+%to be defined on the \term{generic function} named 
+%\param{writer-function-name} to write the value of the \term{slot}. 
+      
+%The \kwd{accessor} slot option causes an \term{unqualified method}
+%to be defined on the \term{generic function} named 
+%\param{reader-function-name} to read the value of the given \term{slot}
+%and an \term{unqualified method} to be defined on the 
+%\term{generic function} named {\tt (setf \param{reader-function-name})} to be
+%used with \macref{setf} to modify the value of the \term{slot}.
+      
+%The \kwd{initarg} slot option declares an initialization argument
+%named \param{initarg-name}.
+ 
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+% added qualification about top-level-ness  --sjl 5 Mar 92
+If a \macref{defclass} \term{form} appears as a \term{top level form},
+the \term{compiler} must make the \term{class} \term{name} be recognized as a
+valid \term{type} \term{name} in subsequent declarations (as for \macref{deftype})
+and be recognized as a valid \term{class} \term{name} for \macref{defmethod}
+\term{parameter specializers} and for use as the \kwd{metaclass} option of a
+subsequent \macref{defclass}.  The \term{compiler} must make 
+%%!!! this doesn't look right. maybe "a class object"? -kmp 7-Jun-91
+the \term{class} definition 
+available to be returned by \funref{find-class} when its \param{environment}
+\term{argument} is a value received as the \term{environment parameter} of a \term{macro}.
+\endissue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+ 
+If there are any duplicate slot names, 
+an error \oftype{program-error} is signaled.
+                                                                          
+If an initialization argument \term{name} appears more than once in 
+\kwd{default-initargs} class option, 
+an error \oftype{program-error} is signaled.
+ 
+If any of the following slot options appears more than once in a
+single slot description, an error \oftype{program-error}
+is signaled: \kwd{allocation},
+\kwd{initform}, \kwd{type}, \kwd{documentation}.
+ 
+It is required that all implementations signal 
+an error \oftype{program-error} if they observe a class option 
+or a slot option that is not implemented locally.
+
+%%gray's annotation
+%>Other possible errors are an undefined metaclass or attempting to
+%>redefine the name of an existing type with an incompatible metaclass
+%>{e.g.  DEFCLASS for a name previously defined by DEFSTRUCT or DEFTYPE}.
+ 
+ 
+\label See Also::
+ 
+\funref{documentation},
+\funref{initialize-instance},
+\funref{make-instance},
+\funref{slot-value},
+{\secref\Classes},
+{\secref\Inheritance},
+{\secref\ClassReDef},
+{\secref\DeterminingtheCPL},
+{\secref\ObjectCreationAndInit}
+ 
+\label Notes:\None.
+
+\endcom
+
+%%% ========== DEFGENERIC
+\begincom{defgeneric}\ftype{Macro}
+ 
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+ 
+\DefmacWithValuesNewline defgeneric
+			 {function-name gf-lambda-list
+	  		  \interleave{\down{option} | \stardown{method-description}}}
+	 		 {new-generic}
+
+\auxbnf{option}{\paren{\kwd{argument-precedence-order} \plusparam{parameter-name}}  |\CR
+		\paren{\misc{declare} \plusparam{gf-declaration}}		    |\CR
+	        \paren{\kwd{documentation} \param{gf-documentation}}		    |\CR
+		\paren{\kwd{method-combination} 
+		       \param{method-combination} 
+		       \starparam{method-combination-argument}}			    |\CR
+		\paren{\kwd{generic-function-class} \param{generic-function-class}} |\CR
+		\paren{\kwd{method-class} \param{method-class}}}
+\auxbnf{method-description}{\lparen\kwd{method}
+			    \vtop{\hbox{\starparam{method-qualifier} 
+					\param{specialized-lambda-list}}
+			          \hbox{{\DeclsAndDoc} 
+					\starparam{form}\rparen}}}
+ 
+\label Arguments and Values::
+
+\param{function-name}---a \term{function name}.
+
+\param{generic-function-class}---a \term{non-nil} \term{symbol} naming a \term{class}.
+
+\param{gf-declaration}---an \declref{optimize} \term{declaration specifier};
+  other \term{declaration specifiers} are not permitted.
+%% Barmar: What's the theory here?
+%%         Are \declref{ignore} and \declref{dynamic-extent} in or out?}
+%   \declref{special}, \declref{ftype}, \declref{function}, 
+%   \declref{inline}, \declref{notinline}, and \declref{declaration} 
+%  declarations are not permitted.
+
+\param{gf-documentation}---a \term{string}; \noeval.
+
+\param{gf-lambda-list}---a \term{generic function lambda list}.
+
+\param{method-class}---a \term{non-nil} \term{symbol} naming a \term{class}.
+
+\param{method-combination-argument}---an \term{object.}
+%% Barmar: Redundant with info to follow.
+%suitable as \term{arguments} to the \param{method-combination-name};
+%the standard method combination type does not support
+%any \term{arguments}.
+%All types of method combination defined by the
+%short form of \macref{define-method-combination} accept
+%\kwd{order}, which defaults to \kwd{most-specific-first}.
+
+\param{method-combination-name}---a \term{symbol} 
+				  naming a \term{method combination} \term{type}.
+
+\param{method-qualifiers},
+\param{specialized-lambda-list},
+\param{declarations},
+\param{documentation},
+\param{forms}---as per \macref{defmethod}.
+
+\param{new-generic}---the \term{generic function} \term{object}.
+
+\param{parameter-name}---a \term{symbol} that names a \term{required parameter} 
+			 in the \param{lambda-list}.
+  (If the \kwd{argument-precedence-order} option is specified,
+   each \term{required parameter} in the \param{lambda-list}
+   must be used exactly once as a \param{parameter-name}.)
+ 
+\label Description::
+ 
+The macro \macref{defgeneric} is used to define a \term{generic function}
+or to specify options and declarations that pertain 
+to a \term{generic function} as a whole.
+ 
+%!!! Rewrite in terms of "fboundp" to avoid function calls?
+If \param{function-name} is a 
+\term{list} it must be of the form {\tt (setf \i{symbol})}.
+If \f{(fboundp \param{function-name})} is \term{false}, a new
+\term{generic function} is created.  
+\issue{FUNCTION-NAME:LARGE}
+If \f{(fdefinition \param{function-name})} is a \term{generic function}, that 
+\endissue{FUNCTION-NAME:LARGE}
+\term{generic function}
+is modified.  If \param{function-name} names 
+an \term{ordinary function},
+a \term{macro}, or a \term{special operator}, 
+an error is signaled.
+ 
+The effect of the \macref{defgeneric} macro is as if the following three
+steps were performed: first, 
+\term{methods} defined by previous \macref{defgeneric} \term{forms} are removed; 
+\reviewer{Barmar: Shouldn't this (second) be first?}
+second, \funref{ensure-generic-function}
+is called; and finally, \term{methods} specified by the current
+\macref{defgeneric} \term{form} are added to the \term{generic function}. 
+ 
+Each \param{method-description} defines a \term{method} on the \term{generic function}.
+The \term{lambda list} of each \term{method} must be congruent with the 
+\term{lambda list}
+specified by the \param{gf-lambda-list} option.  
+If no \term{method} descriptions are specified and a \term{generic function} of the same
+name does not already exist, a \term{generic function} with no 
+\term{methods} is created.
+ 
+The \param{gf-lambda-list} argument of \macref{defgeneric} specifies the shape of
+\term{lambda lists} for the \term{methods} on this \term{generic function}.
+All \term{methods} on the resulting 
+\term{generic function} must have
+\term{lambda lists} that are congruent with this shape.  If a \macref{defgeneric}
+form is evaluated and some 
+\term{methods} for that \term{generic function}
+have \term{lambda lists} that are not congruent with that given in
+the \macref{defgeneric} form, an error is signaled.  For further details
+on method congruence, \seesection\GFMethodLambdaListCongruency.
+ 
+The \term{generic function} passes to the 
+\term{method} all the argument values passed to
+it, and only those; default values are not supported.
+Note that optional and keyword arguments in method definitions, however,
+can have default initial value forms and can use supplied-p parameters. 
+ 
+The following options are provided.  
+\issue{DEFGENERIC-DECLARE:ALLOW-MULTIPLE}
+Except as otherwise noted, 
+\endissue{DEFGENERIC-DECLARE:ALLOW-MULTIPLE}
+a given option may occur only once.
+ 
+\beginlist
+ 
+\itemitem{\bull} 
+The \kwd{argument-precedence-order} option is used to specify the
+order in which the required arguments in a call to the \term{generic function}
+are tested for specificity when selecting a particular
+\term{method}. Each required argument, as specified in the \param{gf-lambda-list}
+argument, must be included exactly once as a \param{parameter-name}
+so that the full and unambiguous precedence order is
+supplied.  If this condition is not met, an error is signaled.
+\reviewer{Barmar: What is the default order?}
+ 
+\itemitem{\bull}
+The \misc{declare} option is used to specify declarations that pertain
+to the \term{generic function}.
+
+An \declref{optimize} \term{declaration specifier} is allowed.
+It specifies whether method selection should be optimized for 
+speed or space, but it has no effect on \term{methods}.
+To control how a \term{method} is optimized, an \declref{optimize}
+declaration must be placed directly in the \macref{defmethod} \term{form}
+or method description.  The optimization qualities \misc{speed} and
+\misc{space} are the only qualities this standard requires, but an
+implementation can extend the \CLOS\ to recognize other qualities.  
+A simple implementation that has only one method selection technique 
+and ignores \declref{optimize} \term{declaration specifiers} is valid.
+ 
+The \declref{special}, \declref{ftype}, \declref{function}, \declref{inline},
+\declref{notinline}, and \declref{declaration} declarations are not permitted.
+Individual implementations can extend the \misc{declare} option to
+support additional declarations.
+\editornote{KMP: Does ``additional'' mean including special, ftype, etc.?  
+Or only other things that are not mentioned here?}
+If an implementation notices a \term{declaration specifier} that it does
+not support and that has not been proclaimed as a non-standard 
+\term{declaration identifier} name in a \declref{declaration} \term{proclamation}, 
+it should issue a warning. \editornote{KMP: The wording of this previous sentence,
+particularly the word ``and'' suggests to me that you can `proclaim declaration'
+of an unsupported declaration (e.g., ftype) in order to suppress the warning.
+That seems wrong.  Perhaps it instead means to say ``does not support or 
+is both undefined and not proclaimed declaration.''}
+
+\issue{DEFGENERIC-DECLARE:ALLOW-MULTIPLE}
+The \misc{declare} option may be specified more than once.
+The effect is the same as if the lists of \term{declaration specifiers} 
+had been appended together into a single list and specified as a 
+single \misc{declare} option.
+\endissue{DEFGENERIC-DECLARE:ALLOW-MULTIPLE}
+
+\itemitem{\bull} 
+The \kwd{documentation} argument is a \term{documentation string}
+to be attached to the \term{generic function} \term{object}, 
+and to be attached with kind \misc{function} to the \param{function-name}.
+ 
+\itemitem{\bull} 
+The \kwd{generic-function-class} option may be used to specify that
+the \term{generic function} is to have a different \term{class} than
+the default provided by the system (\theclass{standard-generic-function}).
+The \param{class-name} argument is the name of a \term{class} that can be the
+\term{class} of a \term{generic function}.  If \param{function-name} specifies
+an existing \term{generic function} that has a different value for the
+\kwd{generic-function-class} argument and the new generic function 
+\term{class} is compatible with the old, \funref{change-class} is called 
+to change the \term{class} of the \term{generic function}; 
+otherwise an error is signaled.
+ 
+\itemitem{\bull} 
+The \kwd{method-class} option is used to specify that all \term{methods} on
+this \term{generic function} are to have a different \term{class} from the 
+default provided by the system (\theclass{standard-method}).
+The \param{class-name} argument is the name of a \term{class} that is capable 
+of being the \term{class} of a \term{method}.
+\reviewer{Barmar: Is \funref{change-class} called on existing methods?}
+ 
+\itemitem{\bull} 
+The \kwd{method-combination} option is followed by a symbol that
+names a type of method combination.  The arguments (if any) that
+follow that symbol depend on the type of method combination.  Note
+that the standard method combination type does not support any
+arguments.  However, all types of method combination defined by the
+short form of \macref{define-method-combination} accept an optional
+argument named \param{order}, defaulting to \kwd{most-specific-first},
+where a value of \kwd{most-specific-last} reverses
+the order of the primary \term{methods} without affecting the order of the
+auxiliary \term{methods}.
+ 
+\endlist
+ 
+The \param{method-description} arguments define \term{methods} that will
+be associated with the \term{generic function}.  The \param{method-qualifier}
+and \param{specialized-lambda-list} arguments in a method description
+are the same as for \macref{defmethod}.
+ 
+The \param{form} arguments specify the method body.  The body of the
+\term{method} is enclosed in an \term{implicit block}.
+If \param{function-name} is a \term{symbol}, this block bears the same name as
+the \term{generic function}.  If \param{function-name} is a 
+\term{list} of the
+form {\tt (setf \param{symbol})}, the name of the block is \param{symbol}.  
+ 
+Implementations can extend \macref{defgeneric} to include other options.
+It is required that an implementation signal an error if
+it observes an option that is not implemented locally.
+
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+\macref{defgeneric} is not required to perform any compile-time side effects.
+In particular, the \term{methods} are not installed for invocation during 
+compilation.  An \term{implementation} may choose to store information about
+the \term{generic function} for the purposes of compile-time error-checking
+(such as checking the number of arguments on calls, or noting that a definition
+ for the function name has been seen).
+\endissue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+
+\label Examples::
+ 
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+ 
+If \param{function-name} names an \term{ordinary function}, a \term{macro},
+or a \term{special operator}, an error \oftype{program-error} is signaled.
+ 
+Each required argument, as specified in the \param{gf-lambda-list}
+argument, must be included exactly once as a \param{parameter-name},
+or an error \oftype{program-error} is signaled.
+ 
+The \term{lambda list} of each \term{method} specified by a 
+\param{method-description} must be congruent with the \term{lambda list} specified
+by the \param{gf-lambda-list} option, or
+an error \oftype{error} is signaled.
+ 
+If a \macref{defgeneric} form is evaluated and some \term{methods} for
+that \term{generic function} have \term{lambda lists} that are not congruent with
+that given in the \macref{defgeneric} form, 
+an error \oftype{error} is signaled.
+ 
+A given \param{option} may occur only once,
+or an error \oftype{program-error} is signaled.
+ 
+\reviewer{Barmar: This says that an error is signaled if you specify the same generic
+    function class as it already has!}
+If \param{function-name} specifies an existing \term{generic function} 
+that has a different value for the \kwd{generic-function-class} 
+argument and the new generic function \term{class} is compatible with the
+old, \funref{change-class} is called to change the \term{class} of 
+the \term{generic function}; otherwise an error \oftype{error} is signaled.
+ 
+Implementations can extend \macref{defgeneric} to include other options.
+It is required that an implementation 
+signal an error \oftype{program-error} if
+it observes an option that is not implemented locally.
+ 
+\label See Also::
+ 
+\macref{defmethod},
+\funref{documentation},
+\funref{ensure-generic-function},
+\issue{GENERIC-FUNCTION-POORLY-DESIGNED:DELETE}
+%\macref{generic-function},
+\typeref{generic-function},
+\endissue{GENERIC-FUNCTION-POORLY-DESIGNED:DELETE}
+{\secref\GFMethodLambdaListCongruency}
+ 
+\label Notes:\None.
+ 
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== DEFMETHOD
+\begincom{defmethod}\ftype{Macro}
+ 
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+ 
+%!!! Barmar: \macref{defun} and \macref{defmacro} don't bother to show this detail
+%      for the specialized lambda list, so why does \macref{defmethod}?
+
+\DefmacWithValuesNewline {defmethod} 
+			 {\vtop{\hbox{\i{function-name}
+				      \star{\curly{\i{method-qualifier}}}
+				      \i{specialized-lambda-list}}
+				\hbox{{\DeclsAndDoc} \starparam{form}}}}
+			 {new-method}
+
+\Vskip1pc!\null
+\i{function-name}::$=$ \curly{\term{symbol} 
+$\vert$ {\tt (setf \term{symbol})}}
+\Vskip1pc!\null
+\i{method-qualifier}::$=$ \term{non-list}
+\Vskip1pc!\null
+\settabs\+\hskip\leftskip&\cr
+\+&\i{specialized-lambda-list}::$=$ 
+(&\star{\curly{\param{var}  $\vert$ {\rm (}{\param{var}
+\i{parameter-specializer-name}}{\rm )}}}  \cr
+\+&&\ttbrac{{\opt} 
+\star{\curly{\param{var} $\vert$ {\rm (}var 
+\ttbrac{\param{initform} {\brac{\param{supplied-p-parameter}}} }{\rm )}}}}  \cr
+\+&&\ttbrac{{\tt\&rest} \param{var}} \cr
+\+&&{\tt \lbracket}{\key{}}&\star{\curly{\param{var}  $\vert$
+{\rm (}\curly{\param{var} $\vert$ {\rm (}\term{keyword}\param{var}{\rm )}}
+\ttbrac{\param{initform} \brac{\param{supplied-p-parameter}} }{\rm )}}}\cr
+\+&&&\brac{\keyref{allow-other-keys}} {\tt \rbracket} \cr
+\+&&\ttbrac{{\tt\&aux} 
+\star{\curly{\param{var} $\vert$ {\rm (}\param{var} 
+\brac{\param{initform}} {\rm )}}}} {\rm )} \cr
+\Vskip1pc!\null
+\+&\i{parameter-specializer-name}::$=$ \term{symbol} 
+$\vert$ {\rm (}{\tt eql} \param{eql-specializer-form}{\rm )}\cr
+\Vskip 1pc!
+ 
+\label Arguments and Values::
+ 
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{documentation}---a \term{string}; \noeval.
+
+\param{var}---a \term{variable} \term{name}.
+
+\param{eql-specializer-form}---a \term{form}.
+ 
+\param{Form}---a \term{form}.
+
+\param{Initform}---a \term{form}.
+
+\param{Supplied-p-parameter}---variable name. 
+
+\param{new-method}---the new \term{method} \term{object}.
+ 
+\label Description::
+ 
+The macro \macref{defmethod} defines a \term{method} on a 
+\term{generic function}.  
+
+%!!! Rewrite to use "fbound" ?
+If {\tt (fboundp \i{function-name})} is \nil, a 
+\term{generic function} is created with default values for 
+the argument precedence order
+(each argument is more specific than the arguments to its right
+in the argument list),
+for the generic function class (\theclass{standard-generic-function}),
+for the method class (\theclass{standard-method}),
+and for the method combination type (the standard method combination type).
+The \term{lambda list} of the \term{generic function} is
+congruent with the \term{lambda list} of the 
+\term{method} being defined; if the
+\macref{defmethod} form mentions keyword arguments, the \term{lambda list} of
+the \term{generic function} 
+will mention {\tt &key} (but no keyword
+arguments).  If \i{function-name} names 
+an \term{ordinary function},
+a \term{macro}, or a \term{special operator}, 
+an error is signaled.
+ 
+If a \term{generic function} is currently named by {\it function-name},
+the \term{lambda list} of the
+\term{method} must be congruent with the \term{lambda list} of the 
+\term{generic function}.
+If this condition does not hold, an error is signaled.  
+For a definition of congruence in this context, \seesection\GFMethodLambdaListCongruency.
+ 
+%% gray says redundant with syntax spec.
+%If \i{function-name} is a \term{list},
+%it must be of the form {\tt (setf \i{symbol})}.  
+%\i{Function-name} names the \term{generic function}
+%on which the \term{method} is defined.
+
+Each \i{method-qualifier} argument is an \term{object} that is used by
+method combination to identify the given \term{method}.  
+The method combination type might further
+restrict what a method \term{qualifier} can be.
+The standard method combination type allows for \term{unqualified methods} and
+\term{methods} whose sole
+\term{qualifier} is one of the keywords \kwd{before}, \kwd{after}, or \kwd{around}.
+ 
+The \i{specialized-lambda-list} argument is like an ordinary
+\term{lambda list} except that the \term{names} of required parameters can
+be replaced by specialized parameters.  A specialized parameter is a
+list of the form 
+\f{(\param{var} \i{parameter-specializer-name})}.
+Only required parameters can be
+specialized.  If \i{parameter-specializer-name} is a \term{symbol} it names a
+\term{class}; if it is a \term{list},
+it is of the form \f{(eql \param{eql-specializer-form})}.  The parameter
+specializer name \f{(eql \param{eql-specializer-form})} indicates
+that the corresponding argument must be \funref{eql} to the \term{object} that
+is the value of \param{eql-specializer-form} for the \term{method} to be applicable.  
+%%gray/moon addition
+The \param{eql-specializer-form} is evaluated at the time
+that the expansion of the \macref{defmethod} macro is evaluated.  
+%%
+If no \term{parameter specializer name} is specified for a given
+required parameter, the \term{parameter specializer} defaults to 
+\theclass{t}.
+For further discussion, \seesection\IntroToMethods.
+ 
+The \param{form} arguments specify the method body.
+The body of the \term{method} is enclosed in an \term{implicit block}.  If
+\i{function-name} is a \term{symbol}, 
+this block bears the same \term{name} as the \term{generic function}.  
+If \i{function-name} is a \term{list} of the form 
+{\tt (setf \i{symbol})}, the \term{name} of the block is \i{symbol}.  
+ 
+The \term{class} of the \term{method} \term{object} that is created is that given by the 
+method class option of the \term{generic function} 
+on which the \term{method} is defined.
+ 
+If the \term{generic function} already has a \term{method} that agrees with the
+\term{method} being defined on \term{parameter specializers} and \term{qualifiers},
+\macref{defmethod} replaces the existing \term{method} with the one now being
+defined.
+For a definition of agreement in this context.
+\seesection\SpecializerQualifierAgreement.
+ 
+The \term{parameter specializers} are derived from 
+the \term{parameter specializer names} as described in
+\secref\IntroToMethods.
+
+The expansion of the \macref{defmethod} macro ``refers to'' each
+specialized parameter (see the description of \declref{ignore} 
+within the description of \misc{declare}).
+This includes parameters that
+have an explicit \term{parameter specializer name} of \t.  This means
+that a compiler warning does not occur if the body of the \term{method} does
+not refer to a specialized parameter, while a warning might occur
+if the body of the \term{method} does not refer to an unspecialized parameter.
+For this reason, a parameter that specializes on \t\ is not quite synonymous
+with an unspecialized parameter in this context.
+ 
+\issue{DEFMETHOD-DECLARATION-SCOPE:CORRESPONDS-TO-BINDINGS}
+Declarations at the head of the method body that apply to the 
+method's \term{lambda variables} are treated as \term{bound declarations}
+whose \term{scope} is the same as the corresponding \term{bindings}.
+
+Declarations at the head of the method body that apply to the 
+functional bindings of \funref{call-next-method} or \funref{next-method-p}
+apply to references to those functions within the method body \param{forms}.
+Any outer \term{bindings} of the \term{function names} \funref{call-next-method} and
+\funref{next-method-p}, and declarations associated with such \term{bindings}
+are \term{shadowed}\meaning{2} within the method body \param{forms}.
+
+The \term{scope} of \term{free declarations} at the head of the method body 
+is the entire method body, 
+which includes any implicit local function definitions
+  but excludes \term{initialization forms} for the \term{lambda variables}.
+\endissue{DEFMETHOD-DECLARATION-SCOPE:CORRESPONDS-TO-BINDINGS}
+
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+\macref{defmethod} is not required to perform any compile-time side effects.
+In particular, the \term{methods} are not installed for invocation during 
+compilation.  An \term{implementation} may choose to store information about
+the \term{generic function} for the purposes of compile-time error-checking
+(such as checking the number of arguments on calls, or noting that a definition
+ for the function name has been seen).
+\endissue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+\param{Documentation} is attached as a \term{documentation string}
+to the \term{method} \term{object}.
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+
+\label Examples:\None.
+
+\label Affected By::
+
+The definition of the referenced \term{generic function}.
+ 
+\label Exceptional Situations::
+ 
+If \i{function-name} names an \term{ordinary function},
+a \term{macro}, or a \term{special operator}, 
+an error \oftype{error} is signaled.
+ 
+If a \term{generic function} is currently named by {\it function-name},
+the \term{lambda list} of the
+\term{method} must be congruent with the \term{lambda list} of the 
+\term{generic function}, or
+an error \oftype{error} is signaled.
+
+%% gray addition
+%Also get an error for an undefined specializer class.
+ 
+\label See Also::
+
+\macref{defgeneric}, 
+\funref{documentation},
+{\secref\IntroToMethods},
+{\secref\GFMethodLambdaListCongruency},
+{\secref\SpecializerQualifierAgreement},
+{\secref\DocVsDecls}
+
+\label Notes:\None.
+ 
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== FIND-CLASS
+\begincom{find-class}\ftype{Accessor}
+ 
+\label Syntax::
+ 
+\DefunWithValues find-class {symbol {\opt} errorp environment} {class}
+\Defsetf         find-class {symbol {\opt} errorp environment} {new-class}
+ 
+\label Arguments and Values::
+ 
+\param{symbol}---a \term{symbol}.
+ 
+\param{errorp}---a \term{generalized boolean}.
+ \Default{\term{true}}
+ 
+\param{environment} -- same as the \keyref{environment} argument to
+  macro expansion functions and is used to distinguish between 
+  compile-time and run-time environments.
+\issue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC}
+  The \keyref{environment} argument has 
+  \term{dynamic extent}; the consequences are undefined if 
+  the \keyref{environment} argument is 
+  referred to outside the \term{dynamic extent} 
+  of the macro expansion function.
+\endissue{MACRO-ENVIRONMENT-EXTENT:DYNAMIC}
+%!!! Default?
+ 
+\param{class}---a \term{class} \term{object}, or \nil.
+ 
+\label Description::
+ 
+Returns the \term{class} \term{object} named by the \param{symbol}
+in the \param{environment}.  If there is no such \term{class},
+\nil\ is returned if \param{errorp} is \term{false}; otherwise,
+if \param{errorp} is \term{true}, an error is signaled.
+
+The \term{class} associated with a particular \term{symbol} can be changed by using
+\macref{setf} with \funref{find-class};
+\issue{SETF-FIND-CLASS:ALLOW-NIL}
+or, if the new \term{class} given to \macref{setf} is \nil,
+the \term{class} association is removed 
+(but the \term{class} \term{object} itself is not affected).
+\endissue{SETF-FIND-CLASS:ALLOW-NIL}
+The results are undefined if the user attempts to change
+\issue{SETF-FIND-CLASS:ALLOW-NIL}
+or remove
+\endissue{SETF-FIND-CLASS:ALLOW-NIL}
+the \term{class} associated with a 
+\term{symbol} that is defined as a \term{type specifier} in this standard.
+\Seesection\IntegratingTypesAndClasses.
+
+When using \SETFof{find-class}, any \term{errorp} argument is \term{evaluated}
+for effect, but any \term{values} it returns are ignored; the \param{errorp}
+\term{parameter} is permitted primarily so that the \param{environment} \term{parameter}
+can be used.
+
+The \param{environment} might be used to distinguish between a compile-time and a
+run-time environment.
+
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+
+If there is no such \term{class} and \param{errorp} is \term{true},
+\funref{find-class} signals an error \oftype{error}.
+ 
+\label See Also::
+
+\macref{defmacro},
+{\secref\IntegratingTypesAndClasses}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== NEXT-METHOD-P
+\begincom{next-method-p}\ftype{Local Function}
+ 
+\label Syntax::
+ 
+\DefunWithValues next-method-p {\noargs} {generalized-boolean}
+ 
+\label Arguments and Values::
+ 
+\param{generalized-boolean}---a \term{generalized boolean}. 
+
+\label Description::
+ 
+The locally defined function \funref{next-method-p} can be used 
+\issue{METHOD-INITFORM:FORBID-CALL-NEXT-METHOD}
+within the body \term{forms} (but not the \term{lambda list})
+\endissue{METHOD-INITFORM:FORBID-CALL-NEXT-METHOD}
+defined by a \term{method-defining form} to determine
+whether a next \term{method} exists.
+ 
+\Thefunction{next-method-p} has \term{lexical scope} and \term{indefinite extent}.
+ 
+\issue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+Whether or not \funref{next-method-p} is \term{fbound} in the
+\term{global environment} is \term{implementation-dependent};
+however, the restrictions on redefinition and \term{shadowing} of
+\funref{next-method-p} are the same as for \term{symbols} in \thepackage{common-lisp}
+which are \term{fbound} in the \term{global environment}.
+The consequences of attempting to use \funref{next-method-p} outside
+of a \term{method-defining form} are undefined.
+\endissue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+ 
+\funref{call-next-method},
+\macref{defmethod},
+\macref{call-method}
+ 
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== CALL-METHOD
+%%% ========== MAKE-METHOD
+%!!! ACW wonders if one of these is a Local Function.
+\begincom{call-method, make-method}\ftype{Local Macro}
+ 
+\label Syntax::
+ 
+\DefmacWithValues call-method {method {\optional} next-method-list} {\starparam{result}}
+\DefmacWithValues make-method {form} {method-object}
+
+\label Arguments and Values::
+ 
+% Moon notes that arguments are not evaluated.
+
+\param{method}---a \term{method} \term{object},
+	      or a \term{list} (see below); \noeval.
+
+\param{method-object}---a \term{method} \term{object}.
+
+\param{next-method-list}---a \term{list} of \param{method} \term{objects}; \noeval.
+ 
+\param{results}---the \term{values} returned by the \term{method} invocation.
+ 
+\label Description::
+ 
+The macro \macref{call-method} is used in method combination.  It hides
+the \term{implementation-dependent} details of how 
+\term{methods} are called. The
+macro \macref{call-method} has \term{lexical scope} and 
+can only be used within
+an \term{effective method} \term{form}.
+ 
+\editornote{KMP: This next paragraph still needs some work.}%!!!
+\issue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+Whether or not \macref{call-method} is \term{fbound} in the
+\term{global environment} is \term{implementation-dependent};
+however, the restrictions on redefinition and \term{shadowing} of
+\macref{call-method} are the same as for \term{symbols} in \thepackage{common-lisp}
+which are \term{fbound} in the \term{global environment}.
+The consequences of attempting to use \macref{call-method} outside
+of an \term{effective method} \term{form} are undefined.
+\endissue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+
+
+% Description of arguments in this paragraph changed by Moon:
+% Description of next-methods in this paragraph shortened by Moon:
+ 
+The macro \macref{call-method} invokes the specified \term{method},
+supplying it with arguments and with definitions for
+\funref{call-next-method} and for \funref{next-method-p}.
+If the invocation of \macref{call-method} is lexically inside
+of a \funref{make-method}, the arguments are those that
+were supplied to that method.  Otherwise the arguments are
+those that were supplied to the generic function.
+The definitions
+of \funref{call-next-method} and \funref{next-method-p} rely on
+the specified \param{next-method-list}.
+ 
+If \param{method} is a \term{list}, the first element of the \term{list}
+must be the symbol \funref{make-method} and the second element must be
+a \term{form}.  Such a \term{list} specifies a \term{method} \term{object}
+whose \term{method} function has a body that is the given \term{form}.
+ 
+\param{Next-method-list} can contain \term{method} \term{objects} or \term{lists},
+the first element of which must be the symbol \funref{make-method} and the
+second element of which must be a \term{form}.
+ 
+% Added by Moon:
+ 
+Those are the only two places where \funref{make-method} can be used.
+The \term{form} used with \funref{make-method} is evaluated in
+the \term{null lexical environment} augmented with a local macro definition
+for \macref{call-method} and with bindings named by
+symbols not \term{accessible} from \thepackage{common-lisp-user}.
+ 
+The \funref{call-next-method} function available to \param{method} 
+will call the first \term{method} in \param{next-method-list}.
+The \funref{call-next-method} function
+available in that \term{method}, in turn, will call the second
+\term{method} in \param{next-method-list}, and so on, until
+the list of next \term{methods} is exhausted.
+ 
+%%--Changed in drafting committee by Moon
+ 
+If \param{next-method-list} is not supplied, the
+\funref{call-next-method} function available to
+\param{method} signals an error \oftype{control-error}
+and the \funref{next-method-p} function
+available to \param{method} returns {\nil}.
+
+\label Examples::
+ 
+%!!! Barmar: This desperately needs examples.
+%      I have a hard time understanding the use of MAKE-METHOD.
+ 
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also:: 
+ 
+\funref{call-next-method},
+\macref{define-method-combination},
+\funref{next-method-p}
+ 
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== CALL-NEXT-METHOD
+\begincom{call-next-method}\ftype{Local Function}
+ 
+\label Syntax::
+ 
+\DefunWithValues call-next-method {{\rest} args} {\starparam{result}}
+ 
+\label Arguments and Values::
+ 
+\param{arg}---an \term{object}.  
+% These are objects that are appropriate as args to the methods.
+ 
+\param{results}---the \term{values} returned by the \term{method} it calls.
+ 
+\label Description::
+ 
+\Thefunction{call-next-method} can be used 
+\issue{METHOD-INITFORM:FORBID-CALL-NEXT-METHOD}
+within the body \term{forms} (but not the \term{lambda list})
+\endissue{METHOD-INITFORM:FORBID-CALL-NEXT-METHOD}
+of a \term{method} defined by a \term{method-defining form} to call the 
+\term{next method}.
+ 
+If there is no next \term{method}, the generic function 
+\funref{no-next-method} is called.
+ 
+The type of method combination used determines which \term{methods}
+can invoke \funref{call-next-method}.  The standard 
+\term{method combination} type allows \funref{call-next-method} 
+to be used within primary \term{methods} and \term{around methods}.
+%%Barmar thinks this is not needed because it is said elsewhere (ch4.1). -kmp 22-Dec-90
+% The standard 
+% \term{method combination}
+% type defines the next \term{method} as follows:
+%  
+% \beginlist
+% \itemitem{\bull}
+% If \funref{call-next-method} is used in an \term{around method},
+% the next \term{method} is the next most specific \term{around method}, if one is
+% applicable.
+%  
+% \itemitem{\bull}
+% If there are no \term{around methods} at all or if 
+% \funref{call-next-method} is called by the least specific \term{around method},
+% other \term{methods} are called as follows:
+% \beginlist 
+% \itemitem{--} All the \term{before methods} are called, in
+% most-specific-first order.  \Thefunction{call-next-method}
+% cannot be used in \term{before methods}.
+%  
+% \itemitem{--} 
+% The most specific primary \term{method} is called.  Inside the body of a
+% primary \term{method}, \funref{call-next-method} can be used to pass control to
+% the next most specific primary \term{method}.  The generic function
+% \funref{no-next-method} is called if \funref{call-next-method} is used and there
+% are no more primary \term{methods}.
+%                                                                    
+% \itemitem{--} All the \term{after methods} are called in
+% most-specific-last order.  \Thefunction{call-next-method}
+% cannot be used in \term{after methods}.
+%  
+% \endlist
+% \endlist
+%
+For generic functions using a type of method combination defined by
+the short form of \macref{define-method-combination},
+\funref{call-next-method} can be used in \term{around methods} only.
+ 
+When \funref{call-next-method} is called with no arguments, it passes the
+current \term{method}'s original arguments to the next \term{method}.  Neither
+argument defaulting, nor using \specref{setq}, nor rebinding variables
+with the same \term{names} as parameters of the \term{method} affects the values
+\funref{call-next-method} passes to the \term{method} it calls.
+ 
+% A sentence was removed here by Moon since it was duplicated below, and another
+% sentence was moved to be next to the duplicate:
+ 
+When \funref{call-next-method} is called with arguments, the 
+\term{next method} is called with those arguments.
+ 
+If \funref{call-next-method} is called with arguments but omits
+optional arguments, the \term{next method} called defaults those arguments.
+ 
+% Further computation is possible after \funref{call-next-method} returns.
+
+\Thefunction{call-next-method} returns any \term{values} that are
+returned by the \term{next method}.
+ 
+\Thefunction{call-next-method} has \term{lexical scope} and 
+\term{indefinite extent} and can only be used within the body of a
+\term{method} defined by a \term{method-defining form}.
+ 
+\issue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+Whether or not \funref{call-next-method} is \term{fbound} in the
+\term{global environment} is \term{implementation-dependent};
+however, the restrictions on redefinition and \term{shadowing} of
+\funref{call-next-method} are the same as for \term{symbols} in \thepackage{common-lisp}
+which are \term{fbound} in the \term{global environment}.
+The consequences of attempting to use \funref{call-next-method} outside
+of a \term{method-defining form} are undefined.
+\endissue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+
+\label Examples:\None.
+
+\label Affected By::
+
+\macref{defmethod}, \macref{call-method}, \funref{define-method-combination}.
+ 
+\label Exceptional Situations::
+ 
+% Grammar improved by Moon:
+ 
+%% Removed per X3J13. -kmp 05-Oct-93
+% If \funref{call-next-method} is used in a \term{method} whose 
+% \term{method combination} does not support it, 
+% an error \oftype{control-error} is \term{signaled}.
+ 
+When providing arguments to \funref{call-next-method}, 
+the following rule must be satisfied or an error \oftype{error} 
+%% "is" => "should be" per X3J13. -kmp 05-Oct-93
+%is
+should be
+signaled: 
+the ordered set of \term{applicable methods} for a changed set of arguments
+for \funref{call-next-method} must be the same as the ordered set of
+\term{applicable methods} for the original arguments to the
+\term{generic function}.
+Optimizations of the error checking are possible, but they must not change
+the semantics of \funref{call-next-method}.
+ 
+\label See Also::
+ 
+\macref{define-method-combination},
+\macref{defmethod},
+\funref{next-method-p},
+\funref{no-next-method},
+\macref{call-method},
+{\secref\MethodSelectionAndCombination},
+{\secref\StdMethComb},
+{\secref\BuiltInMethCombTypes}
+
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== COMPUTE-APPLICABLE-METHODS
+\begincom{compute-applicable-methods}\ftype{Standard Generic Function}
+ 
+\issue{COMPUTE-APPLICABLE-METHODS:GENERIC} 
+
+\label Syntax::
+ 
+\DefgenWithValues compute-applicable-methods {generic-function function-arguments} {methods}
+ 
+\label Method Signatures::
+ 
+\Defmeth compute-applicable-methods {\specparam{generic-function}{standard-generic-function}}
+ 
+\endissue{COMPUTE-APPLICABLE-METHODS:GENERIC} 
+
+\label Arguments and Values::
+ 
+\param{generic-function}---a \term{generic function}.
+                                          
+\param{function-arguments}---a \term{list} of arguments for the \param{generic-function}.
+ 
+\param{methods}---a \term{list} of \term{method} \term{objects}.
+
+\label Description::
+ 
+Given a \param{generic-function} and a set of 
+\param{function-arguments}, the function
+\funref{compute-applicable-methods} returns the set of \term{methods}
+that are applicable for those arguments
+sorted according to precedence order.
+\Seesection\MethodSelectionAndCombination.
+ 
+\label Affected By::
+
+\macref{defmethod}
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+ 
+{\secref\MethodSelectionAndCombination}
+ 
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== DEFINE-METHOD-COMBINATION
+\begincom{define-method-combination}\ftype{Macro}
+ 
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+ 
+% 88-002R p.2-34 said "new method combination object" was returned, but it's wrong,
+% method-combination objects are created by the defgeneric :method-combination option.
+% See 88-002R p.1-28. --Moon
+% The "name" is returned.
+% Barrett didn't believe this at first, but now does.
+% Consensus comes slowly.
+ 
+\DefmacWithValuesNewline define-method-combination 
+			 {name \interleave{\down{short-form-option}}}
+			 {name}
+ 
+\DefmacWithValuesNewline define-method-combination
+                         {\vtop{\hbox{name lambda-list}
+                                \hbox{\paren{\starparam{method-group-specifier}}}
+                                \hbox{\brac{\paren{\kwd{arguments} . args-lambda-list}}}
+                                \hbox{\brac{\paren{\kwd{generic-function} 
+                                                   generic-function-symbol}}}
+                                \hbox{\DeclsAndDoc}
+                                \hbox{\starparam{form}}}}
+			 {name}
+
+\auxbnf{short-form-option}{\kwd{documentation} \param{documentation} | \CR
+			   \kwd{identity-with-one-argument}
+			   \param{identity-with-one-argument} |\CR
+			   \kwd{operator} \param{operator}}
+\auxbnf{method-group-specifier}{\paren{name 
+				       \curly{\plusparam{qualifier-pattern} $\vert$ predicate}
+			               \interleave{\down{long-form-option}}}}
+\auxbnf{long-form-option}{\kwd{description} \param{description} |\CR
+			  \kwd{order} \param{order} 		|\CR
+			  \kwd{required} \param{required-p}}
+ 
+\label Arguments and Values::
+ 
+\param{args-lambda-list}---%
+%Moon thought :arguments for DEFINE-METHOD-COMBINATION took an ordinary lambda list,
+%but Barrett (comment #3, first public review) observes that &whole is permissible.
+%Time to make a new kind of list.
+a \term{define-method-combination arguments lambda list}.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{description}---a \term{format control}.
+
+\param{documentation}---a \term{string}; \noeval.
+
+\param{forms}---an \term{implicit progn} 
+  that must compute and return the \term{form} that specifies how
+  the \term{methods} are combined, that is, the \term{effective method}.
+
+\param{generic-function-symbol}---a \term{symbol}.
+
+\param{identity-with-one-argument}---a \term{generalized boolean}.
+
+\param{lambda-list}---\term{ordinary lambda list}.
+
+\param{name}---a \term{symbol}. 
+  Non-\term{keyword}, \term{non-nil} \term{symbols} are usually used.
+
+\param{operator}---an \term{operator}.
+  \param{Name} and \param{operator} are often the \term{same} \term{symbol}.
+  This is the default, but it is not required.
+
+\param{order}---\kwd{most-specific-first} or \kwd{most-specific-last}; \eval.
+
+%Not a function designator?
+\param{predicate}---a \term{symbol} that names a \term{function} of one argument
+		    that returns a \term{generalized boolean}.
+
+\param{qualifier-pattern}---a \term{list},
+			 or the \term{symbol} \misc{*}.
+
+\param{required-p}---a \term{generalized boolean}.
+ 
+\label Description::
+ 
+The macro \macref{define-method-combination} is used to define new types
+of method combination.
+
+There are two forms of \macref{define-method-combination}.  The short
+form is a simple facility for the cases that are expected
+to be most commonly needed.  The long form is more powerful but more
+verbose.  It resembles \macref{defmacro} in that the body is an
+expression, usually using backquote, that computes a \term{form}.  Thus
+arbitrary control structures can be implemented.  The long form also
+allows arbitrary processing of method \term{qualifiers}.
+ 
+%In both the short and long forms, \param{name} is a symbol.  By convention,
+%non-keyword, \term{non-nil} symbols are usually used.
+ 
+ 
+\beginlist
+\itemitem{{\bf Short Form}}
+ 
+The short form syntax of \macref{define-method-combination} is recognized
+when the second \term{subform} is a \term{non-nil} symbol or is not present.
+When the short form is used, \param{name} is defined as a type of
+method combination that produces a Lisp form
+\f{({\param{operator} \param{method-call} \param{method-call} $\ldots$})}.
+The \param{operator} is a \term{symbol} that can be the \term{name} of a 
+\term{function}, \term{macro}, or \term{special operator}.  
+The \param{operator} can be supplied by a keyword option;
+it defaults to \param{name}.
+ 
+Keyword options for the short form are the following:
+ 
+\beginlist
+ 
+\itemitem{\bull}
+The \kwd{documentation} option is used to document the method-combination type;
+see description of long form below.
+ 
+\itemitem{\bull}
+The \kwd{identity-with-one-argument} option enables an optimization
+when its value is \term{true} (the default is \term{false}).  If there is
+exactly one applicable method and it is a primary method, that method
+serves as the effective method and \param{operator} is not called.
+This optimization avoids the need to create a new effective method and
+avoids the overhead of a \term{function} call.  This option is designed to be
+used with operators such as \specref{progn}, \macref{and}, \funref{$+$}, and
+\funref{max}.
+     
+\itemitem{\bull}
+The \kwd{operator} option specifies the \term{name} of the operator.  The
+\param{operator} argument is a \term{symbol} that can be the 
+\term{name} of a \term{function},
+\term{macro}, or 
+\term{special form}.  
+ 
+%By convention, \param{name} and
+%\param{operator} are often the same symbol.  This is the default,
+%but it is not required.
+\endlist
+ 
+%None of the \term{subforms} is evaluated.
+ 
+These types of method combination require exactly one \term{qualifier} per
+method.  An error is signaled if there are applicable methods with no
+\term{qualifiers} or with \term{qualifiers} that are not supported by 
+the method combination type. 
+ 
+A method combination procedure defined in this way recognizes two
+roles for methods.  A method whose one \term{qualifier} is the symbol naming
+this type of method combination is defined to be a primary method.  At
+least one primary method must be applicable or an error is signaled.
+A method with \kwd{around} as its one \term{qualifier} is an auxiliary
+method that behaves the same as an \term{around method} in standard
+method combination.  \Thefunction{call-next-method} can only be
+used in \term{around methods}; it cannot be used in primary methods
+defined by the short form of the \macref{define-method-combination} macro.
+ 
+A method combination procedure defined in this way accepts an optional
+argument named \param{order}, which defaults to 
+\kwd{most-specific-first}.  A value of \kwd{most-specific-last} reverses
+the order of the primary methods without affecting the order of the
+auxiliary methods.
+ 
+The short form automatically includes error checking and support for
+\term{around methods}.
+ 
+For a discussion of built-in method combination types, 
+\seesection\BuiltInMethCombTypes.
+ 
+\itemitem{{\bf Long Form}}
+ 
+The long form syntax of \macref{define-method-combination} is recognized 
+when the second \term{subform} is a list.  
+ 
+The \param{lambda-list} 
+receives any arguments provided after the \term{name} of the method
+combination type in the \kwd{method-combination} option to
+\macref{defgeneric}.
+ 
+A list of method group specifiers follows.  Each specifier selects a subset
+of the applicable methods to play a particular role, either by matching
+their \term{qualifiers} against some patterns or by testing their \term{qualifiers} with
+a \param{predicate}.   
+These method group specifiers define all method \term{qualifiers}
+that can be used with this type of method combination.
+ 
+% Removed by Moon as the same information is repeated below
+%If an applicable 
+%method does not fall into any method group, the system signals the error
+%that the method is invalid for the kind of method combination in use.
+ 
+%%Rewritten per Barmar. -kmp 28-Dec-90
+%Each method group specifier names a variable.
+The \term{car} of each \param{method-group-specifier} is a \term{symbol}
+which \term{names} a \term{variable}.
+During the execution of
+the \term{forms} in the body of \macref{define-method-combination}, this
+\term{variable} is bound to a list of the \term{methods} in the method group.  The
+\term{methods} in this list occur in the order specified by the 
+\kwd{order} option.
+ 
+If \param{qualifier-pattern} is a \term{symbol} it must be \misc{*}.  
+A method matches
+a \param{qualifier-pattern} if the method's 
+list of \term{qualifiers} is \funref{equal}
+to the \param{qualifier-pattern} (except that the symbol \misc{*} in a 
+\param{qualifier-pattern} matches anything).  Thus 
+a \param{qualifier-pattern} can be one of the
+following:
+ the \term{empty list}, which matches \term{unqualified methods};
+ the symbol \misc{*}, which matches all methods;
+ a true list, which matches methods with the same number of \term{qualifiers} 
+   as the length of the list when each \term{qualifier} matches 
+   the corresponding list element; or
+ a dotted list that ends in the symbol \misc{*} 
+   (the \misc{*} matches any number of additional \term{qualifiers}).
+ 
+ 
+Each applicable method is tested against the \param{qualifier-patterns} and
+\param{predicates} in left-to-right order.  
+As soon as a \param{qualifier-pattern} matches
+or a \param{predicate} returns true, the method becomes a member of the
+corresponding method group and no further tests are made.  Thus if a method
+could be a member of more than one method group, it joins only the first
+such group.  If a method group has more than one 
+\param{qualifier-pattern}, a
+method need only satisfy one of the \param{qualifier-patterns} to be a member of
+the group.
+ 
+The \term{name} of a \param{predicate} function can appear instead of 
+\param{qualifier-patterns} in a method group specifier.  
+The \param{predicate} is called for
+each method that has not been assigned to an earlier method group; it
+is called with one argument, the method's \term{qualifier} \term{list}.
+The \param{predicate} should return true if the method is to be a member of the
+method group.  A \param{predicate} can be distinguished from a 
+\param{qualifier-pattern}
+because it is a \term{symbol} other than \nil\ or \misc{*}.
+ 
+% Wording improved --Moon
+ 
+If there is an applicable method that does not fall into any method group,
+\thefunction{invalid-method-error} is called.
+ 
+Method group specifiers can have keyword options following the
+\term{qualifier} patterns or predicate.  Keyword options can be distinguished from
+additional \term{qualifier} patterns because they are neither lists nor the symbol
+\misc{*}.  The keyword options are as follows:
+ 
+\beginlist
+ 
+\itemitem{\bull}
+The \kwd{description} option is used to provide a description of the
+role of methods in the method group.  Programming environment tools
+use
+ {\tt (apply \#'format stream \param{format-control} (method-qualifiers \param{method}))}
+to print this description, which
+is expected to be concise.  This keyword
+option allows the description of a method \term{qualifier} to be defined in
+the same module that defines the meaning of the 
+method \term{qualifier}.  In most cases, \param{format-control} will not contain any
+\funref{format} directives, but they are available for generality.  
+If \kwd{description} is not supplied, a default description is generated
+based on the variable name and the \term{qualifier} patterns and on whether
+this method group includes the \term{unqualified methods}.  
+ 
+\itemitem{\bull}
+The \kwd{order} option specifies the order of methods.  The \param{order}
+argument is a \term{form} that evaluates to 
+\kwd{most-specific-first} or \kwd{most-specific-last}.  If it evaluates
+to any other value, an error is signaled.  
+%This keyword option is a
+%convenience and does not add any expressive power.
+If \kwd{order} is not supplied, it defaults to 
+\kwd{most-specific-first}.
+                                 
+\itemitem{\bull}
+The \kwd{required} option specifies whether at least one method in
+this method group is required.
+If its value is \term{true} and the method group is empty 
+(that is, no applicable methods match the \term{qualifier} patterns
+or satisfy the predicate), 
+an error is signaled.  
+%This keyword option is a convenience and does not
+%add any expressive power.  
+If \kwd{required} is not supplied,
+it defaults to \nil.  
+ 
+\endlist
+ 
+The use of method group specifiers provides a convenient syntax to
+select methods, to divide them among the possible roles, and to perform the
+necessary error checking.  It is possible to perform further filtering
+of methods in the body \term{forms} by using normal list-processing operations
+and the functions \funref{method-qualifiers} and 
+\funref{invalid-method-error}.  It is permissible to use \specref{setq} on the
+variables named in the method group specifiers and to bind additional
+variables.  It is also possible to bypass the method group specifier
+mechanism and do everything in the body \term{forms}.  This is accomplished
+by writing a single method group with \misc{*} as its only 
+\param{qualifier-pattern}; 
+the variable is then bound to a \term{list} of all of the
+\term{applicable methods}, in most-specific-first order.
+ 
+% Modified by Moon to clarify lexical environment:
+ 
+The body \param{forms} compute and return the \term{form} that specifies
+how the methods are combined, that is, the effective method.
+The effective method is evaluated in
+the \term{null lexical environment} augmented with a local macro definition
+for \funref{call-method} and with bindings named by
+symbols not \term{accessible} from \thepackage{common-lisp-user}.
+Given a method object in one of the 
+\term{lists} produced by the method group
+specifiers and a \term{list} of next methods,
+\funref{call-method}
+will invoke the method such that \funref{call-next-method} has available
+the next methods.
+ 
+When an effective method has no effect other than to call a single
+method, some implementations employ an optimization that uses the
+single method directly as the effective method, thus avoiding the need
+to create a new effective method.  This optimization is active when
+the effective method form consists entirely of an invocation of
+the \funref{call-method} macro whose first \term{subform} is a method object and
+whose second \term{subform} is \nil\ or unsupplied.  Each
+\macref{define-method-combination} body is responsible for stripping off
+redundant invocations of \specref{progn}, \macref{and},
+\macref{multiple-value-prog1}, and the like, if this optimization is desired.
+ 
+ 
+% One sentence was removed and replaced by Moon, since the specification
+% about congruence was excessively vague.  Also discuss the consequences
+% of modifying arguments:
+ 
+The list {\tt (:arguments . \param{lambda-list})} can appear before
+any declarations or \term{documentation string}.  This form is useful when
+the method combination type performs some specific behavior as part of
+the combined method and that behavior needs access to the arguments to
+the \term{generic function}.  Each parameter variable defined by 
+\param{lambda-list} is bound to a \term{form} that can be inserted into the
+effective method.  When this \term{form} is evaluated during execution of the
+effective method, its value is the corresponding argument to the
+\term{generic function}; the consequences of using such a \term{form} as
+the \param{place} in a \macref{setf} \term{form} are undefined.
+\issue{METHOD-COMBINATION-ARGUMENTS:CLARIFY}
+%If \param{lambda-list} is not congruent to the
+%generic function's \term{lambda list}, additional ignored parameters are
+%automatically inserted until it is congruent.
+% If the arguments supplied to the \term{generic function} do not
+% match \param{lambda-list}, extra arguments are ignored and missing
+% arguments are defaulted to \nil\.
+% Thus it is permissible
+% for \param{lambda-list} to receive fewer arguments than the number of
+% required arguments for the \term{generic function}.
+Argument correspondence is computed by dividing the \kwd{arguments} \param{lambda-list}
+and the \term{generic function} \param{lambda-list} into three sections:
+     the \term{required parameters},
+     the \term{optional parameters},
+ and the \term{keyword} and \term{rest parameters}.
+The \term{arguments} supplied to the \term{generic function} for a particular \term{call}
+are also divided into three sections;
+     the required \term{arguments} section contains as many \term{arguments}
+      as the \term{generic function} has \term{required parameters},
+     the optional \term{arguments} section contains as many arguments
+      as the \term{generic function} has \term{optional parameters},
+     and the keyword/rest \term{arguments} section contains the remaining arguments.
+Each \term{parameter} in the required and optional sections of the 
+\kwd{arguments} \param{lambda-list} accesses the argument at the same position
+in the corresponding section of the \term{arguments}.
+If the section of the \kwd{arguments} \param{lambda-list} is shorter,
+ extra \term{arguments} are ignored. 
+If the section of the \kwd{arguments} \param{lambda-list} is longer,
+ excess \term{required parameters} are bound to forms that evaluate to \nil\ 
+ and excess \term{optional parameters} are \term{bound} to their initforms.
+The \term{keyword parameters} and \term{rest parameters} in the \kwd{arguments}
+\param{lambda-list} access the keyword/rest section of the \term{arguments}.
+If the \kwd{arguments} \param{lambda-list} contains \keyref{key}, it behaves as
+if it also contained \keyref{allow-other-keys}.
+
+In addition, \keyref{whole} \param{var} can be placed first in the \kwd{arguments}
+\param{lambda-list}.  It causes \param{var} to be \term{bound} to a \term{form}
+that \term{evaluates} to a \term{list} of all of the \term{arguments} supplied
+to the \term{generic function}.  This is different from \keyref{rest} because it
+accesses all of the arguments, not just the keyword/rest \term{arguments}.
+
+\endissue{METHOD-COMBINATION-ARGUMENTS:CLARIFY}
+
+Erroneous conditions detected by the body should be reported with
+\funref{method-combination-error} or \funref{invalid-method-error}; these
+\term{functions}
+add any necessary contextual information to the error message and will
+signal the appropriate error.
+                                                        
+The body \param{forms} are evaluated inside of the \term{bindings} created by
+the
+\term{lambda list} and method group specifiers. 
+\reviewer{Barmar: Are they inside or outside the :ARGUMENTS bindings?}
+Declarations at the head of
+the body are positioned directly inside of \term{bindings} created by the
+\term{lambda list} and outside of the \term{bindings} of the method group variables. 
+Thus method group variables cannot be declared in this way.  \specref{locally} may be used
+around the body, however.
+ 
+Within the body \param{forms}, \param{generic-function-symbol}
+is bound to the \term{generic function} \term{object}.
+
+\issue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+\param{Documentation} is attached as a \term{documentation string} 
+    to \param{name} (as kind \specref{method-combination})
+and to the \term{method combination} \term{object}.
+\endissue{DOCUMENTATION-FUNCTION-BUGS:FIX}
+ 
+% Removed by Moon, appears to be redundant with what was stated earlier:
+ 
+%The functions \funref{method-combination-error} and 
+%\funref{invalid-method-error} can be called from the body \param{forms} or
+%from \term{functions} called by the body \param{forms}.  The actions of these
+%two \term{functions} can depend on \term{implementation-dependent} dynamic variables
+%automatically bound before the generic function
+%\funref{compute-effective-method} is called.
+ 
+Note that two methods with identical specializers, but with different
+\term{qualifiers}, are not ordered by the algorithm described in Step 2 of
+the method selection and combination process described in 
+\secref\MethodSelectionAndCombination.  Normally the two methods play
+different roles in the effective method because they have different
+\term{qualifiers}, and no matter how they are ordered in the result of Step
+2, the effective method is the same.  If the two methods play the same
+role and their order matters, 
+\reviewer{Barmar: How does the system know when the order matters?}
+an error is signaled.  This happens as
+part of the \term{qualifier} pattern matching in
+\macref{define-method-combination}.
+
+\endlist
+
+\issue{DEFINE-METHOD-COMBINATION:CLARIFY}
+If a \macref{define-method-combination} \term{form} appears as a
+\term{top level form}, the \term{compiler} must make the
+\term{method combination} \term{name} be recognized as a valid
+\term{method combination} \term{name} in subsequent \macref{defgeneric}
+\term{forms}.  However, the \term{method combination} is executed
+no earlier than when the \macref{define-method-combination} \term{form}
+is executed, and possibly as late as the time that \term{generic functions}
+that use the \term{method combination} are executed.
+\endissue{DEFINE-METHOD-COMBINATION:CLARIFY}
+
+\label Examples::
+ 
+%% Examples changed by Moon to reflect that the second argument of
+%% call-method is unsupplied when call-next-method is not allowed
+
+Most examples of the long form of \macref{define-method-combination} also
+illustrate the use of the related \term{functions} that are provided as part
+of the declarative method combination facility.
+ 
+\code
+;;; Examples of the short form of define-method-combination
+ 
+ (define-method-combination and :identity-with-one-argument t) 
+  
+ (defmethod func and ((x class1) y) ...)
+ 
+;;; The equivalent of this example in the long form is:
+ 
+ (define-method-combination and 
+         (&optional (order :most-specific-first))
+         ((around (:around))
+          (primary (and) :order order :required t))
+   (let ((form (if (rest primary)
+                   `(and ,@(mapcar #'(lambda (method)
+                                       `(call-method ,method))
+                                   primary))
+                   `(call-method ,(first primary)))))
+     (if around
+         `(call-method ,(first around)
+                       (,@(rest around)
+                        (make-method ,form)))
+         form)))
+  
+;;; Examples of the long form of define-method-combination
+ 
+;The default method-combination technique
+ (define-method-combination standard ()
+         ((around (:around))
+          (before (:before))
+          (primary () :required t)
+          (after (:after)))
+   (flet ((call-methods (methods)
+            (mapcar #'(lambda (method)
+                        `(call-method ,method))
+                    methods)))
+     (let ((form (if (or before after (rest primary))
+                     `(multiple-value-prog1
+                        (progn ,@(call-methods before)
+                               (call-method ,(first primary)
+                                            ,(rest primary)))
+                        ,@(call-methods (reverse after)))
+                     `(call-method ,(first primary)))))
+       (if around
+           `(call-method ,(first around)
+                         (,@(rest around)
+                          (make-method ,form)))
+           form))))
+  
+;A simple way to try several methods until one returns non-nil
+ (define-method-combination or ()
+         ((methods (or)))
+   `(or ,@(mapcar #'(lambda (method)
+                      `(call-method ,method))
+                  methods)))
+  
+;A more complete version of the preceding
+ (define-method-combination or 
+         (&optional (order ':most-specific-first))
+         ((around (:around))
+          (primary (or)))
+   ;; Process the order argument
+   (case order
+     (:most-specific-first)
+     (:most-specific-last (setq primary (reverse primary)))
+     (otherwise (method-combination-error "~S is an invalid order.~@
+     :most-specific-first and :most-specific-last are the possible values."
+                                          order)))
+   ;; Must have a primary method
+   (unless primary
+     (method-combination-error "A primary method is required."))
+   ;; Construct the form that calls the primary methods
+   (let ((form (if (rest primary)
+                   `(or ,@(mapcar #'(lambda (method)
+                                      `(call-method ,method))
+                                  primary))
+                   `(call-method ,(first primary)))))
+     ;; Wrap the around methods around that form
+     (if around
+         `(call-method ,(first around)
+                       (,@(rest around)
+                        (make-method ,form)))
+         form)))
+  
+;The same thing, using the :order and :required keyword options
+ (define-method-combination or 
+         (&optional (order ':most-specific-first))
+         ((around (:around))
+          (primary (or) :order order :required t))
+   (let ((form (if (rest primary)
+                   `(or ,@(mapcar #'(lambda (method)
+                                      `(call-method ,method))
+                                  primary))
+                   `(call-method ,(first primary)))))
+     (if around
+         `(call-method ,(first around)
+                       (,@(rest around)
+                        (make-method ,form)))
+         form)))
+  
+;This short-form call is behaviorally identical to the preceding
+ (define-method-combination or :identity-with-one-argument t)
+ 
+;Order methods by positive integer qualifiers
+;:around methods are disallowed to keep the example small
+ (define-method-combination example-method-combination ()
+         ((methods positive-integer-qualifier-p))
+   `(progn ,@(mapcar #'(lambda (method)
+                         `(call-method ,method))
+                     (stable-sort methods #'<
+                       :key #'(lambda (method)
+                                (first (method-qualifiers method)))))))
+ 
+ (defun positive-integer-qualifier-p (method-qualifiers)
+   (and (= (length method-qualifiers) 1)
+        (typep (first method-qualifiers) '(integer 0 *))))
+  
+;;; Example of the use of :arguments
+ (define-method-combination progn-with-lock ()
+         ((methods ()))
+   (:arguments object)
+   `(unwind-protect
+        (progn (lock (object-lock ,object))
+               ,@(mapcar #'(lambda (method)
+                             `(call-method ,method))
+                         methods))
+      (unlock (object-lock ,object))))
+  
+\endcode
+ 
+\label Affected By:\None.
+ 
+\label Side Effects::
+
+\issue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+The \term{compiler} is not required to perform any compile-time side-effects.
+\endissue{COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMS:CLARIFY}
+
+\label Exceptional Situations::
+ 
+Method combination types defined with the short form require exactly
+one \term{qualifier} per method.  
+An error \oftype{error} is signaled if there are
+applicable methods with no \term{qualifiers} or with \term{qualifiers} that are not
+supported by the method combination type.
+At least one primary method must be applicable or 
+an error \oftype{error} is signaled.
+ 
+If an applicable method does not fall into any method group, the
+system signals an error \oftype{error}
+indicating that the method is invalid for the kind of
+method combination in use.
+ 
+If the value of the \kwd{required} option is \term{true}
+and the method group is empty (that is, no applicable
+methods match the \term{qualifier} patterns or satisfy the predicate), 
+an error \oftype{error} is signaled.
+ 
+If the \kwd{order} option evaluates to a value other than 
+\kwd{most-specific-first} or \kwd{most-specific-last}, 
+an error \oftype{error} is signaled.
+ 
+\label See Also:: 
+ 
+\funref{call-method},
+\funref{call-next-method},
+\funref{documentation},
+\funref{method-qualifiers},
+\funref{method-combination-error},
+\funref{invalid-method-error},
+\macref{defgeneric},
+{\secref\MethodSelectionAndCombination},
+{\secref\BuiltInMethCombTypes},
+{\secref\DocVsDecls}
+
+\label Notes::
+ 
+% Added phrase to the end of this paragraph --Moon:
+ 
+The \kwd{method-combination} option of \macref{defgeneric} is used to
+specify that a \term{generic function} should use a particular method
+combination type.  The first argument to the \kwd{method-combination}
+option is the \term{name} of a method combination type and the remaining
+arguments are options for that type.
+ 
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== FIND-METHOD
+\begincom{find-method}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\DefgenWithValuesNewline find-method
+			 {generic-function method-qualifiers specializers {\opt} errorp}
+			 {method}
+ 
+\label Method Signatures::
+ 
+\Defmeth find-method 
+	 {\vtop{\hbox{\specparam{generic-function}{standard-generic-function}}
+		\hbox{method-qualifiers specializers {\opt} errorp}}}
+ 
+\label Arguments and Values::
+ 
+\param{generic-function}---a \term{generic function}.
+ 
+\param{method-qualifiers}---a \term{list}.
+ 
+\param{specializers}---a \term{list}.
+ 
+\param{errorp}---a \term{generalized boolean}.
+ \Default{\term{true}}
+ 
+\param{method}---a \term{method} \term{object}, or \nil.
+ 
+\label Description::
+ 
+The \term{generic function} \funref{find-method} takes a \term{generic function} 
+and returns the \term{method} \term{object} that agrees on \term{qualifiers} 
+and \term{parameter specializers} with the \param{method-qualifiers} and 
+\param{specializers} arguments of \funref{find-method}.  
+\param{Method-qualifiers}  contains the
+method \term{qualifiers} for the \term{method}. 
+The order of the method \term{qualifiers}
+is significant.                                
+For a definition of agreement in this context,
+\seesection\SpecializerQualifierAgreement.
+ 
+The \param{specializers} argument contains the parameter
+specializers for the \term{method}. It must correspond in length to
+the number of required arguments of the \term{generic function}, or
+an error is signaled.  This means that to obtain the
+default \term{method} on a given \param{generic-function},
+a \term{list} whose elements are \theclass{t} must be given.
+ 
+If there is no such \term{method} and \param{errorp} is \term{true},
+\funref{find-method} signals an error.
+If there is no such \term{method} and \param{errorp} is \term{false},
+\funref{find-method} returns \nil.
+ 
+\label Examples::
+ 
+\code
+ (defmethod some-operation ((a integer) (b float)) (list a b))
+\EV #<STANDARD-METHOD SOME-OPERATION (INTEGER FLOAT) 26723357>
+ (find-method #'some-operation '() (mapcar #'find-class '(integer float)))
+\EV #<STANDARD-METHOD SOME-OPERATION (INTEGER FLOAT) 26723357>
+ (find-method #'some-operation '() (mapcar #'find-class '(integer integer)))
+\OUT Error: No matching method
+ (find-method #'some-operation '() (mapcar #'find-class '(integer integer)) nil)
+\EV NIL
+\endcode
+
+\label Affected By::
+
+\funref{add-method},
+\macref{defclass},
+\macref{defgeneric},
+\macref{defmethod}
+ 
+\label Exceptional Situations::
+ 
+If the \param{specializers} argument does not correspond in length to
+the number of required arguments of the \param{generic-function}, an
+an error \oftype{error} is signaled.  
+ 
+If there is no such \term{method} and \param{errorp} is \term{true}, 
+\funref{find-method} signals an error \oftype{error}.
+ 
+\label See Also::
+ 
+{\secref\SpecializerQualifierAgreement}
+ 
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== ADD-METHOD
+\begincom{add-method}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\DefgenWithValues add-method {generic-function method} {generic-function}
+ 
+\label Method Signatures::
+ 
+\Defmeth add-method {\vtop{\hbox{\specparam{generic-function}{standard-generic-function}}
+			   \hbox{\specparam{method}{method}}}}
+ 
+\label Arguments and Values::
+ 
+\param{generic-function}---a \term{generic function} \term{object}.
+ 
+\param{method}---a \term{method} \term{object}.
+ 
+\label Description::
+ 
+The generic function \funref{add-method} adds a \term{method}
+to a \term{generic function}.
+ 
+If \param{method} agrees with an existing \term{method} of \param{generic-function}
+on \term{parameter specializers} and \term{qualifiers}, 
+the existing \term{method} is replaced.
+ 
+%% Per X3J13. -kmp 05-Oct-93
+\label Examples:\None.
+ 
+%!!!
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations::
+ 
+The \term{lambda list} of the method function of \param{method} must be
+congruent with the \term{lambda list} of \param{generic-function}, 
+or an error \oftype{error} is signaled.
+ 
+If \param{method} is a \term{method} \term{object} of
+another \term{generic function}, an error \oftype{error} is signaled.
+ 
+                                     
+\label See Also::
+                      
+\macref{defmethod},
+\macref{defgeneric},
+\funref{find-method},
+\funref{remove-method},
+{\secref\SpecializerQualifierAgreement}
+
+\label Notes:\None.
+ 
+\endcom
+ 
+
+%%% ========== INITIALIZE-INSTANCE
+\begincom{initialize-instance}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\issue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+\DefgenWithValues initialize-instance 
+		  {instance {\rest} initargs {\key} {\allowotherkeys}}
+		  {instance}
+\endissue{INITIALIZATION-FUNCTION-KEYWORD-CHECKING}
+ 
+\label Method Signatures::
+ 
+\Defmeth initialize-instance {\specparam{instance}{standard-object} {\rest} initargs}
+ 
+\label Arguments and Values::
+ 
+\param{instance}---an \term{object}.
+ 
+\param{initargs}---a \term{defaulted initialization argument list}.
+ 
+\label Description::
+ 
+Called by \funref{make-instance} to initialize a newly created \term{instance}.
+The generic function is called with the new \param{instance} 
+and the \term{defaulted initialization argument list}.
+ 
+The system-supplied primary \term{method} on \funref{initialize-instance}
+initializes the \term{slots} of the \param{instance} with values according 
+to the \param{initargs} and the \kwd{initform} forms of the \term{slots}.
+It does this by calling the generic function \funref{shared-initialize}
+with the following arguments: the \param{instance}, \t\ (this indicates
+that all \term{slots} for which no initialization arguments are provided
+should be initialized according to their \kwd{initform} forms), and
+the \param{initargs}.
+ 
+Programmers can define \term{methods} for \funref{initialize-instance} to
+specify actions to be taken when an instance is initialized.  If only
+\term{after methods} are defined, they will be run after the
+system-supplied primary \term{method} for initialization and therefore will
+not interfere with the default behavior of \funref{initialize-instance}.
+ 
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+ 
+\funref{shared-initialize},
+\funref{make-instance},
+\funref{slot-boundp},
+\funref{slot-makunbound},
+{\secref\ObjectCreationAndInit},
+{\secref\InitargRules},
+{\secref\DeclaringInitargValidity}
+
+\label Notes:\None.
+ 
+\endcom
+
+%%% ========== CLASS-NAME
+\begincom{class-name}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\DefgenWithValues class-name {class} {name}
+ 
+\label Method Signatures::
+ 
+\Defmeth class-name {\specparam{class}{class}}
+ 
+\label Arguments and Values::
+ 
+\param{class}---a \term{class} \term{object}.
+
+\param{name}---a \term{symbol}.
+ 
+\label Description::
+
+Returns the \term{name} of the given \param{class}.
+ 
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+ 
+\funref{find-class},
+{\secref\Classes}
+ 
+\label Notes::
+ 
+If $S$ is a \term{symbol} such that $S =${\tt (class-name $C$)}
+and $C =${\tt (find-class $S$)}, then $S$ is the proper name of $C$.
+For further discussion, \seesection\Classes.
+
+The name of an anonymous \term{class} is \nil.
+
+\endcom
+
+%%% ========== (SETF CLASS-NAME)
+\begincom{(setf class-name)}\ftype{Standard Generic Function}
+ 
+\label Syntax::
+ 
+\DefgenWithValues {(setf class-name)} {new-value class} {new-value}
+ 
+\label Method Signatures::
+                                                             
+\Defmeth {(setf class-name)} {new-value \specparam{class}{class}}
+ 
+\label Arguments and Values::
+                 
+\param{new-value}---a \term{symbol}.
+ 
+\param{class}---a \term{class}.
+ 
+\label Description::
+ 
+The generic function \f{(setf class-name)} sets the name of 
+a \param{class} object.
+
+%The name of \param{class} is set to \param{new-value}.
+ 
+ 
+\label Examples:\None.
+
+\label Affected By:\None.
+ 
+\label Exceptional Situations:\None.
+ 
+\label See Also::
+ 
+\funref{find-class},
+\term{proper name},
+{\secref\Classes}
+
+%% Per X3J13. -kmp 05-Oct-93
+\label Notes:\None.
+ 
+%This info is in the glossary and elsewhere.  I added a cross reference above. -kmp 14-May-91
+% If \i{S} is a symbol such that 
+%     \f{\i{S} = (class-name \i{C})}
+% and \f{\i{C} = (find-class \i{S})},
+% then \i{S} is the \term{proper name} of \i{C}.  
+%For further discussion, \seesection\Classes.
+ 
+\endcom
+
+%%% ========== CLASS-OF
+\begincom{class-of}\ftype{Function}
+ 
+\label Syntax::
+ 
+\DefunWithValues class-of {object} {class}
+ 
+\label Arguments and Values::
+ 
+\param{object}---an \term{object}.
+ 
+\param{class}---a \term{class} \term{object}.
+
+\label Description::
+ 
+Returns the \term{class} of which the \param{object} is 
+%"an instance" -> "a direct instance" -kmp 15-Jan-91
+a \term{direct instance}.
+ 
+\label Examples::
+
+\code
+ (class-of 'fred) \EV #<BUILT-IN-CLASS SYMBOL 610327300>
+ (class-of 2/3) \EV #<BUILT-IN-CLASS RATIO 610326642>
+ 
+ (defclass book () ()) \EV #<STANDARD-CLASS BOOK 33424745>
+ (class-of (make-instance 'book)) \EV #<STANDARD-CLASS BOOK 33424745>
+ 
+ (defclass novel (book) ()) \EV #<STANDARD-CLASS NOVEL 33424764>
+ (class-of (make-instance 'novel)) \EV #<STANDARD-CLASS NOVEL 33424764>
+
+ (defstruct kons kar kdr) \EV KONS
+ (class-of (make-kons :kar 3 :kdr 4)) \EV #<STRUCTURE-CLASS KONS 250020317>
+\endcode
+
+\label Affected By:\None!
+ 
+\label Exceptional Situations:\None!
+ 
+\label See Also::
+ 
+\funref{make-instance},
+\funref{type-of}
+
+\label Notes:\None.
+ 
+\endcom
+
+%--------------------Object Errors--------------------
+
+\begincom{unbound-slot}\ftype{Condition Type}
+
+\issue{UNDEFINED-VARIABLES-AND-FUNCTIONS:COMPROMISE}
+
+\label Class Precedence List::
+\typeref{unbound-slot},
+\typeref{cell-error},
+\typeref{error},
+\typeref{serious-condition},
+\typeref{condition},
+\typeref{t}
+
+\label Description::
+
+The \term{object} having the unbound slot is initialized by 
+\theinitkeyarg{instance} to \funref{make-condition},
+and is \term{accessed} by \thefunction{unbound-slot-instance}.
+% \Thetype{unbound-slot} has an instance slot that can be
+% initialized using the \kwd{instance} keyword to \funref{make-condition}.
+\endissue{UNDEFINED-VARIABLES-AND-FUNCTIONS:COMPROMISE}
+
+The name of the cell (see \typeref{cell-error}) is the name of the slot.
+
+\label See Also::
+
+\funref{cell-error-name},
+\funref{unbound-slot-object},
+{\secref\ConditionSystemConcepts}
+
+\endcom%{unbound-slot}\ftype{Condition Type}
+
+%%% ========== UNBOUND-SLOT-INSTANCE
+\begincom{unbound-slot-instance}\ftype{Function}
+
+\issue{UNDEFINED-VARIABLES-AND-FUNCTIONS:COMPROMISE}
+
+\label Syntax::
+
+\DefunWithValues unbound-slot-instance {condition} {instance}
+    
+\label Arguments and Values::
+
+\param{condition}---a \term{condition} \oftype{unbound-slot}.
+
+\param{instance}---an \term{object}.
+
+\label Description::
+
+Returns the instance which had the unbound slot in the \term{situation}
+represented by the \param{condition}.          
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{cell-error-name},
+\typeref{unbound-slot},
+{\secref\ConditionSystemConcepts}
+
+\label Notes:\None.
+
+%Shouldn't be needed.
+%It is an error to use \macref{setf} with \funref{unbound-slot-instance}.
+
+\endissue{UNDEFINED-VARIABLES-AND-FUNCTIONS:COMPROMISE}
+\endcom

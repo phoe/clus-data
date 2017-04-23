@@ -1,0 +1,672 @@
+% -*- Mode: TeX -*-
+%% Interpretation of Tokens
+
+\beginsubsection{Numbers as Tokens}
+
+%% 22.1.2 1
+%% 22.1.2 2
+When a \term{token} is read,
+it is interpreted as a \term{number} or \term{symbol}.
+The \term{token} is interpreted as a \term{number} if it satisfies
+the syntax for numbers specified in \thenextfigure.
+%\term{Whitespace}\meaning{2}, macro, and escape
+%characters are treated as \term{alphabetic}\meaning{2} within an extended \term{token}
+%unless preceded by an escape character.
+
+\DefineFigure{SyntaxForNumericTokens}
+%% 2.1.2 3
+%% 2.1.2 4
+%% 22.1.2 3
+\boxfig
+{\advance\baselineskip by 2.5pt
+\halign{{\hskip 2pc}#\hfil&#\hfil&#\hfil\cr
+ \param{numeric-token}   & ::$=$ & \down{integer} $\vert$ 
+				   \down{ratio}   $\vert$
+				   \down{float}   \cr
+ \param{integer}         & ::$=$ & \ttbrac{\param{sign}} 
+				   \plusparam{decimal-digit} 
+				   \param{decimal-point} $\vert$
+				   \ttbrac{\param{sign}} 
+				   \plusparam{digit} \cr
+%  \param{integer}         & ::$=$ & \ttbrac{\param{sign}} 
+% 				   \plus{\curly{\param{digit}}}
+% 				   \ttbrac{\param{decimal-point}} \cr
+ \param{ratio}           & ::$=$ & \ttbrac{\param{sign}}
+				   \plus{\curly{\param{digit}}}
+				   \param{slash} 
+				   \plus{\curly{\param{digit}}}   \cr
+ \param{float}           & ::$=$ & \ttbrac{\param{sign}}
+				   \star{\curly{\param{decimal-digit}}}
+				   \param{decimal-point}
+				   \plus{\curly{\param{decimal-digit}}}
+				   \ttbrac{\down{exponent}}      \cr
+		         &       & $\vert\;$
+				   \ttbrac{\param{sign}}
+				   \plus{\curly{\param{decimal-digit}}} 
+				   \ttbrac{\param{decimal-point} 
+					   \star{\curly{\param{decimal-digit}}}}
+				   \down{exponent} \cr
+ \param{exponent}        & ::$=$ & \param{exponent-marker}
+				   \ttbrac{\param{sign}}
+				   \plus{\curly{\param{digit}}}   \cr
+ \noalign{\vskip 5pt}
+ \param{sign}---a \term{sign}.\span\span\cr
+ \param{slash}---a \term{slash}\span\span\cr
+ \param{decimal-point}---a \term{dot}.\span\span\cr
+ \param{exponent-marker}---an \term{exponent marker}.\span\span\cr
+ \param{decimal-digit}---a \term{digit} in \term{radix} \f{10}.\span\span\cr
+ \param{digit}---a \term{digit} in the \term{current input radix}.\span\span\cr
+}}
+\caption{Syntax for Numeric Tokens}
+\endfig
+
+\beginsubsubsection{Potential Numbers as Tokens}
+\DefineSection{PotentialNumbersAsTokens}
+
+%% 22.1.2 3
+%% 22.1.2 4
+To allow implementors and future \clisp\ standards
+to extend the syntax of numbers, a
+syntax for \term{potential numbers} is defined that is
+more general than the syntax for numbers.
+A \term{token} is a \term{potential number} if it satisfies all of the following
+requirements:
+
+%% 22.1.2 5
+\beginlist
+\item{1.}
+The \term{token} consists entirely of 
+  \term{digits},
+  \term{signs},
+  \term{ratio markers},
+  decimal points (\f{.}),
+  extension characters (\hat\ or \f{\_}),
+  and number markers.
+A number marker is a letter. 
+Whether a letter may be treated as a number marker depends on context,
+but no letter that is adjacent to another letter may ever be treated as a number marker.
+\term{Exponent markers} are number markers.
+
+%% 22.1.2 6
+\item{2.}
+The \term{token} contains at least one digit.  Letters may be considered to be
+digits, depending on the \term{current input base}, but only
+in \term{tokens} containing no decimal points.
+
+
+%% 22.1.2 7
+\item{3.}
+The \term{token} begins with a \term{digit}, \term{sign}, decimal point, or extension character,
+\issue{COLON-NUMBER}
+\reviewer{Barmar: This section is unnecessary because the first bullet already 
+		  omits discussion of a colon (\term{package marker}).}%!!!
+but not a 
+%colon.
+\term{package marker}.
+The syntax involving a leading 
+%colon
+\term{package marker} followed by a \term{potential number} is
+not well-defined. The consequences of the use 
+of notation such as \f{:1}, \f{:1/2}, and \f{:2{\hat}3} in a
+position where an expression appropriate for \funref{read} 
+is expected are unspecified.
+\endissue{COLON-NUMBER}
+
+%% 22.1.2 8
+\item{4.}
+The \term{token} does not end with a sign.
+\endlist
+
+%% 22.1.2 10
+If a \term{potential number} has number syntax, 
+a \term{number} of the appropriate type is constructed and returned, 
+if the \term{number} is representable in an implementation.
+A \term{number} will not be representable in an implementation 
+if it is outside the boundaries set by the \term{implementation-dependent} 
+constants for \term{numbers}.
+For example, specifying too large or too small an exponent for a \term{float}
+may make the \term{number} impossible to represent in the implementation.
+A \term{ratio} with denominator zero (such as \f{-35/000})
+is not represented in any implementation.
+When a \term{token} with the syntax of a number cannot be converted to an internal
+\term{number}, an error \oftype{reader-error} is signaled.  An error
+must not be signaled for specifying too many significant digits
+for a \term{float}; a truncated or rounded value should be produced.
+
+%% 22.1.2 11
+%% 22.1.2 12
+If there is an ambiguity as to whether
+a letter should be treated as a digit or as a number marker,
+the letter is treated as a digit.
+
+\beginsubsubsubsection{Escape Characters and Potential Numbers}
+\DefineSection{EscCharsAndPotentialNums}
+%% This section moved from 22.1.2 per Loosemore #11 (first public review). -kmp 10-May-93
+
+%% 22.1.2 9
+%The printed representation for
+A \term{potential number} cannot contain any \term{escape}
+\term{characters}.  An \term{escape} \term{character} robs the following
+\term{character} of all syntactic qualities, forcing it to be strictly
+\term{alphabetic}\meaning{2} and therefore unsuitable for use in a
+\term{potential number}.  For example, all of the following
+representations are interpreted as \term{symbols}, not \term{numbers}:
+
+\code
+ \\256   25\\64   1.0\\E6   |100|   3\\.14159   |3/4|   3\\/4   5||
+\endcode
+
+In each case, removing the \term{escape} \term{character} (or \term{characters}) 
+would 
+%% Kent and Sandra agreed that the following word change was editorial
+%% and would de-mystify the intent. -kmp 12-May-93
+%allow the token to be treated as a \term{number}.
+cause the token to be a \term{potential number}.
+
+\endsubsubsubsection%{Escape Characters and Potential Numbers}
+
+\beginsubsubsubsection{Examples of Potential Numbers}
+
+As examples, the \term{tokens} in \thenextfigure\ are \term{potential numbers},
+but they are not actually numbers, and so are reserved \term{tokens};
+a \term{conforming implementation} is permitted, but not required,
+to define their meaning.
+
+\showfive{Examples of reserved tokens}{
+\f{1b5000}    & \f{777777q}     & \f{1.7J} & \f{-3/4+6.7J} & \f{12/25/83}\cr
+\f{27{\hat}19} & \f{3{\hat}4/5}   & \f{6//7} & \f{3.1.2.6}   & \f{{\hat}-43\hat}\cr
+\f{3.141_592_653_589_793_238_4} & \f{-3.7+2.6i-6.17j+19.6k}\cr
+}
+
+
+The \term{tokens} in \thenextfigure\ are not \term{potential numbers}; 
+they are always treated as \term{symbols}:
+
+\showfive{Examples of symbols}{
+\f{/}    & \f{/5}    & \f{+}  & \f{1+}   & \f{1-}\cr
+\f{foo+} & \f{ab.cd} & \f{\_} & \f{\hat} & \f{{\hat}/-}\cr
+}
+                                  
+The \term{tokens} in \thenextfigure\ are \term{potential numbers}
+if the \term{current input base} is \f{16}, 
+but they are always treated as \term{symbols} if the \term{current input base} is \f{10}. 
+
+\showfive{Examples of symbols or potential numbers}{
+\f{bad-face} & \f{25-dec-83} & \f{a/b} & \f{fad_cafe} & \f{f{\hat}}\cr
+}
+
+\endsubsubsubsection%{Examples of Potential Numbers}
+
+\endsubsubsection%{Potential Numbers}
+
+\endsubsection%{Numbers as Tokens}
+
+\beginsubsection{Constructing Numbers from Tokens}
+\DefineSection{NumsFromTokens}
+
+A \term{real} is constructed directly from a corresponding numeric \term{token};
+\seefigure\SyntaxForNumericTokens.
+
+A \term{complex} is notated as a \f{\#C} (or \f{\#c}) followed by a \term{list}
+of two \term{reals}; \seesection\SharpsignC.
+
+The \term{reader macros} \f{\#B}, \f{\#O}, \f{\#X}, and \f{\#R} may also be useful
+in controlling the input \term{radix} in which \term{rationals} are parsed;
+ \seesection\SharpsignB,
+     \secref\SharpsignO,
+     \secref\SharpsignX,
+ and \secref\SharpsignR.
+
+This section summarizes the full syntax for \term{numbers}.
+
+\beginsubsubsection{Syntax of a Rational}
+
+\beginsubsubsubsection{Syntax of an Integer}
+\DefineSection{SyntaxOfIntegers}
+
+%% 2.1.2 3
+
+% \term{Integers} can be written as a sequence of digits, optionally
+% preceded by a sign and optionally followed by a decimal point;
+% \seefigure\SyntaxForNumericTokens.
+
+\term{Integers} can be written as a sequence of \term{digits}, 
+optionally preceded by a \term{sign} and optionally followed by a decimal point;
+\seefigure\SyntaxForNumericTokens.
+When a decimal point is used,
+the \term{digits} are taken to be in \term{radix} \f{10};
+when no decimal point is used,
+the \term{digits} are taken to be in radix given by the \term{current input base}.
+
+For information on how \term{integers} are printed, \seesection\PrintingIntegers.
+
+\endsubsubsubsection%{Syntax of an Integer}
+
+\beginsubsubsubsection{Syntax of a Ratio}
+\DefineSection{SyntaxOfRatios}
+
+\term{Ratios} can be written as an optional \term{sign} followed by two
+non-empty sequences of \term{digits} separated by a \term{slash};
+\seefigure\SyntaxForNumericTokens.
+%% 2.1.2 4
+The second sequence may not consist
+entirely of zeros.
+%The same radix specifiers
+%(one of \f{\#\param{nn}R}, \f{\#O}, \f{\#B}, or \f{\#X}) as for 
+%\term{integers}
+%are used to notate \term{ratios} in radices other than ten.
+Examples of \term{ratios} are in \thenextfigure.
+
+\showtwo{Examples of Ratios}{
+\f{2/3}                & ;This is in canonical form                   \cr
+\f{4/6}                & ;A non-canonical form for 2/3                \cr
+\f{-17/23}             & ;A ratio preceded by a sign                  \cr
+\f{-30517578125/32768} & ;This is $(-5/2)^{15}$                       \cr
+\f{10/5}               & ;The canonical form for this is \f{2}        \cr
+\f{\#o-101/75}         & ;Octal notation for $-65/61$                 \cr
+\f{\#3r120/21}         & ;Ternary notation for $15/7$                 \cr
+\f{\#Xbc/ad}           & ;Hexadecimal notation for $188/173$          \cr
+\f{\#xFADED/FACADE}    & ;Hexadecimal notation for $1027565/16435934$ \cr
+}
+
+\reviewer{Barmar: \#o, \#3r, \#X, and \#x mentioned above 
+		  are not in the syntax rules defined just above that.}
+%!!! Maybe they don't belong here? -kmp 17-Oct-90
+
+For information on how \term{ratios} are printed,
+\seesection\PrintingRatios.
+
+\endsubsubsubsection%{Syntax of a Ratio}
+
+\endsubsubsection%{Syntax of a Rational}
+
+\beginsubsubsection{Syntax of a Float}
+\DefineSection{SyntaxOfFloats}
+
+%% 2.1.3 7                   
+\term{Floats} can be written in either decimal fraction or computerized
+scientific notation: an optional sign, then a non-empty sequence of digits
+with an embedded decimal point,
+then an optional decimal exponent specification.
+If there is no exponent specifier, then
+the decimal point is required, and there must be digits
+after it.
+The exponent specifier consists of an \term{exponent marker},
+an optional sign, and a non-empty sequence of digits.
+If no exponent specifier is present, or if the \term{exponent marker} \f{e}
+(or \f{E}) is used, then
+%  the precise format to be used 
+% is not specified.  When such a representation is read and
+% converted to an internal floating-point data value,
+the format specified
+by \varref{*read-default-float-format*} is used.
+\Seefigure\SyntaxForNumericTokens.
+
+%% 2.1.3 1
+An implementation may provide one or more kinds of \term{float}
+that collectively make up \thetype{float}.
+%% 2.1.3 8
+The letters \f{s}, \f{f}, \f{d}, and \f{l} (or their
+respective uppercase equivalents) explicitly specify the
+use of the \term{types} \typeref{short-float}, \typeref{single-float}, 
+\typeref{double-float}, and \typeref{long-float}, respectively.
+                                                
+%% 2.1.3 9
+The internal format used for an external representation depends only
+on the \term{exponent marker}, and not on the number of decimal digits
+in the external representation.
+
+\Thenextfigure\ contains examples of notations for \term{floats}: 
+                                   
+\showtwo{Examples of Floating-point numbers}{
+ \f{0.0}      & ;Floating-point zero in default format                          \cr
+ \f{0E0}      & ;As input, this is also floating-point zero in default format.  \cr
+	      & ;As output, this would appear as \f{0.0}.			\cr
+ \f{0e0}      & ;As input, this is also floating-point zero in default format.  \cr
+	      & ;As output, this would appear as \f{0.0}.			\cr
+ \f{-.0}      & ;As input, this might be a zero or a minus zero,                \cr
+              & ; depending on whether the implementation supports              \cr
+              & ; a distinct minus zero.                                        \cr
+              & ;As output, \f{0.0} is zero and \f{-0.0} is minus zero.         \cr
+ \f{0.}       & ;On input, the integer zero---\i{not} a floating-point number!  \cr
+	      & ;Whether this appears as \f{0} or \f{0.} on output depends	\cr
+	      & ;on \thevalueof{*print-radix*}.					\cr
+ \f{0.0s0}    & ;A floating-point zero in short format                          \cr
+ \f{0s0}      & ;As input, this is a floating-point zero in short format.       \cr
+              & ;As output, such a zero would appear as \f{0.0s0}               \cr
+              & ; (or as \f{0.0} if \misc{short-float} was the default format). \cr
+ \f{6.02E+23} & ;Avogadro's number, in default format                           \cr
+ \f{602E+21}  & ;Also Avogadro's number, in default format                      \cr
+}
+
+For information on how \term{floats} are printed,
+\seesection\PrintingFloats.
+
+\endsubsubsection%{Syntax of a Float}
+
+%!!! Barmar: This next is out of place because it isn't really syntax-related.}
+%    KMP: Where to move it to? -kmp
+
+\beginsubsubsection{Syntax of a Complex}
+\DefineSection{SyntaxOfComplexes}
+
+A \term{complex} has a Cartesian structure, 
+with a real part and an imaginary part each of which is a 
+\issue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+\term{real}.
+\endissue{REAL-NUMBER-TYPE:X3J13-MAR-89}
+The parts of a \term{complex} are not necessarily \term{floats} 
+but both parts must be of the same \term{type}: 
+\editornote{KMP: This is not the same as saying they must be the same type.
+                 Maybe we mean they are of the same `precision' or `format'?
+		 GLS had suggestions which are not yet merged.}%!!! 4-Jan-91
+either both are \term{rationals}, or both are of the same \term{float} \term{subtype}.
+When constructing a \term{complex}, if the specified parts are not the
+same \term{type}, the parts are converted to be the same \term{type}
+internally (\ie the \term{rational} part is converted to a \term{float}). 
+An \term{object} of type \f{(complex rational)} is converted internally
+and represented thereafter as a \term{rational} if its imaginary part is an 
+\term{integer} whose value is 0.
+
+For further information, \seesection\SharpsignC\ and \secref\PrintingComplexes.
+
+\endsubsubsection%{Syntax of a Complex}
+
+\endsubsection%{Constructing Numbers from Tokens}
+
+\beginsubsection{The Consing Dot}
+
+%% 22.1.2 13
+If a \term{token} consists solely of dots (with no escape characters),
+then an error \oftype{reader-error} is signaled,
+except in one circumstance:
+if the \term{token} is a single \term{dot}
+and appears in a situation where \term{dotted pair} notation permits a \term{dot},
+then it is accepted as part of such syntax and no error is signaled. 
+\Seesection\LeftParen.
+
+\endsubsection%{The Consing Dot}
+
+\beginsubSection{Symbols as Tokens}
+\DefineSection{SymbolTokens}
+
+Any \term{token} that is not a \term{potential number},
+%next line added per Barmar:
+does not contain a \term{package marker},
+and does not consist entirely of dots
+will always be interpreted as a \term{symbol}.
+Any \term{token} that is a \term{potential number} but does not fit the       
+number syntax is a reserved \term{token} and
+has an \term{implementation-dependent} interpretation.
+%% 22.1.2 14
+%% 11.3.0 7
+%% 2.3.0 4
+In all other cases, the \term{token} is construed to be the name of a \term{symbol}.
+
+Examples of the printed representation of \term{symbols} are in \thenextfigure. 
+For presentational simplicity,
+these examples assume that
+the \term{readtable case} of the \term{current readtable} is \kwd{upcase}.
+
+%% 2.3.0 7                                        
+\showtwo{Examples of the printed representation of symbols (Part 1 of 2)}{
+\f{FROBBOZ}                        & The \term{symbol} whose \term{name} is \f{FROBBOZ}. \cr
+\f{frobboz}                        & Another way to notate the same \term{symbol}.       \cr
+\f{fRObBoz}                        & Yet another way to notate it.                       \cr
+\f{unwind-protect}                 & A \term{symbol} with a hyphen in its \term{name}.   \cr
+\f{+\$}                            & The \term{symbol} named \f{+\$}.                    \cr
+\f{1+}                             & The \term{symbol} named \f{1+}.                     \cr
+\f{+1}                             & This is the \term{integer} \f{1},
+				     not a \term{symbol}.                                \cr
+\f{pascal\_style}                  & This \term{symbol} has an underscore 
+				     in its \term{name}.                                 \cr
+\f{file.rel.43}                    & This \term{symbol} has periods in its \term{name}.  \cr
+\f{\\(}				   & The \term{symbol} whose \term{name} is \f{(}.       \cr%))
+\f{\\+1}                           & The \term{symbol} whose \term{name} is \f{+1}.      \cr
+\f{+\\1}                           & Also the \term{symbol} whose \term{name} is \f{+1}. \cr
+\f{\\frobboz}                      & The \term{symbol} whose \term{name} is \f{fROBBOZ}. \cr
+\f{3.14159265\\s0}                 & The \term{symbol} whose \term{name}
+				     is \f{3.14159265s0}.                                \cr
+\f{3.14159265\\S0}                 & A different \term{symbol}, 
+				     whose \term{name} is \f{3.14159265S0}.              \cr
+\f{3.14159265s0}                   & A possible \term{short float} 
+				     approximation to $\pi$.                             \cr
+}
+
+% This is sort of an artificial division, but addresses the fact that this table is pretty
+% big and makes for awkward-looking page break if the table is left all one piece.
+% -kmp 31-Jan-92
+
+\showtwo{Examples of the printed representation of symbols (Part 2 of 2)}{
+\f{APL\\\\360}                     & The \term{symbol} whose \term{name} 
+				     is \f{APL\\360}.                                    \cr
+\f{apl\\\\360}                     & Also the \term{symbol} whose \term{name} 
+				     is \f{APL\\360}.                                    \cr
+\f{\\(b{\hat}2\\)\\ -\\ 4*a\f{*c}} & The \term{name} is \f{(B{\hat}2) - 4*A*C}.          \cr
+				   & Parentheses and two spaces in it.                   \cr
+\f{\\(\\b{\hat}2\\)\\ -\\4*\\a*\\c} & The \term{name} is \f{(b{\hat}2) - 4*a*c}.         \cr
+				   & Letters explicitly lowercase.                       \cr
+\f{|"|}                            & The same as writing \f{\\"}.                        \cr
+\f{|(b{\hat}2) - 4*a*c|}           & The \term{name} is \f{(b{\hat}2) - 4*a*c}.          \cr
+\f{|frobboz|}                      & The \term{name} is \f{frobboz}, not \f{FROBBOZ}.    \cr
+\f{|APL\\360|}                     & The \term{name} is \f{APL360}.                      \cr
+\f{|APL\\\\360|}                   & The \term{name} is \f{APL\\360}.                    \cr
+\f{|apl\\\\360|}                   & The \term{name} is \f{apl\\360}.                    \cr
+\f{|\\|\\||}                       & Same as \f{\\|\\|} ---the \term{name} is \f{||}.    \cr
+\f{|(B{\hat}2) - 4*A*C|}           & The \term{name} is \f{(B{\hat}2) - 4*A*C}.          \cr
+				   & Parentheses and two spaces in it.                   \cr
+\f{|(b{\hat}2) - 4*a*c|}           & The \term{name} is \f{(b{\hat}2) - 4*a*c}.          \cr
+}
+
+%!!! Presumably this means "other than the code attribute." sigh... -kmp 25-Jan-92
+\issue{CHARACTER-PROPOSAL:2-1-1}
+In the process of parsing a \term{symbol},
+it is \term{implementation-dependent} which
+%\term{attributes} are removed from \term{symbol} \term{names}.
+%% Sandra didn't like the above wording. She suggested this:
+\term{implementation-defined} \term{attributes} are removed
+from the \term{characters} forming a \term{token} that represents a \term{symbol}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+%% 11.3.0 2      
+% When the \term{Lisp reader} has, by parsing, obtained a string of characters
+% %!!! RPG: "thought"? oh well.
+% thought to name a \term{symbol}, 
+% that name is looked up in the \term{current package}.
+%% Rewritten for RPG's sake:
+When parsing the syntax for a \term{symbol},
+the \term{Lisp reader} looks up the \term{name} of that \term{symbol} 
+in the \term{current package}.
+This lookup may involve looking in other 
+\term{packages} whose \term{external symbols}
+are inherited by the \term{current package}.  If the name is found,
+the corresponding \term{symbol} is returned.  If the name is not found
+(that is, there is no \term{symbol} 
+of that name \term{accessible} in the \term{current package}),
+a new \term{symbol} is created and is placed in the \term{current package}
+as an \term{internal symbol}.  The \term{current package} becomes the owner
+(\term{home package}) of the \term{symbol}, 
+and the \term{symbol} becomes interned in the \term{current package}.
+If the name is later read again while this same \term{package} is
+current, the same \term{symbol} will be found and returned.
+
+\endsubSection%{Symbols as Tokens}
+
+\beginsubSection{Valid Patterns for Tokens}
+
+The valid patterns for \term{tokens} are summarized in \thenextfigure. 
+
+\showtwo{Valid patterns for tokens}{
+\f{\i{nnnnn}}                     & a \term{number} \cr
+\f{\i{xxxxx}}                     & a \term{symbol} in the \term{current package} \cr
+\f{:\i{xxxxx}}                    & a \term{symbol} in the \thepackage{keyword} \cr
+\f{\i{ppppp}:\i{xxxxx}}           & an \term{external symbol} 
+				    in the \i{ppppp} \term{package} \cr
+\f{\i{ppppp}::\i{xxxxx}}          & a (possibly internal) \term{symbol} 
+				    in the \i{ppppp} \term{package} \cr
+\f{:\i{nnnnn}}                    & undefined \cr
+\f{\i{ppppp}:\i{nnnnn}}           & undefined \cr
+\f{\i{ppppp}::\i{nnnnn}}          & undefined \cr
+\f{::\i{aaaaa}}                   & undefined \cr
+\f{\i{aaaaa}:}                    & undefined \cr
+\f{\i{aaaaa}:\i{aaaaa}:\i{aaaaa}} & undefined \cr
+}
+
+Note that \i{nnnnn} has number syntax,
+          neither \i{xxxxx} nor \i{ppppp} has number syntax,
+      and \i{aaaaa} has any syntax.
+
+%% 11.0.0 30
+A summary of rules concerning \term{package markers} follows.
+In each case, examples are offered to illustrate the case;
+for presentational simplicity, the examples assume that
+the \term{readtable case} of the \term{current readtable} is \kwd{upcase}.
+
+%% 22.1.2 15
+%% 11.0.0 33
+\beginlist                                           
+\item{1.}
+If there is a single \term{package marker}, and it occurs at the beginning of the
+\term{token}, then the \term{token} is interpreted as a \term{symbol} in \thepackage{keyword}.
+It also sets the \funref{symbol-value} of the newly-created \term{symbol} to that
+same \term{symbol} so that the \term{symbol} will self-evaluate.
+
+For example, 
+\f{:bar}, when read, interns \f{BAR} as an \term{external symbol} in \thepackage{keyword}.
+
+%% 22.1.2 16
+%% 11.0.0 31
+%% 11.0.0 29
+\item{2.}
+If there is a single \term{package marker} not at the beginning or end of the
+\term{token}, then it divides the \term{token} into two parts.  The first part
+specifies a \term{package}; 
+the second part is the name of an \term{external symbol}
+available in that package.  
+
+For example, 
+\f{foo:bar}, when read, looks up \f{BAR} among the \term{external symbols} of
+the \term{package} named \f{FOO}.
+%\f{\#:bar}, when read, creates a new, \term{uninterned} \term{symbol} 
+%named \f{BAR}.
+%\funref{import} and \funref{unintern} can create a \term{symbol} 
+%that has no
+%recorded \term{home package},
+%but that in fact is \term{accessible} in some \term{package}.
+%The implementation 
+%does not check for this pathological case, and such \term{symbols}
+%are printed preceded by \f{\#:}.
+
+%% 22.1.2 17
+%% 11.0.0 32
+%% 11.0.0 26
+\item{3.}
+If there are two adjacent \term{package markers} not at the beginning or end of the
+\term{token}, then they divide the \term{token} into two parts.  The first part
+specifies a \term{package};
+the second part is the name of a \term{symbol} within
+that \term{package} (possibly an \term{internal symbol}).
+
+For example, 
+\f{foo::bar}, when read, interns \f{BAR} in the \term{package} named \f{FOO}.
+
+%% 22.1.2 18
+\item{4.}
+If the \term{token} contains no \term{package markers}, 
+and does not have \term{potential number} syntax,
+then the entire \term{token} is the name of the \term{symbol}.
+The \term{symbol} is looked up in the \term{current package}.
+
+For example, 
+\f{bar}, when read, interns \f{BAR} in the \term{current package}.
+
+%% 22.1.2 19
+%% 11.0.0 34
+\item{5.}
+The consequences are unspecified if any other pattern of \term{package markers}
+in a \term{token} is used.
+All other uses of \term{package markers} within names of \term{symbols} 
+are not defined by this standard 
+but are reserved for \term{implementation-dependent} use.
+\endlist
+
+%% 11.0.0 25
+For example,
+assuming the \term{readtable case} of the \term{current readtable} is \kwd{upcase},
+\f{editor:buffer} refers to the \term{external symbol} 
+named \f{BUFFER} present in the \term{package} named \f{editor},
+regardless of whether there is a \term{symbol} named \f{BUFFER} in
+the \term{current package}.  If there is no \term{package} named
+\f{editor}, or if no \term{symbol} named \f{BUFFER}
+is present in \f{editor}, or if \f{BUFFER} is not exported by
+\f{editor}, the reader signals
+a correctable error.
+%!!! Error type?
+If \f{editor::buffer} is seen, the effect is exactly the same as
+reading \f{buffer} with \thepackage{editor} being the \term{current package}.
+
+\endsubSection%{Valid Patterns for Tokens}
+
+\beginsubSection{Package System Consistency Rules}
+\DefineSection{PackageSysConsistencyRules}
+
+%% 11.0.0 14
+The following rules apply to the package system as long as 
+\thevalueof{*package*} is not changed:
+
+%% 11.0.0 15
+\beginlist
+\itemitem{\b{Read-read consistency}}
+
+
+%!!! Is "same" meaning "string=" here?
+Reading the same \term{symbol} \term{name}
+% "same (eq)" => "\term{same}" for simplicity. -kmp 10-Apr-91
+always results in the \term{same} \term{symbol}.
+
+%% 11.0.0 16
+\itemitem{\b{Print-read consistency}}
+
+% "same (eq)" => "\term{same}" for simplicity. -kmp 10-Apr-91
+An \term{interned symbol} always prints as a sequence of characters that, 
+when read back in, yields the \term{same} \term{symbol}.
+
+For information about how the \term{Lisp printer} treats \term{symbols},
+\seesection\PrintingSymbols.
+
+%% 11.0.0 17
+\itemitem{\b{Print-print consistency}}
+
+% "same (eq)" => "\term{same}" for simplicity. -kmp 10-Apr-91
+If two interned \term{symbols} are not the \term{same},
+then their printed representations will be different sequences of characters.
+\endlist
+
+%% 11.0.0 18
+These rules are true regardless of any implicit interning.
+As long as the \term{current package} is not changed,
+results are reproducible regardless of the order of \term{loading} files 
+or the exact history of what \term{symbols} were typed in when.  
+If \thevalueof{*package*} is changed and then changed back to the previous value,
+consistency is maintained.
+The rules can be violated by
+    changing \thevalueof{*package*},
+    forcing a change to \term{symbols} 
+                  or to \term{packages} 
+    	          or to both
+    by continuing from an error,
+or calling one of the following \term{functions}:
+    \funref{unintern},
+    \funref{unexport},
+    \funref{shadow},
+    \funref{shadowing-import},
+ or \funref{unuse-package}.
+
+An inconsistency only applies if one of the restrictions is violated
+between two of the named \term{symbols}.
+\funref{shadow}, \funref{unexport}, \funref{unintern},
+and \funref{shadowing-import} can only affect the consistency of
+\term{symbols} with the same \term{names} (under \funref{string=})
+as the ones supplied as arguments.
+
+\endsubsection%{Package System Consistency Rules}

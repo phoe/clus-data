@@ -1,0 +1,309 @@
+% -*- Mode: TeX -*-
+%% Error Checking in Function Calls
+
+\issue{ARGUMENT-MISMATCH-ERROR:MORE-CLARIFICATIONS}
+
+\beginsubSection{Argument Mismatch Detection}
+
+\beginsubsubsection{Safe and Unsafe Calls}
+\DefineSection{SafeAndUnsafeCalls}
+
+A \term{call} is a \newterm{safe call} if each of the following is
+either \term{safe} \term{code} or \term{system code} (other than
+\term{system code} that results from \term{macro expansion} of 
+\term{programmer code}):
+\beginlist
+\itemitem{\bull} the \term{call}.
+\itemitem{\bull} the definition of the \term{function} being \term{called}.
+\itemitem{\bull} the point of \term{functional evaluation} 
+\endlist
+
+The following special cases require some elaboration:
+
+\beginlist
+\itemitem{\bull}
+If the \term{function} being called is a \term{generic function},
+it is considered \term{safe} if all of the following are
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+% "safe" => "safe code or system code" per Moon #12 (first public review).
+\term{safe code} or \term{system code}:
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+
+\beginlist
+\itemitem{--} its definition (if it was defined explicitly).
+\itemitem{--} the \term{method} definitions for all \term{applicable} \term{methods}.
+\itemitem{--} the definition of its \term{method combination}.
+\endlist
+
+\itemitem{\bull}
+For the form \f{(coerce \param{x} 'function)}, 
+where \param{x} is a \term{lambda expression},
+the value of the \term{optimize quality} \declref{safety}
+in the global environment at the time the \funref{coerce}
+is \term{executed} applies to the resulting \term{function}.
+
+\issue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
+% \itemitem{\bull}
+% For the form \f{(enclose \param{x} \param{env})}, 
+% where \param{x} is a \term{lambda expression},
+% the value of the \term{optimize quality} \declref{safety}
+% in the \term{environment} \term{object} \param{env} applies
+% to the resulting \term{function}.
+\endissue{SYNTACTIC-ENVIRONMENT-ACCESS:RETRACTED-MAR91}
+
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+% \itemitem{\bull}
+% For     \macref{generic-function},
+%         \specref{generic-flet},
+%     and \specref{generic-labels}
+% \term{forms}, the value of the \term{optimize quality} \declref{safety}
+% in the \term{lexical environment} in which the form appears applies
+% to the resulting \term{generic functions} and \term{method} definitions.
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+   
+\itemitem{\bull}
+For a call to \thefunction{ensure-generic-function}, the value of the
+\term{optimize quality} \declref{safety} in the \term{environment}
+\term{object} passed as the \kwd{environment} \term{argument} applies 
+to the resulting \term{generic function}.
+
+\itemitem{\bull}
+For a call to \funref{compile} with a \term{lambda expression} as the
+\term{argument}, the value of the \term{optimize quality} \funref{safety}
+in the \term{global environment} at the time \funref{compile} is \term{called}
+applies to the resulting \term{compiled function}.
+
+\itemitem{\bull}
+For a call to \funref{compile} with only one argument, if the original definition
+of the \term{function} was \term{safe}, then the resulting \term{compiled function}
+must also be \term{safe}.
+
+\itemitem{\bull}
+A \term{call} to a \term{method} by \funref{call-next-method} must be 
+considered \term{safe} if each of the following is 
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+% "safe" => "safe code or system code" per Moon #12 (first public review).
+\term{safe code} or \term{system code}:
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+
+\beginlist
+%% These first three reworded per RPG for wording consistency with 
+%% another bullet list above.  KAB concurred. -kmp 26-Jan-92
+% \itemitem{--} the \term{generic function}.
+% \itemitem{--} the \term{applicable} \term{methods}.
+% \itemitem{--} the \term{method combination}.
+\itemitem{--} the definition of the \term{generic function} (if it was defined explicitly).
+\itemitem{--} the \term{method} definitions for all \term{applicable} \term{methods}.
+\itemitem{--} the definition of the \term{method combination}.
+\itemitem{--} the point of entry into the body of the \term{method defining form},
+	      where the \term{binding} of \funref{call-next-method} is established.
+\itemitem{--} the point of \term{functional evaluation} of the name \funref{call-next-method}.
+\endlist
+
+\endlist
+
+An \newterm{unsafe call} is a \term{call} that is not a \term{safe call}.
+
+The informal intent is that the \term{programmer} can rely on a \term{call}
+to be \term{safe}, even when \term{system code} is involved, if all reasonable
+steps have been taken to ensure that the \term{call} is \term{safe}.
+For example, if a \term{programmer} calls \funref{mapcar} from \term{safe}
+\term{code} and supplies a \term{function} that was \term{compiled} 
+as \term{safe}, the \term{implementation} is required to ensure that
+\funref{mapcar} makes a \term{safe call} as well.
+
+\beginsubsubsubsection{Error Detection Time in Safe Calls}
+\DefineSection{SafeCallDetectionTime}
+
+If an error is signaled in a \term{safe call},
+the exact point of the \term{signal} is \term{implementation-dependent}.
+In particular, it might be signaled at compile time or at run time,
+and if signaled at run time, 
+it might be prior to, during, or after \term{executing} the \term{call}.
+However, it is always prior to the execution of the body of the \term{function} 
+being \term{called}.
+
+\endsubsubsubsection%{Error Detection Time in Safe Calls}
+
+\endsubsubsection%{Safe and Unsafe Calls}
+
+\beginsubsubsection{Too Few Arguments}
+
+It is not permitted to supply too few \term{arguments} to a \term{function}.
+%For Moon:
+Too few arguments means fewer \term{arguments} than the number of \term{required parameters} 
+for the \term{function}.
+
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+%% Per Moon #12 (first public review). -kmp 8-May-93
+%Otherwise, in a \term{safe call},
+If this \term{situation} occurs in a \term{safe call},
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+an error \oftype{program-error} must be signaled;
+and in an \term{unsafe call} the \term{situation} has undefined consequences.
+
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+%% Commented out as redundant, per Moon #12 (first public review).
+%% I sure hope this doesn't lead to confusion down the road...  -kmp 8-May-93
+%If an error is signaled in a \term{safe call},
+%the exact point of the \term{signal} is \term{implementation-dependent};
+%\seesection\SafeCallDetectionTime.
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+
+\endsubsubsection%{Too Few Arguments}
+% ========================================
+\beginsubsubsection{Too Many Arguments}
+
+It is not permitted to supply too many \term{arguments} to a \term{function}.
+Too many arguments means more \term{arguments} than the number of \term{required parameters}
+plus the number of \term{optional parameters}; however, if the \term{function} 
+uses \keyref{rest} or \keyref{key}, it is not possible for it to receive too many arguments.
+
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+%% Per Moon #12 (first public review). -kmp 8-May-93
+%Otherwise, in a \term{safe call},
+If this \term{situation} occurs in a \term{safe call},
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+an error \oftype{program-error} must be signaled;
+and in an \term{unsafe call} the \term{situation} has undefined consequences.
+
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+%% Commented out as redundant, per Moon #12 (first public review).
+%% I sure hope this doesn't lead to confusion down the road...  -kmp 8-May-93
+%If an error is signaled in a \term{safe call},
+%the exact point of the \term{signal} is \term{implementation-dependent};
+%\seesection\SafeCallDetectionTime.
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+
+\endsubsubsection%{Too Many Arguments}
+% ========================================
+\beginsubsubsection{Unrecognized Keyword Arguments}
+\DefineSection{UnrecognizedKeyArgs}
+
+It is not permitted to supply a keyword argument to a \term{function}
+using a name that is not recognized by that \term{function} 
+unless keyword argument checking is suppressed as described
+in \secref\SuppressingKeyArgChecks.
+
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+%% Per Moon #12 (first public review). -kmp 8-May-93
+%Otherwise, in a \term{safe call},
+If this \term{situation} occurs in a \term{safe call},
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+an error \oftype{program-error} must be signaled;
+and in an \term{unsafe call} the \term{situation} has undefined consequences.
+
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+%% Commented out as redundant, per Moon #12 (first public review).
+%% I sure hope this doesn't lead to confusion down the road...  -kmp 8-May-93
+%If an error is signaled in a \term{safe call},
+%the exact point of the \term{signal} is \term{implementation-dependent};
+%\seesection\SafeCallDetectionTime.
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+
+\endsubsubsection%{Unrecognized Keyword Arguments}
+% ========================================
+\beginsubsubsection{Invalid Keyword Arguments}
+\DefineSection{InvalidKeyArgs}
+
+It is not permitted to supply a keyword argument to a \term{function}
+using a name that is not a \term{symbol}.
+
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+%% Per Moon #12 (first public review). -kmp 8-May-93
+%Otherwise, in a \term{safe call},
+If this \term{situation} occurs in a \term{safe call},
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+an error \oftype{program-error} must be signaled 
+unless keyword argument checking is suppressed as described
+in \secref\SuppressingKeyArgChecks;
+and in an \term{unsafe call} the \term{situation} has undefined consequences.
+
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+%% Commented out as redundant, per Moon #12 (first public review).
+%% I sure hope this doesn't lead to confusion down the road...  -kmp 8-May-93
+%If an error is signaled in a \term{safe call},
+%the exact point of the \term{signal} is \term{implementation-dependent};
+%\seesection\SafeCallDetectionTime.
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+
+\endsubsubsection%{Invalid Keyword Arguments}
+% ========================================
+\beginsubsubsection{Odd Number of Keyword Arguments}
+\DefineSection{OddNumberOfKeyArgs}
+
+\issue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
+
+An odd number of \term{arguments} must not be supplied for the \term{keyword parameters}.
+
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+%% Per Moon #12 (first public review). -kmp 8-May-93
+%Otherwise, in a \term{safe call},
+If this \term{situation} occurs in a \term{safe call},
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+an error \oftype{program-error} must be signaled
+unless keyword argument checking is suppressed as described
+in \secref\SuppressingKeyArgChecks;
+and in an \term{unsafe call} the \term{situation} has undefined consequences.
+
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+%% Commented out as redundant, per Moon #12 (first public review).
+%% I sure hope this doesn't lead to confusion down the road...  -kmp 8-May-93
+%If an error is signaled in a \term{safe call},
+%the exact point of the \term{signal} is \term{implementation-dependent};
+%\seesection\SafeCallDetectionTime.
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+
+\endissue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
+
+\endsubsubsection%{Odd Number of Keyword Arguments}
+% ========================================
+\beginsubsubsection{Destructuring Mismatch}
+\DefineSection{DestructuringMismatch}
+
+\issue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
+
+When matching a \term{destructuring lambda list} against a \term{form},
+the pattern and the \term{form} must have compatible \term{tree structure},
+as described in \secref\ExtraDestructureInfo.
+
+Otherwise, in a \term{safe call},
+an error \oftype{program-error} must be signaled;
+and in an \term{unsafe call} the \term{situation} has undefined consequences.
+
+\issue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+%% Commented out as redundant, per Moon #12 (first public review).
+%% I sure hope this doesn't lead to confusion down the road...  -kmp 8-May-93
+%If an error is signaled in a \term{safe call},
+%the exact point of the \term{signal} is \term{implementation-dependent};
+%\seesection\SafeCallDetectionTime.
+\endissue{ARGUMENT-MISMATCH-ERROR-MOON:FIX}
+
+\endissue{ARGUMENT-MISMATCH-ERROR-AGAIN:CONSISTENT}
+
+\endsubsubsection%{Destructuring Mismatch}
+% ========================================
+\beginsubsubsection{Errors When Calling a Next Method}
+
+If \funref{call-next-method} is called with \term{arguments}, the ordered
+set of \term{applicable} \term{methods} for the changed set of \term{arguments}
+for \funref{call-next-method} must be the same as the ordered set of 
+\term{applicable} \term{methods} for the original \term{arguments} to the
+\term{generic function}, or else an error should be signaled.
+
+The comparison between the set of methods applicable to the
+new arguments and the set applicable to the original arguments is
+insensitive to order differences among methods with the same
+specializers.
+ 
+If \funref{call-next-method} is called with \term{arguments} that specify
+a different ordered set of \term{applicable} methods and there is no 
+\term{next method} available, the test for different methods and the 
+associated error signaling (when present) takes precedence over calling
+\funref{no-next-method}.
+
+\endsubsubsection%{Errors When Calling a Next Method}
+
+\endsubSection%{Argument Mismatch Detection}
+
+\endissue{ARGUMENT-MISMATCH-ERROR:MORE-CLARIFICATIONS}

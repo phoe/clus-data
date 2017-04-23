@@ -1,0 +1,61 @@
+% -*- Mode: TeX -*-
+%% Exit Extents
+
+% This text was originally duplicated in each of GO, RETURN-FROM,
+% and THROW.  I thought it would be less redundant to centralize it here.
+% --sjl 7 Mar 92
+
+
+\issue{EXIT-EXTENT:MINIMAL}
+When a transfer of control is initiated by \specref{go}, 
+\specref{return-from}, or \specref{throw}
+the following events occur in order to accomplish the transfer of control.
+Note that for \specref{go}, 
+the \term{exit point} is the \term{form} within the \specref{tagbody}
+that is being executed at the time the \specref{go} is performed;
+for \specref{return-from},
+the \term{exit point} is the corresponding 
+\specref{block} \term{form};
+and for \specref{throw},
+the \term{exit point} is the corresponding 
+\specref{catch} \term{form}. 
+
+\beginlist
+\itemitem{1.} 
+ Intervening \term{exit points} are ``abandoned''
+ (\ie their \term{extent} ends 
+      and it is no longer valid to attempt to transfer control through them).
+
+\itemitem{2.} 
+ The cleanup clauses of any intervening \specref{unwind-protect} clauses
+ are evaluated.
+ 
+\itemitem{3.} 
+% added condition handlers and restarts  -- sjl 7 Mar 92
+ Intervening dynamic \term{bindings} of \declref{special} variables,
+ \term{catch tags}, \term{condition handlers}, and \term{restarts}
+ are undone.
+ 
+\itemitem{4.} 
+ The \term{extent} of the \term{exit point} being invoked ends,
+ and control is passed to the target.
+\endlist 
+ 
+The extent of an exit being ``abandoned'' because it is being passed over
+ends as soon as the transfer of control is initiated. That is,
+event 1 occurs at the beginning of the initiation of the transfer of
+control. 
+The consequences are undefined if an attempt is made to transfer control 
+to an \term{exit point} whose \term{dynamic extent} has ended.
+ 
+%Moon had me add the part about "interleaved" -kmp 13-Feb-92
+Events 2 and 3 are actually performed interleaved, in the order
+corresponding to the reverse order in which they were established.
+The effect of this is that the cleanup clauses of an \specref{unwind-protect}
+see the same dynamic \term{bindings} 
+of variables and \term{catch tags} as were
+visible when the \specref{unwind-protect} was entered.
+ 
+Event 4 occurs at the end of the transfer of control.
+ 
+\endissue{EXIT-EXTENT:MINIMAL}

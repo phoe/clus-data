@@ -1,0 +1,124 @@
+%-*- Mode: TeX -*-
+%%Language Extensions
+
+\issue{EXTENSIONS-POSITION:DOCUMENTATION}
+ 
+A language extension is any documented \term{implementation-defined} behavior
+of a \term{defined name} in this standard that varies from the
+behavior described in this standard, or a documented consequence of a
+situation that the standard specifies as undefined, unspecified, or
+extendable by the implementation.  For example, if this standard says
+that ``the results are unspecified,'' an extension would be to specify
+the results.
+
+\reviewer{Barmar: This contradicts previous definitions of conforming code.}
+If the correct behavior of a program depends on the results provided
+by an extension, only implementations with the same extension will
+execute the program correctly.  Note that such a program might be
+non-conforming.  Also, if this standard says that ``an implementation
+may be extended,'' a conforming, but possibly non-portable, program
+can be written using an extension.
+
+An implementation can have extensions, provided they do not alter the
+behavior of conforming code and provided they are not explicitly
+prohibited by this standard.
+
+\endissue{EXTENSIONS-POSITION:DOCUMENTATION}
+          
+The term ``extension'' refers only to extensions available upon
+startup.  An implementation is free to allow or prohibit redefinition
+of an extension.
+
+The following list contains specific guidance to implementations 
+concerning certain types of extensions.
+\beginlist
+%\itemitem{\b{Additional syntax}}
+%
+%An implementation is not allowed to extend \term{macros} 
+%and \term{special forms} to take
+%additional syntax not specified in this standard.
+ 
+%\itemitem{\b{Extra optional or named arguments}}
+% 
+%Unless explicitly allowed in this standard, 
+%implementations are not allowed to include definitions
+%of \term{functions} with extra optional or named arguments
+%with system-dependent meanings.
+%
+%When extra optional or named arguments are allowed by this
+%standard, they will be annotated as follows:
+%\term{functions} that may be
+%extended to take implementation-specific optional arguments are indicated
+%by \f{&rest ignore} in their argument list.
+%\term{functions} that may be extended
+%to take additional keyword parameters are indicated by \keyref{allow-other-keys}.
+% 
+%The goal is not to outlaw any extensions currently offered by
+%implementors, but to make the range of extensions to \term{functions} 
+%defined in
+%this standard well documented in this standard.  Implementations that want to
+%extend \term{functions} that aren't explicitly 
+%allowed to be extended can instead
+%shadow them.
+%
+% or as follows, if this proposal passes.
+%Alternate proposal: NOT-IN-STANDARD-PACKAGE
+% 
+%Like NO-EXCEPT-AS-ALLOWED, except that an implementation may always
+%provide additional named arguments to a function if the names are not in
+%an implementation-specific package (the list of these currently includes
+%the LISP, USER, and KEYWORD packages).
+% 
+
+\itemitem{\b{Extra return values}}
+
+\issue{EXTRA-RETURN-VALUES:NO} 
+An implementation must return exactly
+the number of return values specified by this standard unless the
+standard specifically indicates otherwise.
+\endissue{EXTRA-RETURN-VALUES:NO}
+
+%\itemitem{\b{Function behavior on non-standard data types}}
+%
+%An implementation does not define the behavior of \term{functions}
+%on \term{types} not explicitly permitted by this standard. 
+
+\itemitem{\b{Unsolicited messages}}
+
+\issue{UNSOLICITED-MESSAGES:NOT-TO-SYSTEM-USER-STREAMS}
+ 
+No output can be produced by a function other than that specified in
+the standard or due to the signaling of \term{conditions}
+detected by the function.
+ 
+Unsolicited output, such as garbage collection notifications and
+autoload heralds, should not go directly to the \term{stream}
+that is the value of a \term{stream} variable defined in this
+standard, but can go indirectly to \term{terminal I/O} by using a
+\term{synonym stream} to \varref{*terminal-io*}.
+ 
+Progress reports from such functions as \funref{load} and
+\funref{compile} are considered solicited, and are not covered by
+this prohibition.
+
+\endissue{UNSOLICITED-MESSAGES:NOT-TO-SYSTEM-USER-STREAMS}
+ 
+\itemitem{\b{Implementation of macros and special forms}}
+
+%Operators that are defined as \term{macros} or
+%\term{special forms} may be defined as \term{functions}
+%instead if the semantics can be preserved. 
+%
+%or as follows:
+%Alternate Proposal: MACRO-AS-FUNCTION:STATUS-QUO
+%
+%The standard will remain silent on the issue of whether or not is
+%is valid for an implementation to implementation "macros" and 
+%"special forms" as functions.
+\issue{MACRO-AS-FUNCTION:DISALLOW}
+
+\term{Macros} and \term{special operators} defined in this standard
+must not be \term{functions}.
+\endissue{MACRO-AS-FUNCTION:DISALLOW} 
+
+\endlist

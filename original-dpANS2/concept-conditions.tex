@@ -1,0 +1,841 @@
+% -*- Mode: TeX -*-
+
+%% Errors
+%% CONDITION-RESTARTS hasn't been included
+
+%!!! What to do with this use of "construct"? -kmp 3-Sep-91
+Common Lisp constructs are described not only in terms of their
+behavior in situations during which they are intended to be used (see
+the ``Description'' part of each \term{operator} specification),
+but in all other situations (see the ``Exceptional Situations''
+part of each \term{operator} specification).
+ 
+A situation is the evaluation of an expression in a specific context.
+%at a particular point in time? -kmp 5-Sep-91
+A \term{condition} is an \term{object} that
+represents a specific situation that has been detected.  
+\term{Conditions} are \instancesofclasses{condition}.
+A hierarchy of \term{condition} classes is defined in \clisp.  
+A \term{condition} has \term{slots} that contain data 
+relevant to the situation that the \term{condition} represents.
+
+An error is a situation in which normal program execution cannot
+continue correctly without some form of intervention (either
+interactively by the user or under program control).  Not all errors
+are detected.  When an error goes undetected, the effects can be
+\term{implementation-dependent}, \term{implementation-defined}, unspecified, or
+undefined. \Seesection\Definitions.  All detected errors can
+be represented by \term{conditions}, but not all 
+\term{conditions} represent errors.
+ 
+Signaling is the process by which a \term{condition} can alter
+the flow of control in a program by raising the 
+\term{condition} which can then be \term{handled}.  The functions
+\funref{error}, \funref{cerror}, \funref{signal}, and
+\funref{warn} are used to signal \term{conditions}.
+ 
+The process of signaling involves the selection and invocation of a
+\term{handler} from a set of \term{active} \term{handlers}.  
+A \term{handler} is a \term{function} of one argument (the 
+\term{condition}) that is invoked to handle a \term{condition}.
+Each \term{handler} is associated with a \term{condition} \term{type},
+and a \term{handler} will be invoked only on a \term{condition} of the
+\term{handler}'s associated \term{type}.
+ 
+\term{Active} \term{handlers} are \term{established} dynamically
+(see \macref{handler-bind} or \macref{handler-case}).
+\term{Handlers} are invoked in a \term{dynamic environment} 
+equivalent to that of the signaler,
+except that the set of \term{active} \term{handlers} 
+is bound in such a way as to include only those that were \term{active} 
+at the time the \term{handler} being invoked was \term{established}.
+Signaling a \term{condition} has no side-effect on the \term{condition}, 
+and there is no dynamic state contained in a \term{condition}.
+ 
+If a \term{handler} is invoked, it can address the \term{situation} 
+in one of three ways:
+ 
+\beginlist
+\itemitem{\b{Decline}}
+
+It can decline to \term{handle} the \term{condition}.  It does this by
+simply returning rather than transferring control.
+When this happens, any values returned by the handler are
+ignored and the next most recently established handler is invoked.
+If there is no such handler and the signaling function is \funref{error}
+or \funref{cerror}, the debugger is entered in the
+\term{dynamic environment} of the signaler. If there is no such
+handler and the signaling function is either \funref{signal} or
+\funref{warn}, the signaling function simply returns~\nil.
+
+\itemitem{\b{Handle}}
+ 
+It can \term{handle} the \term{condition} by performing a non-local
+transfer of control.  This can be done either primitively by using
+\specref{go}, \macref{return}, \specref{throw} or more
+abstractly by using a function such as \funref{abort} or
+\funref{invoke-restart}.
+
+\itemitem{\b{Defer}}
+ 
+It can put off a decision about whether to \term{handle} or \term{decline},
+by any of a number of actions, but most commonly by 
+    signaling another condition,
+    resignaling the same condition,
+ or forcing entry into the debugger.
+
+\endlist
+%%KMP
+%The latter two actions 
+%are really just ways of putting off the decision to either \term{handle}
+%or decline. Ultimately,
+%all a handler can do is to \term{handle} or decline to \term{handle}.
+ 
+\beginSubsection{Condition Types}
+ 
+\Thenextfigure\ lists the \term{standardized} \term{condition} \term{types}.
+Additional \term{condition} \term{types} can be defined by using \macref{define-condition}.
+
+\issue{UNDEFINED-FUNCTIONS-AND-VARIABLES:COMPROMISE}
+\issue{DATA-IO:ADD-SUPPORT}
+\issue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+\issue{ACCESS-ERROR-NAME}
+\issue{READER-ERROR:NEW-TYPE}
+\issue{FLOATING-POINT-CONDITION-NAMES:X3J13-NOV-89}
+\issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+\DefineFigure{StandardizedConditionTypes}
+\displaythree{Standardized Condition Types}{
+arithmetic-error&floating-point-overflow&simple-type-error\cr
+cell-error&floating-point-underflow&simple-warning\cr
+condition&package-error&storage-condition\cr
+control-error&parse-error&stream-error\cr
+division-by-zero&print-not-readable&style-warning\cr
+end-of-file&program-error&type-error\cr
+error&reader-error&unbound-slot\cr
+file-error&serious-condition&unbound-variable\cr
+floating-point-inexact&simple-condition&undefined-function\cr
+floating-point-invalid-operation&simple-error&warning\cr
+}
+\endissue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+\endissue{FLOATING-POINT-CONDITION-NAMES:X3J13-NOV-89}
+\endissue{READER-ERROR:NEW-TYPE}
+\endissue{ACCESS-ERROR-NAME}
+\endissue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+\endissue{DATA-IO:ADD-SUPPORT}
+\endissue{UNDEFINED-FUNCTIONS-AND-VARIABLES:COMPROMISE}
+
+All \term{condition} types are \subtypesof{condition}.  That is,
+ 
+\code
+ (typep \param{c} 'condition) \EV \term{true}
+\endcode
+if and only if \param{c} is a \term{condition}.
+ 
+\term{Implementations} must define all specified \term{subtype} relationships.
+%!!! Barrett: I don't understand this sentence.
+Except where noted, all \term{subtype} relationships indicated in 
+this document are not mutually exclusive.
+A \term{condition} inherits the structure of its \term{supertypes}.
+%!!! Barrett: It would be easier to say that conditions are classes, 
+%      but maybe there is some reason to avoid doing so?
+ 
+The metaclass of \theclass{condition} is not specified.
+\term{Names} of \term{condition} \term{types} may be used to specify
+\term{supertype} relationships in \macref{define-condition}, 
+but the consequences are not specified if an attempt is made to use
+a \term{condition} \term{type} as a \term{superclass} in a \macref{defclass} \term{form}.
+
+% \Thenextfigure\ lists the \term{condition} \term{types} defined in this specification.
+%  
+% \issue{UNDEFINED-FUNCTIONS-AND-VARIABLES:COMPROMISE}
+% \issue{DATA-IO:ADD-SUPPORT}
+% \issue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+% \issue{ACCESS-ERROR-NAME}
+% \issue{READER-ERROR:NEW-TYPE}
+% \issue{FLOATING-POINT-CONDITION-NAMES:X3J13-NOV-89}
+% \issue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+% \displaythree{Condition Types}{
+% arithmetic-error&package-error&storage-condition\cr
+% cell-error&parse-error&stream-error\cr
+% condition&print-not-readable&style-warning\cr
+% control-error&program-error&type-error\cr
+% division-by-zero&reader-error&unbound-slot\cr
+% end-of-file&serious-condition&unbound-slot-instance\cr
+% error&simple-condition&unbound-variable\cr
+% file-error&simple-error&undefined-function\cr
+% floating-point-overflow&simple-type-error&warning\cr
+% floating-point-underflow&simple-warning&\cr
+% }
+% \endissue{COMPILER-DIAGNOSTICS:USE-HANDLER}
+% \endissue{FLOATING-POINT-CONDITION-NAMES:X3J13-NOV-89}
+% \endissue{READER-ERROR:NEW-TYPE}
+% \endissue{ACCESS-ERROR-NAME}
+% \endissue{PARSE-ERROR-STREAM:SPLIT-TYPES}
+% \endissue{DATA-IO:ADD-SUPPORT}
+% \endissue{UNDEFINED-FUNCTIONS-AND-VARIABLES:COMPROMISE}
+
+\Thenextfigure\ shows \term{operators} that
+define \term{condition} \term{types} and creating \term{conditions}.
+
+\displaythree{Operators that define and create conditions.}{
+define-condition&make-condition&\cr
+}
+
+\Thenextfigure\ shows \term{operators} that \term{read} 
+the \term{value} of \term{condition} \term{slots}.
+
+\issue{DATA-IO:ADD-SUPPORT}
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\displaytwo{Operators that read condition slots.}{
+arithmetic-error-operands&simple-condition-format-arguments\cr
+arithmetic-error-operation&simple-condition-format-control\cr
+cell-error-name&stream-error-stream\cr
+file-error-pathname&type-error-datum\cr
+package-error-package&type-error-expected-type\cr
+print-not-readable-object&unbound-slot-instance\cr
+}
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\endissue{DATA-IO:ADD-SUPPORT}
+
+\beginsubsubsection{Serious Conditions}
+
+A \term{serious condition} is a \term{condition} serious
+enough to require interactive intervention if not handled.  
+\term{Serious conditions} are typically signaled with \funref{error} or \funref{cerror};
+non-serious \term{conditions} are typically signaled with \funref{signal} or \funref{warn}.
+%%Barrett: Definitional.
+%All \term{serious conditions} should be \subtypesof{serious-condition}.
+
+\endsubsubsection%{Serious Conditions}
+
+\endSubsection%{Condition Types}
+
+\beginsubsection{Creating Conditions}
+
+The function \funref{make-condition} can be used to construct
+a \term{condition} \term{object} explicitly.  Functions such as \funref{error},
+\funref{cerror}, \funref{signal}, and \funref{warn} operate on
+\term{conditions} and might create \term{condition} \term{objects}
+implicitly.  Macros such as \macref{ccase}, \macref{ctypecase},
+\macref{ecase}, \macref{etypecase}, \macref{check-type}, and
+\macref{assert} might also implicitly create (and \term{signal})
+\term{conditions}.
+ 
+\beginsubsubsection{Condition Designators}
+\DefineSection{ConditionDesignators}
+
+A number of the functions in the condition system take arguments which
+are identified as \newtermidx{condition designators}{condition designator}.
+By convention, those arguments are notated as
+
+\ \param{datum} {\rest} \param{arguments}
+
+Taken together, the \param{datum} and the \param{arguments} are 
+``\term{designators} for a \term{condition} of default type \param{default-type}.''
+How the denoted \term{condition} is computed depends on the type of the \param{datum}:
+
+\beginlist
+
+\item{{\bull} If the \param{datum} is a \term{symbol} 
+              naming a \term{condition} \term{type} $\ldots$}
+
+The denoted \term{condition} is the result of
+
+\code
+ (apply #'make-condition \param{datum} \param{arguments})
+\endcode
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\item{{\bull} If the \param{datum} is a \term{format control} $\ldots$}
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+The denoted \term{condition} is the result of 
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\code
+ (make-condition \param{defaulted-type} 
+                 :format-control \param{datum}
+                 :format-arguments \param{arguments})
+\endcode
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+%Barrett wanted this added so that implementations could do something more
+%elaborate than just the given type without interfering with user programs.
+%There's a lot of mail about simple-condition-disjointness-bug which might or
+%might not actually turn into a formal issue someday. -kmp 2-Feb-92
+where the \param{defaulted-type} is a \term{subtype} of \param{default-type}.
+
+\item{{\bull} If the \param{datum} is a \term{condition} $\ldots$}
+
+The denoted \term{condition} is the \param{datum} itself.
+In this case, unless otherwise specified by the description of the
+\term{operator} in question, the \term{arguments} must be \term{null};
+that is, the consequences are undefined if any \param{arguments} were supplied. 
+
+\endlist
+
+Note that the \param{default-type} gets used only in the case where
+the \param{datum} \term{string} is supplied.  In the other situations,
+the resulting condition is not necessarily of \term{type} \param{default-type}.
+
+Here are some illustrations of how different \term{condition designators}
+can denote equivalent \term{condition} \term{objects}:
+
+\issue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+\code
+(let ((c (make-condition 'arithmetic-error :operator '/ :operands '(7 0))))
+  (error c))
+\EQ (error 'arithmetic-error :operator '/ :operands '(7 0))
+
+(error "Bad luck.")
+\EQ (error 'simple-error :format-control "Bad luck." :format-arguments '())
+\endcode
+\endissue{FORMAT-STRING-ARGUMENTS:SPECIFY}
+
+\endsubsubsection%{Condition Designators}
+
+\endsubsection%{Creating Conditions}
+ 
+\beginsubsection{Printing Conditions}
+\DefineSection{PrintingConditions}
+ 
+If the \kwd{report} argument to \macref{define-condition} is used,
+a print function is defined that is called whenever 
+the defined \term{condition} is printed while \thevalueof{*print-escape*} is \term{false}. 
+This function is called the \newterm{condition reporter};
+the text which it outputs is called a \newterm{report message}.
+
+When a \term{condition} is printed and \varref{*print-escape*}
+is \term{false}, the \term{condition reporter} for the \term{condition} is invoked.
+\term{Conditions} are printed automatically by functions such as
+\funref{invoke-debugger}, \funref{break}, and \funref{warn}.
+
+When \varref{*print-escape*} is \term{true}, the \term{object} should print in an
+abbreviated fashion according to the style of the implementation
+(\eg by \funref{print-unreadable-object}).  It is not required that a
+\term{condition} can be recreated by reading its printed representation.
+ 
+No \term{function} is provided for directly \term{accessing} 
+or invoking \term{condition reporters}.
+ 
+\beginsubsubsection{Recommended Style in Condition Reporting}
+
+In order to ensure a properly aesthetic result when presenting
+\term{report messages} to the user, certain stylistic conventions are
+recommended.
+
+There are stylistic recommendations for the content of the messages
+output by \term{condition reporters}, but there are no formal requirements 
+on those \term{programs}.
+If a \term{program} violates the recommendations for some message, the
+display of that message might be less aesthetic than if the guideline
+had been observed, but the \term{program} is still considered a
+\term{conforming program}.
+
+The requirements on a \term{program} or \term{implementation} which
+invokes a \term{condition reporter} are somewhat stronger.  A \term{conforming
+program} must be permitted to assume that if these style guidelines are
+followed, proper aesthetics will be maintained.  Where appropriate, any
+specific requirements on such routines are explicitly mentioned below.
+
+\beginsubsubsubsection{Capitalization and Punctuation in Condition Reports}
+
+It is recommended that a \term{report message} be a complete sentences, in the
+proper case and correctly punctuated.  In English, for example, this
+means the first letter should be uppercase, and there should be a
+trailing period.
+
+\code
+ (error "This is a message")  ; Not recommended
+ (error "this is a message.") ; Not recommended
+
+ (error "This is a message.") ; Recommended instead
+\endcode
+
+\endsubsubsubsection%{Capitalization and Punctuation in Condition Reports}
+
+\beginsubsubsubsection{Leading and Trailing Newlines in Condition Reports}
+
+It is recommended that a \term{report message} not begin with any 
+introductory text, such as ``\f{Error: }'' or ``\f{Warning: }''
+or even just \term{freshline} or \term{newline}. 
+Such text is added, if appropriate to the context,
+by the routine invoking the \term{condition reporter}.
+
+It is recommended that a \term{report message} not be followed 
+by a trailing \term{freshline} or \term{newline}.
+Such text is added, if appropriate to the context, 
+by the routine invoking the \term{condition reporter}.
+
+\code
+ (error "This is a message.~%")   ; Not recommended
+ (error "~&This is a message.")   ; Not recommended
+ (error "~&This is a message.~%") ; Not recommended
+
+ (error "This is a message.")     ; Recommended instead
+\endcode
+
+\endsubsubsubsection%{Leading and Trailing Newlines in Condition Reports}
+
+\beginsubsubsubsection{Embedded Newlines in Condition Reports}
+
+Especially if it is long, it is permissible and appropriate for 
+a \term{report message} to contain one or more embedded \term{newlines}.
+
+If the calling routine conventionally inserts some additional prefix
+(such as ``\f{Error: }'' or ``\f{;; Error: }'') on the first line of
+the message, it must also assure that an appropriate prefix will be
+added to each subsequent line of the output, so that the left edge of
+the message output by the \term{condition reporter} will still be properly
+aligned.
+
+\code
+ (defun test ()
+   (error "This is an error message.~\%It has two lines."))
+
+ ;; Implementation A
+ (test)
+ This is an error message.
+ It has two lines.
+
+ ;; Implementation B
+ (test)
+ ;; Error: This is an error message.
+ ;;        It has two lines.
+
+ ;; Implementation C
+ (test)
+ >> Error: This is an error message. 
+           It has two lines.
+\endcode
+
+\endsubsubsubsection%{Embedded Newlines in Condition Reports}
+
+\beginsubsubsubsection{Note about Tabs in Condition Reports}
+
+Because the indentation of a \term{report message} might be shifted to the right or
+left by an arbitrary amount, special care should be taken with the
+semi-standard \term{character} \TabChar\ 
+(in those \term{implementations} that support such a \term{character}).  
+Unless the \term{implementation} specifically defines its behavior 
+in this context, its use should be avoided.
+
+\endsubsubsubsection%{Note about Tabs in Condition Reports}
+
+\beginsubsubsubsection{Mentioning Containing Function in Condition Reports}
+
+The name of the containing function should generally not be mentioned in
+\term{report messages}.  It is assumed that the \term{debugger} will make this
+information accessible in situations where it is necessary and appropriate.
+
+\endsubsubsubsection%{Mentioning Containing Function in Condition Reports}
+
+\endsubsubsection%{Recommended Style in Condition Reporting}
+
+\endsubsection%{Printing Conditions}
+\goodbreak
+\beginSubsection{Signaling and Handling Conditions}
+\DefineSection{CondSignalHandle}
+ 
+The operation of the condition system depends on the ordering of
+active \term{applicable handlers} from most recent to least recent.
+
+Each \term{handler} is associated with a \term{type specifier}
+that must designate a \subtypeof{condition}.  A \term{handler}
+is said to be \term{applicable} to a \term{condition} if that
+\term{condition} is of the \term{type} designated by the associated
+\term{type specifier}.
+
+\term{Active} \term{handlers} are \term{established} by using 
+\macref{handler-bind} (or an abstraction based on \macref{handler-bind}, 
+such as \macref{handler-case} or \macref{ignore-errors}).
+ 
+\term{Active} \term{handlers} can be \term{established} within the
+dynamic scope of other \term{active} \term{handlers}.
+At any point during program execution, there is a set of \term{active} \term{handlers}.
+When a \term{condition} is signaled, the \term{most recent} active \term{applicable handler}
+for that \term{condition} is selected from this set.
+Given a \term{condition}, the order of recentness of 
+active \term{applicable handlers} is defined by the following two rules:
+ 
+\beginlist
+ 
+ \itemitem{1.} Each handler in a set of active handlers $H\sub 1$ is
+more recent than every handler in a set $H\sub 2$ if the
+handlers in $H\sub 2$ were active when the handlers in $H\sub 1$ were
+established.
+ 
+ \itemitem{2.} Let $h\sub 1$ and $h\sub 2$ be two applicable active
+handlers established by the same \term{form}. Then $h\sub 1$ is
+more recent than $h\sub 2$ if $h\sub 1$ was defined to the left of
+$h\sub 2$ in the \term{form} that established them.
+ 
+\endlist
+ 
+%!!! Barrett:  This doesn't match my reading of CSv18, p12.
+%     I believe contradicts p21,p22 of that document.  It also differs from
+%     previous paragraph (w/ item 2) and first paragraph under "signaling".
+Once a handler in a handler binding \term{form} (such as 
+\macref{handler-bind} or \macref{handler-case}) has been selected, all
+handlers in that \term{form} become inactive for 
+the remainder of the signaling process.
+%--------------------------------------
+While the selected \term{handler} runs, no other \term{handler} established
+by that \term{form} is active. That is, if the \term{handler} declines, 
+no other handler established by that \term{form} will be considered for possible invocation.
+%-----------------------------------------------------------------------------------------
+
+\Thenextfigure\ shows \term{operators} relating to 
+the \term{handling} of \term{conditions}.
+
+\displaythree{Operators relating to handling conditions.}{
+handler-bind&handler-case&ignore-errors\cr
+}
+ 
+\beginsubsubsection{Signaling}
+\DefineSection{Signaling}
+ 
+When a \term{condition} is signaled, the most recent
+applicable \term{active} \term{handler} is invoked.  
+Sometimes a handler will decline by simply returning
+without a transfer of control.
+In such cases, the next most recent applicable active handler is
+invoked. 
+ 
+If there are no applicable handlers for a \term{condition} that
+has been signaled, or if all applicable handlers decline, the
+\term{condition} is unhandled.
+ 
+The functions \funref{cerror} and \funref{error} invoke the
+interactive \term{condition} handler (the debugger) rather than
+return if the \term{condition} being signaled, regardless of
+its \term{type}, is unhandled.  In contrast, \funref{signal}
+returns \nil\ if the \term{condition} being signaled,
+regardless of its \term{type}, is unhandled.
+
+\Thevariable{*break-on-signals*} can be used to cause the
+debugger to be entered before the signaling process begins.
+ 
+\Thenextfigure\ shows \term{defined names} relating to
+the \term{signaling} of \term{conditions}.
+
+\displaythree{Defined names relating to signaling conditions.}{
+*break-on-signals*&error&warn\cr
+cerror&signal&\cr
+}
+
+\beginsubsubsubsection{Resignaling a Condition}
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+During the \term{dynamic extent} of the \term{signaling} process for
+a particular \term{condition} \term{object}, 
+\funref{signaling} the same \term{condition} \term{object} again
+is permitted if and only if the \term{situation} represented in both
+cases are the same.
+
+For example, a \term{handler} might legitimately \term{signal} 
+the \term{condition} \term{object} that is its \term{argument}
+in order to allow outer \term{handlers} first opportunity to \term{handle} 
+the condition.  (Such a \term{handlers} is sometimes called a ``default handler.'')
+This action is permitted because the \term{situation} which the second
+\term{signaling} process is addressing is really the same \term{situation}.
+
+On the other hand, in an \term{implementation} that implemented asynchronous 
+keyboard events by interrupting the user process with a call to \funref{signal},
+it would not be permissible for two distinct asynchronous keyboard events
+to \term{signal} \term{identical} \term{condition} \term{objects}
+at the same time for different 
+%% Per X3J13 (at request of Gadbois). -kmp 5-Oct-93
+%the
+situations.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+ 
+\endsubsubsubsection%{Resignaling a Condition}
+
+\endsubsubsection%{Signaling}
+\beginsubsubsection{Restarts}
+\DefineSection{Restarts}
+ 
+%!!! Barrett: Not true. Debugger may permit arbitrary returning, depending on implementation.
+The interactive condition handler returns only through
+non-local transfer of control to specially defined \term{restarts}
+that can be set up either by the system or by user code.  Transferring
+control to a restart is called ``invoking'' the restart.  Like
+handlers, active \term{restarts} are \term{established}
+dynamically, and 
+only active \term{restarts}
+can be invoked.  An active 
+\term{restart} can be invoked by the user from
+the debugger or by a program by using \funref{invoke-restart}.
+ 
+%!!! Barrett: :TEST predicate also affects applicability.
+A \term{restart} contains a 
+\term{function} to be \term{called} when the \term{restart} is
+invoked, an optional name that can be used to find or invoke the 
+\term{restart}, and
+an optional set of interaction information for the debugger to use to
+enable the user to manually invoke a \term{restart}. 
+%    some optional information that allows the debugger 
+%    to manage the interactive selection of the \term{restart} in
+%    situations where program handlers cannot select one.
+
+The name of a \term{restart} is
+used by \funref{invoke-restart}. \term{Restarts} that can be invoked
+only within the debugger do not need names.
+%Useless information - terms unnamed and anonymous are never used.
+%\term{Restart} names provide a means 
+%to access program interfaces
+%such as 
+%\funref{find-restart} and \funref{invoke-restart}.  
+%\term{Restarts} named
+%\nil\ are called ``unnamed'' or ``anonymous'' 
+%\term{restarts}. Named \term{restarts} 
+%can be used in both
+%interactive and non-interactive situations, but unnamed
+%\term{restarts} are typically useful only in interactive situations.
+ 
+\term{Restarts} can be established by using \macref{restart-bind}, 
+\macref{restart-case}, and \macref{with-simple-restart}.
+A \term{restart} function can itself invoke any other \term{restart}
+that was active at the time of establishment of the \term{restart} 
+of which the \term{function} is part.
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+\issue{JUN90-TRIVIAL-ISSUES:14}
+The \term{restarts} \term{established} by 
+    a \macref{restart-bind} \term{form}, 
+    a \macref{restart-case} \term{form},
+ or a \macref{with-simple-restart} \term{form}
+have \term{dynamic extent}
+which extends for the duration of that \term{form}'s execution.
+\endissue{JUN90-TRIVIAL-ISSUES:14}
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\term{Restarts} of the same name can be ordered from least recent to
+most recent according to the following two rules:
+ 
+\beginlist
+ 
+ \itemitem{1.} Each \term{restart} in a set of active restarts
+$R\sub 1$ is more recent than every \term{restart} in a
+set $R\sub 2$ if the \term{restarts} 
+in $R\sub 2$ were active when the  \term{restarts} in $R\sub 1$ were
+established.
+ 
+ \itemitem{2.} Let $r\sub 1$ and $r\sub 2$ be two active \term{restarts} with
+the same name established by the same \term{form}. Then $r\sub 1$ is
+more recent than $r\sub 2$ if $r\sub 1$ was defined to the
+left of $r\sub 2$ in the \term{form} that established them.
+ 
+\endlist
+
+If a \term{restart} is invoked but does not transfer control,
+the values resulting from the \term{restart} function are
+returned by the function that invoked the restart, either
+\funref{invoke-restart} or \funref{invoke-restart-interactively}.
+%!!! Barrett: There are other functions that invoke restarts that we built
+%      on these two; i.e., muffle-warning, etc.
+
+\beginsubsubsubsection{Interactive Use of Restarts}
+
+%%KMP replaced 
+%Interaction information comprises two \term{functions}, called the
+%\kwd{report} function and the \kwd{interactive}
+%function. The \kwd{report} function is used to print a
+%description of the \term{restart} and takes a 
+%\term{stream} as an argument.  The
+%\kwd{interactive} function is used to produce a list of
+%arguments for the \term{restart} function if that 
+%\term{restart} is invoked; the
+%\kwd{interactive} function takes no arguments.
+% 
+% 
+%When the debugger is entered, the set of active \term{restarts} 
+%is presented to the user. If an active \term{restart} has interaction
+%information, the \kwd{report} function is used to print a
+%description of the \term{restart}. If the 
+%\term{restart} is invoked (in an
+%\term{implementation-dependent} manner), the \kwd{interactive} function
+%is invoked to produce a list of arguments to which the \term{restart}
+%function is applied as if with \funref{apply}. If an active
+%\term{restart} does not have a \kwd{report} 
+%function and a description
+%of the \term{restart} is printed, the description is
+%\term{implementation-dependent}.  If an active \term{restart} does have not an
+%\kwd{interactive} function and the \term{restart} is invoked
+%interactively, the \term{restart} 
+%function is invoked with no arguments.
+%\macref{restart-bind} and \macref{restart-case} supply
+%defaults for interaction information.  
+%If a \term{restart} 
+%is invoked from
+%within the debugger and the \term{restart} 
+%function simply returns,
+%the consequences are unspecified.
+ 
+For interactive handling, two pieces of information are needed
+from a \term{restart}: a report function and an interactive function.
+ 
+The report function
+%which can be specified using the 
+%\kwd{report-function}
+%   keyword in 
+%\macref{restart-bind} or the 
+%\kwd{report} keyword in \macref{restart-case},
+is used by a program such as the debugger to
+present a description of the action the \term{restart} will take.  
+The report function is specified and established by the 
+\kwd{report-function} keyword to
+\macref{restart-bind} or the 
+\kwd{report} keyword to \macref{restart-case}. 
+%The
+%   report function is a function of one argument, a stream on which
+%   the output is to be done.  If no report function is specified by
+%   the user, the restart will be reported in an \term{implementation-dependent}
+%   way. 
+ 
+The interactive function, which can be specified using the 
+\kwd{interactive-function} keyword to 
+\macref{restart-bind} or \kwd{interactive} keyword
+to \macref{restart-case}, is used when the \term{restart}
+is invoked
+interactively, such as from the debugger, to produce a suitable
+list of arguments. 
+%The function takes no arguments, and may
+%   prompt interactively on *QUERY-IO* if necessary.  The result 
+%   should be a list of arguments suitable for use in the expression
+%     (APPLY #'INVOKE-RESTART <restart> <arguments>).
+%   If no interactive function is specified by the user, the argument
+%   list NIL will be assumed.
+ 
+\funref{invoke-restart} invokes the most recently \term{established}
+%!!! Barrett: "active" -- :TEST could inhibit activation.
+\term{restart} whose
+name is the same as the first argument to \funref{invoke-restart}.
+If a \term{restart} is invoked interactively by the debugger and  does
+not transfer control but rather returns values, the precise
+action of the debugger on those values is \term{implementation-defined}.
+
+%!!! Barrett: This doesn't talk about supplying restart objects to INVOKE-RESTART.
+ 
+\endsubsubsubsection%{Interactive Use of Restarts}
+\beginsubsubsubsection{Interfaces to Restarts}
+\DefineSection{InterfacesToRestarts}
+ 
+%%KMP replaced
+%It is possible to define a functional interface that hides the use of
+%\funref{invoke-restart}.  The functions \funref{abort},
+%\funref{continue}, \funref{muffle-warning}, \funref{store-value},
+%and \funref{use-value} are such interfaces.
+Some \term{restarts} have functional interfaces, 
+%either for syntactic
+%   convenience or to de-emphasize the use of restarts in their
+%   implementation.  
+such as \funref{abort}, \funref{continue}, 
+\funref{muffle-warning}, \funref{store-value}, and 
+\funref{use-value}.
+They are ordinary functions that use 
+ \funref{find-restart} and \funref{invoke-restart} internally,
+that have the same name as the \term{restarts} they manipulate,
+and that are provided simply for notational convenience.
+ 
+\Thenextfigure\ shows \term{defined names} relating to
+\term{restarts}.
+
+\displaythree{Defined names relating to restarts.}{
+abort&invoke-restart-interactively&store-value\cr
+compute-restarts&muffle-warning&use-value\cr
+continue&restart-bind&with-simple-restart\cr
+find-restart&restart-case&\cr
+invoke-restart&restart-name&\cr
+}
+ 
+\endsubsubsubsection%{Interfaces to Restarts}
+
+\beginsubsubsubsection{Restart Tests}
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+Each \term{restart} has an associated test, which is a function of one
+argument (a \term{condition} or \nil) which returns \term{true} if the \term{restart}
+should be visible in the current \term{situation}.  This test is created by 
+the \kwd{test-function} option to \macref{restart-bind} or 
+the \kwd{test} option to \macref{restart-case}.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\endsubsubsubsection%{Restart Tests}
+
+\beginsubsubsubsection{Associating a Restart with a Condition}
+\DefineSection{AssocRestartWithCond}
+
+\issue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+A \term{restart} can be ``associated with'' a \term{condition} explicitly
+by \macref{with-condition-restarts}, or implicitly by \macref{restart-case}.
+Such an assocation has \term{dynamic extent}.
+
+A single \term{restart} may be associated with several \term{conditions} 
+at the same time.
+A single \term{condition} may have several associated \term{restarts}
+at the same time.
+
+Active restarts associated with a particular \term{condition} can be detected
+by \term{calling} a \term{function} such as \funref{find-restart}, supplying
+that \term{condition} as the \param{condition} \term{argument}.
+Active restarts can also be detected without regard to any associated
+\term{condition} by calling such a function without a \param{condition} \term{argument},
+or by supplying a value of \nil\ for such an \term{argument}.
+\endissue{CONDITION-RESTARTS:PERMIT-ASSOCIATION}
+
+\endsubsubsubsection%{Associating a Restart with a Condition}
+
+\endsubsubsection%{Restarts}
+\endSubsection%{Signaling and Handling Conditions}
+\goodbreak
+\beginSubsection{Assertions}
+ 
+Conditional signaling of \term{conditions}
+based on such things as key match, form evaluation,
+and \term{type} are handled by assertion \term{operators}.
+\Thenextfigure\ shows \term{operators} relating to assertions.
+
+\displaythree{Operators relating to assertions.}{
+assert&check-type&ecase\cr
+ccase&ctypecase&etypecase\cr
+}
+ 
+\endSubsection%{Assertions}
+
+% Date: Tue, 4 Jun 91 10:39:28 EDT
+% From: kab@chestnut.com (Kim Barrett)
+% To: mueller@sumex-aim.stanford.edu
+% Cc: common-lisp@mcc.com
+% Message-Id: <9106041439.AA08564@chestnut.com>
+% In-Reply-To: <2884982915-12705048@KSL-EXP-30>
+% Subject: CLEH restarts...
+% 
+% [...]
+% The rules for determining whether a (visible) restart is active are:
+% 
+% 1. If the test function for the restart returns false when applied to the
+% condition argument (which may be NIL), then the restart is inactive.
+% 
+% 2. If testing for applicability to a specific condition (the condition argument
+% is actually a condition object), then either
+%   a. The restart is associated with the specified condition.
+%   b. The restart is not associated with some other condition object.
+%      [This case was accidentally left out of the Version 2 proposal.]
+% or the restart is inactive.
+% 
+% 3. If neither of (1) and (2) indicate the restart to be inactive, then it is
+% active.
+% [...]
+
+
+\beginsubsection{Notes about the Condition System's Background}
+
+For a background reference to the abstract concepts detailed in this
+section, see \CondSysPaper.  The details of that paper are not binding on
+this document, but may be helpful in establishing a conceptual basis for
+understanding this material.
+
+\endsubsection%{Notes about the Condition System's Background}

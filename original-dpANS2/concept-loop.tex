@@ -1,0 +1,2389 @@
+% -*- Mode: TeX -*-
+
+\beginsubsection{Overview of the Loop Facility}
+
+\Themacro{loop} performs iteration.
+
+\beginsubsubsection{Simple vs Extended Loop}
+
+\macref{loop} \term{forms} are partitioned into two categories: 
+     simple \macref{loop} \term{forms} 
+ and extended \macref{loop} \term{forms}.
+
+\beginsubsubsubsection{Simple Loop}
+\DefineSection{SimpleLoop}
+
+A simple \macref{loop} \term{form} is one that has a body containing
+only \term{compound forms}.
+%% 7.8.1 3
+Each \term{form} is \term{evaluated} in turn from left to right.
+When the last \param{form} has been \term{evaluated}, 
+then the first \param{form} is evaluated again, and so on, in a never-ending cycle.
+%% 7.8.1 4
+A simple \macref{loop} \term{form} establishes an \term{implicit block} named \nil.
+The execution of a simple \macref{loop} can be terminated by explicitly
+transfering control to the \term{implicit block} (using \macref{return} or
+\specref{return-from}) or to some \term{exit point} outside of the \term{block} 
+(\eg using \specref{throw}, \specref{go}, or \specref{return-from}).
+
+%KMP: What about LOOP-FINISH here?
+%     Test cases: (loop (loop-finish)) and (loop do (loop (loop-finish))).
+%     Mail sent to X3J13 saying I was going to make this explicitly vague,
+%     since some implementations 
+%     See the LOOP-FINISH dictionary entry.
+
+\endsubsubsubsection%{Simple Loop}
+%========================================
+\beginsubsubsubsection{Extended Loop}
+
+An extended \macref{loop} \term{form} is one that has a body containing
+\term{atomic} \term{expressions}.  When \themacro{loop} processes such a
+\term{form}, it invokes a facility that is commonly called ``the Loop Facility.''
+
+The Loop Facility provides standardized access to mechanisms commonly used 
+in iterations through Loop schemas, which are introduced by \term{loop keywords}.
+
+The body of an extended \macref{loop} \term{form} is divided into \macref{loop} clauses,
+each which is in turn made up of \term{loop keywords} and \term{forms}. 
+
+\endsubsubsubsection%{Extended Loop}
+
+\endsubsubsection%{Simple vs Extended Loop}
+
+\beginsubsubsection{Loop Keywords}
+
+%2
+\term{Loop keywords} are not true \term{keywords}\meaning{1}; 
+they are special \term{symbols}, recognized by \term{name} rather than \term{object} identity,
+that are meaningful only to the \macref{loop} facility.
+A \term{loop keyword} is a \term{symbol} but is recognized by its \term{name}
+(not its identity), regardless of the \term{packages} in which it is \term{accessible}.  
+
+\issue{JUN90-TRIVIAL-ISSUES:11}
+In general, \term{loop keywords} are not \term{external symbols} of \thepackage{common-lisp},
+except in the coincidental situation that a \term{symbol} with the same name as a
+\term{loop keyword} was needed for some other purpose in \clisp.  For example,
+there is a \term{symbol} in \thepackage{common-lisp} whose \term{name} is \f{"UNLESS"} but
+not one whose \term{name} is \f{"UNTIL"}.
+\endissue{JUN90-TRIVIAL-ISSUES:11}
+
+If no \term{loop keywords} are supplied in a \macref{loop} \term{form},
+the Loop Facility executes the loop body repeatedly; \seesection\SimpleLoop.
+
+\endsubsubsection%{Loop Keywords}
+
+\beginsubsubsection{Parsing Loop Clauses}
+ 
+%7
+The syntactic parts of an extended \macref{loop} \term{form} are called clauses; 
+%the scope \reviewer{Barmar: what meaning of scope?}%!!!
+%of each clause
+the rules for parsing are determined by 
+%the parsing of
+that clause's keyword.
+The following example shows a \macref{loop} \term{form} with six clauses:
+ 
+\code
+ (loop for i from 1 to (compute-top-value)       ; first clause
+       while (not (unacceptable i))              ; second clause
+       collect (square i)                        ; third clause
+       do (format t "Working on ~D now" i)       ; fourth clause
+       when (evenp i)                            ; fifth clause
+         do (format t "~D is a non-odd number" i)
+       finally (format t "About to exit!"))      ; sixth clause
+\endcode
+ 
+%8 
+Each \term{loop keyword} introduces 
+either a compound loop clause or a simple loop clause
+that can consist of a \term{loop keyword} followed by a single \term{form}.
+The number of \term{forms} in a clause is determined by the \term{loop keyword} 
+that begins the clause and by the auxiliary keywords in the clause.
+The keywords \loopref{do}, 
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+\loopref{doing},
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+\loopref{initially}, and \loopref{finally} 
+are the only loop keywords that can take any number of \term{forms} and 
+group them as an \term{implicit progn}.
+
+%9 
+Loop clauses can contain auxiliary keywords, which are sometimes
+called prepositions.  For example, the first clause in the code
+above includes the prepositions \loopref{from} and \loopref{to}, 
+which mark the value from which stepping begins and the value at which stepping
+ends.
+
+For detailed information about \macref{loop} syntax,
+\seemac{loop}.
+
+\endsubsubsection%{Parsing Loop Clauses}
+ 
+\beginsubsubsection{Expanding Loop Forms}
+
+%!!! Barmar: This seems to legislate the implementation. We should define the meaning
+%      and let the implementors worry about how to code it.
+
+%3
+A \macref{loop} \term{macro form} expands into a \term{form} containing
+%one or more \term{lambda expressions} for the local \term{binding} of loop variables
+one or more binding forms (that \term{establish} \term{bindings} of loop variables)
+and a \specref{block} and a \specref{tagbody} (that express a looping control 
+structure). The variables established in \macref{loop} are bound as
+if by \specref{let} or \misc{lambda}.  
+
+Implementations can interleave the setting of initial values with the \term{bindings}.  
+However, the assignment of the initial values is always calculated in the order
+specified by the user.  A variable is thus sometimes bound to a meaningless value 
+of the correct \term{type}, and then later in the prologue it is set to the true
+initial value by using \specref{setq}.
+\issue{LOOP-INITFORM-ENVIRONMENT:PARTIAL-INTERLEAVING-VAGUE}
+One implication of this interleaving is that it is \term{implementation-dependent}
+whether the \term{lexical environment} in which the initial value \term{forms}
+(variously called the \param{form1}, \param{form2}, \param{form3}, \param{step-fun},
+ \param{vector}, \param{hash-table}, and \param{package}) in any \param{for-as-subclause},
+except \param{for-as-equals-then},
+are \term{evaluated} includes only the loop variables preceding that \term{form}
+or includes more or all of the loop variables;
+the \param{form1} and \param{form2} in a \param{for-as-equals-then} form
+includes the \term{lexical environment} of all the loop variables.
+\endissue{LOOP-INITFORM-ENVIRONMENT:PARTIAL-INTERLEAVING-VAGUE}
+ 
+%4
+After the \term{form} is expanded, it consists of three basic parts in the 
+\specref{tagbody}: 
+      the loop prologue,
+      the loop body,
+  and the loop epilogue.
+
+\beginlist
+\itemitem{\b{Loop prologue}}
+ 
+The loop prologue contains \term{forms} 
+that are executed before iteration begins, such as
+any automatic variable initializations prescribed 
+by the \param{variable} clauses, along with any \loopref{initially} clauses
+in the order they appear in the source.
+ 
+\itemitem{\b{Loop body}}
+ 
+The loop body contains those \term{forms} that are executed during iteration, 
+including application-specific calculations, termination tests,
+and variable \term{stepping}\meaning{1}.
+                           
+\itemitem{\b{Loop epilogue}}
+ 
+The loop epilogue contains \term{forms} that are executed after iteration 
+terminates, such as \loopref{finally} clauses, if any, along
+with any implicit return value from an \param{accumulation} clause or
+an \param{termination-test} clause.
+
+\endlist
+ 
+%5
+Some clauses from the source \term{form}
+contribute code only to the loop prologue; these clauses must
+  come before other clauses that are in the main body of the \macref{loop} form.            
+  Others contribute code only to the loop epilogue.
+  All other clauses contribute to the final 
+translated \term{form} in the same 
+  order given in the original source \term{form} of the \macref{loop}.
+
+%6
+Expansion of the \macref{loop} macro produces an \term{implicit block} named \nil\ 
+\issue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+unless \loopref{named} is supplied.
+\endissue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+Thus, \specref{return-from} (and sometimes \macref{return})
+can be used to return values from \macref{loop} or to exit \macref{loop}.
+%%Barmar: Has nothing to do with LOOP specifically.
+%   Within the executable parts of loop clauses and around the entire
+%   \macref{loop} form, variables can be bound by using \specref{let}.
+
+\endsubsubsection%{Expanding Loop Forms}
+
+\beginsubsubsection{Summary of Loop Clauses}
+ 
+%11
+Loop clauses fall into one of the following categories:
+ 
+\beginsubsubsubsection{Summary of Variable Initialization and Stepping Clauses}
+
+The \loopref{for} and \loopref{as} constructs provide iteration control clauses
+that establish a variable to be initialized.
+\loopref{for} and \loopref{as} clauses can be combined with the loop
+keyword \loopref{and} to get \term{parallel} initialization and \term{stepping}\meaning{1}.
+Otherwise, the initialization and \term{stepping}\meaning{1} are \term{sequential}.
+
+%\issue{LOOP-AND-DISCREPANCY:NO-REITERATION}
+% When two or more such clauses are joined with \loopref{and}, 
+% clauses after the first do not have \loopref{for} or \loopref{as} before them.
+%\endissue{LOOP-AND-DISCREPANCY:NO-REITERATION}
+
+The \loopref{with} construct is similar to a single \specref{let} clause.
+\loopref{with} clauses can be combined using the \term{loop keyword} \loopref{and}
+to get \term{parallel} initialization.
+
+%% Removed per Barmar.  See Termination Clauses.
+%   The \loopref{repeat} construct causes iteration to terminate after 
+%   a specified number of times.  It uses an internal variable 
+%   to keep track of the number of iterations.
+
+For more information, \seesection\LOOPVarInitAndStep.
+
+\endsubsubsubsection%{Summary of Variable Initialization and Stepping Clauses}
+
+\beginsubsubsubsection{Summary of Value Accumulation Clauses}
+ 
+The \loopref{collect} (or \loopref{collecting}) construct
+takes one \term{form} in its clause
+and adds the value of that \term{form} to the end of a \term{list} 
+of values.  By default, the \term{list} of values is returned 
+when the \macref{loop} finishes.
+ 
+The \loopref{append} (or \loopref{appending}) construct 
+takes one \term{form} in its clause
+and appends the value of that \term{form} to the end of a \term{list}
+of values.  By default, the \term{list} of values is returned when the 
+\macref{loop} finishes.
+ 
+The \loopref{nconc} (or \loopref{nconcing}) construct 
+is similar to the \loopref{append} construct,  
+but its \term{list} values are concatenated as if by the function
+\loopref{nconc}.  By default, the \term{list} of values is returned when 
+the \macref{loop} finishes.
+ 
+The \loopref{sum} (or \loopref{summing}) construct 
+takes one \term{form} in its clause 
+that must evaluate to a \term{number} and accumulates the sum of all these
+\term{numbers}.  By default, the cumulative sum is returned when the
+\macref{loop} finishes.
+ 
+The \loopref{count} (or \loopref{counting}) construct 
+takes one \term{form} in its clause 
+and counts the number of times that the \term{form} evaluates to \term{true}.
+By default, the count is returned when the \macref{loop} finishes.
+ 
+The \loopref{minimize} (or \loopref{minimizing}) construct
+takes one \term{form} in its clause 
+and determines the minimum value obtained by evaluating that \term{form}.
+By default, the minimum value is returned when the \macref{loop} finishes.
+ 
+The \loopref{maximize} (or \loopref{maximizing}) construct
+takes one \term{form} in its clause 
+and determines the maximum value obtained by evaluating that \term{form}.
+By default, the maximum value is returned when the \macref{loop} finishes.
+
+For more information, \seesection\LOOPValAcc.
+
+\endsubsubsubsection%{Summary of Value Accumulation Clauses}
+
+\beginsubsubsubsection{Summary of Termination Test Clauses}
+ 
+The \loopref{for} and \loopref{as} constructs provide a termination test
+that is determined by the iteration control clause.
+ 
+The \loopref{repeat} construct causes termination after a specified
+number of iterations.
+%Moved from text removed by Barmar above, so it doesn't get lost. -kmp 30-Jul-91
+(It uses an internal variable to keep track of the number of iterations.)
+ 
+The \loopref{while} construct takes one \term{form}, a \param{test}, 
+and terminates the iteration if the \param{test} evaluates to \term{false}.
+%!!! Barmar thinks this is not necessary:
+A \loopref{while} clause is equivalent to the expression 
+\f{(if (not \param{test}) (loop-finish))}.
+ 
+The \loopref{until} construct is the inverse of \loopref{while};
+it terminates the iteration if the \param{test} evaluates to
+any \term{non-nil} value.
+%!!! Barmar thinks this is not necessary:
+An \loopref{until} clause is equivalent to the expression
+\hbox{\f{(if \param{test} (loop-finish))}}.
+ 
+The \loopref{always} construct takes one \term{form} and
+terminates the \macref{loop} if the \term{form} ever evaluates to \term{false};
+in this case, the \macref{loop} \term{form} returns \nil.
+Otherwise, it provides a default return value of \t.
+ 
+The \loopref{never} construct takes one \term{form} and
+terminates the \macref{loop} if the \term{form} ever evaluates to \term{true};
+in this case, the \macref{loop} \term{form} returns \nil.
+Otherwise, it provides a default return value of \t.
+ 
+The \loopref{thereis} construct takes one \term{form} and
+terminates the \macref{loop} if the \term{form} ever evaluates to
+a \term{non-nil} \term{object};
+in this case, the \macref{loop} \term{form} returns that \term{object}.
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+Otherwise, it provides a default return value of \nil.
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+
+%Added per Barmar:
+If multiple termination test clauses are specified, 
+the \macref{loop} \term{form} terminates if any are satisfied.
+
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+% Note also that the \macref{loop-finish} macro terminates iteration and returns any
+% accumulated result.  Any \loopref{finally} clauses that are supplied are evaluated.
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+ 
+For more information, \seesection\LOOPTermTest.
+
+\endsubsubsubsection%{Summary of Termination Test Clauses}
+
+\beginsubsubsubsection{Summary of Unconditional Execution Clauses}
+ 
+The \loopref{do} (or \loopref{doing}) construct evaluates all \term{forms} in its clause.
+ 
+The \loopref{return} construct takes one 
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+% \term{form} and returns its value.
+  \term{form}. Any \term{values} returned by the \term{form} are
+  immediately returned by the \macref{loop} form.
+%  It is equivalent to the clause \f{do (return \i{value})}.
+   It is equivalent to the clause
+   \f{do (return-from \i{block-name} \i{value})},
+   where \i{block-name} is the name specified in a \loopref{named}
+   clause, or \nil\ if there is no \loopref{named} clause.
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+
+For more information, \seesection\LOOPUnconditional.
+
+\endsubsubsubsection%{Summary of Unconditional Execution Clauses}
+
+\beginsubsubsubsection{Summary of Conditional Execution Clauses}
+
+The \loopref{if} and \loopref{when} constructs take one \term{form} as a test 
+and a clause that is executed when the test \term{yields} \term{true}.
+The clause can be a value accumulation, unconditional, or 
+another conditional clause; it can also be any combination
+of such clauses connected by \theloopkeyword{and}.
+ 
+\Theloopconstruct{unless} is similar to \theloopconstruct{when}
+except that it complements the test result.
+
+\Theloopconstruct{else} provides an optional component of \loopref{if},
+\loopref{when}, and \loopref{unless} clauses that is executed 
+     when an \loopref{if} or \loopref{when} test \term{yields} \term{false}
+  or when an \loopref{unless} test \term{yields} \term{true}.
+The component is one of the clauses described under \loopref{if}.
+
+\Theloopconstruct{end} provides an optional component to mark the
+end of a conditional clause.
+ 
+For more information, \seesection\LOOPConditional.
+
+\endsubsubsubsection%{Summary of Conditional Execution Clauses}
+
+\beginsubsubsubsection{Summary of Miscellaneous Clauses}
+ 
+\Theloopconstruct{named} gives a name for the \term{block} of the loop.
+
+\Theloopconstruct{initially} causes its \term{forms} to be
+evaluated in the loop prologue, which precedes all \macref{loop} code
+except for initial settings supplied by the constructs \loopref{with},
+\loopref{for}, or \loopref{as}.
+ 
+\Theloopconstruct{finally} causes its \term{forms} to
+be evaluated in the loop epilogue after normal iteration terminates.
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+%  An unconditional clause can also follow \theloopkeyword{finally}.
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX} 
+
+For more information, \seesection\LOOPMisc.
+
+\endsubsubsubsection%{Summary of Miscellaneous Clauses}
+
+\endsubsubsection%{Summary of Loop Clauses}
+
+\beginsubsubsection{Order of Execution}\idxtext{order of evaluation}\idxtext{evaluation order}
+
+ 
+%10
+  With the exceptions listed below, clauses are executed in the loop body
+  in the order in which they appear in the source.  Execution is repeated 
+  until a clause
+  terminates the \macref{loop} or until a \macref{return}, \specref{go},
+  or \specref{throw} form is encountered 
+%I added this next. -kmp 10-Feb-92
+which transfers control to a point outside of the loop.
+ The following actions are
+  exceptions to the linear order of execution:
+ 
+\beginlist
+
+\itemitem{\bull}  All variables are initialized first, 
+  regardless of where the establishing clauses appear in the
+  source.  The order of initialization follows the order of these clauses.
+                                    
+\itemitem{\bull}  The code for any \loopref{initially} clauses is collected
+  into one \specref{progn} in the order in which the clauses appear in
+  the source.  The collected code is executed once in the loop prologue
+  after any implicit variable initializations.
+ 
+\itemitem{\bull}    The code for any \loopref{finally} clauses is collected 
+  into one \specref{progn} in the order in which the clauses appear in
+  the source.  The collected code is executed once in the loop epilogue
+  before any implicit values from the accumulation clauses are returned.
+  Explicit returns anywhere in the source, however, will exit the 
+  \macref{loop} without executing the epilogue code.
+                     
+\itemitem{\bull}  A \loopref{with} clause introduces a variable \term{binding}
+  and an optional initial value.  The initial values are calculated 
+  in the order in which the \loopref{with} clauses occur.
+ 
+\itemitem{\bull}  
+  Iteration control clauses implicitly perform the following actions:
+ 
+\beginlist
+\itemitem{--}  initialize variables;
+ 
+\itemitem{--}  \term{step} variables, generally 
+between each execution of the loop body;
+ 
+\itemitem{--} perform termination tests, 
+generally just before the execution of the
+  loop body.
+ 
+  \endlist
+  \endlist
+ 
+\endsubsubsection%{Order of Execution}
+
+\beginsubsubsection{Destructuring}
+\DefineSection{DestructuringLOOPVars}
+
+The \param{d-type-spec} argument is used for destructuring.
+If the
+\param{d-type-spec} argument consists solely of \thetype{fixnum},
+\typeref{float}, \typeref{t}, or \nil, the \loopref{of-type} keyword is optional.
+The \loopref{of-type} construct is optional in these cases to provide backwards
+compatibility; thus, the following two expressions are the same:
+
+%!!! Barmar: Examples belong in the examples section
+\code
+;;; This expression uses the old syntax for type specifiers.
+ (loop for i fixnum upfrom 3 ...)
+ 
+;;; This expression uses the new syntax for type specifiers.
+ (loop for i of-type fixnum upfrom 3 ...)
+
+;; Declare X and Y to be of type VECTOR and FIXNUM respectively.
+ (loop for (x y) of-type (vector fixnum) 
+       in l do ...)
+\endcode
+ 
+A \term{type specifier} for a destructuring pattern is a \term{tree} of 
+\term{type specifiers} with the same shape as the \term{tree} of
+\term{variable} \term{names}, with the following exceptions:
+ 
+\beginlist 
+\itemitem{\bull}
+When aligning the \term{trees}, an \term{atom} in the
+\term{tree} of \term{type specifiers} that matches a \term{cons} 
+in the variable tree declares the same \term{type} for each variable
+in the subtree rooted at the \term{cons}.
+ 
+\itemitem{\bull} 
+A \term{cons} in the \term{tree} of \term{type specifiers} that 
+matches an \term{atom} in the \term{tree} of \term{variable} \term{names}
+is a \term{compound type specifer}.
+ 
+\endlist
+ 
+Destructuring allows \term{binding} of a set of variables to a corresponding
+set of values anywhere that a value can normally be bound to a single
+variable.  During \macref{loop} expansion, 
+each variable in the variable list
+is matched with the values in the values list.  If there are more variables
+in the variable list than there are values in the values list, the 
+remaining variables are given a value of \nil.  If there are more
+values than variables listed, the extra values are discarded.
+
+ 
+To assign values from a list to the variables \f{a},
+\f{b}, and \f{c}, the \loopref{for} clause could be used to
+bind the variable \f{numlist} to the 
+\term{car} of the supplied \param{form},
+and then another \loopref{for} clause could be used to bind the variables
+\f{a}, \f{b}, and \f{c} \term{sequentially}.  
+
+\issue{LOOP-AND-DISCREPANCY:NO-REITERATION}
+\code
+;; Collect values by using FOR constructs.
+ (loop for numlist in '((1 2 4.0) (5 6 8.3) (8 9 10.4))
+       for a of-type integer = (first numlist)
+       and b of-type integer = (second numlist)
+       and c of-type float = (third numlist)
+       collect (list c b a))
+\EV ((4.0 2 1) (8.3 6 5) (10.4 9 8))
+\endcode
+\endissue{LOOP-AND-DISCREPANCY:NO-REITERATION}
+ 
+Destructuring makes this process easier by allowing the variables to
+be bound in each loop iteration.  
+\term{Types} can be declared by using a 
+list of \param{type-spec} arguments.  If 
+all the \term{types}
+are the same, a shorthand destructuring syntax can be used, as the second
+example illustrates.
+
+\code
+;; Destructuring simplifies the process.
+ (loop for (a b c) of-type (integer integer float) in
+       '((1 2 4.0) (5 6 8.3) (8 9 10.4))
+       collect (list c b a))
+\EV ((4.0 2 1) (8.3 6 5) (10.4 9 8))
+ 
+
+;; If all the types are the same, this way is even simpler.
+ (loop for (a b c) of-type float in
+       '((1.0 2.0 4.0) (5.0 6.0 8.3) (8.0 9.0 10.4))
+       collect (list c b a))
+\EV ((4.0 2.0 1.0) (8.3 6.0 5.0) (10.4 9.0 8.0))
+\endcode
+ 
+ 
+ 
+If destructuring is used to declare or initialize a number of groups
+of variables into \term{types}, the \term{loop keyword} \loopref{and} can be used
+to simplify the process further.
+\issue{LOOP-AND-DISCREPANCY:NO-REITERATION} 
+\code
+;; Initialize and declare variables in parallel by using the AND construct.\kern-7pt
+ (loop with (a b) of-type float = '(1.0 2.0)
+       and (c d) of-type integer = '(3 4)
+       and (e f)
+       return (list a b c d e f))
+\EV (1.0 2.0 3 4 NIL NIL)
+\endcode
+\endissue{LOOP-AND-DISCREPANCY:NO-REITERATION} 
+ 
+ 
+If \nil\ is used in a destructuring list, no variable is provided for
+its place.
+ 
+\code
+ (loop for (a nil b) = '(1 2 3)
+       do (return (list a b)))
+\EV (1 3)
+\endcode
+ 
+Note that 
+%% Replaced per Moon #42 (first public review) -kmp 6-May-93
+%nonstandard lists
+\term{dotted lists}
+can specify destructuring.
+ 
+\code
+ (loop for (x . y) = '(1 . 2)
+       do (return y))
+\EV 2
+ (loop for ((a . b) (c . d)) of-type ((float . float) (integer . integer)) in
+       '(((1.2 . 2.4) (3 . 4)) ((3.4 . 4.6) (5 . 6)))
+       collect (list a b c d))
+\EV ((1.2 2.4 3 4) (3.4 4.6 5 6))
+\endcode
+ 
+An error \oftype{program-error} is signaled (at macro expansion time)
+if the same variable is bound twice in any variable-binding
+clause of a single \macref{loop} expression.  Such variables include
+local variables, iteration control variables, and variables found by
+destructuring.
+
+\endsubsubsection%{Destructuring}
+
+\beginsubsubsection{Restrictions on Side-Effects}
+
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+\Seesection\TraversalRules.
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\endsubsubsection%{Restrictions on Side-Effects}
+
+\endsubsection%{Overview of the Loop Facility}
+
+\beginsubsection{Variable Initialization and Stepping Clauses}
+\DefineSection{LOOPVarInitAndStep}
+ 
+\beginsubsubsection{Iteration Control}
+
+Iteration control clauses allow direction of \macref{loop} iteration.
+The \term{loop keywords} \loopref{for} and \loopref{as}
+%, and \loopref{repeat}
+designate iteration control clauses.
+Iteration control clauses differ with respect to the specification of
+termination tests and to the initialization and \term{stepping}\meaning{1}
+of loop variables.  Iteration clauses by themselves
+do not cause the Loop Facility to return values, but they
+can be used in conjunction with value-accumulation clauses to
+return values.  
+ 
+All variables are initialized in the loop prologue.  
+A \term{variable} \term{binding} has \term{lexical scope}
+unless it is proclaimed \declref{special};
+thus, by default, the variable can be \term{accessed} only by \term{forms} 
+that lie textually within the \macref{loop}.
+Stepping assignments are made in the loop body before any other \term{forms}
+are evaluated in the body.  
+ 
+The variable argument in iteration control clauses can be a 
+destructuring list.  A destructuring list
+is a \term{tree} whose \term{non-nil} \term{atoms} are \term{variable} \term{names}.
+\Seesection\DestructuringLOOPVars.
+ 
+The iteration control clauses \loopref{for}, \loopref{as},  and \loopref{repeat} 
+must precede any other loop clauses, except
+  \loopref{initially}, \loopref{with}, and \loopref{named},
+since they establish variable \term{bindings}.  
+When iteration control clauses are
+used in a \macref{loop},
+%Next line added for JonL:
+the corresponding
+termination tests in the loop body are evaluated
+before any other loop body code is executed.
+ 
+ 
+If multiple iteration clauses are used to control iteration, variable
+initialization and \term{stepping}\meaning{1} occur \term{sequentially} by default.  
+The \loopref{and} construct can be used to connect two or more
+iteration clauses when \term{sequential} \term{binding} and 
+\term{stepping}\meaning{1} are not necessary.
+The iteration behavior of clauses joined by \loopref{and}
+is analogous to the behavior of the macro \macref{do} with
+respect to \macref{do*}.
+
+The \loopref{for} and \loopref{as} clauses iterate by using one or more local 
+loop  variables that are initialized to some value and that 
+can be modified or \term{stepped}\meaning{1} after each iteration.  
+For these clauses, iteration terminates when a local
+variable reaches some supplied value or when some other loop clause
+terminates iteration.
+%!!! Barmar: These aren't the only ways for/as can step the variables.
+At each iteration, variables can be 
+   \term{stepped}\meaning{1} by an increment or a decrement
+or can be assigned a new value by the evaluation of a \term{form}).
+Destructuring can be used to assign 
+%% Removed per barmar--It is also used during stepping.
+%initial 
+values to variables during iteration. 
+
+The \loopref{for} and \loopref{as} keywords are synonyms; they can be used
+interchangeably.  There are seven syntactic formats for these constructs.
+In each syntactic format, the \term{type} of
+\param{var} can be supplied by the optional \param{type-spec}
+argument.  If \param{var} is a destructuring list, the \term{type}
+supplied by the \param{type-spec} argument must appropriately match
+the elements of the list.  
+%!!! Barmar: "conventions" belong in the "Notes" section.
+By convention, \loopref{for} introduces new iterations and \loopref{as}
+introduces iterations that depend on a previous iteration specification.
+
+\beginsubsubsubsection{The for-as-arithmetic subclause}
+
+In the \i{for-as-arithmetic} subclause, the \loopref{for} 
+or \loopref{as} construct iterates from the value supplied by
+\param{form1} to the value supplied by \param{form2} in increments or
+decrements denoted by \param{form3}. Each
+expression is evaluated only once and must evaluate to a \term{number}.  
+The variable \param{var} is bound to the value of 
+\param{form1} in the first iteration and is \term{stepped}\meaning{1}
+by the value of \param{form3} in each succeeding iteration,
+or by 1 if \param{form3} is not provided.  
+The following \term{loop keywords} serve as valid prepositions within this 
+syntax.
+At least one of the 
+%three classes of
+prepositions must be used; 
+and at most one from each line may be used in a single subclause.
+
+\beginlist                 
+ 
+\itemitem{\tt from | downfrom | upfrom}
+ 
+\itemitem{\tt to | downto | upto | below | above}
+ 
+\itemitem{\tt by}
+\endlist
+
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+The prepositional phrases in each subclause may appear in any order.
+For example, either ``\f{from x by y}'' or ``\f{by y from x}'' is permitted.
+However, because left-to-right order of evaluation is preserved,
+the effects will be different in the case of side effects.
+\idxtext{order of evaluation}\idxtext{evaluation order}%
+Consider:
+
+\code
+(let ((x 1)) (loop for i from x by (incf x) to 10 collect i))
+\EV (1 3 5 7 9)
+(let ((x 1)) (loop for i by (incf x) from x to 10 collect i))
+\EV (2 4 6 8 10)
+\endcode
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+ 
+The descriptions of the prepositions follow:
+ 
+\beginlist
+\itemitem{\tt from}
+ 
+The \term{loop keyword} \loopref{from} specifies the value from which
+\term{stepping}\meaning{1} begins, as supplied by \param{form1}.  
+\term{Stepping}\meaning{1} is incremental by default.  If 
+decremental \term{stepping}\meaning{1} is desired, 
+the preposition \loopref{downto} 
+or \loopref{above} must be used with \param{form2}.  For incremental
+\term{stepping}\meaning{1}, the default \loopref{from} value is 0.
+
+\itemitem{\tt downfrom, upfrom}
+ 
+The \term{loop keyword} \loopref{downfrom} 
+indicates that the variable \param{var} is decreased in decrements
+supplied by \param{form3}; the \term{loop keyword} \loopref{upfrom} indicates that 
+\param{var} is increased in increments supplied by \param{form3}.
+ 
+\itemitem{\tt to}
+                                                  
+The \term{loop keyword} \loopref{to} marks the end value
+for \term{stepping}\meaning{1} supplied in \param{form2}.
+\term{Stepping}\meaning{1} is incremental by default.
+If decremental \term{stepping}\meaning{1} is desired, 
+the preposition \loopref{downfrom} must be used with \param{form1},
+or else the preposition \loopref{downto} or \loopref{above} should be used instead
+   of \loopref{to} with \param{form2}.
+              
+\itemitem{\tt downto, upto}
+ 
+The \term{loop keyword} \loopref{downto} specifies decremental \term{stepping};
+the \term{loop keyword} \loopref{upto} specifies incremental \term{stepping}.
+In both cases, the amount of change on each step is specified by \param{form3},
+and the \macref{loop} terminates when the variable \param{var} passes 
+the value of \param{form2}.
+Since there is no default for \param{form1} in decremental \term{stepping}\meaning{1},
+a \param{form1} value must be supplied (using \loopref{from} or \loopref{downfrom})
+when \loopref{downto} is supplied.
+ 
+\itemitem{\tt below, above}
+ 
+The \term{loop keywords} \loopref{below} and \loopref{above} are analogous to
+\loopref{upto} and \loopref{downto} respectively.  These keywords stop
+iteration just before the value of the variable \param{var} reaches the value 
+supplied by \param{form2}; the end value of \param{form2} is not included.
+Since there is no default for \param{form1} in decremental \term{stepping}\meaning{1},
+a \param{form1} value must be supplied (using \loopref{from} or \loopref{downfrom})
+when \loopref{above} is supplied.
+ 
+\itemitem{\tt by}
+ 
+The \term{loop keyword} \loopref{by} marks the increment or decrement supplied by
+\param{form3}.  The value of \param{form3} can be any 
+%!!! Jonl wants to know why "positive" here.
+positive 
+\term{number}.
+The default value is 1.
+ 
+\endlist
+ 
+In an iteration control clause, the \loopref{for} or \loopref{as} construct
+causes termination when the supplied limit is reached.  That is,
+iteration continues until the value \param{var} is stepped to the
+exclusive or inclusive limit supplied by \param{form2}.  The range is
+exclusive if \param{form3} increases or decreases \param{var}
+to the value of \param{form2} without reaching that value; the loop
+keywords \loopref{below} and \loopref{above} provide exclusive limits.  An
+inclusive limit allows \param{var} to attain the value of
+\param{form2}; \loopref{to}, \loopref{downto}, and \loopref{upto} provide inclusive
+limits.  
+
+%!!! JonL wonders if we maybe shouldn't define "incremental" and "decremental" here.
+
+\beginsubsubsubsubsection{Examples of for-as-arithmetic subclause}
+
+\code
+;; Print some numbers.
+ (loop for i from 1 to 3
+       do (print i))
+\OUT 1
+\OUT 2
+\OUT 3
+\EV NIL
+ 
+;; Print every third number.
+ (loop for i from 10 downto 1 by 3
+       do (print i))
+\OUT 10 
+\OUT 7 
+\OUT 4 
+\OUT 1 
+\EV NIL
+ 
+;; Step incrementally from the default starting value.
+ (loop for i below 3
+       do (print i))
+\OUT 0
+\OUT 1
+\OUT 2
+\EV NIL
+\endcode
+ 
+\endsubsubsubsubsection%{Examples of for-as-arithmetic subclause}
+
+\endsubsubsubsection%{The for-as-arithmetic subclause}
+
+\beginsubsubsubsection{The for-as-in-list subclause}
+
+In the \i{for-as-in-list} subclause,
+the \loopref{for} 
+or \loopref{as} construct iterates over the contents of a 
+\term{list}.  It checks for 
+the end of the \term{list} as if by using \funref{endp}.  
+The variable \param{var} is bound to the successive elements  of 
+the \term{list} in \param{form1} before each
+iteration.  At the end of each iteration, the function \param{step-fun}
+is applied to the \term{list}; the default value for \param{step-fun} is
+\funref{cdr}.
+The \term{loop keywords} \loopref{in} and \loopref{by} serve as valid prepositions in
+this syntax.
+The \loopref{for} or \loopref{as} construct causes termination when the
+end of the \term{list} is reached.
+
+\beginsubsubsubsubsection{Examples of for-as-in-list subclause}
+
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+%Added OF-TYPE in the third example. -kmp 29-Apr-93
+\code
+;; Print every item in a list.
+ (loop for item in '(1 2 3) do (print item))
+\OUT 1
+\OUT 2
+\OUT 3
+\EV NIL
+ 
+;; Print every other item in a list.
+ (loop for item in '(1 2 3 4 5) by #'cddr
+       do (print item))
+\OUT 1
+\OUT 3
+\OUT 5
+\EV NIL
+ 
+;; Destructure a list, and sum the x values using fixnum arithmetic.
+ (loop for (item . x) of-type (t . fixnum) in '((A . 1) (B . 2) (C . 3))
+       unless (eq item 'B) sum x)
+\EV 4
+\endcode
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+ 
+\endsubsubsubsubsection%{Examples of for-as-in-list subclause}
+
+\endsubsubsubsection%{The for-as-in-list subclause}
+
+\beginsubsubsubsection{The for-as-on-list subclause}
+
+\issue{LOOP-FOR-AS-ON-TYPO:FIX-TYPO}
+In the \i{for-as-on-list} subclause, the \loopref{for} or \loopref{as}
+construct iterates over
+%the contents of
+a \term{list}. It checks for the
+end of the \term{list} as if by using \funref{atom}.
+\endissue{LOOP-FOR-AS-ON-TYPO:FIX-TYPO}
+The variable \param{var} is bound to the successive tails of the 
+\term{list} in 
+\param{form1}.  At the end of each iteration, the function \param{step-fun}
+ is applied to the \term{list}; the default value for \param{step-fun} is \funref{cdr}.
+ The \term{loop keywords} \loopref{on} and \loopref{by} serve as valid
+prepositions in this syntax.
+The \loopref{for} or \loopref{as} construct causes termination when the
+end of the \term{list} is reached.
+ 
+\beginsubsubsubsubsection{Examples of for-as-on-list subclause}
+
+\code
+;; Collect successive tails of a list.
+ (loop for sublist on '(a b c d)
+       collect sublist)
+\EV ((A B C D) (B C D) (C D) (D))
+ 
+;; Print a list by using destructuring with the loop keyword ON.
+ (loop for (item) on '(1 2 3)
+       do (print item))
+\OUT 1 
+\OUT 2 
+\OUT 3 
+\EV NIL
+ 
+\endcode
+
+\endsubsubsubsubsection%{Examples of for-as-on-list subclause}
+
+\endsubsubsubsection%{The for-as-on-list subclause}
+
+\beginsubsubsubsection{The for-as-equals-then subclause}
+
+In the \i{for-as-equals-then} subclause
+the \loopref{for} 
+or \loopref{as} construct 
+initializes the variable \param{var} by setting it to the
+  result of evaluating \param{form1} on the first iteration, then setting
+  it to the result of evaluating \param{form2} on the second and
+  subsequent iterations.  If \param{form2} is omitted, the construct
+  uses \param{form1} on the second and
+  subsequent iterations.  
+%When \param{form2} is omitted, the expanded
+%  code shows the following optimization:
+The \term{loop keywords} {$=$} and \loopref{then} serve as valid prepositions
+in this syntax. 
+This construct does not provide any termination tests.
+ 
+\beginsubsubsubsubsection{Examples of for-as-equals-then subclause}
+
+%\code
+%;; The original code:
+% (prog (...)
+%       (setq x (some-value))
+%   tag (print x)
+%       (setq x (some-value))
+%       (go tag))
+% 
+%;; The expanded code:
+% (prog (...)
+%   tag (setq x (some-value))
+%       (print x)
+%       (go tag))
+%\endcode
+\code
+;; Collect some numbers.
+ (loop for item = 1 then (+ item 10)
+       for iteration from 1 to 5
+       collect item)
+\EV (1 11 21 31 41)
+\endcode
+ 
+\endsubsubsubsubsection%{Examples of for-as-equals-then subclause}
+
+\endsubsubsubsection%{The for-as-equals-then subclause}
+
+\beginsubsubsubsection{The for-as-across subclause}
+
+  In the \i{for-as-across} subclause the \loopref{for} 
+  or \loopref{as} construct binds the variable \param{var} to the value of
+  each element in the array \param{vector}.
+  The \term{loop keyword} \loopref{across} marks the array \param{vector}; \loopref{across}
+  is used as a preposition in this syntax.
+  Iteration stops when there are no more elements in the supplied
+  \term{array} that can be referenced.
+  Some implementations might recognize a \specref{the} special form
+  in the \param{vector} form to produce more efficient code.
+ 
+\beginsubsubsubsubsection{Examples of for-as-across subclause}
+
+\code
+ (loop for char across (the simple-string (find-message channel))
+       do (write-char char stream))
+\endcode
+ 
+\endsubsubsubsubsection%{Examples of for-as-across subclause}
+
+\endsubsubsubsection%{The for-as-across subclause}
+
+\beginsubsubsubsection{The for-as-hash subclause}
+
+  In the \i{for-as-hash} subclause
+  the \loopref{for} 
+  or \loopref{as} construct 
+  iterates over the elements, keys, and values of a \term{hash-table}.
+  In this syntax, a compound preposition is used to designate access to a
+  \term{hash table}.
+  The variable \param{var} takes on the value of each hash key
+  or hash value in the supplied \param{hash-table}. 
+  The following \term{loop keywords} serve as valid prepositions within this syntax:
+ 
+\beginlist
+ 
+\itemitem{\loopref{being}}
+             
+The keyword \loopref{being} introduces either the Loop schema 
+\loopref{hash-key} or \loopref{hash-value}.
+ 
+\itemitem{\loopref{each}, \loopref{the}}
+ 
+The \term{loop keyword} \loopref{each}
+follows the \term{loop keyword} \loopref{being} when \loopref{hash-key} or
+\loopref{hash-value} is used.  The \term{loop keyword} {\tt the} is used with
+\loopref{hash-keys} and \loopref{hash-values} only for ease of reading.
+This agreement isn't required.
+ 
+\itemitem{\loopref{hash-key}, \loopref{hash-keys}}
+ 
+These \term{loop keywords} access each key entry of the \term{hash table}.  If 
+the name \loopref{hash-value} is supplied in a \loopref{using} construct with one
+of these Loop schemas, the iteration can optionally access the keyed
+value. The order in which the keys are accessed is undefined; empty
+slots in the \term{hash table} are ignored.  
+ 
+\itemitem{\loopref{hash-value}, \loopref{hash-values}}
+ 
+These \term{loop keywords} access each value entry of a 
+\term{hash table}.  If 
+the name \loopref{hash-key} is supplied in a \loopref{using} construct with one of
+these Loop schemas, the iteration can optionally access the key that
+corresponds to the value.  The order in which the keys are accessed is
+undefined; empty slots in the \term{hash table} are ignored. 
+ 
+\itemitem{\loopref{using}}
+ 
+The \term{loop keyword} \loopref{using} introduces 
+the optional key or the keyed value to
+be accessed.  It allows access to the hash key if iteration is over
+the hash values, and the hash value if 
+iteration is over the hash keys.
+ 
+\itemitem{\loopref{in}, \loopref{of}}
+ 
+These loop prepositions introduce \param{hash-table}.
+ 
+\endlist
+
+%!!! Barmar: What does this mean?
+In effect 
+
+\loopref{being}
+\curly{\loopref{each} | \loopref{the}}
+\curly{\loopref{hash-value}  |
+       \loopref{hash-values} |
+       \loopref{hash-key}    |
+       \loopref{hash-keys}}
+\curly{\loopref{in} | \loopref{of}}
+
+% \code
+% being \lbracket\ each|the\rbracket \lbracket\ hash-value|hash-values|hash-key|hash-key\rbracket \lbracket\ in|of\rbracket 
+% \endcode
+
+is a compound preposition.
+ 
+Iteration stops when there are no more hash keys or hash values to be
+referenced in the supplied \param{hash-table}.
+
+\endsubsubsubsection%{The for-as-hash subclause}
+
+\beginsubsubsubsection{The for-as-package subclause}
+
+In the \i{for-as-package} subclause
+the \loopref{for} 
+or \loopref{as} construct                    
+iterates over the \term{symbols} in a \term{package}.
+In this syntax, a compound preposition is used to designate access to a
+\term{package}.
+The variable \param{var} takes on the value of each \term{symbol}
+in the supplied \term{package}.  
+ The following \term{loop keywords} serve as valid prepositions within this syntax:
+ 
+\beginlist
+ 
+\itemitem{\loopref{being}}
+ 
+The keyword \loopref{being} introduces either the Loop schema 
+\loopref{symbol}, \loopref{present-symbol},  or \loopref{external-symbol}.
+ 
+\itemitem{\loopref{each}, \loopref{the}}
+ 
+The \term{loop keyword} \loopref{each}
+follows the \term{loop keyword} \loopref{being} when \loopref{symbol}, 
+\loopref{present-symbol}, or \loopref{external-symbol} is used.  
+The \term{loop keyword} \loopref{the} is used with \loopref{symbols}, 
+\loopref{present-symbols}, and \loopref{external-symbols} only for ease of reading.
+This agreement isn't required.
+ 
+\itemitem{\loopref{present-symbol}, \loopref{present-symbols}}
+ 
+These Loop schemas iterate over the \term{symbols} 
+\issue{LOOP-PRESENT-SYMBOLS-TYPO:FLUSH-WRONG-WORDS}
+that are \term{present} in a \term{package}.
+% but not \term{external symbols} of that \term{package}.
+\endissue{LOOP-PRESENT-SYMBOLS-TYPO:FLUSH-WRONG-WORDS}
+The \param{package} to be iterated over is supplied in the same way
+that \term{package} arguments to \funref{find-package} are supplied.  
+If the \param{package} for the iteration is not supplied, 
+the \term{current package} is used.  
+If a \param{package} that does not exist is supplied, 
+an error \oftype{package-error} is signaled.
+ 
+\itemitem{\loopref{symbol}, \loopref{symbols}}
+ 
+These Loop schemas iterate over \term{symbols} that are
+\term{accessible} in a given \param{package}.  
+The \param{package} to be iterated over is supplied in the same way
+that \term{package} arguments to \funref{find-package} are supplied.
+If the \param{package} for the iteration is not supplied, 
+the \term{current package} is used.
+If a \param{package} that does not exist is supplied, 
+an error \oftype{package-error} is signaled.
+ 
+\itemitem{\loopref{external-symbol}, \loopref{external-symbols}}
+ 
+These Loop schemas iterate over the \term{external symbols} of a \param{package}.
+The \param{package} to be iterated over is supplied in the same way
+that \term{package} arguments to \funref{find-package} are supplied.
+If the \param{package} for the iteration is not supplied, 
+the \term{current package} is used.
+If a \param{package} that does not exist is supplied, 
+an error \oftype{package-error} is signaled.
+ 
+\itemitem{\loopref{in}, \loopref{of}}
+ 
+These loop prepositions introduce \param{package}.
+ 
+\endlist
+
+%!!! Barmar: What does this mean?
+In effect 
+                                      
+\loopref{being}
+\curly{\loopref{each} | \loopref{the}}
+\curly{\loopref{symbol}          |
+       \loopref{symbols}         |
+       \loopref{present-symbol}  |
+       \loopref{present-symbols} |
+       \loopref{external-symbol} |
+       \loopref{external-symbols}}
+\curly{\loopref{in} | \loopref{of}}
+
+% \code
+% being \lbracket\ each|the\rbracket \lbracket\ \lbracket\ \lbracket\ 
+% present|external\rbracket\ symbol\rbracket | \lbracket\ 
+% \lbracket\ present|external\rbracket symbols\rbracket\rbracket \lbracket\ in|of\rbracket
+% \endcode
+
+is a compound preposition.
+
+Iteration stops when there are no more \term{symbols} to be referenced 
+in the supplied \param{package}.
+ 
+\beginsubsubsubsubsection{Examples of for-as-package subclause}
+
+\issue{LOOP-PRESENT-SYMBOLS-TYPO:FLUSH-WRONG-WORDS}
+\code
+ (let ((*package* (make-package "TEST-PACKAGE-1")))
+   ;; For effect, intern some symbols
+   (read-from-string "(THIS IS A TEST)")
+   (export (intern "THIS"))
+   (loop for x being each present-symbol of *package*
+          do (print x)))
+\OUT A 
+\OUT TEST 
+\OUT THIS
+\OUT IS 
+\EV NIL
+\endcode
+\endissue{LOOP-PRESENT-SYMBOLS-TYPO:FLUSH-WRONG-WORDS}
+
+\endsubsubsubsubsection%{Examples of for-as-package subclause}
+
+\endsubsubsubsection%{The for-as-package subclause}
+
+\endsubsubsection%{Iteration Control}
+
+\beginsubsubsection{Local Variable Initializations}
+ 
+When a \macref{loop} \term{form} is executed, the local variables are bound and are
+initialized to some value.  These local variables exist until \macref{loop}
+iteration terminates, at which point they cease to exist.  
+Implicit variables are also established by iteration control clauses and the
+\loopref{into} preposition of accumulation clauses.
+
+The \loopref{with} construct initializes variables that are local to 
+a loop.  The variables are initialized one time only.
+If the optional \param{type-spec} argument is supplied for the variable 
+\param{var}, but there is no related expression to be evaluated, \param{var}
+is initialized to an appropriate default value for its \term{type}.
+%!!! Barmar: How is this default specified for "wierd" types? e.g.,
+%     CLOS classes, DEFSTRUCT types, (OR ...), (AND ...), (SATISFIES ...), package, etc.
+For example, for the types \typeref{t}, \typeref{number}, 
+and \typeref{float},
+the default values are \nil, \f{0}, and \f{0.0} respectively.
+The consequences are undefined if a 
+\param{type-spec} argument is supplied for \param{var} if
+the related expression returns a value that is not of the supplied 
+\term{type}.
+By default, the \loopref{with} construct initializes variables
+\term{sequentially}; that is, one variable is assigned a value before the
+next expression is evaluated.  However, by using the \term{loop keyword} \loopref{and}
+to join several \loopref{with} clauses, 
+initializations can be forced to occur in \term{parallel}; that 
+is, all of the supplied
+\param{forms} are evaluated, and the results are bound to the respective
+variables simultaneously.
+
+%The optional \loopref{and} clause forces \term{parallel} rather than \term{sequential} 
+%initializations.
+\term{Sequential} \term{binding} is used when it is desireable for the initialization of
+some variables to depend on the values of previously bound variables.
+For example, suppose the variables \f{a}, \f{b}, and \f{c} are to be bound in sequence:
+ 
+\code
+ (loop with a = 1 
+       with b = (+ a 2) 
+       with c = (+ b 3)
+       return (list a b c))
+\EV (1 3 6)
+\endcode
+ 
+The execution of the above \macref{loop} is equivalent to the execution of
+the following code:
+ 
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+%BLOCK moved to outside.
+\code
+ (block nil
+   (let* ((a 1)
+          (b (+ a 2))
+          (c (+ b 3)))
+     (tagbody
+         (next-loop (return (list a b c))
+                    (go next-loop)
+                    end-loop))))
+\endcode
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+
+If the values of previously bound variables are not needed
+for the initialization of other local variables, an 
+\loopref{and} clause can be used to 
+%force the bindings to occur in \term{parallel}:
+%% for JonL:
+specify that the bindings are to occur in \term{parallel}:
+ 
+\code
+ (loop with a = 1 
+       and b = 2 
+       and c = 3
+       return (list a b c))
+\EV (1 2 3)
+\endcode
+ 
+The execution of the above loop is equivalent to the execution of
+the following code:
+ 
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+%BLOCK moved to outside.
+\code
+ (block nil
+   (let ((a 1)
+         (b 2)
+         (c 3))
+     (tagbody
+         (next-loop (return (list a b c))
+                    (go next-loop)
+                    end-loop))))
+\endcode
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+
+\beginsubsubsubsection{Examples of WITH clause}
+
+\code
+;; These bindings occur in sequence.
+ (loop with a = 1 
+       with b = (+ a 2) 
+       with c = (+ b 3)
+       return (list a b c))
+\EV (1 3 6)
+ 
+;; These bindings occur in parallel.
+ (setq a 5 b 10)
+\EV 10
+ (loop with a = 1
+       and b = (+ a 2)
+       and c = (+ b 3)
+       return (list a b c))
+\EV (1 7 13)
+ 
+;; This example shows a shorthand way to declare local variables 
+;; that are of different types.
+ (loop with (a b c) of-type (float integer float)
+       return (format nil "~A ~A ~A" a b c))
+\EV "0.0 0 0.0"
+ 
+;; This example shows a shorthand way to declare local variables 
+;; that are the same type.
+ (loop with (a b c) of-type float 
+       return (format nil "~A ~A ~A" a b c))
+\EV "0.0 0.0 0.0"
+\endcode
+
+\endsubsubsubsection%{Examples of WITH clause}
+
+\endsubsubsection%{Local Variable Initializations}
+
+\endsubsection%{Variable Initialization and Stepping Clauses}
+
+\beginsubsection{Value Accumulation Clauses}
+\DefineSection{LOOPValAcc}
+ 
+%!!! Moon (comment #40) thinks it would be nice to coalesce 
+%    the discussion of "into" here.
+
+The constructs \loopref{collect}, \loopref{collecting},
+\loopref{append}, \loopref{appending},
+\loopref{nconc}, \loopref{nconcing},
+\loopref{count}, \loopref{counting},
+\loopref{maximize}, \loopref{maximizing},
+\loopref{minimize}, \loopref{minimizing},
+\loopref{sum}, and \loopref{summing},
+allow values to be accumulated in a \macref{loop}.
+ 
+ 
+%Accumulating values during iteration and returning them from a loop
+%is often useful.  Some of these accumulations occur so
+%frequently that special loop clauses have been developed to handle them.
+ 
+The constructs \loopref{collect}, 
+\loopref{collecting}, \loopref{append}, \loopref{appending}, 
+\loopref{nconc}, and \loopref{nconcing}, 
+designate clauses that
+accumulate values in \term{lists} and return them.
+The constructs \loopref{count}, \loopref{counting}, 
+\loopref{maximize}, \loopref{maximizing}, \loopref{minimize}, \loopref{minimizing},
+\loopref{sum}, and \loopref{summing} designate clauses that accumulate and
+return numerical values.
+
+During each iteration,  the constructs
+\loopref{collect} and \loopref{collecting}
+collect the value of the supplied
+\param{form} into a \term{list}. 
+When iteration terminates, the \term{list} is returned.
+The argument \param{var} is 
+set to the \term{list} 
+of collected values; if \param{var} is supplied, the \macref{loop}
+does not return the final \term{list} automatically.  If 
+\param{var} is not
+supplied, it is equivalent to supplying an internal name for
+\param{var} and returning its value in a \loopref{finally} clause.
+The \param{var} argument
+is bound as if by the construct \loopref{with}.
+%A \term{type} cannot be supplied for \param{var};
+No mechanism is provided for declaring the \term{type} of \param{var};
+it must be \oftype{list}.
+ 
+%%Removed per Barmar. Fully redundant with next couple of paragraphs.
+% The \loopref{append} construct is similar to \loopref{collect} except the
+% values of the supplied \param{form} must be 
+% \term{lists}.  These \term{lists} are not modified
+% but are concatenated together into a single 
+% \term{list}, as if they were arguments
+% to \funref{append}.
+% The argument \param{var} is 
+% bound to the list of concatenated values; if \param{var} is supplied, the loop
+% does not return the final 
+% \term{list} automatically.  The \param{var} argument
+% is bound as if by the construct \loopref{with}.
+%  A \term{type} cannot be supplied for \param{var}; it must be \oftype{list}.
+
+
+The constructs \loopref{append}, \loopref{appending}, 
+\loopref{nconc}, and  \loopref{nconcing}
+are similar to \loopref{collect} except that the
+values of the supplied \param{form} must be \term{lists}.  
+ 
+\beginlist
+\itemitem{\bull}
+The \loopref{append} keyword causes its \term{list} values to be concatenated 
+into a single \term{list}, as if 
+they were arguments to \thefunction{append}.
+ 
+\itemitem{\bull}
+The \loopref{nconc} keyword causes its \term{list} values to be concatenated
+into a single \term{list},
+as if they were arguments to \thefunction{nconc}.  
+\endlist
+ 
+The argument \param{var} is 
+set to the \term{list} of 
+concatenated values; if \param{var} is supplied, 
+\macref{loop}
+does not return the final \term{list} automatically.  
+The \param{var} argument
+is bound as if by the construct \loopref{with}.
+ A \term{type} cannot be supplied for \param{var}; 
+it must be \oftype{list}.
+ The construct \loopref{nconc} 
+destructively modifies its argument \term{lists}.
+
+% Barmar: Is it required to coerce the sum to the specified type?
+%  Test case: (loop for x in '(a b c) count x into z of-type float finally (return z))
+%  Mail sent to Quinquevirate (issue LOOP-DECLARATION-VS-COERCION)
+The \loopref{count} construct counts the number of times 
+that the supplied \param{form} returns \term{true}.
+The argument \param{var} accumulates the number of occurrences; 
+if \param{var} is supplied, 
+\macref{loop} does not return the final count automatically.
+The \param{var} argument is bound as if by the construct \loopref{with} 
+%% Per Moon #40, First Public Review. -kmp 28-Jul-93
+to a zero of the appropriate type.
+%% Per X3J13. -kmp 05-Oct-93
+Subsequent values (including any necessary coercions) 
+are computed as if by the function \funref{1+}.
+If \loopref{into} \param{var} is used,
+a \term{type} can be supplied  for \param{var} with the \param{type-spec} argument;
+the consequences are unspecified if a nonnumeric \term{type} is supplied.           
+If there is no \loopref{into} variable,
+the optional \param{type-spec} argument
+applies to the internal variable that is keeping the count.  
+The default \term{type} is \term{implementation-dependent}; 
+but it must be
+%% Per Moon #40, First Public Review -kmp 28-Jul-93
+a \supertypeof{fixnum}.
+ 
+%Barmar: For these next three, is type-spec a declaration, coercion, or both?
+%  Test cases: (loop for x in '(1 2 3) minimize x into z of-type float finally (return z))
+% 	       (loop for x in '(1 2 3) sum x into z of-type float finally (return z))
+The \loopref{maximize} and 
+%% Per X3J13. -kmp 05-Oct-93
+%\loopref{minimum}
+\loopref{minimize} 
+constructs compare
+the value of the supplied \param{form} obtained during the first 
+iteration with values obtained in successive iterations.
+The maximum (for \loopref{maximize}) or minimum (for \loopref{minimize}) 
+value encountered is determined 
+%% Per Moon #40, First Public Review -kmp 28-Jul-93
+(as if by \thefunction{max} for \loopref{maximize} and
+ as if by \thefunction{min} for \loopref{minimize})
+and returned.
+%% Per Moon #40, First Public Review -kmp 28-Jul-93
+If the \loopref{maximize} or \loopref{minimize} clause
+is never executed, the accumulated value is unspecified.
+The argument \param{var} accumulates the maximum or minimum value;
+if \param{var} is supplied,
+\macref{loop} does not return the maximum or minimum automatically.
+The \param{var} argument is bound as if by the construct \loopref{with}.
+If \loopref{into} \param{var} is used,
+a \term{type} can be supplied for \param{var} with the \param{type-spec} argument;
+the consequences are unspecified if a nonnumeric \term{type} is supplied.           
+If there is no \loopref{into} variable,
+the optional \param{type-spec} argument applies to the internal variable 
+that is keeping the maximum or minimum value.  
+%% Per Moon #40, First Public Review -kmp 28-Jul-93
+The default \term{type} 
+%% Per X3J13. -kmp 05-Oct-93
+is \term{implementation-dependent}; but it
+must be a \supertypeof{real}.
+ 
+The \loopref{sum} construct forms a cumulative sum 
+of the successive \term{primary values} of the supplied \param{form}
+at each iteration.
+The argument \param{var} is used to accumulate the sum;
+if \param{var} is supplied,
+\macref{loop} does not return the final sum automatically.
+The \param{var} argument is bound as if by the construct \loopref{with}
+%% Per Moon #40, First Public Review -kmp 28-Jul-93
+to a zero of the appropriate type.
+Subsequent values (including any necessary coercions) are computed as if by \thefunction{+}.
+If \loopref{into} \param{var} is used,
+a \term{type} can be supplied for \param{var} with the \param{type-spec} argument;
+the consequences are unspecified if a nonnumeric \term{type} is supplied.           
+If there is no \loopref{into} variable,
+the optional \param{type-spec} argument applies to the internal variable
+that is keeping the sum.
+%% Per Moon #40, First Public Review -kmp 28-Jul-93
+The default \term{type}
+%% Per X3J13. -kmp 05-Oct-93
+is \term{implementation-dependent}; but it
+must be a \supertypeof{number}.
+ 
+%% Removed per barmar. Redundant with the above.
+% The loop preposition \loopref{into} can be used to name the 
+% variable used to hold partial accumulations.
+% The variable is bound as if by the loop
+% construct \loopref{with}. 
+If \loopref{into} is used,
+the construct does not provide a default return value;
+however, the variable is available
+for use in any \loopref{finally} clause.  
+     
+%These \term{loop keywords}
+%can also be spelled with the optional suffix {\tt ing}.
+ 
+%% Replaced per Moon #40, First Public Review -kmp 28-Jul-93
+% Value-returning accumulation clauses can be combined in a \macref{loop} if
+% all the clauses accumulate the same \term{type} of \term{object}.  
+% By default, the Loop Facility returns only one value;
+% thus, the \term{objects} collected by multiple accumulation clauses 
+% as return values must have compatible \term{types}. For example, since both
+% the \loopref{collect} and \loopref{append} constructs accumulate 
+% \term{objects} into a
+% \term{list} that is returned from a 
+% \macref{loop}, they can be combined safely.
+Certain kinds of accumulation clauses can be combined in a \macref{loop} 
+if their destination is the same 
+(the result of \macref{loop} or an \loopref{into} \param{var}) 
+because they are considered to accumulate conceptually compatible quantities.
+In particular, 
+any elements of following sets of accumulation clauses can be mixed
+with other elements of the same set for the same destination 
+in a \macref{loop} \term{form}:
+
+\beginlist
+\itemitem{\bull} \loopref{collect}, \loopref{append}, \loopref{nconc}
+
+\itemitem{\bull} \loopref{sum}, \loopref{count}
+
+\itemitem{\bull} \loopref{maximize}, \loopref{minimize}
+\endlist
+
+\code
+;; Collect every name and the kids in one list by using 
+;; COLLECT and APPEND.
+ (loop for name in '(fred sue alice joe june)
+       for kids in '((bob ken) () () (kris sunshine) ())
+       collect name
+       append kids)
+\EV (FRED BOB KEN SUE ALICE JOE KRIS SUNSHINE JUNE)
+\endcode
+ 
+%% Per X3J13. -kmp 05-Oct-93
+%Multiple
+Any two
+clauses that do not accumulate the same \term{type} of 
+\term{object} 
+can coexist in a \macref{loop} only 
+if each clause accumulates its values into 
+a different
+%% Removed per Barmar -- "some can still use the default" (i.e., not supply a var)
+%user-specified
+\term{variable}.  
+
+%Any number of values can
+%be returned from \macref{loop} if \thefunction{values} is used,
+%as the next example shows:
+% 
+%\code
+%;; Count and collect names and ages.
+% (loop for name in '(fred sue alice joe june)
+%       as age in '(22 26 19 20 10)
+%       append (list name age) into name-and-age-list
+%       count name into name-count
+%       sum age into total-age
+%       finally
+%       (return
+%        (values (round total-age name-count)
+%                 name-and-age-list)))
+%\EV 19, (FRED 22 SUE 26 ALICE 19 JOE 20 JUNE 10)
+%\endcode
+ 
+\beginsubsubsection{Examples of COLLECT clause}
+
+\code
+;; Collect all the symbols in a list.
+ (loop for i in '(bird 3 4 turtle (1 . 4) horse cat)
+       when (symbolp i) collect i)
+\EV (BIRD TURTLE HORSE CAT)
+ 
+;; Collect and return odd numbers.
+ (loop for i from 1 to 10
+       if (oddp i) collect i)
+\EV (1 3 5 7 9)
+ 
+;; Collect items into local variable, but don't return them.
+ (loop for i in '(a b c d) by #'cddr
+       collect i into my-list
+       finally (print my-list))
+\OUT (A C) 
+\EV NIL
+\endcode
+ 
+\endsubsubsection%{Examples of COLLECT clause}
+
+\beginsubsubsection{Examples of APPEND and NCONC clauses}
+
+\code
+;; Use APPEND to concatenate some sublists.
+  (loop for x in '((a) (b) ((c)))
+        append x)
+\EV (A B (C))
+ 
+;; NCONC some sublists together.  Note that only lists made by the
+;; call to LIST are modified.
+  (loop for i upfrom 0 
+        as x in '(a b (c))
+        nconc (if (evenp i) (list x) nil))
+\EV (A (C))
+\endcode
+
+\endsubsubsection%{Examples of APPEND and NCONC clauses}
+
+\beginsubsubsection{Examples of COUNT clause}
+
+\code
+ (loop for i in '(a b nil c nil d e)
+       count i)
+\EV 5
+\endcode
+ 
+\endsubsubsection%{Examples of COUNT clause}
+
+\beginsubsubsection{Examples of MAXIMIZE and MINIMIZE clauses}
+
+\code
+ (loop for i in '(2 1 5 3 4)
+       maximize i)
+\EV 5
+ (loop for i in '(2 1 5 3 4)
+       minimize i)
+\EV 1
+ 
+;; In this example, FIXNUM applies to the internal variable that holds
+;; the maximum value.
+ (setq series '(1.2 4.3 5.7))
+\EV (1.2 4.3 5.7)
+ (loop for v in series 
+       maximize (round v) of-type fixnum)
+\EV 6
+ 
+;; In this example, FIXNUM applies to the variable RESULT.
+ (loop for v of-type float in series
+       minimize (round v) into result of-type fixnum
+       finally (return result))
+\EV 1
+\endcode
+
+\endsubsubsection%{Examples of MAXIMIZE and MINIMIZE clauses}
+
+\beginsubsubsection{Examples of SUM clause}
+
+\code
+ (loop for i of-type fixnum in '(1 2 3 4 5)
+       sum i)
+\EV 15
+ (setq series '(1.2 4.3 5.7))
+\EV (1.2 4.3 5.7)
+ (loop for v in series 
+       sum (* 2.0 v))
+\EV 22.4
+\endcode
+
+\endsubsubsection%{Examples of SUM clause}
+
+\endsubsection%{Value Accumulation Clauses}
+
+\beginsubsection{Termination Test Clauses}
+\DefineSection{LOOPTermTest}
+
+The \loopref{repeat} construct causes iteration to terminate after a
+specified number of times.
+ The loop body executes \i{n} times, where \i{n} is the value 
+of the expression \param{form}.  The \param{form} argument is evaluated one time
+in the loop prologue.  If the expression evaluates to 0 or 
+to a negative \term{number}, the loop body is not evaluated.
+
+The constructs \loopref{always},
+\loopref{never},
+\loopref{thereis},
+\loopref{while},
+\loopref{until},
+and the macro \macref{loop-finish}
+allow conditional termination of iteration within
+a \macref{loop}.
+
+The constructs \loopref{always}, \loopref{never}, and \loopref{thereis} provide
+specific values to be returned when a \macref{loop} terminates.  
+Using \loopref{always}, \loopref{never}, or \loopref{thereis} in a loop with 
+value accumulation clauses that are not \loopref{into} causes 
+an error \oftype{program-error} to be signaled (at macro expansion time).
+Since \loopref{always}, \loopref{never}, and \loopref{thereis}
+use 
+\issue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+\thespecop{return-from}
+\endissue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+to terminate iteration,
+any \loopref{finally} clause that is supplied is not evaluated
+%Added for JonL
+when exit occurs due to any of these constructs.
+In all other respects these
+constructs behave like the \loopref{while} and \loopref{until} constructs.
+
+  The \loopref{always} construct takes one \term{form} and terminates the 
+\macref{loop}
+  if the \term{form} ever evaluates to \nil; in this case, it returns
+  \nil.  Otherwise, it provides a default return value of \t.
+If the value of the supplied \term{form} is never \nil, some other construct
+can terminate the iteration.
+ 
+%  The {\tt never} construct takes one 
+%\term{form} and terminates the \macref{loop}
+%  if the \term{form} ever evaluates to \term{non-nil}; in this case, it returns
+%  \nil.  Otherwise, it provides a default return value of {\tt t}.
+The \loopref{never} construct terminates iteration the first time that
+the value of the supplied \param{form} is \term{non-nil}; the \macref{loop} returns 
+\nil.                                         
+If the value of the supplied \param{form} is always  \nil, some other 
+construct can terminate the iteration.  
+Unless some other clause contributes 
+a return value, the default value returned is \t.
+ 
+%  The {\tt thereis} construct takes one \param{form} and terminates the 
+%\macref{loop}
+%  if the \param{form} ever evaluates to \term{non-nil}; in this case, it returns
+%  that value.        
+The \loopref{thereis} construct terminates iteration the first time that the
+value of the supplied \param{form} is \term{non-nil}; the \macref{loop} returns the
+value of the supplied \param{form}.
+If the value of the supplied \param{form} 
+is always  \nil, some other
+construct can terminate the iteration.  Unless some other clause contributes a 
+return value, the default value returned is \nil.
+ 
+ 
+%!!! Barmar: Combine this differences info with never/until below.
+There are two differences between the \loopref{thereis} and \loopref{until}
+constructs: 
+ 
+\beginlist
+\itemitem{\bull} The \loopref{until} construct does not return a value or 
+\nil\ based on the value of the supplied \param{form}.
+ 
+\itemitem{\bull} The \loopref{until} construct executes 
+any \loopref{finally} clause.
+Since \loopref{thereis} uses
+\issue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+\thespecop{return-from}
+\endissue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+to terminate iteration,
+any \loopref{finally} clause that is supplied is not evaluated
+%Added per JonL
+when exit occurs due to \loopref{thereis}.
+ 
+\endlist
+ 
+ 
+ 
+The \loopref{while} construct allows iteration to continue until the 
+supplied \param{form} 
+evaluates to \term{false}.  The supplied \param{form} 
+is reevaluated at the location of the \loopref{while} clause.
+ 
+The \loopref{until} construct is equivalent to 
+\f{while (not \param{form})\dots}.  If the value of the
+supplied \param{form} is \term{non-nil}, iteration terminates.
+
+%% Removed per X3J13. -kmp 4-Oct-93
+% The \loopref{while} and \loopref{until} constructs can be used
+% at any point in a \macref{loop}.  
+%% Next two lines (sentences) moved from farther down per X3J13.  -kmp 4-Oct-93
+Termination-test control constructs can be used anywhere within the loop body.
+The termination tests are used in the order in which they appear.
+If an \loopref{until} or \loopref{while} clause causes
+termination, any clauses that precede it in the source
+are still evaluated.  
+If the \loopref{until} and {\tt while} constructs cause termination,
+control is passed to the loop epilogue, where any \loopref{finally}
+clauses will be executed.  
+ 
+There are two differences between the \loopref{never} and \loopref{until}
+constructs: 
+ 
+\beginlist
+\itemitem{\bull} The \loopref{until} construct does not return 
+\t\ or \nil\ based on the value of the supplied \param{form}.
+                                                       
+\itemitem{\bull} 
+The \loopref{until} construct 
+%executes any \loopref{finally} clause.
+does not bypass any \loopref{finally} clauses.
+Since \loopref{never} uses 
+\issue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+\thespecop{return-from}
+\endissue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+to terminate iteration,
+any \loopref{finally} clause that is supplied is not evaluated
+%Added per JonL
+when exit occurs due to \loopref{never}. 
+\endlist
+
+%The macro \macref{loop-finish}
+%can be used at any time to cause normal
+%termination.  
+
+%The macro \macref{loop-finish} terminates iteration normally
+%and returns any accumulated result.  If specified, a {\tt finally} clause
+%is evaluated.
+
+
+In most cases it is not necessary to use \macref{loop-finish}
+because other loop control clauses terminate the \macref{loop}.  
+The macro \macref{loop-finish} is used to provide a normal exit
+from a nested conditional inside a \macref{loop}.
+%You can use \macref{loop-finish}
+%inside nested Lisp code to provide a normal exit from a loop.
+%% Removed per X3J13. -kmp 05-Oct-93
+% In normal termination, \loopref{finally} clauses are 
+% executed and default return values are returned.
+Since \macref{loop-finish} transfers control to the loop epilogue,
+using \macref{loop-finish} within a \loopref{finally} expression can cause
+infinite looping.
+%% This information is already available in the macro entry for LOOP-FINISH.
+% %  Implementations are allowed to provide \macref{loop-finish} 
+% %as a local macro
+% %  by using \specref{macrolet}.
+% It is \term{implementation-dependent} whether or not,
+% in a particular \macref{loop} invocation, \macref{loop-finish}
+% is implemented as a global \term{macro} or a local one (created as if by \specref{macrolet}).
+
+\beginsubsubsection{Examples of REPEAT clause}
+ 
+\code
+ (loop repeat 3
+       do (format t "~&What I say three times is true.~%"))
+\OUT What I say three times is true.
+\OUT What I say three times is true.
+\OUT What I say three times is true.
+\EV NIL
+ (loop repeat -15
+   do (format t "What you see is what you expect~%"))
+\EV NIL
+\endcode
+ 
+\endsubsubsection%{Examples of REPEAT clause}
+
+\beginsubsubsection{Examples of ALWAYS, NEVER, and THEREIS clauses}
+
+\code
+;; Make sure I is always less than 11 (two ways).
+;; The FOR construct terminates these loops.
+ (loop for i from 0 to 10
+       always (< i 11))
+\EV T
+ (loop for i from 0 to 10
+       never (> i 11))
+\EV T
+ 
+;; If I exceeds 10 return I; otherwise, return NIL.
+;; The THEREIS construct terminates this loop.
+ (loop for i from 0
+       thereis (when (> i 10) i) )
+\EV 11
+
+;;; The FINALLY clause is not evaluated in these examples.
+ (loop for i from 0 to 10
+       always (< i 9)
+       finally (print "you won't see this"))
+\EV NIL
+ (loop never t
+       finally (print "you won't see this"))
+\EV NIL
+ (loop thereis "Here is my value"
+       finally (print "you won't see this"))
+\EV "Here is my value"
+ 
+;; The FOR construct terminates this loop, so the FINALLY clause 
+;; is evaluated.
+ (loop for i from 1 to 10
+       thereis (> i 11)
+       finally (prin1 'got-here))
+\OUT GOT-HERE
+\EV NIL
+ 
+;; If this code could be used to find a counterexample to Fermat's
+;; last theorem, it would still not return the value of the
+;; counterexample because all of the THEREIS clauses in this example
+;; only return T.  But if Fermat is right, that won't matter
+;; because this won't terminate.
+ 
+ (loop for z upfrom 2
+       thereis
+         (loop for n upfrom 3 below (log z 2)
+               thereis
+                 (loop for x below z
+                       thereis
+                         (loop for y below z
+                               thereis (= (+ (expt x n) (expt y n))
+                                          (expt z n))))))
+\endcode
+
+\endsubsubsection%{Examples of ALWAYS, NEVER, and THEREIS clauses}
+
+\beginsubsubsection{Examples of WHILE and UNTIL clauses}
+
+\code
+ (loop while (hungry-p) do (eat))
+ 
+;; UNTIL NOT is equivalent to WHILE.
+ (loop until (not (hungry-p)) do (eat))
+ 
+;; Collect the length and the items of STACK.
+ (let ((stack '(a b c d e f)))
+   (loop for item = (length stack) then (pop stack)
+         collect item
+         while stack))
+\EV (6 A B C D E F)
+ 
+;; Use WHILE to terminate a loop that otherwise wouldn't terminate.
+;; Note that WHILE occurs after the WHEN.
+ (loop for i fixnum from 3
+       when (oddp i) collect i
+       while (< i 5))
+\EV (3 5)
+\endcode
+
+\endsubsubsection%{Examples of WHILE and UNTIL clauses}
+
+\endsubsection%{Termination Test Clauses}
+
+\beginsubsection{Unconditional Execution Clauses}
+\DefineSection{LOOPUnconditional}
+ 
+The \loopref{do} and \loopref{doing} constructs 
+evaluate the 
+supplied \param{forms} 
+wherever they occur in the expanded form of \macref{loop}.
+ The \param{form} argument can be any \term{compound form}.
+Each \param{form} is evaluated in every iteration.
+Because every loop clause must begin with a \term{loop keyword}, 
+the keyword \loopref{do} is used when no control action other than execution is 
+required.
+ 
+%!!! This was said somewhere already. -kmp 12-May-91
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+%The \loopref{return} construct takes one \term{form} and returns its \term{values}.
+ The \loopref{return} construct takes one \term{form}. 
+ Any \term{values} returned by the \term{form} 
+ are immediately returned by the \macref{loop} form.
+% It is equivalent to the clause \f{do (return \i{form})}.
+  It is equivalent to the clause
+  \f{do (return-from \i{block-name} \i{value})},
+  where \i{block-name} is the name specified in a \loopref{named}
+  clause, or \nil\ if there is no \loopref{named} clause.
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+ 
+\beginsubsubsection{Examples of unconditional execution}
+
+\code
+;; Print numbers and their squares.
+;; The DO construct applies to multiple forms.
+ (loop for i from 1 to 3
+       do (print i)
+          (print (* i i)))
+\OUT 1 
+\OUT 1 
+\OUT 2 
+\OUT 4 
+\OUT 3 
+\OUT 9 
+\EV NIL
+
+\endcode
+
+\endsubsubsection%{Examples of unconditional execution}
+
+\endsubsection%{Unconditional Execution Clauses}
+
+\beginsubsection{Conditional Execution Clauses}
+\DefineSection{LOOPConditional}
+
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+% The  
+% \loopref{if}, \loopref{when}, and \loopref{unless}
+% constructs 
+% establish conditional control in a \macref{loop}.
+% If the supplied condition is \term{true}, the succeeding loop clause
+% is executed.  If the supplied condition is not true, the succeeding clause is
+% skipped, and program control moves to the clause that follows 
+% the \term{loop keyword} \loopref{else}.  If the supplied condition is not true and no
+% \loopref{else} clause is supplied, control is transferred to the 
+% clause or construct following the supplied condition.
+% %the entire conditional construct
+% %is skipped.
+% 
+% The constructs \loopref{if} and \loopref{when} allow execution of 
+% loop clauses conditionally.  These constructs are synonyms and
+% can be used interchangeably.
+%  If the value of the test expression \param{form} is \term{non-nil}, the expression
+% \param{clause1} is evaluated. If the test expression evaluates to \nil\
+% and an \loopref{else} construct is supplied, the \term{forms} that follow the
+% \loopref{else} are evaluated; otherwise, control passes to the next clause.
+%  If \loopref{if} or \loopref{when} clauses are nested, each \loopref{else} is
+% paired with the closest preceding \loopref{if} or \loopref{when} construct that has
+% no associated \loopref{else} or \loopref{end}.
+% 
+% The \loopref{unless} construct is equivalent to \f{when (not \param{form})}
+% and \f{if (not \param{form})}.
+% If the value of the test expression \param{form} is \nil, the expression
+% \param{clause1} is evaluated. If the test expression evaluates to 
+% \term{non-nil} and an \loopref{else} construct is supplied, the statements that follow the
+% \loopref{else} are evaluated; otherwise, no conditional statement is evaluated.
+%  The \param{clause} arguments must be either accumulation, unconditional,
+% or conditional clauses.  
+
+The \loopref{if}, \loopref{when}, and \loopref{unless} constructs
+establish conditional control in a \macref{loop}. If the test
+passes, the succeeding loop clause is executed. If the test does
+not pass, the succeeding clause is skipped, and program control
+moves to the clause that follows the \term{loop keyword}
+\loopref{else}. If the test does not pass and no \loopref{else}
+clause is supplied, control is transferred to the clause or
+construct following the entire conditional clause.
+
+If conditional clauses are nested, each \loopref{else} is paired
+with the closest preceding conditional clause that has no
+associated \loopref{else} or \loopref{end}. 
+
+In the \loopref{if} and \loopref{when} clauses, which are
+synonymous, the test passes if the value of \param{form} is
+\term{true}.
+
+%% Per X3J13. -kmp 05-Oct-93
+% The \loopref{unless} \param{form} construct 
+% is equivalent to \f{when (not \param{form})};
+% the test passes if the value of \param{form} is \term{false}.
+In the \loopref{unless} clause,
+the test passes if the value of \param{form} is \term{false}.
+
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+ 
+Clauses that follow the test expression can be grouped by using 
+the \term{loop keyword} \loopref{and} to produce a conditional block consisting of 
+a compound clause.
+ 
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+% The \term{loop keyword} \loopref{it} can be used to refer to the result of the
+% test expression in a clause.  If multiple clauses are connected 
+% with \loopref{and},
+% the \loopref{it} construct must be in the first clause in the block.  Since \loopref{it}
+% is a \term{loop keyword}, \loopref{it} cannot be used as a local variable within
+% \macref{loop}.
+The \term{loop keyword} \loopref{it} can be used to refer to the result
+of the test expression in a clause.
+Use the \term{loop keyword} \loopref{it} in place of the form in a
+\loopref{return} clause or an \i{accumulation} clause that is
+inside a conditional execution clause.
+If multiple clauses are connected with \loopref{and}, the \loopref{it}
+construct must be in the first clause in the block.
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+ 
+The optional \term{loop keyword} \loopref{end} marks the end of the clause.  If this
+keyword is not supplied, the next \term{loop keyword} marks the end.  The construct
+\loopref{end} can be used to distinguish the scoping of compound clauses.
+ 
+\beginsubsubsection{Examples of WHEN clause}
+
+\code
+;; Signal an exceptional condition.
+ (loop for item in '(1 2 3 a 4 5)
+       when (not (numberp item))
+        return (cerror "enter new value" "non-numeric value: ~s" item))
+Error: non-numeric value: A
+ 
+;; The previous example is equivalent to the following one.
+ (loop for item in '(1 2 3 a 4 5)
+       when (not (numberp item))
+        do (return 
+            (cerror "Enter new value" "non-numeric value: ~s" item)))
+Error: non-numeric value: A
+\endcode
+
+% Removed ";; The FINALLY clause prints the last value of I." per X3J13. -kmp 05-Oct-93
+\code
+;; This example parses a simple printed string representation from 
+;; BUFFER (which is itself a string) and returns the index of the
+;; closing double-quote character.
+ (let ((buffer "\\"a\\" \\"b\\""))
+   (loop initially (unless (char= (char buffer 0) #\\")
+                     (loop-finish))
+         for i of-type fixnum from 1 below (length (the string buffer))
+         when (char= (char buffer i) #\\")
+          return i))
+\EV 2
+ 
+;; The collected value is returned.
+ (loop for i from 1 to 10
+       when (> i 5)
+         collect i
+       finally (prin1 'got-here))
+\OUT GOT-HERE
+\EV (6 7 8 9 10) 
+
+;; Return both the count of collected numbers and the numbers.
+ (loop for i from 1 to 10
+       when (> i 5)
+         collect i into number-list
+         and count i into number-count
+       finally (return (values number-count number-list)))
+\EV 5, (6 7 8 9 10)
+\endcode
+ 
+\endsubsubsection%{Examples of WHEN clause}
+
+\endsubsection%{Conditional Execution Clauses}
+
+\beginsubsection{Miscellaneous Clauses}
+\DefineSection{LOOPMisc}
+                                          
+\beginsubsubsection{Control Transfer Clauses}
+
+The \loopref{named} construct
+establishes a name for an \term{implicit block} surrounding the 
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+entire
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX} 
+\macref{loop} so that \thespecop{return-from} can be used to return 
+values from or to exit \macref{loop}.   
+Only one name per \macref{loop} \term{form} can be assigned.
+If used, the \loopref{named} construct must be the first clause in the loop expression.
+
+%!!! This is said already above (twice). Consolidate? -kmp 29-Apr-93
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+ The \loopref{return} construct takes one \term{form}. 
+ Any \term{values} returned by the \term{form} 
+ are immediately returned by the \macref{loop} form.
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+This construct is similar to \thespecop{return-from} and \themacro{return}.
+% The Loop Facility supports the \loopref{return} construct for backwards
+%compatibility with older loop implementations.  
+The \loopref{return} construct 
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+%returns immediately and
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+does not execute any \loopref{finally} clause that 
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+the \macref{loop} \term{form}
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+is given.
+                
+\beginsubsubsubsection{Examples of NAMED clause}
+
+\code
+;; Just name and return.
+ (loop named max
+       for i from 1 to 10
+       do (print i)
+       do (return-from max 'done))
+\OUT 1 
+\EV DONE
+\endcode
+
+\endsubsubsubsection%{Examples of NAMED clause}
+
+\endsubsubsection%{Control Transfer Clauses}
+
+\beginsubsubsection{Initial and Final Execution}
+ 
+The \loopref{initially} and \loopref{finally} constructs
+evaluate forms that occur before and after the loop body.
+
+The \loopref{initially} construct causes the supplied
+%% Per X3J13. -kmp 05-Oct-93
+% \param{form}
+\param{compound-forms}
+to be evaluated
+in the loop prologue, which precedes all loop code except for 
+initial settings supplied by constructs \loopref{with}, \loopref{for}, or
+\loopref{as}.
+  The code for any \loopref{initially} clauses is 
+%"collected into one \specref{progn}" => "executed" per barmar:
+%  They don't have to be collected into a real PROGN since the LOOP expands into a TAGBODY.
+% -kmp 31-Jul-91
+executed
+in the order in which the clauses appeared in
+  the \macref{loop}.  
+%The collected code is executed once in the loop prologue
+%  after any implicit variable initializations.
+%% Removed per X3J13. -kmp 05-Oct-93
+%The \param{form} argument can be any \term{compound form}.
+  
+The \loopref{finally} construct causes the supplied
+%% Per X3J13. -kmp 05-Oct-93
+%\param{form}
+\param{compound-forms}
+to be evaluated
+in the loop epilogue after normal iteration terminates.
+  The code for any \loopref{finally} clauses is 
+%collected into one \specref{progn}
+executed
+ in the order in which the clauses appeared in
+  the \macref{loop}.  The collected code is executed once in the loop epilogue
+  before any implicit values are returned from the accumulation clauses.
+%  Explicit \macref{return} \term{forms} in 
+An explicit transfer of control (\eg by \macref{return}, \specref{go}, or \specref{throw})
+from the loop body, however, will exit the 
+  \macref{loop} without executing the epilogue code.
+%% Removed per X3J13. -kmp 05-Oct-93
+% The \param{form} argument can be any \term{compound form}.
+ 
+Clauses such as \loopref{return}, \loopref{always}, \loopref{never}, and 
+\loopref{thereis}
+can bypass the \loopref{finally} clause.
+\issue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+\macref{return} (or \specref{return-from}, if the \loopref{named} option was supplied)
+\endissue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+can be used after \loopref{finally} to return values from a \macref{loop}.  
+\issue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+%The evaluation of the \macref{return} form 
+Such an \term{explicit return}
+\endissue{LOOP-NAMED-BLOCK-NIL:OVERRIDE}
+inside the
+\loopref{finally} clause takes precedence over returning the accumulation
+from clauses supplied by such keywords as \loopref{collect}, \loopref{nconc}, 
+\loopref{append}, \loopref{sum}, \loopref{count}, \loopref{maximize}, and 
+\loopref{minimize}; 
+the accumulation values for these preempted clauses are not returned by 
+\macref{loop} if \macref{return} or \specref{return-from} is used.
+ 
+%Clauses such as {\tt return}, {\tt always}, {\tt never}, and {\tt thereis}
+%defeat the {\tt finally} clause.
+
+%% Removed per Barmar: Said much earlier. 
+% The constructs \loopref{do}, \loopref{initially}, and \loopref{finally} are the
+% only \term{loop keywords} that take an arbitrary number of \term{forms} and group
+% them as if by using an \term{implicit progn}.  
+
+\endsubsubsection%{Initial and Final Execution}
+
+\endsubsection%{Miscellaneous Clauses}
+
+\beginsubSection{Examples of Miscellaneous Loop Features}
+
+\code
+ (let ((i 0))                     ; no loop keywords are used
+    (loop (incf i) (if (= i 3) (return i)))) \EV 3
+ (let ((i 0)(j 0))
+    (tagbody
+      (loop (incf j 3) (incf i) (if (= i 3) (go exit)))
+      exit)
+    j) \EV 9
+\endcode
+
+
+In the following example, the variable \f{x} is stepped
+before \f{y} is stepped; thus, the value of \f{y}
+reflects the updated value of \f{x}:
+ 
+\code
+ (loop for x from 1 to 10 
+       for y = nil then x 
+       collect (list x y))
+\EV ((1 NIL) (2 2) (3 3) (4 4) (5 5) (6 6) (7 7) (8 8) (9 9) (10 10))
+\endcode
+ 
+In this example, \f{x} and \f{y} are stepped in \term{parallel}:
+ 
+\code
+ (loop for x from 1 to 10 
+       and y = nil then x 
+       collect (list x y))
+\EV ((1 NIL) (2 1) (3 2) (4 3) (5 4) (6 5) (7 6) (8 7) (9 8) (10 9))
+\endcode
+
+\beginsubsubsection{Examples of clause grouping}
+\code
+;; Group conditional clauses.
+ (loop for i in '(1 324 2345 323 2 4 235 252)
+       when (oddp i)
+         do (print i)
+         and collect i into odd-numbers
+         and do (terpri)
+       else                              ; I is even.
+         collect i into even-numbers
+       finally
+         (return (values odd-numbers even-numbers)))
+\OUT 1 
+\OUT 
+\OUT 2345 
+\OUT 
+\OUT 323 
+\OUT 
+\OUT 235 
+\EV (1 2345 323 235), (324 2 4 252)
+
+;; Collect numbers larger than 3.
+ (loop for i in '(1 2 3 4 5 6)
+       when (and (> i 3) i)
+       collect it)                      ; IT refers to (and (> i 3) i).
+\EV (4 5 6)
+ 
+;; Find a number in a list.
+ (loop for i in '(1 2 3 4 5 6)
+       when (and (> i 3) i)
+       return it)
+\EV 4
+     
+;; The above example is similar to the following one.
+ (loop for i in '(1 2 3 4 5 6)
+       thereis (and (> i 3) i))
+\EV 4
+
+\medbreak
+;; Nest conditional clauses.
+ (let ((list '(0 3.0 apple 4 5 9.8 orange banana)))
+   (loop for i in list
+         when (numberp i)
+           when (floatp i)
+             collect i into float-numbers
+           else                                  ; Not (floatp i)
+             collect i into other-numbers
+         else                                    ; Not (numberp i)
+           when (symbolp i) 
+             collect i into symbol-list
+           else                                  ; Not (symbolp i)
+             do (error "found a funny value in list ~S, value ~S~%" list i)
+         finally (return (values float-numbers other-numbers symbol-list))))
+\EV (3.0 9.8), (0 4 5), (APPLE ORANGE BANANA)
+
+;; Without the END preposition, the last AND would apply to the
+;; inner IF rather than the outer one.
+ (loop for x from 0 to 3 
+       do (print x)
+       if (zerop (mod x 2))
+         do (princ " a")
+          and if (zerop (floor x 2))
+                do (princ " b")
+                end
+          and do (princ " c"))
+\OUT 0  a b c
+\OUT 1 
+\OUT 2  a c
+\OUT 3 
+\EV NIL
+\endcode
+ 
+\endsubsubsection%{Examples of clause grouping}
+
+\endsubSection%{Examples of Miscellaneous Loop Features}
+
+\beginsubSection{Notes about Loop}
+
+\term{Types} can be supplied for loop variables.  
+It is not necessary to supply a \term{type} for any variable,
+but supplying the \term{type} 
+can ensure that the variable has a correctly typed initial value,
+and it can also enable compiler optimizations 
+(depending on the \term{implementation}).
+ 
+The clause \loopref{repeat} \i{n} ... is roughly equivalent to a clause such as 
+  
+\code
+ (loop for \i{internal-variable} downfrom (- \i{n} 1) to 0 ...)
+\endcode
+                                                            
+but in some \term{implementations},
+the \loopref{repeat} construct might be more efficient.
+
+Within the executable parts of the loop clauses and around the entire
+\macref{loop} form, variables can be bound by using \specref{let}.
+
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+Use caution when using a variable named {\tt IT} (in any \term{package})
+in connection with \macref{loop}, since \loopref{it} is a \term{loop keyword} 
+that can be used in place of a \term{form} in certain contexts.
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+
+There is
+%currently no specified portable
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+no
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+\term{standardized}
+mechanism for users to add
+extensions to \macref{loop}.
+% The names \f{defloop} and \f{define-loop-method} 
+% have been suggested as candidates for such a method.
+
+\endsubSection%{Notes about Loop}

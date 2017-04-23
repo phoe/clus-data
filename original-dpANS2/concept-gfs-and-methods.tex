@@ -1,0 +1,931 @@
+% -*- Mode: TeX -*-
+
+%!!! Uses of "built-in" could be "\term{standardized}" here.
+
+\beginSubsection{Introduction to Generic Functions}
+\DefineSection{IntroToGFs}
+
+A \newterm{generic function} is a function whose behavior depends on
+the \term{classes} or identities of the \term{arguments} supplied to it.
+A \term{generic function} \term{object} 
+%contains
+is associated with 
+     a set of \term{methods},
+     a \term{lambda list},
+     a \term{method combination}\meaning{2}, 
+ and other information.
+
+Like an \term{ordinary function}, a \term{generic function} takes \term{arguments},
+performs a series of operations, and perhaps returns useful \term{values}.
+An \term{ordinary function} has a single body of \term{code} that is always \term{executed}
+when the \term{function} is called.  A \term{generic function} has a set of bodies
+of \term{code} of which a subset is selected for \term{execution}. The selected
+bodies of \term{code} and the manner of their combination are determined by
+the \term{classes} or identities of one or more of the \term{arguments} to the
+\term{generic function} and by its \term{method combination}.
+
+\term{Ordinary functions} and \term{generic functions} are called with identical syntax.
+ 
+\term{Generic functions} are true \term{functions} that can be passed as \term{arguments}
+and used as the first \term{argument} to \funref{funcall} and \funref{apply}.
+
+A \term{binding} of a \term{function name} to a \term{generic function}
+can be \term{established} in one of several ways.  It can be
+\term{established} in the \term{global environment} by 
+ \funref{ensure-generic-function},
+ \macref{defmethod} (implicitly, due to \funref{ensure-generic-function})
+or
+ \macref{defgeneric} (also implicitly, due to \funref{ensure-generic-function}).
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+No \term{standardized} mechanism is provided for \term{establishing} a
+\term{binding} of a \term{function name} to a \term{generic function}
+in the \term{lexical environment}.
+% It can be \term{established} in the \term{lexical environment} by 
+\issue{WITH-ADDED-METHODS:DELETE}
+% \specref{with-added-methods},
+\endissue{WITH-ADDED-METHODS:DELETE}
+%  \specref{generic-flet}
+% or
+%  \specref{generic-labels}.
+% The \term{name} part of such a \term{binding}, like the name of an ordinary
+% \term{function}, can be either a \term{symbol} or a two-element
+% \term{list} whose first element is \misc{setf} and whose second element
+% is a \term{symbol}.  This is true for both \term{lexical bindings} and
+% \term{global bindings}.
+% 
+% The \specref{generic-flet} special form creates new local generic
+% functions using the set of methods specified by the method definitions
+% in the \specref{generic-flet} form.  The scoping of generic function names
+% within a \specref{generic-flet} form is the same as for \specref{flet}.
+% 
+% The \specref{generic-labels} special form creates a set of new mutually
+% recursive local generic functions using the set of methods specified
+% by the method definitions in the \specref{generic-labels} form.  The
+% scoping of generic function names within a \specref{generic-labels} form
+% is the same as for \specref{labels}.
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+
+\issue{WITH-ADDED-METHODS:DELETE}
+% The \specref{with-added-methods} special form creates new local generic
+% functions by adding the set of methods specified by the method
+% definitions with a given name in the \specref{with-added-methods} form to
+% copies of the methods of the lexically visible generic function of the
+% same name. If there is a lexically visible ordinary function of the
+% same name as one of specified generic functions, that function
+% becomes the method function of the default method for the new generic
+% function of that name.
+\endissue{WITH-ADDED-METHODS:DELETE}
+
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+% The \macref{generic-function} macro creates an anonymous generic
+% function with the set of methods specified by the method definitions
+% in the \macref{generic-function} form.
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+
+When a \macref{defgeneric} form is evaluated, one of three actions
+is taken (due to \funref{ensure-generic-function}):
+
+%!!! Barrett observes that GENERIC-FLET and GENERIC-LABELS are not correctly
+%    spoken for here because they are classified as method-defining.
+%    But since they've been flushed, I guess it doesn't matter. -kmp 12-Feb-92
+\beginlist
+
+\itemitem{\bull} If a generic function of the given name already exists,
+the existing generic function object is modified.  Methods specified
+by the current \macref{defgeneric} form are added, and any methods in the
+existing generic function that were defined by a previous \macref{defgeneric}
+form are removed.  Methods added by the current \macref{defgeneric} 
+form might replace methods defined by \macref{defmethod}, 
+\macref{defclass}, \macref{define-condition}, or \macref{defstruct}.  
+No other methods in the generic function are affected
+or replaced.
+
+\itemitem{\bull} If the given name names 
+    an \term{ordinary function}, 
+    a  \term{macro},
+ or a \term{special operator}, 
+an error is signaled.
+
+\itemitem{\bull} Otherwise a generic function is created with the
+methods specified by the method definitions in the \macref{defgeneric}
+form.
+
+\endlist
+
+Some \term{operators} permit specification of the options of a
+\term{generic function}, such as 
+the \term{type} of \term{method combination} it uses 
+or its \term{argument precedence order}.
+These \term{operators} will be referred to as
+``operators that specify generic function options.''
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+% These \term{operators} are:
+%  \macref{defgeneric},
+%% Reworded since there's only one.
+The only \term{standardized} \term{operator} in this category is \macref{defgeneric}.
+%\macref{generic-function},
+\issue{WITH-ADDED-METHODS:DELETE}
+%\specref{with-added-methods},
+\endissue{WITH-ADDED-METHODS:DELETE}
+%  \specref{generic-flet}, 
+% and
+%  \specref{generic-labels}.
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+
+Some \term{operators} define \term{methods} for a \term{generic function}.
+These \term{operators} will be referred to as
+\newtermidx{method-defining operators}{method-defining operator};
+their associated \term{forms} are called \term{method-defining forms}.
+The \term{standardized} \term{method-defining operators} are listed in \thenextfigure.
+% The \term{standardized} \term{operators} in this category are:
+%  \macref{defgeneric},
+%  \macref{defmethod},
+% \issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+% %\macref{generic-function},
+% % \specref{generic-flet},
+% % \specref{generic-labels},
+% \endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+% \issue{WITH-ADDED-METHODS:DELETE}
+% %\specref{with-added-methods}, 
+% \endissue{WITH-ADDED-METHODS:DELETE}%
+%  \macref{defclass},
+%  \macref{define-condition},
+% and 
+%  \macref{defstruct}.
+\DefineFigure{StdMethDefOps}
+\issue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+\issue{WITH-ADDED-METHODS:DELETE}
+%Removed GENERIC-FUNCTION, GENERIC-FLET, and GENERIC-LABELS.
+%Removed WITH-ADDED-METHODS.
+\displaythree{Standardized Method-Defining Operators}{
+defgeneric&defmethod&defclass\cr
+define-condition&defstruct&\cr
+}
+\endissue{WITH-ADDED-METHODS:DELETE}
+\endissue{GENERIC-FLET-POORLY-DESIGNED:DELETE}
+Note that of the \term{standardized} \term{method-defining operators}
+% all of the method-defining operators except
+%  \macref{defclass},
+%  \macref{defmethod},
+%  \macref{define-condition},
+% and 
+%  \macref{defstruct} 
+only \macref{defgeneric}
+can specify \term{generic function} options.
+\macref{defgeneric} and any \term{implementation-defined} \term{operators}
+that can specify \term{generic function} options
+are also referred to as ``operators that specify generic function options.''
+
+\endSubsection%{Introduction to Generic Functions}
+
+\beginSubsection{Introduction to Methods}
+\DefineSection{IntroToMethods}
+
+\term{Methods} define the class-specific or identity-specific behavior
+and operations of a \term{generic function}. 
+
+%KAB was a bit unhappy with "contains" here.
+%He also didn't like the term "method function".
+A \term{method} \term{object} 
+%contains
+is associated with 
+%     a method function,
+     \term{code} that implements the method's behavior,
+     a sequence of \term{parameter specializers} 
+       that specify when the given \term{method} is applicable,
+     a \term{lambda list},
+ and a sequence of \term{qualifiers} that are used by the method combination
+       facility to distinguish among \term{methods}.
+
+A method object is not a function and cannot be invoked as a function. 
+Various mechanisms in the \OS\ take a method object and invoke its method
+function, as is the case when a generic function is invoked.  When this
+occurs it is said that the method is invoked or called.
+
+A method-defining form contains the \term{code} that is to be run when the
+arguments to the generic function cause the method that it defines to
+be invoked.  When a method-defining form is evaluated, a method object
+is created and one of four actions is taken:
+
+\beginlist
+
+\itemitem{\bull} If a \term{generic function} of the given name already exists
+and if a \term{method object} already exists that agrees with the new one on
+\term{parameter specializers} and \term{qualifiers}, the new \term{method object} replaces
+the old one.  For a definition of one method agreeing with another on
+\term{parameter specializers} and \term{qualifiers}, 
+\seesection\SpecializerQualifierAgreement.
+
+\itemitem{\bull} If a \term{generic function} of the given name already exists
+and if there is no \term{method object} that agrees with the new one on
+\term{parameter specializers} and \term{qualifiers}, the existing \term{generic function}
+\term{object} is modified to contain the new \term{method} \term{object}.
+
+\itemitem{\bull} If the given \term{name} names an \term{ordinary function}, a \term{macro},
+or a \term{special operator}, an error is signaled.
+
+\itemitem{\bull} Otherwise a \term{generic function} is created with the \term{method}
+specified by the \term{method-defining form}.
+
+\endlist
+
+If the \term{lambda list} of a new \term{method} is not
+\term{congruent} with the \term{lambda list} of the \term{generic function},
+an error is signaled.  If a \term{method-defining operator} that cannot specify
+\term{generic function} options creates a new \term{generic function}, 
+a \term{lambda list} for that \term{generic function} is derived from the
+\term{lambda list} of the \term{method} in the \term{method-defining form} in such a way
+as to be \term{congruent} with it.  For a discussion of \newterm{congruence},
+\seesection\GFMethodLambdaListCongruency.
+
+Each method has a \term{specialized lambda list}, which determines
+when that method can be applied.  A \term{specialized lambda list} is like
+an \term{ordinary lambda list} except that a specialized parameter
+may occur instead of the name of a required parameter.  A specialized parameter
+is a list \f{(\i{variable-name} \i{parameter-specializer-name})},
+where \i{parameter-specializer-name} is one of the following:
+
+\beginlist
+
+\itemitem{a \term{symbol}}
+
+denotes a \term{parameter specializer} which is the \term{class} 
+named by that \term{symbol}.
+
+\issue{CLASS-OBJECT-SPECIALIZER:AFFIRM}
+%This was apparently introduced accidentally, but has been confirmed by X3J13 vote.
+% -kmp 08-Apr-91
+\itemitem{a \term{class}}
+
+denotes a \term{parameter specializer} which is the \term{class} itself.
+\endissue{CLASS-OBJECT-SPECIALIZER:AFFIRM}
+
+\itemitem{\f{(eql \i{form})}}
+
+denotes a \term{parameter specializer} which satisfies the \term{type specifier}
+\f{(eql \i{object})}, where \i{object} is the 
+result of evaluating \i{form}.  The form \i{form} is evaluated in 
+the lexical environment in which the method-defining form is evaluated.
+Note that \i{form} is evaluated only once, at the time the method is
+defined, not each time the generic function is called.
+\endlist
+
+\term{Parameter specializer names} are used in macros intended as the
+user-level interface (\macref{defmethod}), while \term{parameter specializers}
+are used in the functional interface.
+
+Only required parameters may be specialized, and there must be a
+\term{parameter specializer} for each required parameter.  For notational
+simplicity, if some required parameter in a \term{specialized lambda list} in
+a method-defining form is simply a variable name, its 
+\term{parameter specializer} defaults to \theclass{t}.
+
+Given a generic function and a set of arguments, an applicable
+method is a method for that generic function whose parameter
+specializers are satisfied by their corresponding arguments.  The
+following definition specifies what it means for a method to be
+applicable and for an argument to satisfy a \term{parameter specializer}.
+
+%Barmar: Review use of ``instance'' here.  Also, instead of
+%  ``$C=P\sub i$ or ...'' we should refer just to ``(TYPEP Ai Pi) is true.''
+%Since this is a hot topic on the mail right now, I'll leave this 
+% until the dust settles. -kmp 22-Oct-90
+%KMP: I think this is finally fixed.
+Let $\langle A\sub 1, \ldots, A\sub n\rangle$ be the required
+arguments to a generic function in order. Let $\langle P\sub 1,
+\ldots, P\sub n\rangle$ be the \term{parameter specializers} corresponding to
+the required parameters of the method $M$ in order.  The method $M$ is
+% applicable when each $A\sub i$ satisfies $P\sub i$.
+% If $P\sub i$ is a class, and if $A\sub i$ is a \term{direct instance} of a class
+% $C$\negthinspace, then it is said that $A\sub i$ satisfies
+% $P\sub i$ when $C=P\sub i$ or when $C$ is a subclass of $P\sub i$.  If
+% $P\sub i$ is {\tt (eql \i{object})}, then it is said that
+% $A\sub i$ satisfies $P\sub i$ when
+% %\thefunction{eql} applied to $A\sub i$ and \i{object} \term{yields} \term{true}.
+% $A\sub i$ is the \term{same} as \i{object} (\ie under \funref{eql}).
+applicable when each $A\sub i$ is of the \term{type} specified by 
+the \term{type specifier} $P\sub i$.
+% Because a \term{parameter specializer} is a \term{type specifier}, 
+% \thefunction{typep} can be used during method selection 
+% to determine whether an
+% argument satisfies a \term{parameter specializer}.  
+% %% For Moon
+% %In general
+% A
+% %arbitrary
+% \term{parameter specializer} cannot be a \term{compound type specifier}.
+% %Example moved to the glossary.
+% %such as {\tt (vector single-float)}.
+% The only \term{list} that can be a \term{parameter specializer} is \f{(eql \i{object})}.
+% %This requires that
+% %Common Lisp be modified to include the \term{type specifier} \funref{eql} to be
+% %defined as if the following were evaluated:
+% %
+% %$$\hbox{\f{(deftype eql (object) `(member ,object))}}$$
+% %                                                                  
+%% Rewritten by KMP:
+%% This part isn't really needed because it's said just a few paragraphs before.
+% A \term{parameter specializer} can be a \term{class}, a \term{class} \term{name},
+% or \f{(eql \i{object})}.  
+%% I think this can stand on its own.
+Because every valid \term{parameter specializer} is 
+also a valid \term{type specifier}, \thefunction{typep} can be used during method
+selection to determine whether an argument satisfies a \term{parameter specializer}.  
+
+A method all of whose \term{parameter specializers} are 
+\theclass{t} is called a \newterm{default method}; it is always applicable but
+may be shadowed by a more specific method.
+
+Methods can have \term{qualifiers}, which give the method combination
+procedure a way to distinguish among methods.  A method that has one
+or more \term{qualifiers} is called a \term{qualified method}.
+A method with no \term{qualifiers} is called an \term{unqualified method}. 
+A \term{qualifier} is any \term{non-list}.
+% The \term{qualifiers} defined by standard method combination 
+% and by the built-in method combination types are \term{symbols}.
+%% Simplification per Barrett:
+The \term{qualifiers} defined by the \term{standardized} method combination types 
+are \term{symbols}.
+
+In this specification, the terms ``\term{primary method}'' and 
+``\term{auxiliary method}'' are used to partition \term{methods}
+within a method combination type according to their intended use.  
+In standard method combination, \term{primary methods} are 
+\term{unqualified methods} 
+and \term{auxiliary methods} are methods with a single \term{qualifier} 
+that is one of \kwd{around}, \kwd{before}, or \kwd{after}.
+\term{Methods} with these \term{qualifiers} are called \term{around methods},
+\term{before methods}, and \term{after methods}, respectively.
+When a method combination type is defined using the short form of
+\macref{define-method-combination}, \term{primary methods} are 
+methods qualified with the name of the type of method combination, 
+and auxiliary methods have the \term{qualifier} \kwd{around}.
+Thus the terms ``\term{primary method}'' and ``\term{auxiliary method}''
+have only a relative definition within a given method combination type.
+
+\endSubsection%{Introduction to Methods}
+
+\beginSubsection{Agreement on Parameter Specializers and Qualifiers}
+\DefineSection{SpecializerQualifierAgreement}
+
+Two \term{methods} are said to agree with each other on \term{parameter specializers}
+and \term{qualifiers} if the following conditions hold:
+
+\beginlist
+
+\itemitem{1.} Both methods have the same number of required parameters.
+Suppose the \term{parameter specializers} of the two methods are
+$P\sub{1,1}\ldots P\sub{1,n}$ and $P\sub{2,1}\ldots P\sub{2,n}$.
+
+\itemitem{2.} For each $1\leq i\leq n$, $P\sub{1,i}$ agrees with $P\sub{2,i}$.
+The \term{parameter specializer} $P\sub{1,i}$ agrees with $P\sub{2,i}$ if
+$P\sub{1,i}$ and $P\sub{2,i}$ are the same class or if 
+$P\sub{1,i}=\hbox{{\tt(\b{eql} $\hbox{\i{object}}\sub 1$)}}$,
+$P\sub{2,i}=\hbox{{\tt(\b{eql} $\hbox{\i{object}}\sub 2$)}}$, and
+{\tt (\b{eql} $\hbox{\i{object}}\sub 1$ $\hbox{\i{object}}\sub 2$)}.
+Otherwise $P\sub{1,i}$ and $P\sub{2,i}$ do not agree.
+
+
+\itemitem{3.} The two \term{lists} of \term{qualifiers} are the \term{same} 
+under \funref{equal}.
+
+% \itemitem{3.} The lists of \term{qualifiers} of both methods contain the same   
+% \term{non-nil} atoms in the same order. That is, the lists are \funref{equal}.
+
+\endlist
+
+\endSubsection%{Agreement on Parameter Specializers and Qualifiers}
+
+\beginSubsection{Congruent Lambda-lists for all Methods of a Generic Function}
+\DefineSection{GFMethodLambdaListCongruency}
+
+These rules define the congruence of a set of \term{lambda lists}, including the
+\term{lambda list} of each method for a given generic function and the
+\term{lambda list} specified for the generic function itself, if given.
+
+\beginlist
+
+\itemitem{1.} Each \term{lambda list} must have the same number of required
+parameters.
+
+\itemitem{2.} Each \term{lambda list} must have the same number of optional
+parameters.  Each method can supply its own default for an optional
+parameter.
+                                       
+\itemitem{3.} If any \term{lambda list} mentions \keyref{rest} or \keyref{key}, each
+\term{lambda list} must mention one or both of them.
+                                                        
+\itemitem{4.} If the \term{generic function} \term{lambda list}
+mentions \keyref{key}, each
+method must accept all of the keyword names mentioned after \keyref{key},
+either by accepting them explicitly, by specifying \keyref{allow-other-keys},
+or by specifying \keyref{rest} but not \keyref{key}.
+Each method can accept additional keyword arguments of its own.  The
+checking of the validity of keyword names is done in the generic
+function, not in each method.
+%!!! "Leftmost". Sigh.
+A method is invoked as if the keyword
+argument pair whose name is \kwd{allow-other-keys} and whose value
+is \term{true} were supplied, though no such argument pair will be passed.
+%!!! KAB: Alternatively, as if the lambda list of the method specified &allow-other-keys.
+                      
+\itemitem{5.} The use of \keyref{allow-other-keys} need not be consistent
+across \term{lambda lists}.  If \keyref{allow-other-keys} is mentioned in 
+the \term{lambda list} of any applicable \term{method} or of the \term{generic function},
+any keyword arguments may be mentioned in the call to the \term{generic function}.
+                      
+\itemitem{6.} The use of \keyref{aux} need not be consistent across methods.
+
+If a \term{method-defining operator} that cannot specify \term{generic function} options
+creates a \term{generic function}, and if the \term{lambda list} for the method
+mentions keyword arguments, the \term{lambda list} of the generic function
+will mention \keyref{key} (but no keyword arguments).
+
+\endlist
+
+\endSubsection%{Congruent Lambda-lists for All Methods of a Generic Function}
+
+%\newpage
+
+\beginSubsection{Keyword Arguments in Generic Functions and Methods}
+\DefineSection{KwdArgsInGFsAndMeths}
+                                                        
+When a generic function or any of its methods mentions 
+\keyref{key} in a \term{lambda list}, the specific set of keyword
+arguments accepted by the generic function varies according to the
+applicable methods.  The set of keyword arguments accepted by the
+generic function for a particular call is the union of the keyword
+arguments accepted by all applicable methods and the keyword arguments
+mentioned after \keyref{key} in the generic function definition,
+if any.  A method that has \keyref{rest} but not \keyref{key} does not affect the
+set of acceptable keyword arguments.  If
+the \term{lambda list} of any applicable method or of the generic
+function definition contains \keyref{allow-other-keys}, all
+keyword arguments are accepted by the generic function.
+
+The \term{lambda list} congruence rules require that each method
+accept all of the keyword arguments mentioned after \keyref{key} in the
+generic function definition, by accepting them explicitly, by
+specifying \keyref{allow-other-keys}, or by specifying \keyref{rest} but
+not \keyref{key}.  Each method can accept additional keyword arguments
+of its own, in addition to the keyword arguments mentioned in the
+generic function definition.
+
+If a \term{generic function} is passed a keyword argument that no applicable
+method accepts, an error should be signaled; \seesection\FuncallErrorChecking.
+
+\beginsubsubsection{Examples of Keyword Arguments in Generic Functions and Methods}
+
+For example, suppose there are two methods defined for {\tt width}
+as follows:
+
+\code
+ (defmethod width ((c character-class) &key font) ...)
+ 
+ (defmethod width ((p picture-class) &key pixel-size) ...)
+\endcode
+
+\noindent Assume that there are no other methods and no generic
+function definition for {\tt width}. The evaluation of the
+following form should signal an error because 
+the keyword argument \kwd{pixel-size} is not accepted by the applicable method.
+
+\code
+ (width (make-instance `character-class :char #\\Q) 
+        :font 'baskerville :pixel-size 10)
+\endcode
+
+The evaluation of the following form should signal an error.
+
+\code
+ (width (make-instance `picture-class :glyph (glyph #\\Q)) 
+        :font 'baskerville :pixel-size 10)
+\endcode
+
+The evaluation of the following form will not signal an error
+if the class named {\tt character-picture-class} is a subclass of
+both {\tt picture-class} and {\tt character-class}.
+
+\code
+ (width (make-instance `character-picture-class :char #\\Q)
+        :font 'baskerville :pixel-size 10)
+\endcode
+
+\endsubsubsection%{Examples of Keyword Arguments in Generic Functions and Methods}
+
+\endSubsection%{Keyword Arguments in Generic Functions and Methods}
+
+\beginSubsection{Method Selection and Combination}
+\DefineSection{MethodSelectionAndCombination}
+
+When a \term{generic function} is called with particular arguments, it must
+determine the code to execute.  This code is called the 
+\newterm{effective method} for those \term{arguments}.
+The \term{effective method} is a 
+combination of the \term{applicable methods} in the \term{generic function}
+that \term{calls} some or all of the \term{methods}.
+
+\issue{CLOS-ERROR-CHECKING-ORDER:NO-APPLICABLE-METHOD-FIRST}
+% If a \term{generic function} is      
+% called and no \term{methods} are \term{applicable},
+% the \term{generic function} \funref{no-applicable-method} is invoked.
+If a \term{generic function} is called and no \term{methods} are 
+\term{applicable}, the \term{generic function} \funref{no-applicable-method}
+is invoked, with the \term{results} from that call being used as the
+\term{results} of the call to the original \term{generic function}.  Calling
+\funref{no-applicable-method} takes precedence over checking for acceptable
+keyword arguments; \seesection\KwdArgsInGFsAndMeths.
+\endissue{CLOS-ERROR-CHECKING-ORDER:NO-APPLICABLE-METHOD-FIRST}
+
+When the \term{effective method} has been determined,
+it is invoked with the same \term{arguments} as were passed to the \term{generic function}.  
+Whatever \term{values} it returns are returned as the \term{values}
+of the \term{generic function}.
+
+\beginsubsubsection{Determining the Effective Method}
+\DefineSection{DeterminingtheEffectiveMethod}
+
+The effective method is determined by the following three-step procedure:
+
+\beginlist
+
+\itemitem{1.}{Select the applicable methods.}
+
+\itemitem{2.}{Sort the applicable methods by precedence order, putting
+the most specific method first.}
+
+\itemitem{3.}{Apply method combination to the sorted list of
+applicable methods, producing the effective method.}
+
+\endlist
+
+\beginsubsubsubsection{Selecting the Applicable Methods}
+\DefineSection{SelApplMeth}
+
+This step is described in \secref\IntroToMethods.
+
+\endsubsubsubsection%{Selecting the Applicable Methods}
+
+\beginsubsubsubsection{Sorting the Applicable Methods by Precedence Order}
+
+To compare the precedence of two methods, their \term{parameter specializers}
+are examined in order.  The default examination order is from left to
+right, but an alternative order may be specified by the 
+\kwd{argument-precedence-order} option to \macref{defgeneric} or to any of
+the other operators that specify generic function options.
+
+The corresponding \term{parameter specializers} from each method are
+compared.  When a pair of \term{parameter specializers} agree, the next
+pair are compared for agreement.  If all corresponding parameter
+specializers agree, the two methods must have different
+\term{qualifiers}; in this case, either method can be selected to precede the
+other.  For information about agreement, \seesection\SpecializerQualifierAgreement.
+
+If some corresponding \term{parameter specializers} do not agree, the first
+pair of \term{parameter specializers} that do not agree determines the
+precedence.  If both \term{parameter specializers} are classes, the more
+specific of the two methods is the method whose \term{parameter specializer}
+appears earlier in the \term{class precedence list} of the corresponding
+argument.  Because of the way in which the set of applicable methods
+is chosen, the \term{parameter specializers} are guaranteed to be present in
+the class precedence list of the class of the argument.
+
+If just one of a pair of corresponding \term{parameter specializers} is {\tt (eql \i{object})},
+the \term{method} with that \term{parameter specializer} precedes the
+other \term{method}.  If both \term{parameter specializers} are \funref{eql}
+\term{expressions}, the
+specializers must agree (otherwise the two \term{methods} would
+not both have been applicable to this argument).
+
+The resulting list of \term{applicable methods} has the most specific
+\term{method} first and the least specific \term{method} last.    
+
+\endsubsubsubsection%{Sorting the Applicable Methods by Precedence Order}
+
+\beginsubsubsubsection{Applying method combination to the sorted list of applicable methods}
+\DefineSection{ApplyMethCombToSortedMethods}
+
+In the simple case---if standard method combination is used and all
+applicable methods are primary methods---the 
+%!!! Barrett suggests that this is not the normal meaning of "effective method"
+effective method is the most specific method.
+That method can call the next most specific
+method by using \thefunction{call-next-method}.  The method that
+\funref{call-next-method} will call is referred to as the 
+\newterm{next method}.  The predicate \funref{next-method-p} tests whether a next
+method exists.  If \funref{call-next-method} is called and there is no
+next most specific method, the generic function \funref{no-next-method}
+is invoked.
+
+In general, the effective method is some combination of the applicable
+methods.  It is described by a \term{form} that contains calls to some or
+all of the applicable methods, returns the value or values that will
+be returned as the value or values of the generic function, and
+optionally makes some of the methods accessible by means of 
+\funref{call-next-method}.
+%% Moon wanted this removed.  Barrett agrees. -kmp 9-Feb-92
+% This Lisp form is the body of the effective
+% method; it is augmented with an appropriate \term{lambda list} to
+% make it a function.
+
+The role of each method in the effective method is determined by its
+%\term{method}
+\term{qualifiers} and the specificity of the method.  A \term{qualifier}
+serves to mark a method, and the meaning of a \term{qualifier} is
+determined by the way that these marks are used by this step
+of the procedure.  If an applicable method has an unrecognized
+\term{qualifier}, this step signals an error and does not include that method
+in the effective method.
+
+When standard method combination is used together with qualified methods, 
+the effective method is produced as described in \secref\StdMethComb.
+                                                                  
+Another type of method combination can be specified by using the
+\kwd{method-combination} option of \macref{defgeneric} or
+of any of the other operators that specify generic function options.  In
+this way this step of the procedure can be customized.
+
+New types of method combination can be defined by using 
+\themacro{define-method-combination}. 
+
+\endsubsubsubsection%{Applying method combination to the sorted list of applicable methods}
+
+\endsubsubsection%{Determining the Effective Method}
+
+\beginsubsubsection{Standard Method Combination}
+\DefineSection{StdMethComb}
+\idxref{standard}
+                                                       
+%!!! Barrett: "supported" ?
+Standard method combination is supported by \theclass{standard-generic-function}.
+It is used if no other type of method
+combination is specified or if the built-in method combination type
+\misc{standard} is specified. 
+
+Primary methods define the main action of the effective method,  
+while auxiliary methods modify that action in one of three ways.
+A primary method has no method \term{qualifiers}.
+                                                           
+An auxiliary method is a method whose 
+%\term{method}
+\term{qualifier} is \kwd{before}, \kwd{after}, or \kwd{around}.
+Standard method combination
+allows no more than one \term{qualifier} per method; if a method definition
+specifies more than one \term{qualifier} per method, an error is signaled.
+
+\beginlist
+
+\itemitem{\bull}
+A \term{before method} has the keyword \kwd{before} as its only \term{qualifier}.
+A \term{before method} specifies \term{code} that is to be run before any 
+\term{primary methods}.
+
+\itemitem{\bull}
+An \term{after method} has the keyword \kwd{after} as its only \term{qualifier}.
+An \term{after method} specifies \term{code} that is to be run after
+\term{primary methods}.
+
+\itemitem{\bull}
+An \term{around method} has the keyword \kwd{around} as its only \term{qualifier}.
+An \term{around method} specifies \term{code} that is to be run instead of other
+\term{applicable methods},
+%%I found this to be too vague. -kmp 9-Jan-91
+%but which is able to cause some of them to be run.
+but which might contain explicit \term{code}
+which calls some of those \term{shadowed} \term{methods}
+(via \funref{call-next-method}).
+
+\endlist
+
+The semantics of standard method combination is as follows:
+
+\beginlist
+                               
+\itemitem{\bull} If there are any \term{around methods}, the most specific
+\term{around method} is called.  It supplies the value or values of the
+generic function.
+
+\itemitem{\bull} Inside the body of an \term{around method}, 
+\funref{call-next-method} can be used to call the \term{next method}.  When the next
+method returns, the \term{around method} can execute more code,
+perhaps based on the returned value or values.
+% !!!
+% Moon: Can't happen, `next page' says signals an error if there are no primaries.
+% Barrett: This is a bone of contention. (e.g., no-next-method might -do- the signaling)
+\TheGF{no-next-method} is invoked if \funref{call-next-method} is used and
+there is no \term{applicable method} to call.  \Thefunction{next-method-p}
+may be used to determine whether a \term{next method} exists.
+
+\itemitem{\bull} 
+If an \term{around method} invokes \funref{call-next-method},
+the next most specific \term{around method}
+is called, if one is applicable.  If there are no \term{around methods} 
+or if \funref{call-next-method} is called by the least
+specific \term{around method}, the other methods are called as
+follows:
+\beginlist
+\itemitem{--} All the \term{before methods} are called, in
+most-specific-first order.  Their values are ignored.
+An error is signaled if \funref{call-next-method} is used in a
+\term{before method}.
+
+\itemitem{--} The most specific primary method is called.  Inside the
+body of a primary method, \funref{call-next-method} may be used to call
+the next most specific primary method.  When that method returns, the
+previous primary method can execute more code, perhaps based on the
+returned value or values.  The generic function \funref{no-next-method}
+is invoked if \funref{call-next-method} is used and there are no more
+applicable primary methods.  \Thefunction{next-method-p} may be
+used to determine whether a \term{next method} exists.  If \funref{call-next-method}
+is not used, only the most specific \term{primary method} is called.
+
+\itemitem{--} All the \term{after methods} are called in
+most-specific-last order.  Their values are ignored.
+An error is signaled if \funref{call-next-method} is used in an
+\term{after method}.
+\endlist
+\itemitem{\bull} If no \term{around methods} were invoked, the most
+specific primary method supplies the value or values returned by the
+generic function.  The value or values returned by the invocation of
+\funref{call-next-method} in the least specific \term{around method} are
+those returned by the most specific primary method.
+
+\endlist
+
+In standard method combination, if there is an applicable method
+but no applicable primary method, an error is signaled.
+     
+The \term{before methods} are run in most-specific-first order while
+the \term{after methods} are run in least-specific-first order.  The
+design rationale for this difference can be illustrated with an
+example.  Suppose class $C\sub 1$ modifies the behavior of its
+superclass, $C\sub 2$, by adding \term{before methods} and \term{after methods}.
+Whether the behavior of the class $C\sub 2$ is defined
+directly by methods on $C\sub 2$ or is inherited from its superclasses
+does not affect the relative order of invocation of methods on
+instances of the class $C\sub 1$.  Class $C\sub 1$'s 
+\term{before method} runs before all of class $C\sub 2$'s methods.  
+Class $C\sub 1$'s \term{after method} runs after all of class $C\sub 2$'s methods.
+
+By contrast, all \term{around methods} run before any other methods
+run.  Thus a less specific \term{around method} runs before a more
+specific primary method.
+
+If only primary methods are used and if \funref{call-next-method} is not
+used, only the most specific method is invoked; that is, more specific
+methods shadow more general ones. 
+
+\endsubsubsection%{Standard Method Combination}
+
+\beginsubsubsection{Declarative Method Combination}
+           
+The macro \macref{define-method-combination} defines new forms of method
+combination.  It provides a mechanism for customizing the production
+of the effective method. The default procedure for producing an
+effective method is described in \secref\DeterminingtheEffectiveMethod.
+There are two forms of
+\macref{define-method-combination}.  The short form is a simple facility while
+the long form is more powerful and more verbose.  The long form
+resembles \macref{defmacro} in that the body is an expression that
+computes a Lisp form; it provides mechanisms for implementing
+arbitrary control structures within method combination and for
+arbitrary processing of method \term{qualifiers}.  
+
+\endsubsubsection%{Declarative Method Combination}
+
+\beginsubsubsection{Built-in Method Combination Types}
+\DefineSection{BuiltInMethCombTypes}
+
+The \CLOS\ provides a set of built-in method combination types.  To
+specify that a generic function is to use one of these method
+combination types, the name of the method combination type is given as
+the argument to the \kwd{method-combination} option to 
+\macref{defgeneric} or to the \kwd{method-combination} option to any of the
+other operators that specify generic function options.
+
+The names of the built-in  method combination types are listed in \thenextfigure.
+\idxref{+}%
+\idxref{and}%
+\idxref{append}%
+\idxref{list}%
+\idxref{max}%
+\idxref{min}%
+\idxref{nconc}%
+\idxref{or}%
+\idxref{progn}%
+\idxref{standard}
+
+\displayfive{Built-in Method Combination Types}{
++&append&max&nconc&progn\cr
+and&list&min&or&standard\cr
+}
+
+The semantics of the \misc{standard} built-in method combination type is
+described in \secref\StdMethComb.  The other
+built-in method combination types are called simple built-in method
+combination types.
+
+The simple built-in method combination types act as though they were
+defined by the short form of \macref{define-method-combination}.  
+They recognize two roles for \term{methods}:
+
+\beginlist
+                                                                  
+\itemitem{\bull} An \term{around method} has the keyword symbol 
+\kwd{around} as its sole \term{qualifier}.  The meaning of 
+\kwd{around} \term{methods} is the same as in standard method combination.
+Use of the functions \funref{call-next-method} and \funref{next-method-p}
+is supported in \term{around methods}.
+
+\itemitem{\bull} A primary method has the name of the method combination
+type as its sole \term{qualifier}.  For example, the built-in method
+combination type {\tt and} recognizes methods whose sole \term{qualifier} is
+{\tt and}; these are primary methods. Use of the functions 
+\funref{call-next-method} and \funref{next-method-p} is not supported 
+in \term{primary methods}.
+
+\endlist
+
+The semantics of the simple built-in method combination types is as
+follows:
+
+\beginlist
+\itemitem{\bull}                                                    
+If there are any \term{around methods}, the most specific \term{around method}
+is called.   It supplies the value or values of the \term{generic function}. 
+                                    
+\itemitem{\bull} Inside the body of an \term{around method}, the function
+\funref{call-next-method} can be used to call the \term{next method}.
+% !!!
+% Moon: Can't happen, `next page' says signals an error if there are no primaries.
+% Barrett: This is a bone of contention. (e.g., no-next-method might -do- the signaling)
+\TheGF{no-next-method} is invoked if 
+\funref{call-next-method} is used and there is no applicable method to call.
+\Thefunction{next-method-p} may be used to determine whether a
+\term{next method} exists. When the \term{next method} returns, 
+the \term{around method} can execute more code,
+perhaps based on the returned value or values.
+                    
+\itemitem{\bull} If an \term{around method} invokes \funref{call-next-method},
+the next most specific \term{around method} is
+called, if one is applicable.  If there are no \term{around methods}
+or if \funref{call-next-method} is called by the least specific
+\term{around method}, a Lisp form derived from the name of the built-in
+method combination type and from the list of applicable primary
+methods is evaluated to produce the value of the generic function.
+Suppose the name of the method combination type is \i{operator}
+and the call to the generic function is of the form
+
+$$(\hbox{\i{generic-function}}\ a\sub 1\ldots a\sub n)$$
+
+\itemitem{} Let $M\sub 1,\ldots,M\sub k$ be the applicable primary methods
+in order; then the derived Lisp form is
+
+$$(\hbox{\i{operator}}\ \langle M\sub  1%
+\ a\sub 1\ldots a\sub n\rangle\ldots\langle%
+M\sub k\ a\sub 1\ldots a\sub n\rangle)$$
+
+\itemitem{} If the expression $\langle M\sub i \ a\sub 1\ldots a\sub
+n\rangle$ is
+evaluated, the method $M\sub i$ will be applied to the arguments
+$a\sub 1\ldots a\sub n$.  
+For example,
+if \i{operator} is {\tt or},
+the expression $\langle M\sub i \ a\sub 1\ldots a\sub n\rangle$ is
+evaluated only if $\langle M\sub j \ a\sub 1\ldots a\sub n\rangle$,
+$1\leq j<i$, returned {\tt nil}.
+                                                      
+\itemitem{} The default order for the primary methods is 
+\kwd{most-specific-first}.  However, the order can be reversed by supplying
+\kwd{most-specific-last} as the second argument to the \kwd{method-combination} option.
+\endlist
+
+The simple built-in method combination types require exactly one
+\term{qualifier} per method.  An error is signaled if there are applicable
+methods with no \term{qualifiers} or with \term{qualifiers} that are not supported
+by the method combination type. An error is signaled if there are
+applicable \term{around methods} and no applicable primary
+methods.
+
+\endsubsubsection%{Built-in Method Combination Types}
+
+\endSubsection%{Method Selection and Combination}
+
+\beginSubsection{Inheritance of Methods}
+\DefineSection{MethodInheritance}
+
+A subclass inherits methods in the sense that any method applicable to
+all instances of a class is also applicable to all instances of any
+subclass of that class.
+
+The inheritance of methods acts the same way regardless of 
+which of the \term{method-defining operators} created the methods.
+% whether the
+% method was created by using one of the method-defining operators or by
+% using one of the \macref{defclass} options that causes methods to be
+% generated automatically.
+
+The inheritance of methods is described in detail in 
+\secref\MethodSelectionAndCombination.
+
+\endSubsection%{Inheritance of Methods}

@@ -1,0 +1,1939 @@
+% -*- Mode: TeX -*-
+
+% Pathnames
+%  Logical Pathnames
+%  Parsing
+%   Namestrings
+%   Pathname Matching
+%   Pathname Merging
+
+%-------------------- Pathname Types --------------------
+
+\begincom{pathname}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{pathname},
+\typeref{t}
+
+\label Description::
+
+A \term{pathname} is a structured \term{object} which represents a \term{filename}.
+
+There are two kinds of \term{pathnames}---\term{physical pathnames} and
+\term{logical pathnames}.
+
+\endcom%{pathname}\ftype{System Class}
+\begincom{logical-pathname}\ftype{System Class}
+
+\issue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\label Class Precedence List::
+
+\typeref{logical-pathname},
+\typeref{pathname},
+\typeref{t}
+
+\label Description::
+
+A \term{pathname} that uses a \term{namestring} syntax that is 
+\term{implementation-independent}, 
+and that has component values that are \term{implementation-independent}.
+\term{Logical pathnames} do not refer directly to \term{filenames}
+
+%!!! Barmar: Needs more description.  e.g.,
+%      an implementation-independent pathname that is automatically translated
+%      to a pathname when it is used.
+%
+% Relate to physical pathname.
+
+\label See Also::
+
+{\secref\FileSystemConcepts},
+{\secref\SharpsignP},
+{\secref\PrintingPathnames}
+
+\endissue{TYPE-OF-AND-PREDEFINED-CLASSES:UNIFY-AND-EXTEND}
+
+\endcom%{logical-pathname}\ftype{System Class}
+
+%-------------------- Pathnames --------------------
+
+%%% ========== PATHNAME
+\begincom{pathname}\ftype{Function}
+
+\label Syntax:: 
+
+\DefunWithValues pathname {pathspec} {pathname}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-STREAM}
+\param{pathspec}---a \term{pathname designator}.
+\endissue{PATHNAME-STREAM}
+
+\param{pathname}---a \term{pathname}.
+
+\label Description::
+
+Returns the \term{pathname} denoted by \param{pathspec}.
+
+%% 23.1.2 5
+% \funref{pathname} converts \param{pathspec} to a \term{pathname} 
+% and returns the new \term{pathname}.
+% If \param{pathspec} is a \term{stream} 
+% it represents the name used to open the file. This may be, but is
+% not required to be, the actual name of the file. 
+\issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+If the \param{pathspec} \term{designator} is a \term{stream},
+the \term{stream} can be either open or closed;
+in both cases, the \funref{pathname} returned 
+corresponds to the \term{filename} used to open the \term{file}.
+\funref{pathname} returns the same \term{pathname} for a \term{file stream}
+after it is closed as it did when it was open.
+\endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+
+\issue{PATHNAME-LOGICAL:ADD}
+% created by \funref{open}
+% or \macref{with-open-file} of a \term{logical pathname},
+%\funref{pathname} returns a \term{logical pathname}.
+If the \param{pathspec} \term{designator} is
+a \term{file stream} created by opening a \term{logical pathname},
+a \term{logical pathname} is returned.
+\endissue{PATHNAME-LOGICAL:ADD}
+% \issue{PATHNAME-STREAM}
+% It is an error if \param{pathspec} is a \term{stream} that is 
+% created with \funref{make-two-way-stream}, 
+% \funref{make-echo-stream},
+% \funref{make-broadcast-stream}, 
+% \funref{make-concatenated-stream}, \funref{make-string-input-stream},
+% \funref{make-string-output-stream}.
+% \endissue{PATHNAME-STREAM}
+
+\label Examples::
+
+\code
+ ;; There is a great degree of variability permitted here.  The next
+ ;; several examples are intended to illustrate just a few of the many
+ ;; possibilities.  Whether the name is canonicalized to a particular
+ ;; case (either upper or lower) depends on both the file system and the
+ ;; implementation since two different implementations using the same
+ ;; file system might differ on many issues.  How information is stored
+ ;; internally (and possibly presented in #S notation) might vary,
+ ;; possibly requiring `accessors' such as PATHNAME-NAME to perform case
+ ;; conversion upon access.  The format of a namestring is dependent both
+ ;; on the file system and the implementation since, for example, one
+ ;; implementation might include the host name in a namestring, and
+ ;; another might not.  #S notation would generally only be used in a
+ ;; situation where no appropriate namestring could be constructed for use
+ ;; with #P.
+ (setq p1 (pathname "test"))
+\EV #P"CHOCOLATE:TEST" ; with case canonicalization (e.g., VMS)
+\OV #P"VANILLA:test"   ; without case canonicalization (e.g., Unix)
+\OV #P"test"
+\OV #S(PATHNAME :HOST "STRAWBERRY" :NAME "TEST")
+\OV #S(PATHNAME :HOST "BELGIAN-CHOCOLATE" :NAME "test")
+ (setq p2 (pathname "test"))
+\EV #P"CHOCOLATE:TEST"
+\OV #P"VANILLA:test"
+\OV #P"test"
+\OV #S(PATHNAME :HOST "STRAWBERRY" :NAME "TEST")
+\OV #S(PATHNAME :HOST "BELGIAN-CHOCOLATE" :NAME "test")
+ (pathnamep p1) \EV \term{true}
+ (eq p1 (pathname p1)) \EV \term{true}
+ (eq p1 p2)
+\EV \term{true}
+\OV \term{false}
+ (with-open-file (stream "test" :direction :output)
+   (pathname stream))
+\EV #P"ORANGE-CHOCOLATE:>Gus>test.lisp.newest"
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+%% 23.1.2 4                 
+%% was left out
+
+\endcom%{pathname}
+
+
+%%% ========== MAKE-PATHNAME
+\begincom{make-pathname}\ftype{Function}
+
+\label Syntax:: 
+
+\DefunWithValuesNewline make-pathname 
+		        {{\key} host device directory name type version defaults case}
+		        {pathname}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
+\param{host}---a \term{valid physical pathname host}.
+%%Per X3J13. -kmp 05-Oct-93.
+ \HairyDefault.
+
+\param{device}---a \term{valid pathname device}.
+%%Per X3J13. -kmp 05-Oct-93.
+ \HairyDefault.
+
+\param{directory}---a \term{valid pathname directory}.
+%%Per X3J13. -kmp 05-Oct-93.
+ \HairyDefault.
+
+\param{name}---a \term{valid pathname name}.
+%%Per X3J13. -kmp 05-Oct-93.
+ \HairyDefault.
+
+\param{type}---a \term{valid pathname type}.
+%%Per X3J13. -kmp 05-Oct-93.
+ \HairyDefault.
+
+\param{version}---a \term{valid pathname version}.
+%%Per X3J13. -kmp 05-Oct-93
+ \HairyDefault.
+\endissue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
+
+\param{defaults}---a \term{pathname designator}.
+ \Default{a \term{pathname} whose host component is the same as the
+          host component of \thevalueof{*default-pathname-defaults*},
+	  and whose other components are all \nil}
+
+\issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+\param{case}---one of \kwd{common} or \kwd{local}.
+ \Default{\kwd{local}}
+\endissue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+
+\param{pathname}---a \term{pathname}.
+
+\label Description::
+
+%% 23.1.2 27
+Constructs and returns a \term{pathname} from the supplied keyword arguments.
+
+After the components supplied explicitly by
+       \param{host},
+       \param{device}, 
+       \param{directory},
+       \param{name},
+       \param{type},
+   and \param{version} 
+are filled in, 
+the merging rules used by \funref{merge-pathnames} 
+are used to fill in any 
+%%Per X3J13. -kmp 05-Oct-93.
+%missing
+unsupplied
+components
+from the defaults supplied by \param{defaults}.
+
+%% 23.1.2 28
+Whenever a \term{pathname} is constructed the components may be 
+canonicalized if appropriate.
+%For example, if a file system is insensitive to case, then
+%characters with case may be forced to be all uppercase or all lowercase
+%by the implementation.
+For the explanation of the arguments that can be supplied for each component,
+\seesection\PathnameComponents.
+
+\issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+If \param{case} is supplied,
+it is treated as described in \secref\PathnameComponentCase.
+\endissue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+\issue{PATHNAME-LOGICAL:ADD}
+The resulting \param{pathname} is a \term{logical pathname} 
+if and only its host component 
+%denotes 
+is
+a \term{logical host} 
+or a \term{string} that names a defined \term{logical host}.
+% If \param{host} is supplied,
+% the host is logical if it came from \funref{pathname-host} of a \term{logical pathname}. 
+% Whether \param{host} denotes a \term{logical host} if it is a \term{string} 
+% that is equal to the \term{name} of a \term{logical host} is \term{implementation-defined}.
+\endissue{PATHNAME-LOGICAL:ADD}
+\endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+
+\issue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION}
+%!!! Laddaga: Clearly this should also be presented in the concept section.
+If the \param{directory} is a \term{string},
+it should be the name of a top level directory,
+and should not contain any punctuation characters; that is,
+specifying a \term{string}, \i{str}, is
+equivalent to specifying the list \f{(:absolute \i{str})}.
+Specifying the symbol \kwd{wild} is equivalent to specifying the list 
+\f{(:absolute :wild-inferiors)}, or \f{(:absolute :wild)} 
+in a file system that does not support \kwd{wild-inferiors}.
+\endissue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION}
+ 
+\label Examples::
+
+\code
+ ;; Implementation A -- an implementation with access to a single
+ ;;  Unix file system.  This implementation happens to never display
+ ;;  the `host' information in a namestring, since there is only one host. 
+ (make-pathname :directory '(:absolute "public" "games")
+                :name "chess" :type "db")
+\EV #P"/public/games/chess.db" 
+\medbreak
+ ;; Implementation B -- an implementation with access to one or more
+ ;;  VMS file systems.  This implementation displays `host' information
+ ;;  in the namestring only when the host is not the local host.
+ ;;  It uses a double colon to separate a host name from the host's local
+ ;;  file name.
+ (make-pathname :directory '(:absolute "PUBLIC" "GAMES")
+                :name "CHESS" :type "DB")
+\EV #P"SYS$DISK:[PUBLIC.GAMES]CHESS.DB" 
+ (make-pathname :host "BOBBY"
+                :directory '(:absolute "PUBLIC" "GAMES")
+                :name "CHESS" :type "DB")
+\EV #P"BOBBY::SYS$DISK:[PUBLIC.GAMES]CHESS.DB" 
+\medbreak
+ ;; Implementation C -- an implementation with simultaneous access to
+ ;;  multiple file systems from the same Lisp image.  In this 
+ ;;  implementation, there is a convention that any text preceding the
+ ;;  first colon in a pathname namestring is a host name.
+ (dolist (case '(:common :local))
+   (dolist (host '("MY-LISPM" "MY-VAX" "MY-UNIX"))
+     (print (make-pathname :host host :case case
+                           :directory '(:absolute "PUBLIC" "GAMES")
+                           :name "CHESS" :type "DB"))))
+\OUT #P"MY-LISPM:>public>games>chess.db"
+\OUT #P"MY-VAX:SYS$DISK:[PUBLIC.GAMES]CHESS.DB"
+\OUT #P"MY-UNIX:/public/games/chess.db"
+\OUT #P"MY-LISPM:>public>games>chess.db" 
+\OUT #P"MY-VAX:SYS$DISK:[PUBLIC.GAMES]CHESS.DB" 
+\OUT #P"MY-UNIX:/PUBLIC/GAMES/CHESS.DB" 
+\EV NIL
+\endcode
+
+\label Affected By::
+
+The \term{file system}.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\funref{merge-pathnames},
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes::
+
+Portable programs should not supply \kwd{unspecific} for any component.
+\Seesection\UnspecificComponent.
+
+\endcom%{make-pathname}
+
+%%% ========== PATHNAMEP
+\begincom{pathnamep}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues pathnamep {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 23.1.2 29
+\TypePredicate{object}{pathname}
+
+\label Examples::
+
+\code
+ (setq q "test")  \EV "test"
+ (pathnamep q) \EV \term{false}
+ (setq q (pathname "test"))
+\EV #S(PATHNAME :HOST NIL :DEVICE NIL :DIRECTORY NIL :NAME "test" :TYPE NIL
+       :VERSION NIL)
+ (pathnamep q) \EV \term{true} 
+ (setq q (logical-pathname "SYS:SITE;FOO.SYSTEM"))
+\EV #P"SYS:SITE;FOO.SYSTEM"
+ (pathnamep q) \EV \term{true}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also:\None.
+
+\label Notes::
+
+\code
+ (pathnamep \param{object}) \EQ (typep \param{object} 'pathname)
+\endcode
+
+\endcom%{pathnamep}
+
+%%% ========== PATHNAME-HOST
+%%% ========== PATHNAME-DEVICE
+%%% ========== PATHNAME-DIRECTORY
+%%% ========== PATHNAME-NAME
+%%% ========== PATHNAME-TYPE
+%%% ========== PATHNAME-VERSION
+\begincom{pathname-host, pathname-device, pathname-directory,
+	  pathname-name, pathname-type,   pathname-version}\ftype{Function}
+
+\label Syntax::
+
+\issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+
+\DefunWithValues pathname-host      {pathname {\key} case} {host}
+
+\DefunWithValues pathname-device    {pathname {\key} case} {device}
+
+\DefunWithValues pathname-directory {pathname {\key} case} {directory}
+
+\DefunWithValues pathname-name      {pathname {\key} case} {name}
+
+\DefunWithValues pathname-type      {pathname {\key} case} {type}
+
+\endissue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+
+\DefunWithValues pathname-version {pathname} {version}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-STREAM}
+\param{pathname}---a \term{pathname designator}.
+\endissue{PATHNAME-STREAM}
+
+\issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+\param{case}---one of \kwd{local} or \kwd{common}.
+ \Default{\kwd{local}}
+\endissue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+
+\issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
+\param{host}---a \term{valid pathname host}.
+
+\param{device}---a \term{valid pathname device}.
+
+\issue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION}
+\param{directory}---a \term{valid pathname directory}.
+\endissue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION}
+
+\param{name}---a \term{valid pathname name}.
+
+\param{type}---a \term{valid pathname type}.
+
+\param{version}---a \term{valid pathname version}.
+
+\endissue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
+
+\label Description::
+
+%% 23.1.2 30
+These functions return the components of \param{pathname}.
+
+If the \param{pathname} \term{designator} is a \term{pathname},
+it represents the name used to open the file. This may be, but is
+not required to be, the actual name of the file. 
+
+\issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+If \param{case} is supplied,
+it is treated as described in \secref\PathnameComponentCase.
+\endissue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+
+\label Examples::
+
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+\issue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION}
+\code
+ (setq q (make-pathname :host "KATHY"
+                        :directory "CHAPMAN" 
+                        :name "LOGIN" :type "COM"))
+\EV #P"KATHY::[CHAPMAN]LOGIN.COM"
+ (pathname-host q) \EV "KATHY"
+ (pathname-name q) \EV "LOGIN"
+ (pathname-type q) \EV "COM"
+
+ ;; Because namestrings are used, the results shown in the remaining
+ ;; examples are not necessarily the only possible results.  Mappings
+ ;; from namestring representation to pathname representation are 
+ ;; dependent both on the file system involved and on the implementation
+ ;; (since there may be several implementations which can manipulate the
+ ;; the same file system, and those implementations are not constrained
+ ;; to agree on all details). Consult the documentation for each
+ ;; implementation for specific information on how namestrings are treated
+ ;; that implementation.
+
+ ;; VMS
+ (pathname-directory (parse-namestring "[FOO.*.BAR]BAZ.LSP"))
+\EV (:ABSOLUTE "FOO" "BAR")
+ (pathname-directory (parse-namestring "[FOO.*.BAR]BAZ.LSP") :case :common)
+\EV (:ABSOLUTE "FOO" "BAR")
+
+ ;; Unix
+ (pathname-directory "foo.l") \EV NIL
+ (pathname-device "foo.l") \EV :UNSPECIFIC
+ (pathname-name "foo.l") \EV "foo"
+ (pathname-name "foo.l" :case :local) \EV "foo"
+ (pathname-name "foo.l" :case :common) \EV "FOO"
+ (pathname-type "foo.l") \EV "l"
+ (pathname-type "foo.l" :case :local) \EV "l"
+ (pathname-type "foo.l" :case :common) \EV "L"
+ (pathname-type "foo") \EV :UNSPECIFIC
+ (pathname-type "foo" :case :common) \EV :UNSPECIFIC
+ (pathname-type "foo.") \EV ""
+ (pathname-type "foo." :case :common) \EV ""
+ (pathname-directory (parse-namestring "/foo/bar/baz.lisp") :case :local)
+\EV (:ABSOLUTE "foo" "bar")
+ (pathname-directory (parse-namestring "/foo/bar/baz.lisp") :case :local)
+\EV (:ABSOLUTE "FOO" "BAR")
+ (pathname-directory (parse-namestring "../baz.lisp"))
+\EV (:RELATIVE :UP)
+ (PATHNAME-DIRECTORY (PARSE-NAMESTRING "/foo/BAR/../Mum/baz"))
+\EV (:ABSOLUTE "foo" "BAR" :UP "Mum")
+ (PATHNAME-DIRECTORY (PARSE-NAMESTRING "/foo/BAR/../Mum/baz") :case :common)
+\EV (:ABSOLUTE "FOO" "bar" :UP "Mum")
+ (PATHNAME-DIRECTORY (PARSE-NAMESTRING "/foo/*/bar/baz.l"))
+\EV (:ABSOLUTE "foo" :WILD "bar")
+ (PATHNAME-DIRECTORY (PARSE-NAMESTRING "/foo/*/bar/baz.l") :case :common)
+\EV (:ABSOLUTE "FOO" :WILD "BAR")
+
+ ;; Symbolics LMFS
+ (pathname-directory (parse-namestring ">foo>**>bar>baz.lisp"))
+\EV (:ABSOLUTE "foo" :WILD-INFERIORS "bar")
+ (pathname-directory (parse-namestring ">foo>*>bar>baz.lisp"))
+\EV (:ABSOLUTE "foo" :WILD "bar")
+ (pathname-directory (parse-namestring ">foo>*>bar>baz.lisp") :case :common)
+\EV (:ABSOLUTE "FOO" :WILD "BAR")
+ (pathname-device (parse-namestring ">foo>baz.lisp")) \EV :UNSPECIFIC
+\endcode
+\endissue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION}
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+
+
+\label Affected By::
+
+The \term{implementation} and the host \term{file system}.
+
+\label Exceptional Situations::
+
+Should signal an error \oftype{type-error} if its first argument is not a \term{pathname}.
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\endcom%{pathname-host, ...}
+
+%-------------------- Logical Pathnames --------------------
+
+%%% ========== LOAD-LOGICAL-PATHNAME-TRANSLATIONS
+\begincom{load-logical-pathname-translations}\ftype{Function}
+
+\issue{PATHNAME-LOGICAL:ADD}
+
+\label Syntax:: 
+
+\DefunWithValues load-logical-pathname-translations {host} {just-loaded}
+
+\label Arguments and Values::
+
+\param{host}---a \term{string}.
+
+\term{just-loaded}---a \term{generalized boolean}.
+
+\label Description::
+
+Searches for and loads the definition of a \term{logical host} named \param{host},
+if it is not already defined.
+The specific nature of the search is \term{implementation-defined}.
+ 
+If the \param{host} is already defined, 
+no attempt to find or load a definition is attempted,
+and \term{false} is returned.
+If the \param{host} is not already defined,
+but a definition is successfully found and loaded,
+\term{true} is returned.
+Otherwise, an error is signaled.
+
+\label Examples::
+
+\code
+ (translate-logical-pathname "hacks:weather;barometer.lisp.newest")
+\OUT Error: The logical host HACKS is not defined.
+ (load-logical-pathname-translations "HACKS")
+\OUT ;; Loading SYS:SITE;HACKS.TRANSLATIONS
+\OUT ;; Loading done.
+\EV \term{true}
+ (translate-logical-pathname "hacks:weather;barometer.lisp.newest")
+\EV #P"HELIUM:[SHARED.HACKS.WEATHER]BAROMETER.LSP;0"
+ (load-logical-pathname-translations "HACKS")
+\EV \term{false}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+If no definition is found, an error \oftype{error} is signaled.
+
+\label See Also::
+
+\typeref{logical-pathname}
+
+\label Notes::
+
+\term{Logical pathname} definitions will be created not just by 
+\term{implementors} but also by \term{programmers}.  As such,
+it is important that the search strategy be documented.
+For example, an \term{implementation} might define that the
+definition of a \param{host} is to be found in a file called
+``\param{host}.translations'' in some specifically named directory.
+ 
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\endcom%{load-logical-pathname-translations}
+
+%%% ========== LOGICAL-PATHNAME-TRANSLATIONS
+\begincom{logical-pathname-translations}\ftype{Accessor}
+
+\issue{PATHNAME-LOGICAL:ADD}
+
+\label Syntax:: 
+
+\DefunWithValues logical-pathname-translations {host} {translations}
+\Defsetf         logical-pathname-translations {host} {new-translations}
+
+\label Arguments and Values::
+
+\param{host}--a \term{logical host designator}.
+
+\param{translations}, \param{new-translations}---a \term{list}.
+
+\label Description::
+
+Returns the host's \term{list} of translations.
+Each translation is a \term{list} of at least two elements: 
+\i{from-wildcard} and \i{to-wildcard}.  Any
+    additional elements are \term{implementation-defined}.  
+\i{From-wildcard} is a
+    \term{logical pathname} whose host is \param{host}.  
+\i{To-wildcard} is a \term{pathname}.    
+\reviewer{Laddaga: Can this be a logical pathname?}
+                                                    
+\f{(setf (logical-pathname-translations \param{host}) \i{translations})} sets a 
+\term{logical pathname} host's
+\term{list} of \i{translations}.  If \param{host} 
+is a \term{string} that has
+    not been previously used as 
+a \term{logical pathname} host, a new 
+\term{logical pathname} host is defined; 
+otherwise an existing host's translations are
+    replaced.  \term{logical pathname} host names are compared with \funref{string-equal}.
+ 
+    When setting the translations list, each \i{from-wildcard} 
+can be a \term{logical pathname} whose
+host is \param{host} or a \term{logical pathname} namestring
+    parseable by \f{(parse-namestring \term{string} \i{host})}, 
+where \i{host}
+    represents the appropriate \term{object} as defined 
+by \funref{parse-namestring}. Each
+    \i{to-wildcard} can be anything coercible to a 
+\term{pathname} by
+    \f{(pathname \i{to-wildcard})}.  
+If \i{to-wildcard} coerces to a \term{logical pathname},
+\funref{translate-logical-pathname} 
+will perform repeated translation steps when
+    it uses it.
+ 
+\param{host} is either the host component of a 
+\term{logical pathname} or a
+    \term{string} that has been defined 
+as a \term{logical pathname} host name by \macref{setf} of
+\funref{logical-pathname-translations}. 
+
+\label Examples::
+
+\reviewer{Laddaga: Shouldn't there be some \f{*.*}'s in the list
+		   of translations for \f{PROG} below?}
+
+\code
+ ;;;A very simple example of setting up a logical pathname host.  No
+ ;;;translations are necessary to get around file system restrictions, so
+ ;;;all that is necessary is to specify the root of the physical directory
+ ;;;tree that contains the logical file system.
+ ;;;The namestring syntax on the right-hand side is implementation-dependent.
+ (setf (logical-pathname-translations "foo")
+       '(("**;*.*.*"              "MY-LISPM:>library>foo>**>")))
+\smallbreak 
+ ;;;Sample use of that logical pathname.  The return value
+ ;;;is implementation-dependent.          
+ (translate-logical-pathname "foo:bar;baz;mum.quux.3")
+\EV #P"MY-LISPM:>library>foo>bar>baz>mum.quux.3"
+\medbreak 
+ ;;;A more complex example, dividing the files among two file servers
+ ;;;and several different directories.  This Unix doesn't support
+ ;;;:WILD-INFERIORS in the directory, so each directory level must
+ ;;;be translated individually.  No file name or type translations
+ ;;;are required except for .MAIL to .MBX.
+ ;;;The namestring syntax on the right-hand side is implementation-dependent.
+ (setf (logical-pathname-translations "prog")
+       '(("RELEASED;*.*.*"        "MY-UNIX:/sys/bin/my-prog/")
+         ("RELEASED;*;*.*.*"      "MY-UNIX:/sys/bin/my-prog/*/")
+         ("EXPERIMENTAL;*.*.*"    "MY-UNIX:/usr/Joe/development/prog/")
+         ("EXPERIMENTAL;DOCUMENTATION;*.*.*"
+                                  "MY-VAX:SYS$DISK:[JOE.DOC]")
+         ("EXPERIMENTAL;*;*.*.*"  "MY-UNIX:/usr/Joe/development/prog/*/")
+         ("MAIL;**;*.MAIL"        "MY-VAX:SYS$DISK:[JOE.MAIL.PROG...]*.MBX")))
+\smallbreak
+ ;;;Sample use of that logical pathname.  The return value
+ ;;;is implementation-dependent.          
+ (translate-logical-pathname "prog:mail;save;ideas.mail.3")
+\EV #P"MY-VAX:SYS$DISK:[JOE.MAIL.PROG.SAVE]IDEAS.MBX.3"
+\medbreak
+ ;;;Example translations for a program that uses three files main.lisp,
+ ;;;auxiliary.lisp, and documentation.lisp.  These translations might be
+ ;;;supplied by a software supplier as examples.
+\smallbreak
+ ;;;For Unix with long file names
+ (setf (logical-pathname-translations "prog")
+       '(("CODE;*.*.*"             "/lib/prog/")))
+\smallbreak
+ ;;;Sample use of that logical pathname.  The return value
+ ;;;is implementation-dependent.          
+ (translate-logical-pathname "prog:code;documentation.lisp")
+\EV #P"/lib/prog/documentation.lisp"
+\smallbreak
+ ;;;For Unix with 14-character file names, using .lisp as the type
+ (setf (logical-pathname-translations "prog")
+       '(("CODE;DOCUMENTATION.*.*" "/lib/prog/docum.*")
+         ("CODE;*.*.*"             "/lib/prog/")))
+
+ ;;;Sample use of that logical pathname.  The return value
+ ;;;is implementation-dependent.          
+ (translate-logical-pathname "prog:code;documentation.lisp")
+\EV #P"/lib/prog/docum.lisp"
+\medbreak
+ ;;;For Unix with 14-character file names, using .l as the type
+ ;;;The second translation shortens the compiled file type to .b
+ (setf (logical-pathname-translations "prog")
+       `(("**;*.LISP.*"            ,(logical-pathname "PROG:**;*.L.*"))
+         (,(compile-file-pathname (logical-pathname "PROG:**;*.LISP.*"))
+                                   ,(logical-pathname "PROG:**;*.B.*"))
+         ("CODE;DOCUMENTATION.*.*" "/lib/prog/documentatio.*")
+         ("CODE;*.*.*"             "/lib/prog/")))
+\smallbreak
+ ;;;Sample use of that logical pathname.  The return value
+ ;;;is implementation-dependent.          
+ (translate-logical-pathname "prog:code;documentation.lisp")
+\EV #P"/lib/prog/documentatio.l"
+\medbreak
+ ;;;For a Cray with 6 character names and no directories, types, or versions.
+ (setf (logical-pathname-translations "prog")
+       (let ((l '(("MAIN" "PGMN")
+                  ("AUXILIARY" "PGAUX")
+                  ("DOCUMENTATION" "PGDOC")))
+             (logpath (logical-pathname "prog:code;"))
+             (phypath (pathname "XXX")))
+         (append
+           ;; Translations for source files
+           (mapcar #'(lambda (x)
+                       (let ((log (first x))
+                             (phy (second x)))
+                         (list (make-pathname :name log
+                                              :type "LISP"
+                                              :version :wild
+                                              :defaults logpath)
+                               (make-pathname :name phy
+                                              :defaults phypath))))
+                   l)
+           ;; Translations for compiled files
+           (mapcar #'(lambda (x)
+                       (let* ((log (first x))
+                              (phy (second x))
+                              (com (compile-file-pathname
+                                     (make-pathname :name log
+                                                    :type "LISP"
+                                                    :version :wild
+                                                    :defaults logpath))))
+                         (setq phy (concatenate 'string phy "B"))
+                         (list com
+                               (make-pathname :name phy
+                                              :defaults phypath))))
+                   l))))
+
+ ;;;Sample use of that logical pathname.  The return value
+ ;;;is implementation-dependent.          
+ (translate-logical-pathname "prog:code;documentation.lisp")
+\EV #P"PGDOC"
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+If \param{host} is incorrectly supplied, 
+an error \oftype{type-error} is signaled.
+
+\label See Also::
+
+\typeref{logical-pathname},
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes::
+
+Implementations can define additional \term{functions}
+that operate on \term{logical pathname} hosts,
+for example to specify additional translation rules or options.
+ 
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\endcom%{logical-pathname-translations}
+
+%%% ========== LOGICAL-PATHNAME
+\begincom{logical-pathname}\ftype{Function}
+
+\issue{PATHNAME-LOGICAL:ADD}
+
+\label Syntax:: 
+
+\DefunWithValues logical-pathname {pathspec} {logical-pathname}
+
+\label Arguments and Values::
+
+\param{pathspec}---a \term{logical pathname}, 
+		   a \term{logical pathname} \term{namestring},
+		or a \term{stream}.
+
+\param{logical-pathname}---a \term{logical pathname}.
+
+\label Description::
+
+\funref{logical-pathname} converts \param{pathspec} to a
+\term{logical pathname} and returns the new \term{logical pathname}.
+If \param{pathspec} is a \term{logical pathname} \term{namestring},
+it should contain a host component and its following \term{colon}.
+If \param{pathspec} is a \term{stream}, it should be one
+for which \funref{pathname} returns a \term{logical pathname}.  
+ 
+\issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+If \param{pathspec} is a \term{stream}, the \term{stream} can be either open or closed.
+\funref{logical-pathname} returns the same \term{logical pathname} after a
+file is closed as it did when the file was open.
+\endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+\issue{PATHNAME-STREAM}
+It is an error if \param{pathspec} is a \term{stream} that is 
+created with
+  \funref{make-two-way-stream}, 
+  \funref{make-echo-stream},             
+  \funref{make-broadcast-stream}, 
+  \funref{make-concatenated-stream},
+  \funref{make-string-input-stream},
+or
+  \funref{make-string-output-stream}.
+\endissue{PATHNAME-STREAM}
+
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+Signals an error \oftype{type-error} if \param{pathspec} isn't supplied correctly.
+
+\label See Also::
+
+\typeref{logical-pathname},
+\funref{translate-logical-pathname},
+{\secref\LogicalPathnames}
+
+\label Notes:\None.
+
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\endcom%{logical-pathname}
+
+%-------------------- Pathname Parsing --------------------
+
+%%% ========== DEFAULT-PATHNAME-DEFAULTS
+\begincom{*default-pathname-defaults*}\ftype{Variable}
+
+\label Value Type::
+
+a \term{pathname} \term{object}.
+
+\label Initial Value::
+
+%I added this first little phrase. -kmp 12-Jan-91
+An \term{implementation-dependent} \term{pathname}, 
+typically in the working directory that was current when \clisp\ was started up.
+
+\label Description::
+
+%% 23.1.2 26
+a \term{pathname}, used as the default whenever a \term{function}
+needs a default \term{pathname} and one is not supplied.
+
+\label Examples::                                                   
+\code
+ ;; This example illustrates a possible usage for a hypothetical Lisp running on a
+ ;; DEC TOPS-20 file system.  Since pathname conventions vary between Lisp 
+ ;; implementations and host file system types, it is not possible to provide a
+ ;; general-purpose, conforming example.
+ *default-pathname-defaults* \EV #P"PS:<FRED>"
+ (merge-pathnames (make-pathname :name "CALENDAR"))
+\EV #P"PS:<FRED>CALENDAR"
+ (let ((*default-pathname-defaults* (pathname "<MARY>")))
+   (merge-pathnames (make-pathname :name "CALENDAR")))
+\EV #P"<MARY>CALENDAR"
+\endcode
+
+\label Affected By::
+
+The \term{implementation}.
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom%{*default-pathname-defaults*}
+
+%-------------------- Pathname Namestrings --------------------
+
+%%% ========== NAMESTRING
+%%% ========== FILE-NAMESTRING
+%%% ========== DIRECTORY-NAMESTRING
+%%% ========== HOST-NAMESTRING
+%%% ========== ENOUGH-NAMESTRING
+
+\begincom{namestring, file-namestring, directory-namestring, 
+          host-namestring, enough-namestring}\ftype{Function}
+                                                 
+\label Syntax::
+
+\DefunWithValues namestring {pathname} {namestring}
+
+\DefunWithValues file-namestring      {pathname} {namestring}
+\DefunWithValues directory-namestring {pathname} {namestring}
+\DefunWithValues host-namestring      {pathname} {namestring}
+
+\DefunWithValues enough-namestring    {pathname {\opt} defaults} {namestring}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-STREAM}
+\param{pathname}---a \term{pathname designator}.
+\endissue{PATHNAME-STREAM}                 
+
+\issue{PATHNAME-SYMBOL}
+\param{defaults}---a \term{pathname designator}.
+\endissue{PATHNAME-SYMBOL}
+ \Default{\thevalueof{*default-pathname-defaults*}}
+
+\param{namestring}---a \term{string} or \nil.
+\editornote{KMP: Under what circumstances can NIL be returned??}%!!!
+
+\label Description::
+
+\issue{PATHNAME-SYMBOL}
+% Reference to conversion of symbol to a pathname removed.
+\endissue{PATHNAME-SYMBOL}
+
+These functions convert \param{pathname} into a namestring.
+%% 23.1.2 31
+The name represented by \param{pathname} is returned as a \term{namestring}
+in an \term{implementation-dependent} canonical form.
+
+%% 23.1.2 33
+\funref{namestring} returns the full form of \param{pathname}.
+
+\funref{file-namestring} returns just the name, type, and version
+ components of \param{pathname}.
+
+\funref{directory-namestring} returns the directory name portion.
+
+\funref{host-namestring} returns the host name. 
+%% 23.1.2 34
+
+\funref{enough-namestring} returns an abbreviated namestring 
+ that is just sufficient to identify the file named by \param{pathname}
+ when considered relative to the \param{defaults}.
+ It is required that
+
+\code
+ (merge-pathnames (enough-namestring pathname defaults) defaults)
+\EQ (merge-pathnames (parse-namestring pathname nil defaults) defaults)
+\endcode
+in all cases, and the result of \funref{enough-namestring} is
+the shortest reasonable \term{string} that will satisfy this criterion.
+
+It is not necessarily possible to construct a valid \term{namestring} 
+by concatenating some of the three shorter \term{namestrings} in some order.
+
+\label Examples::
+
+%!!! This example needs to use real filenames instead of "\i{directory-name}", etc.
+\code
+ (namestring "getty")            
+\EV "getty"
+ (setq q (make-pathname :host "kathy" 
+                         :directory 
+                           (pathname-directory *default-pathname-defaults*)
+                         :name "getty")) 
+\EV #S(PATHNAME :HOST "kathy" :DEVICE NIL :DIRECTORY \i{directory-name} 
+       :NAME "getty" :TYPE NIL :VERSION NIL)
+ (file-namestring q) \EV "getty"
+ (directory-namestring q) \EV \i{directory-name}
+ (host-namestring q) \EV "kathy" 
+\endcode
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+\code
+ ;;;Using Unix syntax and the wildcard conventions used by the
+ ;;;particular version of Unix on which this example was created:
+ (namestring
+   (translate-pathname "/usr/dmr/hacks/frob.l"
+                       "/usr/d*/hacks/*.l"
+                       "/usr/d*/backup/hacks/backup-*.*"))
+\EV "/usr/dmr/backup/hacks/backup-frob.l"
+ (namestring
+   (translate-pathname "/usr/dmr/hacks/frob.l"
+                       "/usr/d*/hacks/fr*.l"
+                       "/usr/d*/backup/hacks/backup-*.*"))
+\EV "/usr/dmr/backup/hacks/backup-ob.l"
+ 
+ ;;;This is similar to the above example but uses two different hosts,
+ ;;;U: which is a Unix and V: which is a VMS.  Note the translation
+ ;;;of file type and alphabetic case conventions.
+ (namestring
+   (translate-pathname "U:/usr/dmr/hacks/frob.l"
+                       "U:/usr/d*/hacks/*.l"
+                       "V:SYS$DISK:[D*.BACKUP.HACKS]BACKUP-*.*"))
+\EV "V:SYS$DISK:[DMR.BACKUP.HACKS]BACKUP-FROB.LSP"
+ (namestring
+   (translate-pathname "U:/usr/dmr/hacks/frob.l"
+                       "U:/usr/d*/hacks/fr*.l"
+                       "V:SYS$DISK:[D*.BACKUP.HACKS]BACKUP-*.*"))
+\EV "V:SYS$DISK:[DMR.BACKUP.HACKS]BACKUP-OB.LSP"
+\endcode
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS} 
+
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\funref{truename},
+\funref{merge-pathnames},
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+ 
+\endcom%{namestring, ...}
+
+%%% ========== PARSE-NAMESTRING
+\begincom{parse-namestring}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValuesNewline parse-namestring
+		        {thing {\opt} host default-pathname {\key} start end junk-allowed}
+			{pathname, position}
+                                       
+\label Arguments and Values::
+
+\issue{PATHNAME-SYMBOL}
+\issue{PATHNAME-LOGICAL:ADD}
+\param{thing}---a \term{string},
+	        a \term{pathname},
+	     or a \term{stream associated with a file}.
+%% This isn't quite right.  The start/end thing puts a wrinkle in things. -kmp 29-Aug-93
+%\term{pathname designator}
+\endissue{PATHNAME-LOGICAL:ADD}
+\endissue{PATHNAME-SYMBOL}
+
+\issue{PATHNAME-LOGICAL:ADD}
+\issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
+%% Added NIL here because the Description seemed to permit it. -kmp 29-Aug-93
+\param{host}---a \term{valid pathname host}, a \term{logical host}, or \nil.
+\endissue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\param{default-pathname}---a \term{pathname designator}.
+ \Default{\thevalueof{*default-pathname-defaults*}}
+
+%% This should go without saying!! -kmp 29-Aug-93
+%It is an error if optional arguments do not accompany keyword arguments.
+
+\issue{SUBSEQ-OUT-OF-BOUNDS}
+\issue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\param{start}, \param{end}---\term{bounding index designators} of \param{thing}.
+ \Defaults{\param{start} and \param{end}}{\f{0} and \nil}
+\endissue{RANGE-OF-START-AND-END-PARAMETERS:INTEGER-AND-INTEGER-NIL}
+\endissue{SUBSEQ-OUT-OF-BOUNDS}
+
+\param{junk-allowed}---a \term{generalized boolean}.
+  \Default{\term{false}}
+                                       
+\param{pathname}---a \term{pathname}, or \nil.
+
+\param{position}---a \term{bounding index designator} for \param{thing}.
+
+\label Description::
+
+%% 23.1.2 9
+%% 23.1.2 10
+Converts \param{thing} into a \term{pathname}.
+
+The \param{host} supplies a host name with respect to which the parsing occurs.
+%% Removed per X3J13. -kmp 05-Oct-93
+% If \param{host} is \nil,
+% then the host name is extracted from \param{default-pathname}
+% and used to determine the syntax convention.  
+
+\issue{PATHNAME-STREAM}
+If \param{thing} is a \term{stream associated with a file},
+processing proceeds as if the \term{pathname} used to open that \term{file}
+had been supplied instead.
+\endissue{PATHNAME-STREAM}
+
+If \param{thing} is a \term{pathname},
+the \param{host} and the host component of \param{thing} are compared.
+%% 23.1.2 15    
+%If \param{thing} is not a \term{string}, then \param{start} is returned as the second value.
+If they match, 
+two values are immediately returned: \param{thing} and \param{start};
+otherwise (if they do not match), an error is signaled.
+
+\issue{PATHNAME-SYMBOL}
+% If \param{thing} is a \term{symbol}, the print name is used.
+\endissue{PATHNAME-SYMBOL}
+
+%% 23.1.2 11
+Otherwise (if \param{thing} is a \term{string}),
+\funref{parse-namestring} parses the name of a \term{file} within
+the substring of \param{thing} bounded by \param{start} and \param{end}.
+
+\issue{PATHNAME-LOGICAL:ADD}
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+%% Replaced (again) per X3J13. -kmp 05-Oct-93
+% \param{thing} is recognized as a \term{logical pathname} \term{namestring}
+% when \param{host} is a \term{logical host} 
+%        (or a \term{string} that names a defined \term{logical host}),
+%      \param{default-pathname} is a \term{logical pathname},
+% %% Per X3J13. -kmp 05-Oct-93
+% %   or the substring begins with the name of a defined \term{logical host}
+% %      followed by a \term{colon}.
+% or \param{host} is unsupplied and \param{thing} is a \term{string} 
+% that is a syntactically valid \term{logical pathname} \term{namestring}
+% containing an explicit host.
+If \param{thing} is a \term{string} then 
+%% I added this. -kmp 05-Oct-93
+% it
+the substring of \param{thing} \term{bounded} by \param{start} and \param{end}
+is parsed into a \term{pathname} 
+as follows:
+
+\beginlist
+
+\itemitem{\bull} 
+  If \param{host} is a \term{logical host} then \param{thing} is parsed
+  as a \term{logical pathname} \term{namestring} 
+%% I added this. -kmp 05-Oct-93
+  on the \param{host}.
+
+\itemitem{\bull}
+  If \param{host} is \nil\ and \param{thing} is a syntactically valid 
+  \term{logical pathname} \term{namestring} containing an explicit host,
+  then it is parsed as a \term{logical pathname} \term{namestring}.
+
+\itemitem{\bull}
+  If  \param{host} is \nil,
+      \param{default-pathname} is a \term{logical pathname},
+  and \param{thing} is a syntactically valid \term{logical pathname} \term{namestring}
+       without an explicit host,
+  then it is parsed as a \term{logical pathname} \term{namestring}
+%% Wording simplified by me. -kmp 05-Oct-93
+%         with the host from \param{default-pathname} 
+%          used as the host for the resulting \term{pathname}.
+        on the host that is the host component of \param{default-pathname}.
+
+\itemitem{\bull}
+  Otherwise, the parsing of \param{thing} is \term{implementation-defined}.
+
+\endlist
+
+In the first 
+%% Changed to match wording voted by X3J13 above. -kmp 05-Oct-93
+%two
+of these
+%% Don't bother trying to count. -kmp 05-Oct-93
+%three
+cases,
+the host portion of the \term{logical pathname} namestring
+and its following \term{colon} are optional.
+% Whether a host argument is logical if it is a \term{string} 
+% that is \term{string equal} to a \term{logical pathname} host name is
+% \term{implementation-defined}.
+\endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+\endissue{PATHNAME-LOGICAL:ADD}
+
+If the host portion of the namestring and \param{host} 
+are both present and do not match,
+an error is signaled.               
+
+%% 23.1.2 12
+If \param{junk-allowed} is \term{true},
+then the \term{primary value} is the \term{pathname} parsed 
+or, if no syntactically correct \term{pathname} was seen, \nil.
+%% 23.1.2 13
+If \param{junk-allowed} is \term{false},
+then the entire substring is scanned, 
+and the \term{primary value} is the \term{pathname} parsed.
+
+%% 23.1.2 14
+In either case, the \term{secondary value}
+is the index into \param{thing} of the delimiter that terminated the parse,
+or the index beyond the substring if the parse terminated at the end of the substring
+  (as will always be the case if \param{junk-allowed} is \term{false}).
+
+%% 23.1.2 16
+Parsing a \term{null} \term{string} always succeeds,
+producing a \term{pathname} with all components (except the host) equal to \nil.
+
+%% 23.1.2 18
+If \param{thing} contains an explicit host name and no explicit device name,
+then it is \term{implementation-defined} whether \funref{parse-namestring}
+will supply the standard default device for that host as the device component
+of the resulting \term{pathname}.
+
+\label Examples::
+
+\issue{PATHNAME-PRINT-READ:SHARPSIGN-P}
+\code
+ (setq q (parse-namestring "test"))  
+\EV #S(PATHNAME :HOST NIL :DEVICE NIL :DIRECTORY NIL :NAME "test" 
+       :TYPE NIL :VERSION NIL)
+ (pathnamep q) \EV \term{true}
+ (parse-namestring "test") 
+\EV #S(PATHNAME :HOST NIL :DEVICE NIL :DIRECTORY NIL :NAME "test"
+       :TYPE NIL :VERSION NIL), 4
+ (setq s (open \i{xxx})) \EV #<Input File Stream...>
+ (parse-namestring s) 
+\EV #S(PATHNAME :HOST NIL :DEVICE NIL :DIRECTORY NIL :NAME \i{xxx} 
+       :TYPE NIL :VERSION NIL), 0
+ (parse-namestring "test" nil nil :start 2 :end 4 )
+ \EV #S(PATHNAME ...), 15
+ (parse-namestring "foo.lisp")
+\EV #P"foo.lisp"
+\endcode
+\endissue{PATHNAME-PRINT-READ:SHARPSIGN-P}
+
+\label Affected By:\None.
+
+\label Exceptional Situations::           
+
+If \param{junk-allowed} is \term{false},
+an error \oftype{parse-error} is signaled if \param{thing} 
+does not consist entirely of the representation of a \term{pathname}, 
+possibly surrounded on either side by \term{whitespace}\meaning{1} characters if that is
+appropriate to the cultural conventions of the implementation.
+
+%% 23.1.2 17
+If \param{host} is supplied and not \nil,
+and \param{thing} contains a manifest host name, 
+an error \oftype{error} is signaled if the hosts do not match.
+
+\issue{PATHNAME-LOGICAL:ADD}
+If \param{thing} is a \term{logical pathname} namestring
+and if the host portion of the namestring and \param{host} 
+are both present and do not match,
+an error \oftype{error} is signaled.               
+\endissue{PATHNAME-LOGICAL:ADD}
+
+%% This is implied by stream associated with a file. -kmp 29-Aug-93
+% \issue{PATHNAME-STREAM}
+% It is an error if \param{thing} is a \term{stream} that is 
+% created with \funref{make-two-way-stream}, 
+% 	     \funref{make-echo-stream},
+% 	     \funref{make-broadcast-stream}, 
+% 	     \funref{make-concatenated-stream},
+% 	     \funref{make-string-input-stream},
+% 	     \funref{make-string-output-stream}.
+% \endissue{PATHNAME-STREAM}
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+{\secref\UnspecificComponent},
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\endcom%{parse-namestring}
+
+%-------------------- Pathname Matching --------------------
+
+%%% ========== WILD-PATHNAME-P
+\begincom{wild-pathname-p}\ftype{Function}
+
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+
+\label Syntax:: 
+
+\DefunWithValues wild-pathname-p {pathname {\opt} field-key} {generalized-boolean}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-STREAM}
+\param{pathname}---a \term{pathname designator}.
+\endissue{PATHNAME-STREAM}
+
+\param{Field-key}---one of \kwd{host},
+			   \kwd{device}
+			   \kwd{directory},
+			   \kwd{name},
+			   \kwd{type},
+		 	   \kwd{version},
+			or \nil.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+\funref{wild-pathname-p} tests \param{pathname} for the presence of wildcard components.  
+  
+If \param{pathname} is a \term{pathname} (as returned by \funref{pathname})
+it represents the name used to open the file. This may be, but is
+not required to be, the actual name of the file. 
+
+If \param{field-key} is not supplied or \nil, \funref{wild-pathname-p}    
+returns true if \param{pathname} has any wildcard components, \nil\ 
+if \param{pathname} has none.
+If \param{field-key} is \term{non-nil}, \funref{wild-pathname-p}    
+returns true if the indicated component of \param{pathname} is a wildcard, 
+\nil\ if the component is not a wildcard.  
+
+\label Examples::
+\code
+ ;;;The following examples are not portable.  They are written to run
+ ;;;with particular file systems and particular wildcard conventions.
+ ;;;Other implementations will behave differently.  These examples are
+ ;;;intended to be illustrative, not to be prescriptive.
+ 
+ (wild-pathname-p (make-pathname :name :wild)) \EV \term{true}
+ (wild-pathname-p (make-pathname :name :wild) :name) \EV \term{true}
+ (wild-pathname-p (make-pathname :name :wild) :type) \EV \term{false}
+ (wild-pathname-p (pathname "s:>foo>**>")) \EV \term{true} ;Lispm
+ (wild-pathname-p (pathname :name "F*O")) \EV \term{true} ;Most places
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+If \param{pathname} is not a \term{pathname}, a \term{string}, 
+or a \term{stream associated with a file} an error \oftype{type-error} is signaled.
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes::
+
+Not all implementations support wildcards in all fields.
+\Seesection\WildComponents\ and \secref\WildcardRestrictions.
+                                  
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+\endcom%{wild-pathname-p}
+
+%%% ========== PATHNAME-MATCH-P
+\begincom{pathname-match-p}\ftype{Function}
+
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+
+\label Syntax:: 
+
+\DefunWithValues pathname-match-p {pathname wildcard} {generalized-boolean}
+
+\label Arguments and Values:: 
+
+\issue{PATHNAME-STREAM}
+\param{pathname}---a \term{pathname designator}.
+
+\param{wildcard}---a \term{designator} for a \term{wild} \term{pathname}.
+\endissue{PATHNAME-STREAM}
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+\funref{pathname-match-p} returns true if 
+\param{pathname} matches \param{wildcard}, otherwise \nil.  The 
+matching rules are \term{implementation-defined} but should be consistent with 
+\funref{directory}. Missing components of \param{wildcard} default to \kwd{wild}.
+ 
+It is valid for \param{pathname} to be a wild \term{pathname}; 
+a wildcard field in \param{pathname} only matches a
+wildcard field in \param{wildcard} (\ie 
+\funref{pathname-match-p} is not commutative).
+It is valid for \param{wildcard} to be a non-wild \term{pathname}.
+ 
+\label Examples:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+If \param{pathname} or \param{wildcard} is not a \term{pathname}, \term{string}, 
+or \term{stream associated with a file} an error \oftype{type-error} is signaled.
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\funref{directory},
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+\endcom%{pathname-match-p}
+
+%%% ========== TRANSLATE-LOGICAL-PATHNAME
+\begincom{translate-logical-pathname}\ftype{Function}
+
+\issue{PATHNAME-LOGICAL:ADD}
+
+\label Syntax:: 
+
+\DefunWithValues translate-logical-pathname {pathname {\key}} {physical-pathname}
+
+\label Arguments and Values:: 
+
+\param{pathname}---a \term{pathname designator},
+		or a \term{logical pathname} \term{namestring}.
+
+\param{physical-pathname}---a \term{physical pathname}.
+
+\label Description::
+
+Translates \param{pathname} to a \term{physical pathname}, which it returns.
+                                                    
+\issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+If \param{pathname} is a \term{stream}, the
+\term{stream} can be either open or closed.
+\funref{translate-logical-pathname} returns the same 
+physical pathname after a
+    file is closed as it did when the file was open.
+\endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+\issue{PATHNAME-STREAM}
+It is an error if \param{pathname} is a \term{stream} that is 
+created with \funref{make-two-way-stream}, 
+\funref{make-echo-stream},             
+\funref{make-broadcast-stream}, 
+\funref{make-concatenated-stream}, \funref{make-string-input-stream},
+\funref{make-string-output-stream}.
+\endissue{PATHNAME-STREAM}
+
+If \param{pathname} is a \term{logical pathname} namestring,
+the host portion of the 
+\term{logical pathname} namestring and its following \term{colon} are required.
+ 
+
+\param{Pathname} is first coerced to a \term{pathname}.
+If the coerced \param{pathname} is a physical pathname, it is returned.
+If the coerced \param{pathname} is a \term{logical pathname},
+the first matching translation (according to \funref{pathname-match-p})
+of the \term{logical pathname} host is applied, as if by calling 
+\funref{translate-pathname}.  If the result is
+    a \term{logical pathname}, this process is repeated.  
+When the result is
+    finally a physical pathname, it is returned.
+    If no translation matches, an error 
+is signaled.
+
+\funref{translate-logical-pathname} might perform additional translations,
+    typically to provide translation of file types to local naming
+    conventions, to accomodate physical file systems with limited length
+    names, or to deal with special character requirements such as
+    translating hyphens to underscores or uppercase letters to lowercase.
+    Any such additional translations are \term{implementation-defined}.  Some
+    implementations do no additional translations.
+
+    There are no specified keyword arguments for
+\funref{translate-logical-pathname}, 
+but implementations are permitted to extend
+    it by adding keyword arguments.  
+
+%The following was deleted because part 2 of EXTRA-RETURN-VALUES didn't
+%pass.
+%There is one specified return value
+%    from TRANSLATE-LOGICAL-PATHNAME; implementations are permitted to
+%    extend it by returning additional values.
+ 
+
+\label Examples::
+
+See \funref{logical-pathname-translations}.
+
+\label Affected By:\None.%!!! Not likely.
+
+\label Exceptional Situations::
+
+If \param{pathname} is incorrectly supplied, an error \oftype{type-error} is signaled.
+
+If no translation matches, an error \oftype{file-error} is signaled.
+\editornote{KMP: Is file-error really right, or should it be pathname-error?}
+
+\label See Also::
+
+\funref{logical-pathname},
+\funref{logical-pathname-translations}, 
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes:\None.
+
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\endcom%{translate-logical-pathname}
+
+%%% ========== TRANSLATE-PATHNAME
+\begincom{translate-pathname}\ftype{Function}
+
+\issue{PATHNAME-WILD:NEW-FUNCTIONS}
+
+\label Syntax:: 
+
+\DefunWithValuesNewline translate-pathname
+		 	{source from-wildcard to-wildcard {\key}}
+		 	{translated-pathname}
+
+\label Arguments and Values:: 
+
+\param{source}---a \term{pathname designator}.
+
+\param{from-wildcard}---a \term{pathname designator}.
+
+\param{to-wildcard}---a \term{pathname designator}.
+
+\param{translated-pathname}---a \term{pathname}.
+
+\label Description::
+
+\funref{translate-pathname} translates \param{source} 
+(that matches \param{from-wildcard}) into a corresponding \term{pathname} 
+that matches \param{to-wildcard}, and returns the corresponding \term{pathname}.
+ 
+The resulting \term{pathname} is \param{to-wildcard} with each wildcard or missing
+field replaced by a portion of \param{source}.  A ``wildcard field'' is a
+\term{pathname} component with a value of \kwd{wild}, a \kwd{wild} element of a
+\term{list}-valued directory component, or an \term{implementation-defined} portion
+of a component, such as the \f{"*"} in the complex wildcard string
+\f{"foo*bar"} that some implementations support.  An implementation that
+adds other wildcard features, such as regular expressions, must define
+how \funref{translate-pathname} extends to those features.  
+A ``missing field'' is a \term{pathname} component with a value of \nil.
+ 
+    The portion of \param{source} 
+that is copied into the resulting \term{pathname} is 
+\term{implementation-defined}.  Typically 
+it is determined by the user interface conventions
+    of the file systems involved.  Usually it is the portion of \param{source}
+    that matches a wildcard field of 
+\param{from-wildcard} that is in the same
+    position as the wildcard or missing field of 
+\param{to-wildcard}.  If there
+    is no wildcard field in 
+\param{from-wildcard} at that position, then usually
+    it is the entire corresponding 
+\term{pathname} component of \param{source}, or in
+    the case of a 
+\term{list}-valued directory component, the entire corresponding
+    \term{list} element.  
+
+    During the copying of a portion of \param{source} into 
+the resulting \term{pathname}, additional
+    \term{implementation-defined} translations of \term{case} or file naming
+    conventions might occur, especially when 
+\param{from-wildcard} and
+    \param{to-wildcard} are for different hosts.
+ 
+It is valid for
+    \param{source} to be a wild 
+\term{pathname}; in general this will produce a wild
+    result.  It 
+is valid for \param{from-wildcard} and/or \param{to-wildcard} to be
+    non-wild \term{pathnames}.  
+    
+    There are no specified keyword arguments for 
+\funref{translate-pathname}, but
+    implementations are permitted to extend it by adding keyword arguments.
+
+%The following is deleted because part 2 of EXTRA-RETURN-VALUES didn't
+%pass:
+%
+%    There is one specified return value from TRANSLATE-PATHNAME;
+%    implementations are permitted to extend it by returning additional
+%    values.
+\issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+\issue{JUN90-TRIVIAL-ISSUES:5}
+\funref{translate-pathname} maps customary case in
+\param{source} into customary case in the output \term{pathname}.
+\endissue{JUN90-TRIVIAL-ISSUES:5}
+\endissue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+
+ 
+\label Examples::
+
+\code
+ ;; The results of the following five forms are all implementation-dependent.
+ ;; The second item in particular is shown with multiple results just to 
+ ;; emphasize one of many particular variations which commonly occurs.
+ (pathname-name (translate-pathname "foobar" "foo*" "*baz")) \EV "barbaz"
+ (pathname-name (translate-pathname "foobar" "foo*" "*"))
+\EV "foobar"
+\OV "bar"
+ (pathname-name (translate-pathname "foobar" "*"    "foo*")) \EV "foofoobar"
+ (pathname-name (translate-pathname "bar"    "*"    "foo*")) \EV "foobar"
+ (pathname-name (translate-pathname "foobar" "foo*" "baz*")) \EV "bazbar"
+
+ (defun translate-logical-pathname-1 (pathname rules)
+   (let ((rule (assoc pathname rules :test #'pathname-match-p)))
+     (unless rule (error "No translation rule for ~A" pathname))
+     (translate-pathname pathname (first rule) (second rule))))
+ (translate-logical-pathname-1 "FOO:CODE;BASIC.LISP"
+                       '(("FOO:DOCUMENTATION;" "MY-UNIX:/doc/foo/")
+                         ("FOO:CODE;"          "MY-UNIX:/lib/foo/")
+                         ("FOO:PATCHES;*;"     "MY-UNIX:/lib/foo/patch/*/")))
+\EV #P"MY-UNIX:/lib/foo/basic.l"
+
+;;;This example assumes one particular set of wildcard conventions
+;;;Not all file systems will run this example exactly as written
+ (defun rename-files (from to)
+   (dolist (file (directory from))
+     (rename-file file (translate-pathname file from to))))
+ (rename-files "/usr/me/*.lisp" "/dev/her/*.l")
+   ;Renames /usr/me/init.lisp to /dev/her/init.l
+ (rename-files "/usr/me/pcl*/*" "/sys/pcl/*/")
+   ;Renames /usr/me/pcl-5-may/low.lisp to /sys/pcl/pcl-5-may/low.lisp
+   ;In some file systems the result might be /sys/pcl/5-may/low.lisp
+ (rename-files "/usr/me/pcl*/*" "/sys/library/*/")
+   ;Renames /usr/me/pcl-5-may/low.lisp to /sys/library/pcl-5-may/low.lisp
+   ;In some file systems the result might be /sys/library/5-may/low.lisp
+ (rename-files "/usr/me/foo.bar" "/usr/me2/")
+   ;Renames /usr/me/foo.bar to /usr/me2/foo.bar
+ (rename-files "/usr/joe/*-recipes.text" "/usr/jim/cookbook/joe's-*-rec.text")
+   ;Renames /usr/joe/lamb-recipes.text to /usr/jim/cookbook/joe's-lamb-rec.text
+   ;Renames /usr/joe/pork-recipes.text to /usr/jim/cookbook/joe's-pork-rec.text
+   ;Renames /usr/joe/veg-recipes.text to /usr/jim/cookbook/joe's-veg-rec.text
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+If any of \param{source}, \param{from-wildcard}, or \param{to-wildcard}
+is not a \term{pathname}, a \term{string}, or a \term{stream associated with a file}
+an error \oftype{type-error} is signaled.  
+
+\f{(pathname-match-p \param{source from-wildcard})} must
+be true or an error \oftype{error} is signaled.
+
+\label See Also::
+
+\funref{namestring},
+\funref{pathname-host},
+\issue{PATHNAME-LOGICAL:ADD}
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes::
+
+The exact behavior of \funref{translate-pathname} cannot be dictated
+by the \clisp\ language and must be allowed to vary, depending on the
+user interface conventions of the file systems involved.
+
+The following is an implementation guideline.
+One file system performs this operation by
+    examining each piece of the three 
+\term{pathnames} in turn, where a piece is a
+    \term{pathname} component or a 
+\term{list} element of a structured component such as
+    a hierarchical directory.  Hierarchical directory elements in
+    \param{from-wildcard} and 
+\param{to-wildcard} are matched by whether they are
+    wildcards, not by depth in the directory hierarchy.  If the piece in
+\param{to-wildcard} is present and not wild, it is copied into the result.
+    If the piece in \param{to-wildcard} is 
+\kwd{wild} or \nil, the piece in \param{source} is
+    copied into the result.  Otherwise, the piece in
+\param{to-wildcard} might be
+    a complex wildcard such as \f{"foo*bar"} and the piece in 
+\param{from-wildcard}
+    should be wild; the portion of the piece in 
+\param{source} that matches the
+    wildcard portion of the piece in 
+\param{from-wildcard} replaces the wildcard
+    portion of the piece in 
+\param{to-wildcard} and the value produced is used in
+    the result.
+
+\endissue{PATHNAME-WILD:NEW-FUNCTIONS}
+\endcom%{translate-pathname}
+
+%-------------------- Pathname Merging --------------------
+
+%%% ========== MERGE-PATHNAMES
+\begincom{merge-pathnames}\ftype{Function}
+
+\label Syntax:: 
+
+\DefunWithValuesNewline merge-pathnames
+		 	{pathname {\opt} default-pathname default-version}
+			{merged-pathname}
+
+\label Arguments and Values::
+
+\issue{PATHNAME-STREAM}  
+\param{pathname}---a \term{pathname designator}.
+\endissue{PATHNAME-STREAM}
+
+\issue{PATHNAME-STREAM}
+%% 23.1.2 20
+\param{default-pathname}---a \term{pathname designator}.
+\endissue{PATHNAME-STREAM}
+ \Default{\thevalueof{*default-pathname-defaults*}}
+
+\issue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
+\param{default-version}---a \term{valid pathname version}.
+\endissue{PATHNAME-UNSPECIFIC-COMPONENT:NEW-TOKEN}
+ \Default{\kwd{newest}}
+
+\param{merged-pathname}---a \term{pathname}.
+
+\label Description::
+
+%% 23.1.2 19
+Constructs a \term{pathname} from \param{pathname} 
+by filling in any unsupplied components with the corresponding values
+from \param{default-pathname} and \param{default-version}. 
+
+%% 23.1.2 22
+Defaulting of pathname components 
+is done by filling in components taken from another \term{pathname}.
+\issue{COMPILE-FILE-OUTPUT-FILE-DEFAULTS:INPUT-FILE}
+% Unsupplied components of the output \term{pathname} come from \param{pathname},
+% except that the type should default not to the type of \param{pathname} 
+% but to the appropriate default type for output from this program.
+This is especially useful for cases such as 
+a program that has an input file and an output file.
+Unspecified components of the output pathname will come from the input pathname,
+except that the type should not default
+%% "not" removed per X3J13. -kmp 05-Oct-93
+%not
+to the type of the input pathname
+but rather to the appropriate default type for output from the program;
+for example, \seefun{compile-file-pathname}.
+\endissue{COMPILE-FILE-OUTPUT-FILE-DEFAULTS:INPUT-FILE}
+
+%% 23.1.2 23
+If no version is supplied, \param{default-version} is used.
+If \param{default-version} is \nil, the version component will remain unchanged.
+
+%% 23.1.2 24
+If \param{pathname} explicitly specifies a host and not a device, and 
+if the host component of \param{default-pathname} matches the host component
+of \param{pathname}, then the device is taken from the \param{default-pathname};
+otherwise the device will be the default file device for that host.  If
+\param{pathname} does not specify a host, device, directory, name,
+or type, each such component is copied from \param{default-pathname}.
+If \param{pathname} does not specify a name, then the version, if not provided, will
+come from \param{default-pathname}, just like the other components.  If
+\param{pathname} does specify a name, then the version is not affected
+by \param{default-pathname}. If this process leaves the
+version missing, the \param{default-version} is used.
+If the host's file name syntax provides a way
+to input a version without a name or type, the user can let the name
+and type default but supply a version different from the one in \param{default-pathname}.
+
+\issue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+If \param{pathname} is a \term{stream}, \param{pathname} effectively
+becomes \f{(pathname \param{pathname})}. \funref{merge-pathnames}
+can be used on either an open or a closed \term{stream}.
+\endissue{CLOSED-STREAM-FUNCTIONS:ALLOW-INQUIRY}
+%% This follows from "stream associated with a file",
+%% which is implicit in "pathname designator".
+% \issue{PATHNAME-STREAM}
+% It is an error if \param{pathname} is a \term{stream} that is 
+% created with \funref{make-two-way-stream}, 
+% \funref{make-echo-stream},
+% \funref{make-broadcast-stream}, 
+% \funref{make-concatenated-stream}, \funref{make-string-input-stream},
+% \funref{make-string-output-stream}.
+% \endissue{PATHNAME-STREAM}
+
+If \param{pathname} is a \term{pathname}
+%% Superfluous. -kmp 29-Aug-93
+%(as returned by \funref{pathname})
+it represents the name used to open the file. This may be, but is
+not required to be, the actual name of the file. 
+
+\issue{PATHNAME-LOGICAL:ADD}
+\funref{merge-pathnames} recognizes a \term{logical pathname} \term{namestring}
+   when \param{default-pathname} is a \term{logical pathname},
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+or when the \term{namestring} begins with 
+    the name of a defined \term{logical host} followed by a \term{colon}.
+In the first of these two cases,
+\endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+the host portion of the \term{logical pathname} \term{namestring}
+and its following \term{colon} are optional.
+\endissue{PATHNAME-LOGICAL:ADD}
+
+\issue{PATHNAME-LOGICAL:ADD}
+\funref{merge-pathnames} returns a 
+\term{logical pathname} if and only if
+   its first argument is a \term{logical pathname},
+\issue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+or its first argument is a \term{logical pathname} \term{namestring} with an explicit host,
+or its first argument does not specify a host 
+    and the \param{default-pathname} is a \term{logical pathname}.
+\endissue{PATHNAME-HOST-PARSING:RECOGNIZE-LOGICAL-HOST-NAMES}
+\endissue{PATHNAME-LOGICAL:ADD}
+ 
+\issue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION}
+\term{Pathname} merging treats a relative directory specially.  
+If \f{(pathname-directory \param{pathname})} is a \term{list} whose
+\term{car} is \kwd{relative}, and 
+\f{(pathname-directory \param{default-pathname})} is a \term{list}, then
+the merged directory is the value of
+
+\code
+ (append (pathname-directory \param{default-pathname})
+         (cdr  ;remove :relative from the front
+           (pathname-directory \param{pathname})))
+\endcode
+except that if the resulting \term{list} contains a \term{string} or \kwd{wild}
+immediately followed by \kwd{back}, both of them are removed.  This removal of 
+redundant \kwd{back} \term{keywords} is repeated as many times as possible.
+If \f{(pathname-directory \param{default-pathname})} is not a \term{list} or
+\f{(pathname-directory \param{pathname})} is not a \term{list} 
+whose \term{car} is \kwd{relative}, the merged directory is
+\f{(or (pathname-directory \param{pathname}) (pathname-directory \param{default-pathname}))}
+\endissue{PATHNAME-SUBDIRECTORY-LIST:NEW-REPRESENTATION}
+
+\issue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+\funref{merge-pathnames} maps customary case in \param{pathname} 
+into customary case in the output \term{pathname}.
+\endissue{PATHNAME-COMPONENT-CASE:KEYWORD-ARGUMENT}
+
+\label Examples::
+%% 23.1.2 21
+\code
+ (merge-pathnames "CMUC::FORMAT"
+                  "CMUC::PS:<LISPIO>.FASL")
+\EV #P"CMUC::PS:<LISPIO>FORMAT.FASL.0"
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\issue{PATHNAME-LOGICAL:ADD}
+\varref{*default-pathname-defaults*},
+\typeref{pathname},
+\typeref{logical-pathname},
+{\secref\FileSystemConcepts},
+\endissue{PATHNAME-LOGICAL:ADD}
+\issue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+{\secref\PathnamesAsFilenames}
+\endissue{FILE-OPEN-ERROR:SIGNAL-FILE-ERROR}
+
+\label Notes::
+ 
+%% 23.1.2 25
+The net effect 
+%% removed as redundant to avoid making this paragraph run onto next page by one word.
+% of \funref{merge-pathnames} 
+is that if just a name is supplied, 
+%% ditto.
+%then
+the host, device, directory, and type will come from \param{default-pathname}, 
+but the version will come from \param{default-version}.
+If nothing or just a directory is supplied,
+the name, type, and version will come from \param{default-pathname} together.
+
+\endcom%{merge-pathnames}

@@ -1,0 +1,928 @@
+% -*- Mode: TeX -*-
+%% Generalized Reference
+
+%% Moon thinks terms "generalized reference" and "place" need to be rationalized throughout.
+%% Done! -kmp 16-Jul-93
+
+\beginsubSection{Overview of Places and Generalized Reference}
+
+A \newterm{generalized reference} is the use of a \term{form},
+sometimes called a \newterm{place},
+as if it were a \term{variable} that could be read and written.
+The \term{value} of a \term{place} is 
+the \term{object} to which the \term{place} \term{form} evaluates.
+The \term{value} of a \term{place} can be changed by using \macref{setf}.
+The concept of binding a \term{place} is not defined in \clisp,
+but an \term{implementation} is permitted to extend the language by defining this concept.
+
+\Thenextfigure\ contains examples of the use of \macref{setf}.
+Note that the values returned by evaluating the \term{forms} in column two 
+are not necessarily the same as those obtained by evaluating the 
+\term{forms} in column three.
+%% 7.2.0 18
+In general, the exact \term{macro expansion} of a \macref{setf} \term{form} is not guaranteed 
+and can even be \term{implementation-dependent};
+all that is guaranteed is 
+ that the expansion is an update form that works
+   for that particular \term{implementation},
+ that the left-to-right evaluation of \term{subforms} is preserved, 
+and
+%% 7.2.0 19
+ that the ultimate result of evaluating \macref{setf} is the value
+  or values being stored.
+
+\tablefigthree{Examples of setf}{Access function}{Update Function}{Update using \macref{setf}}{
+\f{x}                & \f{(setq x datum)}   & \f{(setf x datum)}                \cr
+\f{(car x)}          & \f{(rplaca x datum)} & \f{(setf (car x) datum)}          \cr
+\f{(symbol-value x)} & \f{(set x datum)}    & \f{(setf (symbol-value x) datum)} \cr}
+
+\Thenextfigure\ shows \term{operators} relating to
+\term{places} and \term{generalized reference}.
+
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+
+\displaythree{Operators relating to places and generalized reference.}{
+assert&defsetf&push\cr
+ccase&get-setf-expansion&remf\cr
+ctypecase&getf&rotatef\cr
+decf&incf&setf\cr
+define-modify-macro&pop&shiftf\cr
+define-setf-expander&psetf&\cr
+}
+%!!! Should defmethod be here for the sake of SETF methods?? -kmp 8-May-91
+
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+Some of the \term{operators} above manipulate \term{places}
+and some manipulate \term{setf expanders}.
+%% 7.2.0 57
+A \term{setf expansion} can be derived from any \term{place}.
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+%% 7.2.0 20
+New \term{setf expanders} can be defined by using \macref{defsetf} 
+and \macref{define-setf-expander}.
+
+
+%% Moon thinks this follows from rule 2 below, and asked that it be commented out.
+%
+% %% 7.2.0 29
+% %% 7.2.0 30                 
+% These operators evaluate the \term{subforms} of 
+% \term{places} exactly as many times as they appear in the source program,
+% and exactly in the same order (left-to-right) as they appear in the source.
+% \issue{PUSH-EVALUATION-ORDER:ITEM-FIRST}
+% %The left-to-right rule does not
+% %remove the obligation on writers of \term{macros} and 
+% %users of 
+% %\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+% %\macref{define-setf-expander}  
+% %\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+% %to ensure left-to-right order, however. 
+% \endissue{PUSH-EVALUATION-ORDER:ITEM-FIRST}
+% 
+% %% 7.2.0 31
+% For example, in 
+% 
+% {\tt (setf \param{reference} \param{value})}
+% 
+% \param{value}
+% will be evaluated after all the \term{subforms} of \param{reference} because
+% \param{value} appears to the right of them.
+
+%% 7.2.0 32
+%The expansion of these operators must consist of code that follows these
+%rules or has the same effect as such code.  This is accomplished by
+%introducing temporary variables bound to the 
+%\issue{PUSH-EVALUATION-ORDER:ITEM-FIRST}
+%\term{subforms} of the macro call.
+%\endissue{PUSH-EVALUATION-ORDER:ITEM-FIRST}
+%As an optimization in the implementation,
+%temporary variables can be eliminated whenever
+%removing them has no effect on the semantics of the program.
+%For example, a constant need never be saved in a temporary variable.
+%A variable or any \term{form} that does not have side effects need not be
+%saved in a temporary variable if it can be proven that its value will
+%not change within the scope of the \term{place}.
+
+\issue{PUSH-EVALUATION-ORDER:ITEM-FIRST}
+\beginsubsubsection{Evaluation of Subforms to Places}
+\DefineSection{GenRefSubFormEval}
+
+The following rules apply to the \term{evaluation} of \term{subforms} in a
+\term{place}:
+
+\beginlist
+\itemitem{1.}
+The evaluation ordering of \term{subforms} within a \term{place}
+is determined by the order specified by the second value returned by
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\funref{get-setf-expansion}. 
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+For all \term{places} defined by this specification
+%!!! Table??
+(\eg \funref{getf}, \funref{ldb}, $\ldots$),
+this order of evaluation is left-to-right.
+\idxtext{order of evaluation}\idxtext{evaluation order}%
+%!!! Barmar: Does the next sentence say the same thing as the one which follows it
+%            (i.e., the first sentence in the next paragraph)??
+When a \term{place} is derived from a macro expansion,
+this rule is applied after the macro is expanded to find the appropriate \term{place}. 
+
+\term{Places} defined by using \macref{defmacro} or
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\macref{define-setf-expander}
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+use the evaluation order defined by those definitions.
+For example, consider the following:
+
+\code
+ (defmacro wrong-order (x y) `(getf ,y ,x))
+\endcode
+
+This following \term{form} evaluates \f{place2} first and
+then \f{place1} because that is the order they are evaluated in
+the macro expansion:
+
+\code
+ (push value (wrong-order place1 place2))
+\endcode
+
+\itemitem{2.}
+\issue{JUN90-TRIVIAL-ISSUES:4}
+For the \term{macros} that manipulate \term{places} 
+  (\macref{push},
+   \macref{pushnew},
+   \macref{remf},
+   \macref{incf},
+   \macref{decf}, 
+   \macref{shiftf},
+   \macref{rotatef},
+   \macref{psetf},
+   \macref{setf},
+   \macref{pop}, and those defined by \macref{define-modify-macro})
+the \term{subforms} of the macro call are evaluated exactly once
+in left-to-right order, with the \term{subforms} of the \term{places}
+evaluated in the order specified in (1).
+\endissue{JUN90-TRIVIAL-ISSUES:4}
+
+\macref{push}, \macref{pushnew}, \macref{remf}, 
+\macref{incf}, \macref{decf}, \macref{shiftf}, \macref{rotatef}, 
+\macref{psetf}, \macref{pop} evaluate all \term{subforms} before modifying
+any of the \term{place} locations.
+\macref{setf} (in the case when \macref{setf} has more than two arguments) 
+performs its operation on each pair in sequence. For example, in 
+
+\code
+ (setf place1 value1 place2 value2 ...)
+\endcode
+the \term{subforms} of \f{place1} and \f{value1} are evaluated, the location
+specified by 
+\f{place1} is modified to contain the value returned by 
+\f{value1}, and
+then the rest of the \macref{setf} form is processed in a like manner.
+
+\itemitem{3.}
+For \macref{check-type}, \macref{ctypecase}, and \macref{ccase},
+\term{subforms} of the \term{place} are evaluated once as in (1),
+but might be evaluated again if the
+type check fails in the case of \macref{check-type} 
+or none of the cases hold in
+\macref{ctypecase} and \macref{ccase}.
+
+\itemitem{4.}
+For \macref{assert}, the order of evaluation of the generalized 
+references is not specified.\idxtext{order of evaluation}\idxtext{evaluation order}
+% Barmar: There's only one place in \macref{assert}.
+% Moon: Not true!
+
+\endlist
+Rules 2, 3 and 4 cover all \term{standardized} \term{macros} that manipulate \term{places}.
+
+\beginsubsubsubsection{Examples of Evaluation of Subforms to Places}
+
+\code
+ (let ((ref2 (list '())))
+   (push (progn (princ "1") 'ref-1)
+         (car (progn (princ "2") ref2)))) 
+\OUT 12
+\EV (REF1)
+
+ (let (x)
+    (push (setq x (list 'a))
+          (car (setq x (list 'b))))
+     x)
+\EV (((A) . B))
+\endcode
+
+\macref{push} first evaluates {\tt (setq x (list 'a)) \EV\ (a)},
+ then evaluates {\tt (setq x (list 'b)) \EV\ (b)},
+ then modifies the \term{car} of this latest value to be {\tt ((a) . b)}.
+
+\endsubsubsubsection%{Examples of Evaluation of Subforms to Places}
+
+\endsubsubsection%{Evaluation of Subforms to Places}
+\endissue{PUSH-EVALUATION-ORDER:ITEM-FIRST}
+
+%!!! Uses of "access", "accessing", etc. here are suspect. -kmp 18-Apr-91
+
+\beginsubsubsection{Setf Expansions}
+\DefineSection{SetfExpansions}
+
+%% 7.2.0 59
+Sometimes it is possible to avoid evaluating \term{subforms} of a 
+\term{place} multiple times or in the wrong order.  A
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\term{setf expansion}
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+for a given access form can be expressed as an ordered collection of five \term{objects}:
+
+%!!! Andy Latto is concerned about whether "temporaries" mustn't or might
+%    be proclaimed special.  And if they must not, must an implementation check?
+%    Would some elaboration of what a "temporary" is here be of help? -kmp 5-Dec-91
+
+%% 7.2.0 60
+\beginlist
+%% 7.2.0 64
+\itemitem{\b{List of temporary variables}}
+
+a list of symbols naming temporary variables to be bound
+sequentially, as if by \specref{let*}, to \term{values} 
+resulting from value forms.
+     
+\itemitem{\b{List of value forms}}
+
+a list of forms (typically, \term{subforms} of the
+\term{place}) which when evaluated 
+yield the values to which the corresponding temporary 
+variables should be bound.
+
+%% 7.2.0 61
+%% 7.2.0 65
+\itemitem{\b{List of store variables}}
+
+a list of symbols naming temporary store variables which are
+to hold the new values that will be assigned to the
+\term{place}.
+
+%% 7.2.0 62
+\itemitem{\b{Storing form}}
+
+a form which can reference both the temporary and the store variables,
+and which changes the \term{value} of the \term{place}
+and guarantees to return as its values the values of the store variables,
+which are the correct values for \macref{setf} to return.
+
+%% 7.2.0 63
+\itemitem{\b{Accessing form}}
+
+a \term{form} which can reference the temporary variables,
+and which returns the \term{value} of the \term{place}.
+\endlist
+
+%% 7.2.0 66
+The value returned by the accessing form is
+affected by execution of the storing form, but either of these
+forms might be evaluated any number of times.
+
+
+%% 7.2.0 67
+%% Redundant with next paragraph.
+% The temporary variables and the store variables must be generated
+% names (see \funref{gensym} or \funref{gentemp}).
+
+It is possible
+to do more than one \macref{setf} in parallel via
+\macref{psetf}, \macref{shiftf}, and \macref{rotatef}.  
+Because of this, the 
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\term{setf expander}
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+must produce new temporary 
+and store variable names every time.  For examples of how to do this,
+see \funref{gensym}.
+% and \funref{gentemp}.
+
+\issue{SETF-FUNCTIONS-AGAIN:MINIMAL-CHANGES}
+For each \term{standardized} accessor function \param{F},
+unless it is explicitly documented otherwise,
+it is \term{implementation-dependent} whether the ability to 
+use an \param{F} \term{form} as a \macref{setf} \term{place}
+is implemented by a \term{setf expander} or a \term{setf function}.
+Also, it follows from this that it is \term{implementation-dependent} 
+whether the name \f{(setf \param{F})} is \term{fbound}.
+\endissue{SETF-FUNCTIONS-AGAIN:MINIMAL-CHANGES}
+
+\beginsubsubsubsection{Examples of Setf Expansions}
+
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+Examples of the contents of the constituents of \term{setf expansions}
+follow.
+
+%% 7.2.0 69
+For a variable \param{x}:
+
+\showtwo{Sample Setf Expansion of a Variable}{
+\f{()}                     & ;list of temporary variables \cr
+\f{()}                     & ;list of value forms         \cr
+\f{(g0001)}                & ;list of store variables     \cr
+\f{(setq \param{x} g0001)} & ;storing form                \cr
+\param{x}                  & ;accessing form              \cr
+}
+
+%% 7.2.0 70
+For {\tt (car \param{exp})}:
+
+\showtwo{Sample Setf Expansion of a CAR Form}{
+\f{(g0002)}                            & ;list of temporary variables \cr
+\f{(\param{exp})}                      & ;list of value forms         \cr
+\f{(g0003)}                            & ;list of store variables     \cr
+\f{(progn (rplaca g0002 g0003) g0003)} & ;storing form                \cr
+\f{(car g0002)}                        & ;accessing form              \cr
+}
+
+%% 7.2.0 71
+For \f{(subseq \param{seq} \param{s} \param{e})}:
+
+\showtwo{Sample Setf Expansion of a SUBSEQ Form}{
+\f{(g0004 g0005 g0006)}               & ;list of temporary variables    \cr
+\f{(\param{seq} \param{s} \param{e})} & ;list of value forms            \cr
+\f{(g0007)}                           & ;list of store variables        \cr
+\f{(progn (replace g0004 g0007 :start1 g0005 :end1 g0006) g0007)} \span \cr
+				      & ;storing form                   \cr
+\f{(subseq g0004 g0005 g0006)}        & ; accessing form                \cr
+}
+
+In some cases, if a \term{subform} of a \term{place} is itself
+a \term{place}, it is necessary to expand the \term{subform}
+in order to compute some of the values in the expansion of the outer
+\term{place}.  For \f{(ldb \param{bs} (car \param{exp}))}:
+
+\showtwo{Sample Setf Expansion of a LDB Form}{
+\f{(g0001 g0002)}	              & ;list of temporary variables    \cr
+\f{(\param{bs} \param{exp})}	      & ;list of value forms            \cr
+\f{(g0003)}                           & ;list of store variables        \cr
+\f{(progn (rplaca g0002 (dpb g0003 g0001 (car g0002))) g0003)} \span    \cr
+				      & ;storing form                   \cr
+\f{(ldb g0001 (car g0002))}           & ; accessing form                \cr
+}
+
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+
+\endsubsubsubsection%{Examples of Setf Expansions}
+
+\endsubsubsection%{Setf Expansions}
+
+\endsubSection%{Overview of Places and Generalized Reference}
+
+\beginsubSection{Kinds of Places}
+\DefineSection{KindsOfPlaces}
+
+%% 7.2.0 7
+Several kinds of \term{places} are defined by \clisp; 
+this section enumerates them.
+This set can be extended by \term{implementations} and by \term{programmer code}.
+
+%% 7.2.0 8
+
+\beginsubsubsection{Variable Names as Places}
+
+The name of a \term{lexical variable} or \term{dynamic variable} 
+can be used as a \term{place}.
+
+\endsubsubsection%{Variable Names as Places}
+
+%% 7.2.0 9
+\beginsubsubsection{Function Call Forms as Places}
+\DefineSection{FnFormsAsGenRefs}
+
+A \term{function form} can be used as a \term{place} if it falls
+into one of the following categories:
+
+\beginlist
+
+\itemitem{\bull}
+A function call form whose first element is the name of
+any one of the functions in \thenextfigure.
+%% Barmar: Unnecessary as binding these symbols is disallowed.
+% \issue{FUNCTION-NAME:LARGE}
+% The function name must refer to the global function definition, 
+% rather than a locally defined \term{function}.
+% \endissue{FUNCTION-NAME:LARGE}
+
+%!!! CLASS-NAME and DOCUMENTATION maybe deserve their own table,
+%    since they are the only two defined by setf method.
+\issue{CONDITION-ACCESSORS-SETFABLE:NO}
+
+\editornote{KMP: Note that what are in some places still called `condition accessors'
+		 are deliberately omitted from this table, and are not labeled as
+		 accessors in their entries.  I have not yet had time to do a full
+	         search for these items and eliminate stray references to them as `accessors',
+		 which they are not, but I will do that at some point.}%!!!
+
+\issue{PATHNAME-LOGICAL:ADD}
+\issue{AREF-1D}
+\issue{FUNCTION-NAME:LARGE}
+%Merged BIT, SBIT, CHAR, SCHAR, and SUBSEQ from next table on advice of Moon and others.
+% -kmp 13-Feb-92
+% I added COMPILER-MACRO-FUNCTION, READTABLE-CASE, and SLOT-VALUE, 
+% which were also missing.  --sjl 5 Mar 92
+\displaythree{Functions that setf can be used with---1}{
+aref&cdadr&get\cr
+bit&cdar&gethash\cr
+caaaar&cddaar&logical-pathname-translations\cr
+caaadr&cddadr&macro-function\cr
+caaar&cddar&ninth\cr
+caadar&cdddar&nth\cr
+caaddr&cddddr&readtable-case\cr
+caadr&cdddr&rest\cr
+caar&cddr&row-major-aref\cr
+cadaar&cdr&sbit\cr
+cadadr&char&schar\cr
+cadar&class-name&second\cr
+caddar&compiler-macro-function&seventh\cr
+cadddr&documentation&sixth\cr
+caddr&eighth&slot-value\cr
+cadr&elt&subseq\cr
+car&fdefinition&svref\cr
+cdaaar&fifth&symbol-function\cr
+cdaadr&fill-pointer&symbol-plist\cr
+cdaar&find-class&symbol-value\cr
+cdadar&first&tenth\cr
+cdaddr&fourth&third\cr
+}
+\endissue{FUNCTION-NAME:LARGE}
+\endissue{AREF-1D}
+\endissue{PATHNAME-LOGICAL:ADD}
+\endissue{CONDITION-ACCESSORS-SETFABLE:NO}
+
+%% This text used to belong after the next table, which is now commented out. -kmp 13-Feb-92
+In the case of \funref{subseq}, the replacement value must be a \term{sequence}
+whose elements might be contained by the sequence argument to \funref{subseq},
+but does not have to be a \term{sequence} of the same \term{type} 
+%!!! Moon thinks this next is awkward.
+as the \term{sequence} of which the subsequence is specified.
+If the length of the replacement value does not equal the length of
+the subsequence to be replaced, then the shorter length determines
+the number of elements to be stored, as for \funref{replace}.
+
+  
+\itemitem{\bull}
+%% 7.2.0 10
+A function call form whose first element is the name of
+a selector function constructed by \macref{defstruct}.
+%% Barmar: Unnecessary as binding these symbols is disallowed.
+%% KMP: I'm not so sure in this case.
+\issue{FUNCTION-NAME:LARGE}
+The function name must refer to the global function definition,
+rather than a locally defined \term{function}.
+\endissue{FUNCTION-NAME:LARGE}
+
+%% Moon:
+%%  The distinction between this and the previous table is strange. After all,
+%%  fill-pointer, symbol-function, and class-name have type restrictions, too.
+%%  Also, the text above this table seems garbled.  I would merge these into previous
+%%  and delete the text.
+%% KMP: Done. (13-Feb-92)
+% 
+% \itemitem{\bull}
+% %% 7.2.0 11
+% A function call form whose first element is the name of
+% any one of the functions in \thenextfigure, 
+% provided that the new value
+% is of the specified type so that it can be used to
+% place in the specified ``location'' (which is in each of these cases
+% not truly a \term{place}).
+% %% Barmar: Unnecessary as binding these symbols is disallowed.
+% % \issue{FUNCTION-NAME:LARGE}
+% % The function name must refer to the global 
+% % function definition, rather than a locally defined \term{function}.
+% % \endissue{FUNCTION-NAME:LARGE}
+% 
+% \issue{CHARACTER-PROPOSAL:2-1-1}
+% \tablefigtwo{Functions that setf can be used with---n}{Function name}{Required type}{
+% \funref{bit}&\typeref{bit}\cr
+% \funref{sbit}&\typeref{bit}\cr
+% \funref{char}&\typeref{character}\cr
+% \funref{schar}&\typeref{character}\cr
+% \funref{subseq}&\typeref{sequence}\cr
+% }
+% \endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\itemitem{\bull}
+%% 7.2.0 12
+A function call form whose first element is the name of
+any one of the functions in \thenextfigure, 
+provided that the supplied argument
+to that function is in turn a \term{place} form;
+in this case the new \term{place} has stored back into it the
+result of applying the supplied ``update'' function.
+%% Moon thought this next was just confusing.
+%(which is in each of these cases not a true update function).
+%% Barmar: Unnecessary as binding these symbols is disallowed.
+% \issue{FUNCTION-NAME:LARGE}
+% The function name must refer to the global function 
+% definition, rather than a locally defined \term{function}.
+% \endissue{FUNCTION-NAME:LARGE}
+
+\issue{SETF-SUB-METHODS:DELAYED-ACCESS-STORES}                        
+\tablefigthree{Functions that setf can be used with---2}{Function name}{Argument that is a \param{place}}{Update function used}{
+\funref{ldb}        & second & \funref{dpb}                     \cr
+\funref{mask-field} & second & \funref{deposit-field}           \cr
+\funref{getf}       & first  &  \term{implementation-dependent} \cr
+}
+%% Moon thinks this is redundant.
+% The \param{place} forms listed in the above figure admit other
+% \param{places} as arguments; these are called sub-recursive \param{places}.
+During the \macref{setf} expansion of these \term{forms}, it is necessary to call 
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\funref{get-setf-expansion} 
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+in order to figure out how the inner, nested generalized variable must be treated.  
+ 
+The information from
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\funref{get-setf-expansion}
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+is used as follows.
+\beginlist
+\issue{CHARACTER-PROPOSAL:2-1-1} 
+%References to CHAR-BIT omitted.
+\endissue{CHARACTER-PROPOSAL:2-1-1} 
+\itemitem{\funref{ldb}}
+ 
+In a form such as:
+       
+{\tt (setf (ldb \param{byte-spec} \param{place-form}) \param{value-form})}
+ 
+the place referred to by the \param{place-form} must always be both \term{read} 
+and \term{written};  note that the update is to the generalized variable 
+specified by \param{place-form}, not to any object \oftype{integer}.
+       
+Thus this \macref{setf} should generate code to do the following:
+ 
+\beginlist
+\itemitem{1.} Evaluate \param{byte-spec} (and bind it into a temporary variable).
+\itemitem{2.} Bind the temporary variables for \param{place-form}.
+\itemitem{3.} Evaluate \param{value-form}  (and bind 
+\issue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW}
+its value or values into the store variable).
+%% Moon: Can only be ONE store variable here.
+% or variables
+\endissue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW}
+\itemitem{4.} Do the \term{read} from \param{place-form}.
+\itemitem{5.} Do the \term{write} into \param{place-form} with 
+the given bits of the \term{integer}
+       fetched in step 4 replaced with the value from step 3.
+\endlist 
+    If the evaluation of \param{value-form} 
+in step 3 alters what is found in \param{place-form},
+such as setting different bits of \term{integer},
+    then the change of the bits denoted by 
+\param{byte-spec} is to that 
+    altered \term{integer}, 
+because step 4 is done after the \param{value-form}
+    evaluation.  Nevertheless, the 
+    evaluations required for \term{binding} 
+the temporary variables are done in steps 1 and 
+    2, and thus the expected left-to-right evaluation order is seen.
+For example:
+
+\code
+ (setq integer #x69) \EV #x69
+ (rotatef (ldb (byte 4 4) integer) 
+          (ldb (byte 4 0) integer))
+ integer \EV #x96
+;;; This example is trying to swap two independent bit fields 
+;;; in an integer.  Note that the generalized variable of 
+;;; interest here is just the (possibly local) program variable
+;;; integer.
+\endcode
+ 
+\itemitem{\funref{mask-field}}
+ 
+   This case is the same as \funref{ldb} in all essential aspects.
+ 
+\itemitem{\funref{getf}}
+ 
+    In a form such as:
+ 
+\f{(setf (getf \param{place-form} \param{ind-form}) \param{value-form})}
+ 
+    the place referred to by \param{place-form} must always be both \term{read}
+    and \term{written};  note that the update is to the generalized variable 
+    specified by \param{place-form}, not necessarily to the particular 
+\term{list}
+that is the property list in question.
+ 
+    Thus this \macref{setf} should generate code to do the following:
+\beginlist
+\itemitem{1.} 
+Bind the temporary variables for \param{place-form}.
+\itemitem{2.} 
+Evaluate \param{ind-form} (and bind it into a temporary variable).
+\itemitem{3.} 
+Evaluate \param{value-form} (and bind 
+\issue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW}
+its value or values into the store variable).
+%%Moon: Can only be one store variable
+% or variables
+\endissue{SETF-MULTIPLE-STORE-VARIABLES:ALLOW}
+\itemitem{4.} 
+Do the \term{read} from \param{place-form}.
+\itemitem{5.} 
+Do the \term{write} into \param{place-form} with a possibly-new property list
+       obtained by combining the values from steps 2, 3, and 4.  
+(Note that the phrase ``possibly-new property list'' can mean that 
+    the former property list is somehow destructively re-used, or it can 
+    mean partial or full copying of it.  
+Since either copying or destructive re-use can occur, 
+the treatment of the resultant value for the 
+    possibly-new property list must proceed as if it were a different copy
+    needing to be stored back into the generalized variable.)
+\endlist 
+    If the evaluation of \param{value-form} 
+in step 3 alters what is found in
+\param{place-form}, such as setting a different named property in the list,
+    then the change of the property denoted by \param{ind-form} 
+is to that 
+    altered list, because step 4 is done after the 
+\param{value-form}
+    evaluation.  Nevertheless, the 
+    evaluations required for \term{binding} 
+the temporary variables  are done in steps 1 and 
+    2,  and thus the expected left-to-right evaluation order is seen.
+
+For example:
+
+\code
+ (setq s (setq r (list (list 'a 1 'b 2 'c 3)))) \EV ((a 1 b 2 c 3))
+ (setf (getf (car r) 'b) 
+       (progn (setq r nil) 6)) \EV 6
+ r \EV NIL
+ s \EV ((A 1 B 6 C 3))
+;;; Note that the (setq r nil) does not affect the actions of 
+;;; the SETF because the value of R had already been saved in 
+;;; a temporary variable as part of the step 1. Only the CAR
+;;; of this value will be retrieved, and subsequently modified 
+;;; after the value computation.
+\endcode
+ 
+\endlist
+\endlist
+ 
+\endissue{SETF-SUB-METHODS:DELAYED-ACCESS-STORES}                        
+
+\endsubsubsection%{Function Call Forms as Places}
+
+
+% This section added.  --sjl 4 Mar 92
+\issue{SETF-OF-VALUES:ADD}
+\beginsubsubsection{VALUES Forms as Places}
+\DefineSection{SETFofVALUES}
+
+A \funref{values} \term{form} can be used as a \term{place},
+provided that each of its \term{subforms} is also a \term{place} form.
+
+A form such as
+
+{\tt (setf (values \param{place-1} \dots \param{place-n}) \param{values-form})}
+
+does the following:
+
+\beginlist
+\itemitem{1.} The \term{subforms} of each nested \param{place} are evaluated
+in left-to-right order.
+\itemitem{2.} The \param{values-form} is evaluated, and the first store
+variable from each \param{place} is bound to its return values as if by 
+\macref{multiple-value-bind}.  
+\itemitem{3.} If the \term{setf expansion} for any \param{place} 
+involves more than one store variable, then the additional
+store variables are bound to \nil.
+\itemitem{4.} The storing forms for each \param{place} are evaluated in
+left-to-right order.
+\endlist
+
+The storing form in the \term{setf expansion} of \funref{values}
+returns as \term{multiple values}\meaning{2} the values of the store
+variables in step 2.  That is, the number of values returned is the
+same as the number of \term{place} forms.  This may be more or fewer
+values than are produced by the \param{values-form}.
+
+% There probably ought to be some examples here.
+
+\endsubsubsection%{VALUES Forms as Places}
+\endissue{SETF-OF-VALUES:ADD}
+
+
+\beginsubsubsection{THE Forms as Places}
+
+%% 7.2.0 13
+A \specref{the} \term{form} can be used as a \term{place},
+in which case the declaration is transferred to the \param{newvalue} form,
+and the resulting \macref{setf} is analyzed.  For example,
+
+\code
+ (setf (the integer (cadr x)) (+ y 3))
+\endcode
+is processed as if it were
+
+\code
+ (setf (cadr x) (the integer (+ y 3)))
+\endcode
+
+\endsubsubsection%{THE Forms as Places}
+     
+\issue{SETF-APPLY-EXPANSION:IGNORE-EXPANDER}
+\issue{SETF-OF-APPLY:ONLY-AREF-AND-FRIENDS}
+\issue{JUN90-TRIVIAL-ISSUES:27}
+\beginsubsubsection{APPLY Forms as Places}
+\DefineSection{SETFofAPPLY}
+
+The following situations involving \macref{setf} of \funref{apply} must be supported:
+
+\beginlist
+\itemitem{\bull} \f{(setf (apply \#'aref \param{array}
+				        \starparam{subscript}
+					\param{more-subscripts})
+			  \param{new-element})}
+\itemitem{\bull} \f{(setf (apply \#'bit \param{array} 
+				       \starparam{subscript}
+				       \param{more-subscripts})
+			  \param{new-element})}
+\itemitem{\bull} \f{(setf (apply \#'sbit \param{array} 
+					\starparam{subscript}
+					\param{more-subscripts}) 
+			  \param{new-element})}
+\endlist
+
+In all three cases, the \term{element} of \param{array} designated
+by the concatenation of \param{subscripts} and \param{more-subscripts}
+(\ie the same \term{element} which would be \term{read} by the call to
+     \term{apply} if it were not part of a \macref{setf} \term{form})
+is changed to have the \term{value} given by \param{new-element}.
+\issue{FUNCTION-NAME:LARGE}
+For these usages, the function name (\funref{aref}, \funref{bit}, or \funref{sbit})
+must refer to the global function definition, rather than a locally defined
+\term{function}.
+\endissue{FUNCTION-NAME:LARGE}
+
+No other \term{standardized} \term{function} is required to be supported,
+but an \term{implementation} may define such support.
+An \term{implementation} may also define support 
+for \term{implementation-defined} \term{operators}.
+
+If a user-defined \term{function} is used in this context,
+the following equivalence is true, except that care is taken
+to preserve proper left-to-right evaluation of argument \term{subforms}:
+
+\code
+ (setf (apply \#'\param{name} \starparam{arg}) \param{val})
+ \EQ (apply \#'(setf \param{name}) \param{val} \starparam{arg})
+\endcode
+
+% Removed reference to (setf (apply #'name a1 a2 ...) (values v1 v2 ...)) as bogus.
+
+\endsubsubsection%{APPLY Forms as Places}
+\endissue{JUN90-TRIVIAL-ISSUES:27}
+\endissue{SETF-OF-APPLY:ONLY-AREF-AND-FRIENDS}
+\endissue{SETF-APPLY-EXPANSION:IGNORE-EXPANDER}
+
+\beginsubsubsection{Setf Expansions and Places}
+% \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+% \itemitem{\macref{defsetf} or \macref{define-setf-expander} declarations}
+% \endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+
+%% 7.2.0 17
+Any \term{compound form} for which the \term{operator} has a
+\issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+\term{setf expander}
+\endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+defined can be used as a \term{place}.
+\issue{FUNCTION-NAME:LARGE}
+The 
+% function name that is the \param{access-fn} 
+% argument to \macref{defsetf} or 
+% \issue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+% \macref{define-setf-expander}
+% \endissue{SETF-METHOD-VS-SETF-METHOD:RENAME-OLD-TERMS}
+%% previous phrase replaced by Moon as just "operator" -kmp 4-Dec-91
+\term{operator}
+must refer to the global function definition,
+rather than a locally defined \term{function} or \term{macro}.
+\endissue{FUNCTION-NAME:LARGE}
+
+\issue{FUNCTION-NAME:LARGE}
+
+\endsubsubsection%{Setf Expansions and Places}
+
+%% 7.2.0 16
+\beginsubsubsection{Macro Forms as Places}
+
+A \term{macro form} can be used as a \term{place}, 
+in which case \clisp\ expands the \term{macro form}
+\issue{FUNCTION-NAME:LARGE}
+as if by \funref{macroexpand-1}
+\endissue{FUNCTION-NAME:LARGE}
+and then uses the \term{macro expansion} in place of the original \term{place}.
+\issue{SETF-MACRO-EXPANSION:LAST}
+%This is true for GET-SETF-EXPANSION, too, but there's no obvious place to say that.
+% -kmp 5-Jun-91
+Such \term{macro expansion} is attempted only after exhausting all other possibilities
+other than expanding into a call to a function named \f{(setf \param{reader})}.
+\endissue{SETF-MACRO-EXPANSION:LAST}
+
+\endsubsubsection%{Macro Forms as Places}
+
+
+% I moved this section here from below.  --sjl 5 Mar 92
+\issue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM}
+\beginsubsubsection{Symbol Macros as Places}
+
+A reference to a \term{symbol} that has been \term{established} as a \term{symbol macro} 
+can be used as a \term{place}.  In this case,
+\macref{setf} expands the reference and then analyzes the resulting \term{form}.
+\endissue{SYMBOL-MACROLET-SEMANTICS:SPECIAL-FORM}
+
+\endsubsubsection%{Symbol Macros as Places}
+
+\beginsubsubsection{Other Compound Forms as Places}
+
+For any other \term{compound form} for which the \term{operator} is a
+\term{symbol} \param{f},
+the \macref{setf} \term{form} expands into a call 
+to the \term{function} named \f{(setf \param{f})}.
+The first \term{argument} in the newly constructed \term{function form}
+is \param{newvalue} and the
+     remaining \term{arguments} are the remaining \term{elements} of
+     \param{place}.
+This expansion occurs regardless of whether \param{f} or \f{(setf \param{f})}
+is defined as a \term{function} locally, globally, or not at all.
+For example,
+
+\f{(setf (\param{f} \param{arg1} \param{arg2} ...) \param{new-value})}
+
+expands into a form with the same effect and value as
+
+\code
+ (let ((#:temp-1 arg1)          ;force correct order of evaluation
+       (#:temp-2 arg2)
+       ...
+       (#:temp-0 \param{new-value}))
+   (funcall (function (setf \param{f})) #:temp-0 #:temp-1 #:temp-2...))
+\endcode
+
+A \term{function} named \f{(setf \param{f})} must return its first argument
+as its only value in order to preserve the semantics of \macref{setf}.
+
+\endissue{FUNCTION-NAME:LARGE}
+
+\endsubsubsection%{Other Compound Forms as Places}
+
+% I moved the symbol macro section up to be with the ordinary macro
+% section.  --sjl 5 Mar 92
+
+\endsubSection%{Kinds of Places}
+
+\beginsubSection{Treatment of Other Macros Based on SETF}
+
+\issue{READ-MODIFY-WRITE-EVALUATION-ORDER:DELAYED-ACCESS-STORES}
+
+For each of the ``read-modify-write'' \term{operators} in \thenextfigure, 
+and for any additional \term{macros} 
+defined by the \term{programmer} using \macref{define-modify-macro},
+an exception is made to the normal rule of left-to-right evaluation of arguments.
+Evaluation of \term{argument} \term{forms} occurs in left-to-right order,
+with the exception that for the \param{place} \term{argument}, the actual
+\term{read} of the ``old value'' from that \param{place} happens 
+after all of the \term{argument} \term{form} \term{evaluations}, 
+and just before a ``new value'' is computed and \term{written} back into the \param{place}.
+
+Specifically, each of these \term{operators} can be viewed as involving a
+\term{form} with the following general syntax:
+
+\code
+ (\term{operator} \starparam{preceding-form} \param{place} \starparam{following-form})
+\endcode
+
+The evaluation of each such \term{form} proceeds like this:
+
+\beginlist
+\itemitem{1.} \term{Evaluate} each of the \param{preceding-forms}, in left-to-right order.
+\itemitem{2.} \term{Evaluate} the \term{subforms} of the \param{place},
+ in the order specified by the second value of the \term{setf expansion}
+ for that \param{place}.
+\itemitem{3.} \term{Evaluate} each of the \param{following-forms}, in left-to-right order.
+\itemitem{4.} \term{Read} the old value from \param{place}.
+\itemitem{5.} Compute the new value.
+\itemitem{6.} Store the new value into \param{place}.
+\endlist
+
+\displaythree{Read-Modify-Write Macros}{
+decf&pop&pushnew\cr
+incf&push&remf\cr
+}
+
+\endissue{READ-MODIFY-WRITE-EVALUATION-ORDER:DELAYED-ACCESS-STORES}
+
+\endsubSection%{Treatment of Other Macros Based on SETF}

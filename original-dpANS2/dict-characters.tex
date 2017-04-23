@@ -1,0 +1,1314 @@
+% -*- Mode: TeX -*-
+
+% Character Comparison
+% Character Types
+% Character Roles
+% Character Casification
+% Character Codes
+% Character Names
+
+%-------------------- Character Types --------------------
+
+%%% ========== CHARACTER (System Class)
+\begincom{character}\ftype{System Class}
+
+\label Class Precedence List::
+\typeref{character},
+\typeref{t}
+
+\label Description::
+
+A \term{character} is an \term{object} that 
+represents a unitary token in an aggregate quantity of text;
+\seesection\CharacterConcepts.
+
+\issue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+\issue{CHARACTER-PROPOSAL:2-3-1}
+\Thetypes{base-char} and \typeref{extended-char}
+form an \term{exhaustive partition} of \thetype{character}.
+\endissue{CHARACTER-PROPOSAL:2-3-1}
+\endissue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+
+\label See Also::
+
+{\secref\CharacterConcepts},
+{\secref\SharpsignBackslash},
+{\secref\PrintingCharacters}
+
+\endcom%{character}\ftype{System Class}
+\begincom{base-char}\ftype{Type}
+
+\issue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+
+\label Supertypes::
+
+\typeref{base-char},
+\typeref{character},
+\typeref{t}
+
+\label Description::
+
+\Thetype{base-char} is defined as the \term{upgraded array element type} 
+of \typeref{standard-char}.
+An \term{implementation} can support additional \subtypesof{character}
+(besides the ones listed in this standard) 
+that might or might not be \supertypesof{base-char}.
+In addition, an \term{implementation} can define \typeref{base-char}
+to be the \term{same} \term{type} as \typeref{character}.
+ 
+\term{Base characters} are distinguished in the following respects:
+\beginlist
+\itemitem{1.} \Thetype{standard-char} is a \term{subrepertoire} of \thetype{base-char}.
+\itemitem{2.} The selection of \term{base characters} that are not \term{standard characters}
+	      is implementation defined.
+\itemitem{3.} Only \term{objects} of \thetype{base-char} can be 
+	     \term{elements} of a \term{base string}.
+\itemitem{4.}
+No upper bound is specified for the number of characters in the 
+\typeref{base-char} \term{repertoire}; the size of that \term{repertoire}
+is %\term{implementation-dependent}
+\term{implementation-defined}.
+The lower bound is~96, the number of \term{standard characters}.
+%defined for \clisp. 
+\endlist
+ 
+%The distinction of base characters is largely a pragmatic
+%choice.  It permits efficient handling of common situations, may
+%be privileged for host system I/O, and can serve as an
+%intermediate basis for portability, less general than the standard
+%characters, but possibly more useful across a narrower range of
+%implementations.
+% 
+%Many computers have some "base" character representation which
+%is a function of hardware instructions for dealing with characters,
+%as well as the organization of the file system.  The base character
+%representation is likely to be the smallest transaction unit permitted
+%for text file and terminal I/O operations.  On a system with a record
+%based I/O paradigm, the base character representation is likely to
+%be the smallest record quantum.  On many computer systems,
+%this representation is a byte.
+ 
+Whether a character is a \term{base character} depends on the way 
+that an \term{implementation} represents \term{strings}, 
+and not any other properties of the \term{implementation} or the host operating system.  
+For example, one implementation might encode all \term{strings} 
+as characters having 16-bit encodings, and another might have
+two kinds of \term{strings}: those with characters having 8-bit 
+encodings and those with characters having 16-bit encodings.  In the
+first \term{implementation}, \thetype{base-char} is equivalent to
+\thetype{character}: there is only one kind of \term{string}.
+In the second \term{implementation}, the \term{base characters} might be 
+those \term{characters} that could be stored in a \term{string} of \term{characters}
+having 8-bit encodings.  In such an implementation,
+\thetype{base-char} is a \term{proper subtype} of \thetype{character}.
+%KMP: Note that I think there could be implementations in which the 8-bit strings
+%are -not- base characters, if all the standard-chars were not 
+%representable using the 8-bit encoding scheme.  In such a case,
+%it might be that (upgraded-array-element-type 'standard-char) returned
+%the 16-bit representation.  It might be that the 8-bit representation
+%was something else entirely.
+ 
+%% 2.15.0 15              
+\Thetype{standard-char} is a 
+\issue{CHARACTER-PROPOSAL:2-3-1}
+\subtypeof{base-char}.
+%This text will be deleted:
+%subtype of \typeref{character}.
+\endissue{CHARACTER-PROPOSAL:2-3-1}
+%\thetype{string-char} is a \subtypeof{character}.
+
+\endissue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+
+\endcom%{base-char}\ftype{Type}
+\begincom{standard-char}\ftype{Type}
+
+\issue{STANDARD-REPERTOIRE-GRATUITOUS:RENAME}
+
+\label Supertypes::
+
+\typeref{standard-char},
+\issue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+\typeref{base-char},
+\endissue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+\typeref{character},
+\typeref{t}
+
+\label Description::
+
+A fixed set of 96 \term{characters} required to be present in all 
+\term{conforming implementations}.  \term{Standard characters} are 
+defined in \secref\StandardChars.
+
+%%% 13.2.0 4
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+Any \term{character} that is not \term{simple} is not a \term{standard character}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\endissue{STANDARD-REPERTOIRE-GRATUITOUS:RENAME}
+
+\label See Also::
+
+{\secref\StandardChars}
+
+\endcom%{standard-char}\ftype{Type}
+\begincom{extended-char}\ftype{Type}
+
+\issue{CHARACTER-PROPOSAL:2-3-1}
+\issue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+
+\label Supertypes::
+
+\typeref{extended-char},
+\typeref{character},
+\typeref{t}
+
+\label Description::
+
+\Thetype{extended-char} is equivalent to the \term{type} \f{(and character (not base-char))}.
+
+%% 2.3.0 1
+%% 2.3.0 2
+
+\label Notes::
+
+%This next paragraph as added per Barrett's suggestion:
+\Thetype{extended-char} might 
+%be equivalent to \thetype{nil}
+%% Replaced as controversial. -kmp 4-Feb-92
+have no \term{elements}\meaning{4}
+in \term{implementations} in which all \term{characters} are \oftype{base-char}.
+
+\endissue{CHARACTER-VS-CHAR:LESS-INCONSISTENT-SHORT}
+\endissue{CHARACTER-PROPOSAL:2-3-1}
+
+\endcom%{extended-char}\ftype{Type}
+
+
+%-------------------- Character Comparison --------------------
+
+%%% ========== CHAR-EQUAL
+%%% ========== CHAR-NOT-EQUAL
+%%% ========== CHAR-LESSP
+%%% ========== CHAR-GREATERP
+%%% ========== CHAR-NOT-LESSP
+%%% ========== CHAR-NOT-GREATERP
+%%% ========== CHAR=
+%%% ========== CHAR/=
+%%% ========== CHAR<
+%%% ========== CHAR>
+%%% ========== CHAR>=
+%%% ========== CHAR<=
+\begincom{char=, char/=, char<, char>, char<=, char>=, 
+          char-equal, char-not-equal, char-lessp, char-greaterp, char-not-greaterp,
+          char-not-lessp}\ftype{Function}
+
+\label Syntax::
+
+\DefunMultiWithValues {{\rest} \plus{characters}}
+		      {generalized-boolean}
+{\entry{{char$=$}}
+ \entry{{char$/=$}}
+ \entry{{char$<$}}
+ \entry{{char$>$}}
+ \entry{{char$<=$}}
+ \entry{{char$>=$}}
+ \noalign{\vskip 5pt}
+ \entry{char-equal}
+ \entry{char-not-equal}
+ \entry{char-lessp}
+ \entry{char-greaterp}
+ \entry{char-not-greaterp}
+ \entry{char-not-lessp}}
+
+\label Arguments and Values::
+
+\param{character}---a \term{character}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+                         
+\label Description::
+
+These predicates compare \term{characters}.
+
+\funref{char=} returns \term{true} if all \param{characters} are the \term{same};
+otherwise, it returns \term{false}.
+\issue{CHARACTER-PROPOSAL:2-1-1}
+If two \param{characters} differ 
+in any \term{implementation-defined} \term{attributes},
+then they are not \funref{char=}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\funref{char/=} returns \term{true} if all \param{characters} are different;
+otherwise, it returns \term{false}.
+
+\funref{char<} returns \term{true} if the \param{characters} are monotonically increasing; 
+otherwise, it returns \term{false}.
+\issue{CHARACTER-PROPOSAL:2-1-1}
+If two \term{characters} 
+have \term{identical} \term{implementation-defined} \term{attributes}, 
+then their ordering by \funref{char<} is 
+consistent with the numerical ordering by the predicate \f{<} on their \term{codes}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\funref{char>} returns \term{true} if the \param{characters} are monotonically decreasing; 
+otherwise, it returns \term{false}.
+\issue{CHARACTER-PROPOSAL:2-1-1}
+If two \term{characters} have 
+\term{identical} \term{implementation-defined} \term{attributes},
+then their ordering by \funref{char>} is 
+consistent with the numerical ordering by the predicate \f{>} on their \term{codes}. 
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\funref{char<=} returns \term{true} 
+if the \param{characters} are monotonically nondecreasing; 
+otherwise, it returns \term{false}.
+\issue{CHARACTER-PROPOSAL:2-1-1}
+If two \term{characters} have
+\term{identical} \term{implementation-defined} \term{attributes},
+then their ordering by \funref{char<=} is
+consistent with the numerical ordering by the predicate \f{<=} on their \term{codes}. 
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+                               
+\funref{char>=} returns \term{true} 
+if the \param{characters} are monotonically nonincreasing; 
+otherwise, it returns \term{false}.
+\issue{CHARACTER-PROPOSAL:2-1-1}
+If two \term{characters} have
+\term{identical} \term{implementation-defined} \term{attributes},
+then their ordering by \funref{char>=} is 
+consistent with the numerical ordering by the predicate \f{>=} on their \term{codes}. 
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+    \funref{char-equal},
+    \funref{char-not-equal},
+    \funref{char-lessp},
+    \funref{char-greaterp},
+    \funref{char-not-greaterp},
+and \funref{char-not-lessp}
+are similar to 
+    \funref{char=},
+    \funref{char/=},
+    \funref{char<},
+    \funref{char>},
+    \funref{char<=},
+    \funref{char>=},
+respectively,
+except that they ignore differences in \term{case} and
+\issue{CHARACTER-PROPOSAL:2-1-1}
+% that the effect, if any, of each \term{implementation-defined} \term{attribute} 
+% must be specified as part of the definition of that \term{attribute}.
+%% Sandra thought the above was awkward. Trying again. -kmp 26-Jan-92
+might have an \term{implementation-defined} behavior 
+for \term{non-simple} \term{characters}.
+% For example, an implementation might define that certain 
+% \term{implementation-defined} \term{attributes} are ignored by
+% \funref{char-equal}, \i{etc.}
+%% More rewording to soothe awkwardness. -kmp 26-Jan-92
+For example, an \term{implementation} might define that 
+\funref{char-equal}, \i{etc.} ignore certain 
+\term{implementation-defined} \term{attributes}.
+The effect, if any, 
+of each \term{implementation-defined} \term{attribute}
+upon these functions must be specified as part of the definition of that \term{attribute}.
+%% This part has been moved to the notes.
+% %% 13.2.0 char-equal
+% This means that for the \term{standard characters}, the ordering used by
+% \funref{char-equal}, \etc. is such that
+% \f{A=a}, \f{B=b}, and so on, up to \f{Z=z}, and furthermore either
+% \f{9<A} or \f{Z<0}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+%% 13.2.0 31
+
+\label Examples::
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+\code
+ (char= #\\d #\\d) \EV \term{true}
+ (char= #\\A #\\a) \EV \term{false}
+ (char= #\\d #\\x) \EV \term{false}
+ (char= #\\d #\\D) \EV \term{false}
+ (char/= #\\d #\\d) \EV \term{false}
+ (char/= #\\d #\\x) \EV \term{true}
+ (char/= #\\d #\\D) \EV \term{true}
+ (char= #\\d #\\d #\\d #\\d) \EV \term{true}
+ (char/= #\\d #\\d #\\d #\\d) \EV \term{false}
+ (char= #\\d #\\d #\\x #\\d) \EV \term{false}
+ (char/= #\\d #\\d #\\x #\\d) \EV \term{false}
+ (char= #\\d #\\y #\\x #\\c) \EV \term{false}
+ (char/= #\\d #\\y #\\x #\\c) \EV \term{true}
+ (char= #\\d #\\c #\\d) \EV \term{false}
+ (char/= #\\d #\\c #\\d) \EV \term{false}
+ (char< #\\d #\\x) \EV \term{true}
+ (char<= #\\d #\\x) \EV \term{true}
+ (char< #\\d #\\d) \EV \term{false}
+ (char<= #\\d #\\d) \EV \term{true}
+ (char< #\\a #\\e #\\y #\\z) \EV \term{true}
+ (char<= #\\a #\\e #\\y #\\z) \EV \term{true}
+ (char< #\\a #\\e #\\e #\\y) \EV \term{false}
+ (char<= #\\a #\\e #\\e #\\y) \EV \term{true}
+ (char> #\\e #\\d) \EV \term{true}
+ (char>= #\\e #\\d) \EV \term{true}
+ (char> #\\d #\\c #\\b #\\a) \EV \term{true}
+ (char>= #\\d #\\c #\\b #\\a) \EV \term{true}
+ (char> #\\d #\\d #\\c #\\a) \EV \term{false}
+ (char>= #\\d #\\d #\\c #\\a) \EV \term{true}
+ (char> #\\e #\\d #\\b #\\c #\\a) \EV \term{false}
+ (char>= #\\e #\\d #\\b #\\c #\\a) \EV \term{false}
+ (char> #\\z #\\A) \EV \term{implementation-dependent}
+ (char> #\\Z #\\a) \EV \term{implementation-dependent}
+ (char-equal #\\A #\\a) \EV \term{true}
+ (stable-sort (list #\\b #\\A #\\B #\\a #\\c #\\C) #'char-lessp)
+\EV (#\\A #\\a #\\b #\\B #\\c #\\C)
+ (stable-sort (list #\\b #\\A #\\B #\\a #\\c #\\C) #'char<)
+\EV (#\\A #\\B #\\C #\\a #\\b #\\c) ;Implementation A
+\EV (#\\a #\\b #\\c #\\A #\\B #\\C) ;Implementation B
+\EV (#\\a #\\A #\\b #\\B #\\c #\\C) ;Implementation C
+\EV (#\\A #\\a #\\B #\\b #\\C #\\c) ;Implementation D
+\EV (#\\A #\\B #\\a #\\b #\\C #\\c) ;Implementation E
+\endcode
+%GLS observes that there are 15 other possibilities here:
+% (#\\A #\\a #\\b #\\c #\\B #\\C)
+% (#\\A #\\B #\\a #\\b #\\c #\\C)
+% (#\\a #\\A #\\b #\\B #\\C #\\c)
+% (#\\a #\\A #\\B #\\b #\\C #\\c)
+% (#\\a #\\A #\\b #\\c #\\B #\\C)
+% (#\\a #\\A #\\B #\\b #\\c #\\C)
+% (#\\a #\\A #\\B #\\C #\\b #\\c)
+% (#\\A #\\a #\\B #\\b #\\c #\\C)
+% (#\\A #\\a #\\B #\\C #\\b #\\c)
+% (#\\A #\\B #\\a #\\C #\\b #\\c)
+% (#\\a #\\b #\\A #\\c #\\B #\\C)
+% (#\\a #\\b #\\A #\\B #\\c #\\C)
+% (#\\a #\\b #\\A #\\B #\\C #\\c)
+% (#\\A #\\a #\\b #\\B #\\c #\\C)
+% (#\\A #\\a #\\b #\\B #\\C #\\c)
+%But I think readers will get the idea from those I've specified. -kmp 27-May-91
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldcheckplus{character}
+
+\label See Also::
+
+{\secref\CharacterSyntax},
+{\secref\ImplementationDefinedScripts}
+
+\label Notes::
+
+If characters differ in their \term{code} \term{attribute} 
+or any \term{implementation-defined} \term{attribute},
+they are considered to be different by \funref{char=}.
+
+%% 13.2.0 33
+There is no requirement that \f{(eq c1 c2)} be true merely because
+\f{(char= c1 c2)} is \term{true}.  While \funref{eq} can distinguish two 
+\term{characters}
+that \funref{char=} does not, it is distinguishing them not
+as \term{characters}, but in some sense on the basis of a lower level
+implementation characteristic.
+If \f{(eq c1 c2)} is \term{true},
+then \f{(char= c1 c2)} is also true.
+\funref{eql} and \funref{equal}
+compare \term{characters} in the same
+way that \funref{char=} does.
+
+The manner in which \term{case} is used by 
+     \funref{char-equal},
+     \funref{char-not-equal},
+     \funref{char-lessp},
+     \funref{char-greaterp},
+     \funref{char-not-greaterp},
+ and \funref{char-not-lessp}
+implies an ordering for \term{standard characters} such that
+\f{A=a}, \f{B=b}, and so on, up to \f{Z=z}, and furthermore either
+\f{9<A} or \f{Z<0}.
+
+\endcom
+
+%-------------------- Character Types --------------------
+
+%%% ========== CHARACTER (Function)
+\begincom{character}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues character {character} {denoted-character}
+
+\label Arguments and Values:: 
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+\param{character}---a \term{character designator}.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\param{denoted-character}---a \term{character}.
+
+\label Description::
+
+%% 13.4.0 3
+Returns the \term{character} denoted by the \param{character} \term{designator}.
+
+\label Examples::
+
+\code
+ (character #\\a) \EV #\\a
+ (character "a") \EV #\\a
+ (character 'a) \EV #\\A
+ (character '\\a) \EV #\\a
+ (character 65.) is an error.
+ (character 'apple) is an error.
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{object}{a \term{character designator}}
+
+\label See Also::
+
+\funref{coerce}
+
+\label Notes::
+
+\code
+ (character \param{object}) \EQ (coerce \param{object} 'character)
+\endcode
+
+\endcom
+
+%%% ========== CHARACTERP
+\begincom{characterp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues characterp {object} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{object}---an \term{object}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 6.2.2 17
+\TypePredicate{object}{character}
+
+\label Examples::                  
+
+\code
+ (characterp #\\a) \EV \term{true}
+ (characterp 'a) \EV \term{false}
+ (characterp "a") \EV \term{false}
+ (characterp 65.) \EV \term{false}
+ (characterp #\\Newline) \EV \term{true}
+ ;; This next example presupposes an implementation 
+ ;; in which #\\Rubout is an implementation-defined character.
+ (characterp #\\Rubout) \EV \term{true}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None!
+
+\label See Also::
+
+\funref{character} (\term{type} and \term{function}), \funref{typep}
+
+\label Notes::
+
+\code
+ (characterp \param{object}) \EQ (typep \param{object} 'character)
+\endcode
+
+\endcom
+
+%-------------------- Character Roles --------------------
+
+%%% ========== ALPHA-CHAR-P
+\begincom{alpha-char-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues alpha-char-p {character} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{character}---a \term{character}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 13.2.0 9
+\Predicate{character}{an \term{alphabetic}\meaning{1} \term{character}}
+
+\label Examples::
+
+\def\alfa{$\alpha$}
+\code
+ (alpha-char-p #\\a) \EV \term{true}
+ (alpha-char-p #\\5) \EV \term{false}
+ (alpha-char-p #\\Newline) \EV \term{false}
+ ;; This next example presupposes an implementation
+ ;; in which #\\\alfa is a defined character.
+ (alpha-char-p #\\\alfa) \EV \term{implementation-dependent}
+\endcode
+
+\label Affected By::
+
+None.
+(In particular, the results of this predicate are independent 
+of any special syntax which might have been enabled in the \term{current readtable}.)
+
+\label Exceptional Situations::
+
+\Shouldchecktype{character}{a \term{character}}
+
+\label See Also::
+
+\funref{alphanumericp},
+{\secref\ImplementationDefinedScripts}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== ALPHANUMERICP
+\begincom{alphanumericp}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues alphanumericp {character} {generalized-boolean}
+
+\label Arguments and Values:: 
+
+\param{character}---a \term{character}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 13.2.0 22
+\Predicate{character}{an \term{alphabetic}\meaning{1} \term{character} 
+		   or a  \term{numeric}    \term{character}}
+
+\label Examples::
+
+\code
+ (alphanumericp #\\Z) \EV \term{true}
+ (alphanumericp #\\9) \EV \term{true}
+ (alphanumericp #\\Newline) \EV \term{false}
+ (alphanumericp #\\#) \EV \term{false}
+\endcode
+
+\label Affected By::
+
+None.
+(In particular, the results of this predicate are independent 
+of any special syntax which might have been enabled in the \term{current readtable}.)
+
+\label Exceptional Situations::
+
+\Shouldchecktype{character}{a \term{character}}
+
+\label See Also::
+
+\funref{alpha-char-p}, \funref{graphic-char-p}, \funref{digit-char-p}
+
+\label Notes::
+
+Alphanumeric characters are graphic
+as defined by \funref{graphic-char-p}.
+The alphanumeric characters are a subset of the graphic characters.
+%The bits \term{attribute} of any alphanumeric character is 0.
+%% 13.2.0 24
+The standard characters \f{A} through \f{Z},
+		        \f{a} through \f{z},
+		    and \f{0} through \f{9} are alphanumeric characters.
+
+\code
+ (alphanumericp x)
+   \EQ (or (alpha-char-p x) (not (null (digit-char-p x))))
+\endcode
+\endcom
+
+%%% ========== DIGIT-CHAR
+\begincom{digit-char}\ftype{Function}
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+
+%% 13.4.0 7
+\label Syntax::
+
+\DefunWithValues digit-char {weight {\opt} radix} {char}
+
+\label Arguments and Values::
+
+\param{weight}---a non-negative \term{integer}.
+
+\param{radix}---a \term{radix}.
+ \Default{\f{10}}
+
+\param{char}---a \term{character} or \term{false}.
+
+\label Description::   
+
+%% 13.4.0 8
+%% 13.4.0 9
+%% 13.4.0 10
+
+% I reorganized this description in a major way because once bits 
+% were removed, it seemed to have a simpler description. -kmp 23-Apr-91
+
+If \param{weight} is less than \param{radix},
+\funref{digit-char} returns a \term{character} which has that \param{weight}
+when considered as a digit in the specified radix.
+If the resulting \term{character} is to be an \term{alphabetic}\meaning{1} \term{character},
+it will be an uppercase \term{character}.
+
+If \param{weight} is greater than or equal to \param{radix},
+\funref{digit-char} returns \term{false}.
+
+
+\label Examples::
+
+\code
+ (digit-char 0) \EV #\\0
+ (digit-char 10 11) \EV #\\A
+ (digit-char 10 10) \EV \term{false}
+ (digit-char 7) \EV #\\7
+ (digit-char 12) \EV \term{false}
+ (digit-char 12 16) \EV #\\C  ;not #\\c
+ (digit-char 6 2) \EV \term{false}
+ (digit-char 1 2) \EV #\\1
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{digit-char-p},
+\funref{graphic-char-p},
+{\secref\CharacterSyntax}
+
+\label Notes::
+
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\endcom
+
+%%% ========== DIGIT-CHAR-P
+\begincom{digit-char-p}\ftype{Function}
+
+%% 13.2.0 18
+\label Syntax::
+
+\DefunWithValues digit-char-p {char {\opt} radix} {weight}
+
+\label Arguments and Values::
+
+\param{char}---a \term{character}.
+
+\param{radix}---a \term{radix}.
+ \Default{\f{10}}
+
+\param{weight}---either a non-negative \term{integer} less than \param{radix}, 
+		 or \term{false}.
+
+\label Description::
+
+Tests whether \param{char} is a digit in the specified \param{radix}
+%% 13.2.0 20
+(\ie with a weight less than \param{radix}).
+If it is a digit in that \param{radix},
+its weight is returned as an \term{integer}; 
+otherwise \nil\ is returned.
+                          
+\label Examples::
+
+\code
+ (digit-char-p #\\5)    \EV 5
+ (digit-char-p #\\5 2)  \EV \term{false}
+ (digit-char-p #\\A)    \EV \term{false}
+ (digit-char-p #\\a)    \EV \term{false}
+ (digit-char-p #\\A 11) \EV 10
+ (digit-char-p #\\a 11) \EV 10
+ (mapcar #'(lambda (radix) 
+             (map 'list #'(lambda (x) (digit-char-p x radix)) 
+                  "059AaFGZ"))
+         '(2 8 10 16 36))
+ \EV ((0 NIL NIL NIL NIL NIL NIL NIL)
+     (0 5 NIL NIL NIL NIL NIL NIL)
+     (0 5 9 NIL NIL NIL NIL NIL)
+     (0 5 9 10 10 15 NIL NIL)
+     (0 5 9 10 10 15 16 35))
+\endcode
+%In the above, recall that \EV's arrow takes up about two column positions,
+%rather than three characters "\EV" -- so the grinding looks funny here in
+%the source, but better on paper.
+
+\label Affected By::
+
+None.
+(In particular, the results of this predicate are independent 
+of any special syntax which might have been enabled in the \term{current readtable}.)
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{alphanumericp}
+
+\label Notes::
+
+%% 13.2.0 19                   
+Digits are \term{graphic} \term{characters}.
+
+\endcom
+
+%%% ========== GRAPHIC-CHAR-P
+\begincom{graphic-char-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues graphic-char-p {char} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{char}---a \term{character}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 13.2.0 5
+\Predicate{character}{a \term{graphic} \term{character}}
+
+\label Examples::                   
+
+\code
+ (graphic-char-p #\\G) \EV \term{true}
+ (graphic-char-p #\\#) \EV \term{true}
+ (graphic-char-p #\\Space) \EV \term{true}
+ (graphic-char-p #\\Newline) \EV \term{false}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{character}{a \term{character}}
+
+\label See Also::
+
+\funref{read},
+{\secref\CharacterSyntax},
+{\secref\ImplementationDefinedScripts}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== STANDARD-CHAR-P
+\begincom{standard-char-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues standard-char-p {character} {generalized-boolean}
+
+\label Arguments and Values::
+
+\param{character}---a \term{character}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+%% 13.2.0 3
+\TypePredicate{character}{standard-char}
+
+\label Examples::                
+
+\code
+ (standard-char-p #\\Space) \EV \term{true}
+ (standard-char-p #\\~) \EV \term{true}
+ ;; This next example presupposes an implementation
+ ;; in which #\\Bell is a defined character.
+ (standard-char-p #\\Bell) \EV \term{false}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{character}{a \term{character}}
+
+\label See Also:\None.
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Character Casification --------------------
+
+%%% ========== CHAR-DOWNCASE
+%%% ========== CHAR-UPCASE
+\begincom{char-upcase, char-downcase}\ftype{Function}
+
+\label Syntax::
+
+\DefunMultiWithValues {character} {corresponding-character} 
+   {\entry{char-upcase}
+    \entry{char-downcase}}
+
+\label Arguments and Values:: 
+
+\param{character}, \param{corresponding-character}---a \term{character}.
+
+\label Description::
+
+%% 13.4.0 5
+
+If \param{character} is a \term{lowercase} \term{character},
+\funref{char-upcase} returns the corresponding \term{uppercase} \term{character}.
+Otherwise, \funref{char-upcase} just returns the given \param{character}.
+
+If \param{character} is an \term{uppercase} \term{character},
+\funref{char-downcase} returns the corresponding \term{lowercase} \term{character}.
+Otherwise, \funref{char-downcase} just returns the given \param{character}.
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+The result only ever differs from \param{character} 
+in its \term{code} \term{attribute};
+all \term{implementation-defined} \term{attributes} are preserved.
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\label Examples::
+
+\code
+ (char-upcase #\\a) \EV #\\A
+ (char-upcase #\\A) \EV #\\A
+ (char-downcase #\\a) \EV #\\a
+ (char-downcase #\\A) \EV #\\a
+ (char-upcase #\\9) \EV #\\9
+ (char-downcase #\\9) \EV #\\9
+ (char-upcase #\\@) \EV #\\@
+ (char-downcase #\\@) \EV #\\@
+ ;; Note that this next example might run for a very long time in 
+ ;; some implementations if CHAR-CODE-LIMIT happens to be very large
+ ;; for that implementation.
+ (dotimes (code char-code-limit)
+   (let ((char (code-char code)))
+     (when char
+       (unless (cond ((upper-case-p char) (char= (char-upcase (char-downcase char)) char))
+                     ((lower-case-p char) (char= (char-downcase (char-upcase char)) char))
+                     (t (and (char= (char-upcase (char-downcase char)) char)
+                             (char= (char-downcase (char-upcase char)) char))))
+         (return char)))))
+\EV NIL
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{character}{a \term{character}}
+
+\label See Also::
+
+\funref{upper-case-p},
+\funref{alpha-char-p},
+{\secref\CharactersWithCase},
+{\secref\ImplementationDefinedScripts}
+
+\label Notes::
+
+If the \param{corresponding-char} is \term{different} than \param{character},
+then both the \param{character} and the \param{corresponding-char} have \term{case}.
+
+Since \funref{char-equal} ignores the \term{case} of the \term{characters} it compares,
+the \param{corresponding-character} is always the \term{same} as \param{character}
+under \funref{char-equal}.
+
+\endcom
+
+%%% ========== LOWER-CASE-P
+%%% ========== BOTH-CASE-P
+%%% ========== UPPER-CASE-P
+\begincom{upper-case-p, lower-case-p, both-case-p}\ftype{Function}
+
+\label Syntax::
+
+\DefunMultiWithValues {character} {generalized-boolean}
+  {\entry{upper-case-p}
+   \entry{lower-case-p}
+   \entry{both-case-p}}
+
+\label Arguments and Values::
+
+\param{character}---a \term{character}.
+
+\param{generalized-boolean}---a \term{generalized boolean}.
+
+\label Description::
+
+These functions test the case of a given \param{character}.
+
+%% 13.2.0 13
+\NamedPredicate{upper-case-p}{character}{an \term{uppercase} \term{character}}
+
+%% 13.2.0 14
+\NamedPredicate{lower-case-p}{character}{a \term{lowercase} \term{character}}
+
+%% 13.2.0 15
+\NamedPredicate{both-case-p}{character}{a \term{character} with \term{case}}
+
+\label Examples::
+
+\code
+ (upper-case-p #\\A) \EV \term{true}
+ (upper-case-p #\\a) \EV \term{false}
+ (both-case-p #\\a) \EV \term{true}
+ (both-case-p #\\5) \EV \term{false}
+ (lower-case-p #\\5) \EV \term{false}
+ (upper-case-p #\\5) \EV \term{false}
+ ;; This next example presupposes an implementation 
+ ;; in which #\\Bell is an implementation-defined character.
+ (lower-case-p #\\Bell) \EV \term{false}
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{character}{a \term{character}}
+
+\label See Also::
+
+\funref{char-upcase},
+\funref{char-downcase},
+{\secref\CharactersWithCase},
+{\secref\ImplementationDefinedScripts}
+
+\label Notes:\None.
+
+\endcom
+
+%-------------------- Character Codes --------------------
+
+%%% ========== CHAR-CODE
+\begincom{char-code}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues char-code {character} {code}
+
+\label Arguments and Values:: 
+
+\param{character}---a \term{character}.
+
+\param{code}---a \term{character code}.
+
+\label Description::
+
+%% 13.3.0 3
+\funref{char-code} returns the \term{code} \term{attribute} of \param{character}.
+
+\label Examples::
+
+\code
+;; An implementation using ASCII character encoding 
+;; might return these values:
+(char-code #\\$) \EV 36
+(char-code #\\a) \EV 97
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{character}{a \term{character}}
+
+\label See Also::
+                          
+\funref{char-code-limit}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== CHAR-INT
+\begincom{char-int}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues char-int {character} {integer}
+
+\label Arguments and Values:: 
+
+\param{character}---a \term{character}.
+
+\param{integer}---a non-negative \term{integer}.
+
+\label Description::
+
+%% 13.4.0 11
+\issue{CHARACTER-PROPOSAL:2-1-2}
+Returns a non-negative \term{integer} encoding the \param{character} object.
+The manner in which the \term{integer} is computed is \term{implementation-dependent}.
+In contrast to \funref{sxhash}, the result is not guaranteed to be independent 
+of the particular \term{Lisp image}.
+\endissue{CHARACTER-PROPOSAL:2-1-2}
+
+%% 13.4.0 12
+If \param{character} has no \term{implementation-defined} \term{attributes},
+the results of \funref{char-int} and \funref{char-code} are the same. 
+
+\code
+ (char= \i{c1} \i{c2}) \EQ (= (char-int \i{c1}) (char-int \i{c2}))
+\endcode
+for characters \i{c1} and \i{c2}.
+
+\label Examples::
+
+\code
+ (char-int #\\A) \EV 65       ; implementation A
+ (char-int #\\A) \EV 577      ; implementation B
+ (char-int #\\A) \EV 262145   ; implementation C
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{char-code}
+
+\label Notes:\None.
+
+\endcom
+
+%%% ========== CODE-CHAR
+\begincom{code-char}\ftype{Function}
+
+\issue{CHARACTER-PROPOSAL:2-1-1}
+
+\label Syntax::
+
+\DefunWithValues code-char {code} {char-p}
+
+\label Arguments and Values::
+
+\param{code}---a \term{character code}.
+
+\param{char-p}---a \term{character} or \nil.
+
+\label Description::
+
+%% 13.3.0 6
+Returns a \term{character} with the \term{code} \term{attribute} given by \param{code}.
+If no such \term{character} exists and one cannot be created, \nil\ is returned.
+
+\label Examples::
+
+\code
+(code-char 65.) \EV #\\A  ;in an implementation using ASCII codes
+(code-char (char-code #\\Space)) \EV #\\Space  ;in any implementation
+\endcode
+
+%% 13.3.0 7
+% Removed per suggestion of Barmar -- used old-style bits/fonts.
+
+\label Affected By::
+
+The \term{implementation}'s character encoding.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\funref{char-code}
+
+\label Notes::
+
+\endissue{CHARACTER-PROPOSAL:2-1-1}
+
+\endcom
+
+%%% ========== CHAR-CODE-LIMIT
+\begincom{char-code-limit}\ftype{Constant Variable}
+
+\label Constant Value::
+
+A non-negative \term{integer}, the exact magnitude of which
+is \term{implementation-dependent}, but which is not less
+than \f{96} (the number of \term{standard characters}).
+
+\label Description::
+
+%% 13.1.0 2
+The upper exclusive bound on the \term{value} returned by 
+the \term{function} \funref{char-code}.
+
+\label See Also::
+
+\funref{char-code}
+
+\label Notes::
+
+% Sandra wanted this added.
+\Thevalueof{char-code-limit} might be larger than the actual
+number of \term{characters} supported by the \term{implementation}.
+
+\endcom
+
+%-------------------- Character Names --------------------
+
+%%% ========== CHAR-NAME
+\begincom{char-name}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues char-name {character} {name}
+
+\label Arguments and Values::
+
+\param{character}---a \term{character}.
+
+\param{name}---a \term{string} or \nil.
+
+\label Description::
+
+Returns a \term{string} that is the \term{name} of the \param{character},
+or \nil\ if the \param{character} has no \term{name}.
+
+%% 13.4.0 20
+% \funref{char-name} will only locate ``simple'' character names;
+% it will not construct names on the basis of
+% the \param{character}'s \term{implementation-dependent} \term{attributes}.
+
+All \term{non-graphic} characters are required to have \term{names}
+unless they have some \term{implementation-defined} \term{attribute}
+which is not \term{null}.  Whether or not other \term{characters}
+have \term{names} is \term{implementation-dependent}.
+
+\issue{CHAR-NAME-CASE:X3J13-MAR-91}
+%% I added this next phrase to highlight why there are two lists here. -kmp 14-May-93
+The \term{standard characters}
+\NewlineChar\ and \SpaceChar\ have the respective names \f{"Newline"} and \f{"Space"}.
+%% Ditto. -kmp 14-May-93
+The \term{semi-standard} \term{characters}
+\TabChar, \PageChar, \RuboutChar, \LinefeedChar, \ReturnChar, and \BackspaceChar\ 
+%% Next parenthetical remark added for emphasis. -kmp 14-May-93
+(if they are supported by the \term{implementation})
+have the respective names
+\f{"Tab"},  \f{"Page"},  \f{"Rubout"},  \f{"Linefeed"},  \f{"Return"}, and \f{"Backspace"}
+(in the indicated case, even though name lookup by ``\f{\#\\}'' 
+and by \thefunction{name-char} is not case sensitive).
+\endissue{CHAR-NAME-CASE:X3J13-MAR-91}
+
+\label Examples::
+
+\code
+ (char-name #\\ ) \EV "Space"
+ (char-name #\\Space) \EV "Space"
+ (char-name #\\Page) \EV "Page"
+
+ (char-name #\\a)
+\EV NIL
+\OV "LOWERCASE-a"
+\OV "Small-A"
+\OV "LA01"
+
+ (char-name #\\A)
+\EV NIL
+\OV "UPPERCASE-A"
+\OV "Capital-A"
+\OV "LA02"
+
+ ;; Even though its CHAR-NAME can vary, #\\A prints as #\\A
+ (prin1-to-string (read-from-string (format nil "#\\\\~A" (or (char-name #\\A) "A"))))
+\EV "#\\\\A"
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{character}{a \term{character}}
+
+\label See Also::
+
+\funref{name-char},
+{\secref\PrintingCharacters}
+
+\label Notes::
+
+%% Added "non-graphic" to cover objection by Sandra:
+%%  Does this mean that if (char-name #\A) = "Capital-A"
+%%   (print #\A) prints
+%%   #\Capital-A
+%%  instead of #\A ???
+%%  Or does this apply only to non-standard characters.
+\term{Non-graphic} 
+\term{characters} having \term{names} are written by the \term{Lisp printer}
+as ``\f{\#\\}'' followed by the their \term{name}; \seesection\PrintingCharacters.
+
+\endcom
+
+%%% ========== NAME-CHAR
+\begincom{name-char}\ftype{Function}
+
+\label Syntax::
+
+\DefunWithValues name-char {name} {char-p}
+
+\label Arguments and Values::
+
+%% 13.4.0 17
+%% 13.4.0 18
+\param{name}---a \term{string designator}.
+
+\param{char-p}---a \term{character} or \nil.
+
+\label Description::
+
+%% 13.4.0 21                          
+Returns the \term{character} \term{object} whose \term{name} is
+\param{name} (as determined by \funref{string-equal}---\ie lookup is not case sensitive).
+If such a \term{character} does not exist, \nil\ is returned.
+
+\label Examples::
+
+\code
+(name-char 'space) \EV #\\Space
+(name-char "space") \EV #\\Space
+(name-char "Space") \EV #\\Space
+(let ((x (char-name #\\a)))
+  (or (not x) (eql (name-char x) #\\a))) \EV \term{true}
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\Shouldchecktype{name}{a \term{string designator}}
+
+\label See Also::
+
+\funref{char-name}
+
+\label Notes:\None.
+
+\endcom

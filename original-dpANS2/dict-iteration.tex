@@ -1,0 +1,941 @@
+% -*- Mode: tex -*-
+
+%  Iteration
+
+%-------------------- Iteration --------------------
+
+%%% ========== DO
+%%% ========== DO*
+\begincom{do, do*}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\issue{VARIABLE-LIST-ASYMMETRY:SYMMETRIZE}
+\DefmacWithValuesNewline do
+        	  {\vtop{\hbox{\paren{\star{\VarInitStep}}}
+	 	   	 \hbox{\paren{end-test-form \starparam{result-form}}}
+	 	   	 \hbox{\starparam{declaration} \star{\curly{tag $\vert$ statement}}}}}
+		  {\starparam{result}}
+
+%% 7.8.2 5
+\DefmacWithValuesNewline {do*}
+	          {\vtop{\hbox{\paren{\star{\VarInitStep}}}
+	 	   	 \hbox{\paren{end-test-form {\starparam{result-form}}}}
+	 	   	 \hbox{\starparam{declaration} \star{\curly{tag $\vert$ statement}}}}}
+		  {\starparam{result}}
+\endissue{VARIABLE-LIST-ASYMMETRY:SYMMETRIZE}
+
+\label Arguments and Values::
+
+%% 7.8.2 6
+%% 7.8.2 7
+%% 7.8.3 12
+
+\param{var}---a \term{symbol}.
+
+\param{init-form}---a \term{form}.
+
+\param{step-form}---a \term{form}.
+
+%% 7.8.2 9
+\param{end-test-form}---a \term{form}.
+
+\param{result-forms}---an \term{implicit progn}.
+
+%% 7.8.2 14
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{tag}---a \term{go tag}; \noeval.
+
+\param{statement}---a \term{compound form}; \evalspecial.
+
+\param{results}---if a \macref{return} or \macref{return-from} form is executed,
+ the \term{values} passed from that \term{form};
+%% 7.9.2 13            
+ otherwise, the \term{values} returned by the \param{result-forms}.
+
+\label Description::
+
+\macref{do} iterates over a group of \param{statements}
+while a test condition holds.
+\macref{do} accepts an arbitrary number of iteration \param{vars}
+which are bound within the iteration and stepped in parallel.
+An initial value may be supplied for each iteration variable by use of
+an \param{init-form}.
+\param{Step-forms} may be used to specify how the
+\param{vars} should be updated on succeeding iterations through the loop.  
+\param{Step-forms} may be used both to generate successive
+values or to accumulate results.
+If the \param{end-test-form} condition 
+is met prior to an execution of the body, the iteration terminates.
+\param{Tags} label \param{statements}.
+
+\macref{do*} is exactly like \macref{do} 
+except that the \term{bindings} and steppings
+of the \param{vars} are performed sequentially rather than in parallel.
+
+%% 7.8.2 4
+
+%% 7.8.2 8
+
+Before the first iteration, all the \param{init-forms} are evaluated, and
+each \param{var} is bound to the value of its respective \param{init-form},
+if supplied.
+This is a \term{binding}, not an assignment; when the loop terminates,
+the old values of those variables will be restored.
+For \macref{do}, all 
+of the \param{init-forms} are evaluated before any \param{var}
+is bound. The
+\param{init-forms} can refer to the \term{bindings} of the \param{vars}
+visible before beginning execution of
+\macref{do}.
+For \macref{do*}, the first \param{init-form} is evaluated, then the first
+\param{var} is bound to that value, then the second \param{init-form} 
+is evaluated, then the second \param{var} is bound, and so on;
+in general, the \i{k}th \param{init-form} can refer to the new binding 
+of the \i{j}th \param{var} if \i{j} < \i{k}, and otherwise to the 
+old binding of the \i{j}th \param{var}.
+
+At the beginning of each iteration, after processing the variables,
+the \param{end-test-form} is evaluated.  If the result is
+\term{false}, execution proceeds with the body of the \macref{do} 
+(or \macref{do*}) form.
+If the result is \term{true}, the \param{result-forms} are evaluated in order
+as an \term{implicit progn},
+and then \macref{do} or \macref{do*} returns.  
+
+%% 7.8.2 10
+At the beginning of each iteration other than the first, 
+\param{vars} are updated as follows.  All the \param{step-forms}, if supplied,
+are evaluated, from left to right, and the resulting values are
+assigned to the respective \param{vars}.
+Any \param{var} that has no associated \param{step-form} is not assigned to.
+For \macref{do}, all the \param{step-forms} are evaluated before any \param{var}
+is updated; the assignment of values to \param{vars} is done in parallel,
+as if by \macref{psetq}.
+Because all of the \param{step-forms} are evaluated before any
+of the \param{vars} are altered, a \param{step-form} when evaluated always has
+access to the old values of all the \param{vars}, even if other \param{step-forms}
+precede it.
+For \macref{do*}, the first \param{step-form} is evaluated, then the
+value is assigned to the first \param{var}, then the second \param{step-form} 
+is evaluated, then the value is assigned to the second \param{var}, and so on;
+the assignment of values to variables is done sequentially,
+as if by \specref{setq}.
+For either \macref{do} or \macref{do*},
+after the \param{vars} have been updated,
+the \param{end-test-form} 
+is evaluated as described above, and the iteration continues.
+
+
+%% 7.8.2 12
+The remainder of the \macref{do} (or \macref{do*}) form constitutes 
+an \term{implicit tagbody}.
+\param{Tags} may appear within the body of a \macref{do} loop
+for use by \specref{go} statements appearing in the body (but such \specref{go}
+statements may not appear in the variable specifiers, the \param{end-test-form},
+or the \param{result-forms}).
+When the end of a \macref{do} body is reached, the next iteration cycle
+(beginning with the evaluation of \param{step-forms}) occurs.
+
+%% 7.8.2 13
+An \term{implicit block} named \nil\ surrounds the entire \macref{do} 
+(or \macref{do*}) form.
+A \macref{return} statement may be used at any point to exit the loop
+immediately.
+
+\param{Init-form}  is an
+initial value for the \param{var} with which it is associated.
+If \param{init-form} is omitted, the initial value of \param{var} is \nil.
+If a \param{declaration} is supplied for a \param{var}, \param{init-form} 
+must be consistent with the \param{declaration}.
+
+%% Barmar: Redundant. 
+% If \param{step-form} is omitted, the \param{var} 
+% with which it is associated is not changed by \macref{do} 
+% between repetitions. 
+
+\param{Declarations} can appear at the beginning of a \macref{do} 
+(or \macref{do*}) body.
+They apply to code in the \macref{do} (or \macref{do*}) body, 
+to the \term{bindings} of the \macref{do} (or \macref{do*}) 
+\param{vars}, 
+%% Barmar: The part about init forms was changed by NO-HOISTING.
+%% JonL: Agree
+% to the \param{init-forms},
+to the \param{step-forms},
+to the \param{end-test-form}, and to the \param{result-forms}.
+
+%For \macref{do}, the 
+%\term{scope} of the name binding does not include any
+%initial value form, but does include the stepper forms and optional result
+%forms.
+%For \macref{do*}, a variable's \term{scope} also includes the 
+%     remaining initial value forms for subsequent variable bindings.
+
+
+\label Examples::
+%% 7.8.2 16
+\code
+ (do ((temp-one 1 (1+ temp-one))
+       (temp-two 0 (1- temp-two)))
+      ((> (- temp-one temp-two) 5) temp-one)) \EV 4
+
+ (do ((temp-one 1 (1+ temp-one))
+       (temp-two 0 (1+ temp-one)))     
+      ((= 3 temp-two) temp-one)) \EV 3
+
+ (do* ((temp-one 1 (1+ temp-one))
+        (temp-two 0 (1+ temp-one)))
+       ((= 3 temp-two) temp-one)) \EV 2                     
+
+ (do ((j 0 (+ j 1)))
+     (nil)                       ;Do forever.
+   (format t "~%Input ~D:" j)
+   (let ((item (read)))
+     (if (null item) (return)   ;Process items until NIL seen.
+         (format t "~&Output ~D: ~S" j item))))
+\OUT Input 0: \IN{banana}
+\OUT Output 0: BANANA
+\OUT Input 1: \IN{(57 boxes)}
+\OUT Output 1: (57 BOXES)
+\OUT Input 2: \IN{NIL}
+\EV NIL
+
+ (setq a-vector (vector 1 nil 3 nil))
+ (do ((i 0 (+ i 1))     ;Sets every null element of a-vector to zero.
+      (n (array-dimension a-vector 0)))
+     ((= i n))
+   (when (null (aref a-vector i))
+     (setf (aref a-vector i) 0))) \EV NIL
+a-vector \EV #(1 0 3 0)
+\endcode
+
+\code
+ (do ((x e (cdr x))
+      (oldx x x))
+     ((null x))
+   body)
+\endcode
+is an example of parallel assignment to index variables.  On the first
+iteration, the value of \f{oldx} is whatever value \f{x} had before
+the \macref{do} was entered.  On succeeding iterations, \f{oldx} contains
+the value that \f{x} had on the previous iteration. 
+
+%% 7.8.2 17
+\code
+ (do ((x foo (cdr x))
+      (y bar (cdr y))
+      (z '() (cons (f (car x) (car y)) z)))
+     ((or (null x) (null y))
+      (nreverse z)))
+\endcode
+does the same thing as \f{(mapcar \#'f foo bar)}.  The step
+computation for \f{z} is an example of the fact that variables 
+are stepped in parallel.
+Also, the body of the loop is empty.  
+
+\code
+ (defun list-reverse (list)
+        (do ((x list (cdr x))
+             (y '() (cons (car x) y)))
+            ((endp x) y)))
+\endcode
+
+%% 7.8.2 18
+As an example of nested iterations, consider a data structure that is a 
+\term{list} of \term{conses}. The \term{car} of each \term{cons} is a 
+\term{list} of \term{symbols},
+and the \term{cdr} of each \term{cons} is a 
+\term{list} of equal length containing
+corresponding values.  Such a data structure is similar to an association
+list,
+but is divided into ``frames''; the overall structure resembles a rib-cage.
+A lookup function on such a data structure might be:
+
+\code
+ (defun ribcage-lookup (sym ribcage)           
+        (do ((r ribcage (cdr r)))
+            ((null r) nil)
+          (do ((s (caar r) (cdr s))
+               (v (cdar r) (cdr v))) 
+              ((null s))
+            (when (eq (car s) sym)
+              (return-from ribcage-lookup (car v)))))) \EV RIBCAGE-LOOKUP
+\endcode
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also:: 
+
+other iteration functions
+ (\macref{dolist}, \macref{dotimes}, and \macref{loop})
+and more primitive functionality 
+ (\specref{tagbody}, \specref{go}, \specref{block}, \macref{return}, 
+  \specref{let}, and \specref{setq})
+
+\label Notes::
+%% 7.8.2 11
+If \param{end-test-form} is \nil, the test will never succeed.
+This provides an idiom for ``do forever'':
+the body of the \macref{do} or \macref{do*} 
+is executed repeatedly.
+The infinite loop can be terminated by the use of \macref{return},
+\specref{return-from}, \specref{go} to an outer level, or \specref{throw}.
+
+%% 7.8.2 19
+A \macref{do} \term{form} may be explained in terms of the more primitive \term{forms}
+\specref{block}, \macref{return}, 
+\specref{let}, \macref{loop}, \specref{tagbody},
+and \macref{psetq} as follows:
+
+\code
+ (block nil        
+   (let ((var1 init1)
+         (var2 init2)
+         ...
+         (varn initn))
+     \i{declarations}
+     (loop (when end-test (return (progn . result)))
+           (tagbody . tagbody)
+           (psetq var1 step1
+                  var2 step2
+                  ...
+                  varn stepn))))
+\endcode
+
+\macref{do*} is similar, except that \specref{let*} and \specref{setq} replace
+the \specref{let} and \macref{psetq}, respectively.
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== DOTIMES
+\begincom{dotimes}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\DefmacWithValuesNewline dotimes
+		 {\paren{var count-form \brac{result-form}}
+		  \starparam{declaration}
+		  \star{\curly{tag | statement}}}
+		 {\starparam{result}}
+
+\label Arguments and Values:: 
+
+\param{var}---a \term{symbol}.
+
+\param{count-form}---a \term{form}.
+
+\param{result-form}---a \term{form}.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{tag}---a \term{go tag}; \noeval.
+
+\param{statement}---a \term{compound form}; \evalspecial.
+
+%% 7.8.3 4
+\param{results}---if a \macref{return} or \macref{return-from} form is executed,
+ the \term{values} passed from that \term{form};
+ otherwise, the \term{values} returned by the \param{result-form}
+ or \nil\ if there is no \param{result-form}.
+
+\label Description::
+
+%% 7.8.3 9
+\macref{dotimes} iterates over a series of \term{integers}.
+                       
+\macref{dotimes} evaluates \param{count-form},
+which should produce an \term{integer}. 
+If \param{count-form} is zero or negative,
+the body is not executed.
+\macref{dotimes} then executes the body once for each \term{integer} from 0 up to
+but not including
+the value of \param{count-form},
+in the order in which the
+\param{tags} and \param{statements} occur, with
+\param{var} bound to each \term{integer}.
+Then \param{result-form} 
+is evaluated.
+At the time \param{result-form} is processed, \param{var} is bound to
+the number of times the body was executed.
+\param{Tags} label
+\param{statements}.
+
+An \term{implicit block}  
+%In effect, a \specref{block} 
+named \nil\ surrounds \macref{dotimes}.
+%% 7.8.3 5
+%% 7.8.3 10
+\macref{return} may be used to terminate the loop immediately without
+performing any further iterations, returning zero or more \term{values}.
+
+The body of the loop is an \term{implicit tagbody}; 
+it may contain tags to serve as the targets of \specref{go} statements.
+Declarations may appear before the body of the loop.
+
+% Per Loosemore #28
+% For \macref{dotimes}, the \term{scope} of the name binding 
+% does not include any initial value form,
+% but the stepper and optional result forms are included.
+The \term{scope} of the binding of \param{var}
+does not include the \param{count-form},
+but the \param{result-form} is included.
+
+% Added per Loosemore #27, first public review
+It is \term{implementation-dependent} whether \macref{dotimes}
+\term{establishes} a new \term{binding} of \param{var} on each iteration
+or whether it \term{establishes} a binding for \param{var} once at the
+beginning and then \param{assigns} it on any subsequent iterations.
+
+\label Examples::
+
+\code
+ (dotimes (temp-one 10 temp-one)) \EV 10
+ (setq temp-two 0) \EV 0
+ (dotimes (temp-one 10 t) (incf temp-two)) \EV T
+ temp-two \EV 10
+\endcode
+
+
+%% 7.8.3 11
+
+Here is an example of the use of \f{dotimes} in processing strings:
+
+\code
+;;; True if the specified subsequence of the string is a
+;;; palindrome (reads the same forwards and backwards).
+ (defun palindromep (string \optional
+                           (start 0)
+                           (end (length string)))
+   (dotimes (k (floor (- end start) 2) t)
+    (unless (char-equal (char string (+ start k))
+                        (char string (- end k 1)))
+      (return nil))))
+ (palindromep "Able was I ere I saw Elba") \EV T
+ (palindromep "A man, a plan, a canal--Panama!") \EV NIL
+ (remove-if-not #'alpha-char-p          ;Remove punctuation.
+               "A man, a plan, a canal--Panama!")
+\EV "AmanaplanacanalPanama"
+ (palindromep
+  (remove-if-not #'alpha-char-p
+                "A man, a plan, a canal--Panama!")) \EV T
+ (palindromep
+  (remove-if-not
+   #'alpha-char-p
+   "Unremarkable was I ere I saw Elba Kramer, nu?")) \EV T
+ (palindromep
+  (remove-if-not
+   #'alpha-char-p
+   "A man, a plan, a cat, a ham, a yak,
+                  a yam, a hat, a canal--Panama!")) \EV T
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{do}, \macref{dolist}, \specref{tagbody}
+
+\label Notes::
+
+\specref{go} may be used within the body of
+\macref{dotimes} to transfer control to a statement labeled by a \param{tag}.
+
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+%%% ========== DOLIST
+\begincom{dolist}\ftype{Macro}
+
+\issue{DECLS-AND-DOC}
+
+\label Syntax::
+
+\DefmacWithValuesNewline dolist
+		  {\paren{var list-form \brac{result-form}}
+		   \starparam{declaration}
+	           \star{\curly{tag | statement}}}
+		  {\starparam{result}}
+
+\label Arguments and Values::
+
+\param{var}---a \term{symbol}.
+
+\param{list-form}---a \term{form}.
+
+\param{result-form}---a \term{form}.
+
+\param{declaration}---a \misc{declare} \term{expression}; \noeval.
+
+\param{tag}---a \term{go tag}; \noeval.
+
+\param{statement}---a \term{compound form}; \evalspecial.
+
+%% 7.8.3 4
+\param{results}---if a \macref{return} or \macref{return-from} form is executed,
+ the \term{values} passed from that \term{form};
+ otherwise, the \term{values} returned by the \param{result-form}
+ or \nil\ if there is no \param{result-form}.
+
+\label Description::
+
+%% 7.8.3 6
+\macref{dolist} iterates over the elements of a \term{list}.
+The body of \macref{dolist} is like a \specref{tagbody}.
+It consists of a series of \param{tags} and \param{statements}.
+
+\macref{dolist}
+evaluates \param{list-form},
+which should produce a \term{list}. It then executes the body
+once for each element in the \term{list}, in the order in which the
+\param{tags} and \param{statements} occur, with
+\param{var} bound to the element.
+Then \param{result-form} 
+is evaluated.
+\param{tags} label
+\param{statements}.
+
+At the time \param{result-form} is processed, 
+\param{var} is bound to \nil.
+
+An \term{implicit block}  
+%In effect, a \specref{block}
+named \nil\ surrounds \macref{dolist}.
+%% Made symmetric with the wording in DOTIMES. -kmp 26-May-93
+% %% 7.8.3 5
+% %% 7.8.3 8
+% \macref{return} may be used to terminate the loop
+% and return a specified value.
+\macref{return} may be used to terminate the loop immediately without
+performing any further iterations, returning zero or more \term{values}.
+
+%% Changed per Loosemore #28, first public review
+% For \macref{dolist}, the 
+% \term{scope} of the name binding does not include any
+% initial value form, but the stepper and optional result forms are included.
+The \term{scope} of the binding of \param{var}
+does not include the \param{list-form},
+but the \param{result-form} is included.
+
+%% Added per Loosemore #27, first public review
+It is \term{implementation-dependent} whether \macref{dolist}
+\term{establishes} a new \term{binding} of \param{var} on each iteration
+or whether it \term{establishes} a binding for \param{var} once at the
+beginning and then \param{assigns} it on any subsequent iterations.
+
+\label Examples::
+%% 7.8.3 7
+\code
+ (setq temp-two '()) \EV NIL
+ (dolist (temp-one '(1 2 3 4) temp-two) (push temp-one temp-two)) \EV (4 3 2 1)
+
+ (setq temp-two 0) \EV 0
+ (dolist (temp-one '(1 2 3 4)) (incf temp-two)) \EV NIL
+ temp-two \EV 4
+
+ (dolist (x '(a b c d)) (prin1 x) (princ " ")) 
+\OUT A B C D 
+\EV NIL
+\endcode
+
+\label Side Effects:\None.
+
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+\label See Also::
+
+\macref{do},
+\macref{dotimes},
+\specref{tagbody},
+\issue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+{\secref\TraversalRules}
+\endissue{MAPPING-DESTRUCTIVE-INTERACTION:EXPLICITLY-VAGUE}
+
+\label Notes::
+
+\specref{go} may be used within the body of \macref{dolist} 
+to transfer control to a statement labeled by a \param{tag}.
+
+\endissue{DECLS-AND-DOC}
+
+\endcom
+
+
+%%% ========== LOOP
+\begincom{loop}\ftype{Macro}
+
+\issue{LOOP-SYNTAX-OVERHAUL:REPAIR}
+
+\label Syntax::
+
+The ``simple'' \macref{loop} \term{form}:
+
+\DefmacWithValues loop {\starparam{compound-form}} {\starparam{result}}
+
+The ``extended'' \macref{loop} \term{form}:
+
+\DefmacWithValues loop {\brac{\down{name-clause}}
+			\stardown{variable-clause}
+		        \stardown{main-clause}} {\starparam{result}}
+
+\auxbnf{name-clause}{\loopref{named} \param{name}}
+\auxbnf{variable-clause}{\down{with-clause} | \down{initial-final} | \down{for-as-clause}}
+\auxbnf{with-clause}%
+{\loopref{with} \param{var1} \brac{\param{type-spec}} \brac{$=$ \param{form1}}
+ \star{\curly{\loopref{and} \param{var2} \brac{\param{type-spec}} 
+		            \brac{$=$ \param{form2}}}}}
+\auxbnf{main-clause}%
+{\down{unconditional}    |
+ \down{accumulation}     |
+ \down{conditional}      |
+ \down{termination-test} |
+ \down{initial-final}}
+\auxbnf{initial-final}%
+{\loopref{initially} \plusparam{compound-form} |  \loopref{finally} \plusparam{compound-form}}
+\auxbnf{unconditional}%
+{\curly{\loopref{do} | \loopref{doing}} \plusparam{compound-form} |
+ \loopref{return} \curly{\param{form} | \loopref{it}}}
+\auxbnf{accumulation}{\down{list-accumulation} | \down{numeric-accumulation}}
+\auxbnf{list-accumulation}%
+{\curly{\loopref{collect} | \loopref{collecting} |
+	\loopref{append}  | \loopref{appending}  |
+	\loopref{nconc} | \loopref{nconcing}} \curly{\param{form} | \loopref{it}} \CR
+ \brac{\loopref{into} \param{simple-var}}}
+\auxbnf{numeric-accumulation}%
+{\curly{\loopref{count}    | \loopref{counting}   |
+	\loopref{sum}      | \loopref{summing}    | \CR
+ \xcurly\loopref{maximize} | \loopref{maximizing} |
+        \loopref{minimize} | \loopref{minimizing}} \curly{\param{form} | \loopref{it}} \CR
+ \brac{\loopref{into} \param{simple-var}} \brac{\param{type-spec}}}
+\auxbnf{conditional}%
+{\curly{\loopref{if} | \loopref{when} | \loopref{unless}} \param{form}
+         \down{selectable-clause} \star{\curly{\loopref{and} \down{selectable-clause}}} \CR
+ \brac{\loopref{else}
+         \down{selectable-clause} \star{\curly{\loopref{and} \down{selectable-clause}}}} \CR
+ \brac{\loopref{end}}}
+%% I flushed the clause/clause1/clause2 distinction in the next thing, since it's not used
+%% anywhere for reference, and it's not appropriate to the bnf style.
+%% However, I'm concerned about the loss of IT here due to LOOP-MISCELLANEOUS-REPAIRS.
+%%  -kmp 4-May-93
+\auxbnf{selectable-clause}{\down{unconditional} | \down{accumulation} | \down{conditional}}
+\auxbnf{termination-test}%
+{\loopref{while}   \param{form}  | 
+ \loopref{until}   \param{form}  |
+ \loopref{repeat}  \param{form}  |
+ \loopref{always}  \param{form}  |
+ \loopref{never}   \param{form}  |
+ \loopref{thereis} \param{form}}
+\auxbnf{for-as-clause}%
+{\curly{\loopref{for} | \loopref{as}} \down{for-as-subclause}
+ \star{\curly{\loopref{and} \down{for-as-subclause}}}}
+\auxbnf{for-as-subclause}%
+{\down{for-as-arithmetic}  |
+ \down{for-as-in-list}     |
+ \down{for-as-on-list}     |
+ \down{for-as-equals-then} |\CR
+ \down{for-as-across}      |
+ \down{for-as-hash}        |
+ \down{for-as-package}}
+\auxbnf{for-as-arithmetic}{\param{var} \brac{\param{type-spec}}
+			   \down{for-as-arithmetic-subclause}}
+\auxbnf{for-as-arithmetic-subclause}%
+{\down{arithmetic-up} | \down{arithmetic-downto} | \down{arithmetic-downfrom}}
+\auxbnf{arithmetic-up}%
+{\begininterleave\curly{\loopref{from} | \loopref{upfrom}} \param{form1}               | 
+ \extrainterleave\curly{\loopref{to} | \loopref{upto} | \loopref{below}} \param{form2} | 
+ \extrainterleave\loopref{by} \param{form3}\endinterleave\prevplus}
+\auxbnf{arithmetic-downto}%
+{\begininterleave\one{\curly{\loopref{from} \param{form1}}} 				| 
+ \extrainterleave\one{\curly{\curly{\loopref{downto} | \loopref{above}} \param{form2}}} | 
+ \extrainterleave\loopref{by} \param{form3}\endinterleave}
+\auxbnf{arithmetic-downfrom}%
+{\begininterleave\one{\curly{\loopref{downfrom} \param{form1}}} 			 | 
+ \extrainterleave\curly{\loopref{to} | \loopref{downto} | \loopref{above}} \param{form2} | 
+ \extrainterleave\loopref{by} \param{form3}\endinterleave}
+\auxbnf{for-as-in-list}%
+{\param{var} \brac{\param{type-spec}}
+ \loopref{in} \param{form1} \brac{\loopref{by} \param{step-fun}}}
+\auxbnf{for-as-on-list}%
+{\param{var} \brac{\param{type-spec}}
+ \loopref{on} \param{form1} \brac{\loopref{by} \param{step-fun}}}
+\auxbnf{for-as-equals-then}%
+{\param{var} \brac{\param{type-spec}}
+ $=$ \param{form1} \brac{\loopref{then} \param{form2}}}
+\auxbnf{for-as-across}%
+{\param{var} \brac{\param{type-spec}}
+ \loopref{across} \param{vector}}
+\auxbnf{for-as-hash}%
+{\param{var} \brac{\param{type-spec}}
+ \loopref{being} \curly{\loopref{each} | \loopref{the}} \CR
+ \lcurly\curly{\loopref{hash-key} | \loopref{hash-keys}}
+        \curly{\loopref{in} | \loopref{of}} \param{hash-table} \CR
+ \xcurly\brac{\loopref{using} \paren{\loopref{hash-value} \param{other-var}}} | \CR
+ \xcurly\curly{\loopref{hash-value} | \loopref{hash-values}}
+        \curly{\loopref{in} | \loopref{of}} \param{hash-table} \CR
+ \xcurly\brac{\loopref{using} \paren{\loopref{hash-key} \param{other-var}}}\rcurly}
+\auxbnf{for-as-package}%
+{\param{var} \brac{\param{type-spec}}
+ \loopref{being} \curly{\loopref{each} | \loopref{the}} 	        \CR
+ \lcurly\loopref{symbol} | \loopref{symbols}		               |\CR
+ \xcurly\loopref{present-symbol} | \loopref{present-symbols}           |\CR
+ \xcurly\loopref{external-symbol} | \loopref{external-symbols}\rcurly   \CR
+ \brac{\curly{\loopref{in} | \loopref{of}} \param{package}}}
+\auxbnf{type-spec}{\down{simple-type-spec} | \down{destructured-type-spec}}
+\auxbnf{simple-type-spec}%
+{\declref{fixnum} | \declref{float} | \declref{t} | \declref{nil}}
+\auxbnf{destructured-type-spec}{\loopref{of-type} \param{d-type-spec}}
+\auxbnf{d-type-spec}%
+{\param{type-specifier} | \f{(\param{d-type-spec} . \param{d-type-spec})}}
+\auxbnf{var}{\down{d-var-spec}}
+\auxbnf{var1}{\down{d-var-spec}}
+\auxbnf{var2}{\down{d-var-spec}}
+\auxbnf{other-var}{\down{d-var-spec}}
+\auxbnf{d-var-spec}{\param{simple-var} | 
+		    \nil\ |
+		    \paren{\down{d-var-spec} \f{.} \down{d-var-spec}}}
+
+\label Arguments and Values::
+
+\param{compound-form}---a \term{compound form}.
+
+\param{name}---a \term{symbol}.
+
+%% Per X3J13. -kmp 05-Oct-93
+% \param{var}, \param{var1}, \param{var2}, \param{other-var}---a \term{symbol}
+%   (a \term{variable} \term{name}).
+\param{simple-var}---a \term{symbol} (a \term{variable} name).
+
+\param{form}, \param{form1}, \param{form2}, \param{form3}---a \term{form}.
+
+\issue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+\param{step-fun}---a \term{form} that evaluates to a \term{function} of one \term{argument}.
+\endissue{LOOP-MISCELLANEOUS-REPAIRS:FIX}
+
+\param{vector}---a \term{form} that evaluates to a \term{vector}.
+
+\param{hash-table}---a \term{form} that evaluates to a \term{hash table}.
+
+\param{package}---a \term{form} that evaluates to a \term{package designator}.
+
+\param{type-specifier}---a \term{type specifier}.
+  This might be either an \term{atomic type specifier} or a \term{compound type specifier},
+  which introduces some additional complications to proper parsing in the face of 
+  destructuring; for further information, \seesection\DestructuringLOOPVars.
+
+\param{result}---an \term{object}.
+
+\endissue{LOOP-SYNTAX-OVERHAUL:REPAIR}
+
+\label Description::
+
+%!!! This should be elaborated slightly here.
+For details, \seesection\LoopFacility.
+
+\label Examples::
+
+\code
+;; An example of the simple form of LOOP.
+ (defun sqrt-advisor ()
+   (loop (format t "~&Number: ")
+         (let ((n (parse-integer (read-line) :junk-allowed t)))
+           (when (not n) (return))
+           (format t "~&The square root of ~D is ~D.~%" n (sqrt n)))))
+\EV SQRT-ADVISOR
+ (sqrt-advisor)
+\OUT Number: \IN{5\CRLF}
+\OUT The square root of 5 is 2.236068.
+\OUT Number: \IN{4\CRLF}
+\OUT The square root of 4 is 2.
+\OUT Number: \IN{done\CRLF}
+\EV NIL
+
+;; An example of the extended form of LOOP.
+ (defun square-advisor ()
+   (loop as n = (progn (format t "~&Number: ")
+                       (parse-integer (read-line) :junk-allowed t))
+         while n
+         do (format t "~&The square of ~D is ~D.~%" n (* n n))))
+\EV SQUARE-ADVISOR
+ (square-advisor)
+\OUT Number: \IN{4\CRLF}
+\OUT The square of 4 is 16.
+\OUT Number: \IN{23\CRLF}
+\OUT The square of 23 is 529.
+\OUT Number: \IN{done\CRLF}
+\EV NIL
+
+;; Another example of the extended form of LOOP.
+ (loop for n from 1 to 10
+       when (oddp n)
+         collect n)
+\EV (1 3 5 7 9)
+\endcode
+ 
+\label Affected By:\None.
+
+\label Exceptional Situations:\None.
+
+%!!! Barmar: The description mentions several places where PROGRAM-ERROR is signaled.
+
+\label See Also::
+
+\macref{do}, \macref{dolist}, \macref{dotimes}, 
+\macref{return}, \specref{go}, \specref{throw},
+{\secref\DestructuringLOOPVars}
+ 
+\label Notes::
+
+%% Per X3J13. -kmp 05-Oct-93
+% The simple form of \macref{loop} is related to the extended form
+% in the following way:
+Except that \macref{loop-finish} cannot be used within a simple \funref{loop} \term{form},
+a simple \macref{loop} \term{form} is related to an extended \macref{loop} \term{form} 
+in the following way:
+
+\code
+ (loop \starparam{compound-form}) \EQ (loop do \starparam{compound-form})
+\endcode
+
+\endcom%{loop}
+
+%%% ========== LOOP-FINISH
+\begincom{loop-finish}\ftype{Local Macro}
+
+\label Syntax::
+
+\DefmacNoReturn loop-finish {\noargs}
+
+\label Description::
+
+\Themacro{loop-finish} can be used lexically within 
+%% KMP changed it to say extended
+%a
+an extended
+\macref{loop} \term{form} 
+to terminate that \term{form} ``normally.''
+That is, it transfers control to the loop epilogue
+%% Added per X3J13 -kmp 05-Oct-93
+of the lexically innermost extended \macref{loop} \term{form}.
+This permits execution of any \macref{finally} clause (for effect)
+and
+%% Per X3J13. -kmp 05-Oct-93
+%then returns
+the return of
+any accumulated result.
+
+%% Clarified above per X3J13. -kmp 05-Oct-93
+% %% KMP added this because it was implicitly vague and portable programs
+% %% must know this fact to avoid utter lossage.  It affects nesting behavior,
+% %% as explained in a note farther down. -kmp 1-Aug-93
+% It is \term{implementation-defined} whether \macref{loop-finish}
+% can be used in a simple \macref{loop} form.
+
+\label Examples::
+
+\code
+;; Terminate the loop, but return the accumulated count.
+ (loop for i in '(1 2 3 stop-here 4 5 6)
+       when (symbolp i) do (loop-finish)
+       count i)
+\EV 3
+ 
+;; The preceding loop is equivalent to:
+ (loop for i in '(1 2 3 stop-here 4 5 6)
+       until (symbolp i)
+       count i)
+\EV 3
+
+;; While LOOP-FINISH can be used can be used in a variety of 
+;; situations it is really most needed in a situation where a need
+;; to exit is detected at other than the loop's `top level'
+;; (where UNTIL or WHEN often work just as well), or where some 
+;; computation must occur between the point where a need to exit is
+;; detected and the point where the exit actually occurs.  For example:
+ (defun tokenize-sentence (string)
+   (macrolet ((add-word (wvar svar)
+                `(when ,wvar
+                   (push (coerce (nreverse ,wvar) 'string) ,svar)
+                   (setq ,wvar nil))))
+     (loop with word = '() and sentence = '() and endpos = nil
+           for i below (length string)
+           do (let ((char (aref string i)))
+                (case char
+                  (#\\Space (add-word word sentence))
+                  (#\\. (setq endpos (1+ i)) (loop-finish))
+                  (otherwise (push char word))))
+           finally (add-word word sentence)
+                   (return (values (nreverse sentence) endpos)))))
+\EV TOKENIZE-SENTENCE
+ 
+ (tokenize-sentence "this is a sentence. this is another sentence.")
+\EV ("this" "is" "a" "sentence"), 19
+ 
+ (tokenize-sentence "this is a sentence")
+\EV ("this" "is" "a" "sentence"), NIL
+
+\endcode
+
+\label Side Effects::
+
+Transfers control.
+
+\label Affected By:\None.
+
+\label Exceptional Situations::
+
+\issue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+Whether or not \macref{loop-finish} is \term{fbound} in the
+\term{global environment} is \term{implementation-dependent};
+however, the restrictions on redefinition and \term{shadowing} of
+\macref{loop-finish} are the same as for \term{symbols} in \thepackage{common-lisp}
+which are \term{fbound} in the \term{global environment}.
+The consequences of attempting to use \macref{loop-finish} outside
+of \macref{loop} are undefined.
+\endissue{LEXICAL-CONSTRUCT-GLOBAL-DEFINITION:UNDEFINED}
+
+\label See Also::
+
+\macref{loop},
+{\secref\LoopFacility}
+
+%% Semantics clarified per X3J13. -kmp 05-Oct-93
+\label Notes::
+
+% %% This part added to make it clear to users that this is a portability pitfall.
+% 
+% Because it is \term{implementation-defined} whether \macref{loop-finish} 
+% will work in a simple \macref{loop} form, it follows an obvious consequence 
+% that a form such as the following is not portable:
+% 
+% \code
+%  (loop (loop-finish))
+% \endcode
+% 
+% However, what may be less obvious is that there are
+% implications on nesting behavior as well.  In particular, it is recommended
+% that user code not mix styles (simple and extended) of \macref{loop} forms
+% when \macref{loop-finish} will be involved.  For example, the following form
+% is also not portable:
+% 
+% \code
+%  (loop do (loop (loop-finish)))
+% \endcode
+
+\endcom%{loop-finish}

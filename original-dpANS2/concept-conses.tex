@@ -1,0 +1,134 @@
+% -*- Mode: TeX -*-
+
+A \newterm{cons} is a compound data \term{object} 
+having two components called the \term{car} and the \term{cdr}.
+
+\displaythree{Some defined names relating to conses.}{
+car&cons&rplacd\cr
+cdr&rplaca&\cr
+}
+
+Depending on context, a group of connected \term{conses} can be viewed
+in a variety of different ways.  A variety of operations is provided to
+support each of these various views.
+
+\beginsubsection{Conses as Trees}
+
+A \newterm{tree} is a binary recursive data structure made up of
+\term{conses} and \term{atoms}:
+the \term{conses} are themselves also \term{trees}
+(sometimes called ``subtrees'' or ``branches''), and the \term{atoms}
+are terminal nodes (sometimes called \newterm{leaves}). 
+Typically, the \term{leaves} represent data while the branches 
+establish some relationship among that data.
+
+\displayfour{Some defined names relating to trees.}{
+caaaar&caddar&cdar&nsubst\cr
+caaadr&cadddr&cddaar&nsubst-if\cr
+caaar&caddr&cddadr&nsubst-if-not\cr
+caadar&cadr&cddar&nthcdr\cr
+caaddr&cdaaar&cdddar&sublis\cr
+caadr&cdaadr&cddddr&subst\cr
+caar&cdaar&cdddr&subst-if\cr
+cadaar&cdadar&cddr&subst-if-not\cr
+cadadr&cdaddr&copy-tree&tree-equal\cr
+cadar&cdadr&nsublis&\cr
+}
+
+\beginsubsubsection{General Restrictions on Parameters that must be Trees}
+
+\issue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+Except as explicitly stated otherwise,
+for any \term{standardized} \term{function} that takes a \term{parameter}
+that is required to be a \term{tree},
+the consequences are undefined
+if that \term{tree} is circular.
+\endissue{DOTTED-LIST-ARGUMENTS:CLARIFY}
+
+\endsubsubsection%{General Restrictions on Parameters that must be Trees}
+
+\endsubsection%{Conses as Trees}
+
+\beginsubsection{Conses as Lists}
+
+A \newterm{list} is a chain of \term{conses} in which the \term{car} of each
+\term{cons} is an \term{element} of the \term{list}, 
+and the \term{cdr} of each \term{cons} is either the next
+link in the chain or a terminating \term{atom}.  
+
+A \newterm{proper list} is a \term{list} terminated by the \term{empty list}.
+The \term{empty list} is a \term{proper list}, but is not a \term{cons}.
+
+An \newterm{improper list} is a \term{list} that is not a \term{proper list};
+that is, it is a \term{circular list} or a \term{dotted list}.
+
+A \newterm{dotted list} is a \term{list} that has a terminating \term{atom}
+that is not the \term{empty list}.  A \term{non-nil} \term{atom} by itself
+is not considered to be a \term{list} of any kind---not even a \term{dotted list}.
+
+A \newterm{circular list} is a chain of \term{conses} that has no termination 
+because some \term{cons} in the chain is the \term{cdr} of a later \term{cons}.
+
+\displayfour{Some defined names relating to lists.}{
+append&last&nbutlast&rest\cr
+butlast&ldiff&nconc&revappend\cr
+copy-alist&list&ninth&second\cr
+copy-list&list*&nreconc&seventh\cr
+eighth&list-length&nth&sixth\cr
+endp&make-list&nthcdr&tailp\cr
+fifth&member&pop&tenth\cr
+first&member-if&push&third\cr
+fourth&member-if-not&pushnew&\cr
+}
+ 
+\beginsubsubsection{Lists as Association Lists}
+
+An \newterm{association list} is a \term{list} of \term{conses} 
+representing an association of \term{keys} with \term{values}, 
+where the \term{car} of each \term{cons} is the \term{key} 
+and the \term{cdr} is the \term{value} associated with that \term{key}.
+
+\displayfour{Some defined names related to assocation lists.}{
+acons&assoc-if&pairlis&rassoc-if\cr
+assoc&assoc-if-not&rassoc&rassoc-if-not\cr
+}
+
+\endsubsubsection%{Lists as Association Lists}
+
+\beginsubsubsection{Lists as Sets}
+
+\term{Lists} are sometimes viewed as sets by considering their elements
+unordered and by assuming there is no duplication of elements.
+
+\displayfour{Some defined names related to sets.}{
+adjoin&nset-difference&set-difference&union\cr
+intersection&nset-exclusive-or&set-exclusive-or&\cr
+nintersection&nunion&subsetp&\cr
+}
+
+\endsubsubsection%{Lists as Sets}
+
+\beginsubsubsection{General Restrictions on Parameters that must be Lists}
+
+%Barrett: This forces something like
+% 	    \f{(MEMBER X '(X Y . Z))} to detect the \f{( . Z )}
+% 	  in safe code even when it would not naturally be reached
+% 	  by the search.  We should soften this slightly.
+%KMP: Fixed.
+Except as explicitly specified otherwise,
+any \term{standardized} \term{function} that takes a \term{parameter}
+that is required to be a \term{list} should be prepared to signal 
+an error \oftype{type-error} if the \term{value} received is a \term{dotted list}.
+
+% Sandra complained that this was only said a few places, 
+% and needed to be said more.
+% This is a stopgap while we make sure we mean it everywhere.
+Except as explicitly specified otherwise,
+for any \term{standardized} \term{function} that takes a \term{parameter}
+that is required to be a \term{list}, 
+the consequences are undefined 
+if that \term{list} is \term{circular}.
+
+\endsubsubsection%{General Restrictions on Parameters that must be Lists}
+
+\endsubsection%{Conses as Lists}
