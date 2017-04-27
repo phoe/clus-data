@@ -1,0 +1,132 @@
+--- saved-pages-dpans3/cl:functions:make-package.txt	2017-04-27 21:48:04.000000000 +0100
++++ saved-pages-clus/cl:functions:make-package.txt	2017-04-27 21:48:04.000000000 +0100
+@@ -2,19 +4,35 @@
+ Syntax
+  
+ 
+-make-package package-name &key nicknames use => package
++ make-package package-name &key nicknames use → package
++
++
+  
+ Arguments and Values
+  
+-package-name - a string designator. 
+-nicknames - a list of string designators. The default is the empty list. 
++
++ package-name - a package name designator.
++
++ nicknames - a list of package name designators. The default is the empty list.
++
+  use - a list of package designators.  The default is implementation-defined.   
++
+ package - a package. 
++
++
++
+ Description
+  
++
+ Creates a new package with the name package-name. 
++
++
+ Nicknames are additional names which may be used to refer to the new package. 
++
++
+ use specifies zero or more packages the external symbols of which are to be inherited by the new package. See the function use-package. 
++
++
+ Examples
+  
+ 
+@@ -18,13 +36,44 @@
+ Examples
+  
+ 
+- (make-package 'temporary nicknames '("TEMP" "temp")) =>  #<PACKAGE "TEMPORARY">
+- (make-package "OWNER" use '("temp")) =>  #<PACKAGE "OWNER">
+- (package-used-by-list 'temp) =>  (#<PACKAGE "OWNER">)
+- (package-use-list 'owner) =>  (#<PACKAGE "TEMPORARY">)
+ 
+-<TT> 
+-Side Effects None.
++(make-package 'temporary nicknames '("TEMP" "temp")) 
++
++→
++
++#<PACKAGE "TEMPORARY">
++
++
++
++(make-package "OWNER" use '("temp")) 
++
++→
++
++#<PACKAGE "OWNER">
++
++
++
++(package-used-by-list 'temp) 
++
++→
++
++(#<PACKAGE "OWNER">)
++
++
++
++(package-use-list 'owner) 
++
++→
++
++(#<PACKAGE "TEMPORARY">)
++
++
++
++Side Effects
++
++
++None.
++
+  
+ Affected By
+  
+@@ -28,16 +77,35 @@
+  
+ Affected By
+  
++
+ The existence of other packages in the system. 
++
++
+ Exceptional Situations
+  
++
+ The consequences are unspecified if packages denoted by use do not exist. 
++
++
+ A correctable error is signaled if the package-name or any of the nicknames is already the name or nickname of an existing package. 
++
++
+ See Also
+  
+-defpackage, use-package 
++
++ Macro DEFPACKAGE,
++
++ Function USE-PACKAGE
++
++
++
+ Notes
+  
++
+ In situations where the packages to be used contain symbols which would conflict, it is necessary to first create the package with use '(), then to use shadow or shadowing-import to address the conflicts, and then after that to use use-package once the conflicts have been addressed. 
++
++
+ When packages are being created as part of the static definition of a program rather than dynamically by the program, it is generally considered more stylistically appropriate to use defpackage rather than make-package. 
+-The following X3J13 cleanup issues, not part of the specification, apply to this section MAKE-PACKAGE-USE-DEFAULTIMPLEMENTATION-DEPENDENT PACKAGE-FUNCTION-CONSISTENCYMORE-PERMISSIVE
+\ No newline at end of file
++
++
++\
+\ No newline at end of file

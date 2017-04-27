@@ -1,0 +1,325 @@
+--- saved-pages-dpans3/cl:functions:open.txt	2017-04-27 21:43:19.000000000 +0100
++++ saved-pages-clus/cl:functions:open.txt	2017-04-27 21:43:19.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-open filespec &key direction element-type if-exists if-does-not-exist external-format => stream
++ open filespec &key direction element-type if-exists if-does-not-exist external-format → stream
++
++
+  
+ Arguments and Values
+  
+@@ -6,100 +10,244 @@
+  
+ Arguments and Values
+  
++
+ filespec - a pathname designator. 
++
+ direction - one of input, output, io, or probe. The default is input. 
++
+ element-type - a type specifier for recognizable subtype of character; or a type specifier for a finite recognizable subtype of integer; or one of the symbols signed-byte, unsigned-byte, or default. The default is character. 
++
+ if-exists - one of error, new-version, rename, rename-and-delete, overwrite, append, supersede, or nil. The default is new-version if the version component of filespec is newest, or error otherwise. 
++
+ if-does-not-exist - one of error, create, or nil. The default is error if direction is input or if-exists is overwrite or append; create if direction is output or io, and if-exists is neither overwrite nor append; or nil when direction is probe. 
++
+  external-format - an external file format designator. The default is default.  
++
+  stream - a file stream or nil.  
++
++
++
+ Description
+  
+-open creates, opens, and returns a file stream that is connected to the file specified by filespec. Filespec is the name of the file to be opened. If the filespec designator is a stream, that stream is not closed first or otherwise affected. 
++
++open creates, opens, and returns a file stream that is connected to the file specified by filespec. Filespec is the name of the file to be opened.
++
++
++If the filespec designator is a stream, that stream is not closed first or otherwise affected.
++
++
+ The keyword arguments to open specify the characteristics of the file stream that is returned, and how to handle errors. 
++
++
+ If direction is input or probe, or if if-exists is not new-version and the version component of the filespec is newest, then the file opened is that file already existing in the file system that has a version greater than that of any other file in the file system whose other pathname components are the same as those of filespec. 
++
++
+ An implementation is required to recognize all of the open keyword options and to do something reasonable in the context of the host operating system. For example, if a file system does not support distinct file versions and does not distinguish the notions of deletion and expunging, new-version might be treated the same as rename or supersede, and rename-and-delete might be treated the same as supersede. 
+ 
++
+ direction  
++
++
+ These are the possible values for direction, and how they affect the nature of the stream that is created 
+-input  
+-Causes the creation of an input file stream. 
+-output  
+-Causes the creation of an output file stream. 
+-io  
+-Causes the creation of a bidirectional file stream. 
+-probe  
+-Causes the creation of a ``no-directional'' file stream; in effect, the file stream is created and then closed prior to being returned by open. 
++
++
++ input Causes the creation of an input file stream.
++
++ output Causes the creation of an output file stream.
++
++ io Causes the creation of a bidirectional file stream.
++
++ probe Causes the creation of a "no-directional" file stream; in effect, the file stream is created and then closed prior to being returned by open.
++
++
+ 
+ element-type  
+-The element-type specifies the unit of transaction for the file stream. If it is default, the unit is determined by file system, possibly based on the file. 
++
++
++The element-type specifies the unit of transaction for the file stream.
++
++
++If it is default, the unit is determined by file system, possibly based on the file.
++
++
+ if-exists  
++
++
+ if-exists specifies the action to be taken if direction is output or io and a file of the name filespec already exists. If direction is input, not supplied, or probe, if-exists is ignored. These are the results of open as modified by if-exists 
+ 
+-error  
+-An error of type file-error is signaled. 
+-new-version  
+-A new file is created with a larger version number. 
+-rename  
+-The existing file is renamed to some other name and then a new file is created. 
+-rename-and-delete  
+-The existing file is renamed to some other name, then it is deleted but not expunged, and then a new file is created. 
+-overwrite  
+-Output operations on the stream destructively modify the existing file. If direction is io the file is opened in a bidirectional mode that allows both reading and writing. The file pointer is initially positioned at the beginning of the file; however, the file is not truncated back to length zero when it is opened. 
+-append  
+-Output operations on the stream destructively modify the existing file. The file pointer is initially positioned at the end of the file. 
+-If direction is io, the file is opened in a bidirectional mode that allows both reading and writing. 
+-supersede  
+-The existing file is superseded; that is, a new file with the same name as the old one is created. If possible, the implementation should not destroy the old file until the new stream is closed. 
+-nil  
+-No file or stream is created; instead, nil is returned to indicate failure. 
++
++ error An error of type file-error is signaled.
++
++ new-version A new file is created with a larger version number.
++
++ rename The existing file is renamed to some other name and then a new file is created.
++
++ rename-and-delete The existing file is renamed to some other name, then it is deleted but not expunged, and then a new file is created.
++
++ overwrite Output operations on the stream destructively modify the existing file. If direction is io the file is opened in a bidirectional mode that allows both reading and writing. The file pointer is initially positioned at the beginning of the file; however, the file is not truncated back to length zero when it is opened.
++
++ append Output operations on the stream destructively modify the existing file. The file pointer is initially positioned at the end of the file. If direction is io, the file is opened in a bidirectional mode that allows both reading and writing.
++
++ supersede The existing file is superseded; that is, a new file with the same name as the old one is created. If possible, the implementation should not destroy the old file until the new stream is closed.
++
++ nil No file or stream is created; instead, nil is returned to indicate failure.
++
++
+ 
+ if-does-not-exist  
++
++
+ if-does-not-exist specifies the action to be taken if a file of name filespec does not already exist. These are the results of open as modified by if-does-not-exist 
+ 
+-error  
+-An error of type file-error is signaled. 
+-create  
+-An empty file is created. Processing continues as if the file had already existed but no processing as directed by if-exists is performed. 
+-nil  
+-No file or stream is created; instead, nil is returned to indicate failure. 
++
++ error An error of type file-error is signaled.
++
++ create An empty file is created. Processing continues as if the file had already existed but no processing as directed by if-exists is performed.
++
++ nil No file or stream is created; instead, nil is returned to indicate failure.
++
++
+ 
+  external-format  
+-This option selects an external file format for the file The only standardized value for this option is default, although implementations are permitted to define additional external file formats and implementation-dependent values returned by stream-external-format can also be used by conforming programs. 
+-The external-format is meaningful for any kind of file stream whose element type is a subtype of character. This option is ignored for streams for which it is not meaningful; however, implementations may define other element types for which it is meaningful. The consequences are unspecified if a character is written that cannot be represented by the given external file format.  
++
++
++This option selects an external file format for the file
++
++
++The only standardized value for this option is default, although implementations are permitted to define additional external file formats and implementation-dependent values returned by stream-external-format can also be used by conforming programs.
++
++
++The external-format is meaningful for any kind of file stream whose element type is a subtype of character. This option is ignored for streams for which it is not meaningful; however, implementations may define other element types for which it is meaningful.
++
++
++The consequences are unspecified if a character is written that cannot be represented by the given external file format.
++
++
+ 
+ When a file is opened, a file stream is constructed to serve as the file system's ambassador to the Lisp environment; operations on the file stream are reflected by operations on the file in the file system. 
++
++
+ A file can be deleted, renamed, or destructively modified by open. 
+-For information about opening relative pathnames, see Section 19.2.3 (Merging Pathnames). 
++
++
++For information about opening relative pathnames, see section {\secref\MergingPathnames}.
++
++
+ Examples
+  
+ 
+- (open filespec direction probe)  =>  #<Closed Probe File Stream...>
+- (setq q (merge-pathnames (user-homedir-pathname) "test"))
+-=>  #<PATHNAME HOST NIL DEVICE device-name DIRECTORY directory-name
++
++;;; TODO these examples are more or less useless
++
++
++
++(open filespec direction probe) 
++
++→
++
++#<Closed Probe File Stream...> 
++
++
++
++(defparameter *q* (merge-pathnames (user-homedir-pathname) "test")) 
++
++→
++
++*Q*
++
++
++
++*q*
++
++→
++
++#<PATHNAME HOST NIL DEVICE device-name DIRECTORY directory-name
+     NAME "test" TYPE NIL VERSION NEWEST>
+- (open filespec if-does-not-exist create) =>  #<Input File Stream...>
+- (setq s (open filespec direction probe)) =>  #<Closed Probe File Stream...>
+- (truename s) =>  #<PATHNAME HOST NIL DEVICE device-name DIRECTORY
+-    directory-name NAME filespec TYPE extension VERSION 1>
+- (open s direction output if-exists nil) =>  NIL 
+ 
+-<TT> 
++
++
++(open filespec if-does-not-exist create) 
++
++→
++
++#<Input File Stream...> 
++
++
++
++(defparameter *s* (open filespec direction probe)) 
++
++→
++
++*S*
++
++
++
++*s* 
++
++→
++
++#<Closed Probe File Stream...> 
++
++
++
++(truename *s*) 
++#<PATHNAME HOST NIL DEVICE device-name DIRECTORY directory-name
++           NAME filespec TYPE extension VERSION 1>
++(open s direction output if-exists nil) 
++
++→
++
++NIL
++
++
++
+ Affected By
+  
++
+ The nature and state of the host computer's file system. 
++
++
+ Exceptional Situations
+  
++
+ If if-exists is error, (subject to the constraints on the meaning of if-exists listed above), an error of type file-error is signaled. 
++
++
+ If if-does-not-exist is error (subject to the constraints on the meaning of if-does-not-exist listed above), an error of type file-error is signaled. 
++
++
+ If it is impossible for an implementation to handle some option in a manner close to what is specified here, an error of type error might be signaled. 
+- An error of type file-error is signaled if (wild-pathname-p filespec) returns true.  
++
++
++An error of type file-error is signaled if (wild-pathname-p //filespec//) returns true.
++
++
+  An error of type error is signaled if the external-format is not understood by the implementation.  
+-The various file systems in existence today have widely differing capabilities, and some aspects of the file system are beyond the scope of this specification to define. A given implementation might not be able to support all of these options in exactly the manner stated. An implementation is required to recognize all of these option keywords and to try to do something ``reasonable'' in the context of the host file system. Where necessary to accomodate the file system, an implementation deviate slightly from the semantics specified here without being disqualified for consideration as a conforming implementation. If it is utterly impossible for an implementation to handle some option in a manner similar to what is specified here, it may simply signal an error. 
++
++
++The various file systems in existence today have widely differing capabilities, and some aspects of the file system are beyond the scope of this specification to define. A given implementation might not be able to support all of these options in exactly the manner stated. An implementation is required to recognize all of these option keywords and to try to do something "reasonable" in the context of the host file system. Where necessary to accomodate the file system, an implementation deviate slightly from the semantics specified here without being disqualified for consideration as a conforming implementation. If it is utterly impossible for an implementation to handle some option in a manner similar to what is specified here, it may simply signal an error.
++
++
+ With regard to the element-type option, if a type is requested that is not supported by the file system, a substitution of types such as that which goes on in upgrading is permissible. As a minimum requirement, it should be the case that opening an output stream to a file in a given element type and later opening an input stream to the same file in the same element type should work compatibly. 
++
++
+ See Also
+  
+- with-open-file, close, pathname, logical-pathname,  Section 19.2.3 (Merging Pathnames),  Section 19.1.2 (Pathnames as Filenames)  
++
++ Macro WITH-OPEN-FILE
++
++ Function CLOSE
++
++ System Class PATHNAME
++
++ System Class LOGICAL-PATHNAME
++
++ {\secref\MergingPathnames}
++
++ {\secref\PathnamesAsFilenames}
++
++
++
+ Notes
+  
+   
+@@ -104,7 +252,15 @@
+  
+   
+ open does not automatically close the file when an abnormal exit occurs. 
++
++
+ When element-type is a subtype of character, read-char and/or write-char can be used on the resulting file stream. 
++
++
+ When element-type is a subtype of integer, read-byte and/or write-byte can be used on the resulting file stream. 
++
++
+ When element-type is default, the type can be determined by using stream-element-type. 
+-The following X3J13 cleanup issues, not part of the specification, apply to this section PATHNAME-HOST-PARSINGRECOGNIZE-LOGICAL-HOST-NAMES FILE-OPEN-ERRORSIGNAL-FILE-ERROR PATHNAME-LOGICALADD PATHNAME-WILDNEW-FUNCTIONS STREAM-ACCESSADD-TYPES-ACCESSORS CHARACTER-PROPOSAL2-5-2
+\ No newline at end of file
++
++
++\
+\ No newline at end of file

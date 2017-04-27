@@ -1,0 +1,148 @@
+--- saved-pages-dpans3/cl:macros:with-hash-table-iterator.txt	2017-04-27 21:54:42.000000000 +0100
++++ saved-pages-clus/cl:macros:with-hash-table-iterator.txt	2017-04-27 21:54:42.000000000 +0100
+@@ -4,7 +4,9 @@
+ Syntax
+  
+ 
+-with-hash-table-iterator (name hash-table) declaration* form* => result*
++ with-hash-table-iterator (name hash-table) declaration* form* →result*
++
++
+  
+ Arguments and Values
+  
+@@ -8,22 +10,52 @@
+  
+ Arguments and Values
+  
++
+ name - a name suitable for the first argument to macrolet. 
++
+ hash-table - a form, evaluated once, that should produce a hash table. 
++
+ declaration - a declare expression; not evaluated. 
++
+ forms - an implicit progn. 
++
+ results - the values returned by forms. 
++
++
++
+ Description
+  
++
+ Within the lexical scope of the body, name is defined via macrolet such that successive invocations of (name) return the items, one by one, from the hash table that is obtained by evaluating hash-table only once. 
++
++
+ An invocation (name) returns three values as follows 
+-1.  A generalized boolean that is true if an entry is returned. 2.  The key from the hash-table entry. 3.  The value from the hash-table entry. After all entries have been returned by successive invocations of (name), then only one value is returned, namely nil. 
++
++
++ 1. A generalized boolean that is true if an entry is returned. 
++
++ 2. The key from the hash-table entry. 
++
++ 3. The value from the hash-table entry. 
++
++
++
++After all entries have been returned by successive invocations of (name), then only one value is returned, namely nil.
++
++
+ It is unspecified what happens if any of the implicit interior state of an iteration is returned outside the dynamic extent of the with-hash-table-iterator form such as by returning some closure over the invocation form. 
++
++
+ Any number of invocations of with-hash-table-iterator can be nested, and the body of the innermost one can invoke all of the locally established macros, provided all of those macros have distinct names. 
++
++
+ Examples
+  
++
+ The following function should return t on any hash table, and signal an error if the usage of with-hash-table-iterator does not agree with the corresponding usage of maphash. 
+ 
++
++
+  (defun test-hash-table-iterator (hash-table)
+    (let ((all-entries '())
+          (generated-entries '())
+@@ -28,7 +60,8 @@
+    (let ((all-entries '())
+          (generated-entries '())
+          (unique (list nil)))
+-     (maphash #'(lambda (key value) (push (list key value) all-entries))
++    (maphash #'(lambda (key value) 
++                 (push (list key value) all-entries)) 
+               hash-table)
+      (with-hash-table-iterator (generator-fn hash-table)
+        (loop     
+@@ -40,23 +73,37 @@
+      (unless (= (length all-entries)
+                 (length generated-entries)
+                 (length (union all-entries generated-entries
+-                               key #'car test (hash-table-test hash-table))))
++                              key #'car
++                              test (hash-table-test hash-table)))) 
+        (error "Generated entries and Maphash entries don't correspond"))
+      t))
+ 
+-<TT> 
++
++
+ The following could be an acceptable definition of maphash, implemented by with-hash-table-iterator. 
+ 
++
++
+  (defun maphash (function hash-table)
+    (with-hash-table-iterator (next-entry hash-table)
+-     (loop (multiple-value-bind (more key value) (next-entry)
++    (loop
++      (multiple-value-bind (more key value) (next-entry)
+              (unless more (return nil))
+              (funcall function key value)))))
+ 
+-<TT> 
+-Side Effects None.
+  
+-Affected By None.
++
++Side Effects
++
++
++None.
++
++
++Affected By
++
++
++None.
++
+  
+ Exceptional Situations
+  
+@@ -60,11 +107,21 @@
+  
+ Exceptional Situations
+  
++
+ The consequences are undefined if the local function named name established by with-hash-table-iterator is called after it has returned false as its primary value. 
++
++
+ See Also
+  
+- Section 3.6 (Traversal Rules and Side Effects)  
+-Notes None.
++
++ {\secref\TraversalRules}
++
++
++
++Notes
++
++
++None.
+  
+   
+-The following X3J13 cleanup issues, not part of the specification, apply to this section MAPPING-DESTRUCTIVE-INTERACTIONEXPLICITLY-VAGUE HASH-TABLE-PACKAGE-GENERATORSADD-WITH-WRAPPER DECLS-AND-DOC
+\ No newline at end of file
++\
+\ No newline at end of file

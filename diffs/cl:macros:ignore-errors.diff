@@ -1,0 +1,85 @@
+--- saved-pages-dpans3/cl:macros:ignore-errors.txt	2017-04-27 22:00:14.000000000 +0100
++++ saved-pages-clus/cl:macros:ignore-errors.txt	2017-04-27 22:00:15.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-ignore-errors form* => result*
++ ignore-errors form* → result*
++
++
+  
+ Arguments and Values
+  
+@@ -21,22 +38,46 @@
+      (ignore-errors ;if this fails, don't enter debugger
+        (load (merge-pathnames (make-pathname name program type lisp)
+                               (user-homedir-pathname)))
+-       (setq win t))
+-     (unless win (format t "~&Init file failed to load.~%"))
++      (setf win t))
++    (unless win (format t ~&Init file failed to load.~%"))
+      win))
+  
++→
++
++LOAD-INIT-FILE
++
++
++
+  (load-init-file "no-such-program")
+->>  Init file failed to load.
++
++▷
++
++Init file failed to load.
++
++→
++
+ NIL
+ 
+-<TT> 
+-Affected By None.
+  
+-Exceptional Situations None.
++
++Affected By
++
++
++None.
++
++
++Exceptional Situations
++
++
++None.
++
+  
+ See Also
+  
+-handler-case, Section 9.1 (Condition System Concepts) 
++
++handler-case, {\secref\ConditionSystemConcepts}
++
++
+ Notes
+  
+ 
+@@ -40,13 +81,11 @@
+ Notes
+  
+ 
++
+  (ignore-errors . forms)
++  ≡ (handler-case (progn . forms) 
++      (error (condition) (values nil condition)))
+ 
+-<TT> 
+- is equivalent to 
+ 
+- (handler-case (progn . forms)
+-   (error (condition) (values nil condition)))
+ 
+-<TT> 
+ Because the second return value is a condition in the exceptional case, it is common (but not required) to arrange for the second return value in the normal case to be missing or nil so that the two situations can be distinguished.
+\ No newline at end of file

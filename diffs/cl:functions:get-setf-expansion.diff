@@ -1,0 +1,124 @@
+--- saved-pages-dpans3/cl:functions:get-setf-expansion.txt	2017-04-27 21:56:46.000000000 +0100
++++ saved-pages-clus/cl:functions:get-setf-expansion.txt	2017-04-27 21:56:46.000000000 +0100
+@@ -3,7 +4,9 @@
+ Syntax
+  
+  
+-get-setf-expansion place &optional environment => vars, vals, store-vars, writer-form, reader-form
++ get-setf-expansion place &optional environment → vars, vals, store-vars, writer-form, reader-form
++
++
+   
+ Arguments and Values
+  
+@@ -7,13 +10,24 @@
+   
+ Arguments and Values
+  
++
+ place - a place. 
++
+  environment - an environment object.  
++
+ vars, vals, store-vars, writer-form, reader-form - a setf expansion. 
++
++
++
+ Description
+  
+-Determines five values constituting the setf expansion for place in environment; see Section 5.1.1.2 (Setf Expansions). 
++
++Determines five values constituting the setf expansion for place in environment; see section {\secref\SetfExpansions}.
++
++
+   If environment is not supplied or nil, the environment is the null lexical environment.  
++
++
+ Examples
+  
+ 
+@@ -17,40 +31,70 @@
+ Examples
+  
+ 
++
+  (get-setf-expansion 'x)
+-=>  NIL, NIL, (#G0001), (SETQ X #G0001), X 
+ 
+-<TT> 
++→
++
++NIL
++NIL
++(#G0001)
++(SETQ X #G0001)
++X
++
++
+  
++;;; TODO fix the below example, it seems very broken -
++;;; complains about the NEW variable etc.
+ 
+-;;; This macro is like POP 
+ 
+- (defmacro xpop (place &environment env)
++
++(defmacro xpop (place &environment env) ; This macro is like POP
+    (multiple-value-bind (dummies vals new setter getter)
+                         (get-setf-expansion place env)
+       `(let* (,@(mapcar #'list dummies vals) (,(car new) ,getter))
+-         (if (cdr new) (error "Can't expand this."))
++       (when (cdr new) (error "Can't expand this."))
+          (prog1 (car ,(car new))
+-                (setq ,(car new) (cdr ,(car new)))
++         (setf ,(car new) (cdr ,(car new)))
+                 ,setter))))
+  
++
++
+  (defsetf frob (x) (value) 
+-     `(setf (car ,x) ,value)) =>  FROB
++  `(setf (car ,x) ,value)) → FROB 
+ ;;; The following is an error; an error might be signaled at macro expansion time
+  (flet ((frob (x) (cdr x)))  ;Invalid
+    (xpop (frob z)))
+  
+ 
+-<TT>  
+- Affected By None.
+  
+-Exceptional Situations None.
++Affected By
++
++
++None.
++
++
++Exceptional Situations
++
++
++None.
++
+  
+ See Also
+  
+-defsetf, define-setf-expander, setf 
++
++ Macro DEFSETF
++
++ Macro DEFINE-SETF-EXPANDER
++
++ Macro SETF
++
++
++
+ Notes
+  
++
+ Any compound form is a valid place, since any compound form whose operator f has no setf expander are expanded into a call to (setf f). 
+  
+-The following X3J13 cleanup issues, not part of the specification, apply to this section GET-SETF-METHOD-ENVIRONMENTADD-ARG SETF-METHOD-VS-SETF-METHODRENAME-OLD-TERMS
+\ No newline at end of file
++
++\
+\ No newline at end of file

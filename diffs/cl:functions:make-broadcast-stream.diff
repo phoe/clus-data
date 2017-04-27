@@ -1,0 +1,104 @@
+--- saved-pages-dpans3/cl:functions:make-broadcast-stream.txt	2017-04-27 21:43:33.000000000 +0100
++++ saved-pages-clus/cl:functions:make-broadcast-stream.txt	2017-04-27 21:43:33.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-make-broadcast-stream &rest streams => broadcast-stream
++ make-broadcast-stream &rest streams → broadcast-stream
++
++
+  
+ Arguments and Values
+  
+@@ -15,22 +26,76 @@
+ Examples
+  
+ 
+- (setq a-stream (make-string-output-stream)
+-        b-stream (make-string-output-stream)) =>  #<String Output Stream>
+- (format (make-broadcast-stream a-stream b-stream)
+-          "this will go to both streams") =>  NIL
+- (get-output-stream-string a-stream) =>  "this will go to both streams"
+- (get-output-stream-string b-stream) =>  "this will go to both streams"
+ 
+-<TT> 
+-Side Effects None.
++(defparameter *a-stream* (make-string-input-stream "*a-stream*")) 
++
++→
++
++*A-STREAM* 
++
++
++
++(defparameter *b-stream* (make-string-input-stream "*b-stream*")) 
++
++→
++
++*B-STREAM*
++
++
++
++(format (make-broadcast-stream *a-stream* *b-stream*) "this will go to both streams") 
++
++→
++
++NIL 
++
++
++
++(get-output-stream-string a-stream) 
++
++→
++
++"this will go to both streams" 
++
++
++
++(get-output-stream-string b-stream) 
++
++→
++
++"this will go to both streams" 
++
++
++
++Side Effects
++
++
++None.
++
++
++Affected By
++
++
++None.
+  
+- Affected By None.
+  
+ Exceptional Situations
+  
+-Should signal an error of type type-error if any stream is not an output stream. 
++
++Should signal an error of type type-error if stream is not an output stream.
++
++
+ See Also
+  
+-broadcast-stream-streams 
+-Notes None.
+\ No newline at end of file
++
++ Function BROADCAST-STREAM-STREAMS
++
++
++
++Notes
++
++
++None.
++
++
++\
+\ No newline at end of file

@@ -1,0 +1,282 @@
+--- saved-pages-dpans3/cl:functions:copy-symbol.txt	2017-04-27 21:41:12.000000000 +0100
++++ saved-pages-clus/cl:functions:copy-symbol.txt	2017-04-27 21:41:12.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-copy-symbol symbol &optional copy-properties => new-symbol
++ copy-symbol symbol &optional copy-properties → new-symbol
++
++
+  
+ Arguments and Values
+  
+@@ -6,43 +10,216 @@
+  
+ Arguments and Values
+  
++
+ symbol - a symbol. 
++
+ copy-properties - a generalized boolean. The default is false. 
++
+ new-symbol - a fresh, uninterned symbol. 
++
++
++
+ Description
+  
++
+  copy-symbol returns a fresh, uninterned symbol, the name of which is string= to and possibly the same as the name of the given symbol.  
+-If copy-properties is false, the new-symbol is neither bound nor fbound and has a null property list. If copy-properties is true, then the initial value of new-symbol is the value of symbol, the initial function definition of new-symbol is the functional value of symbol, and the property list of new-symbol is  a copy[2] of the property list of symbol.  
++
++
++If copy-properties is false, the new-symbol is neither bound nor fbound and has a null property list. If copy-properties is true, then the initial value of new-symbol is the value of symbol, the initial function definition of new-symbol is the functional value of symbol, and the property list of new-symbol is a copy of the property list of symbol.
++
++
+ Examples
+  
+ 
+- (setq fred 'fred-smith) =>  FRED-SMITH
+- (setf (symbol-value fred) 3) =>  3
+- (setq fred-clone-1a (copy-symbol fred nil)) =>  #FRED-SMITH
+- (setq fred-clone-1b (copy-symbol fred nil)) =>  #FRED-SMITH
+- (setq fred-clone-2a (copy-symbol fred t))   =>  #FRED-SMITH
+- (setq fred-clone-2b (copy-symbol fred t))   =>  #FRED-SMITH
+- (eq fred fred-clone-1a) =>  false
+- (eq fred-clone-1a fred-clone-1b) =>  false
+- (eq fred-clone-2a fred-clone-2b) =>  false
+- (eq fred-clone-1a fred-clone-2a) =>  false
+- (symbol-value fred) =>  3
+- (boundp fred-clone-1a) =>  false
+- (symbol-value fred-clone-2a) =>  3
+- (setf (symbol-value fred-clone-2a) 4) =>  4
+- (symbol-value fred) =>  3
+- (symbol-value fred-clone-2a) =>  4
+- (symbol-value fred-clone-2b) =>  3
+- (boundp fred-clone-1a) =>  false
+- (setf (symbol-function fred) #'(lambda (x) x)) =>  #<FUNCTION anonymous>
+- (fboundp fred) =>  true
+- (fboundp fred-clone-1a) =>  false
+- (fboundp fred-clone-2a) =>  false
+ 
+-<TT> 
+-Side Effects None.
++(defparameter *fred* 'fred-smith) 
++
++→
++
++FRED-SMITH 
++
++
++
++(setf (symbol-value *fred*) 3) 
++
++→
++
++3 
++
++
++
++(defparameter *fred-clone-1a* (copy-symbol *fred* nil)) 
++
++→
++
++#FRED-SMITH 
++
++
++
++(defparameter *fred-clone-1b* (copy-symbol *fred* nil)) 
++
++→
++
++#FRED-SMITH 
++
++
++
++(defparameter *fred-clone-2a* (copy-symbol *fred* t)) 
++
++→
++
++#FRED-SMITH 
++
++
++
++(defparameter *fred-clone-2b* (copy-symbol *fred* t)) 
++
++→
++
++#FRED-SMITH 
++
++
++
++(eq *fred* *fred-clone-1a*) 
++
++→
++
++false 
++
++
++
++(eq *fred-clone-1a* *fred-clone-1b*) 
++
++→
++
++false 
++
++
++
++(eq *fred-clone-2a* *fred-clone-2b*) 
++
++→
++
++false 
++
++
++
++(eq *fred-clone-1a* *fred-clone-2a*) 
++
++→
++
++false 
++
++
++
++(symbol-value *fred*) 
++
++→
++
++3 
++
++
++
++(boundp *fred-clone-1a*) 
++
++→
++
++false 
++
++
++
++(symbol-value *fred-clone-2a*) 
++
++→
++
++3 
++
++
++
++(setf (symbol-value *fred-clone-2a*) 4) 
++
++→
++
++4 
++
++
++
++(symbol-value *fred*) 
++
++→
++
++3 
++
++
++
++(symbol-value *fred-clone-2a*) 
++
++→
++
++4 
++
++
++
++(symbol-value *fred-clone-2b*) 
++
++→
++
++3 
++
++
++
++(boundp *fred-clone-1a*) 
++
++→
++
++false 
++
++
++
++(setf (symbol-function *fred*) 
++      #'(lambda (x) x)) 
++
++→
++
++#<FUNCTION anonymous> 
++
++
++
++(fboundp *fred*) 
++
++→
++
++true 
++
++
++
++(fboundp *fred-clone-1a*) 
++
++→
++
++false 
++
++
++
++(fboundp *fred-clone-2a*) 
++
++→
++
++false 
++
++
++
++Side Effects
++
++
++None.
++
++
++Affected By
++
++
++None.
+  
+-Affected By None.
+  
+ Exceptional Situations
+  
+@@ -46,11 +223,21 @@
+  
+ Exceptional Situations
+  
++
+ Should signal an error of type type-error if symbol is not a symbol. 
++
++
+ See Also
+  
+-make-symbol 
++
++ Function MAKE-SYMBOL
++
++
++
+ Notes
+  
++
+ Implementors are encouraged not to copy the string which is the symbol's name unnecessarily. Unless there is a good reason to do so, the normal implementation strategy is for the new-symbol's name to be identical to the given symbol's name. 
+-The following X3J13 cleanup issues, not part of the specification, apply to this section COPY-SYMBOL-COPY-PLISTCOPY-LIST COPY-SYMBOL-PRINT-NAMEEQUAL
+\ No newline at end of file
++
++
++\
+\ No newline at end of file

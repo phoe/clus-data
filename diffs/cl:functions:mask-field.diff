@@ -1,0 +1,150 @@
+--- saved-pages-dpans3/cl:functions:mask-field.txt	2017-04-27 21:50:54.000000000 +0100
++++ saved-pages-clus/cl:functions:mask-field.txt	2017-04-27 21:50:54.000000000 +0100
+@@ -2,9 +4,9 @@
+ Syntax
+  
+ 
+-mask-field bytespec integer => masked-integer
++ mask-field bytespec integer → masked-integer (setf (mask-field bytespec place) new-masked-integer)
++
+  
+-(setf (mask-field bytespec place) new-masked-integer)
+  
+ Arguments and Values
+  
+@@ -8,13 +10,24 @@
+  
+ Arguments and Values
+  
++
+ bytespec - a byte specifier. 
++
+ integer - an integer. 
++
+ masked-integer, new-masked-integer - a non-negative integer. 
++
++
++
+ Description
+  
+-mask-field performs a ``mask'' operation on integer. It returns an integer that has the same bits as integer in the byte specified by bytespec, but that has zero-bits everywhere else. 
++
++mask-field performs a "mask" operation on integer. It returns an integer that has the same bits as integer in the byte specified by bytespec, but that has zero-bits everywhere else.
++
++
+ setf may be used with mask-field to modify a byte within the integer that is stored in a given place. The effect is to perform a deposit-field operation and then store the result back into the place. 
++
++
+ Examples
+  
+ 
+@@ -18,29 +31,91 @@
+ Examples
+  
+ 
+- (mask-field (byte 1 5) -1) =>  32
+- (setq a 15) =>  15
+- (mask-field (byte 2 0) a) =>  3
+- a =>  15
+- (setf (mask-field (byte 2 0) a) 1) =>  1
+- a =>  13
+ 
+-<TT> 
+-Side Effects None.
++(mask-field (byte 1 5) -1) 
++
++→
++
++32 
++
++
++
++(defparameter *a* 15) 
++
++→
++
++15 
++
++
++
++(mask-field (byte 2 0) *a*) 
++
++→
++
++3 
++
++
++
++*a* 
++
++→
+  
+-Affected By None.
++15 
++
++
++
++(setf (mask-field (byte 2 0) *a*) 1) 
++
++→
++
++1 
++
++
++
++*a* 
++
++→
++
++13
++
++
++
++Side Effects
++
++
++None.
++
++
++Affected By
++
++
++None.
++
++
++Exceptional Situations
++
++
++None.
+  
+-Exceptional Situations None.
+  
+ See Also
+  
+-byte, ldb 
++
++ Function BYTE
++
++ Function LDB
++
++
++
+ Notes
+  
+ 
+- (ldb bs (mask-field bs n)) ==  (ldb bs n)
+- (logbitp j (mask-field (byte s p) n))
+-   ==  (and (>= j p) (< j s) (logbitp j n))
+- (mask-field bs n) ==  (logand n (dpb -1 bs 0))
+ 
+-<TT>
+\ No newline at end of file
++(ldb bs (mask-field bs n)) 
++  ≡ (ldb bs n)
++(logbitp j (mask-field (byte s p) n)) 
++  ≡ (and (>= j p) 
++         (< j s) 
++         (logbitp j n)) 
++(mask-field bs n) 
++  ≡ (logand n (dpb -1 bs 0))
+\ No newline at end of file

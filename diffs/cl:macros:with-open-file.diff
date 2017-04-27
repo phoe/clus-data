@@ -1,0 +1,88 @@
+--- saved-pages-dpans3/cl:macros:with-open-file.txt	2017-04-27 21:42:40.000000000 +0100
++++ saved-pages-clus/cl:macros:with-open-file.txt	2017-04-27 21:42:40.000000000 +0100
+@@ -3,7 +4,9 @@
+ Syntax
+  
+ 
+-with-open-file (stream filespec options*) declaration* form* => results
++ with-open-file (stream filespec options*) declaration* form* → results
++
++
+  
+ Arguments and Values
+  
+@@ -13,61 +17,30 @@
+ declaration - a declare expression; not evaluated. 
+ forms - an implicit progn. 
+ results - the values returned by the forms. 
++
++
+ Description
+  
+- with-open-file uses open to create a file stream  to file named by filespec. Filespec is the name of the file to be opened. Options are used as keyword arguments to open. 
+- The stream object to which the stream variable is bound has dynamic extent; its extent ends when the form is exited.  
+-with-open-file evaluates the forms as an implicit progn with stream bound to  the value returned by open.  
+-When control leaves the body, either normally or abnormally (such as by use of throw), the file is automatically closed. If a new output file is being written, and control leaves abnormally, the file is aborted and the file system is left, so far as possible, as if the file had never been opened. 
+-It is possible by the use of if-exists nil or if-does-not-exist nil for stream to be bound to nil.  Users of if-does-not-exist nil should check for a valid stream.  
+- The consequences are undefined if an attempt is made to assign the stream variable. The compiler may choose to issue a warning if such an attempt is detected.  
+-Examples
++
++with-open-file uses open to create a file stream to file named by filespec.
+  
+ 
+- (setq p (merge-pathnames "test"))
+-=>  #<PATHNAME HOST NIL DEVICE device-name DIRECTORY directory-name
+-    NAME "test" TYPE NIL VERSION NEWEST>
+- (with-open-file (s p direction output if-exists supersede)
+-    (format s "Here are a couple~%of test data lines~%")) =>  NIL
+- (with-open-file (s p)
+-    (do ((l (read-line s) (read-line s nil 'eof)))
+-        ((eq l 'eof) "Reached end of file.")
+-     (format t "~&*** ~A~%" l)))
+->>  *** Here are a couple
+->>  *** of test data lines
+-=>  "Reached end of file."
++filespec is the name of the file to be opened. options are used as keyword arguments to open.
+ 
+-<TT> 
+  
++The stream object to which the stream variable is bound has dynamic extent; its extent ends when the form is exited.
+ 
+-;; Normally one would not do this intentionally because it is
+-;; not perspicuous, but beware when using IF-DOES-NOT-EXIST NIL
+-;; that this doesn't happen to you accidentally...
+- (with-open-file (foo "no-such-file" if-does-not-exist nil)
+-   (read foo))
+->>  hello?
+-=>  HELLO? ;This value was read from the terminal, not a file!
+ 
+-;; Here's another bug to avoid...
+- (with-open-file (foo "no-such-file" direction output if-does-not-exist nil)
+-   (format foo "Hello"))
+-=>  "Hello" ;FORMAT got an argument of NIL!
++with-open-file evaluates the forms as an implicit progn with stream bound to the value returned by open.
+ 
+-<TT>  
+-Side Effects
+  
+-Creates a stream to the file named by filename (upon entry), and closes the stream (upon exit). In some implementations, the file might be locked in some way while it is open. If the stream is an output stream, a file might be created. 
+-Affected By
++When control leaves the body, either normally or abnormally (such as by use of throw), the file is automatically closed. If a new output file is being written, and control leaves abnormally, the file is aborted and the file system is left, so far as possible, as if the file had never been opened.
+  
+-The host computer's file system. 
+-Exceptional Situations
+  
+- See the function open.  
+-See Also
++It is possible by the use of if-exists nil or if-does-not-exist nil for stream to be bound to nil.
+  
+- open, close, pathname, logical-pathname,   Section 19.1.2 (Pathnames as Filenames)  
+-Notes None.
+  
++Users of if-does-not-exist nil should check for a valid stream.
+   
+  
+-The following X3J13 cleanup issues, not part of the specification, apply to this section PATHNAME-HOST-PARSINGRECOGNIZE-LOGICAL-HOST-NAMES PATHNAME-LOGICALADD FILE-OPEN-ERRORSIGNAL-FILE-ERROR WITH-OPEN-FILE-SETQEXPLICITLY-VAGUE WITH-OPEN-FILE-DOES-NOT-EXISTSTREAM-IS-NIL WITH-OPEN-FILE-STREAM-EXTENTDYNAMIC-EXTENT STREAM-ACCESSADD-TYPES-ACCESSORS DECLS-AND-DOC
+\ No newline at end of file
++The consequences are undefined if an attempt is made to assign the stream variable. The compiler may choose to
+\ No newline at end of file

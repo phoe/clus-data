@@ -1,0 +1,66 @@
+--- saved-pages-dpans3/cl:functions:unintern.txt	2017-04-27 21:47:46.000000000 +0100
++++ saved-pages-clus/cl:functions:unintern.txt	2017-04-27 21:47:46.000000000 +0100
+@@ -1,36 +1,35 @@
+ Function UNINTERN 
+-Syntax
+  
+ 
+-unintern symbol &optional package => generalized-boolean
++Syntax
+  
+-Arguments and Values
+  
+-symbol - a symbol. 
+- package - a package designator.  The default is the current package. 
+-generalized-boolean - a generalized boolean. 
+-Description
+- unintern removes symbol from package. If symbol is present in package, it is removed from package and also from package's shadowing symbols list if it is present there. If package is the home package for symbol, symbol is made to have no home package. Symbol may continue to be accessible in package by inheritance. 
++ unintern symbol &optional package → generalized-boolean
++====Arguments and Values====
++* symbol - a symbol.
++* package - a package designator. The default is the current package.
++* generalized-boolean - a generalized boolean.
++====Description====
++unintern removes symbol from package.
++If symbol is present in package, it is removed from package and also from package's shadowing symbols list if it is present there. If package is the home package for symbol, symbol is made to have no home package. Symbol may continue to be accessible in package by inheritance.
+ Use of unintern can result in a symbol that has no recorded home package, but that in fact is accessible in some package. Common Lisp does not check for this pathological case, and such symbols are always printed preceded by #. 
+ unintern returns true if it removes symbol, and nil otherwise. 
+-Examples
+- 
+-
+- (in-package "COMMON-LISP-USER") =>  #<PACKAGE "COMMON-LISP-USER">
+- (setq temps-unpack (intern "UNPACK" (make-package 'temp))) =>  TEMPUNPACK 
+- (unintern temps-unpack 'temp) =>  T
+- (find-symbol "UNPACK" 'temp) =>  NIL, NIL 
+- temps-unpack =>  #UNPACK 
+-
+-<TT> 
+-Side Effects
+- 
++====Examples====
++<blockquote>
++(in-package "COMMON-LISP-USER") → #<PACKAGE "COMMON-LISP-USER">
++(defparameter *temps-unpack* (intern "UNPACK" (make-package 'temp))) → TEMPUNPACK
++(unintern *temps-unpack* 'temp) → T
++(find-symbol "UNPACK" 'temp) → NIL, NIL
++*temps-unpack* → #UNPACK
++</blockquote>
++====Side Effects====
+ unintern changes the state of the package system in such a way that the consistency rules do not hold across the change. 
+-Affected By
++====Affected By====
+  Current state of the package system. 
+-Exceptional Situations
++====Exceptional Situations====
+  Giving a shadowing symbol to unintern can uncover a name conflict that had previously been resolved by the shadowing. If package A uses packages B and C, A contains a shadowing symbol x, and B and C each contain external symbols named x, then removing the shadowing symbol x from A will reveal a name conflict between bx and cx if those two symbols are distinct. In this case unintern will signal an error. 
+-See Also
+- 
+-Section 11.1 (Package Concepts) 
+-Notes None.
+\ No newline at end of file
++====See Also====
++* {\secref\PackageConcepts}
++====Notes====
++None.
++\
+\ No newline at end of file

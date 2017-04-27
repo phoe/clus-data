@@ -1,0 +1,108 @@
+--- saved-pages-dpans3/cl:variables:star-break-on-signals-star.txt	2017-04-27 21:59:39.000000000 +0100
++++ saved-pages-clus/cl:variables:star-break-on-signals-star.txt	2017-04-27 21:59:39.000000000 +0100
+@@ -13,45 +26,77 @@
+  
+  
+ 
+- *break-on-signals* =>  NIL
++*break-on-signals* → NIL
+  (ignore-errors (error 'simple-error format-control "Fooey!"))
+-=>  NIL, #<SIMPLE-ERROR 32207172>
++
++→
++
++NIL
++#<SIMPLE-ERROR 32207172>
++
++
+ 
+  (let ((*break-on-signals* 'error))
+    (ignore-errors (error 'simple-error format-control "Fooey!")))
+->>  Break Fooey!
+->>  BREAK entered because of *BREAK-ON-SIGNALS*.
+->>  To continue, type CONTINUE followed by an option number
+->>   1 Continue to signal.
+->>   2 Top level.
+->>  Debug> CONTINUE 1
+->>  Continue to signal.
+-=>  NIL, #<SIMPLE-ERROR 32212257>
++
++✖
++
++Break Fooey!
++BREAK entered because of *BREAK-ON-SIGNALS*.
++To continue, type CONTINUE followed by an option number
++1 Continue to signal.
++2 Top level.
++Debug> continue 1
++Continue to signal.
++
++→
++
++NIL, #<SIMPLE-ERROR 32212257>
++
++
+ 
+  (let ((*break-on-signals* 'error))
+    (error 'simple-error format-control "Fooey!"))
+->>  Break Fooey!
+->>  BREAK entered because of *BREAK-ON-SIGNALS*.
+->>  To continue, type CONTINUE followed by an option number
+->>   1 Continue to signal.
+->>   2 Top level.
+->>  Debug> CONTINUE 1
+->>  Continue to signal.
+->>  Error Fooey!
+->>  To continue, type CONTINUE followed by an option number
+->>   1 Top level.
+->>  Debug> CONTINUE 1
+->>  Top level.
+ 
+-<TT>  
+-Affected By None.
++✖
++
++Break Fooey!
++BREAK entered because of *BREAK-ON-SIGNALS*.
++To continue, type CONTINUE followed by an option number
++1 Continue to signal.
++2 Top level.
++Debug> continue 1
++Continue to signal.
++
++✖
++
++Error Fooey!
++To continue, type CONTINUE followed by an option number
++1 Top level.
++Debug> continue 1
++Top level.
++
++
++
++Affected By
++
++
++None.
++
+  
+ See Also
+  
+-break, signal, warn, error, typep, Section 9.1 (Condition System Concepts) 
++
++Function BREAK, Function SIGNAL, Function WARN, Function ERROR, Function TYPEP, {\secref\ConditionSystemConcepts}
++
++
+ Notes
+  
++
+ *break-on-signals* is intended primarily for use in debugging code that does signaling. When setting *break-on-signals*, the user is encouraged to choose the most restrictive specification that suffices. Setting *break-on-signals* effectively violates the modular handling of condition signaling. In practice, the complete effect of setting *break-on-signals* might be unpredictable in some cases since the user might not be aware of the variety or number of calls to signal that are used in code called only incidentally. 
+   
++
+ *break-on-signals* enables an early entry to the debugger but such an entry does not preclude an additional entry to the debugger in the case of operations such as error and cerror. 
+-The following X3J13 cleanup issues, not part of the specification, apply to this section BREAK-ON-WARNINGS-OBSOLETEREMOVE FORMAT-STRING-ARGUMENTSSPECIFY
+\ No newline at end of file
++
++
++\
+\ No newline at end of file

@@ -1,0 +1,104 @@
+--- saved-pages-dpans3/cl:macros:pprint-pop.txt	2017-04-27 21:46:09.000000000 +0100
++++ saved-pages-clus/cl:macros:pprint-pop.txt	2017-04-27 21:46:09.000000000 +0100
+@@ -3,7 +4,9 @@
+ Syntax
+  
+ 
+-pprint-pop <no arguments> => object
++ pprint-pop → object
++
++
+  
+ Arguments and Values
+  
+@@ -7,18 +10,42 @@
+  
+ Arguments and Values
+  
++
+ object - an element of the list being printed in the lexically current logical block, or nil. 
++
++
++
+ Description
+  
++
+ Pops one element from the list being printed in the lexically current logical block, obeying *print-length* and *print-circle* as described below. 
++
++
+ Each time pprint-pop is called, it pops the next value off the list passed to the lexically current logical block and returns it. However, before doing this, it performs three tests 
+-  If the remaining `list' is not a list, ``. '' is printed followed by the remaining `list.' (This makes it easier to write printing functions that are robust in the face of malformed arguments.) 
+-   If *print-length* is non-nil, and pprint-pop has already been called *print-length* times within the immediately containing logical block, ``...'' is printed. (This makes it easy to write printing functions that properly handle *print-length*.) 
+-   If *print-circle* is non-nil, and the remaining list is a circular (or shared) reference, then ``. '' is printed followed by an appropriate ``#n#'' marker. (This catches instances of cdr circularity and sharing in lists.) 
++
++
++ If the remaining `list' is not a list, . is printed followed by the remaining `list.' (This makes it easier to write printing functions that are robust in the face of malformed arguments.)
++
++ If *print-length* is non-nil, and pprint-pop has already been called *print-length* times within the immediately containing logical block, ... is printed. (This makes it easy to write printing functions that properly handle *print-length*.)
++
++ If *print-circle* is non-nil, and the remaining list is a circular (or shared) reference, then .  is printed followed by an appropriate #n# marker. (This catches instances of cdr circularity and sharing in lists.)
++
++
++
+ If either of the three conditions above occurs, the indicated output is printed on the pretty printing stream created by the immediately containing pprint-logical-block and the execution of the immediately containing pprint-logical-block is terminated except for the printing of the suffix. 
+-If pprint-logical-block is given a `list' argument of nil - because it is not processing a list - pprint-pop can still be used to obtain support for *print-length*. In this situation, the first and third tests above are disabled and pprint-pop always returns nil. See Section 22.2.2 (Examples of using the Pretty Printer) - specifically, the pprint-vector example. 
++
++
++If pprint-logical-block is given a `list' argument of nil---because it is not processing a list - pprint-pop can still be used to obtain support for *print-length*. In this situation, the first and third tests above are disabled and pprint-pop always returns nil. see section {\secref\PrettyPrinterExamples} - specifically, the pprint-vector example.
++
++
+  Whether or not pprint-pop is fbound in the global environment is implementation-dependent; however, the restrictions on redefinition and shadowing of pprint-pop are the same as for symbols in the COMMON-LISP package which are fbound in the global environment. The consequences of attempting to use pprint-pop outside of pprint-logical-block are undefined.  
+-Examples None.
++
++
++Examples
++
++
++None.
++
+  
+ Side Effects
+  
+@@ -22,19 +49,38 @@
+  
+ Side Effects
+  
++
+ Might cause output to the pretty printing stream associated with the lexically current logical block. 
++
++
+ Affected By
+  
++
+ *print-length*, *print-circle*. 
++
++
+ Exceptional Situations
+  
++
+ An error is signaled (either at macro expansion time or at run time) if a usage of pprint-pop occurs where there is no lexically containing pprint-logical-block form. 
++
++
+ The consequences are undefined if pprint-pop is executed outside of the dynamic extent of this pprint-logical-block. 
++
++
+ See Also
+  
+-pprint-exit-if-list-exhausted, pprint-logical-block. 
++
++ Local Macro PPRINT-EXIT-IF-LIST-EXHAUSTED,
++
++ Macro PPRINT-LOGICAL-BLOCK.
++
++
++
+ Notes
+  
++
+ It is frequently a good idea to call pprint-exit-if-list-exhausted before calling pprint-pop. 
+  
+-The following X3J13 cleanup issues, not part of the specification, apply to this section LEXICAL-CONSTRUCT-GLOBAL-DEFINITIONUNDEFINED PRETTY-PRINT-INTERFACE
+\ No newline at end of file
++
++\
+\ No newline at end of file

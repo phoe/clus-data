@@ -1,0 +1,45 @@
+--- saved-pages-dpans3/cl:restarts:continue.txt	2017-04-27 22:00:04.000000000 +0100
++++ saved-pages-clus/cl:restarts:continue.txt	2017-04-27 22:00:04.000000000 +0100
+@@ -1,4 +1,37 @@
+-CONTINUE
+-Please select which reference to CONTINUE you intended
++Restart CONTINUE
+ 
+-FunctionRestart
+\ No newline at end of file
++
++Data Arguments Required
++
++
++None.
++
++
++Description
++
++
++The continue restart is generally part of protocols where there is a single "obvious" way to continue, such as in break and cerror. Some user-defined protocols may also wish to incorporate it for similar reasons. In general, however, it is more reliable to design a special purpose restart with a name that more directly suits the particular application.
++
++
++Examples
++
++
++
++(let ((x 3))
++  (handler-bind ((error #'(lambda (c) 
++                            (let ((r (find-restart 'continue c))) 
++                              (when r (invoke-restart r))))))
++    (cond ((not (floatp x))
++           (cerror "Try floating it." "~D is not a float." x) (float x))
++          (t x)))) 
++
++→
++
++3.0
++
++
++
++See Also
++
++
++\secref\Restarts, {\secref\InterfacesToRestarts}, Function INVOKE-RESTART, Function CONTINUE, Macro ASSERT, Function CERROR
+\ No newline at end of file

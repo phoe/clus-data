@@ -1,0 +1,96 @@
+--- saved-pages-dpans3/cl:functions:type-error-expected-type.txt	2017-04-27 21:40:15.000000000 +0100
++++ saved-pages-clus/cl:functions:type-error-expected-type.txt	2017-04-27 21:40:15.000000000 +0100
+@@ -2,9 +4,11 @@
+ Syntax
+  
+ 
+-type-error-datum condition => datum
++ type-error-datum condition → datum 
++
++ type-error-expected-type condition → expected-type
++
+  
+-type-error-expected-type condition => expected-type
+  
+ Arguments and Values
+  
+@@ -18,30 +33,68 @@
+ Examples
+  
+ 
++
++;;; TODO fix this so this doesn't always store 7 but val instead
+  (defun fix-digits (condition)
+    (check-type condition type-error)
+-   (let* ((digits '(zero one two three four
+-                   five six seven eight nine))
++  (let* ((digits '(zero one two three four five six seven eight nine)) 
+          (val (position (type-error-datum condition) digits)))
+      (if (and val (subtypep 'fixnum (type-error-expected-type condition)))
+          (store-value 7))))
+  
++→
++
++FIX-DIGITS
++
++
++
+  (defun foo (x)
+    (handler-bind ((type-error #'fix-digits))
+      (check-type x number)
+      (+ x 3)))
+  
++→
++
++FOO
++
++
++
+  (foo 'seven)
+-=>  10
+ 
+-<TT> 
+-Side Effects None.
++→
++
++10 
++
++
++
++Side Effects
++
++
++None.
++
++
++Affected By
++
+  
+-Affected By None.
++None.
++
++
++Exceptional Situations
++
++
++None.
+  
+-Exceptional Situations None.
+  
+ See Also
+  
+-type-error, Section 9 (Conditions) 
+-Notes None.
+\ No newline at end of file
++
++ Condition Type TYPE-ERROR
++
++ {\secref\Conditions}
++
++
++
++Notes
++
++
++None.
+\ No newline at end of file

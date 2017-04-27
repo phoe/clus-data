@@ -1,0 +1,134 @@
+--- saved-pages-dpans3/cl:functions:hash-table-count.txt	2017-04-27 21:54:57.000000000 +0100
++++ saved-pages-clus/cl:functions:hash-table-count.txt	2017-04-27 21:54:57.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-hash-table-count hash-table => count
++ hash-table-count hash-table → count
++
++
+  
+ Arguments and Values
+  
+@@ -14,35 +26,103 @@
+ Examples
+  
+ 
+- (setq table (make-hash-table)) =>  #<HASH-TABLE EQL 0/120 32115135>
+- (hash-table-count table) =>  0
+- (setf (gethash 57 table) "fifty-seven") =>  "fifty-seven"
+- (hash-table-count table) =>  1
+- (dotimes (i 100) (setf (gethash i table) i)) =>  NIL
+- (hash-table-count table) =>  100
+ 
+-<TT> 
+-Side Effects None.
++(defparameter *table* (make-hash-table)) 
++
++→
++
++*TABLE*
++
++
++
++*table* 
++
++→
++
++#<HASH-TABLE EQL 0/120 32115135>
++
++
++
++(hash-table-count *table*) 
++
++→
++
++0
++
++
++
++(setf (gethash 57 *table*) "fifty-seven") 
++
++→
++
++"fifty-seven"
++
++
++
++(hash-table-count *table*) 
++
++→
++
++1
++
++
++
++(dotimes (i 100) 
++  (setf (gethash i *table*) i)) 
++
++→
++
++NIL
++
++
++
++(hash-table-count *table*) 
++
++→
++
++100
++
++
++
++Side Effects
++
++
++None.
++
+  
+ Affected By
+  
+-clrhash, remhash, setf of gethash 
+-Exceptional Situations None.
++
++clrhash, remhash, (setf gethash)
++
++
++Exceptional Situations
++
++
++None.
++
+  
+ See Also
+  
+-hash-table-size 
++
++ Function HASH-TABLE-SIZE
++
++
++
+ Notes
+  
++
+ The following relationships are functionally correct, although in practice using hash-table-count is probably much faster 
+ 
+- (hash-table-count table) == 
+- (loop for value being the hash-values of table count t) == 
+- (let ((total 0))
++
++
++(hash-table-count table) 
++  ≡ (loop for value 
++                          being the hash-values of table
++                        count t) 
++  ≡ (let ((total 0)) 
+    (maphash #'(lambda (key value)
+                 (declare (ignore key value))
+                 (incf total))
+             table)
+    total)
+-
+-<TT>
+\ No newline at end of file

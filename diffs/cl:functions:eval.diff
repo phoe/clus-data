@@ -1,0 +1,137 @@
+--- saved-pages-dpans3/cl:functions:eval.txt	2017-04-27 21:58:09.000000000 +0100
++++ saved-pages-clus/cl:functions:eval.txt	2017-04-27 21:58:09.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-eval form => result*
++ eval form → result*
++
++
+  
+ Arguments and Values
+  
+@@ -17,27 +35,109 @@
+ Examples
+  
+ 
+- (setq form '(1+ a) a 999) =>  999
+- (eval form) =>  1000
+- (eval 'form) =>  (1+ A)
+- (let ((a '(this would break if eval used local value))) (eval form))
+-=>  1000
+ 
+-<TT> 
+-Affected By None.
++(defparameter *form* '(1+ a)) 
++
++→
++
++*FORM*
++
++
++
++(defparameter *a* 999) 
++
++→
++
++*A*
++
++
++
++(eval form) 
++
++→
++
++1000
++
++
++
++(eval 'form) 
++
++→
++
++(1+ A)
++
++
++
++(let ((a '(this would break if eval used local value)))
++  (eval form))
++
++→
++
++1000
++
++
++
++Affected By
++
++
++None.
++
++
++Exceptional Situations
++
++
++None.
+  
+-Exceptional Situations None.
+  
+ See Also
+  
+-  macroexpand-1, Section 3.1.2 (The Evaluation Model) 
++
++Function MACROEXPAND-1, {\secref\EvaluationModel}
++
++
+ Notes
+  
++
+ To obtain the current dynamic value of a symbol, use of symbol-value is equivalent (and usually preferable) to use of eval. 
++
++
+ Note that an eval form involves two levels of evaluation for its argument. First, form is evaluated by the normal argument evaluation mechanism as would occur with any call. The object that results from this normal argument evaluation becomes the value of the form parameter, and is then evaluated as part of the eval form. For example 
+ 
+- (eval (list 'cdr (car '((quote (a . b)) c)))) =>  b
+ 
+-<TT> The argument form (list 'cdr (car '((quote (a . b)) c))) is evaluated in the usual way to produce the argument (cdr (quote (a . b))); eval then evaluates its argument, (cdr (quote (a . b))), to produce b. Since a single evaluation already occurs for any argument form in any function form, eval is sometimes said to perform ``an extra level of evaluation.'' 
+   
+-The following X3J13 cleanup issues, not part of the specification, apply to this section EVALHOOK-STEP-CONFUSIONFIX EVALHOOK-STEP-CONFUSIONX3J13-NOV-89 QUOTE-SEMANTICSNO-COPYING
+\ No newline at end of file
++(eval (list 'cdr (car '((quote (a . b)) c)))) 
++
++→
++
++B
++
++
++
++The argument form
++
++
++
++(list 'cdr (car '((quote (a . b)) c)))
++
++
++
++is evaluated in the usual way to produce the argument
++
++
++
++(cdr (quote (a . b)))
++
++
++
++eval then evaluates its argument,
++
++
++
++(cdr (quote (a . b)))
++
++
++
++to produce b. Since a single evaluation already occurs for any argument form in any function form, eval is sometimes said to perform "an extra level of evaluation."
++
++
++\
+\ No newline at end of file

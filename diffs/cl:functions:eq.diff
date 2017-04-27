@@ -1,0 +1,283 @@
+--- saved-pages-dpans3/cl:functions:eq.txt	2017-04-27 21:57:00.000000000 +0100
++++ saved-pages-clus/cl:functions:eq.txt	2017-04-27 21:57:00.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-eq x y => generalized-boolean
++ eq x y → generalized-boolean
++
++
+  
+ Arguments and Values
+  
+@@ -15,57 +28,232 @@
+ Examples
+  
+ 
+- (eq 'a 'b) =>  false
+- (eq 'a 'a) =>  true
++
++(eq 'a 'b) 
++
++→
++
++false 
++
++
++
++(eq 'a 'a) 
++
++→
++
++true 
++
++
++
+  (eq 3 3)
+-=>  true
+-OR=>  false
+- (eq 3 3.0) =>  false
++
++→
++
++true
++or false 
++
++
++
++(eq 3 3.0) 
++
++→
++
++false 
++
++
++
+  (eq 3.0 3.0)
+-=>  true
+-OR=>  false
++
++→
++
++true
++or false 
++
++
++
+  (eq #c(3 -4) #c(3 -4))
+-=>  true
+-OR=>  false
+- (eq #c(3 -4.0) #c(3 -4)) =>  false
+- (eq (cons 'a 'b) (cons 'a 'c)) =>  false
+- (eq (cons 'a 'b) (cons 'a 'b)) =>  false
++
++→
++
++true
++or false 
++
++
++
++(eq #c(3 -4.0) #c(3 -4)) 
++
++→
++
++false 
++
++
++
++(eq (cons 'a 'b) (cons 'a 'c)) 
++
++→
++
++false 
++
++
++
++(eq (cons 'a 'b) (cons 'a 'b)) 
++
++→
++
++false 
++
++
++
+  (eq '(a . b) '(a . b))
+-=>  true
+-OR=>  false
+- (progn (setq x (cons 'a 'b)) (eq x x)) =>  true
+- (progn (setq x '(a . b)) (eq x x)) =>  true
+- (eq #\A #\A)
+-=>  true
+-OR=>  false
+- (let ((x "Foo")) (eq x x)) =>  true
++
++→
++
++true
++or false 
++
++
++
++(progn (defparameter *x* (cons 'a 'b)) (eq *x* *x*)) 
++
++→
++
++true 
++
++
++
++(progn (defparameter *x* '(a . b)) (eq *x* *x*)) 
++
++→
++
++true 
++
++
++
++(progn (let ((x (cons 'a 'b))) (eq x x))) 
++
++→
++
++true 
++
++
++
++(progn (let ((x '(a . b))) (eq x x))) 
++
++→
++
++true 
++
++
++
++(eq #\\A #\\A) 
++
++→
++
++true
++or false 
++
++
++
++(let ((x "Foo")) (eq x x)) 
++
++→
++
++true 
++
++
++
+  (eq "Foo" "Foo")
+-=>  true
+-OR=>  false
+- (eq "Foo" (copy-seq "Foo")) =>  false
+- (eq "FOO" "foo") =>  false
+- (eq "string-seq" (copy-seq "string-seq")) =>  false
++
++→
++
++true
++or false 
++
++
++
++(eq "Foo" (copy-seq "Foo")) 
++
++→
++
++false 
++
++
++
++(eq "FOO" "foo") 
++
++→
++
++false 
++
++
++
++(eq "string-seq" (copy-seq "string-seq")) 
++
++→
++
++false 
++
++
++
+  (let ((x 5)) (eq x x))
+-=>  true
+-OR=>  false
+ 
+-<TT> 
+-Side Effects None.
++→
++
++true
++or false 
++
++
++
++Side Effects
++
++
++None.
++
+  
+-Affected By None.
++Affected By
++
++
++None.
++
++
++Exceptional Situations
++
++
++None.
+  
+-Exceptional Situations None.
+  
+ See Also
+  
+-eql, equal, equalp, =, Section 3.2 (Compilation) 
++
++ Function EQL
++
++ Function EQUAL
++
++ Function EQUALP
++
++ Function =
++
++ {\secref\Compilation}
++
++
++
+ Notes
++
++
+  Objects that appear the same when printed are not necessarily eq to each other. Symbols that print the same usually are eq to each other because of the use of the intern function. However, numbers with the same value need not be eq, and two similar lists are usually not identical. 
+-An implementation is permitted to make ``copies'' of characters and numbers at any time. The effect is that Common Lisp makes no guarantee that eq is true even when both its arguments are ``the same thing'' if that thing is a character or number. 
++
++
++An implementation is permitted to make "copies" of characters and numbers at any time. The effect is that Common Lisp makes no guarantee that eq is true even when both its arguments are "the same thing" if that thing is a character or number.
++
++
+ Most Common Lisp operators use eql rather than eq to compare objects, or else they default to eql and only use eq if specifically requested to do so. However, the following operators are defined to use eq rather than eql in a way that cannot be overridden by the code which employs them 
+ 
++
++
+ catch           getf     throw  
++
++
+ get             remf            
+-get-properties  remprop  
+ 
+-Figure 5-11.  Operators that always prefer EQ over EQL
+\ No newline at end of file
++
++ get-properties  remprop
+\ No newline at end of file

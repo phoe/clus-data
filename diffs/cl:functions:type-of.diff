@@ -1,0 +1,248 @@
+--- saved-pages-dpans3/cl:functions:type-of.txt	2017-04-27 21:40:13.000000000 +0100
++++ saved-pages-clus/cl:functions:type-of.txt	2017-04-27 21:40:13.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-type-of object => typespec
++ type-of object → typespec
++
++
+  
+ Arguments and Values
+  
+@@ -13,16 +22,32 @@
+  
+ Returns a type specifier, typespec, for a type that has the object as an element. The typespec satisfies the following 
+ 
++
+ 1.  For any object that is an element of some built-in type 
++
+ a.  the type returned is a recognizable subtype of that built-in type. 
++
+ b.  the type returned does not involve and, eql, member, not, or, satisfies, or values. 
++
++
++
+ 2.  For all objects, (typep object (type-of object)) returns true. Implicit in this is that type specifiers which are not valid for use with typep, such as the list form of the function type specifier, are never returned by type-of. 
+-3.  The type returned by type-of is always a recognizable subtype of the class returned by class-of. That is, 
+ 
+- (subtypep (type-of object) (class-of object)) =>  true, true
++ 3. The type returned by type-of is always a recognizable subtype of the class returned by class-of. That is
++
++
++
++
++(subtypep (type-of object) (class-of object)) 
++
++→
++
++true
++true
++
+ 
+-<TT> 
+ 4.  For objects of metaclass structure-class or standard-class,  and for conditions,  type-of returns the proper name of the class returned by class-of if it has a proper name, and otherwise returns the class itself. In particular, for objects created by the constructor function of a structure defined with defstruct without a type option, type-of returns the structure name; and for objects created by make-condition, the typespec is the name of the condition type. 
++
+  5.  For each of the types short-float, single-float, double-float, or long-float of which the object is an element, the typespec is a recognizable subtype of that type.  
+ 
+  
+@@ -30,44 +56,170 @@
+  
+ 
+ 
+-<TT> 
++(type-of 'a) 
++
++→
++
++SYMBOL 
++
+  
+ 
+- (type-of 'a) =>  SYMBOL          
+  (type-of '(1 . 2))
+-=>  CONS
+-OR=>  (CONS FIXNUM FIXNUM)
++
++→
++
++CONS 
++
++→
++
++or (CONS FIXNUM FIXNUM) 
++
++
++
+  (type-of #c(0 1))
+-=>  COMPLEX
+-OR=>  (COMPLEX INTEGER)
+- (defstruct temp-struct x y z) =>  TEMP-STRUCT
+- (type-of (make-temp-struct)) =>  TEMP-STRUCT
++
++→
++
++COMPLEX 
++
++→
++
++or (COMPLEX INTEGER) 
++
++
++
++(defstruct temp-struct x y z) 
++
++→
++
++TEMP-STRUCT 
++
++
++
++(type-of (make-temp-struct)) 
++
++→
++
++TEMP-STRUCT 
++
++
++
+  (type-of "abc")
+-=>  STRING
+-OR=>  (STRING 3)
+- (subtypep (type-of "abc") 'string) =>  true, true
++
++→
++
++STRING 
++
++→
++
++or (STRING 3) 
++
++
++
++(subtypep (type-of "abc") 'string) 
++
++→
++
++true
++true 
++
++
++
+  (type-of (expt 2 40))
+-=>  BIGNUM
+-OR=>  INTEGER
+-OR=>  (INTEGER 1099511627776 1099511627776)
+-OR=>  SYSTEMTWO-WORD-BIGNUM
+-OR=>  FIXNUM
+- (subtypep (type-of 112312) 'integer) =>  true, true
+- (defvar *foo* (make-array 5 element-type t)) =>  *FOO*
+- (class-name (class-of *foo*)) =>  VECTOR
++
++→
++
++BIGNUM 
++
++→
++
++or INTEGER 
++
++→
++
++or (INTEGER 1099511627776 1099511627776) 
++
++→
++
++or SYSTEMTWO-WORD-BIGNUM 
++
++→
++
++or FIXNUM 
++
++
++
++(subtypep (type-of 112312) 'integer) 
++
++→
++
++true
++true 
++
++
++
++(defvar *foo* 
++  (make-array 5 element-type t)) 
++
++→
++
++*FOO* 
++
++
++
++(class-name (class-of *foo*)) 
++
++→
++
++VECTOR 
++
++
++
+  (type-of *foo*)
+-=>  VECTOR
+-OR=>  (VECTOR T 5)
+ 
+-<TT>  
+-Affected By None.
++→
++
++VECTOR 
++
++→
++
++or (VECTOR T 5) 
++
++
++
++Affected By
++
++
++None.
++
++
++Exceptional Situations
++
++
++None.
+  
+-Exceptional Situations None.
+  
+ See Also
+  
+-array-element-type, class-of, defstruct, typecase, typep, Section 4.2 (Types) 
++
++ Function ARRAY-ELEMENT-TYPE
++
++ Function CLASS-OF
++
++ Macro DEFSTRUCT
++
++ Macro TYPECASE
++
++ Function TYPEP
++
++ {\secref\Types}
++
++
++
+ Notes
+  
++
+ Implementors are encouraged to arrange for type-of to return  a portable value.  
+-The following X3J13 cleanup issues, not part of the specification, apply to this section TYPE-OF-AND-PREDEFINED-CLASSESTYPE-OF-HANDLES-FLOATS TYPE-OF-AND-PREDEFINED-CLASSESUNIFY-AND-EXTEND TYPE-OF-UNDERCONSTRAINEDADD-CONSTRAINTS
+\ No newline at end of file
++
++
++\
+\ No newline at end of file

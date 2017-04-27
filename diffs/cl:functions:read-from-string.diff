@@ -1,0 +1,123 @@
+--- saved-pages-dpans3/cl:functions:read-from-string.txt	2017-04-27 21:45:34.000000000 +0100
++++ saved-pages-clus/cl:functions:read-from-string.txt	2017-04-27 21:45:34.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-read-from-string string &optional eof-error-p eof-value &key start end preserve-whitespace => object, position
++ read-from-string string &optional eof-error-p eof-value &key start end preserve-whitespace → object, position
++
++
+  
+ Arguments and Values
+  
+@@ -6,29 +10,74 @@
+  
+ Arguments and Values
+  
++
+ string - a string. 
++
+ eof-error-p - a generalized boolean. The default is true. 
++
+  eof-value - an object.  The default is nil. 
++
+   start, end - bounding index designators of string. The defaults for start and end are 0 and nil, respectively.   
++
+ preserve-whitespace - a generalized boolean. The default is false. 
++
+ object - an object (parsed by the Lisp reader) or the eof-value. 
++
+ position - an integer greater than or equal to zero, and less than or equal to one more than the length of the string. 
++
++
++
+ Description
+  
++
+ Parses the printed representation of an object from the subsequence of string bounded by start and end, as if read had been called on an input stream containing those same characters. 
+-If preserve-whitespace is true, the operation will preserve whitespace[2] as read-preserving-whitespace would do. 
++
++
++If preserve-whitespace is true, the operation will preserve whitespace as read-preserving-whitespace would do.
++
++
+ If an object is successfully parsed, the primary value, object, is the object that was parsed. If eof-error-p is false and if the end of the substring is reached, eof-value is returned. 
+-The secondary value, position, is the index of the first character in the bounded string that was not read. The position may depend upon the value of preserve-whitespace. If the entire string was read, the position returned is either the length of the string or one greater than the length of the string. 
++
++
++The secondary value, position, is the index of the first character in the bounded string that was not read. The position may depend upon the value of preserve-whitespace.
++
++
++If the entire string was read, the position returned is either the length of the string or one greater than the length of the string.
++
++
+ Examples
+  
+ 
+- (read-from-string " 1 3 5" t nil start 2) =>  3, 5
+- (read-from-string "(a b c)") =>  (A B C), 7
+ 
+-<TT> 
+-Side Effects None.
++(read-from-string " 1 3 5" t nil start 2) 
++
++→
++
++3
++5 
++
++
++
++(read-from-string "(a b c)") 
++
++→
++
++(A B C)
++7 
++
++
++
++Side Effects
++
++
++None.
++
++
++Affected By
++
++
++None.
+  
+-Affected By None.
+  
+ Exceptional Situations
+  
+@@ -32,11 +81,23 @@
+  
+ Exceptional Situations
+  
++
+ If the end of the supplied substring occurs before an object can be read, an error is signaled if eof-error-p is true. An error is signaled if the end of the substring occurs in the middle of an incomplete object. 
++
++
+ See Also
+  
+-read, read-preserving-whitespace 
++
++ Function READ
++
++ Function READ-PRESERVING-WHITESPACE
++
++
++
+ Notes
+  
++
+ The reason that position is allowed to be beyond the length of the string is to permit (but not require) the implementation to work by simulating the effect of a trailing delimiter at the end of the bounded string. When preserve-whitespace is true, the position might count the simulated delimiter. 
+-The following X3J13 cleanup issues, not part of the specification, apply to this section RANGE-OF-START-AND-END-PARAMETERSINTEGER-AND-INTEGER-NIL SUBSEQ-OUT-OF-BOUNDS ARGUMENTS-UNDERSPECIFIEDSPECIFY
+\ No newline at end of file
++
++
++\
+\ No newline at end of file

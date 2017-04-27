@@ -1,0 +1,115 @@
+--- saved-pages-dpans3/cl:macros:prog2.txt	2017-04-27 21:55:59.000000000 +0100
++++ saved-pages-clus/cl:macros:prog2.txt	2017-04-27 21:55:59.000000000 +0100
+@@ -1,36 +1,34 @@
+ Macro PROG1, PROG2 
+-Syntax
+- 
+ 
+-prog1 first-form form* => result-1
+  
+-prog2 first-form second-form form* => result-2
++Syntax
+  
+-Arguments and Values
+  
+-first-form - a form; evaluated as described below. 
+-second-form - a form; evaluated as described below. 
+-forms - an implicit progn; evaluated as described below. 
+-result-1 - the primary value resulting from the evaluation of first-form. 
+-result-2 - the primary value resulting from the evaluation of second-form. 
+-Description
++ prog1 first-form form* → result-1
+  
++ prog2 {first-form second-form form* → result-2
++====Arguments and Values====
++* first-form - a form; evaluated as described below.
++* second-form - a form; evaluated as described below.
++* forms - an implicit progn; evaluated as described below.
++* result-1 - the primary value resulting from the evaluation of first-form.
++* result-2 - the primary value resulting from the evaluation of second-form.
++====Description====
+ prog1 evaluates first-form and then forms, yielding as its only value the primary value yielded by first-form. 
+-prog2 evaluates first-form, then second-form, and then forms, yielding as its only value the primary value yielded by first-form. 
+-Examples
+- 
+-
+- (setq temp 1) =>  1
+- (prog1 temp (print temp) (incf temp) (print temp))
+->>  1
+->>  2
+-=>  1
+- (prog1 temp (setq temp nil)) =>  2
+- temp =>  NIL
+- (prog1 (values 1 2 3) 4) =>  1 
+- (setq temp (list 'a 'b 'c))
+- (prog1 (car temp) (setf (car temp) 'alpha)) =>  A
+- temp =>  (ALPHA B C)
++prog2 evaluates first-form, then second-form, and then forms, yielding as its only value the primary value yielded by second-form.
++====Examples====
++<blockquote>
++(defparameter *temp* 1) <r>1 </r>
++(prog1 *temp* (print *temp*) (incf *temp*) (print *temp*))
++<o>1
++2 </o>
++<r>1 </r>
++(prog1 *temp* (defparameter *temp* nil)) <r>2</r>
++*temp* <r>NIL </r>
++(prog1 (values 1 2 3) 4) <r>1 </r>
++(defparameter *temp* (list 'a 'b 'c))
++(prog1 (car *temp*) (setf (car *temp*) 'alpha)) <r>A </r>
++*temp* <r>(ALPHA B C) </r>
+  (flet ((swap-symbol-values (x y)
+           (setf (symbol-value x) 
+                 (prog1 (symbol-value y)
+@@ -38,28 +36,25 @@
+    (let ((*foo* 1) (*bar* 2))
+      (declare (special *foo* *bar*))
+      (swap-symbol-values '*foo* '*bar*)
+-     (values *foo* *bar*)))
+-=>  2, 1
+- (setq temp 1) =>  1
+- (prog2 (incf temp) (incf temp) (incf temp)) =>  3
+- temp =>  4
+- (prog2 1 (values 2 3 4) 5) =>  2
+-
+-<TT> 
+-Side Effects None.
+- 
+-Affected By None.
+- 
+-Exceptional Situations None.
+- 
+-See Also
+- 
+-multiple-value-prog1, progn 
+-Notes
+- 
++(values *foo* *bar*))) <r>2
++1 </r>
++(setf *temp* 1) <r>1 </r>
++(prog2 (incf *temp*) (incf *temp*) (incf *temp*)) <r>3 </r>
++*temp* <r>4 </r>
++(prog2 1 (values 2 3 4) 5) <r>2 </r>
++</blockquote>
++====Side Effects====
++None.
++====Affected By====
++None.
++====Exceptional Situations====
++None.
++====See Also====
++* Special Operator MULTIPLE-VALUE-PROG1
++* Special Operator PROGN
++====Notes====
+ prog1 and prog2 are typically used to evaluate one or more forms with side effects and return a value that must be computed before some or all of the side effects happen. 
+-
+- (prog1 form*) ==  (values (multiple-value-prog1 form*))
+- (prog2 form1 form*) ==  (let () form1 (prog1 form*))
+-
+-<TT>
+\ No newline at end of file
++<blockquote>
++(prog1 form*) ≡ (values (multiple-value-prog1 form*))
++(prog2 form1 form*) ≡ (let () form1 (prog1 form*))
++</blockquote>
+\ No newline at end of file

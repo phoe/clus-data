@@ -1,0 +1,104 @@
+--- saved-pages-dpans3/cl:macros:handler-bind.txt	2017-04-27 22:00:18.000000000 +0100
++++ saved-pages-clus/cl:macros:handler-bind.txt	2017-04-27 22:00:18.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-handler-bind ({binding}*) form* => result*
++ handler-bind ({binding}*) form* → result*
++
++
+  
+ 
+ binding= (type handler) 
+@@ -29,9 +54,12 @@
+                 (error #'(lambda ...)))
+    ...)
+ 
+-<TT> 
++
++
+ If any other kind of error is signaled, the second function is called. In either case, neither handler is active while executing the code in the associated function. 
+ 
++
++
+  (defun trap-error-handler (condition)
+    (format *error-output* "~&~A~&" condition)
+    (throw 'trap-errors nil))
+@@ -36,26 +64,65 @@
+    (format *error-output* "~&~A~&" condition)
+    (throw 'trap-errors nil))
+ 
++→
++
++TRAP-ERROR-HANDLER
++
++
++
+  (defmacro trap-errors (&rest forms)
+    `(catch 'trap-errors
+       (handler-bind ((error #'trap-error-handler))
+         ,@forms)))
+  
++→
++
++TRAP-ERRORS
++
++
++
+  (list (trap-errors (signal "Foo.") 1)
+        (trap-errors (error  "Bar.") 2)
+        (+ 1 2))
+->>  Bar.
+-=>  (1 NIL 3)
+ 
+-<TT> 
+-Note that ``Foo.'' is not printed because the condition made by signal is a simple condition, which is not of type error, so it doesn't trigger the handler for error set up by trap-errors. 
+-Side Effects None.
++▷
++
++Bar. 
++
++→
++
++(1 NIL 3)
++
++
++
++Note that "Foo." is not printed because the condition made by signal is a simple condition, which is not of type error, so it doesn't trigger the handler for error set up by trap-errors.
++
++
++Side Effects
+  
+-Affected By None.
+  
+-Exceptional Situations None.
++None.
++
++
++Affected By
++
++
++None.
++
++
++Exceptional Situations
++
++
++None.
++
+  
+ See Also
+  
+-handler-case 
+-Notes None.
+\ No newline at end of file
++
++Macro HANDLER-CASE
++
++
++Notes
++
++
++None.
+\ No newline at end of file

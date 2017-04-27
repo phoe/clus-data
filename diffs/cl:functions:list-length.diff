@@ -1,0 +1,154 @@
+--- saved-pages-dpans3/cl:functions:list-length.txt	2017-04-27 22:02:20.000000000 +0100
++++ saved-pages-clus/cl:functions:list-length.txt	2017-04-27 22:02:20.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-list-length list => length
++ list-length list → length
++
++
+  
+ Arguments and Values
+  
+@@ -14,21 +26,84 @@
+ Examples
+  
+ 
+- (list-length '(a b c d)) =>  4
+- (list-length '(a (b c) d)) =>  3
+- (list-length '()) =>  0
+- (list-length nil) =>  0
++
++(list-length '(a b c d)) 
++
++→
++
++4
++
++
++
++(list-length '(a (b c) d)) 
++
++→
++
++3
++
++
++
++(list-length '()) 
++
++→
++
++0
++
++
++
++(list-length nil) 
++
++→
++
++0
++
++
++
+  (defun circular-list (&rest elements)
+    (let ((cycle (copy-list elements))) 
+      (nconc cycle cycle)))
+- (list-length (circular-list 'a 'b)) =>  NIL
+- (list-length (circular-list 'a)) =>  NIL
+- (list-length (circular-list)) =>  0
+ 
+-<TT> 
+-Side Effects None.
++→
++
++CIRCULAR-LIST
++
++
++
++(list-length (circular-list 'a 'b)) 
++
++→
++
++NIL
++
++
++
++(list-length (circular-list 'a)) 
++
++→
++
++NIL
++
++
++
++(list-length (circular-list)) 
++
++→
++
++0
++
++
++
++Side Effects
++
++
++None.
++
++
++Affected By
++
++
++None.
+  
+-Affected By None.
+  
+ Exceptional Situations
+  
+@@ -32,11 +107,18 @@
+  
+ Exceptional Situations
+  
++
+ Should signal an error of type type-error if list is not a proper list or a circular list. 
++
++
+ See Also
+  
+-length 
+-Notes
++
++Function LENGTH
++
++
++Example Implementation
++
+  
+ list-length could be implemented as follows 
+ 
+@@ -44,10 +128,10 @@
+    (do ((n 0 (+ n 2))           ;Counter.
+         (fast x (cddr fast))    ;Fast pointer leaps by 2.
+         (slow x (cdr slow)))    ;Slow pointer leaps by 1.
+-       (nil)
++      ()
+      ;; If fast pointer hits the end, return the count.
+      (when (endp fast) (return n))
+-     (when (endp (cdr fast)) (return (+ n 1)))
++    (when (endp (cdr fast)) (return (1+ n)))
+      ;; If fast pointer eventually equals slow pointer,
+      ;;  then we must be stuck in a circular list.
+      ;; (A deeper property is the converse if we are
+@@ -57,4 +141,8 @@
+      (when (and (eq fast slow) (> n 0)) (return nil))))
+  
+ 
+-<TT>
+\ No newline at end of file
++
++Notes
++
++
++None.
+\ No newline at end of file

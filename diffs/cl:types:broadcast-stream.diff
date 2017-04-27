@@ -1,0 +1,68 @@
+--- saved-pages-dpans3/cl:types:broadcast-stream.txt	2017-04-27 21:42:35.000000000 +0100
++++ saved-pages-clus/cl:types:broadcast-stream.txt	2017-04-27 21:42:35.000000000 +0100
+@@ -1,24 +1,53 @@
+ System Class BROADCAST-STREAM 
+   
++
+ Class Precedence List
+  
++
+ broadcast-stream, stream, t 
++
++
+ Description
+  
++
+ A broadcast stream is an output stream which has associated with it a set of zero or more output streams such that any output sent to the broadcast stream gets passed on as output to each of the associated output streams. (If a broadcast stream has no component streams, then all output to the broadcast stream is discarded.) 
++
++
+ The set of operations that may be performed on a broadcast stream is the intersection of those for its associated output streams. 
+-Some output operations (e.g., fresh-line) return values based on the state of the stream at the time of the operation.  Since these values might differ for each of the component streams, it is necessary to describe their return value specifically 
+ 
+-*  stream-element-type returns the value from the last component stream, or t if there are no component streams. 
+-*  fresh-line returns the value from the last component stream, or nil if there are no component streams. 
+-*  The functions file-length, file-position, file-string-length, and stream-external-format return the value from the last component stream; if there are no component streams, file-length and file-position return 0, file-string-length returns 1, and stream-external-format returns default. 
+-*  The functions streamp and output-stream-p always return true for broadcast streams. 
+-*  The functions open-stream-p tests whether the broadcast stream is open[2], not whether its component streams are open. 
+-*  The functions input-stream-p and interactive-stream-p return an implementation-defined, generalized boolean value. 
+-*  For the input operations clear-input listen, peek-char, read-byte, read-char-no-hang, read-char, read-line, and unread-char, the consequences are undefined if the indicated operation is performed. However, an implementation is permitted to define such a behavior as an implementation-dependent extension. 
++
++Some output operations (e.g. fresh-line) return values based on the state of the stream at the time of the operation.
++
++
++Since these values might differ for each of the component streams, it is necessary to describe their return value specifically
++
++
++ stream-element-type returns the value from the last component stream, or t if there are no component streams.
++
++ fresh-line returns the value from the last component stream, or nil if there are no component streams.
++
++ The functions file-length, file-position, file-string-length, and stream-external-format return the value from the last component stream; if there are no component streams, file-length and file-position return 0, file-string-length returns 1, and stream-external-format returns default.
++
++ The functions streamp and output-stream-p always return true for broadcast streams.
++
++ The functions open-stream-p tests whether the broadcast stream is open, not whether its component streams are open.
++
++ The functions input-stream-p and interactive-stream-p return an implementation-defined, generalized boolean value.
++
++ For the input operations clear-input listen, peek-char, read-byte, read-char-no-hang, read-char, read-line, and unread-char, the consequences are undefined if the indicated operation is performed. However, an implementation is permitted to define such a behavior as an implementation-dependent extension.
++
++
++
+ For any output operations not having their return values explicitly specified above or elsewhere in this document, it is defined that the values returned by such an operation are the values resulting from performing the operation on the last of its component streams; the values resulting from performing the operation on all preceding streams are discarded. If there are no component streams, the value is implementation-dependent.  
++
++
+ See Also
+  
+-broadcast-stream-streams, make-broadcast-stream 
+   
+-The following X3J13 cleanup issues, not part of the specification, apply to this section BROADCAST-STREAM-RETURN-VALUESCLARIFY-MINIMALLY STREAM-ACCESSADD-TYPES-ACCESSORS TYPE-OF-AND-PREDEFINED-CLASSESUNIFY-AND-EXTEND
+\ No newline at end of file
++ Function BROADCAST-STREAM-STREAMS
++
++ Function MAKE-BROADCAST-STREAM
++
++
++
++\
+\ No newline at end of file

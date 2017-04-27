@@ -1,0 +1,74 @@
+--- saved-pages-dpans3/cl:functions:import.txt	2017-04-27 21:48:08.000000000 +0100
++++ saved-pages-clus/cl:functions:import.txt	2017-04-27 21:48:08.000000000 +0100
+@@ -1,40 +1,44 @@
+ Function IMPORT 
+-Syntax
+- 
+ 
+-import symbols &optional package => t
+  
+-Arguments and Values
++Syntax
+  
+-symbols - a designator for a list of symbols. 
+- package - a package designator.  The default is the current package. 
+-Description
+  
++ import symbols &optional package → t
++====Arguments and Values====
++* symbols - a designator for a list of symbols.
++* package - a package designator. The default is the current package.
++====Description====
+ import adds symbol or symbols to the internals of package, checking for name conflicts with existing symbols either present in package or accessible to it. Once the symbols have been imported, they may be referenced in the importing package without the use of a package prefix when using the Lisp reader. 
+ A name conflict in import between the symbol being imported and a symbol inherited from some other package can be resolved in favor of the symbol being imported by making it a shadowing symbol, or in favor of the symbol already accessible by not doing the import. A name conflict in import with a symbol already present in the package may be resolved by uninterning that symbol, or by not doing the import. 
+-The imported symbol is not automatically exported from the current package, but if it is already present and external, then the fact that it is external is not changed.  If any symbol to be imported has no home package (i.e., (symbol-package symbol) =>  nil), import sets the home package of the symbol to package.  
++The imported symbol is not automatically exported from the current package, but if it is already present and external, then the fact that it is external is not changed.
++If any symbol to be imported has no home package (i.e. when (symbol-package symbol) returns nil), import sets the home package of the symbol to package.
+ If the symbol is already present in the importing package, import has no effect. 
+-Examples
+- 
++====Examples====
++<blockquote>
++(import 'car (make-package 'temp use nil)) <r>T</r>
++(find-symbol "CAR" 'temp) <r>CAR
++INTERNAL </r>
++(find-symbol "CDR" 'temp) <r>NIL
++NIL</r>
++</blockquote>
++The form (import 'editorbuffer) takes the external symbol named buffer in the editor package (this symbol was located when the form was read by the Lisp reader) and adds it to the current package as an internal symbol. The symbol buffer is then present in the current package.
++====Side Effects====
++The package system is modified.
++====Affected By====
++Current state of the package system.
++====Exceptional Situations====
++import signals a correctable error of type package-error if any of the symbols to be imported has the same name (under string=) as some distinct symbol (under eql) already accessible in the package, even if the conflict is with a shadowing symbol of the package.
++====See Also====
++* Function SHADOW
++* Function EXPORT**
+ 
+- (import 'common-lispcar (make-package 'temp use nil)) =>  T
+- (find-symbol "CAR" 'temp) =>  CAR, INTERNAL
+- (find-symbol "CDR" 'temp) =>  NIL, NIL 
+ 
+-<TT> 
+-The form (import 'editorbuffer) takes the external symbol named buffer in the EDITOR package (this symbol was located when the form was read by the Lisp reader) and adds it to the current package as an internal symbol. The symbol buffer is then present in the current package. 
+-Side Effects
+  
+-The package system is modified. 
+-Affected By
++Notes
+  
+-Current state of the package system. 
+-Exceptional Situations
+  
+-import signals a correctable error of type package-error if any of the symbols to be imported has the same name (under string=) as some distinct symbol (under eql) already accessible in the package, even if the conflict is with a shadowing symbol of the package. 
+-See Also
++None.
+  
+-shadow, export 
+-Notes None.
+  
+-The following X3J13 cleanup issues, not part of the specification, apply to this section IMPORT-SETF-SYMBOL-PACKAGE PACKAGE-FUNCTION-CONSISTENCYMORE-PERMISSIVE
+\ No newline at end of file
++\
+\ No newline at end of file

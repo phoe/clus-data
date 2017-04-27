@@ -1,0 +1,133 @@
+--- saved-pages-dpans3/cl:functions:byte-size.txt	2017-04-27 21:52:20.000000000 +0100
++++ saved-pages-clus/cl:functions:byte-size.txt	2017-04-27 21:52:20.000000000 +0100
+@@ -2,12 +4,11 @@
+ Syntax
+  
+ 
+-byte size position => bytespec
++ byte size position → bytespec
+  
++ byte-size  bytespec → size byte-position bytespec → position
+ 
+-byte-size bytespec => size
+  
+-byte-position bytespec => position
+  
+ Arguments and Values
+  
+@@ -11,13 +12,25 @@
+  
+ Arguments and Values
+  
++
+ size, position - a non-negative integer. 
++
+ bytespec - a byte specifier. 
++
++
++
+ Description
+  
+-byte returns a byte specifier that indicates a byte of width size and whose bits have weights 2^position + size - 1 through 2^position, and whose representation is implementation-dependent. 
++
++byte returns a byte specifier that indicates a byte of width size and whose bits have weights 2^(position + size - 1) through 2^position, and whose representation is implementation-dependent.
++
++
+ byte-size returns the number of bits specified by bytespec. 
++
++
+ byte-position returns the position specified by bytespec. 
++
++
+ Examples
+  
+ 
+@@ -21,28 +34,72 @@
+ Examples
+  
+ 
+- (setq b (byte 100 200)) =>  #<BYTE-SPECIFIER size 100 position 200>
+- (byte-size b) =>  100
+- (byte-position b) =>  200
+ 
+-<TT> 
+-Affected By None.
++(defparameter *b* (byte 100 200)) 
++
++→
++
++*B*
++
++
++
++*b* 
++
++→
++
++#<BYTE-SPECIFIER size 100 position 200> 
++
++
++
++(byte-size *b*) 
++
++→
++
++100 
++
++
++
++(byte-position *b*) 
++
++→
++
++200
++
++
++
++Affected By
++
++
++None.
++
++
++Exceptional Situations
++
++
++None.
+  
+-Exceptional Situations None.
+  
+ See Also
+  
+-ldb, dpb 
++
++ Function LDB
++
++ Function DPB
++
++
++
+ Notes
+  
+ 
+- (byte-size (byte j k)) ==  j
+- (byte-position (byte j k)) ==  k
+ 
+-<TT> 
+-A byte of size of 0 is permissible; it refers to a byte of width zero. For example, 
++(byte-size (byte j k)) ≡ j
++(byte-position (byte j k)) ≡ k
++
++
++
++A byte of size of 0 is permissible; it refers to a byte of width zero. For example
++
+ 
+- (ldb (byte 0 3) #o7777) =>  0
+- (dpb #o7777 (byte 0 3) 0) =>  0
+ 
+-<TT>
+\ No newline at end of file
++(ldb (byte 0 3) #o7777) → 0 
++(dpb #o7777 (byte 0 3) 0) → 0
+\ No newline at end of file

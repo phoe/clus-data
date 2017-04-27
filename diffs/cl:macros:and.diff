@@ -1,0 +1,62 @@
+--- saved-pages-dpans3/cl:macros:and.txt	2017-04-27 21:56:33.000000000 +0100
++++ saved-pages-clus/cl:macros:and.txt	2017-04-27 21:56:33.000000000 +0100
+@@ -1,4 +1,54 @@
+-AND
+-Please select which reference to AND you intended
++Macro AND
+ 
+-MacroType Specifier
+\ No newline at end of file
++
++Syntax
++
++
++ and form* → result*
++====Arguments and Values====
++* form - a form.
++* results - the values resulting from the evaluation of the last form, or the symbols nil or t.
++====Description====
++The macro and evaluates each form one at a time from left to right. As soon as any form evaluates to nil, and returns nil without evaluating the remaining forms. If all forms but the last evaluate to true values, and returns the results produced by evaluating the last form.
++If no forms are supplied, (and) returns t.
++and passes back multiple values from the last subform but not from subforms other than the last.
++====Examples====
++<blockquote>
++(when (and (>= n 0)
++(< n (length a-simple-vector))
++           (eq (elt a-simple-vector n) 'foo))
++      (princ "Foo!"))
++</blockquote>
++
++The above expression prints Foo! if element n of a-simple-vector is the symbol foo, provided also that n is indeed a valid index for a-simple-vector. Because and guarantees left-to-right testing of its parts, elt is not called if n is out of range.
++
++<blockquote>
++(defvar *temp1* 1) <r>*TEMP1*</r>
++(defvar *temp2* 1) <r>*TEMP2*</r>
++(defvar *temp3* 1) <r>*TEMP3*</r>
++(and (incf temp1) (incf temp2) (incf temp3)) <r>2 </r>
++(and (eql 2 temp1) (eql 2 temp2) (eql 2 temp3)) <r>true </r>
++(decf temp3) <r>1 </r>
++(and (decf temp1) (decf temp2) (eq temp3 'nil) (decf temp3)) <r>NIL </r>
++(and (eql temp1 temp2) (eql temp2 temp3)) <r>true </r>
++(and) <r>T </r>
++</blockquote>
++
++====Affected By====
++None.
++
++====Exceptional Situations====
++None.
++
++====See Also====
++  * Macro COND
++  * Function EVERY
++  * Special Operator IF
++  * Macro OR
++  * Macro WHEN
++
++====Notes====
++<blockquote>
++(and form) ≡ (let () form)
++(and form1 form2 ...) ≡ (when form1 (and form2 ...))
++</blockquote>
+\ No newline at end of file

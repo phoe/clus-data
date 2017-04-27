@@ -1,0 +1,258 @@
+--- saved-pages-dpans3/cl:special_operators:eval-when.txt	2017-04-27 21:57:51.000000000 +0100
++++ saved-pages-clus/cl:special_operators:eval-when.txt	2017-04-27 21:57:51.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-eval-when (situation*) form* => result*
++ eval-when (situation*) form* → result*
++
++
+  
+ Arguments and Values
+  
+@@ -6,34 +10,58 @@
+  
+ Arguments and Values
+  
++
+  situation - One of the symbols compile-toplevel, load-toplevel, execute, compile, load, or eval. 
+-The use of eval, compile, and load is deprecated.    
++
+ forms - an implicit progn. 
++
+ results - the values of the forms if they are executed, or nil if they are not. 
++
++
++
++The use of eval, compile, and load is deprecated.
++
++
+ Description
+  
++
+  The body of an eval-when form is processed as an implicit progn, but only in the situations listed. 
+- The use of the situations compile-toplevel (or compile) and load-toplevel (or load) controls whether and when evaluation occurs when eval-when appears as a top level form in code processed by compile-file. See Section 3.2.3 (File Compilation). 
++
++
++The use of the situations compile-toplevel (or compile) and load-toplevel (or load) controls whether and when evaluation occurs when eval-when appears as a top level form in code processed by compile-file; see section {\secref\FileCompilation}.
++
++
+ The use of the situation execute (or eval) controls whether evaluation occurs for other eval-when forms; that is, those that are not top level forms, or those in code processed by eval or compile. If the execute situation is specified in such a form, then the body forms are processed as an implicit progn; otherwise, the eval-when form returns nil. 
+  
+- eval-when normally appears as a top level form, but it is meaningful for it to appear as a non-top-level form. However, the compile-time side effects described in Section 3.2 (Compilation) only take place when eval-when appears as a top level form.  
++
++eval-when normally appears as a top level form, but it is meaningful for it to appear as a non-top-level form. However, the compile-time side effects described in {\secref\Compilation} only take place when eval-when appears as a top level form.
++
++
+ Examples
+  
++
+ One example of the use of eval-when is that for the compiler to be able to read a file properly when it uses user-defined reader macros, it is necessary to write 
+ 
++
++
+  (eval-when (compile-toplevel load-toplevel execute)
+-   (set-macro-character #\$ #'(lambda (stream char)
++  (set-macro-character #\$ 
++    #'(lambda (stream char)
+                                 (declare (ignore char))
+-                                (list 'dollar (read stream))))) =>  T
++        (list 'dollar (read stream)))))
++
++
+ 
+-<TT> This causes the call to set-macro-character to be executed in the compiler's execution environment, thereby modifying its reader syntax table. 
++This causes the call to set-macro-character to be executed in the compiler's execution environment, thereby modifying its reader syntax table.
+ 
+-;;;     The EVAL-WHEN in this case is not at toplevel, so only the EXECUTE
+-;;;     keyword is considered. At compile time, this has no effect.
+-;;;     At load time (if the LET is at toplevel), or at execution time
+-;;;     (if the LET is embedded in some other form which does not execute
+-;;;     until later) this sets (SYMBOL-FUNCTION 'FOO1) to a function which
+-;;;     returns 1.
++
++
++;;; The EVAL-WHEN in this case is not at toplevel, so only the 
++;;; EXECUTE keyword is considered. At compile time, this has no 
++;;; effect. At load time (if the LET is at toplevel), or at execution
++;;; time (if the LET is embedded in some other form which does not 
++;;; execute until later) this sets (SYMBOL-FUNCTION 'FOO1) to a function 
++;;; which returns 1.
+  (let ((x 1))
+    (eval-when (execute load-toplevel compile-toplevel)
+      (setf (symbol-function 'foo1) #'(lambda () x))))
+@@ -42,10 +72,11 @@
+ ;;;     it has BOTH a compile time AND a load-time effect of setting
+ ;;;     (SYMBOL-FUNCTION 'FOO2) to a function which returns 2.
+  (eval-when (execute load-toplevel compile-toplevel)
+-   (let ((x 2))
+-     (eval-when (execute load-toplevel compile-toplevel)
++  (let ((x 2)) (eval-when (execute load-toplevel compile-toplevel)
+        (setf (symbol-function 'foo2) #'(lambda () x)))))
+ 
++
++
+ ;;;     If this expression occurs at the toplevel of a file to be compiled,
+ ;;;     it has BOTH a compile time AND a load-time effect of setting the
+ ;;;     function cell of FOO3 to a function which returns 3.
+@@ -52,13 +83,17 @@
+  (eval-when (execute load-toplevel compile-toplevel)
+    (setf (symbol-function 'foo3) #'(lambda () 3)))
+  
+-;;; #4 This always does nothing. It simply returns NIL.
++
++
++;;; This always does nothing. It simply returns NIL.
+  (eval-when (compile-toplevel)
+    (eval-when (compile-toplevel) 
+      (print 'foo4)))
+ 
+-;;;     If this form occurs at toplevel of a file to be compiled, FOO5 is
+-;;;     printed at compile time. If this form occurs in a non-top-level
++
++
++;;; If this form occurs at toplevel of a file to be compiled, FOO5 
++;;; is printed at compile time. If this form occurs in a non-top-level
+ ;;;     position, nothing is printed at compile time. Regardless of context,
+ ;;;     nothing is ever printed at load time or execution time.
+  (eval-when (compile-toplevel) 
+@@ -73,22 +110,48 @@
+    (eval-when (compile-toplevel)
+      (print 'foo6)))
+ 
+-<TT> 
+-Affected By None.
+  
+-Exceptional Situations None.
++
++Affected By
++
++
++None.
++
++
++Exceptional Situations
++
++
++None.
++
+  
+ See Also
+  
+-compile-file, Section 3.2 (Compilation) 
++
++Function COMPILE-FILE, {\secref\Compilation}
++
++
+ Notes
+  
++
+  The following effects are logical consequences of the definition of eval-when 
+-*  Execution of a single eval-when expression executes the body code at most once. 
+-*  Macros intended for use in top level forms should be written so that side-effects are done by the forms in the macro expansion. The macro-expander itself should not do the side-effects. 
++
++
++
++Execution of a single eval-when expression executes the body code at most once.
++
++
++
++Macros intended for use in top level forms should be written so that side-effects are done by the forms in the macro expansion. The macro-expander itself should not do the side-effects.
++
++
+ For example 
++
++
+  Wrong 
+ 
++
++
++
+  (defmacro foo ()
+    (really-foo)
+    `(really-foo))
+@@ -93,36 +156,58 @@
+    (really-foo)
+    `(really-foo))
+ 
+-<TT> 
++
+  Right 
+ 
++
++
++
+  (defmacro foo ()
+-   `(eval-when (compile-toplevel execute load-toplevel) (really-foo)))
++  `(eval-when (compile-toplevel execute load-toplevel)
++     (really-foo)))
++
++
+ 
+-<TT> 
+ Adherence to this convention means that such macros behave intuitively when appearing as non-top-level forms. 
+-*  Placing a variable binding around an eval-when reliably captures the binding because the compile-time-too mode cannot occur (i.e., introducing a variable binding means that the eval-when is not a top level form). For example, 
++
++
++
++Placing a variable binding around an eval-when reliably captures the binding because the compile-time-too mode cannot occur (i.e. introducing a variable binding means that the eval-when is not a top level form). For example,
++
++
+ 
+  (let ((x 3))
+-   (eval-when (execute load-toplevel compile-toplevel) (print x)))
++  (eval-when (execute load-toplevel compile-toplevel)
++    (print x))) 
++
++
++
++prints 3 at execution (i.e. load) time, and does not print anything at compile time. This is important so that expansions of defun and defmacro can be done in terms of eval-when and can correctly capture the lexical environment.
++
++
++
++(defun bar (x)
++  (defun foo () (+ x 3)))
+ 
+-<TT> 
+-prints 3 at execution (i.e., load) time, and does not print anything at compile time. This is important so that expansions of defun and defmacro can be done in terms of eval-when and can correctly capture the lexical environment. 
+ 
+- (defun bar (x) (defun foo () (+ x 3)))
+ 
+-<TT> 
+ might expand into 
+ 
++
++
+  (defun bar (x) 
+-   (progn (eval-when (compile-toplevel) 
++  (progn 
++    (eval-when (compile-toplevel)
+             (compilernotice-function-definition 'foo '(x)))
+           (eval-when (execute load-toplevel)
+             (setf (symbol-function 'foo) #'(lambda () (+ x 3))))))
+ 
+-<TT> 
++
++
+ which would be treated by the above rules the same as 
+ 
++
++
+  (defun bar (x) 
+    (setf (symbol-function 'foo) #'(lambda () (+ x 3))))
+ 
+@@ -126,7 +211,9 @@
+  (defun bar (x) 
+    (setf (symbol-function 'foo) #'(lambda () (+ x 3))))
+ 
+-<TT> 
++
++
+ when the definition of bar is not a top level form. 
+  
+-The following X3J13 cleanup issues, not part of the specification, apply to this section DEFINING-MACROS-NON-TOP-LEVELALLOW EVAL-WHEN-OBSOLETE-KEYWORDSX3J13-MAR-1993 EVAL-WHEN-NON-TOP-LEVELGENERALIZE-EVAL-NEW-KEYWORDS
+\ No newline at end of file
++
++\
+\ No newline at end of file

@@ -1,0 +1,120 @@
+--- saved-pages-dpans3/cl:functions:get-decoded-time.txt	2017-04-27 21:59:18.000000000 +0100
++++ saved-pages-clus/cl:functions:get-decoded-time.txt	2017-04-27 21:59:18.000000000 +0100
+@@ -2,10 +4,11 @@
+ Syntax
+  
+ 
+-get-universal-time <no arguments> => universal-time
++ get-universal-time → universal-time
++
++ get-decoded-time → second, minute, hour, date, month, year, day, daylight-p, zone
+  
+ 
+-get-decoded-time <no arguments> => second, minute, hour, date, month, year, day, daylight-p, zone
+  
+ Arguments and Values
+  
+@@ -18,31 +31,86 @@
+ Examples
+  
+ 
+-;; At noon on July 4, 1976 in Eastern Daylight Time.
+- (get-decoded-time) =>  0, 0, 12, 4, 7, 1976, 6, true, 5
+-;; At exactly the same instant.
+- (get-universal-time) =>  2414332800
+-;; Exactly five minutes later.
+- (get-universal-time) =>  2414333100
+-;; The difference is 300 seconds (five minutes)
+- (- * **) =>  300
+ 
+-<TT> 
+-Side Effects None.
++;;; TODO should the DATE and DAY variables really be called like 
++;;; this? They are confusing. ~phoe
++
++
++
++;;; At noon on July 4, 1976 in Eastern Daylight Time.
++(get-decoded-time) 
++
++→
++
++0     ; second
++0     ; minute
++12    ; hour
++4     ; date - day of month
++7     ; month
++1976  ; year
++6     ; day - day of week
++true  ; daylight-p
++5     ; timezone
++
++
++
++;;; At exactly the same instant.
++(get-universal-time) 
++
++→
++
++2414332800
++
++
++
++;;; Exactly five minutes later.
++(get-universal-time) 
++
++→
++
++2414333100
++
++
++
++;;; The difference is 300 seconds (five minutes)
++(- * **) 
++
++→
++
++300
++
++
++
++Side Effects
++
++
++None.
++
+  
+ Affected By
+  
+-The time of day (i.e., the passage of time), the system clock's ability to keep accurate time, and the accuracy of the system clock's initial setting. 
++
++The time of day (i.e. the passage of time), the system clock's ability to keep accurate time, and the accuracy of the system clock's initial setting.
++
++
+ Exceptional Situations
+  
++
+ An error of type error might be signaled if the current time cannot be determined. 
++
++
+ See Also
+  
+-decode-universal-time, encode-universal-time, Section 25.1.4 (Time) 
++
++decode-universal-time, encode-universal-time, {\secref\Time}
++
++
+ Notes
+  
+ 
+- (get-decoded-time) ==  (decode-universal-time (get-universal-time))
+ 
+-<TT> 
+-No implementation is required to have a way to verify that the time returned is correct. However, if an implementation provides a validity check (e.g., the failure to have properly initialized the system clock can be reliably detected) and that validity check fails, the implementation is strongly encouraged (but not required) to signal an error of type error (rather than, for example, returning a known-to-be-wrong value) that is correctable by allowing the user to interactively set the correct time.
+\ No newline at end of file
++(get-decoded-time) ≡ (decode-universal-time (get-universal-time))
++
++
++
++No implementation is required to have a way to verify that the time returned is correct. However, if an implementation provides a validity check (e.g. the failure to have properly initialized the system clock can be reliably detected) and that validity check fails, the implementation is strongly encouraged (but not required) to signal an error of type error (rather than, for example, returning a known-to-be-wrong value) that is correctable by allowing the user to interactively set the correct time.
+\ No newline at end of file

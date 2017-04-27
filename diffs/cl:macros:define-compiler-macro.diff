@@ -1,0 +1,252 @@
+--- saved-pages-dpans3/cl:macros:define-compiler-macro.txt	2017-04-27 21:57:57.000000000 +0100
++++ saved-pages-clus/cl:macros:define-compiler-macro.txt	2017-04-27 21:57:57.000000000 +0100
+@@ -3,7 +4,9 @@
+ Syntax
+  
+ 
+-define-compiler-macro name lambda-list [[declaration* | documentation]] form* => name
++ define-compiler-macro name lambda-list [[declaration* | documentation]] form* → name
++
++
+  
+ Arguments and Values
+  
+@@ -16,15 +27,32 @@
+  
+  
+ This is the normal mechanism for defining a compiler macro function. Its manner of definition is the same as for defmacro; the only differences are 
+-*  The name can be a function name naming any function or macro. 
+-*  The expander function is installed as a compiler macro function for the name, rather than as a macro function. 
+-*  The &whole argument is bound to the form argument that is passed to the compiler macro function. The remaining lambda-list parameters are specified as if this form contained the function name in the car and the actual arguments in the cdr, but if the car of the actual form is the symbol funcall, then the destructuring of the arguments is actually performed using its cddr instead. 
+-*  Documentation is attached as a documentation string to name (as kind compiler-macro) and to the compiler macro function.  
+-*  Unlike an ordinary macro, a compiler macro can decline to provide an expansion merely by returning a form that is the same as the original (which can be obtained by using &whole). 
++
++
++ The name can be a function name naming any function or macro.
++
++ The expander function is installed as a compiler macro function for the name, rather than as a macro function.
++
++ The &whole argument is bound to the form argument that is passed to the compiler macro function. The remaining lambda-list parameters are specified as if this form contained the function name in the car and the actual arguments in the cdr, but if the car of the actual form is the symbol funcall, then the destructuring of the arguments is actually performed using its cddr instead.
++
++ Documentation is attached as a documentation string to name (as kind compiler-macro) and to the compiler macro function.
++
++ Unlike an ordinary macro, a compiler macro can decline to provide an expansion merely by returning a form that is the same as the original (which can be obtained by using &whole).
++
++
++
+ Examples
+  
+ 
+- (defun square (x) (expt x 2)) =>  SQUARE
++
++(defun square (x) (expt x 2)) 
++
++→
++
++SQUARE
++
++
++
+  (define-compiler-macro square (&whole form arg)
+    (if (atom arg)
+        `(expt ,arg 2)
+@@ -37,22 +65,76 @@
+                          `(expt ,(nth 1 arg) ,(* 2 (nth 2 arg)))
+                          `(expt ,(nth 1 arg) (* 2 ,(nth 2 arg))))
+                      form))
+-         (otherwise `(expt ,arg 2))))) =>  SQUARE
+- (square (square 3)) =>  81
+- (macroexpand '(square x)) =>  (SQUARE X), false
+- (funcall (compiler-macro-function 'square) '(square x) nil)
+-=>  (EXPT X 2)
+- (funcall (compiler-macro-function 'square) '(square (square x)) nil)
+-=>  (EXPT X 4)
+- (funcall (compiler-macro-function 'square) '(funcall #'square x) nil)
+-=>  (EXPT X 2)
++        (otherwise `(expt ,arg 2))))) 
++
++→
++
++SQUARE
++
++
++
++(square (square 3)) 
++
++→
++
++81
++
++
++
++(macroexpand '(square x)) 
++
++→
++
++(SQUARE X)
++false
++
++
++
++(funcall (compiler-macro-function 'square)
++         '(square x) nil)
++
++→
++
++(EXPT X 2)
++
++
++
++(funcall (compiler-macro-function 'square) 
++         '(square (square x)) nil)
++
++→
++
++(EXPT X 4)
++
++
++
++(funcall (compiler-macro-function 'square) 
++         '(funcall #'square x) nil)
++
++→
++
++(EXPT X 2)
++
++
+ 
+  (defun distance-positional (x1 y1 x2 y2)
+    (sqrt (+ (expt (- x2 x1) 2) (expt (- y2 y1) 2))))
+-=>  DISTANCE-POSITIONAL
++
++→
++
++DISTANCE-POSITIONAL
++
++
++
+  (defun distance (&key (x1 0) (y1 0) (x2 x1) (y2 y1))
+    (distance-positional x1 y1 x2 y2))
+-=>  DISTANCE
++
++→
++
++DISTANCE
++
++
++
+  (define-compiler-macro distance (&whole form
+                                   &rest key-value-pairs
+                                   &key (x1 0  x1-p)
+@@ -94,45 +176,82 @@
+                 (let ((temps (loop repeat n collect (gensym))))
+                   `(let ,(loop for i below n
+                                collect (list (nth i temps) (arg i)))
+-                     (distance
+-                       ,@(loop for i below n
++                    (distance ,@(loop for i below n 
+                                append (list (key i) (nth i temps)))))))
+                (t form))))))
+-=>  DISTANCE
++
++→
++
++DISTANCE
++
++
++
+  (dolist (form
+-           '((distance x1 (setq x 7) x2 (decf x) y1 (decf x) y2 (decf x))
+-             (distance x1 (setq x 7) y1 (decf x) x2 (decf x) y2 (decf x))
+-             (distance x1 (setq x 7) y1 (incf x))
+-             (distance x1 (setq x 7) y1 (incf x) x1 (incf x))
++          '((distance x1 (setf x 7) x2 (decf x) y1 (decf x) y2 (decf x))
++            (distance x1 (setf x 7) y1 (decf x) x2 (decf x) y2 (decf x))
++            (distance x1 (setf x 7) y1 (incf x))
++            (distance x1 (setf x 7) y1 (incf x) x1 (incf x))
+              (distance x1 a1 y1 b1 x2 a2 y2 b2)
+              (distance x1 a1 x2 a2 y1 b1 y2 b2)
+              (distance x1 a1 y1 b1 z1 c1 x2 a2 y2 b2 z2 c2)))
+    (print (funcall (compiler-macro-function 'distance) form nil)))
+->>  (LET ((#G6558 (SETQ X 7))
+->>        (#G6559 (DECF X))
+->>        (#G6560 (DECF X))
+->>        (#G6561 (DECF X)))
+->>    (DISTANCE X1 #G6558 X2 #G6559 Y1 #G6560 Y2 #G6561)) 
+->>  (DISTANCE-POSITIONAL (SETQ X 7) (DECF X) (DECF X) (DECF X)) 
+->>  (LET ((#G6567 (SETQ X 7))
+->>        (#G6568 (INCF X)))
+->>    (DISTANCE X1 #G6567 Y1 #G6568)) 
+->>  (DISTANCE X1 (SETQ X 7) Y1 (INCF X) X1 (INCF X)) 
+->>  (DISTANCE-POSITIONAL A1 B1 A2 B2) 
+->>  (DISTANCE-POSITIONAL A1 B1 A2 B2) 
+->>  (DISTANCE X1 A1 Y1 B1 Z1 C1 X2 A2 Y2 B2 Z2 C2) 
+-=>  NIL
+ 
+-<TT> 
+-Affected By None.
++▷
++
++(LET ((#G6558 (SETF X 7))
++      (#G6559 (DECF X))
++      (#G6560 (DECF X))
++      (#G6561 (DECF X)))
++(DISTANCE X1 #G6558 X2 #G6559 Y1 #G6560 Y2 #G6561))
++(DISTANCE-POSITIONAL (SETF X 7) (DECF X) (DECF X) (DECF X))
++(LET ((#G6567 (SETF X 7))
++      (#G6568 (INCF X)))
++  (DISTANCE X1 #G6567 Y1 #G6568))
++(DISTANCE X1 (SETF X 7) Y1 (INCF X) X1 (INCF X))
++(DISTANCE-POSITIONAL A1 B1 A2 B2)
++(DISTANCE-POSITIONAL A1 B1 A2 B2)
++(DISTANCE X1 A1 Y1 B1 Z1 C1 X2 A2 Y2 B2 Z2 C2)
++
++→
++
++NIL
++
++
++
++
++Affected By
++
++
++
++None.
++
++
++
++
++Exceptional Situations
++
++
++
++None.
++
++
+  
+-Exceptional Situations None.
+  
+ See Also
+  
+-compiler-macro-function, defmacro, documentation, Section 3.4.11 (Syntactic Interaction of Documentation Strings and Declarations) 
++
++
++Function COMPILER-MACRO-FUNCTION, Macro DEFMACRO, Generic Function DOCUMENTATION, {\secref\DocVsDecls}
++
++
++
++
+ Notes
+  
+-The consequences of writing a compiler macro definition for a function in the COMMON-LISP package are undefined; it is quite possible that in some implementations such an attempt would override an equivalent or equally important definition. In general, it is recommended that a programmer only write compiler macro definitions for functions he or she personally maintains--writing a compiler macro definition for a function maintained elsewhere is normally considered a violation of traditional rules of modularity and data abstraction. 
+  
+-The following X3J13 cleanup issues, not part of the specification, apply to this section DOCUMENTATION-FUNCTION-BUGSFIX DECLS-AND-DOC
+\ No newline at end of file
++
++The consequences of writing a compiler macro definition for a function in the COMMON-LISP package are undefined; it is quite possible that in some implementations such an attempt would override an equivalent or equally important definition. In general, it is recommended that a programmer only write compiler macro definitions for functions he or she personally maintains - writing a compiler macro definition for a function maintained elsewhere is normally considered a violation of traditional rules of modularity and data abstraction.
++
++
++
++\
+\ No newline at end of file

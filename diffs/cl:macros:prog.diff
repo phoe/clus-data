@@ -1,0 +1,195 @@
+--- saved-pages-dpans3/cl:macros:prog.txt	2017-04-27 21:55:56.000000000 +0100
++++ saved-pages-clus/cl:macros:prog.txt	2017-04-27 21:55:56.000000000 +0100
+@@ -3,10 +4,11 @@
+ Syntax
+  
+ 
+-prog ({var | (var [init-form])}*) declaration* {tag | statement}* => result*
++ prog ({var | (var [init-form])}*) declaration* {tag | statement}* → result*
++
++ prog* ({var | (var [init-form])}*) declaration* {tag | statement}* → result*
+  
+ 
+-prog* ({var | (var [init-form])}*) declaration* {tag | statement}* => result*
+  
+ Arguments and Values
+  
+@@ -29,14 +43,22 @@
+        statement4
+   tag2
+        statement5
+-       ...
+-       )
++   ...)
++
++
+ 
+-<TT> 
+ For prog, init-forms are evaluated first, in the order in which they are supplied. The vars are then bound to the corresponding values in parallel. If no init-form is supplied for a given var, that var is bound to nil. 
++
++
+ The body of prog is executed as if it were a tagbody form; the go statement can be used to transfer control to a tag. Tags label statements. 
++
++
+ prog implicitly establishes a block named nil around the entire prog form, so that return can be used at any time to exit from the prog form. 
++
++
+ The difference between prog* and prog is that in prog* the binding and initialization of the vars is done sequentially, so that the init-form for each one can use the values of previous ones. 
++
++
+ Examples
+  
+ 
+@@ -40,37 +62,77 @@
+ Examples
+  
+ 
+-(prog* ((y z) (x (car y)))
++
++(prog* ((y '(1 2 3)) 
++        (x (car y)))
+        (return x))
+ 
+-<TT> returns the car of the value of z. 
++→
++
++1
++
++
++
++(defparameter *a* 1) 
++
++→
++
++*A* 
++
++
++
++(prog ((*a* 2) (b *a*))
++   (return (if (= *a* b) '= '\=))) 
++
++→
++
++\=
++
++
++
++(prog* ((*a* 2) (b *a*)) 
++   (return (if (= *a* b) '= '\=))) 
++
++→
++
++= 
++
++
++
++(prog () 'no-return-value) 
++
++→
++
++NIL
+ 
+- (setq a 1) =>  1
+- (prog ((a 2) (b a)) (return (if (= a b) '= '/=))) =>  /=
+- (prog* ((a 2) (b a)) (return (if (= a b) '= '/=))) =>  =
+- (prog () 'no-return-value) =>  NIL
+ 
+-<TT> 
+ 
+  (defun king-of-confusion (w)
+    "Take a cons of two lists and make a list of conses.
+     Think of this function as being like a zipper."
+    (prog (x y z)          ;Initialize x, y, z to NIL
+-        (setq y (car w) z (cdr w))
++     (setf y (car w) z (cdr w))
+     loop
+         (cond ((null y) (return x))
+               ((null z) (go err)))
+     rejoin
+-        (setq x (cons (cons (car y) (car z)) x))
+-        (setq y (cdr y) z (cdr z))
++     (setf x (cons (cons (car y) (car z)) x)
++           y (cdr y) z (cdr z))
+         (go loop)
+     err
+-        (cerror "Will self-pair extraneous items"
+-                "Mismatch - gleep!  ~S" y)
+-        (setq z y)
+-        (go rejoin))) =>  KING-OF-CONFUSION 
++     (cerror "Will self-pair extraneous items" "Mismatch - gleep! ~S" y) 
++     (setf z y) 
++     (go rejoin))) 
++
++→
++
++KING-OF-CONFUSION 
++
++
++
++This can be accomplished more perspicuously as follows
++
+ 
+-<TT> This can be accomplished more perspicuously as follows 
+ 
+  (defun prince-of-clarity (w)
+    "Take a cons of two lists and make a list of conses.
+@@ -80,22 +142,48 @@
+         (x '() (cons (cons (car y) (car z)) x)))
+        ((null y) x)
+      (when (null z)
+-       (cerror "Will self-pair extraneous items"
+-              "Mismatch - gleep!  ~S" y)
+-       (setq z y)))) =>  PRINCE-OF-CLARITY 
++      (cerror "Will self-pair extraneous items" "Mismatch - gleep! ~S" y)
++      (setf z y)))) 
++
++→
++
++PRINCE-OF-CLARITY
+ 
+-<TT> 
+-Affected By None.
+  
+-Exceptional Situations None.
++
++Affected By
++
++
++None.
++
++
++Exceptional Situations
++
++
++None.
++
+  
+ See Also
+  
+-block, let, tagbody, go, return, Section 3.1 (Evaluation) 
++
++* Special Operator BLOCK
++* Special Operator LET
++* Special Operator TAGBODY
++* Special Operator GO
++* Macro RETURN
++* {\secref\Evaluation}
++
++
+ Notes
++
++
+  prog can be explained in terms of block, let, and tagbody as follows 
+ 
++
++
+  (prog variable-list declaration . body)
+-    ==  (block nil (let variable-list declaration (tagbody . body)))
++  ≡ (block nil (let variable-list declaration (tagbody . body)))
++
++
+ 
+-<TT>
+\ No newline at end of file
++\
+\ No newline at end of file

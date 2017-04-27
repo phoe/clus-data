@@ -1,0 +1,348 @@
+--- saved-pages-dpans3/cl:functions:math-not-less.txt	2017-04-27 21:52:46.000000000 +0100
++++ saved-pages-clus/cl:functions:math-not-less.txt	2017-04-27 21:52:46.000000000 +0100
+@@ -1,76 +1,290 @@
+-Function =, /=, <, >, <=, >= 
++Function EQUAL
++
++
+ Syntax
+  
+ 
+-= &rest numbers+ => generalized-boolean
++ equal x y → generalized-boolean
+  
+-/= &rest numbers+ => generalized-boolean
+  
+-< &rest numbers+ => generalized-boolean
+  
+-> &rest numbers+ => generalized-boolean
++Arguments and Values
+  
+-<= &rest numbers+ => generalized-boolean
+  
+->= &rest numbers+ => generalized-boolean
++ x - an object.
+  
+-Arguments and Values
++ y - an object.
+  
+-number - for <, >, <=, >= a real; for =, /= a number. 
+ generalized-boolean - a generalized boolean. 
++
++
++
+ Description
+  
+-=, /=, <, >, <=, and >= perform arithmetic comparisons on their arguments as follows 
+-=  
+-The value of = is true if all numbers are the same in value; otherwise it is false. Two complexes are considered equal by = if their real and imaginary parts are equal according to =. 
+-/=  
+-The value of /= is true if no two numbers are the same in value; otherwise it is false. 
+-<  
+-The value of < is true if the numbers are in monotonically increasing order; otherwise it is false. 
+->  
+-The value of > is true if the numbers are in monotonically decreasing order; otherwise it is false. 
+-<=  
+-The value of <= is true if the numbers are in monotonically nondecreasing order; otherwise it is false. 
+->=  
+-The value of >= is true if the numbers are in monotonically nonincreasing order; otherwise it is false. 
+-=, /=, <, >, <=, and >= perform necessary type conversions. 
++
++Returns true if x and y are structurally similar (isomorphic) objects. objects are treated as follows by equal.
++
++
++Symbols, numbers and characters
++
++
++equal is true of two objects if they are symbols that are eq, if they are numbers that are eql, or if they are characters that are eql.
++
++
++Conses
++
++
++For conses, equal is defined recursively as the two cars being equal and the two cdrs being equal.
++
++
++Arrays
++
++
++Two arrays are equal only if they are eq, with one exception strings and bit vectors are compared element-by-element (using eql). If either x or y has a fill pointer, the fill pointer limits the number of elements examined by equal. Uppercase and lowercase letters in strings are considered by equal to be different.
++
++
++Pathnames
++
++
++Two pathnames are equal if and only if all the corresponding components (host, device, and so on) are equivalent. Whether or not uppercase and lowercase letters are considered equivalent in strings appearing in components is implementation-dependent. pathnames that are equal should be functionally equivalent.
++
++
++Other (structures, hash-tables, instances, ...)
++
++
++Two other objects are equal only if they are eq.
++
++
++
++equal does not descend any objects other than the ones explicitly specified above. The below table summarizes the information given in the previous list.
++
++
++In addition, the table specifies the priority of the behavior of equal, with upper entries taking priority over lower ones.
++
++
++
++
++ Type  Behavior 
++
++
++
++ number  uses eql 
++
++
++ character  uses eql 
++
++
++ cons  descends 
++
++
++ bit vector  descends 
++
++
++ string  descends 
++
++
++ pathname  "functionally equivalent" 
++
++
++ structure  uses eq 
++
++
++ Other array  uses eq 
++
++
++ hash table  uses eq 
++
++
++ Other object  uses eq 
++
++
++
++Any two objects that are eql are also equal.
++
++
++equal may fail to terminate if x or y is circular.
++
++
+ Examples
+  
+-The uses of these functions are illustrated in the next figure. 
+ 
+-(= 3 3) is true.              (/= 3 3) is false.             
+-(= 3 5) is false.             (/= 3 5) is true.              
+-(= 3 3 3 3) is true.          (/= 3 3 3 3) is false.         
+-(= 3 3 5 3) is false.         (/= 3 3 5 3) is false.         
+-(= 3 6 5 2) is false.         (/= 3 6 5 2) is true.          
+-(= 3 2 3) is false.           (/= 3 2 3) is false.           
+-(< 3 5) is true.              (<= 3 5) is true.              
+-(< 3 -5) is false.            (<= 3 -5) is false.            
+-(< 3 3) is false.             (<= 3 3) is true.              
+-(< 0 3 4 6 7) is true.        (<= 0 3 4 6 7) is true.        
+-(< 0 3 4 4 6) is false.       (<= 0 3 4 4 6) is true.        
+-(> 4 3) is true.              (>= 4 3) is true.              
+-(> 4 3 2 1 0) is true.        (>= 4 3 2 1 0) is true.        
+-(> 4 3 3 2 0) is false.       (>= 4 3 3 2 0) is true.        
+-(> 4 3 1 2 0) is false.       (>= 4 3 1 2 0) is false.       
+-(= 3) is true.                (/= 3) is true.                
+-(< 3) is true.                (<= 3) is true.                
+-(= 3.0 #c(3.0 0.0)) is true.  (/= 3.0 #c(3.0 1.0)) is true.  
+-(= 3 3.0) is true.            (= 3.0s0 3.0d0) is true.       
+-(= 0.0 -0.0) is true.         (= 5/2 2.5) is true.           
+-(> 0.0 -0.0) is false.        (= 0 -0.0) is true.            
+-(<= 0 x 9) is true if x is between 0 and 9, inclusive                               
+-(< 0.0 x 1.0) is true if x is between 0.0 and 1.0, exclusive                               
+-(< -1 j (length v)) is true if j is a valid array index for a vector v                               
+ 
+-Figure 12-13.  Uses of /=, =, <, >, <=, and >= 
+-Affected By None.
++(equal 'a 'b) 
++
++→
++
++false 
++
++
++
++(equal 'a 'a) 
++
++→
++
++true 
++
++
++
++(equal 3 3) 
++
++→
++
++true 
++
++
++
++(equal 3 3.0) 
++
++→
++
++false 
++
++
++
++(equal 3.0 3.0) 
++
++→
++
++true 
++
++
++
++(equal #c(3 -4) #c(3 -4)) 
++
++→
++
++true 
++
++
++
++(equal #c(3 -4.0) #c(3 -4)) 
++
++→
++
++false 
++
++
++
++(equal (cons 'a 'b) (cons 'a 'c)) 
++
++→
++
++false 
++
++
++
++(equal (cons 'a 'b) (cons 'a 'b)) 
++
++→
++
++true 
++
++
++
++(equal #\\A #\\A) 
++
++→
++
++true 
++
++
++
++(equal #\\A #\\a) 
++
++→
++
++false 
++
++
++
++(equal "Foo" "Foo") 
++
++→
++
++true 
++
++
++
++(equal "Foo" (copy-seq "Foo")) 
++
++→
++
++true 
++
++
++
++(equal "FOO" "foo") 
++
++→
++
++false 
++
++
++
++(equal "This-string" "This-string") 
++
++→
++
++true 
++
++
++
++(equal "This-string" "this-string") 
++
++→
++
++false 
++
++
++
++Side Effects
++
++
++None.
++
++
++Affected By
++
++
++None.
++
+  
+ Exceptional Situations
+  
+-Might signal type-error if some argument is not a real. Might signal arithmetic-error if otherwise unable to fulfill its contract. 
+-See Also None.
++
++None.
++
++
++See Also
++
++
++ Function EQ
++
++ Function EQL
++
++ Function EQUALP
++
++ Function =
++
++ Function STRING=
++
++ Function STRING-EQUAL
++
++ Function CHAR=
++
++ Function CHAR-EQUAL
++
++ Function TREE-EQUAL
++
++
+  
+ Notes
+  
+-= differs from eql in that (= 0.0 -0.0) is always true, because = compares the mathematical values of its operands, whereas eql compares the representational values, so to speak.
+\ No newline at end of file
++
++Object equality is not a concept for which there is a uniquely determined correct algorithm. The appropriateness of an equality predicate can be judged only in the context of the needs of some particular program. Although these functions take any type of argument and their names sound very generic, equal and equalp are not appropriate for every application.
++
++
++A rough rule of thumb is that two objects are equal if and only if their printed representations are the same.
++
++
++\
+\ No newline at end of file

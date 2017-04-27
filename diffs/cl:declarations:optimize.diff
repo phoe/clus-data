@@ -1,0 +1,119 @@
+--- saved-pages-dpans3/cl:declarations:optimize.txt	2017-04-27 21:58:18.000000000 +0100
++++ saved-pages-clus/cl:declarations:optimize.txt	2017-04-27 21:58:18.000000000 +0100
+@@ -1,32 +1,74 @@
+ Declaration OPTIMIZE 
++
++
+ Syntax
+  
++
+ (optimize {quality | (quality value)}*)  
++
++
++
+ Arguments
+  
++
+ quality - an optimize quality. 
++
+ value - one of the integers 0, 1, 2, or 3. 
++
++
++
+ Valid Context
+  
++
+ declaration or proclamation 
+-Binding Types Affected None.
++
++
++Binding Types Affected
++
++
++None.
++
+  
+ Description
+  
+-Advises the compiler that each quality should be given attention according to the specified corresponding value. Each quality must be a symbol naming an optimize quality; the names and meanings of the standard optimize qualities are shown in the next figure. 
++
++Advises the compiler that each quality should be given attention according to the specified corresponding value. Each quality must be a symbol naming an optimize quality; the names and meanings of the standard optimize qualities are shown below.
++
++
++
+  
+ Name               Meaning                            
++
++
++
+ compilation-speed  speed of the compilation process   
++
++
+ debug              ease of debugging                  
++
++
+ safety             run-time error checking            
++
++
+ space              both code size and run-time space  
++
++
+ speed              speed of the object code           
+ 
+-Figure 3-25.  Optimize qualities  
++
++
+ There may be other, implementation-defined optimize qualities. 
++
++
+ A value 0 means that the corresponding quality is totally unimportant, and 3 that the quality is extremely important; 1 and 2 are intermediate values, with 1 the neutral value. (quality 3) can be abbreviated to quality. 
++
++
+ Note that code which has the optimization (safety 3), or just safety, is called safe code. 
++
++
+ The consequences are unspecified if a quality appears more than once with different values. 
++
++
+ Examples
+  
+ 
+@@ -34,18 +77,27 @@
+    (declare (optimize (safety 2)))
+    (error-check x y)
+    (hairy-setup x)
+-   (do ((i 0 (+ i 1))
+-        (z x (cdr z)))
+-       ((null z))
+-     ;; This inner loop really needs to burn.
++  (do ((i 0 (+ i 1)) (z x (cdr z)))
++      ((null z)) ;; This inner loop really needs to burn.
+      (declare (optimize speed))
+-     (declare (fixnum i))
+-     ))
++    (declare (fixnum i))))
++
++→
++
++OFTEN-USED-SUBROUTINE
++
++
+ 
+-<TT> 
+ See Also
+  
+-declare, declaim, proclaim, Section 3.3.4 (Declaration Scope) 
++
++Symbol DECLARE, Macro DECLAIM, Function PROCLAIM, {\secref\DeclScope}
++
++
+ Notes
+  
+-An optimize declaration never applies to either a variable or a function binding. An optimize declaration can only be a free declaration. For more information, see Section 3.3.4 (Declaration Scope).
+\ No newline at end of file
++
++An optimize declaration never applies to either a variable or a function binding. An optimize declaration can only be a free declaration. For more information, see section {\secref\DeclScope}.
++
++
++\
+\ No newline at end of file

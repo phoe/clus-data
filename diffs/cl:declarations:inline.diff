@@ -1,0 +1,196 @@
+--- saved-pages-dpans3/cl:declarations:inline.txt	2017-04-27 21:58:22.000000000 +0100
++++ saved-pages-clus/cl:declarations:inline.txt	2017-04-27 21:58:22.000000000 +0100
+@@ -1,24 +1,56 @@
+ Declaration INLINE, NOTINLINE 
++
++
+ Syntax
+  
++
+ (inline function-name*) 
++
+ (notinline function-name*) 
++
++
++
+ Arguments
+  
++
+ function-name - a function name. 
++
++
++
+ Valid Context
+  
++
+ declaration or proclamation 
++
++
+ Binding Types Affected
+  
++
+ function 
++
++
+ Description
+  
+- inline specifies that it is desirable for the compiler to produce inline calls to the functions named by function-names; that is, the code for a specified function-name  should be integrated into the calling routine, appearing ``in line'' in place of a procedure call. A compiler is free to ignore this declaration. inline declarations never apply to variable bindings. 
++
++inline specifies that it is desirable for the compiler to produce inline calls to the functions named by function-names; that is, the code for a specified function-name
++
++
++should be integrated into the calling routine, appearing "in line" in place of a procedure call.
++
++
++A compiler is free to ignore this declaration. inline declarations never apply to variable bindings.
++
++
+ If one of the functions mentioned has a lexically apparent local definition (as made by flet or labels), then the declaration applies to that local definition and not to the global function definition. 
++
++
+  While no conforming implementation is required to perform inline expansion of user-defined functions, those implementations that do attempt to recognize the following paradigm 
++
++
+ To define a function f that is not inline by default but for which (declare (inline f)) will make f be locally inlined, the proper definition sequence is 
+ 
++
++
+  (declaim (inline f))
+  (defun f ...)
+  (declaim (notinline f))
+@@ -23,36 +55,117 @@
+  (defun f ...)
+  (declaim (notinline f))
+ 
+-<TT> 
++
++
+ The inline proclamation preceding the defun form ensures that the compiler has the opportunity save the information necessary for inline expansion, and the notinline proclamation following the defun form prevents f from being expanded inline everywhere.  
++
++
+  notinline specifies that it is  undesirable to compile the functions named by function-names in-line. A compiler is not free to ignore this declaration; calls to the specified functions must be implemented as out-of-line subroutine calls. 
++
++
+ If one of the functions mentioned has a lexically apparent local definition (as made by flet or labels), then the declaration applies to that local definition and not to the global function definition. 
+- In the presence of a compiler macro definition for function-name, a notinline declaration prevents that  compiler macro from being used.  An inline declaration may be used to encourage use of compiler macro definitions. inline and notinline declarations otherwise have no effect when the lexically visible definition of function-name is a macro definition.  
+-inline and notinline declarations can be free declarations or bound declarations. inline and notinline declarations of functions that appear before the body of a flet or labels     form that defines that function are bound declarations. Such declarations in other contexts are free declarations. 
++
++
++In the presence of a compiler macro definition for function-name, a notinline declaration prevents that compiler macro from being used.
++
++
++An inline declaration may be used to encourage use of compiler macro definitions. inline and notinline declarations otherwise have no effect when the lexically visible definition of function-name is a macro definition.
++
++
++inline and notinline declarations can be free declarations or bound declarations. inline and notinline declarations of functions that appear before the body of a flet or labels
++
++
++form that defines that function are bound declarations. Such declarations in other contexts are free declarations.
++
++
+ Examples
+  
+ 
+- ;; The globally defined function DISPATCH should be open-coded,
+- ;; if the implementation supports inlining, unless a NOTINLINE 
+- ;; declaration overrides this effect.
++
++The globally defined function dispatch should be open-coded, if the implementation supports inlining, unless a notinline declaration overrides this effect.
+  (declaim (inline dispatch))
+- (defun dispatch (x) (funcall (get (car x) 'dispatch) x))
+- ;; Here is an example where inlining would be encouraged.
+- (defun top-level-1 () (dispatch (read-command)))
+- ;; Here is an example where inlining would be prohibited.
++
++→
++
++implementation-dependent
++
++
++
++(defun dispatch (x)
++  (funcall (get (car x) 'dispatch) x))
++
++→
++
++DISPATCH
++
++
++
++Here is an example where inlining would be encouraged.
++
++
++
++(defun top-level-1 ()
++  (dispatch (read-command)))
++
++→
++
++TOP-LEVEL-1
++
++
++
++Here is an example where inlining would be prohibited.
++
++
++
+  (defun top-level-2 ()
+    (declare (notinline dispatch))
+    (dispatch (read-command)))
+- ;; Here is an example where inlining would be prohibited.
++
++→
++
++TOP-LEVEL-2
++
++
++
++Here is an example where inlining would be prohibited.
++
++
++
+  (declaim (notinline dispatch))
+- (defun top-level-3 () (dispatch (read-command)))
+- ;; Here is an example where inlining would be encouraged.
++
++→
++
++implementation-dependent
++
++
++
++(defun top-level-3 ()
++  (dispatch (read-command)))
++
++→
++
++TOP-LEVEL-3
++
++
++
++Here is an example where inlining would be encouraged.
++
++
++
+  (defun top-level-4 () 
+    (declare (inline dispatch))
+    (dispatch (read-command)))
+ 
+-<TT> 
++→
++
++TOP-LEVEL-4
++
++
++
+ See Also
+  
+-declare, declaim, proclaim 
+-The following X3J13 cleanup issues, not part of the specification, apply to this section GENERIC-FLET-POORLY-DESIGNEDDELETE WITH-ADDED-METHODSDELETE MACRO-DECLARATIONSMAKE-EXPLICIT ALLOW-LOCAL-INLINEINLINE-NOTINLINE FUNCTION-NAMELARGE
+\ No newline at end of file
++
++Symbol DECLARE, Macro DECLAIM, Function PROCLAIM
++
++
++\
+\ No newline at end of file

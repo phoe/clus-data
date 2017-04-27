@@ -1,0 +1,136 @@
+--- saved-pages-dpans3/cl:functions:make-synonym-stream.txt	2017-04-27 21:43:25.000000000 +0100
++++ saved-pages-clus/cl:functions:make-synonym-stream.txt	2017-04-27 21:43:25.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+  
+ 
+-make-synonym-stream symbol => synonym-stream
++ make-synonym-stream symbol → synonym-stream
++
++
+  
+ Arguments and Values
+  
+@@ -14,22 +26,82 @@
+ Examples
+  
+ 
+- (setq a-stream (make-string-input-stream "a-stream")
+-        b-stream (make-string-input-stream "b-stream"))
+-=>  #<String Input Stream> 
+- (setq s-stream (make-synonym-stream 'c-stream))
+-=>  #<SYNONYM-STREAM for C-STREAM> 
+- (setq c-stream a-stream)
+-=>  #<String Input Stream> 
+- (read s-stream) =>  A-STREAM
+- (setq c-stream b-stream)
+-=>  #<String Input Stream> 
+- (read s-stream) =>  B-STREAM
+ 
+-<TT> 
+-Side Effects None.
++(defparameter *a-stream* (make-string-input-stream "*a-stream*")) 
++
++→
++
++*A-STREAM* 
++
++
++
++(defparameter *b-stream* (make-string-input-stream "*b-stream*")) 
++
++→
++
++*B-STREAM*
++
++
++
++(defparameter *s-stream* (make-synonym-stream '*c-stream*)) 
++
++→
++
++*S-STREAM*
++
++
++
++*s-stream* 
++
++→
++
++#<SYNONYM-STREAM for *C-STREAM*> 
++
++
++
++(setf *c-stream* *a-stream*) 
++
++→
++
++#<String Input Stream> 
++
++
++
++(read *s-stream*) 
++
++→
++
++*A-STREAM*
++
++
++
++(setf *c-stream* *b-stream*) 
++
++→
++
++#<String Input Stream> 
++
++
++
++(read *s-stream*) 
++
++→
++
++*B-STREAM*
++
++
++
++Side Effects
++
++
++None.
++
++
++Affected By
++
++
++None.
+  
+-Affected By None.
+  
+ Exceptional Situations
+  
+@@ -33,8 +105,21 @@
+  
+ Exceptional Situations
+  
++
+ Should signal type-error if its argument is not a symbol. 
++
++
+ See Also
+  
+-Section 21.1 (Stream Concepts) 
+-Notes None.
+\ No newline at end of file
++
++ {\secref\StreamConcepts}
++
++
++
++Notes
++
++
++None.
++
++
++\
+\ No newline at end of file
