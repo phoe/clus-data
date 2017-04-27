@@ -32,7 +32,7 @@ It should be consistent in style.
 It should belong to the Lisp community and be further developed and extended there.
 \end{enumerate}
 
-The implementation of this idea is a project created by me that I have named the \cl{} \us{}, henceforth abbreviated CLUS.
+The implementation of this idea is a project that I have named the \cl{} \us{}, henceforth abbreviated CLUS.
 
 The dpANS\footnote{Draft preview American National Standard.} source\cite{ANSI:1994:draft} makes it \textbf{editable}.
 
@@ -46,7 +46,7 @@ The goals are to make it \textbf{complete} and \textbf{unified}.
 
 \subsection{Source}
 
-The whole process was made possible by the availability of the \LaTeX{} source code for ``draft preview Americal National Standard'', abbreviated as dpANS, for \cl{}. These sources were put into public domain by Kent M. Pitman and other members of the X3J13 committee.
+The whole process was made possible by the availability of the \TeX{} source code for ``draft preview Americal National Standard'', abbreviated as dpANS, for \cl{}. These sources were put into public domain by Kent M. Pitman and other members of the X3J13 committee.
 
 While not being the actual standard itself, the dpANS is close enough to it to be usable as a proper reference of \cl{} while also being in the public domain, which allows me to create derivative works of it. It turned out to be a feasible source upon which I could begin implementing the first part of the \us{}.
 
@@ -58,7 +58,7 @@ Additionally, I have created a customized version of Doku\-Wiki meant for displa
 
 \subsection{Used methods and tools}
 
-The presence of feasible source for creating a unified and modernized piece of \cl{} documentation allowed me to download the sources and start looking for means of parsing and processing it. The following subchapters describe the tools I have been using and explain the reasons for them being chosen.
+The presence of a feasible source for creating a unified and modernized piece of \cl{} documentation allowed me to download the draft and start looking for means of parsing and processing it. The following subchapters describe the tools I have been using and explain the reasons for them being chosen.
 
 \subsubsection{Main method}
 
@@ -66,7 +66,7 @@ My method of editing the original sources involves cutting the original \TeX fil
 
 Then, I utilize regular expressions to remove comments, replace parts of \TeX markup with their corresponding Doku\-Wiki markup and remove the \TeX macros that do not make sense in the new context. I also automatically create hyperlinks to other pages.
 
-After this semi-automatic process is done, I manually clean and realign the text wherever necessary, manually edit and clean more complicated markup such as mathematical symbols, reindent the tables, fix broken hyperlinks. I also do all required fixes in the specification text. I pay care to ask other people for advice whenever I edit the original text, especially whenever I edit the parts that construct the formal specification (and not e.g. notes, or examples.)
+After this semi-automatic process is done, I manually clean and realign the text wherever necessary, manually edit more complicated markup such as mathematical symbols, reindent the tables, and fix broken hyperlinks. I also do all required fixes in the specification text. I take care to ask other people for advice whenever I edit the original text, especially whenever I change the parts that construct the formal specification (and not e.g. notes, or examples.)
 
 Once the files are parsed and cleaned, I create the proper file structure by renaming and moving the files into the DokuWiki directory tree. Simply moving a file into its proper location immediately allows DokuWiki to be able to render it, so creating or updating files is enough to update the CLUS version visible in the browser.
 
@@ -82,25 +82,27 @@ I ended up doing most of the actual processing of the sources in Notepad++. I fo
 
 \subsubsection{DokuWiki---the engine for displaying HTML}
 
-DokuWiki is a GPL-licensed wiki software written in PHP\footnote{\url{http://php.net/}}. In my experience, it was able to fulfill all the requirements I had for a displaying engine. It simply works and allows me to deliver the contents in a readable and aesthetically pleasing way. It does not need database access and instead relies on flat files, which allows for easy versioning of the data with Git. It has a simple markup syntax that I consider sane. It is extensible and hackable, which so far proves very useful. Also, I have had some previous experience in using and configuring it.
+DokuWiki is a GPL-licensed wiki software written in PHP\footnote{\url{https://php.net/}}. In my experience, it was able to fulfill all the requirements I had for a displaying engine. It simply works and allows me to deliver the contents in a readable and aesthetically pleasing way. It does not need database access and instead relies on flat files, which allows for easy versioning of the data with Git. It has a simple markup syntax that I consider sane. It is extensible and hackable, which so far proves very useful. Also, I have had some previous experience in using and configuring it.
+
+The displaying engine is also a part that can be replaced later for another solution - in this case, I am not bound to DokuWiki as the only displaying engine.
 
 \subsubsection{Regular expressions, GNU coreutils---tools for parsing the sources}
 
-The most important choice that I had to make in the beginning was, how to parse the source files of the dpANS. The source code is a large body of \LaTeX{} code, created by multiple people over a large span of time. It contains highly customized \TeX{} macros, used irregularly among the source code.
+The most important choice that I had to make in the beginning was how to parse the source files of dpANS. The source code is a large body of \LaTeX{} code, created by multiple people over a large span of time. It contains highly customized \TeX{} macros, used irregularly among the source code.
 
 The initial research led me towards \TeX{} parsers written in various languages, such as Parsec\footnote{\url{https://wiki.haskell.org/Parsec}} written in Haskell\footnote{\url{https://wiki.haskell.org/}}. My initial attempts of feeding the dpANS sources to the parsers I found were failures though; the individual bodies of code were too complex and my knowledge about these parsers was too little for me to succeed. I realized that, in order to properly parse the \TeX{} source code of the draft, I would need to create a substantially large set of parsing rules; even afterwards, I would need to spend a lot of time doing manual polishing and fixing of the corner cases, such as \TeX{} macros used only in a few places within the source files or actual mistakes within formatting, such as utilizing function markup for macros and vice versa.
 
-Because of this, I decided to abandon the approach of parsing the standard with a parser capable of processing \TeX{} directly and instead go for a simpler choice: utilizing a set of regular expressions to parse a subset of \TeX{} macros and formatting used. It would mean later polishing the preprocessed data by hand, though I would like to note that this last step would be necessary anyway regardless of the technique used.
+Because of this, I decided to abandon the approach of parsing the standard with a parser capable of processing \TeX{} directly and instead go for a simpler choice: utilizing a set of regular expressions to parse a subset of the used \TeX{}. It would mean later polishing the preprocessed data by hand, though I would like to note that this last step---manual processing and fixing---would be necessary anyway regardless of the technique used.
 
-My editor of choice, Notepad++, contained a powerful enough RegEx engine that was capable of guiding me through the process. Various bulk edits were also made through the assorted Unix utilities: grep, sed, awk, rename.
+My editor of choice, Notepad++, contained a powerful enough RegEx engine that was capable of guiding me through the process. Various bulk edits were also made through assorted Unix utilities: grep, sed, awk, rename.
 
-\subsubsection{Git---versioning system, GitHub---project hosting}
+\subsubsection{Git---versioning system, GitHub---project\\ hosting}
 
 The data for the whole project is kept in a Git repository, stored at GitHub\footnote{\url{https://github.com/phoe/clus-data}} and publicly available. Because DokuWiki keeps all data as flat text files, I can easily modify and deploy new versions of data to upstream websites.
 
 \subsection{Problems encountered}
 
-Most of the problems I have encountered are connected with the dpANS sources being a big and complicated piece of documentation and usage of regular expressions to parse the \TeX{} sources.
+Most of the problems I have encountered are connected with the dpANS sources being a big and complicated piece of documentation, and using regular expressions to parse the \TeX{} sources.
 
 As I have mentioned before, the source code had been created over a lengthy period of time with multiple people contributing to it. Because of that, many parts of the specification are formatted differently: they utilize different \TeX{} macros, specific to the people creating the source and the part of the language that was worked upon. Despite the irregularities, I was able to employ the regular expressions and capabilities of my editor to fix most of the cases globally and fix the corner cases manually.
 
@@ -110,8 +112,8 @@ I have had some minor problems with DokuWiki's rendering and markup capabilities
 
 \subsection{Differences to source materials}
 
-I do not claim that my markup is better than the original \TeX markup of the dpANS---if anything, it is different, allowing me to directly display the contents inside the DokuWiki engine. Most of the work I have done does not regard the markup itself, but rather making tens of minor corrections within the specification regarding to spelling, linking and obvious mistakes\footnote{Such as, quoting the specification page for \texttt{PROG2}: \textit{\textbf{prog2} [returns] the primary value yielded by \textbf{first-form}.}}.
+I do not claim that my markup is better than the original \TeX{} markup of dpANS---if anything, it is different, allowing me to directly display the contents inside the DokuWiki engine. Most of the work I have done does not regard the markup itself, but rather making tens of minor corrections within the specification regarding to spelling, linking and obvious mistakes\footnote{Such as, quoting the specification page for \texttt{PROG2}: \textit{\textbf{prog2} [returns] the primary value yielded by \textbf{first-form}.}}.
 
-If I may make such a bold claim here - as I worked through and with the text of the specification, I got a growing impression that the third draft of the specification, subsequently accepted by the X3J13 committee, lacked a final, global review from an external source that would catch all the minor mistakes and errors in the specification. If I, a person without much experience in Lisp and untrained in creating specifications, am able to catch and fix tens of them inside the \TeX sources, then it was also possible twenty three years ago, when the test of the specification was turned into a standard.
+If I may make such a bold claim here - as I worked through and with the text of the specification, I got a growing impression that the third draft of the specification, subsequently accepted by the X3J13 committee, lacked a final, global review from an external source that would catch all the minor mistakes and errors in the specification. If I, a person without much experience in Lisp and untrained in creating specifications, am able to catch and fix tens of them inside the \TeX{} sources, then it was also possible twenty three years ago, when the test of the specification was turned into a standard.
 
 A major part of my work consists of doing such a ``final review'', which puts me in the position of being one more editor to the \cl{} specification.
