@@ -1045,9 +1045,9 @@
  (:SYMBOL "SHARED-INITIALIZE" :CLUS-URL
   "http://phoe.tymoon.eu/clus/doku.php?id=cl:functions:shared-initialize"
   :CLHS-URL "http://www.lispworks.com/reference/HyperSpec/Body/f_shared.htm")
- (:SYMBOL "CLASS-NAME)" :CLUS-URL
+ (:SYMBOL "(SETF CLASS-NAME)" :CLUS-URL
   "http://phoe.tymoon.eu/clus/doku.php?id=cl:functions:setf-class-name"
-  :CLHS-URL "http://www.lispworks.com/reference/HyperSpec/Body/")
+  :CLHS-URL "http://www.lispworks.com/reference/HyperSpec/Body/f_opsetf.htm")
  (:SYMBOL "REMOVE-METHOD" :CLUS-URL
   "http://phoe.tymoon.eu/clus/doku.php?id=cl:functions:remove-method" :CLHS-URL
   "http://www.lispworks.com/reference/HyperSpec/Body/f_rm_met.htm")
