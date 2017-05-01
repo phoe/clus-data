@@ -4,22 +4,17 @@
  Function DECODE-FLOAT, SCALE-FLOAT, FLOAT-RADIX, FLOAT-SIGN, FLOAT-DIGITS, FLOAT-PRECISION, INTEGER-DECODE-FLOAT 
 -Syntax
 - 
--
 -decode-float float => significand, exponent, sign
 - 
--
 -scale-float float integer => scaled-float
 - 
--
 -float-radix float => float-radix
   
  
 -float-sign float-1 &optional float-2 => signed-float
 - 
--
 -float-digits float => digits1
 - 
--
 -float-precision float => digits2
 +Syntax
   
@@ -77,16 +72,13 @@
  float-precision returns the number of significant radix b digits present in float; if float is a float zero, then the result is an integer zero. 
  For normalized floats, the results of float-digits and float-precision are the same, but the precision is less than the number of representation digits for a denormalized or zero number. 
 -integer-decode-float computes three values that characterize float - the significand scaled so as to be an integer, and the same last two values that are returned by decode-float. If float is zero, integer-decode-float returns zero as the first value. The second value bears the same relationship to the first value as for decode-float 
--
 - (multiple-value-bind (signif expon sign)
 +integer-decode-float computes three values that characterize float - the significand scaled so as to be an integer, and the same last two values that are returned by decode-float. If float is zero, multiple-value-bind (signif expon sign)
                        (integer-decode-float f)
 -   (scale-float (float signif f) expon)) ==  (abs f)
--
 -<TT> 
 -Examples
 - 
--
 - ;; Note that since the purpose of this functionality is to expose
 - ;; details of the implementation, all of these examples are necessarily
 - ;; very implementation-dependent.  Results may vary widely.
@@ -107,7 +99,6 @@
 - (float-precision 1.0) =>  24
 - (float-precision least-positive-single-float) =>  1
 - (integer-decode-float 1.0) =>  8388608, -23, 1
--
 -<TT> 
 -Side Effects None.
 - 
@@ -156,7 +147,6 @@
 -Notes
 - 
 -The product of the first result of decode-float or integer-decode-float, of the radix raised to the power of the second result, and of the third result is exactly equal to the value of float. 
--
 +====See Also====
 +None.
 +====Notes====
@@ -166,15 +156,12 @@
                        (decode-float f)
     (scale-float signif expon))
 -==  (abs f)
--
 -<TT> and 
--
 +≡ (abs f)
   (multiple-value-bind (signif expon sign)
                        (decode-float f)
     (* (scale-float signif expon) sign))
 -==  f
--
 -<TT>
 \ No newline at end of file
 +≡ f

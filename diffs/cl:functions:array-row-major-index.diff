@@ -6,8 +6,6 @@
  
 -array-row-major-index array &rest subscripts => index
 + array-row-major-index array &rest subscripts → index
-+
-+
   
  Arguments and Values
   
@@ -28,19 +26,11 @@
 -Affected By None.
 +(defparameter *a* 
 +  (make-array '(4 7) element-type '(unsigned-byte 8))) 
-+
 +→
-+
 +*A*
-+
-+
-+
 +(array-row-major-index *a* 1 2) 
-+
 +→
-+
 +9
-+
   
 -Exceptional Situations None.
   
@@ -49,38 +39,17 @@
 +  (make-array '(2 3 4) element-type '(unsigned-byte 8) 
 +                       displaced-to *a* 
 +                       displaced-index-offset 4)) 
-+
 +→
-+
 +*B*
-+
-+
-+
 +(array-row-major-index *b* 0 2 1) 
-+
 +→
-+
 +9
-+
-+
-+
 +Affected By
-+
-+
 +None.
-+
-+
 +Exceptional Situations
-+
-+
 +None.
-+
-+
 +See Also
-+
-+
 +None.
-+
   
  Notes
   
@@ -88,7 +57,6 @@
   
  Notes
   
-+
  A possible definition of array-row-major-index, with no error-checking, is 
  
 - (defun array-row-major-index (a &rest subscripts)
@@ -99,7 +67,6 @@
  
 -<TT>
 \ No newline at end of file
-+
 +(defun array-row-major-index (a &rest subscripts)
 +  (apply #'+ (maplist #'(lambda (x y) (* (car x) (apply #'* (cdr y)))) 
 +                      subscripts (array-dimensions a))))

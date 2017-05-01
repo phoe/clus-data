@@ -7,196 +7,92 @@
  
 -FunctionRestart
 \ No newline at end of file
-+
 +Syntax
-+
-+
 + abort &optional condition
-+
 + continue &optional condition → nil
-+
 + muffle-warning &optional condition
-+
 + store-value value &optional condition → nil
-+
 + use-value value &optional condition → nil
-+
-+
-+
 +Arguments and Values
-+
-+
 + value - an object.
-+
 + condition - a condition object, or nil.
-+
-+
-+
 +Description
-+
-+
 +Transfers control to the most recently established applicable restart having the same name as the function. That is, the function abort searches for an applicable abort restart, the function continue searches for an applicable continue restart, and so on.
-+
-+
 +If no such restart exists, the functions continue, store-value, and use-value return nil, and the functions abort and muffle-warning signal an error of type control-error.
-+
-+
 +When condition is non-nil, only those restarts are considered that are either explicitly associated with that condition, or not associated with any condition; that is, the excluded restarts are those that are associated with a non-empty set of conditions of which the given condition is not an element. If condition is nil, all restarts are considered.
-+
-+
 +Examples
-+
-+
 +Example of the **abort** restart
-+
-+
-+
 +(defmacro abort-on-error (&body forms)
 +  `(handler-bind ((error #'abort)) ,@forms))
-+
 +→
-+
 +ABORT-ON-ERROR
-+
-+
-+
 +(abort-on-error (+ 3 5)) 
-+
 +→
-+
 +8
-+
-+
-+
 +(abort-on-error (error "You lose."))
-+
 +▷
-+
 +▷ Returned to Lisp Top Level.
-+
-+
-+
 +Example of the **continue** restart
-+
-+
-+
 +(defun real-sqrt (n)
 +  (when (minusp n)
 +    (cerror "Return sqrt(~D) instead." "Tried to take sqrt(-~D)." n)
 +    (setf n (- n)))
 +  (sqrt n)) 
-+
 +→
-+
 +REAL-SQRT
-+
-+
-+
 +(real-sqrt 4) 
-+
 +→
-+
 +2
-+
-+
-+
 +(real-sqrt -9)
-+
 +✖
-+
 +Error Tried to take sqrt(-9).
 +To continue, type CONTINUE followed by an option number
 +1 Return sqrt(9) instead.
 +2 Return to Lisp Toplevel.
 +Debug> (continue)
 +Return sqrt(9) instead.
-+
 +→
-+
 +3
-+
-+
-+
 +(handler-bind
 +    ((error #'(lambda (c) (continue))))
 +  (real-sqrt -9))
-+
 +→
-+
 +3
-+
-+
-+
 +Example of the **muffle-warning** restart
-+
-+
-+
 +(defun count-down (x)
 +  (do ((counter x (1- counter)))
 +      ((= counter 0) 'done)
 +    (when (= counter 1)
 +      (warn "Almost done"))
 +    (format t "~&~D~%" counter)))
-+
 +→
-+
 +COUNT-DOWN
-+
-+
-+
 +(count-down 3)
-+
 +▷
-+
 +3
 +2
 +Warning Almost done
 +1
-+
 +→
-+
 +DONE
-+
-+
-+
 +(defun ignore-warning (condition)
 +  (declare (ignore condition))
 +  (muffle-warning)) 
-+
 +→
-+
 +IGNORE-WARNING
-+
-+
-+
 +(defun ignore-warnings-while-counting (x)
 +  (handler-bind ((warning #'ignore-warning))
 +    (count-down x))) 
-+
 +→
-+
 +IGNORE-WARNINGS-WHILE-COUNTING
-+
-+
-+
 +(ignore-warnings-while-counting 3)
-+
 +▷
-+
 +3
 +2
 +1 
-+
 +→
-+
 +DONE
-+
-+
-+
 +Example of the **store-value** and **use-value** restarts
-+
-+
-+
 +(defun careful-symbol-value (symbol)
 +  (check-type symbol symbol)
 +  (restart-case
@@ -209,157 +105,71 @@
 +    (store-value (value) 
 +      report "Specify a value to store and use in the future."
 +      (setf (symbol-value symbol) value))))
-+
 +→
-+
 +CAREFUL-SYMBOL-VALUE
-+
-+
-+
 +(defparameter *a* 1234) 
-+
 +→
-+
 +1234
-+
-+
-+
 +(careful-symbol-value '*a*) 
-+
 +→
-+
 +1234
-+
-+
-+
 +(makunbound '*a*) 
-+
 +→
-+
 +A
-+
-+
-+
 +(careful-symbol-value '*a*)
-+
 +✖
-+
 +Error *A* is not bound.
 +To continue, type CONTINUE followed by an option number.
 +1 Specify a value to use this time.
 +2 Specify a value to store and use in the future.
 +3 Return to Lisp Toplevel.
 +Debug> (use-value 12)
-+
 +→
-+
 +12
-+
-+
-+
 +(careful-symbol-value '*a*)
-+
 +✖
-+
 +▷ Error *A* is not bound.
 +▷ To continue, type CONTINUE followed by an option number.
 +▷ 1 Specify a value to use this time.
 +▷ 2 Specify a value to store and use in the future.
 +▷ 3 Return to Lisp Toplevel.
 +▷ Debug> (store-value 24)
-+
 +→
-+
 +24
-+
-+
-+
 +(careful-symbol-value '*a*) 
-+
 +→
-+
 +24
-+
-+
-+
 +Example of the **use-value** restart
-+
-+
-+
 +(defun add-symbols-with-default (default &rest symbols)
 +  (handler-bind ((unbound-symbol #'(lambda (c)
 +                                     (declare (ignore c))
 +                                     (use-value default))))
 +  (apply #'+ (mapcar #'careful-symbol-value symbols))))
-+
 +→
-+
 +ADD-SYMBOLS-WITH-DEFAULT
-+
-+
-+
 +(defparameter *x* 1) 
-+
 +→
-+
 +*X*
-+
-+
-+
 +(defparameter *y* 2) 
-+
 +→
-+
 +*Y*
-+
-+
-+
 +(add-symbols-with-default 3 '*x* '*y* '*z*) 
-+
 +→
-+
 +6
-+
-+
-+
 +Side Effects
-+
-+
 +A transfer of control may occur if an appropriate restart is available, or (in the case of the function abort or the function muffle-warning) execution may be stopped.
-+
-+
 +Affected By
-+
-+
 +Each of these functions can be affected by the presence of a restart having the same name.
-+
-+
 +Exceptional Situations
-+
-+
 +If an appropriate abort restart is not available for the function abort, or an appropriate muffle-warning restart is not available for the function muffle-warning, an error of type control-error is signaled.
-+
-+
 +See Also
-+
-+
 +Function INVOKE-RESTART, {\secref\Restarts}, {\secref\InterfacesToRestarts}, Macro ASSERT, Macro CCASE, Function CERROR, Macro CHECK-TYPE, Macro CTYPECASE, Function USE-VALUE, Function WARN
-+
-+
 +Notes
-+
-+
-+
 +(abort condition) ≡ (invoke-restart 'abort)
 +(muffle-warning) ≡ (invoke-restart 'muffle-warning)
 +(continue) ≡ (let ((r (find-restart 'continue))) (when r (invoke-restart r)))
 +(use-value x) ≡ (let ((r (find-restart 'use-value))) (when r (invoke-restart r x)))
 +(store-value x) ≡ (let ((r (find-restart 'store-value))) (when r (invoke-restart r x)))
-+
-+
-+
 +No functions defined in this specification are required to provide a use-value restart.
-+
-+
 +\
 \ No newline at end of file

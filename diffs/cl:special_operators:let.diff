@@ -6,7 +6,6 @@
   
 -let ({var | (var [init-form])}*) declaration* form* => result*
 + let ({var | (var [init-form])}*) declaration* form* → result*
-+
 + let* ({var | (var [init-form])}*) declaration* form* → result*
   
  
@@ -19,14 +18,8 @@
     formn)
  
 -<TT> first evaluates the expressions init-form-1, init-form-2, and so on,  in that order, saving the resulting values. Then all of the variables varj are bound to the corresponding values; each binding is lexical unless there is a special declaration to the contrary. The expressions formk are then evaluated in order; the values of all but the last are discarded (that is, the body of a let is an implicit progn). 
-+
-+
 +first evaluates the expressions init-form-1, init-form-2, and so on, in that order, saving the resulting values. Then all of the variables varj are bound to the corresponding values; each binding is lexical unless there is a special declaration to the contrary. The expressions formk are then evaluated in order; the values of all but the last are discarded (that is, the body of a let is an implicit progn).
-+
-+
  let* is similar to let, but the bindings of variables are performed sequentially rather than in parallel. The expression for the init-form of a var can refer to vars previously bound in the let*. 
-+
-+
  The form 
   
  
@@ -35,17 +28,9 @@
     formn)
  
 -<TT> first evaluates the expression init-form-1, then binds the variable var1 to that value; then it evaluates init-form-2 and binds  var2, and so on. The expressions formj are then evaluated in order; the values of all but the last are discarded (that is, the body of let* is an implicit progn). 
-+
-+
 +first evaluates the expression init-form-1, then binds the variable var1 to that value; then it evaluates init-form-2 and binds var2, and so on. The expressions varj are then evaluated in order; the values of all but the last are discarded (that is, the body of let* is an implicit progn).
-+
-+
  For both let and let*, if there is not an init-form associated with a var, var is initialized to nil. 
-+
-+
  The special form let has the property that the scope of the name binding does not include any initial value form. For let*, a variable's scope also includes the remaining initial value forms for subsequent variable bindings. 
-+
-+
  Examples
   
  
@@ -66,63 +51,31 @@
 -<TT> 
 -The code 
 +(defparameter *a* 'top) 
-+
 +→
-+
 +*A* 
-+
-+
-+
 +(defun dummy-function () *a*) 
-+
 +→
-+
 +DUMMY-FUNCTION 
-+
-+
-+
 +(let ((*a* 'inside) (b *a*)) 
 +  (format nil "~S ~S ~S" *a* b (dummy-function))) 
-+
 +→
-+
 +"INSIDE TOP TOP" 
-+
-+
-+
 +(let* ((*a* 'inside) (b *a*)) 
 +  (format nil "~S ~S ~S" *a* b (dummy-function))) 
-+
 +→
-+
 +"INSIDE INSIDE TOP" 
-+
-+
-+
 +(let ((*a* 'inside) (b *a*)) 
 +  (declare (special *a*)) (format nil "~S ~S ~S" *a* b (dummy-function))) 
-+
 +→
-+
 +"INSIDE TOP INSIDE" 
-+
-+
-+
 +The example below is incorrect; although x is indeed set before it is used, and is set to a value of the declared type integer, nevertheless x initially takes on the value nil in violation of the type declaration.
-+
-+
  
   (let (x)
     (declare (integer x))
 -   (setq x (gcd y z))
 -   ...)
 +  (setf x (gcd y z)) ...)
-+
-+
-+
 +Affected By
-+
-+
 +None.
  
 -<TT> is incorrect; although x is indeed set before it is used, and is set to a value of the declared type integer, nevertheless x initially takes on the value nil in violation of the type declaration. 
@@ -130,22 +83,14 @@
   
 -Exceptional Situations None.
 +Exceptional Situations
-+
-+
 +None.
-+
   
  See Also
   
 -progv 
 -Notes None.
-+
 +Special Operator PROGV
-+
-+
 +Notes
-+
-+
 +None.
   
   

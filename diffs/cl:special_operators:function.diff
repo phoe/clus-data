@@ -7,118 +7,45 @@
  
 -Special OperatorSymbolSystem ClassGlossary Entry
 \ No newline at end of file
-+
 +Syntax
-+
-+
 + function name → function
-+
-+
-+
 +Arguments and Values
-+
-+
 + name - a function name or lambda expression.
-+
 + function - a function object.
-+
-+
-+
 +Description
-+
-+
 +The value of function is the functional value of name in the current lexical environment.
-+
-+
 +If name is a function name, the functional definition of that name is that established by the innermost lexically enclosing flet, labels, or macrolet form, if there is one. Otherwise the global functional definition of the function name is returned.
-+
-+
 +If name is a lambda expression, then a lexical closure is returned. In situations where a closure over the same set of bindings might be produced more than once, the various resulting closures might or might not be eq.
-+
-+
 +It is an error to use function on a function name that does not denote a function in the lexical environment in which the function form appears. Specifically, it is an error to use function on a symbol that denotes a macro or special form. An implementation may choose not to signal this error for performance reasons, but implementations are forbidden from defining the failure to signal an error as a useful behavior.
-+
-+
 +Examples
-+
-+
-+
 +(defun adder (x)
 +  (function (lambda (y) (+ x y)))) 
-+
 +→
-+
 +ADDER
-+
-+
-+
 +The result of (adder 3) is a function that adds 3 to its argument
-+
-+
-+
 +(defparameter *add3* (adder 3)) 
-+
 +→
-+
 +ADD3
-+
-+
-+
 +(funcall *add3* 5) 
-+
 +→
-+
 +8
-+
-+
-+
 +This works because function creates a closure of the lambda expression that is able to refer to the value 3 of the variable x even after control has returned from the function adder.
-+
-+
 +Side Effects
-+
-+
 +None.
-+
-+
 +Affected By
-+
-+
 +None.
-+
-+
 +Exceptional Situations
-+
-+
 +None.
-+
-+
 +See Also
-+
-+
 + Macro DEFUN
-+
 + Function FDEFINITION
-+
 + Special Operator FLET
-+
 + Special Operator LABELS
-+
 + Function SYMBOL-FUNCTION
-+
 + {\secref\SymbolsAsForms}
-+
 + {\secref\SharpsignQuote}
-+
 + {\secref\PrintingOtherObjects}
-+
-+
-+
 +Notes
-+
-+
 +The notation #'name may be used as an abbreviation for (function name).
-+
-+
 +\
 \ No newline at end of file

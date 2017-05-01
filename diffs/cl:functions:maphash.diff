@@ -6,8 +6,6 @@
  
 -maphash function hash-table => nil
 + maphash function hash-table → nil
-+
-+
   
  Arguments and Values
   
@@ -17,23 +15,12 @@
  
 - (setq table (make-hash-table)) =>  #<HASH-TABLE EQL 0/120 32304110>
 - (dotimes (i 10) (setf (gethash i table) i)) =>  NIL
-+
 +(defparameter *table* (make-hash-table)) 
-+
 +→
-+
 +*TABLE*
-+
-+
-+
 +(dotimes (i 10) (setf (gethash i *table*) i)) 
-+
 +→
-+
 +NIL 
-+
-+
-+
   (let ((sum-of-squares 0))
      (maphash #'(lambda (key val) 
                   (let ((square (* val val)))
@@ -43,54 +30,25 @@
 -    sum-of-squares) =>  285
 - (hash-table-count table) =>  10
 +                 (setf (gethash key *table*) square)))
-+
-+
 +table*) 
-+
-+
-+
-+
 +  sum-of-squares) 
-+
 +→
-+
 +285 
-+
-+
-+
 +(hash-table-count *table*) 
-+
 +→
-+
 +10 
-+
-+
-+
   (maphash #'(lambda (key val)
 -               (when (oddp val) (remhash key table)))
 -           table) =>  NIL
 - (hash-table-count table) =>  5
 - (maphash #'(lambda (k v) (print (list k v))) table)
 +             (when (oddp val) (remhash key *table*)))
-+
-+
 +table*) <r>NIL </r>
-+
-+
-+
-+
 +(hash-table-count *table*) 
-+
 +→
-+
 +5 
-+
-+
-+
 +(maphash #'(lambda (k v) (print (list k v))) *table*)
-+
 +▷
-+
  (0 0) 
  (8 64) 
  (2 4) 
@@ -101,10 +59,7 @@
 -<TT> 
 -Side Effects
 +→
-+
 +NIL </blockquote>
-+
-+
   
 +====Side Effects====
  None, other than any which might be done by the function. 
@@ -119,32 +74,13 @@
 \ No newline at end of file
 +====Affected By====
 +None.
-+
-+
-+
 +====Exceptional Situations====
 +None.
-+
-+
-+
 +====See Also====
-+
-+
 + Macro LOOP
-+
 + Macro WITH-HASH-TABLE-ITERATOR,
-+
-+
-+
-+
 +{\secref\TraversalRules}
-+
-+
-+
 +====Notes====
 +None.
-+
-+
-+
 +\
 \ No newline at end of file

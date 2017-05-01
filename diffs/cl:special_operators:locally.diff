@@ -6,8 +6,6 @@
   
 -locally declaration* form* => result*
 + locally declaration* form* → result*
-+
-+
    
  Arguments and Values
   
@@ -16,7 +14,6 @@
   
  
 - (defun sample-function (y)  ;this y is regarded as special
-+
 +(defun sample-function (y) ; This y is regarded as special.
     (declare (special y))                                
 -   (let ((y t))              ;this y is regarded as lexical
@@ -30,36 +27,17 @@
 +    (let ((y t))           ; This y is regarded as lexical. 
 +      (list y (locally (declare (special y))
 +                y))))      ; This y is regarded as special.
-+
 +→
-+
 +SAMPLE-FUNCTION
-+
-+
-+
 +(sample-function nil)
-+
 +→
-+
 +(T NIL)
-+
-+
-+
 +(defparameter *x* '(1 2 3)) 
-+
 +→
-+
 +*X*
-+
-+
-+
 +(defparameter *y* '(4 . 5)) 
-+
 +→
-+
 +*Y*
-+
-+
  
  ;;; The following declarations are not notably useful in specific.
  ;;; They just offer a sample of valid declaration syntax using LOCALLY.
@@ -67,9 +45,7 @@
            (declare (optimize space))
 -    (floor (car x) (cdr y))) =>  0, 1
 +  (floor (car *x*) (cdr *y*)))
-+
 +→
-+
 +0
 +1
  
@@ -87,8 +63,6 @@
  
 -;;; This is like the previous example, except that the optimize settings
 -;;; remain in effect for subsequent definitions in the same compilation unit.
-+
-+
 +;;; This is like the previous example, except that the optimize settings remain
 +;;; in effect for subsequent definitions in the same compilation unit.
   (declaim (optimize (safety 3) (space 3) (speed 0)))
@@ -103,41 +77,23 @@
   
 -Exceptional Situations None.
 +Side Effects
-+
-+
 +None.
-+
-+
 +Affected By
-+
-+
 +None.
-+
-+
 +Exceptional Situations
-+
-+
 +None.
-+
   
  See Also
   
 -declare 
-+
 +Symbol DECLARE
-+
-+
  Notes
   
-+
  The special declaration may be used with locally to affect references to, rather than bindings of, variables. 
 - If a locally form is a top level form, the body forms are also processed as top level forms. See Section 3.2.3 (File Compilation).  
   
 -The following X3J13 cleanup issues, not part of the specification, apply to this section RETURN-VALUES-UNSPECIFIEDSPECIFY LOCALLY-TOP-LEVELSPECIAL-FORM DECLS-AND-DOC
 \ No newline at end of file
-+
 +If a locally form is a top level form, the body forms are also processed as top level forms. see section {\secref\FileCompilation}.
-+
-+
 +\
 \ No newline at end of file

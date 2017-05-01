@@ -6,9 +6,7 @@
  
 -defparameter name initial-value [documentation]  => name
 + defparameter name initial-value [documentation]  → name 
-+
 + defvar  name [initial-value [documentation]] → name
-+
   
 -defvar name [initial-value [documentation]] => name
   
@@ -24,109 +22,48 @@
 - (setq *p* 2) =>  2
 - (defparameter *p* 3) =>  *P*
 - *p* =>  3
--
 - (defvar *v* 1) =>  *V*
 - *v* =>  1
 - (constantp '*v*) =>  false
 - (setq *v* 2) =>  2
 - (defvar *v* 3) =>  *V*
 - *v* =>  2
-+
 +(defparameter *p* 1) 
-+
 +→
-+
 +*P*
-+
-+
-+
 +*p* 
-+
 +→
-+
 +1
-+
-+
-+
 +(constantp '*p*) 
-+
 +→
-+
 +false
-+
-+
-+
 +(defparameter *p* 2) 
-+
 +→
-+
 +2
-+
-+
-+
 +(defparameter *p* 3) 
-+
 +→
-+
 +*P*
-+
-+
-+
 +*p* 
-+
 +→
-+
 +3
-+
-+
-+
 +(defvar *v* 1) 
-+
 +→
-+
 +*V*
-+
-+
-+
 +*v* 
-+
 +→
-+
 +1
-+
-+
-+
 +(constantp '*v*) 
-+
 +→
-+
 +false
-+
-+
-+
 +(defparameter *v* 2) 
-+
 +→
-+
 +2
-+
-+
-+
 +(defvar *v* 3) 
-+
 +→
-+
 +*V*
-+
-+
-+
 +*v* 
-+
 +→
-+
 +2
-+
-+
  
   (defun foo ()
     (let ((*p* 'p) (*v* 'v))
@@ -134,76 +71,39 @@
 - (defun bar () (list *p* *v*)) =>  BAR
 - (foo) =>  (P V)
 +    (bar))) 
-+
 +→
-+
 +FOO
-+
-+
-+
 +(defun bar ()
 +  (list *p* *v*)) 
-+
 +→
-+
 +BAR
-+
-+
-+
 +(foo) 
-+
 +→
-+
 +(P V)
-+
-+
  
 -<TT> 
  The principal operational distinction between defparameter and defvar is that defparameter makes an unconditional assignment to name, while defvar makes a conditional one. In practice, this means that defparameter is useful in situations where loading or reloading the definition would want to pick up a new value of the variable, while defvar is used in situations where the old value would want to be retained if the file were loaded or reloaded. For example, one might create a file which contained 
  
-+
-+
   (defvar *the-interesting-numbers* '())
-+
 +→
-+
 +*THE-INTERESTING-NUMBERS*
-+
-+
-+
   (defmacro define-interesting-number (name n)
     `(progn (defvar ,name ,n)
 -           (pushnew ,name *the-interesting-numbers*)
 -           ',name))
 +     (pushnew ,name *the-interesting-numbers*) ',name)) 
-+
 +→
-+
 +DEFINE-INTERESTING-NUMBER
-+
-+
-+
   (define-interesting-number *my-height* 168) ;cm
-+
 +→
-+
 +(168)
-+
-+
-+
   (define-interesting-number *my-weight* 13)  ;stones
  
 -<TT> 
 +→
-+
 +(13 168)
-+
-+
-+
  Here the initial value, (), for the variable *the-interesting-numbers* is just a seed that we are never likely to want to reset to something else once something has been grown from it. As such, we have used defvar to avoid having the *interesting-numbers* information reset if the file is loaded a second time. It is true that the two calls to define-interesting-number here would be reprocessed, but if there were additional calls in another file, they would not be and that information would be lost. On the other hand, consider the following code 
  
-+
-+
   (defparameter *default-beep-count* 3)
   (defun beep (&optional (n *default-beep-count*))
     (dotimes (i n) (si%beep 1000. 100000.) (sleep 0.1)))
@@ -212,70 +112,37 @@
     (dotimes (i n) (si%beep 1000. 100000.) (sleep 0.1)))
  
 -<TT> 
-+
-+
  Here we could easily imagine editing the code to change the initial value of *default-beep-count*, and then reloading the file to pick up the new value. In order to make value updating easy, we have used defparameter. 
-+
-+
  On the other hand, there is potential value to using defvar in this situation. For example, suppose that someone had predefined an alternate value for *default-beep-count*, or had loaded the file and then manually changed the value. In both cases, if we had used defvar instead of defparameter, those user preferences would not be overridden by (re)loading the file. 
-+
-+
  The choice of whether to use defparameter or defvar has visible consequences to programs, but is nevertheless often made for subjective reasons. 
-+
-+
  Side Effects
   
-+
   If a defvar or defparameter form appears as a top level form, the compiler must recognize that the name has been proclaimed special. However, it must neither evaluate the initial-value form nor assign the dynamic variable named name at compile time.  
-+
-+
  There may be additional (implementation-defined) compile-time or run-time side effects, as long as such effects do not interfere with the correct operation of conforming programs. 
-+
-+
  Affected By
   
-+
  defvar is affected by whether name is already bound. 
 -Exceptional Situations None.
-+
-+
 +Exceptional Situations
-+
-+
 +None.
-+
   
  See Also
   
 -declaim, defconstant, documentation, Section 3.2 (Compilation) 
-+
 + Macro DECLAIM
-+
 + Macro DEFCONSTANT
-+
 + Generic Function DOCUMENTATION
-+
 + {\secref\Compilation}
-+
-+
-+
  Notes
   
-+
  It is customary to name dynamic variables with an asterisk at the beginning and end of the name. e.g., *foo* is a good name for a dynamic variable, but not for a lexical variable; foo is a good name for a lexical variable, but not for a dynamic variable. This naming convention is observed for all defined names in Common Lisp; however, neither conforming programs nor conforming implementations are obliged to adhere to this convention. 
 -The intent of the permission for additional side effects is to allow implementations to do normal ``bookkeeping'' that accompanies definitions. For example, the macro expansion of a defvar or defparameter form might include code that arranges to record the name of the source file in which the definition occurs. 
-+
-+
 +The intent of the permission for additional side effects is to allow implementations to do normal "bookkeeping" that accompanies definitions. For example, the macro expansion of a defvar or defparameter form might include code that arranges to record the name of the source file in which the definition occurs.
-+
-+
  defparameter and defvar might be defined as follows 
  
 - (defmacro defparameter (name initial-value 
 -                         &optional (documentation nil documentation-p))
 -   `(progn (declaim (special ,name))
-+
-+
 +(defmacro defparameter (name initial-value &optional (documentation nil documentation-p))
 +  `(progn 
 +     (declaim (special ,name)) 
@@ -298,8 +165,6 @@
 -              `(setf (documentation ',name 'variable) ',documentation))
 -           ',name))
 +         `(setf (documentation ',name 'variable) ',documentation)) ',name))
-+
-+
  
 -<TT> 
 -The following X3J13 cleanup issues, not part of the specification, apply to this section COMPILE-FILE-HANDLING-OF-TOP-LEVEL-FORMSCLARIFY DEFINING-MACROS-NON-TOP-LEVELALLOW DEFVAR-INITIALIZATIONCONSERVATIVE DEFVAR-DOCUMENTATIONUNEVALUATED DEFVAR-INIT-TIMENOT-DELAYED

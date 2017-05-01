@@ -6,8 +6,6 @@
  
 -gentemp &optional prefix package => new-symbol
 + gentemp &optional prefix package → new-symbol
-+
-+
   
  Arguments and Values
   
@@ -15,28 +13,15 @@
   
  Arguments and Values
   
-+
  prefix - a string. The default is "T". 
-+
  package - a package designator. The default is the current package. 
-+
  new-symbol - a fresh, interned symbol. 
-+
-+
-+
  Description
   
 -gentemp creates and returns a fresh symbol, interned in the indicated package. The symbol is guaranteed to be one that was not previously accessible in package. It is neither bound nor fbound, and has a null property list. 
-+
 +gentemp creates and returns a fresh symbol, interned in the indicated package.
-+
-+
 +The symbol is guaranteed to be one that was not previously accessible in package. It is neither bound nor fbound, and has a null property list.
-+
-+
  The name of the new-symbol is the concatenation of the prefix and a suffix, which is taken from an internal counter used only by gentemp. (If a symbol by that name is already accessible in package, the counter is incremented as many times as is necessary to produce a name that is not already the name of a symbol accessible in package.) 
-+
-+
  Examples
   
  
@@ -55,112 +40,50 @@
  
 -<TT> 
 +(gentemp) 
-+
 +→
-+
 +T1298 
-+
-+
-+
 +(gentemp "FOO") 
-+
 +→
-+
 +FOO1299 
-+
-+
-+
 +(find-symbol "FOO1300") 
-+
 +→
-+
 +NIL, NIL 
-+
-+
-+
 +(gentemp "FOO") 
-+
 +→
-+
 +FOO1300 
-+
-+
-+
 +(find-symbol "FOO1300") 
-+
 +→
-+
 +FOO1300, INTERNAL 
-+
-+
-+
 +(intern "FOO1301") 
-+
 +→
-+
 +FOO1301, INTERNAL 
-+
-+
-+
 +(gentemp "FOO") 
-+
 +→
-+
 +FOO1302 
-+
-+
-+
 +(gentemp) 
-+
 +→
-+
 +T1303 
-+
-+
-+
  Side Effects
   
-+
  Its internal counter is incremented one or more times. 
-+
-+
  Interns the new-symbol in package. 
-+
-+
  Affected By
   
-+
  The current state of its internal counter, and the current state of the package. 
-+
-+
  Exceptional Situations
   
-+
  Should signal an error of type type-error if prefix is not a string. Should signal an error of type type-error if package is not a package designator. 
-+
-+
  See Also
   
 -gensym 
-+
 + Function GENSYM
-+
-+
-+
  Notes
   
-+
  The function gentemp is deprecated. 
 -If package is the KEYWORD package, the result is an external symbol of package. Otherwise, the result is an internal symbol of package. 
-+
-+
 +If package is the package keyword, the result is an external symbol of package. Otherwise, the result is an internal symbol of package.
-+
-+
  The gentemp internal counter is independent of *gensym-counter*, the counter used by gensym. There is no provision for accessing the gentemp internal counter. 
 -Just because gentemp creates a symbol which did not previously exist does not mean that such a symbol might not be seen in the future (e.g., in a data file - perhaps even created by the same program in another session). As such, this symbol is not truly unique in the same sense as a gensym would be. In particular, programs which do automatic code generation should be careful not to attach global attributes to such generated symbols (e.g., special declarations) and then write them into a file because such global attributes might, in a different session, end up applying to other symbols that were automatically generated on another day for some other purpose.
 \ No newline at end of file
-+
-+
 +Just because gentemp creates a symbol which did not previously exist does not mean that such a symbol might not be seen in the future (e.g. in a data file - perhaps even created by the same program in another session). As such, this symbol is not truly unique in the same sense as a gensym would be. In particular, programs which do automatic code generation should be careful not to attach global attributes to such generated symbols (e.g. special declarations) and then write them into a file because such global attributes might, in a different session, end up applying to other symbols that were automatically generated on another day for some other purpose.
 \ No newline at end of file

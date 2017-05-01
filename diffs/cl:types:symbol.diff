@@ -2,116 +2,51 @@
 +++ saved-pages-clus/cl:types:symbol.txt	2017-04-27 21:40:45.000000000 +0100
 @@ -1,32 +1,105 @@
  System Class SYMBOL 
-+
-+
  Class Precedence List
-+
-+
   symbol, t 
-+
-+
  Description
   
-+
  Symbols are used for their object identity to name various entities in Common Lisp, including (but not limited to) linguistic entities such as variables and functions. 
-+
-+
  Symbols can be collected together into packages. A symbol is said to be interned in a package if it is accessible in that package; the same symbol can be interned in more than one package. If a symbol is not interned in any package, it is called uninterned. 
-+
-+
  An interned symbol is uniquely identifiable by its name from any package in which it is accessible. 
 -Symbols have the following attributes. For historical reasons, these are sometimes referred to as cells, although the actual internal representation of symbols and their attributes is implementation-dependent. 
  
 -Name  
 -The name of a symbol is a string used to identify the symbol. Every symbol has a name,  and the consequences are undefined if that name is altered.  The name is used as part of the external, printed representation of the symbol; see Section 2.1 (Character Syntax). The function symbol-name returns the name of a given symbol.  A symbol may have any character in its name.  
-+
 +Symbols have the following attributes.
-+
-+
 +For historical reasons, these are sometimes referred to as cells, although the actual internal representation of symbols and their attributes is implementation-dependent.
-+
-+
 +\beginlist
-+
-+
 +\itemitem{\b{Name}}
-+
-+
 +The name of a symbol is a string used to identify the symbol. Every symbol has a name,
-+
-+
 +and the consequences are undefined if that name is altered.
-+
-+
 +The name is used as part of the external, printed representation of the symbol; see section {\secref\CharacterSyntax}. The function symbol-name returns the name of a given symbol.
-+
-+
 +A symbol may have any character in its name.
-+
-+
  Package  
-+
-+
  The object in this cell is called the home package of the symbol. If the home package is nil, the symbol is sometimes said to have no home package. 
-+
-+
  When a symbol is first created, it has no home package. When it is first interned, the package in which it is initially interned becomes its home package. The home package of a symbol can be accessed by using the function symbol-package. 
-+
-+
  If a symbol is uninterned from the package which is its home package, its home package is set to nil. Depending on whether there is another package in which the symbol is interned, the symbol might or might not really be an uninterned symbol. A symbol with no home package is therefore called apparently uninterned. 
 - The consequences are undefined if an attempt is made to alter the home package of a symbol external in the COMMON-LISP package or the KEYWORD package.  
-+
-+
 +The consequences are undefined if an attempt is made to alter the home package of a symbol
-+
-+
 +external in the package common-lisp or the package keyword.
-+
-+
  Property list  
 -The property list of a symbol provides a mechanism for associating named attributes with that symbol. The operations for adding and removing entries are destructive to the property list. Common Lisp provides operators both for direct manipulation of property list objects (e.g., see getf, remf, and symbol-plist) and for implicit manipulation of a symbol's property list by reference to the symbol (e.g., see get and remprop). The property list associated with a fresh symbol is initially null. 
-+
-+
 +The property list of a symbol provides a mechanism for associating named attributes with that symbol. The operations for adding and removing entries are destructive to the property list. Common Lisp provides operators both for direct manipulation of property list objects (e.g. see getf, remf, and symbol-plist) and for implicit manipulation of a symbol's property list by reference to the symbol (e.g. see get and remprop). The property list associated with a fresh symbol is initially null.
-+
-+
  Value  
-+
-+
  If a symbol has a value attribute, it is said to be bound, and that fact can be detected by the function boundp. The object contained in the value cell of a bound symbol is the value of the global variable named by that symbol, and can be accessed by the function symbol-value. A symbol can be made to be unbound by the function makunbound. 
-+
-+
  The consequences are undefined if an attempt is made to change the value of a symbol that names a constant variable, or to make such a symbol be unbound. 
-+
-+
  Function  
-+
-+
  If a symbol has a function attribute, it is said to be fbound, and that fact can be detected by the function fboundp. If the symbol is the name of a function in the global environment, the function cell contains the function, and can be accessed by the function symbol-function. If the symbol is the name of either a macro in the global environment (see macro-function) or a special operator (see special-operator-p), the symbol is fbound, and can be accessed by the function symbol-function, but the object which the function cell contains is of implementation-dependent type and purpose. A symbol can be made to be funbound by the function fmakunbound. 
-+
-+
  The consequences are undefined if an attempt is made to change the functional value of a symbol that names a special form. 
  
-+
  Operations on a symbol's value cell and function cell are sometimes described in terms of their effect on the symbol itself, but the user should keep in mind that there is an intimate relationship between the contents of those cells and the global variable or global function definition, respectively. 
-+
-+
  Symbols are used as identifiers for lexical variables and lexical function definitions, but in that role, only their object identity is significant. Common Lisp provides no operation on a symbol that can have any effect on a lexical variable or on a lexical function definition. 
-+
-+
  See Also
   
 -Section 2.3.4 (Symbols as Tokens), Section 2.3.1.1 (Potential Numbers as Tokens), Section 22.1.3.3 (Printing Symbols) 
 -The following X3J13 cleanup issues, not part of the specification, apply to this section LISP-SYMBOL-REDEFINITIONMAR89-X3J13 CHARACTER-PROPOSAL2-6-2 CHARACTER-PROPOSAL2-6-3
 \ No newline at end of file
-+
 + {\secref\SymbolTokens}
-+
 + {\secref\PotentialNumbersAsTokens}
-+
 + {\secref\PrintingSymbols}
-+
-+
-+
 +\
 \ No newline at end of file

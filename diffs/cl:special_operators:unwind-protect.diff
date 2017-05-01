@@ -6,8 +6,6 @@
  
 -unwind-protect protected-form cleanup-form* => result*
 + unwind-protect protected-form cleanup-form* → result*
-+
-+
   
  Arguments and Values
   
@@ -16,9 +14,6 @@
   
  
 +In the below example, when go is executed, the call to print is executed first, and then the transfer of control to the tag out is completed.
-+
-+
-+
   (tagbody
     (let ((x 3))
       (unwind-protect
@@ -29,16 +24,9 @@
     ...)
  
 -<TT> When go is executed, the call to print is executed first, and then the transfer of control to the tag out is completed. 
-+
-+
-+
 +(defvar *state*) 
-+
 +→
-+
 +*STATE*
-+
-+
  
   (defun dummy-function (x)
 -    (setq state 'running)
@@ -55,69 +43,33 @@
 +  (unless (numberp x) 
 +    (throw 'abort 'not-a-number))
 +  (setf *state* (1+ x))) 
-+
 +→
-+
 +DUMMY-FUNCTION 
-+
-+
-+
 +(catch 'abort (dummy-function 1)) 
-+
 +→
-+
 +2 
-+
-+
-+
 +*state* 
-+
 +→
-+
 +2 
-+
-+
-+
 +(catch 'abort (dummy-function 'trash)) 
-+
 +→
-+
 +NOT-A-NUMBER
-+
-+
-+
 +*state* 
-+
 +→
-+
 +RUNNING 
-+
-+
-+
 +(catch 'abort 
 +  (unwind-protect 
 +      (dummy-function 'trash) 
 +    (setf *state* 'aborted))) 
-+
 +→
-+
 +NOT-A-NUMBER 
-+
-+
-+
 +*state* 
-+
 +→
-+
 +ABORTED
-+
-+
  
 -<TT> 
  The following code is not correct 
  
-+
-+
   (unwind-protect
 -   (progn (incf *access-count*)
 +    (incf *access-count*)
@@ -125,11 +77,7 @@
     (decf *access-count*))
  
 -<TT> If an exit occurs before completion of incf, the decf form is executed anyway, resulting in an incorrect value for *access-count*. The correct way to code this is as follows 
-+
-+
 +If an exit occurs before completion of incf, the decf form is executed anyway, resulting in an incorrect value for *access-count*. The correct way to code this is as follows
-+
-+
  
   (let ((old-count *access-count*))
     (unwind-protect
@@ -139,7 +87,6 @@
              (perform-access))
 -     (setq *access-count* old-count)))
 +    (setf *access-count* old-count)))
-+
  
 -<TT> 
   
@@ -153,11 +100,7 @@
   
 -;;; The following has undefined consequences.
 +→
-+
 +2
-+
-+
-+
   (block a    
     (block b
 -     (unwind-protect (return-from a 1)
@@ -167,11 +110,7 @@
   
 -;;; The following returns 2.
 +?
-+
 +This has undefined consequences.
-+
-+
-+
   (catch nil 
 -   (unwind-protect (throw nil 1)
 +  (unwind-protect 
@@ -183,15 +122,8 @@
 -;;; its dynamic extent is terminated.  The binding of the catch tag is not
 -;;; yet disestablished and therefore it is the target of the second throw.
 +→
-+
 +2
-+
-+
-+
 +The following has undefined consequences because the catch of b is passed over by the first throw, hence portable programs must assume its dynamic extent is terminated. The binding of the catch tag is not yet disestablished and therefore it is the target of the second throw.
-+
-+
-+
   (catch 'a
     (catch 'b
 -     (unwind-protect (throw 'a 1)
@@ -201,8 +133,6 @@
   
 -;;; The following prints "The inner catch returns SECOND-THROW"
 -;;; and then returns OUTER-CATCH.
-+
-+
   (catch 'foo
           (format t "The inner catch returns ~s.~%"
                   (catch 'foo
@@ -213,18 +143,10 @@
           outer-catch)
   
 +▷
-+
 +The inner catch returns SECOND-THROW
-+
 +→
-+
 +OUTER-CATCH
-+
-+
-+
 +In the following example, the inner catch of a is passed over, but because that catch is disestablished before the throw to a is executed, it isn't seen.
-+
-+
   
 -;;; The following returns 10. The inner CATCH of A is passed over, but 
 -;;; because that CATCH is disestablished before the THROW to A is executed,
@@ -237,14 +159,8 @@
         (throw 'a 10))))
   
 +→
-+
 +10
-+
-+
-+
 +The following has undefined consequences because the extent of the (catch 'bar ...) exit ends when the (throw 'foo ...) commences.
-+
-+
   
 -;;; The following has undefined consequences because the extent of
 -;;; the (CATCH 'BAR ...) exit ends when the (THROW 'FOO ...)
@@ -258,14 +174,8 @@
           (print 'xxx))))
   
 +?
-+
 +This has undefined consequences.
-+
-+
-+
 +In the following example, the (throw 'foo ...) has no effect on the scope of the bar catch tag or the extent of the (catch 'bar ...) exit.
-+
-+
   
 -;;; The following returns 4; XXX is not printed.
 -;;; The (THROW 'FOO ...) has no effect on the scope of the BAR
@@ -279,10 +189,7 @@
           (print 'xxx))))
   
 +→
-+
 +4
-+
-+
   
 -;;; The following prints 5.
   (block nil
@@ -296,24 +203,12 @@
 -<TT> 
 - Affected By None.
 +▷
-+
 +5
-+
 +→
-+
 +NIL
-+
-+
-+
 +Affected By
-+
-+
 +None.
-+
-+
 +Exceptional Situations
-+
-+
 +None.
   
 -Exceptional Situations None.
@@ -326,28 +221,14 @@
 -The following X3J13 cleanup issues, not part of the specification, apply to this section EXIT-EXTENTMINIMAL EXIT-EXTENT-AND-CONDITION-SYSTEMLIKE-DYNAMIC-BINDINGS
 \ No newline at end of file
 + Special Operator CATCH
-+
 + Special Operator GO
-+
 + Macro HANDLER-CASE
-+
 + Macro RESTART-CASE
-+
 + Macro RETURN
-+
 + Special Operator RETURN-FROM
-+
 + Special Operator THROW
-+
 + {\secref\Evaluation}
-+
-+
-+
 +Notes
-+
-+
 +None.
-+
-+
 +\
 \ No newline at end of file

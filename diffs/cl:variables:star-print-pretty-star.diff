@@ -2,37 +2,20 @@
 +++ saved-pages-clus/cl:variables:star-print-pretty-star.txt	2017-04-27 21:45:47.000000000 +0100
 @@ -1,16 +1,33 @@
  Variable *PRINT-PRETTY* 
-+
-+
  Value Type
   
-+
  a generalized boolean. 
-+
-+
  Initial Value
   
-+
  implementation-dependent. 
-+
-+
  Description
   
-+
  Controls whether the Lisp printer calls the pretty printer. 
 -If it is false, the pretty printer is not used and  a minimum  of whitespace[1] is output when printing an expression. 
 -If it is true, the pretty printer is used, and the Lisp printer will endeavor to insert extra whitespace[1] where appropriate to make expressions more readable. 
-+
-+
 +If it is false, the pretty printer is not used and a minimum of whitespace is output when printing an expression.
-+
-+
 +If it is true, the pretty printer is used, and the Lisp printer will endeavor to insert extra whitespace where appropriate to make expressions more readable.
-+
-+
  *print-pretty* has an effect even when the value of *print-escape* is false. 
-+
-+
  Examples
   
   
@@ -45,27 +28,15 @@
 ->>  (LET ((A 1) (B 2) (C 3)) (+ A B C))
 -=>  NIL
 +(setf *print-pretty* 'nil) 
-+
 +→
-+
 +NIL 
-+
-+
-+
 +(progn
 +  (write '(let ((a 1) (b 2) (c 3)) (+ a b c))) 
 +  nil)
-+
 +▷
-+
 +(LET ((A 1) (B 2) (C 3)) (+ A B C))
-+
 +→
-+
 +NIL 
-+
-+
-+
   (let ((*print-pretty* t))
 -   (progn (write '(let ((a 1) (b 2) (c 3)) (+ a b c))) nil))
 ->>  (LET ((A 1)
@@ -79,24 +50,14 @@
 +  (progn
 +    (write '(let ((a 1) (b 2) (c 3)) (+ a b c))) 
 +    nil))
-+
 +▷
-+
 +(LET ((A 1)
 +      (B 2)
 +      (C 3))
 +  (+ A B C))
-+
 +→
-+
 +NIL 
-+
-+
-+
 +Note that the first two expressions printed by this next example differ from the second two only in whether escape characters are printed. In all four cases, extra whitespace is inserted by the pretty printer.
-+
-+
-+
   (flet ((test (x)
            (let ((*print-pretty* t))
              (print x)
@@ -114,9 +75,7 @@
 ->>      (LIST a b 'C #'D))
 -=>  NIL
 +  (test '#'(lambda () (list "a" #\b 'c #'d))))
-+
 +▷
-+
 +#'(LAMBDA ()
 +    (LIST "a" #\b 'C #'D))
 +#'(LAMBDA ()
@@ -125,16 +84,9 @@
 +    (LIST a b 'C #'D))
 +#'(LAMBDA ()
 +    (LIST a b 'C #'D)) 
-+
 +→
-+
 +NIL
-+
-+
-+
 +Affected By
-+
-+
 +None.
  
 -<TT>  
@@ -148,14 +100,7 @@
 -The following X3J13 cleanup issues, not part of the specification, apply to this section FORMAT-PRETTY-PRINTYES PRINTER-WHITESPACEJUST-ONE-SPACE
 \ No newline at end of file
 + Function WRITE
-+
-+
-+
 +Notes
-+
-+
 +None.
-+
-+
 +\
 \ No newline at end of file

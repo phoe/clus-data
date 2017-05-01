@@ -6,8 +6,6 @@
  
 -use-package packages-to-use &optional package => t
 + use-package packages-to-use &optional package → t
-+
-+
   
  Arguments and Values
   
@@ -15,33 +13,17 @@
   
  Arguments and Values
   
-+
   packages-to-use - a designator for a list of package designators. The KEYWORD package may not be supplied. 
-+
  package - a package designator. The default is the current package. The package cannot be the KEYWORD package.  
-+
-+
-+
  Description
   
-+
  use-package causes package to inherit all the external symbols of packages-to-use. The inherited symbols become accessible as internal symbols of package. 
 -Packages-to-use are added to the use list of package if they are not there already. All external symbols in packages-to-use become accessible in package as internal symbols. use-package does not cause any new symbols to be present in package but only makes them accessible by inheritance. 
 -use-package checks for name conflicts between the newly imported symbols and those already accessible in package. A name conflict in use-package between two external symbols inherited by package from packages-to-use may be resolved in favor of either symbol by importing one of them into package and making it a shadowing symbol. 
-+
-+
 +Packages-to-use are added to the use list of package if they are not there already. All external symbols in packages-to-use become accessible in package as internal symbols.
-+
-+
 +use-package does not cause any new symbols to be present in package but only makes them accessible by inheritance.
-+
-+
 +use-package checks for name conflicts between the newly imported symbols and those already accessible in package.
-+
-+
 +A name conflict in use-package between two external symbols inherited by package from packages-to-use may be resolved in favor of either symbol by importing one of them into package and making it a shadowing symbol.
-+
-+
  Examples
   
  
@@ -54,93 +36,44 @@
  
 -<TT> 
 +(export (intern "LAND-FILL" (make-package 'trash)) 'trash) 
-+
 +→
-+
 +T 
-+
-+
-+
 +(find-symbol "LAND-FILL" (make-package 'temp)) 
-+
 +→
-+
 +NIL
 +NIL 
-+
-+
-+
 +(package-use-list 'temp) 
-+
 +→
-+
 +(#<PACKAGE "TEMP">) 
-+
-+
-+
 +(use-package 'trash 'temp) 
-+
 +→
-+
 +T 
-+
-+
-+
 +(package-use-list 'temp) 
-+
 +→
-+
 +(#<PACKAGE "TEMP"> #<PACKAGE "TRASH">) 
-+
-+
-+
 +(find-symbol "LAND-FILL" 'temp) 
-+
 +→
-+
 +TRASHLAND-FILL
 +INHERITED 
-+
-+
-+
  Side Effects
   
-+
  The use list of package may be modified. 
 -Affected By None.
   
 -Exceptional Situations None.
-+
 +Affected By
-+
-+
 +None.
-+
-+
 +Exceptional Situations
-+
-+
 +None.
-+
-+
   See Also
   
 -unuse-package, package-use-list, Section 11.1 (Package Concepts) 
-+
 + Function UNUSE-PACKAGE
-+
 + Function PACKAGE-USE-LIST
-+
 + {\secref\PackageConcepts}
-+
-+
-+
  Notes
   
-+
  It is permissible for a package P1 to use a package P2 even if P2 already uses P1. The using of packages is not transitive, so no problem results from the apparent circularity.
 \ No newline at end of file
-+
-+
 +\
 \ No newline at end of file

@@ -19,14 +19,12 @@
                 {initarg symbol}* |  
                 {initform form} |  
 -               {type type-specifier} ]] 
--
 - 
 +                  {type type-specifier} 
 +                  ]]
  option= [[(default-initargs . initarg-list) |  
            (documentation string) |  
 -          (report report-name) ]] 
--
 +             (report report-name)
 +             ]]
 +function-name = {symbol | (setf symbol)}}
@@ -34,10 +32,8 @@
 +report-name = {string | symbol | lambda expression}
   
 -function-name= {symbol | (setf symbol)} 
--
 - 
 -allocation-type= instance | class 
--
 - 
 -report-name= string | symbol | lambda expression 
  
@@ -47,9 +43,7 @@
  default-initargs - a list of keyword/value pairs. 
    
  Slot-spec -- the name of a slot or a list consisting of the slot-name followed by zero or more slot-options. 
-+
  Slot-name -- a slot name (a symbol), the list of a slot name, or the list of slot name/slot form pairs. 
-+
  Option -- Any of the following 
  
 -reader  
@@ -71,26 +65,14 @@
 -report  
 -report can be supplied once at most. 
 + reader - can be supplied more than once for a given slot and cannot be nil.
-+
 + writer - can be supplied more than once for a given slot and must name a generic function.
-+
 + accessor - can be supplied more than once for a given slot and cannot be nil.
-+
 + allocation - can be supplied once at most for a given slot. The default, if allocation is not supplied, is instance.
-+
 + initarg - can be supplied more than once for a given slot.
-+
 + initform - can be supplied once at most for a given slot.
-+
 + type - can be supplied once at most for a given slot.
-+
 + documentation - can be supplied once at most for a given slot.
-+
 + report - can be supplied once at most.
-+
-+
-+
-+
   
  Description
   
@@ -98,59 +80,27 @@
   
  
  reader  
-+
-+
  The reader slot option specifies that an unqualified method is to be defined on the generic function named by the argument to reader to read the value of the given slot. 
 -*  The initform slot option is used to provide a default initial value form to be used in the initialization of the slot. This form is evaluated every time it is used to initialize the slot. The lexical environment in which this form is evaluated is the lexical environment in which the define-condition form was evaluated. Note that the lexical environment refers both to variables and to functions. For local slots, the dynamic environment is the dynamic environment in which make-condition was called; for shared slots, the dynamic environment is the dynamic environment in which the define-condition form was evaluated. 
-+
-+
 +initform
-+
-+
 +The initform slot option is used to provide a default initial value form to be used in the initialization of the slot. This form is evaluated every time it is used to initialize the slot. The lexical environment in which this form is evaluated is the lexical environment in which the define-condition form was evaluated. Note that the lexical environment refers both to variables and to functions. For local slots, the dynamic environment is the dynamic environment in which make-condition was called; for shared slots, the dynamic environment is the dynamic environment in which the define-condition form was evaluated.
-+
-+
   No implementation is permitted to extend the syntax of define-condition to allow (slot-name form) as an abbreviation for (slot-name initform form). 
-+
-+
  initarg  
-+
-+
  The initarg slot option declares an initialization argument named by its symbol argument and specifies that this initialization argument initializes the given slot. If the initialization argument has a value in the call to initialize-instance, the value is stored into the given slot, and the slot's initform slot option, if any, is not evaluated. If none of the initialization arguments specified for a given slot has a value, the slot is initialized according to the initform slot option, if specified. 
-+
-+
  type  
-+
-+
  The type slot option specifies that the contents of the slot is always of the specified type. It effectively declares the result type of the reader generic function when applied to an object of this condition type. The consequences of attempting to store in a slot a value that does not satisfy the type of the slot is undefined. 
-+
-+
  default-initargs  
-+
-+
   This option is treated the same as it would be defclass. 
-+
-+
  documentation  
-+
-+
   The documentation slot option provides a documentation string for the slot. 
-+
-+
   report  
-+
-+
   Condition reporting is mediated through the print-object method for the condition type in question, with *print-escape* always being nil. Specifying (report report-name) in the definition of a condition type C is equivalent to 
  
-+
-+
   (defmethod print-object ((x c) stream)
 -   (if *print-escape* (call-next-method) (report-name x stream)))
 +  (if *print-escape*
 +      (call-next-method)
 +      (report-name x stream))) 
-+
-+
  
 -<TT> 
   If the value supplied by the argument to report (report-name) is a symbol or a lambda expression, it must be acceptable to function. (function report-name) is evaluated in the current lexical environment. It should return a function of two arguments, a condition and a stream, that prints on the stream a description of the condition. This function is called whenever the condition is printed while *print-escape* is nil. 
@@ -162,30 +112,17 @@
  
 -<TT> 
 +If report-name is a string, it is a shorthand for (lambda (condition stream) (declare (ignore condition)) (write-string report-name stream)).
-+
-+
  This option is processed after the new condition type has been defined, so use of the slot accessors within the report function is permitted. If this option is not supplied, information about how to report this type of condition is inherited from the parent-type. 
  
-+
-+
  The consequences are unspecifed if an attempt is made to read a slot that has not been explicitly initialized and that has not been given a default value. 
-+
-+
  The consequences are unspecified if an attempt is made to assign the slots by using setf. 
-+
-+
   If a define-condition form appears as a top level form, the compiler must make name recognizable as a valid type name, and it must be possible to reference the condition type as the parent-type of another condition type in a subsequent define-condition form in the file being compiled.  
-+
-+
  Examples
   
-+
  The following form defines a condition of type peg/hole-mismatch which inherits from a condition type called blocks-world-error 
  
 -(define-condition peg/hole-mismatch 
 -                  (blocks-world-error)
-+
-+
 +(define-condition peg/hole-mismatch (blocks-world-error)
                    ((peg-shape  initarg peg-shape
                                 reader peg/hole-mismatch-peg-shape)
@@ -196,20 +133,12 @@
  
 -<TT> 
 +→
-+
 +PEG/HOLE-MISMATCH
-+
-+
-+
  The new type has slots peg-shape and hole-shape, so make-condition accepts peg-shape and hole-shape keywords. The readers peg/hole-mismatch-peg-shape and peg/hole-mismatch-hole-shape apply to objects of this type, as illustrated in the report information. 
-+
-+
  The following form defines a condition type named machine-error which inherits from error 
  
 -(define-condition machine-error 
 -                  (error)
-+
-+
 +(define-condition machine-error (error) 
                    ((machine-name initarg machine-name
                                   reader machine-error-machine-name))
@@ -219,15 +148,9 @@
  
 -<TT> 
 +→
-+
 +MACHINE-ERROR
-+
-+
-+
  Building on this definition, a new error condition can be defined which is a subtype of machine-error for use when machines are not available 
  
-+
-+
  (define-condition machine-not-available-error (machine-error) ()
    (report (lambda (condition stream)
               (format stream "The machine ~A is not available."
@@ -237,15 +160,9 @@
  
 -<TT> 
 +→
-+
 +MACHINE-NOT-AVAILABLE-ERROR
-+
-+
-+
  This defines a still more specific condition, built upon machine-not-available-error, which provides a slot initialization form for machine-name but which does not provide any new slots or report information. It just gives the machine-name slot a default initialization 
  
-+
-+
  (define-condition my-favorite-machine-not-available-error
                    (machine-not-available-error)
    ((machine-name initform "mc.lcs.mit.edu")))
@@ -255,15 +172,9 @@
  
 -<TT> 
 +→
-+
 +my-favorite-machine-not-available-error
-+
-+
-+
  Note that since no report clause was given, the information inherited from machine-not-available-error is used to report this type of condition. 
  
-+
-+
   (define-condition ate-too-much (error) 
 -     ((person initarg person reader ate-too-much-person)
 -      (weight initarg weight reader ate-too-much-weight)
@@ -274,13 +185,8 @@
        (kind-of-food initarg kind-of-food
                      reader ate-too-much-kind-of-food)))
 -=>  ATE-TOO-MUCH
-+
 +→
-+
 +ATE-TOO-MUCH
-+
-+
-+
   (define-condition ate-too-much-ice-cream (ate-too-much)
     ((kind-of-food initform 'ice-cream)
      (flavor       initarg flavor
@@ -289,26 +195,16 @@
                        (ate-too-much-person condition)
                        (ate-too-much-ice-cream-flavor condition)))))
 -=>  ATE-TOO-MUCH-ICE-CREAM
-+
 +→
-+
 +ate-too-much-ice-cream
-+
-+
-+
   (make-condition 'ate-too-much-ice-cream
 -                 person 'fred
 -                 weight 300
 +                person 'fred weight 300 
                   flavor 'chocolate)
 -=>  #<ATE-TOO-MUCH-ICE-CREAM 32236101>
-+
 +→
-+
 +#<ATE-TOO-MUCH-ICE-CREAM 32236101> 
-+
-+
-+
   (format t "~A" *)
 ->>  FRED ate too much CHOCOLATE ice-cream
 -=>  NIL
@@ -316,24 +212,12 @@
 -<TT> 
 -Affected By None.
 +▷
-+
 +FRED ate too much CHOCOLATE ice-cream
-+
 +→
-+
 +NIL
-+
-+
-+
 +Affected By
-+
-+
 +None.
-+
-+
 +Exceptional Situations
-+
-+
 +None.
   
 -Exceptional Situations None.
@@ -342,13 +226,8 @@
   
 -make-condition, defclass, Section 9.1 (Condition System Concepts) 
 -Notes None.
-+
 +Function MAKE-CONDITION, Macro DEFCLASS, {\secref\ConditionSystemConcepts}
-+
-+
 +Notes
-+
-+
 +None.
   
   

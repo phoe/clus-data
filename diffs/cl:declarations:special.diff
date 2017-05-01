@@ -2,34 +2,18 @@
 +++ saved-pages-clus/cl:declarations:special.txt	2017-04-27 21:58:16.000000000 +0100
 @@ -1,43 +1,91 @@
  Declaration SPECIAL 
-+
-+
  Syntax
   
-+
  (special var*) 
-+
-+
-+
  Arguments
   
-+
  var - a symbol. 
-+
-+
-+
  Valid Context
   
-+
  declaration or proclamation 
-+
-+
  Binding Types Affected
   
-+
  variable 
-+
-+
  Description
   
 -Specifies that all of the vars named are dynamic. This specifier affects variable bindings and affects references. All variable bindings affected are made to be dynamic bindings, and affected variable references refer to the current dynamic binding. For example 
@@ -38,22 +22,12 @@
 -   (declare (special *mod*))  ; *mod* is visible to hack1,
 -   (hack1 (car thing)))       ; but not that of thing.
 +Specifies that all of the vars named are dynamic. This specifier affects variable bindings and affects references. All variable bindings affected are made to be dynamic bindings, and affected variable references refer to the current dynamic binding.
-+
-+
 +In the below example, the binding of the parameter *mod* is visible to hack1, but the binding of thing is not.
-+
-+
-+
 +(defun hack (thing *mod*)
 +  (declare (special *mod*))
 +  (hack1 (car thing)))
-+
 +→
-+
 +HACK
-+
-+
-+
   (defun hack1 (arg)
 -   (declare (special *mod*))  ;Declare references to *mod*
 -                              ;within hack1 to be special.
@@ -65,41 +39,23 @@
 +      *mod*
 +      (cons (hack1 (car arg))
 +            (hack1 (cdr arg)))))
-+
 +→
-+
 +HACK1
-+
-+
  
 -<TT> 
  A special declaration does not affect inner bindings of a var; the inner bindings implicitly shadow a special declaration and must be explicitly re-declared to be special. special declarations never apply to function bindings. 
-+
-+
  special declarations can be either bound declarations, affecting both a binding and references, or free declarations, affecting only references, depending on whether the declaration is attached to a variable binding. 
-+
-+
  When used in a proclamation, a special declaration specifier applies to all bindings as well as to all references of the mentioned variables. For example, after 
  
-+
-+
   (declaim (special x))
  
 -<TT> 
-+
-+
  then in a function definition such as 
  
-+
-+
   (defun example (x) ...)
  
 -<TT> 
-+
-+
  the parameter x is bound as a dynamic variable rather than as a lexical variable. 
-+
-+
  Examples
   
  
@@ -108,7 +64,6 @@
   
  
 -(defun declare-eg (y)                 ;this y is special
-+
 +(defun declare-eg (y) ; This y is special.
   (declare (special y))
 - (let ((y t))                         ;this y is lexical
@@ -120,31 +75,18 @@
 - (declare-eg nil) =>  (T NIL) 
 +          (locally (declare (special y))
 +            y)))) ; This y refers to the special binding of y.
-+
 +→
-+
 +DECLARE-EG
-+
-+
-+
 +(declare-eg nil)
-+
 +→
-+
 +(T NIL)
-+
  
 -<TT> 
  
  (setf (symbol-value 'x) 6)
 -(defun foo (x)                         ;a lexical binding of x
-+
 +→
-+
 +6
-+
-+
-+
 +(defun foo (x) ; A lexical binding of x.
    (print x)
 -  (let ((x (1+ x)))                    ;a special binding of x
@@ -153,23 +95,13 @@
 +    (declare (special x)) ; And a lexical reference.
      (bar))
    (1+ x))
-+
 +→
-+
 +FOO
-+
-+
-+
  (defun bar () 
    (print (locally (declare (special x))
             x)))
-+
 +→
-+
 +BAR
-+
-+
-+
  (foo 10) 
 ->>  10
 ->>  11
@@ -177,24 +109,14 @@
  
 -<TT> 
 +▷
-+
 +10
 +11
-+
 +→
-+
 +11
-+
-+
  
  (setf (symbol-value 'x) 6)
-+
 +→
-+
 +6
-+
-+
-+
  (defun bar (x y)            ;[1] 1st occurrence of x
 -  (let ((old-x x)           ;[2] 2nd occurrence of x -- same as 1st occurrence
 +  (let ((old-x x) ; [2] 2nd occurrence of x - same as 1st occurrence
@@ -205,18 +127,10 @@
  
 -<TT> 
 +→
-+
 +BAR
-+
-+
-+
 +(bar 'first 'second)
-+
 +→
-+
 +(FIRST SECOND)
-+
-+
  
   (defun few (x &optional (y *foo*))
     (declare (special *foo*))
@@ -231,66 +145,30 @@
 -    (list prosp reg))             ;whereas the variable reg is lexical
 -=>  (3 2)
 - (list prosp reg) =>  (1 3)
-+
 +The reference to *foo* in the first line of this example is not special even though there is a special declaration in the second line.
-+
-+
-+
 +(declaim (special *prosp*))
-+
 +→
-+
 +implementation-dependent
-+
-+
-+
 +(defparameter *prosp* 1)
-+
 +→
-+
 +*PROSP*
-+
-+
-+
 +(defparameter *reg* 1)
-+
 +→
-+
 +*REG*
-+
-+
-+
 +In the example below, the binding of *prosp* is special due to the preceding proclamation, whereas the variable *reg* is lexical.
-+
-+
-+
 +(let ((*prosp* 2) (*reg* 2))
 +  (set '*prosp* 3)
 +  (set '*reg* 3)
 +  (list *prosp* *reg*)) 
-+
 +→
-+
 +(3 2)
-+
-+
-+
 +(list *prosp* *reg*)
-+
 +→
-+
 +(1 3)
-+
-+
  
   (declaim (special x))          ;x is always special.
-+
 +→
-+
 +implementation-dependent
-+
-+
-+
   (defun example (x y)                                 
     (declare (special y))
     (let ((y 3) (x (* x 2)))
@@ -301,21 +179,14 @@
 +    (let ((y 4))
 +      (declare (special y))
 +        (foo x))))
-+
 +→
-+
 +EXAMPLE
-+
-+
-+
 +In the contorted code above, the outermost and innermost bindings of y are dynamic, but the middle binding is lexical. The two arguments to + are different, one being the value, which is 3, of the lexical variable y, and the other being the value of the dynamic variable named y (a binding of which happens, coincidentally, to lexically surround it at an outer level). All the bindings of x and references to x are dynamic, however, because of the proclamation that x is always special.
-+
  
 -<TT> In the contorted code above, the outermost and innermost bindings of y are dynamic, but the middle binding is lexical. The two arguments to + are different, one being the value, which is 3, of the lexical variable y, and the other being the value of the dynamic variable named y (a binding of which happens, coincidentally, to lexically surround it at an outer level). All the bindings of x and references to x are dynamic, however, because of the proclamation that x is always special. 
  See Also
   
 -defparameter, defvar
 \ No newline at end of file
-+
 +Symbol DECLARE, Macro DEFPARAMETER, Macro DEFVAR
 \ No newline at end of file

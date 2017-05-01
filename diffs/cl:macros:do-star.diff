@@ -6,7 +6,6 @@
   
 -do ({var | (var [init-form [step-form]])}*) (end-test-form result-form*) declaration* {tag | statement}* => result*
 + do ({var | (var [init-form [step-form]])}*) (end-test-form result-form*) declaration* {tag | statement}* → result*
-+
 + do* ({var | (var [init-form [step-form]])}*) (end-test-form result-form*) declaration* {tag | statement}* → result*
   
  
@@ -18,39 +17,26 @@
  Examples
   
  
-+
   (do ((temp-one 1 (1+ temp-one))
         (temp-two 0 (1- temp-two)))
 -      ((> (- temp-one temp-two) 5) temp-one)) =>  4
 +    ((> (- temp-one temp-two) 5) temp-one)) 
-+
 +→
-+
 +4
-+
-+
  
   (do ((temp-one 1 (1+ temp-one))
         (temp-two 0 (1+ temp-one)))     
 -      ((= 3 temp-two) temp-one)) =>  3
 +    ((= 3 temp-two) temp-one)) 
-+
 +→
-+
 +3
-+
-+
  
   (do* ((temp-one 1 (1+ temp-one))
          (temp-two 0 (1+ temp-one)))
 -       ((= 3 temp-two) temp-one)) =>  2                     
 +     ((= 3 temp-two) temp-one)) 
-+
 +→
-+
 +2
-+
-+
  
   (do ((j 0 (+ j 1)))
       (nil)                       ;Do forever.
@@ -66,25 +52,17 @@
 ->>  Output 1 (57 BOXES)
 ->>  Input 2 NIL
 -=>  NIL
--
 - (setq a-vector (vector 1 nil 3 nil))
 - (do ((i 0 (+ i 1))     ;Sets every null element of a-vector to zero.
 -      (n (array-dimension a-vector 0)))
-+
 +▷
-+
 +Input 0 banana
 +Output 0 BANANA
 +Input 1 (57 boxes)
 +Output 1 (57 BOXES)
 +Input 2 NIL
-+
 +→
-+
 +NIL
-+
-+
-+
 +(defparameter *vector* (vector 1 nil 3 nil))
 +(do ((i 0 (1+ i)) ;Sets every null element of *vector* to zero. 
 +     (n (array-dimension *vector* 0)))
@@ -94,23 +72,12 @@
 -a-vector =>  #(1 0 3 0)
 +  (when (null (aref *vector* i))
 +    (setf (aref *vector* i) 0)))
-+
 +→
-+
 +NIL 
-+
-+
-+
 +*vector* 
-+
 +→
-+
 +#(1 0 3 0)
-+
-+
-+
 +The below is an example of parallel assignment to index variables. On the first iteration, the value of oldx is whatever value x had before the do was entered. On succeeding iterations, oldx contains the value that x had on the previous iteration.
-+
  
 -<TT> 
  
@@ -120,11 +87,7 @@
     body)
  
 -<TT> is an example of parallel assignment to index variables. On the first iteration, the value of oldx is whatever value x had before the do was entered. On succeeding iterations, oldx contains the value that x had on the previous iteration. 
-+
-+
 +The below does the same thing as (mapcar #'f foo bar). The step computation for z is an example of the fact that variables are stepped in parallel. Also, the body of the loop is empty.
-+
-+
  
   (do ((x foo (cdr x))
        (y bar (cdr y))
@@ -133,11 +96,7 @@
        (nreverse z)))
  
 -<TT> does the same thing as (mapcar #'f foo bar). The step computation for z is an example of the fact that variables are stepped in parallel. Also, the body of the loop is empty. 
-+
-+
 +An example implementation of a list-reversing function could be
-+
-+
  
   (defun list-reverse (list)
          (do ((x list (cdr x))
@@ -147,14 +106,8 @@
 -<TT> 
 -As an example of nested iterations, consider a data structure that is a list of conses. The car of each cons is a list of symbols, and the cdr of each cons is a list of equal length containing corresponding values. Such a data structure is similar to an association list, but is divided into ``frames''; the overall structure resembles a rib-cage. A lookup function on such a data structure might be 
 +→
-+
 +LIST-REVERSE
-+
-+
-+
 +As an example of nested iterations, consider a data structure that is a list of conses. The car of each cons is a list of symbols, and the cdr of each cons is a list of equal length containing corresponding values. Such a data structure is similar to an association list, but is divided into "frames"; the overall structure resembles a rib-cage. A lookup function on such a data structure might be
-+
-+
  
   (defun ribcage-lookup (sym ribcage)           
          (do ((r ribcage (cdr r)))
@@ -164,19 +117,10 @@
              (when (eq (car s) sym)
 -              (return-from ribcage-lookup (car v)))))) =>  RIBCAGE-LOOKUP
 +        (return-from ribcage-lookup (car v)))))) 
-+
 +→
-+
 +RIBCAGE-LOOKUP
-+
-+
-+
 +Affected By
-+
-+
 +None.
-+
-+
 +Exceptional Situations
  
 -<TT> 
@@ -184,51 +128,26 @@
   
 -Exceptional Situations None.
 +None.
-+
   
  See Also
   
 -other iteration functions (dolist, dotimes, and loop) and more primitive functionality (tagbody, go, block, return, let, and setq) 
-+
 + Other iteration functions 
-+
 + Macro DOLIST
-+
 + Macro DOTIMES
-+
 + Macro LOOP
-+
-+
-+
 + More primitive functionality 
-+
 + Special Operator TAGBODY
-+
 + Special Operator GO
-+
 + Special Operator BLOCK
-+
 + Macro RETURN
-+
 + Special Operator LET
-+
 + Special Operator SETQ
-+
-+
-+
-+
-+
  Notes
 - If end-test-form is nil, the test will never succeed. This provides an idiom for ``do forever'' the body of the do or do* is executed repeatedly. The infinite loop can be terminated by the use of return, return-from, go to an outer level, or throw. 
-+
-+
 +If end-test-form is nil, the test will never succeed. This provides an idiom for "do forever" the body of the do or do* is executed repeatedly. The infinite loop can be terminated by the use of return, return-from, go to an outer level, or throw.
-+
-+
  A do form may be explained in terms of the more primitive forms block, return, let, loop, tagbody, and psetq as follows 
  
-+
-+
   (block nil        
     (let ((var1 init1)
           (var2 init2)
@@ -246,12 +165,9 @@
                    varn stepn))))
  
 -<TT> 
-+
-+
  do* is similar, except that let* and setq replace the let and psetq, respectively. 
   
 -The following X3J13 cleanup issues, not part of the specification, apply to this section VARIABLE-LIST-ASYMMETRYSYMMETRIZE DECLS-AND-DOC
 \ No newline at end of file
-+
 +\
 \ No newline at end of file

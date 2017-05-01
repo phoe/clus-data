@@ -19,26 +19,14 @@
   
  Arguments and Values
   
-+
  size, position - a non-negative integer. 
-+
  bytespec - a byte specifier. 
-+
-+
-+
  Description
   
 -byte returns a byte specifier that indicates a byte of width size and whose bits have weights 2^position + size - 1 through 2^position, and whose representation is implementation-dependent. 
-+
 +byte returns a byte specifier that indicates a byte of width size and whose bits have weights 2^(position + size - 1) through 2^position, and whose representation is implementation-dependent.
-+
-+
  byte-size returns the number of bits specified by bytespec. 
-+
-+
  byte-position returns the position specified by bytespec. 
-+
-+
  Examples
   
  
@@ -53,46 +41,20 @@
 -<TT> 
 -Affected By None.
 +(defparameter *b* (byte 100 200)) 
-+
 +→
-+
 +*B*
-+
-+
-+
 +*b* 
-+
 +→
-+
 +#<BYTE-SPECIFIER size 100 position 200> 
-+
-+
-+
 +(byte-size *b*) 
-+
 +→
-+
 +100 
-+
-+
-+
 +(byte-position *b*) 
-+
 +→
-+
 +200
-+
-+
-+
 +Affected By
-+
-+
 +None.
-+
-+
 +Exceptional Situations
-+
-+
 +None.
   
 -Exceptional Situations None.
@@ -100,13 +62,8 @@
  See Also
   
 -ldb, dpb 
-+
 + Function LDB
-+
 + Function DPB
-+
-+
-+
  Notes
   
  
@@ -117,11 +74,7 @@
 -A byte of size of 0 is permissible; it refers to a byte of width zero. For example, 
 +(byte-size (byte j k)) ≡ j
 +(byte-position (byte j k)) ≡ k
-+
-+
-+
 +A byte of size of 0 is permissible; it refers to a byte of width zero. For example
-+
  
 - (ldb (byte 0 3) #o7777) =>  0
 - (dpb #o7777 (byte 0 3) 0) =>  0
