@@ -1,106 +1,106 @@
 --- saved-pages-dpans3/cl:functions:substitute-if.txt	2017-04-27 21:44:03.000000000 +0100
 +++ saved-pages-clus/cl:functions:substitute-if.txt	2017-04-27 21:44:03.000000000 +0100
-@@ -1,23 +1,22 @@
- Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT, NSUBSTITUTE, NSUBSTITUTE-IF, NSUBSTITUTE-IF-NOT 
+@@ -1,3 +1,1 @@
+ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT, NSUBSTITUTE, NSUBSTITUTE-IF, NSUBSTITUTE-IF-NOT
 -Syntax
-- 
- 
+-
+
 -substitute newitem olditem sequence &key from-end test test-not start end count key => result-sequence
-  
+
 +Syntax
- 
+
 -substitute-if newitem predicate sequence &key from-end start end count key => result-sequence
-  
+
 + substitute newitem olditem sequence &key from-end test test-not start end count key → result-sequence
- 
+
 -substitute-if-not newitem predicate sequence &key from-end start end count key => result-sequence
 + substitute-if newitem predicate sequence &key from-end start end count key → result-sequence
-  
+
 + substitute-if-not newitem predicate sequence &key from-end start end count key → result-sequence
- 
+
 -nsubstitute newitem olditem sequence &key from-end test test-not start end count key => sequence
 + nsubstitute newitem olditem sequence &key from-end test test-not start end count key → result-sequence
-  
+
 + nsubstitute-if newitem predicate sequence &key from-end start end count key → result-sequence
- 
+
 -nsubstitute-if newitem predicate sequence &key from-end start end count key => sequence
 + nsubstitute-if-not newitem predicate sequence &key from-end start end count key → result-sequence
-  
- 
+
+
 -nsubstitute-if-not newitem predicate sequence &key from-end start end count key => sequence
-  
+
  Arguments and Values
-  
+
 @@ -21,28 +20,70 @@
-  
+
  Arguments and Values
-  
- newitem - an object. 
- olditem - an object. 
- sequence - a proper sequence. 
- predicate - a designator for a function of one argument that returns a generalized boolean. 
- from-end - a generalized boolean. The default is false. 
- test - a designator for a function of two arguments that returns a generalized boolean. 
- test-not - a designator for a function of two arguments that returns a generalized boolean. 
-   start, end - bounding index designators of sequence. The defaults for start and end are 0 and nil, respectively.   
-  count - an integer or nil.  The default is nil. 
- key - a designator for a function of one argument, or nil. 
- result-sequence - a sequence. 
+
+ newitem - an object.
+ olditem - an object.
+ sequence - a proper sequence.
+ predicate - a designator for a function of one argument that returns a generalized boolean.
+ from-end - a generalized boolean. The default is false.
+ test - a designator for a function of two arguments that returns a generalized boolean.
+ test-not - a designator for a function of two arguments that returns a generalized boolean.
+   start, end - bounding index designators of sequence. The defaults for start and end are 0 and nil, respectively.
+  count - an integer or nil.  The default is nil.
+ key - a designator for a function of one argument, or nil.
+ result-sequence - a sequence.
  Description
-  
- substitute, substitute-if, and substitute-if-not return a copy of sequence in which each element that satisfies the test has been replaced with newitem. 
- nsubstitute, nsubstitute-if, and nsubstitute-if-not are like substitute, substitute-if, and substitute-if-not respectively, but they may modify sequence. 
--If sequence is a vector, the result is a vector that has the same actual array element type as sequence. If sequence is a list, the result is a list. 
--Count, if supplied, limits the number of elements altered; if more than count elements satisfy the test, then of these elements only the leftmost or rightmost, depending on from-end, are replaced, as many as specified by count.  If count is supplied and negative, the behavior is as if zero had been supplied instead.  If count is nil, all matching items are affected. 
+
+ substitute, substitute-if, and substitute-if-not return a copy of sequence in which each element that satisfies the test has been replaced with newitem.
+ nsubstitute, nsubstitute-if, and nsubstitute-if-not are like substitute, substitute-if, and substitute-if-not respectively, but they may modify sequence.
+-If sequence is a vector, the result is a vector that has the same actual array element type as sequence. If sequence is a list, the result is a list.
+-Count, if supplied, limits the number of elements altered; if more than count elements satisfy the test, then of these elements only the leftmost or rightmost, depending on from-end, are replaced, as many as specified by count.  If count is supplied and negative, the behavior is as if zero had been supplied instead.  If count is nil, all matching items are affected.
 +If sequence is a vector, the result is a vector that has the same actual array element type as sequence.
 +If sequence is a list, the result is a list.
 +count, if supplied, limits the number of elements altered; if more than count elements satisfy the test, then of these elements only the leftmost or rightmost, depending on from-end, are replaced, as many as specified by count.
 +If count is supplied and negative, the behavior is as if zero had been supplied instead.
 +If count is nil, all matching items are affected.
- Supplying a from-end of true matters only when the count is provided (and non-nil); in that case, only the rightmost count elements satisfying the test are removed (instead of the leftmost). 
- predicate, test, and test-not might be called more than once for each sequence element, and their side effects can happen in any order. 
- The result of all these functions is a sequence of the same type as sequence that has the same elements except that those in the subsequence bounded by start and end and satisfying the test have been replaced by newitem. 
- substitute, substitute-if, and substitute-if-not return a sequence which can share with sequence or may be identical to the input sequence if no elements need to be changed. 
-  nsubstitute and nsubstitute-if are required to setf any car (if sequence is a list) or aref (if sequence is a vector) of sequence that is required to be replaced with newitem. If sequence is a list, none of the cdrs of the top-level list can be modified.  
+ Supplying a from-end of true matters only when the count is provided (and non-nil); in that case, only the rightmost count elements satisfying the test are removed (instead of the leftmost).
+ predicate, test, and test-not might be called more than once for each sequence element, and their side effects can happen in any order.
+ The result of all these functions is a sequence of the same type as sequence that has the same elements except that those in the subsequence bounded by start and end and satisfying the test have been replaced by newitem.
+ substitute, substitute-if, and substitute-if-not return a sequence which can share with sequence or may be identical to the input sequence if no elements need to be changed.
+  nsubstitute and nsubstitute-if are required to setf any car (if sequence is a list) or aref (if sequence is a vector) of sequence that is required to be replaced with newitem. If sequence is a list, none of the cdrs of the top-level list can be modified.
  Examples
-  
- 
+
+
 @@ -46,32 +87,131 @@
  Examples
-  
- 
+
+
 - (substitute #\. #\SPACE "0 2 4 6") =>  "0.2.4.6"
 - (substitute 9 4 '(1 2 4 1 3 4 5)) =>  (1 2 9 1 3 9 5)
 - (substitute 9 4 '(1 2 4 1 3 4 5) count 1) =>  (1 2 9 1 3 4 5)
-+(substitute #\. #\Space "0 2 4 6") 
++(substitute #\. #\Space "0 2 4 6")
 +→
-+"0.2.4.6" 
-+(substitute 9 4 '(1 2 4 1 3 4 5)) 
++"0.2.4.6"
++(substitute 9 4 '(1 2 4 1 3 4 5))
 +→
-+(1 2 9 1 3 9 5) 
-+(substitute 9 4 '(1 2 4 1 3 4 5) count 1) 
++(1 2 9 1 3 9 5)
++(substitute 9 4 '(1 2 4 1 3 4 5) count 1)
 +→
-+(1 2 9 1 3 4 5) 
++(1 2 9 1 3 4 5)
   (substitute 9 4 '(1 2 4 1 3 4 5) count 1 from-end t)
 -=>  (1 2 4 1 3 9 5)
 - (substitute 9 3 '(1 2 4 1 3 4 5) test #'>) =>  (9 9 4 9 3 4 5)
 +→
-+(1 2 4 1 3 9 5) 
-+(substitute 9 3 '(1 2 4 1 3 4 5) test #'>) 
++(1 2 4 1 3 9 5)
++(substitute 9 3 '(1 2 4 1 3 4 5) test #'>)
 +→
 +(9 9 4 9 3 4 5)
- 
+
   (substitute-if 0 #'evenp '((1) (2) (3) (4)) start 2 key #'car)
 -=>  ((1) (2) (3) 0)
 - (substitute-if 9 #'oddp '(1 2 4 1 3 4 5)) =>  (9 2 4 9 9 4 9)
 +→
-+((1) (2) (3) 0) 
-+(substitute-if 9 #'oddp '(1 2 4 1 3 4 5)) 
++((1) (2) (3) 0)
++(substitute-if 9 #'oddp '(1 2 4 1 3 4 5))
 +→
-+(9 2 4 9 9 4 9) 
++(9 2 4 9 9 4 9)
   (substitute-if 9 #'evenp '(1 2 4 1 3 4 5) count 1 from-end t)
 -=>  (1 2 4 1 3 9 5)
- 
+
 - (setq some-things (list 'a 'car 'b 'cdr 'c)) =>  (A CAR B CDR C)
 - (nsubstitute-if "function was here" #'fboundp some-things
 -                 count 1 from-end t) =>  (A CAR B "function was here" C)
@@ -110,67 +110,67 @@
 - alpha-tester =>  "abz"
 +→
 +(1 2 4 1 3 9 5)
-+(defparameter *some-things* (list 'a 'car 'b 'cdr 'c)) 
++(defparameter *some-things* (list 'a 'car 'b 'cdr 'c))
 +→
 +*SOME-THINGS*
-+(nsubstitute-if "function was here" #'fboundp *some-things* 
-+                count 1 from-end t) 
++(nsubstitute-if "function was here" #'fboundp *some-things*
++                count 1 from-end t)
 +→
 +(A CAR B "function was here" C)
-+*some-things* 
++*some-things*
 +→
-+(A CAR B "function was here" C) 
-+(defparameter *alpha-tester* (copy-seq "ab ")) 
++(A CAR B "function was here" C)
++(defparameter *alpha-tester* (copy-seq "ab "))
 +→
-+"ab " 
-+(nsubstitute-if-not #\z #'alpha-char-p *alpha-tester*) 
++"ab "
++(nsubstitute-if-not #\z #'alpha-char-p *alpha-tester*)
 +→
-+"abz" 
-+*alpha-tester* 
++"abz"
++*alpha-tester*
 +→
-+"abz" 
- 
--<TT> 
++"abz"
+
+-<TT>
  Side Effects
-  
- nsubstitute, nsubstitute-if, and nsubstitute-if-not modify sequence. 
+
+ nsubstitute, nsubstitute-if, and nsubstitute-if-not modify sequence.
 -Affected By None.
 +Affected By
 +None.
-  
+
  Exceptional Situations
-  
+
 @@ -75,24 +215,46 @@
-  
+
  Exceptional Situations
-  
- Should be prepared to signal an error of type type-error if sequence is not a proper sequence. 
+
+ Should be prepared to signal an error of type type-error if sequence is not a proper sequence.
  See Also
-  
--subst, nsubst,  Section 3.2.1 (Compiler Terminology),   Section 3.6 (Traversal Rules and Side Effects)  
+
+-subst, nsubst,  Section 3.2.1 (Compiler Terminology),   Section 3.6 (Traversal Rules and Side Effects)
 + Function SUBST
 + Function NSUBST,
 +{\secref\ConstantModification},
 +{\secref\TraversalRules}
  Notes
-  
- If sequence is a vector, the result might or might not be simple, and might or might not be identical to sequence. 
-  The test-not argument is deprecated.  
-  The functions substitute-if-not and nsubstitute-if-not are deprecated.  
- nsubstitute and nsubstitute-if can be used in for-effect-only positions in code. 
--Because the side-effecting variants (e.g., nsubstitute) potentially change the path that is being traversed, their effects in the presence of shared or circular structure may vary in surprising ways when compared to their non-side-effecting alternatives. To see this, consider the following side-effect behavior, which might be exhibited by some implementations 
- 
+
+ If sequence is a vector, the result might or might not be simple, and might or might not be identical to sequence.
+  The test-not argument is deprecated.
+  The functions substitute-if-not and nsubstitute-if-not are deprecated.
+ nsubstitute and nsubstitute-if can be used in for-effect-only positions in code.
+-Because the side-effecting variants (e.g., nsubstitute) potentially change the path that is being traversed, their effects in the presence of shared or circular structure may vary in surprising ways when compared to their non-side-effecting alternatives. To see this, consider the following side-effect behavior, which might be exhibited by some implementations
+
 - (defun test-it (fn)
 -   (let ((x (cons 'b nil)))
 -     (rplacd x x)
 -     (funcall fn 'a 'b x count 1)))
 - (test-it #'substitute) =>  (A . #1=(B . #1#))
 - (test-it #'nsubstitute) =>  (A . #1#)
- 
--<TT> 
+
+-<TT>
 -The following X3J13 cleanup issues, not part of the specification, apply to this section TEST-NOT-IF-NOTFLUSH-ALL MAPPING-DESTRUCTIVE-INTERACTIONEXPLICITLY-VAGUE CONSTANT-MODIFICATIONDISALLOW REMF-DESTRUCTION-UNSPECIFIEDX3J13-MAR-89 RANGE-OF-COUNT-KEYWORDNIL-OR-INTEGER RANGE-OF-START-AND-END-PARAMETERSINTEGER-AND-INTEGER-NIL SUBSEQ-OUT-OF-BOUNDS
 \ No newline at end of file
 +Because the side-effecting variants (e.g. nsubstitute) potentially change the path that is being traversed, their effects in the presence of shared or circular structure may vary in surprising ways when compared to their non-side-effecting alternatives. To see this, consider the following side-effect behavior, which might be exhibited by some implementations
-+ (defun test-it (fn) (let ((x (cons 'b nil))) (rplacd x x) (funcall fn 'a 'b x count 1))) (test-it #'substitute) → (A . #1=(B . #1#)) (test-it #'nsubstitute) → (A . #1#) 
++ (defun test-it (fn) (let ((x (cons 'b nil))) (rplacd x x) (funcall fn 'a 'b x count 1))) (test-it #'substitute) → (A . #1=(B . #1#)) (test-it #'nsubstitute) → (A . #1#)
 +\
 \ No newline at end of file

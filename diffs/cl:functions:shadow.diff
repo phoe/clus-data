@@ -1,9 +1,9 @@
 --- saved-pages-dpans3/cl:functions:shadow.txt	2017-04-27 21:47:49.000000000 +0100
 +++ saved-pages-clus/cl:functions:shadow.txt	2017-04-27 21:47:49.000000000 +0100
-@@ -2,54 +4,73 @@
+@@ -2,54 +4,63 @@
  Syntax
-  
- 
+
+
 -shadow symbol-names &optional package => t
 + shadow symbol-names &optional package → t
 +====Arguments and Values====
@@ -37,63 +37,63 @@
 +(use-package 'test-2 (find-package 'test-1)) <r>T</r>
 +</blockquote>
 +The use-package call in the above example does not error, because the symbol with name "TEST" is shadowed in the package test-1. Therefore, that symbol is not found via inheritance from package test-2'' and there is no conflict between symbols with the same name.
-  
+
 -Arguments and Values
-  
-- symbol-names - a designator for a list of string designators.  
-- package - a package designator.  The default is the current package. 
+
+- symbol-names - a designator for a list of string designators.
+- package - a package designator.  The default is the current package.
 -Description
-  
--shadow assures that symbols with names given by symbol-names are present in the package. 
--Specifically, package is searched for symbols with the names supplied by symbol-names.  For each such name, if a corresponding symbol is not present in package (directly, not by inheritance), then a corresponding symbol is created with that name, and inserted into package as an internal symbol. The corresponding symbol, whether pre-existing or newly created, is then added, if not already present, to the shadowing symbols list of package.  
+
+-shadow assures that symbols with names given by symbol-names are present in the package.
+-Specifically, package is searched for symbols with the names supplied by symbol-names.  For each such name, if a corresponding symbol is not present in package (directly, not by inheritance), then a corresponding symbol is created with that name, and inserted into package as an internal symbol. The corresponding symbol, whether pre-existing or newly created, is then added, if not already present, to the shadowing symbols list of package.
 -Examples
 +Side Effects
-  
- 
+
+
 - (package-shadowing-symbols (make-package 'temp)) =>  NIL
 - (find-symbol 'car 'temp) =>  CAR, INHERITED
 - (shadow 'car 'temp) =>  T
 - (find-symbol 'car 'temp) =>  TEMPCAR, INTERNAL
 - (package-shadowing-symbols 'temp) =>  (TEMPCAR)
 +shadow changes the state of the package system in such a way that the package consistency rules do not hold across the change.
- 
--<TT> 
-  
+
+-<TT>
+
 +Affected By
- 
+
 - (make-package 'test-1) =>  #<PACKAGE "TEST-1">
 - (intern "TEST" (find-package 'test-1)) =>  TEST-1TEST, NIL
 - (shadow 'test-1test (find-package 'test-1)) =>  T
 - (shadow 'TEST (find-package 'test-1)) =>  T
 - (assert (not (null (member 'test-1test (package-shadowing-symbols
 -                                            (find-package 'test-1))))))
-  
+
 - (make-package 'test-2) =>  #<PACKAGE "TEST-2">
 - (intern "TEST" (find-package 'test-2)) =>  TEST-2TEST, NIL
 - (export 'test-2test (find-package 'test-2)) =>  T
 - (use-package 'test-2 (find-package 'test-1))    ;should not error
 +Current state of the package system.
-  
- 
--<TT>  
+
+
+-<TT>
 -Side Effects
 +Exceptional Situations
-  
--shadow changes the state of the package system in such a way that the package consistency rules do not hold across the change. 
+
+-shadow changes the state of the package system in such a way that the package consistency rules do not hold across the change.
 -Affected By
-  
--Current state of the package system. 
+
+-Current state of the package system.
 -Exceptional Situations None.
 +None.
-  
+
  See Also
-  
--package-shadowing-symbols, Section 11.1 (Package Concepts) 
+
+-package-shadowing-symbols, Section 11.1 (Package Concepts)
 + Function PACKAGE-SHADOWING-SYMBOLS
 + {\secref\PackageConcepts}
  Notes
-  
--If a symbol with a name in symbol-names already exists in package, but by inheritance, the inherited symbol becomes shadowed[3] by a newly created internal symbol. 
+
+-If a symbol with a name in symbol-names already exists in package, but by inheritance, the inherited symbol becomes shadowed[3] by a newly created internal symbol.
 -The following X3J13 cleanup issues, not part of the specification, apply to this section SHADOW-ALREADY-PRESENT PACKAGE-FUNCTION-CONSISTENCYMORE-PERMISSIVE SHADOW-ALREADY-PRESENTWORKS
 \ No newline at end of file
 +If a symbol with a name in symbol-names already exists in package, but by inheritance, the inherited symbol becomes shadowed by a newly created internal symbol.
