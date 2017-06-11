@@ -1,48 +1,48 @@
 --- saved-pages-dpans3/cl:functions:constantp.txt	2017-04-27 21:58:10.000000000 +0100
 +++ saved-pages-clus/cl:functions:constantp.txt	2017-04-27 21:58:10.000000000 +0100
-@@ -3,7 +4,9 @@
+@@ -3,1 +4,1 @@
  Syntax
-  
- 
+
+
 -constantp form &optional environment => generalized-boolean
 + constantp form &optional environment → generalized-boolean
-  
+
  Arguments and Values
-  
+
 @@ -7,17 +10,37 @@
-  
+
  Arguments and Values
-  
- form - a form. 
- environment - an environment object. The default is nil. 
- generalized-boolean - a generalized boolean. 
+
+ form - a form.
+ environment - an environment object. The default is nil.
+ generalized-boolean - a generalized boolean.
  Description
-  
- Returns true if form can be determined by the implementation to be a constant form in the indicated environment; otherwise, it returns false indicating either that the form is not a constant form or that it cannot be determined whether or not form is a constant form. 
--The following kinds of forms are considered constant forms *  Self-evaluating objects (such as numbers, characters, and the various kinds of arrays) are always considered constant forms and must be recognized as such by constantp. 
--*  Constant variables, such as keywords, symbols defined by Common Lisp as constant (such as nil, t, and pi), and symbols declared as constant by the user in the indicated environment using defconstant are always considered constant forms and must be recognized as such by constantp. 
--*  quote forms are always considered constant forms and must be recognized as such by constantp. 
--*  An implementation is permitted, but not required, to detect additional constant forms. If it does, it is also permitted, but not required, to make use of information in the environment. Examples of constant forms for which constantp might or might not return true are (sqrt pi), (+ 3 2), (length '(a b c)), and (let ((x 7)) (zerop x)). 
+
+ Returns true if form can be determined by the implementation to be a constant form in the indicated environment; otherwise, it returns false indicating either that the form is not a constant form or that it cannot be determined whether or not form is a constant form.
+-The following kinds of forms are considered constant forms *  Self-evaluating objects (such as numbers, characters, and the various kinds of arrays) are always considered constant forms and must be recognized as such by constantp.
+-*  Constant variables, such as keywords, symbols defined by Common Lisp as constant (such as nil, t, and pi), and symbols declared as constant by the user in the indicated environment using defconstant are always considered constant forms and must be recognized as such by constantp.
+-*  quote forms are always considered constant forms and must be recognized as such by constantp.
+-*  An implementation is permitted, but not required, to detect additional constant forms. If it does, it is also permitted, but not required, to make use of information in the environment. Examples of constant forms for which constantp might or might not return true are (sqrt pi), (+ 3 2), (length '(a b c)), and (let ((x 7)) (zerop x)).
 +The following kinds of forms are considered constant forms
 + Self-evaluating objects (such as numbers, characters, and the various kinds of arrays) are always considered constant forms and must be recognized as such by constantp.
 + Constant variables, such as keywords, symbols defined by Common Lisp as constant (such as nil, t, and pi), and symbols declared as constant by the user in the indicated environment using defconstant are always considered constant forms and must be recognized as such by constantp.
 + quote forms are always considered constant forms and must be recognized as such by constantp.
 + An implementation is permitted, but not required, to detect additional constant forms. If it does, it is also permitted, but not required, to make use of information in the environment. Examples of constant forms for which constantp might or might not return true are (sqrt pi), (+ 3 2), (length '(a b c)), and (let ((x 7)) (zerop x)).
- If an implementation chooses to make use of the environment information, such actions as expanding macros or performing function inlining are permitted to be used, but not required; however, expanding compiler macros is not permitted. 
+ If an implementation chooses to make use of the environment information, such actions as expanding macros or performing function inlining are permitted to be used, but not required; however, expanding compiler macros is not permitted.
  Examples
-  
- 
+
+
 @@ -21,35 +44,163 @@
  Examples
-  
- 
+
+
 - (constantp 1) =>  true
 - (constantp 'temp) =>  false
 - (constantp ''temp)) =>  true
-- (defconstant this-is-a-constant 'never-changing) =>  THIS-IS-A-CONSTANT 
+- (defconstant this-is-a-constant 'never-changing) =>  THIS-IS-A-CONSTANT
 - (constantp 'this-is-a-constant) =>  true
 - (constantp "temp") =>  true
-- (setq a 6) =>  6 
+- (setq a 6) =>  6
 - (constantp a) =>  true
 - (constantp '(sin pi)) =>  implementation-dependent
 - (constantp '(car '(x))) =>  implementation-dependent
@@ -52,76 +52,76 @@
 - (constantp '(values this-is-a-constant)) =>  implementation-dependent
 - (constantp '(values 'x 'y)) =>  implementation-dependent
 - (constantp '(let ((a '(a b c))) (+ (length a) 6))) =>  implementation-dependent
- 
--<TT> 
+
+-<TT>
 -Side Effects None.
-+(constantp 1) 
++(constantp 1)
 +→
 +true
-+(constantp 'temp) 
++(constantp 'temp)
 +→
 +false
-+(constantp ''temp)) 
++(constantp ''temp))
 +→
 +true
-+(defconstant +this-is-a-constant+ 'never-changing) 
++(defconstant +this-is-a-constant+ 'never-changing)
 +→
-++THIS-IS-A-CONSTANT+(constantp '+this-is-a-constant+) 
-+→
-+true
-+(constantp "temp") 
+++THIS-IS-A-CONSTANT+(constantp '+this-is-a-constant+)
 +→
 +true
-+(defparameter *a* 6) 
++(constantp "temp")
++→
++true
++(defparameter *a* 6)
 +→
 +*A*
-+(constantp *a*) 
++(constantp *a*)
 +→
 +true
-+(constantp '(sin pi)) 
++(constantp '(sin pi))
 +→
 +implementation-dependent
-+(constantp '(car '(x))) 
++(constantp '(car '(x)))
 +→
 +implementation-dependent
-+(constantp '(eql x x)) 
++(constantp '(eql x x))
 +→
 +implementation-dependent
-+(constantp '(typep x 'nil)) 
++(constantp '(typep x 'nil))
 +→
 +implementation-dependent
-+(constantp '(typep x 't)) 
++(constantp '(typep x 't))
 +→
 +implementation-dependent
-+(constantp '(values +this-is-a-constant+)) 
++(constantp '(values +this-is-a-constant+))
 +→
 +implementation-dependent
-+(constantp '(values 'x 'y)) 
++(constantp '(values 'x 'y))
 +→
 +implementation-dependent
-+(constantp '(let ((a '(a b c))) (+ (length a) 6))) 
++(constantp '(let ((a '(a b c))) (+ (length a) 6)))
 +→
 +implementation-dependent
 +Side Effects
 +None.
-  
+
  Affected By
-  
--The state of the global environment (e.g., which symbols have been declared to be the names of constant variables). 
+
+-The state of the global environment (e.g., which symbols have been declared to be the names of constant variables).
 -Exceptional Situations None.
 +The state of the global environment (e.g. which symbols have been declared to be the names of constant variables).
 +Exceptional Situations
 +None.
-  
+
  See Also
-  
--defconstant 
+
+-defconstant
 -Notes None.
 +Macro DEFCONSTANT
 +Notes
 +None.
-  
-   
+
+
 -The following X3J13 cleanup issues, not part of the specification, apply to this section CONSTANTP-ENVIRONMENTADD-ARG CONSTANTP-DEFINITIONINTENTIONAL
 \ No newline at end of file
 +\

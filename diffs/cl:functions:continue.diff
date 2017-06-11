@@ -1,10 +1,10 @@
 --- saved-pages-dpans3/cl:functions:continue.txt	2017-04-27 22:00:54.000000000 +0100
 +++ saved-pages-clus/cl:functions:continue.txt	2017-04-27 22:00:54.000000000 +0100
-@@ -1,4 +1,357 @@
+@@ -1,4 +1,167 @@
 -CONTINUE
 -Please select which reference to CONTINUE you intended
 +Function ABORT, CONTINUE, MUFFLE-WARNING, STORE-VALUE, USE-VALUE
- 
+
 -FunctionRestart
 \ No newline at end of file
 +Syntax
@@ -26,7 +26,7 @@
 +  `(handler-bind ((error #'abort)) ,@forms))
 +→
 +ABORT-ON-ERROR
-+(abort-on-error (+ 3 5)) 
++(abort-on-error (+ 3 5))
 +→
 +8
 +(abort-on-error (error "You lose."))
@@ -37,10 +37,10 @@
 +  (when (minusp n)
 +    (cerror "Return sqrt(~D) instead." "Tried to take sqrt(-~D)." n)
 +    (setf n (- n)))
-+  (sqrt n)) 
++  (sqrt n))
 +→
 +REAL-SQRT
-+(real-sqrt 4) 
++(real-sqrt 4)
 +→
 +2
 +(real-sqrt -9)
@@ -77,19 +77,19 @@
 +DONE
 +(defun ignore-warning (condition)
 +  (declare (ignore condition))
-+  (muffle-warning)) 
++  (muffle-warning))
 +→
 +IGNORE-WARNING
 +(defun ignore-warnings-while-counting (x)
 +  (handler-bind ((warning #'ignore-warning))
-+    (count-down x))) 
++    (count-down x)))
 +→
 +IGNORE-WARNINGS-WHILE-COUNTING
 +(ignore-warnings-while-counting 3)
 +▷
 +3
 +2
-+1 
++1
 +→
 +DONE
 +Example of the **store-value** and **use-value** restarts
@@ -102,18 +102,18 @@
 +    (use-value (value)
 +      report "Specify a value to use this time."
 +      value)
-+    (store-value (value) 
++    (store-value (value)
 +      report "Specify a value to store and use in the future."
 +      (setf (symbol-value symbol) value))))
 +→
 +CAREFUL-SYMBOL-VALUE
-+(defparameter *a* 1234) 
++(defparameter *a* 1234)
 +→
 +1234
-+(careful-symbol-value '*a*) 
++(careful-symbol-value '*a*)
 +→
 +1234
-+(makunbound '*a*) 
++(makunbound '*a*)
 +→
 +A
 +(careful-symbol-value '*a*)
@@ -136,7 +136,7 @@
 +▷ Debug> (store-value 24)
 +→
 +24
-+(careful-symbol-value '*a*) 
++(careful-symbol-value '*a*)
 +→
 +24
 +Example of the **use-value** restart
@@ -147,13 +147,13 @@
 +  (apply #'+ (mapcar #'careful-symbol-value symbols))))
 +→
 +ADD-SYMBOLS-WITH-DEFAULT
-+(defparameter *x* 1) 
++(defparameter *x* 1)
 +→
 +*X*
-+(defparameter *y* 2) 
++(defparameter *y* 2)
 +→
 +*Y*
-+(add-symbols-with-default 3 '*x* '*y* '*z*) 
++(add-symbols-with-default 3 '*x* '*y* '*z*)
 +→
 +6
 +Side Effects
