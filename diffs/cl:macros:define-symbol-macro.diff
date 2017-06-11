@@ -1,38 +1,38 @@
 --- saved-pages-dpans3/cl:macros:define-symbol-macro.txt	2017-04-27 21:57:56.000000000 +0100
 +++ saved-pages-clus/cl:macros:define-symbol-macro.txt	2017-04-27 21:57:56.000000000 +0100
-@@ -2,7 +4,9 @@
+@@ -2,7 +4,7 @@
  Syntax
-  
- 
+
+
 -define-symbol-macro symbol expansion => symbol
 + define-symbol-macro symbol expansion → symbol
-  
+
  Arguments and Values
-  
+
 @@ -6,36 +10,135 @@
-  
+
  Arguments and Values
-  
- symbol - a symbol. 
- expansion - a form. 
+
+ symbol - a symbol.
+ expansion - a form.
  Description
-  
- Provides a mechanism for globally affecting the macro expansion of the indicated symbol. 
--Globally establishes an expansion function for the symbol macro named by symbol. The only guaranteed property of an expansion function for a symbol macro is that when it is applied to the form and the environment it returns the correct expansion. (In particular, it is implementation-dependent whether the expansion is conceptually stored in the expansion function, the environment, or both.) 
--Each global reference to symbol (i.e., not shadowed[2] by a binding for a variable or symbol macro named by the same symbol) is expanded by the normal macro expansion process; see Section 3.1.2.1.1 (Symbols as Forms). The expansion of a symbol macro is subject to further macro expansion in the same lexical environment as the symbol macro reference, exactly analogous to normal macros. 
--The consequences are unspecified if a special declaration is made for symbol while in the scope of this definition (i.e., when it is not shadowed[2] by a binding for a variable or symbol macro named by the same symbol). 
+
+ Provides a mechanism for globally affecting the macro expansion of the indicated symbol.
+-Globally establishes an expansion function for the symbol macro named by symbol. The only guaranteed property of an expansion function for a symbol macro is that when it is applied to the form and the environment it returns the correct expansion. (In particular, it is implementation-dependent whether the expansion is conceptually stored in the expansion function, the environment, or both.)
+-Each global reference to symbol (i.e., not shadowed[2] by a binding for a variable or symbol macro named by the same symbol) is expanded by the normal macro expansion process; see Section 3.1.2.1.1 (Symbols as Forms). The expansion of a symbol macro is subject to further macro expansion in the same lexical environment as the symbol macro reference, exactly analogous to normal macros.
+-The consequences are unspecified if a special declaration is made for symbol while in the scope of this definition (i.e., when it is not shadowed[2] by a binding for a variable or symbol macro named by the same symbol).
 +Globally establishes an expansion function for the symbol macro named by symbol.
 +The only guaranteed property of an expansion function for a symbol macro is that when it is applied to the form and the environment it returns the correct expansion. (In particular, it is implementation-dependent whether the expansion is conceptually stored in the expansion function, the environment, or both.)
 +Each global reference to symbol (i.e. not shadowed by a binding for a variable or symbol macro named by the same symbol) is expanded by the normal macro expansion process; see section {\secref\SymbolsAsForms}. The expansion of a symbol macro is subject to further macro expansion in the same lexical environment as the symbol macro reference, exactly analogous to normal macros.
 +The consequences are unspecified if a special declaration is made for symbol while in the scope of this definition (i.e. when it is not shadowed by a binding for a variable or symbol macro named by the same symbol).
- Any use of setq to set the value of the symbol while in the scope of this definition is treated as if it were a setf. psetq of symbol is treated as if it were a psetf, and multiple-value-setq is treated as if it were a setf of values. 
--A binding for a symbol macro can be shadowed[2] by let or symbol-macrolet. 
+ Any use of setq to set the value of the symbol while in the scope of this definition is treated as if it were a setf. psetq of symbol is treated as if it were a psetf, and multiple-value-setq is treated as if it were a setf of values.
+-A binding for a symbol macro can be shadowed[2] by let or symbol-macrolet.
 +A binding for a symbol macro can be shadowed by let or symbol-macrolet.
  Examples
-  
- 
+
+
 -(defvar *things* (list 'alpha 'beta 'gamma)) =>  *THINGS*
- 
+
 -(define-symbol-macro thing1 (first *things*)) =>  THING1
 -(define-symbol-macro thing2 (second *things*)) =>  THING2
 -(define-symbol-macro thing3 (third *things*)) =>  THING3
@@ -42,58 +42,58 @@
 -(multiple-value-setq (thing2 thing3) (values 'two 'three)) =>  TWO
 -thing3 =>  THREE
 -*things* =>  (ONE TWO THREE)
-+(defvar *things* (list 'alpha 'beta 'gamma)) 
++(defvar *things* (list 'alpha 'beta 'gamma))
 +→
 +*THINGS*
-+(define-symbol-macro *thing1* (first *things*)) 
++(define-symbol-macro *thing1* (first *things*))
 +→
 +*THING1*
-+(define-symbol-macro *thing2* (second *things*)) 
++(define-symbol-macro *thing2* (second *things*))
 +→
 +*THING2*
-+(define-symbol-macro *thing3* (third *things*)) 
++(define-symbol-macro *thing3* (third *things*))
 +→
 +*THING3*
-+*thing1* 
- 
++*thing1*
+
 -(list thing2 (let ((thing2 2)) thing2)) =>  (TWO 2)
 +→
 +ALPHA
-+(setf *thing1* 'ONE) 
++(setf *thing1* 'ONE)
 +→
 +ONE
-+*things* 
++*things*
 +→
 +(ONE BETA GAMMA)
-+(setf (values *thing2* *thing3*) (values 'two 'three)) 
++(setf (values *thing2* *thing3*) (values 'two 'three))
 +→
 +TWO
 +THREE
-+*thing3* 
++*thing3*
 +→
-+THREE 
-+*things* 
++THREE
++*things*
 +→
 +(ONE TWO THREE)
-+(list *thing2* (let ((*thing2* 2)) *thing2*)) 
++(list *thing2* (let ((*thing2* 2)) *thing2*))
 +→
 +(TWO 2)
 +Affected By
 +None.
- 
--<TT> 
+
+-<TT>
 -Affected By None.
-  
+
  Exceptional Situations
-  
+
 @@ -39,8 +142,17 @@
-  
+
  Exceptional Situations
-  
- If symbol is already defined as a global variable, an error of type program-error is signaled. 
+
+ If symbol is already defined as a global variable, an error of type program-error is signaled.
  See Also
-  
--symbol-macrolet, macroexpand 
+
+-symbol-macrolet, macroexpand
 -Notes None.
 \ No newline at end of file
 +Special Operator SYMBOL-MACROLET, Function MACROEXPAND
