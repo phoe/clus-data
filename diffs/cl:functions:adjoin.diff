@@ -1,94 +1,94 @@
 --- saved-pages-dpans3/cl:functions:adjoin.txt	2017-04-27 22:03:42.000000000 +0100
 +++ saved-pages-clus/cl:functions:adjoin.txt	2017-04-27 22:03:42.000000000 +0100
-@@ -2,7 +4,9 @@
+@@ -2,1 +4,1 @@
  Syntax
-  
- 
+
+
 -adjoin item list &key key test test-not => new-list
 + adjoin item list &key key test test-not → new-list
-  
+
  Arguments and Values
-  
+
 @@ -6,31 +10,109 @@
-  
+
  Arguments and Values
-  
- item - an object. 
- list - a proper list. 
- test - a designator for a function of two arguments that returns a generalized boolean. 
- test-not - a designator for a function of two arguments that returns a generalized boolean. 
- key - a designator for a function of one argument, or nil. 
- new-list - a list. 
+
+ item - an object.
+ list - a proper list.
+ test - a designator for a function of two arguments that returns a generalized boolean.
+ test-not - a designator for a function of two arguments that returns a generalized boolean.
+ key - a designator for a function of one argument, or nil.
+ new-list - a list.
  Description
-  
- Tests whether item is the same as an existing element of list. If the item is not an existing element, adjoin adds it to list (as if by cons) and returns the resulting list; otherwise, nothing is added and the original list is returned. 
+
+ Tests whether item is the same as an existing element of list. If the item is not an existing element, adjoin adds it to list (as if by cons) and returns the resulting list; otherwise, nothing is added and the original list is returned.
 -The test, test-not, and key affect how it is determined whether item is the same as an element of list. For details, see Section 17.2.1 (Satisfying a Two-Argument Test).
 +The test, test-not, and key affect how it is determined whether item is the same as an element of list. For details, see {\secref 17.2.1}.
-  
+
  Examples
-  
- 
-- (setq slist '()) =>  NIL 
-- (adjoin 'a slist) =>  (A) 
-- slist =>  NIL 
-- (setq slist (adjoin '(test-item 1) slist)) =>  ((TEST-ITEM 1)) 
-- (adjoin '(test-item 1) slist) =>  ((TEST-ITEM 1) (TEST-ITEM 1)) 
-- (adjoin '(test-item 1) slist test 'equal) =>  ((TEST-ITEM 1)) 
-- (adjoin '(new-test-item 1) slist key #'cadr) =>  ((TEST-ITEM 1)) 
-- (adjoin '(new-test-item 1) slist) =>  ((NEW-TEST-ITEM 1) (TEST-ITEM 1)) 
- 
--<TT> 
+
+
+- (setq slist '()) =>  NIL
+- (adjoin 'a slist) =>  (A)
+- slist =>  NIL
+- (setq slist (adjoin '(test-item 1) slist)) =>  ((TEST-ITEM 1))
+- (adjoin '(test-item 1) slist) =>  ((TEST-ITEM 1) (TEST-ITEM 1))
+- (adjoin '(test-item 1) slist test 'equal) =>  ((TEST-ITEM 1))
+- (adjoin '(new-test-item 1) slist key #'cadr) =>  ((TEST-ITEM 1))
+- (adjoin '(new-test-item 1) slist) =>  ((NEW-TEST-ITEM 1) (TEST-ITEM 1))
+
+-<TT>
 -Affected By None.
-+(defparameter *slist* '()) 
++(defparameter *slist* '())
 +→
 +*SLIST*
-+(adjoin 'a *slist*) 
++(adjoin 'a *slist*)
 +→
-+(A) 
-+*slist* 
++(A)
++*slist*
 +→
-+NIL 
-+(setf *slist* (adjoin '(test-item 1) *slist*)) 
++NIL
++(setf *slist* (adjoin '(test-item 1) *slist*))
 +→
-+((TEST-ITEM 1)) 
-+(adjoin '(test-item 1) *slist*) 
++((TEST-ITEM 1))
++(adjoin '(test-item 1) *slist*)
 +→
-+((TEST-ITEM 1) (TEST-ITEM 1)) 
-+(adjoin '(test-item 1) *slist* test #'equal) 
++((TEST-ITEM 1) (TEST-ITEM 1))
++(adjoin '(test-item 1) *slist* test #'equal)
 +→
-+((TEST-ITEM 1)) 
-+(adjoin '(new-test-item 1) *slist* key #'cadr) 
++((TEST-ITEM 1))
++(adjoin '(new-test-item 1) *slist* key #'cadr)
 +→
-+((TEST-ITEM 1)) 
-+(adjoin '(new-test-item 1) *slist*) 
++((TEST-ITEM 1))
++(adjoin '(new-test-item 1) *slist*)
 +→
-+((NEW-TEST-ITEM 1) (TEST-ITEM 1)) 
++((NEW-TEST-ITEM 1) (TEST-ITEM 1))
 +Side Effects
 +None.
 +Affected By
 +None.
-  
+
  Exceptional Situations
-  
+
 @@ -34,16 +116,28 @@
-  
+
  Exceptional Situations
-  
- Should be prepared to signal an error of type type-error if list is not a proper list. 
+
+ Should be prepared to signal an error of type type-error if list is not a proper list.
  See Also
-  
--pushnew,  Section 3.6 (Traversal Rules and Side Effects)  
+
+-pushnew,  Section 3.6 (Traversal Rules and Side Effects)
 +Macro PUSHNEW, {\secref\TraversalRules}
 +Example Implementation
 +(adjoin item list key fn) ≡ (if (member (funcall fn item) list key fn) list (cons item list))
  Notes
-  
-  The test-not parameter is deprecated.  
- 
+
+  The test-not parameter is deprecated.
+
 - (adjoin item list key fn)
 -   ==  (if (member (fn item) list key fn) list (cons item list))
- 
--<TT> 
+
+-<TT>
 -The following X3J13 cleanup issues, not part of the specification, apply to this section TEST-NOT-IF-NOTFLUSH-ALL MAPPING-DESTRUCTIVE-INTERACTIONEXPLICITLY-VAGUE
 \ No newline at end of file
 +\

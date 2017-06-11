@@ -1,76 +1,76 @@
 --- saved-pages-dpans3/cl:functions:apply.txt	2017-04-27 21:57:08.000000000 +0100
 +++ saved-pages-clus/cl:functions:apply.txt	2017-04-27 21:57:08.000000000 +0100
-@@ -2,7 +4,9 @@
+@@ -2,1 +4,1 @@
  Syntax
-  
- 
+
+
 -apply function &rest args+ => result*
 + apply function &rest args+ → result*
-  
+
  Arguments and Values
-  
+
 @@ -6,50 +10,199 @@
-  
+
  Arguments and Values
-  
-  function - a function designator.  
- args - a spreadable argument list designator. 
- results - the values returned by function. 
+
+  function - a function designator.
+ args - a spreadable argument list designator.
+ results - the values returned by function.
  Description
-  
- Applies the function to the args. 
-  When the function receives its arguments via &rest, it is permissible (but not required) for the implementation to bind the rest parameter to an object that shares structure with the last argument to apply. Because a function can neither detect whether it was called via apply nor whether (if so) the last argument to apply was a constant, conforming programs must neither rely on the list structure of a rest list to be freshly consed, nor modify that list structure.  
--setf can be used with apply in certain circumstances; see Section 5.1.2.5 (APPLY Forms as Places). 
+
+ Applies the function to the args.
+  When the function receives its arguments via &rest, it is permissible (but not required) for the implementation to bind the rest parameter to an object that shares structure with the last argument to apply. Because a function can neither detect whether it was called via apply nor whether (if so) the last argument to apply was a constant, conforming programs must neither rely on the list structure of a rest list to be freshly consed, nor modify that list structure.
+-setf can be used with apply in certain circumstances; see Section 5.1.2.5 (APPLY Forms as Places).
 +setf can be used with apply in certain circumstances; see section {\secref\SETFofAPPLY}.
  Examples
-  
-  
- 
+
+
+
 - (setq f '+) =>  - (apply f '(1 2)) =>  3
 - (setq f #'-) =>  #<FUNCTION ->
 - (apply f '(1 2)) =>  -1
 - (apply #'max 3 5 '(2 7 3)) =>  7
 - (apply 'cons '((+ 2 3) 4)) =>  ((+ 2 3) . 4)
 - (apply #'+ '()) =>  0
-+(defparameter *f* '+) 
++(defparameter *f* '+)
 +→
-+(apply *f* '(1 2)) 
++(apply *f* '(1 2))
 +→
 +3
-+(setf *f* #'-) 
++(setf *f* #'-)
 +→
-+# 
-+(apply *f* '(1 2)) 
++#
++(apply *f* '(1 2))
 +→
-+-1 
-+(apply #'max 3 5 '(2 7 3)) 
++-1
++(apply #'max 3 5 '(2 7 3))
 +→
-+7 
-+(apply 'cons '((+ 2 3) 4)) 
++7
++(apply 'cons '((+ 2 3) 4))
 +→
-+((+ 2 3) . 4) 
-+(apply #'+ '()) 
++((+ 2 3) . 4)
++(apply #'+ '())
 +→
 +0
- 
+
   (defparameter *some-list* '(a b c))
 - (defun strange-test (&rest x) (eq x *some-list*))
 - (apply #'strange-test *some-list*) =>  implementation-dependent
- 
+
 - (defun bad-boy (&rest x) (rplacd x 'y))
 - (bad-boy 'a 'b 'c) has undefined consequences.
 - (apply #'bad-boy *some-list*) has undefined consequences.
 +→
 +*SOME-LIST*
 +(defun strange-test (&rest x)
-+  (eq x *some-list*)) 
++  (eq x *some-list*))
 +→
 +STRANGE-TEST
-+(apply #'strange-test *some-list*) 
++(apply #'strange-test *some-list*)
 +→
 +implementation-dependent
-+(defun bad-boy (&rest x) 
-+  (rplacd x 'y)) 
++(defun bad-boy (&rest x)
++  (rplacd x 'y))
 +→
 +BAD-BOY
 +(bad-boy 'a 'b 'c)
@@ -79,21 +79,21 @@
 +(apply #'bad-boy *some-list*)
 +?
 +The above has undefined consequences.
- 
--<TT>  
- 
+
+-<TT>
+
   (defun foo (size &rest keys &key double &allow-other-keys)
     (let ((v (apply #'make-array size allow-other-keys t keys)))
 -     (if double (concatenate (type-of v) v v) v)))
-+    (if double 
++    (if double
 +        (concatenate (type-of v) v v)
-+        v))) 
++        v)))
 +→
 +FOO
   (foo 4 initial-contents '(a b c d) double t)
 -    =>  #(A B C D A B C D)
- 
--<TT> 
+
+-<TT>
 -Affected By None.
 +→
 +#(A B C D A B C D)
@@ -101,14 +101,14 @@
 +None.
 +Exceptional Situations
 +None.
-  
+
 -Exceptional Situations None.
-  
+
  See Also
-  
--funcall, fdefinition, function, Section 3.1 (Evaluation), Section 5.1.2.5 (APPLY Forms as Places) 
+
+-funcall, fdefinition, function, Section 3.1 (Evaluation), Section 5.1.2.5 (APPLY Forms as Places)
 -Notes None.
-  
+
 -The following X3J13 cleanup issues, not part of the specification, apply to this section REST-LIST-ALLOCATIONMAY-SHARE FUNCTION-TYPEX3J13-MARCH-88
 \ No newline at end of file
 + Function FUNCALL
