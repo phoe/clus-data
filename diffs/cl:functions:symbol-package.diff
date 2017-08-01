@@ -1,18 +1,18 @@
 --- saved-pages-dpans3/cl:functions:symbol-package.txt	2017-04-27 21:40:53.000000000 +0100
 +++ saved-pages-clus/cl:functions:symbol-package.txt	2017-04-27 21:40:53.000000000 +0100
-@@ -2,7 +4,9 @@
+@@ -2,4 +4,4 @@
  Syntax
-  
- 
+
+
 -symbol-package symbol => contents
 + symbol-package symbol → contents
-  
+
  Arguments and Values
-  
+
 @@ -14,32 +26,147 @@
  Examples
-  
- 
+
+
 - (in-package "CL-USER") =>  #<PACKAGE "COMMON-LISP-USER">
 - (symbol-package 'car) =>  #<PACKAGE "COMMON-LISP">
 - (symbol-package 'bus) =>  #<PACKAGE "COMMON-LISP-USER">
@@ -36,79 +36,79 @@
 - (unintern s3 'pk1) =>  T
 - (symbol-package s3) =>  NIL
 - (eq s3 'pk2sample3) =>  T
- 
--<TT> 
+
+-<TT>
 -Side Effects None.
-+(in-package "CL-USER") 
++(in-package "CL-USER")
 +→
-+#<PACKAGE "COMMON-LISP-USER"> 
-+(symbol-package 'car) 
++#<PACKAGE "COMMON-LISP-USER">
++(symbol-package 'car)
 +→
-+#<PACKAGE "COMMON-LISP"> 
-+(symbol-package 'bus) 
++#<PACKAGE "COMMON-LISP">
++(symbol-package 'bus)
 +→
-+#<PACKAGE "COMMON-LISP-USER"> 
-+(symbol-package optional) 
++#<PACKAGE "COMMON-LISP-USER">
++(symbol-package optional)
 +→
-+#<PACKAGE "KEYWORD"> 
-+(symbol-package (gensym)) 
++#<PACKAGE "KEYWORD">
++(symbol-package (gensym))
 +→
 +NIL ; gensyms are uninterned, so have no home package
-+(make-package 'pk1) 
++(make-package 'pk1)
 +→
-+#<PACKAGE "PK1"> 
-+(intern "SAMPLE1" "PK1") 
-+→
-+PK1SAMPLE1
-+NIL 
-+(export (find-symbol "SAMPLE1" "PK1") "PK1") 
-+→
-+T 
-+(make-package 'pk2 use '(pk1)) 
-+→
-+#<PACKAGE "PK2"> 
-+(find-symbol "SAMPLE1" "PK2") 
++#<PACKAGE "PK1">
++(intern "SAMPLE1" "PK1")
 +→
 +PK1SAMPLE1
-+INHERITED 
-+(symbol-package 'pk1sample1) 
++NIL
++(export (find-symbol "SAMPLE1" "PK1") "PK1")
 +→
-+#<PACKAGE "PK1"> 
-+(symbol-package 'pk2sample1) 
++T
++(make-package 'pk2 use '(pk1))
 +→
-+#<PACKAGE "PK1"> 
-+(symbol-package 'pk1sample2) 
++#<PACKAGE "PK2">
++(find-symbol "SAMPLE1" "PK2")
 +→
-+#<PACKAGE "PK1"> 
-+(symbol-package 'pk2sample2) 
++PK1SAMPLE1
++INHERITED
++(symbol-package 'pk1sample1)
 +→
-+#<PACKAGE "PK2"> 
++#<PACKAGE "PK1">
++(symbol-package 'pk2sample1)
++→
++#<PACKAGE "PK1">
++(symbol-package 'pk1sample2)
++→
++#<PACKAGE "PK1">
++(symbol-package 'pk2sample2)
++→
++#<PACKAGE "PK2">
 +The next several forms create a scenario in which a symbol is not really uninterned, but is "apparently uninterned", and so symbol-package still returns nil.
 +;;; TODO separate this example from the above one
-+(defparameter *my-symbol* 'pk1sample3) 
++(defparameter *my-symbol* 'pk1sample3)
 +→
 +*MY-SYMBOL*
-+*my-symbol* → PK1SAMPLE3 
++*my-symbol* → PK1SAMPLE3
 +(import *my-symbol* 'pk2) → T
 +(unintern *my-symbol* 'pk1) → T
 +(symbol-package *my-symbol*) → NIL
 +(eq *my-symbol* 'pk2sample3) → T
 +Side Effects
 +None.
-  
+
  Affected By
-  
+
 @@ -43,11 +170,24 @@
-  
+
  Affected By
-  
- import, intern, unintern 
+
+ import, intern, unintern
  Exceptional Situations
-  
- Should signal an error of type type-error if symbol is not a symbol. 
+
+ Should signal an error of type type-error if symbol is not a symbol.
  See Also
-  
--intern 
+
+-intern
 -Notes None.
 \ No newline at end of file
 + *Function INTERN**

@@ -1,59 +1,59 @@
 --- saved-pages-dpans3/cl:functions:equalp.txt	2017-04-27 21:56:59.000000000 +0100
 +++ saved-pages-clus/cl:functions:equalp.txt	2017-04-27 21:56:59.000000000 +0100
-@@ -2,7 +4,9 @@
+@@ -2,7 +4,7 @@
  Syntax
-  
- 
+
+
 -equalp x y => generalized-boolean
 + equalp x y → generalized-boolean
-  
+
  Arguments and Values
-  
+
 @@ -6,80 +10,302 @@
-  
+
  Arguments and Values
-  
- x - an object. 
- y - an object. 
- generalized-boolean - a generalized boolean. 
+
+ x - an object.
+ y - an object.
+ generalized-boolean - a generalized boolean.
  Description
-  
--Returns true if x and y are equal, or if they have components that are of the same type as each other and if those components are equalp; specifically, equalp returns true in the following cases Characters  
+
+-Returns true if x and y are equal, or if they have components that are of the same type as each other and if those components are equalp; specifically, equalp returns true in the following cases Characters
 +Returns true if x and y are equal, or if they have components that are of the same type as each other and if those components are equalp; specifically, equalp returns true in the following cases
 +Characters
- If two characters are char-equal. 
- Numbers  
- If two numbers are the same under =. 
- Conses  
- If the two cars in the conses are equalp and the two cdrs in the conses are equalp. 
- Arrays  
--If two arrays have the same number of dimensions, the dimensions match, and the corresponding active elements are equalp. The types for which the arrays are specialized need not match; for example, a string and a general array that happens to contain the same characters are equalp. Because equalp performs element-by-element comparisons of strings and ignores the case of characters, case distinctions are ignored when equalp compares strings. 
+ If two characters are char-equal.
+ Numbers
+ If two numbers are the same under =.
+ Conses
+ If the two cars in the conses are equalp and the two cdrs in the conses are equalp.
+ Arrays
+-If two arrays have the same number of dimensions, the dimensions match, and the corresponding active elements are equalp. The types for which the arrays are specialized need not match; for example, a string and a general array that happens to contain the same characters are equalp. Because equalp performs element-by-element comparisons of strings and ignores the case of characters, case distinctions are ignored when equalp compares strings.
 +If two arrays have the same number of dimensions, the dimensions match, and the corresponding active elements are equalp. The types for which the arrays are specialized need not match; for example, a string and a general array that happens to contain the same characters are equalp.
 +Because equalp performs element-by-element comparisons of strings and ignores the case of characters, case distinctions are ignored when equalp compares strings.
-  Structures  
- If two structures S1 and S2 have the same class and the value of each slot in S1 is the same under equalp as the value of the corresponding slot in S2. 
- Hash Tables  
- equalp descends hash-tables by first comparing the count of entries and the test function; if those are the same, it compares the keys of the tables using the test function and then the values of the matching keys using equalp recursively.  
- 
-- equalp does not descend any objects other than the ones explicitly specified above. The next figure summarizes the information given in the previous list. In addition, the figure specifies the priority of the behavior of equalp, with upper entries taking priority over lower ones. 
+  Structures
+ If two structures S1 and S2 have the same class and the value of each slot in S1 is the same under equalp as the value of the corresponding slot in S2.
+ Hash Tables
+ equalp descends hash-tables by first comparing the count of entries and the test function; if those are the same, it compares the keys of the tables using the test function and then the values of the matching keys using equalp recursively.
+
+- equalp does not descend any objects other than the ones explicitly specified above. The next figure summarizes the information given in the previous list. In addition, the figure specifies the priority of the behavior of equalp, with upper entries taking priority over lower ones.
 +equalp does not descend any objects other than the ones explicitly specified above. The below table summarizes the information given in the previous list. In addition, the table specifies the priority of the behavior of equalp, with upper entries taking priority over lower ones.
- 
- Type          Behavior                      
- number        uses =                        
- character     uses char-equal               
- cons          descends                      
- bit vector    descends                      
- string        descends                      
- pathname      same as equal                 
- structure     descends, as described above  
- Other array   descends                      
- hash table    descends, as described above  
- Other object  uses eq                       
- 
--Figure 5-13.  Summary and priorities of behavior of equalp  
+
+ Type          Behavior
+ number        uses =
+ character     uses char-equal
+ cons          descends
+ bit vector    descends
+ string        descends
+ pathname      same as equal
+ structure     descends, as described above
+ Other array   descends
+ hash table    descends, as described above
+ Other object  uses eq
+
+-Figure 5-13.  Summary and priorities of behavior of equalp
  Examples
-  
- 
+
+
 - (equalp 'a 'b) =>  false
 - (equalp 'a 'a) =>  true
 - (equalp 3 3) =>  true
@@ -68,9 +68,9 @@
 - (equalp "Foo" "Foo") =>  true
 - (equalp "Foo" (copy-seq "Foo")) =>  true
 - (equalp "FOO" "foo") =>  true
--<TT> 
+-<TT>
 - (setq array1 (make-array 6 element-type 'integer
--                            initial-contents '(1 1 1 3 5 7))) 
+-                            initial-contents '(1 1 1 3 5 7)))
 -=>  #(1 1 1 3 5 7)
 - (setq array2 (make-array 8 element-type 'integer
 -                            initial-contents '(1 1 1 3 5 7 2 6)
@@ -78,84 +78,84 @@
 -=>  #(1 1 1 3 5 7)
 - (equalp array1 array2) =>  true
 - (setq vector1 (vector 1 1 1 3 5 7)) =>  #(1 1 1 3 5 7)
-- (equalp array1 vector1) =>  true 
- 
--<TT> 
+- (equalp array1 vector1) =>  true
+
+-<TT>
 -Side Effects None.
-+(equalp 'a 'b) 
++(equalp 'a 'b)
 +→
-+false 
-+(equalp 'a 'a) 
++false
++(equalp 'a 'a)
 +→
-+true 
-+(equalp 3 3) 
++true
++(equalp 3 3)
 +→
-+true 
-+(equalp 3 3.0) 
++true
++(equalp 3 3.0)
 +→
-+true 
-+(equalp 3.0 3.0) 
++true
++(equalp 3.0 3.0)
 +→
-+true 
-+(equalp #c(3 -4) #c(3 -4)) 
++true
++(equalp #c(3 -4) #c(3 -4))
 +→
-+true 
-  
++true
+
 -Affected By None.
-  
+
 -Exceptional Situations None.
-+(equalp #c(3 -4.0) #c(3 -4)) 
++(equalp #c(3 -4.0) #c(3 -4))
 +→
-+true 
-+(equalp (cons 'a 'b) (cons 'a 'c)) 
++true
++(equalp (cons 'a 'b) (cons 'a 'c))
 +→
-+false 
-+(equalp (cons 'a 'b) (cons 'a 'b)) 
++false
++(equalp (cons 'a 'b) (cons 'a 'b))
 +→
-+true 
-+(equalp #\\A #\\A) 
++true
++(equalp #\\A #\\A)
 +→
-+true 
-+(equalp #\\A #\\a) 
++true
++(equalp #\\A #\\a)
 +→
-+true 
-+(equalp "Foo" "Foo") 
++true
++(equalp "Foo" "Foo")
 +→
-+true 
-+(equalp "Foo" (copy-seq "Foo")) 
++true
++(equalp "Foo" (copy-seq "Foo"))
 +→
-+true 
-+(equalp "FOO" "foo") 
++true
++(equalp "FOO" "foo")
 +→
-+true 
++true
 +(defparameter *array1*
-+  (make-array 6 element-type 'integer initial-contents '(1 1 1 3 5 7))) 
++  (make-array 6 element-type 'integer initial-contents '(1 1 1 3 5 7)))
 +→
 +*ARRAY1*
 +(defparameter *array2*
-+  (make-array 8 element-type 'integer initial-contents '(1 1 1 3 5 7 2 6) fill-pointer 6)) 
++  (make-array 8 element-type 'integer initial-contents '(1 1 1 3 5 7 2 6) fill-pointer 6))
 +→
 +*ARRAY2*
-+(equalp *array1* *array2*) 
++(equalp *array1* *array2*)
 +→
-+true 
-+(defparameter *vector1* 
-+  (vector 1 1 1 3 5 7)) 
++true
++(defparameter *vector1*
++  (vector 1 1 1 3 5 7))
 +→
 +*VECTOR1*
-+(equalp *array1* *vector1*) 
++(equalp *array1* *vector1*)
 +→
-+true 
++true
 +Side Effects
 +None.
 +Affected By
 +None.
 +Exceptional Situations
 +None.
-  
+
  See Also
-  
--eq, eql, equal, =, string=, string-equal, char=, char-equal 
+
+-eq, eql, equal, =, string=, string-equal, char=, char-equal
 + Function EQ
 + Function EQL
 + Function EQUAL
@@ -165,7 +165,7 @@
 + Function CHAR=
 + Function CHAR-EQUAL
  Notes
-  
+
   Object equality is not a concept for which there is a uniquely determined correct algorithm. The appropriateness of an equality predicate can be judged only in the context of the needs of some particular program. Although these functions take any type of argument and their names sound very generic, equal and equalp are not appropriate for every application.
 \ No newline at end of file
 +\

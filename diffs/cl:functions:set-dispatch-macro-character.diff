@@ -1,48 +1,48 @@
 --- saved-pages-dpans3/cl:functions:set-dispatch-macro-character.txt	2017-04-27 21:45:26.000000000 +0100
 +++ saved-pages-clus/cl:functions:set-dispatch-macro-character.txt	2017-04-27 21:45:26.000000000 +0100
-@@ -2,10 +4,13 @@
+@@ -2,10 +4,10 @@
  Syntax
-  
- 
+
+
 -get-dispatch-macro-character disp-char sub-char &optional readtable => function
 + get-dispatch-macro-character disp-char sub-char &optional readtable → function
 + set-dispatch-macro-character disp-char sub-char new-function &optional readtable → t
-  
- 
+
+
 -set-dispatch-macro-character disp-char sub-char new-function &optional readtable => t
-  
+
  Arguments and Values
-  
+
 @@ -9,18 +14,40 @@
-  
+
  Arguments and Values
-  
- disp-char - a character. 
- sub-char - a character. 
-  readtable - a readtable designator.  The default is the current readtable. 
- function - a function designator or nil. 
- new-function - a function designator. 
+
+ disp-char - a character.
+ sub-char - a character.
+  readtable - a readtable designator.  The default is the current readtable.
+ function - a function designator or nil.
+ new-function - a function designator.
  Description
-  
--set-dispatch-macro-character causes new-function to be called when disp-char followed by sub-char is read. If sub-char is a lowercase letter, it is converted to its uppercase equivalent. It is an error if sub-char is one of the ten decimal digits. 
+
+-set-dispatch-macro-character causes new-function to be called when disp-char followed by sub-char is read. If sub-char is a lowercase letter, it is converted to its uppercase equivalent. It is an error if sub-char is one of the ten decimal digits.
 +set-dispatch-macro-character causes new-function to be called when disp-char followed by sub-char is read.
 +If sub-char is a lowercase letter, it is converted to its uppercase equivalent. It is an error if sub-char is one of the ten decimal digits.
- set-dispatch-macro-character installs a new-function to be called when a particular dispatching macro character pair is read. New-function is installed as the dispatch function to be called when readtable is in use and when disp-char is followed by sub-char. 
--For more information about how the new-function is invoked, see Section 2.1.4.4 (Macro Characters). 
+ set-dispatch-macro-character installs a new-function to be called when a particular dispatching macro character pair is read. New-function is installed as the dispatch function to be called when readtable is in use and when disp-char is followed by sub-char.
+-For more information about how the new-function is invoked, see Section 2.1.4.4 (Macro Characters).
 +For more information about how the new-function is invoked, see section {\secref\MacroChars}.
- get-dispatch-macro-character retrieves the dispatch function associated with disp-char and sub-char in readtable. 
- get-dispatch-macro-character returns the macro-character function for sub-char under disp-char, or nil if there is no function associated with sub-char. If sub-char is a decimal digit, get-dispatch-macro-character returns nil. 
+ get-dispatch-macro-character retrieves the dispatch function associated with disp-char and sub-char in readtable.
+ get-dispatch-macro-character returns the macro-character function for sub-char under disp-char, or nil if there is no function associated with sub-char. If sub-char is a decimal digit, get-dispatch-macro-character returns nil.
  Examples
-  
- 
+
+
 @@ -24,40 +51,121 @@
  Examples
-  
- 
+
+
 - (get-dispatch-macro-character #\# #\{) =>  NIL
-+(get-dispatch-macro-character #\# #\{) 
++(get-dispatch-macro-character #\# #\{)
 +→
-+NIL 
++NIL
   (set-dispatch-macro-character #\# #\{        ;dispatch on #{
      #'(lambda(s c n)
          (let ((list (read s nil (values) t)))  ;list is object after #n{
@@ -53,54 +53,54 @@
 - #{(1 2 3 4) =>  1
 - #3{(0 1 2 3) =>  3
 - #{123 =>  123
-+          (unless (and n (< 0 n (length list))) 
++          (unless (and n (< 0 n (length list)))
 +            (setf n 0))
 +          (setf list (nth n list)))
-+        list))) 
++        list)))
 +→
-+T 
-+#{(1 2 3 4) 
++T
++#{(1 2 3 4)
 +→
-+1 
-+#3{(0 1 2 3) 
++1
++#3{(0 1 2 3)
 +→
-+3 
-+#{123 
++3
++#{123
 +→
 +123
 +If it is desired that #$foo was read as if it were (dollars foo).
- 
--<TT> If it is desired that #$foo  as if it were (dollars foo). 
- 
+
+-<TT> If it is desired that #$foo  as if it were (dollars foo).
+
  (defun |#$-reader| (stream subchar arg)
     (declare (ignore subchar arg))
 -   (list 'dollars (read stream t nil t))) =>  |#$-reader|
 - (set-dispatch-macro-character #\# #\$ #'|#$-reader|) =>  T
-+  (list 'dollars (read stream t nil t))) 
++  (list 'dollars (read stream t nil t)))
 +→
-+|#''-reader| 
-+(set-dispatch-macro-character #\# #\$ #'|#$-reader|) 
++|#''-reader|
++(set-dispatch-macro-character #\# #\$ #'|#$-reader|)
 +→
-+T 
- 
--<TT> 
++T
+
+-<TT>
 -See Also
-  
--Section 2.1.4.4 (Macro Characters) 
+
+-Section 2.1.4.4 (Macro Characters)
 -Side Effects
-  
--The readtable is modified. 
+
+-The readtable is modified.
  Affected By
-  
- *readtable*. 
+
+ *readtable*.
 +Side Effects
 +The readtable is modified.
  Exceptional Situations
-  
- For either function, an error is signaled if disp-char is not a dispatching macro character in readtable. 
+
+ For either function, an error is signaled if disp-char is not a dispatching macro character in readtable.
  See Also
-  
--*readtable* 
+
+-*readtable*
 + Variable *READTABLE*
 + {\secref\MacroChars}
  Notes

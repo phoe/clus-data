@@ -1,30 +1,30 @@
 --- saved-pages-dpans3/cl:macros:loop-finish.txt	2017-04-27 21:54:30.000000000 +0100
 +++ saved-pages-clus/cl:macros:loop-finish.txt	2017-04-27 21:54:30.000000000 +0100
-@@ -2,60 +4,94 @@
+@@ -2,1 +4,1 @@
  Syntax
-  
- 
--loop-finish <no arguments> =>| 
+
+
+-loop-finish <no arguments> =>|
 + loop-finish
-  
+
  Description
-  
--The loop-finish macro can be used lexically within an extended loop form to terminate that form ``normally.'' That is, it transfers control to the loop epilogue of the lexically innermost extended loop form. This permits execution of any finally clause (for effect) and the return of any accumulated result. 
+
+-The loop-finish macro can be used lexically within an extended loop form to terminate that form ``normally.'' That is, it transfers control to the loop epilogue of the lexically innermost extended loop form. This permits execution of any finally clause (for effect) and the return of any accumulated result.
 +The loop-finish macro can be used lexically within an extended loop form to terminate that form "normally." That is, it transfers control to the loop epilogue of the lexically innermost extended loop form. This permits execution of any finally clause (for effect) and the return of any accumulated result.
  Examples
-  
- 
+
+
 -;; Terminate the loop, but return the accumulated count.
 +The below example terminates the loop, but returns the accumulated count.
   (loop for i in '(1 2 3 stop-here 4 5 6)
 -       when (symbolp i) do (loop-finish)
 -       count i)
 -=>  3
-+      when (symbolp i) 
++      when (symbolp i)
 +        do (loop-finish)
 +      count i) → 3
 +This loop is equivalent to
-  
+
 -;; The preceding loop is equivalent to
   (loop for i in '(1 2 3 stop-here 4 5 6)
         until (symbolp i)
@@ -32,11 +32,11 @@
 -=>  3
 +      count i) → 3
 +While loop-finish can be used can be used in a variety of situations, it is really most needed in a situation where a need to exit is detected at other than the loop's "top level" (where until or when often work just as well), or where some computation must occur between the point where a need to exit is detected and the point where the exit actually occurs. For example
- 
--;; While LOOP-FINISH can be used can be used in a variety of 
+
+-;; While LOOP-FINISH can be used can be used in a variety of
 -;; situations it is really most needed in a situation where a need
 -;; to exit is detected at other than the loop's `top level'
--;; (where UNTIL or WHEN often work just as well), or where some 
+-;; (where UNTIL or WHEN often work just as well), or where some
 -;; computation must occur between the point where a need to exit is
 -;; detected and the point where the exit actually occurs.  For example
   (defun tokenize-sentence (string)
@@ -58,38 +58,38 @@
 -=>  TOKENIZE-SENTENCE
 +→
 +TOKENIZE-SENTENCE
-  
+
   (tokenize-sentence "this is a sentence. this is another sentence.")
 -=>  ("this" "is" "a" "sentence"), 19
 +→
 +("this" "is" "a" "sentence")
 +19
-  
+
   (tokenize-sentence "this is a sentence")
 -=>  ("this" "is" "a" "sentence"), NIL
 +→
 +("this" "is" "a" "sentence")
 +NIL
- 
- 
--<TT> 
+
+
+-<TT>
  Side Effects
-  
- Transfers control. 
+
+ Transfers control.
 -Affected By None.
 +Affected By
 +None.
-  
+
  Exceptional Situations
-  
+
 @@ -59,8 +95,20 @@
-  
+
  Exceptional Situations
-  
-  Whether or not loop-finish is fbound in the global environment is implementation-dependent; however, the restrictions on redefinition and shadowing of loop-finish are the same as for symbols in the COMMON-LISP package which are fbound in the global environment. The consequences of attempting to use loop-finish outside of loop are undefined.  
+
+  Whether or not loop-finish is fbound in the global environment is implementation-dependent; however, the restrictions on redefinition and shadowing of loop-finish are the same as for symbols in the COMMON-LISP package which are fbound in the global environment. The consequences of attempting to use loop-finish outside of loop are undefined.
  See Also
-  
--loop, Section 6.1 (The LOOP Facility) 
+
+-loop, Section 6.1 (The LOOP Facility)
 + Macro LOOP
 + {\secref\LoopFacility}
  Notes

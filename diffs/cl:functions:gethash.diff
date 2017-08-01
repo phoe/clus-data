@@ -2,34 +2,34 @@
 +++ saved-pages-clus/cl:functions:gethash.txt	2017-04-27 21:54:58.000000000 +0100
 @@ -2,7 +4,7 @@
  Syntax
-  
- 
+
+
 -gethash key hash-table &optional default => value, present-p
-+ gethash key hash-table &optional default → value, present-p 
-  
++ gethash key hash-table &optional default → value, present-p
+
  (setf (gethash key hash-table &optional default) new-value)
-  
+
 @@ -6,51 +8,234 @@
-  
+
  (setf (gethash key hash-table &optional default) new-value)
-  
+
  Arguments and Values
-  
- key - an object. 
- hash-table - a hash table. 
- default - an object. The default is nil. 
- value - an object. 
- present-p - a generalized boolean. 
+
+ key - an object.
+ hash-table - a hash table.
+ default - an object. The default is nil.
+ value - an object.
+ present-p - a generalized boolean.
  Description
-  
- Value is the object in hash-table whose key is the same as key under the hash-table's equivalence test. If there is no such entry, value is the default. 
- Present-p is true if an entry is found; otherwise, it is false. 
--setf may be used with gethash to modify the value associated with a given key, or to add a new entry.  When a gethash form is used as a setf place, any default which is supplied is evaluated according to normal left-to-right evaluation rules, but its value is ignored.  
+
+ Value is the object in hash-table whose key is the same as key under the hash-table's equivalence test. If there is no such entry, value is the default.
+ Present-p is true if an entry is found; otherwise, it is false.
+-setf may be used with gethash to modify the value associated with a given key, or to add a new entry.  When a gethash form is used as a setf place, any default which is supplied is evaluated according to normal left-to-right evaluation rules, but its value is ignored.
 +setf may be used with gethash to modify the value associated with a given key, or to add a new entry.
 +When a gethash form is used as a setf place, any default which is supplied is evaluated according to normal left-to-right evaluation rules, but its value is ignored.
  Examples
-  
- 
+
+
 - (setq table (make-hash-table)) =>  #<HASH-TABLE EQL 0/120 32206334>
 - (gethash 1 table) =>  NIL, false
 - (gethash 1 table 2) =>  2, false
@@ -38,7 +38,7 @@
 - (gethash 1 table) =>  "one", true
 - (gethash 2 table) =>  "two", true
 - (gethash nil table) =>  NIL, false
-- (setf (gethash nil table) nil) =>  NIL 
+- (setf (gethash nil table) nil) =>  NIL
 - (gethash nil table) =>  NIL, true
 - (defvar *counters* (make-hash-table)) =>  *COUNTERS*
 - (gethash 'foo *counters*) =>  NIL, false
@@ -49,94 +49,94 @@
 - (how-many 'foo) =>  2
 - (how-many 'bar) =>  3
 - (how-many 'quux) =>  0
- 
--<TT> 
+
+-<TT>
 -Side Effects None.
-+(defparameter *table* (make-hash-table)) 
++(defparameter *table* (make-hash-table))
 +→
 +*TABLE*
-+(gethash 1 *table*) 
++(gethash 1 *table*)
 +→
 +NIL
-+false 
-+(gethash 1 *table* 2) 
++false
++(gethash 1 *table* 2)
 +→
 +2
-+false 
-+(setf (gethash 1 *table*) "one") 
-+→
-+"one" 
-+(setf (gethash 2 *table* "two") "two") 
-+→
-+"two" 
-+(gethash 1 *table*) 
++false
++(setf (gethash 1 *table*) "one")
 +→
 +"one"
-+true 
-+(gethash 2 *table*) 
++(setf (gethash 2 *table* "two") "two")
 +→
 +"two"
-+true 
-+(gethash nil *table*) 
++(gethash 1 *table*)
++→
++"one"
++true
++(gethash 2 *table*)
++→
++"two"
++true
++(gethash nil *table*)
 +→
 +NIL
-+false 
-+(setf (gethash nil *table*) nil) 
++false
++(setf (gethash nil *table*) nil)
 +→
-+NIL 
-+(gethash nil *table*) 
-  
++NIL
++(gethash nil *table*)
+
 -Affected By None.
 +→
 +NIL
-+true 
-+(defvar *counters* (make-hash-table)) 
++true
++(defvar *counters* (make-hash-table))
 +→
-+*COUNTERS* 
-+(gethash 'foo *counters*) 
++*COUNTERS*
++(gethash 'foo *counters*)
 +→
 +NIL
-+false 
-+(gethash 'foo *counters* 0) 
++false
++(gethash 'foo *counters* 0)
 +→
 +0
-+false 
-+(defmacro how-many (obj) 
-+  `(values (gethash ,obj *counters* 0))) 
++false
++(defmacro how-many (obj)
++  `(values (gethash ,obj *counters* 0)))
 +→
-+HOW-MANY 
-+(defun count-it (obj) 
-+  (incf (how-many obj))) 
++HOW-MANY
++(defun count-it (obj)
++  (incf (how-many obj)))
 +→
-+COUNT-IT 
-+(dolist (x '(bar foo foo bar bar baz)) 
-+  (count-it x)) 
++COUNT-IT
++(dolist (x '(bar foo foo bar bar baz))
++  (count-it x))
 +→
 +NIL
-+(how-many 'foo) 
++(how-many 'foo)
 +→
-+2 
-+(how-many 'bar) 
++2
++(how-many 'bar)
 +→
-+3 
-+(how-many 'quux) 
++3
++(how-many 'quux)
 +→
-+0 
++0
 +Side Effects
 +None.
 +Affected By
 +None.
 +Exceptional Situations
 +None.
-  
+
 -Exceptional Situations None.
-  
+
  See Also
-  
--remhash 
+
+-remhash
 + Function REMHASH
  Notes
-  
+
  The secondary value, present-p, can be used to distinguish the absence of an entry from the presence of an entry that has a value of default.
 \ No newline at end of file
 +\

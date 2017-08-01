@@ -1,78 +1,78 @@
 --- saved-pages-dpans3/cl:functions:directory-namestring.txt	2017-04-27 21:47:27.000000000 +0100
 +++ saved-pages-clus/cl:functions:directory-namestring.txt	2017-04-27 21:47:27.000000000 +0100
-@@ -2,17 +4,17 @@
+@@ -2,1 +4,1 @@
  Syntax
-  
- 
+
+
 -namestring pathname => namestring
 + namestring pathname → namestring
-  
-+ file-namestring pathname → namestring 
- 
+
++ file-namestring pathname → namestring
+
 -file-namestring pathname => namestring
-+ directory-namestring pathname → namestring 
-  
++ directory-namestring pathname → namestring
+
 -directory-namestring pathname => namestring
 + host-namestring pathname → namestring
-  
+
 -host-namestring pathname => namestring
 + enough-namestring pathname &optional defaults → namestring
-  
- 
+
+
 -enough-namestring pathname &optional defaults => namestring
-  
+
  Arguments and Values
-  
+
 @@ -16,23 +18,51 @@
-  
+
  Arguments and Values
-  
-  pathname - a pathname designator.  
-  defaults - a pathname designator.  The default is the value of *default-pathname-defaults*. 
+
+  pathname - a pathname designator.
+  defaults - a pathname designator.  The default is the value of *default-pathname-defaults*.
 -namestring - a string or nil.  Description
 + namestring - a string or nil.
 +Description
 +These functions convert pathname into a namestring.
 +The name represented by pathname is returned as a namestring in an implementation-dependent canonical form.
-  
-   
--These functions convert pathname into a namestring. The name represented by pathname is returned as a namestring in an implementation-dependent canonical form. 
- namestring returns the full form of pathname. 
- file-namestring returns just the name, type, and version components of pathname. 
- directory-namestring returns the directory name portion. 
- host-namestring returns the host name. 
- enough-namestring returns an abbreviated namestring that is just sufficient to identify the file named by pathname when considered relative to the defaults. It is required that 
- 
+
+
+-These functions convert pathname into a namestring. The name represented by pathname is returned as a namestring in an implementation-dependent canonical form.
+ namestring returns the full form of pathname.
+ file-namestring returns just the name, type, and version components of pathname.
+ directory-namestring returns the directory name portion.
+ host-namestring returns the host name.
+ enough-namestring returns an abbreviated namestring that is just sufficient to identify the file named by pathname when considered relative to the defaults. It is required that
+
   (merge-pathnames (enough-namestring pathname defaults) defaults)
 -==  (merge-pathnames (parse-namestring pathname nil defaults) defaults)
-+  ≡ (merge-pathnames (parse-namestring pathname nil defaults) defaults) 
++  ≡ (merge-pathnames (parse-namestring pathname nil defaults) defaults)
 +in all cases, and the result of enough-namestring is the shortest reasonable string that will satisfy this criterion.
- 
--<TT> in all cases, and the result of enough-namestring is the shortest reasonable string that will satisfy this criterion. 
- It is not necessarily possible to construct a valid namestring by concatenating some of the three shorter namestrings in some order. 
+
+-<TT> in all cases, and the result of enough-namestring is the shortest reasonable string that will satisfy this criterion.
+ It is not necessarily possible to construct a valid namestring by concatenating some of the three shorter namestrings in some order.
  Examples
-  
- 
+
+
 @@ -36,55 +66,142 @@
  Examples
-  
- 
-- (namestring "getty")            
+
+
+- (namestring "getty")
 -=>  "getty"
-- (setq q (make-pathname host "kathy" 
--                         directory 
+- (setq q (make-pathname host "kathy"
+-                         directory
 +In the below example, the return value of the first pathname-directory call depends on the implementation and the file system.
                             (pathname-directory *default-pathname-defaults*)
 +→
 +(ABSOLUTE "home" "kathy")
-+(namestring "getty") 
++(namestring "getty")
 +→
 +"getty"
-+(defparameter *q* 
++(defparameter *q*
 +  (make-pathname host "kathy"
 +                 directory (pathname-directory *default-pathname-defaults*)
-                          name "getty")) 
--=>  #S(PATHNAME HOST "kathy" DEVICE NIL DIRECTORY directory-name 
+                          name "getty"))
+-=>  #S(PATHNAME HOST "kathy" DEVICE NIL DIRECTORY directory-name
 +→
 +*Q*
 +*q*
@@ -81,21 +81,21 @@
         NAME "getty" TYPE NIL VERSION NIL)
 - (file-namestring q) =>  "getty"
 - (directory-namestring q) =>  directory-name
-- (host-namestring q) =>  "kathy" 
--<TT>  
+- (host-namestring q) =>  "kathy"
+-<TT>
 - ;;;Using Unix syntax and the wildcard conventions used by the
 - ;;;particular version of Unix on which this example was created
 - (namestring
 -   (translate-pathname "/usr/dmr/hacks/frob.l"
-+(file-namestring *q*) 
++(file-namestring *q*)
 +→
-+"getty" 
-+(directory-namestring *q*) 
++"getty"
++(directory-namestring *q*)
 +→
 +(ABSOLUTE "home" "kathy")
-+(host-namestring *q*) 
++(host-namestring *q*)
 +→
-+"kathy" 
++"kathy"
 +Using Unix syntax and the wildcard conventions used by the particular version of Unix on which this example was created
 +(namestring (translate-pathname "/usr/dmr/hacks/frob.l"
                         "/usr/d*/hacks/*.l"
@@ -104,12 +104,12 @@
 - (namestring
 -   (translate-pathname "/usr/dmr/hacks/frob.l"
 +→
-+"/usr/dmr/backup/hacks/backup-frob.l" 
++"/usr/dmr/backup/hacks/backup-frob.l"
 +(namestring (translate-pathname "/usr/dmr/hacks/frob.l"
                         "/usr/d*/hacks/fr*.l"
                         "/usr/d*/backup/hacks/backup-*.*"))
 -=>  "/usr/dmr/backup/hacks/backup-ob.l"
-  
+
 - ;;;This is similar to the above example but uses two different hosts,
 - ;;;U which is a Unix and V which is a VMS.  Note the translation
 - ;;;of file type and alphabetic case conventions.
@@ -124,29 +124,29 @@
 -=>  "VSYS$DISK[DMR.BACKUP.HACKS]BACKUP-FROB.LSP"
 - (namestring
 -   (translate-pathname "U/usr/dmr/hacks/frob.l"
-+                                "VSYSDISK[D*.BACKUP.HACKS]BACKUP-*.*")) 
++                                "VSYSDISK[D*.BACKUP.HACKS]BACKUP-*.*"))
 +<r>"VSYSDISK[DMR.BACKUP.HACKS]BACKUP-FROB.LSP" </r>
 +(namestring (translate-pathname "U/usr/dmr/hacks/frob.l"
                         "U/usr/d*/hacks/fr*.l"
 -                       "VSYS$DISK[D*.BACKUP.HACKS]BACKUP-*.*"))
 -=>  "VSYS$DISK[DMR.BACKUP.HACKS]BACKUP-OB.LSP"
-+                                "VSYSDISK[D*.BACKUP.HACKS]BACKUP-*.*")) 
++                                "VSYSDISK[D*.BACKUP.HACKS]BACKUP-*.*"))
 +<r>"VSYSDISK[DMR.BACKUP.HACKS]BACKUP-OB.LSP"</r>
 +Affected By
 +None.
 +Exceptional Situations
- 
--<TT>  
+
+-<TT>
 -Affected By None.
 +None.
-  
+
 -Exceptional Situations None.
-  
+
  See Also
-  
-- truename, merge-pathnames, pathname, logical-pathname, Section 20.1 (File System Concepts),   Section 19.1.2 (Pathnames as Filenames)  
+
+- truename, merge-pathnames, pathname, logical-pathname, Section 20.1 (File System Concepts),   Section 19.1.2 (Pathnames as Filenames)
 -Notes None.
-  
+
 -The following X3J13 cleanup issues, not part of the specification, apply to this section FILE-OPEN-ERRORSIGNAL-FILE-ERROR PATHNAME-LOGICALADD PATHNAME-WILDNEW-FUNCTIONS PATHNAME-SYMBOL PATHNAME-STREAM
 \ No newline at end of file
 + Function TRUENAME

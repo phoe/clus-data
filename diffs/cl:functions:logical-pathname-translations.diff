@@ -1,39 +1,39 @@
 --- saved-pages-dpans3/cl:functions:logical-pathname-translations.txt	2017-04-27 21:47:19.000000000 +0100
 +++ saved-pages-clus/cl:functions:logical-pathname-translations.txt	2017-04-27 21:47:20.000000000 +0100
-@@ -3,7 +4,9 @@
+@@ -3,7 +4,7 @@
  Syntax
-  
- 
+
+
 -logical-pathname-translations host => translations
-+ logical-pathname-translations host → translations 
-  
++ logical-pathname-translations host → translations
+
  (setf (logical-pathname-translations host) new-translations)
-  
+
 @@ -7,16 +10,31 @@
-  
+
  (setf (logical-pathname-translations host) new-translations)
-  
+
  Arguments and Values
-  
- host--a logical host designator. 
- translations, new-translations - a list. 
+
+ host--a logical host designator.
+ translations, new-translations - a list.
  Description
-  
- Returns the host's list of translations. Each translation is a list of at least two elements from-wildcard and to-wildcard. Any additional elements are implementation-defined. From-wildcard is a logical pathname whose host is host. To-wildcard is a pathname.  
- (setf (logical-pathname-translations host) translations) sets a logical pathname host's list of translations. If host is a string that has not been previously used as a logical pathname host, a new logical pathname host is defined; otherwise an existing host's translations are replaced. logical pathname host names are compared with string-equal. 
-- When setting the translations list, each from-wildcard can be a logical pathname whose host is host or a logical pathname namestring parseable by (parse-namestring string<A> host), where host represents the appropriate object as defined by parse-namestring. Each to-wildcard can be anything coercible to a pathname by (pathname to-wildcard). If to-wildcard coerces to a logical pathname, translate-logical-pathname will perform repeated translation steps when it uses it. 
+
+ Returns the host's list of translations. Each translation is a list of at least two elements from-wildcard and to-wildcard. Any additional elements are implementation-defined. From-wildcard is a logical pathname whose host is host. To-wildcard is a pathname.
+ (setf (logical-pathname-translations host) translations) sets a logical pathname host's list of translations. If host is a string that has not been previously used as a logical pathname host, a new logical pathname host is defined; otherwise an existing host's translations are replaced. logical pathname host names are compared with string-equal.
+- When setting the translations list, each from-wildcard can be a logical pathname whose host is host or a logical pathname namestring parseable by (parse-namestring string<A> host), where host represents the appropriate object as defined by parse-namestring. Each to-wildcard can be anything coercible to a pathname by (pathname to-wildcard). If to-wildcard coerces to a logical pathname, translate-logical-pathname will perform repeated translation steps when it uses it.
 +When setting the translations list, each from-wildcard can be a logical pathname whose host is host or a logical pathname namestring parseable by (parse-namestring string host), where host represents the appropriate object as defined by parse-namestring. Each to-wildcard can be anything coercible to a pathname by (pathname to-wildcard). If to-wildcard coerces to a logical pathname, translate-logical-pathname will perform repeated translation steps when it uses it.
- host is either the host component of a logical pathname or a string that has been defined as a logical pathname host name by setf of logical-pathname-translations. 
+ host is either the host component of a logical pathname or a string that has been defined as a logical pathname host name by setf of logical-pathname-translations.
  Examples
-  
-  
+
+
 @@ -20,78 +38,110 @@
  Examples
-  
-  
+
+
 +The top-level calls to setf in following examples have their return values omitted for readability.
 +A very simple example of setting up a logical pathname host. No translations are necessary to get around file system restrictions, so all that is necessary is to specify the root of the physical directory tree that contains the logical file system. The namestring syntax on the right-hand side is implementation-dependent.
- 
+
 - ;;;A very simple example of setting up a logical pathname host.  No
 - ;;;translations are necessary to get around file system restrictions, so
 - ;;;all that is necessary is to specify the root of the physical directory
@@ -43,12 +43,12 @@
 -       '(("**;*.*.*"              "MY-LISPM>library>foo>**>")))
 +      '((";*.*.*" "MY-LISPM>library>foo>>")))
 +Sample use of that logical pathname. The return value is implementation-dependent.
-  
+
 - ;;;Sample use of that logical pathname.  The return value
-- ;;;is implementation-dependent.          
+- ;;;is implementation-dependent.
   (translate-logical-pathname "foobar;baz;mum.quux.3")
 -=>  #P"MY-LISPM>library>foo>bar>baz>mum.quux.3"
-  
+
 - ;;;A more complex example, dividing the files among two file servers
 - ;;;and several different directories.  This Unix doesn't support
 - ;;;WILD-INFERIORS in the directory, so each directory level must
@@ -64,86 +64,86 @@
           ("EXPERIMENTAL;*.*.*"    "MY-UNIX/usr/Joe/development/prog/")
 -         ("EXPERIMENTAL;DOCUMENTATION;*.*.*"
 -                                  "MY-VAXSYS$DISK[JOE.DOC]")
-+        ("EXPERIMENTAL;DOCUMENTATION;*.*.*" "MY-VAXSYS$DISK[JOE.DOC]") 
++        ("EXPERIMENTAL;DOCUMENTATION;*.*.*" "MY-VAXSYS$DISK[JOE.DOC]")
           ("EXPERIMENTAL;*;*.*.*"  "MY-UNIX/usr/Joe/development/prog/*/")
 -         ("MAIL;**;*.MAIL"        "MY-VAXSYS$DISK[JOE.MAIL.PROG...]*.MBX")))
 +        ("MAIL;;*.MAIL"                   "MY-VAXSYS$DISK[JOE.MAIL.PROG...]*.MBX")))
-+</blockquote> 
-+Sample use of that logical pathname. The return value is implementation-dependent. 
- 
++</blockquote>
++Sample use of that logical pathname. The return value is implementation-dependent.
+
 - ;;;Sample use of that logical pathname.  The return value
-- ;;;is implementation-dependent.          
-+<blockquote> 
+- ;;;is implementation-dependent.
++<blockquote>
   (translate-logical-pathname "progmail;save;ideas.mail.3")
 -=>  #P"MY-VAXSYS$DISK[JOE.MAIL.PROG.SAVE]IDEAS.MBX.3"
 +<r>#P"MY-VAXSYS$DISK[JOE.MAIL.PROG.SAVE]IDEAS.MBX.3"</r>
 +</blockquote>
- 
+
 - ;;;Example translations for a program that uses three files main.lisp,
 - ;;;auxiliary.lisp, and documentation.lisp.  These translations might be
 - ;;;supplied by a software supplier as examples.
- 
+
 - ;;;For Unix with long file names
 +Example translations for a program that uses three files main.lisp, auxiliary.lisp, and documentation.lisp. These translations might be supplied by a software supplier as examples.
 +For Unix with long file names
-+<blockquote> 
++<blockquote>
   (setf (logical-pathname-translations "prog")
         '(("CODE;*.*.*"             "/lib/prog/")))
-+</blockquote> 
- 
++</blockquote>
+
 - ;;;Sample use of that logical pathname.  The return value
-- ;;;is implementation-dependent.          
-+Sample use of that logical pathname. The return value is implementation-dependent. 
-+<blockquote> 
+- ;;;is implementation-dependent.
++Sample use of that logical pathname. The return value is implementation-dependent.
++<blockquote>
   (translate-logical-pathname "progcode;documentation.lisp")
 -=>  #P"/lib/prog/documentation.lisp"
 +<r>#P"/lib/prog/documentation.lisp"</r>
 +</blockquote>
- 
+
 - ;;;For Unix with 14-character file names, using .lisp as the type
 +For Unix with 14-character file names, using .lisp as the type.
-+<blockquote> 
++<blockquote>
   (setf (logical-pathname-translations "prog")
         '(("CODE;DOCUMENTATION.*.*" "/lib/prog/docum.*")
           ("CODE;*.*.*"             "/lib/prog/")))
-+</blockquote> 
-+Sample use of that logical pathname. The return value is implementation-dependent. 
- 
++</blockquote>
++Sample use of that logical pathname. The return value is implementation-dependent.
+
 - ;;;Sample use of that logical pathname.  The return value
-- ;;;is implementation-dependent.          
-+<blockquote> 
+- ;;;is implementation-dependent.
++<blockquote>
   (translate-logical-pathname "progcode;documentation.lisp")
 -=>  #P"/lib/prog/docum.lisp"
 +<r>#P"/lib/prog/docum.lisp"</r>
 +</blockquote>
- 
+
 - ;;;For Unix with 14-character file names, using .l as the type
 - ;;;The second translation shortens the compiled file type to .b
 +For Unix with 14-character file names, using .l as the type. The second translation shortens the compiled file type to .b.
-+<blockquote> 
++<blockquote>
   (setf (logical-pathname-translations "prog")
 -       `(("**;*.LISP.*"            ,(logical-pathname "PROG**;*.L.*"))
 -         (,(compile-file-pathname (logical-pathname "PROG**;*.LISP.*"))
 -                                   ,(logical-pathname "PROG**;*.B.*"))
-+      `((";*.LISP.*" ,(logical-pathname "PROG;*.L.*")) 
-+        (,(compile-file-pathname (logical-pathname "PROG;*.LISP.*")) 
++      `((";*.LISP.*" ,(logical-pathname "PROG;*.L.*"))
++        (,(compile-file-pathname (logical-pathname "PROG;*.LISP.*"))
 +         ,(logical-pathname "PROG;*.B.*"))
           ("CODE;DOCUMENTATION.*.*" "/lib/prog/documentatio.*")
           ("CODE;*.*.*"             "/lib/prog/")))
-+</blockquote> 
-+Sample use of that logical pathname. The return value is implementation-dependent. 
- 
++</blockquote>
++Sample use of that logical pathname. The return value is implementation-dependent.
+
 - ;;;Sample use of that logical pathname.  The return value
-- ;;;is implementation-dependent.          
-+<blockquote> 
+- ;;;is implementation-dependent.
++<blockquote>
   (translate-logical-pathname "progcode;documentation.lisp")
 -=>  #P"/lib/prog/documentatio.l"
 +<r>#P"/lib/prog/documentatio.l"</r>
-+</blockquote> 
-+For a Cray with 6 character names and no directories, types, or versions. 
- 
++</blockquote>
++For a Cray with 6 character names and no directories, types, or versions.
+
 - ;;;For a Cray with 6 character names and no directories, types, or versions.
-+<blockquote> 
++<blockquote>
   (setf (logical-pathname-translations "prog")
         (let ((l '(("MAIN" "PGMN")
                    ("AUXILIARY" "PGAUX")
@@ -154,43 +154,43 @@
 -                         (setq phy (concatenate 'string phy "B"))
 -                         (list com
 -                               (make-pathname name phy
-+                        (setf phy 
++                        (setf phy
 +                              (concatenate 'string phy "B"))
-+                        (list com (make-pathname name phy 
++                        (list com (make-pathname name phy
                                                defaults phypath))))
                     l))))
-+</blockquote> 
- 
++</blockquote>
+
 - ;;;Sample use of that logical pathname.  The return value
-- ;;;is implementation-dependent.          
+- ;;;is implementation-dependent.
 - (translate-logical-pathname "progcode;documentation.lisp")
 -=>  #P"PGDOC"
-+Sample use of that logical pathname. The return value is implementation-dependent. 
- 
--<TT> 
++Sample use of that logical pathname. The return value is implementation-dependent.
+
+-<TT>
 -Affected By None.
-+<blockquote> 
-+(translate-logical-pathname "progcode;documentation.lisp") 
++<blockquote>
++(translate-logical-pathname "progcode;documentation.lisp")
 +<r>#P"PGDOC"</r>
 +</blockquote>
-  
+
 -Exceptional Situations
 +====Affected By====
 +None.
-  
+
 +====Exceptional Situations====
- If host is incorrectly supplied, an error of type type-error is signaled. 
+ If host is incorrectly supplied, an error of type type-error is signaled.
 -See Also
-  
--logical-pathname,  Section 19.1.2 (Pathnames as Filenames)  
+
+-logical-pathname,  Section 19.1.2 (Pathnames as Filenames)
 -Notes
 +====See Also====
 +  * System Class LOGICAL-PATHNAME**
-  
+
 + {\secref\PathnamesAsFilenames}
 +====Notes====
- Implementations can define additional functions that operate on logical pathname hosts, for example to specify additional translation rules or options. 
-  
+ Implementations can define additional functions that operate on logical pathname hosts, for example to specify additional translation rules or options.
+
 -The following X3J13 cleanup issues, not part of the specification, apply to this section FILE-OPEN-ERRORSIGNAL-FILE-ERROR PATHNAME-LOGICALADD
 \ No newline at end of file
 +\

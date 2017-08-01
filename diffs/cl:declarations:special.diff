@@ -1,23 +1,23 @@
 --- saved-pages-dpans3/cl:declarations:special.txt	2017-04-27 21:58:16.000000000 +0100
 +++ saved-pages-clus/cl:declarations:special.txt	2017-04-27 21:58:16.000000000 +0100
-@@ -1,43 +1,91 @@
- Declaration SPECIAL 
+@@ -1,43 +1,47 @@
+ Declaration SPECIAL
  Syntax
-  
- (special var*) 
+
+ (special var*)
  Arguments
-  
- var - a symbol. 
+
+ var - a symbol.
  Valid Context
-  
- declaration or proclamation 
+
+ declaration or proclamation
  Binding Types Affected
-  
- variable 
+
+ variable
  Description
-  
--Specifies that all of the vars named are dynamic. This specifier affects variable bindings and affects references. All variable bindings affected are made to be dynamic bindings, and affected variable references refer to the current dynamic binding. For example 
- 
+
+-Specifies that all of the vars named are dynamic. This specifier affects variable bindings and affects references. All variable bindings affected are made to be dynamic bindings, and affected variable references refer to the current dynamic binding. For example
+
 - (defun hack (thing *mod*)    ;The binding of the parameter
 -   (declare (special *mod*))  ; *mod* is visible to hack1,
 -   (hack1 (car thing)))       ; but not that of thing.
@@ -41,28 +41,28 @@
 +            (hack1 (cdr arg)))))
 +→
 +HACK1
- 
--<TT> 
- A special declaration does not affect inner bindings of a var; the inner bindings implicitly shadow a special declaration and must be explicitly re-declared to be special. special declarations never apply to function bindings. 
- special declarations can be either bound declarations, affecting both a binding and references, or free declarations, affecting only references, depending on whether the declaration is attached to a variable binding. 
- When used in a proclamation, a special declaration specifier applies to all bindings as well as to all references of the mentioned variables. For example, after 
- 
+
+-<TT>
+ A special declaration does not affect inner bindings of a var; the inner bindings implicitly shadow a special declaration and must be explicitly re-declared to be special. special declarations never apply to function bindings.
+ special declarations can be either bound declarations, affecting both a binding and references, or free declarations, affecting only references, depending on whether the declaration is attached to a variable binding.
+ When used in a proclamation, a special declaration specifier applies to all bindings as well as to all references of the mentioned variables. For example, after
+
   (declaim (special x))
- 
--<TT> 
- then in a function definition such as 
- 
+
+-<TT>
+ then in a function definition such as
+
   (defun example (x) ...)
- 
--<TT> 
- the parameter x is bound as a dynamic variable rather than as a lexical variable. 
+
+-<TT>
+ the parameter x is bound as a dynamic variable rather than as a lexical variable.
  Examples
-  
- 
+
+
 @@ -41,66 +89,184 @@
  Examples
-  
- 
+
+
 -(defun declare-eg (y)                 ;this y is special
 +(defun declare-eg (y) ; This y is special.
   (declare (special y))
@@ -71,8 +71,8 @@
        (list y
 -            (locally (declare (special y)) y)))) ;this y refers to the
 -                                                 ;special binding of y
--=>  DECLARE-EG 
-- (declare-eg nil) =>  (T NIL) 
+-=>  DECLARE-EG
+- (declare-eg nil) =>  (T NIL)
 +          (locally (declare (special y))
 +            y)))) ; This y refers to the special binding of y.
 +→
@@ -80,9 +80,9 @@
 +(declare-eg nil)
 +→
 +(T NIL)
- 
--<TT> 
- 
+
+-<TT>
+
  (setf (symbol-value 'x) 6)
 -(defun foo (x)                         ;a lexical binding of x
 +→
@@ -97,23 +97,23 @@
    (1+ x))
 +→
 +FOO
- (defun bar () 
+ (defun bar ()
    (print (locally (declare (special x))
             x)))
 +→
 +BAR
- (foo 10) 
+ (foo 10)
 ->>  10
 ->>  11
 -=>  11
- 
--<TT> 
+
+-<TT>
 +▷
 +10
 +11
 +→
 +11
- 
+
  (setf (symbol-value 'x) 6)
 +→
 +6
@@ -124,20 +124,20 @@
      (declare (special x))
      (list old-x x)))
 -(bar 'first 'second) =>  (FIRST SECOND)
- 
--<TT> 
+
+-<TT>
 +→
 +BAR
 +(bar 'first 'second)
 +→
 +(FIRST SECOND)
- 
+
   (defun few (x &optional (y *foo*))
     (declare (special *foo*))
     ...)
- 
--<TT> The reference to *foo* in the first line of this example is not special even though there is a special declaration in the second line. 
- 
+
+-<TT> The reference to *foo* in the first line of this example is not special even though there is a special declaration in the second line.
+
 - (declaim (special prosp)) =>  implementation-dependent
 - (setq prosp 1 reg 1) =>  1
 - (let ((prosp 2) (reg 2))         ;the binding of prosp is special
@@ -159,22 +159,22 @@
 +(let ((*prosp* 2) (*reg* 2))
 +  (set '*prosp* 3)
 +  (set '*reg* 3)
-+  (list *prosp* *reg*)) 
++  (list *prosp* *reg*))
 +→
 +(3 2)
 +(list *prosp* *reg*)
 +→
 +(1 3)
- 
+
   (declaim (special x))          ;x is always special.
 +→
 +implementation-dependent
-  (defun example (x y)                                 
+  (defun example (x y)
     (declare (special y))
     (let ((y 3) (x (* x 2)))
 -     (print (+ y (locally (declare (special y)) y)))
 -     (let ((y 4)) (declare (special y)) (foo x)))) =>  EXAMPLE
-+    (print (+ y (locally (declare (special y)) 
++    (print (+ y (locally (declare (special y))
 +                  y)))
 +    (let ((y 4))
 +      (declare (special y))
@@ -182,10 +182,10 @@
 +→
 +EXAMPLE
 +In the contorted code above, the outermost and innermost bindings of y are dynamic, but the middle binding is lexical. The two arguments to + are different, one being the value, which is 3, of the lexical variable y, and the other being the value of the dynamic variable named y (a binding of which happens, coincidentally, to lexically surround it at an outer level). All the bindings of x and references to x are dynamic, however, because of the proclamation that x is always special.
- 
--<TT> In the contorted code above, the outermost and innermost bindings of y are dynamic, but the middle binding is lexical. The two arguments to + are different, one being the value, which is 3, of the lexical variable y, and the other being the value of the dynamic variable named y (a binding of which happens, coincidentally, to lexically surround it at an outer level). All the bindings of x and references to x are dynamic, however, because of the proclamation that x is always special. 
+
+-<TT> In the contorted code above, the outermost and innermost bindings of y are dynamic, but the middle binding is lexical. The two arguments to + are different, one being the value, which is 3, of the lexical variable y, and the other being the value of the dynamic variable named y (a binding of which happens, coincidentally, to lexically surround it at an outer level). All the bindings of x and references to x are dynamic, however, because of the proclamation that x is always special.
  See Also
-  
+
 -defparameter, defvar
 \ No newline at end of file
 +Symbol DECLARE, Macro DEFPARAMETER, Macro DEFVAR
