@@ -1,4 +1,4 @@
-### Same "cl:macros:psetf.diff"
+### Some changes
 ### +++ CLUS
 ### --- CLHS
 
@@ -11,6 +11,7 @@
 -setf {pair}* => result*
 + setf pair* → result*
 + psetf pair* → nil
+### "{pair}*" goes to "pair*"
    
 -psetf {pair}* => nil
   
@@ -26,12 +27,14 @@
  newvalue - a form. 
 - results - the multiple values[2] returned by the storing form for the last place, or nil if there are no pairs.  
 + results - the multiple values returned by the storing form for the last place, or nil if there are no pairs.
+### CLHS "values[2]" CLUS "values"
  Description
   
  setf changes the value of place to be newvalue. 
 -(setf place newvalue) expands into an update form that stores the result of evaluating newvalue into the location referred to by place. Some place forms involve uses of accessors that take optional arguments. Whether those optional arguments are permitted by setf, or what their use is, is up to the setf expander function and is not under the control of setf. The documentation for any function that accepts &optional, &rest, or  ..... key arguments and that claims to be usable with setf must specify how those arguments are treated. 
 +(setf place newvalue) expands into an update form that stores the result of evaluating newvalue into the location referred to by place.
 +Some place forms involve uses of accessors that take optional arguments. Whether those optional arguments are permitted by setf, or what their use is, is up to the setf expander function and is not under the control of setf. The documentation for any function that accepts &optional, &rest, or &key arguments and that claims to be usable with setf must specify how those arguments are treated.
+### CLHS "..... key" CLUS "&key"
  If more than one pair is supplied, the pairs are processed sequentially; that is, 
  
 - (setf place-1 newvalue-1
@@ -54,6 +57,7 @@
 -For detailed treatment of the expansion of setf and psetf, see Section 5.1.2 (Kinds of Places). 
 +For psetf, if more than one pair is supplied then the assignments of new values to places are done in parallel. More precisely, all subforms (in both the place and newvalue forms) that are to be evaluated are evaluated from left to right; after all evaluations have been performed, all of the assignments are performed in an unpredictable order.
 +For detailed treatment of the expansion of setf and psetf, see section {\secref\KindsOfPlaces}.
+### Section 5.1.2 (Kinds of Places) {\secref\KindsOfPlaces}
  Examples
   
  
@@ -100,8 +104,9 @@
   
  See Also
   
--define-setf-expander, defsetf, macroexpand-1, rotatef, shiftf, Section 5.1 (Generalized Reference) 
+-define-setf-expander, defsetf, macroexpand-1, rotatef, shiftf, Section 5.1 (Generalized Reference)
 -Notes None.
+### define-setf-expander, defsetf, macroexpand-1, rotatef, shiftf, Section 5.1 (Generalized Reference) {\secref\GeneralizedReference}
 \ No newline at end of file
 + Macro DEFINE-SETF-EXPANDER
 + Macro DEFSETF
