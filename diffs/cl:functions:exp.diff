@@ -1,3 +1,7 @@
+### Wrong mathematical equations, a lot of style changed
+### +++ CLUS
+### --- CLHS
+
 --- saved-pages-dpans3/cl:functions:exp.txt	2017-04-27 21:51:55.000000000 +0100
 +++ saved-pages-clus/cl:functions:exp.txt	2017-04-27 21:51:55.000000000 +0100
 @@ -2,9 +4,9 @@
@@ -12,7 +16,7 @@
 
  Arguments and Values
 
-@@ -8,53 +12,73 @@
+@@ -8,20 +12,14 @@
 
  Arguments and Values
 
@@ -33,6 +37,7 @@
 
 -<TT> If power-number is a zero of any other type, then the result is also the value one, in the type of the arguments after the application of the contagion rules in Section 12.1.1.2 (Contagion in Numeric Operations), with one exception the consequences are undefined if base-number is zero when power-number is zero and not of type integer.
 -Examples
+### Section 12.1.1.2 (Contagion in Numeric Operations) {\secref\NumericContagionRules}
 +exp returns e raised to the power number, where e is the base of the natural logarithms.
 +exp has no branch cut.
 
@@ -58,14 +63,21 @@
 +The result of expt can be a complex, even when neither argument is a complex, if base-number is negative and power-number is not an integer. The result is always the principal complex value. For example, (expt -8 1/3) is not permitted to return -2, even though -2 is one of the cube roots of -8. The principal cube root is a complex approximately equal to #C(1.0 1.73205), not -2.
 
 -log, Section 12.1.3.3 (Rule of Float Substitutability)
+### log, Section 12.1.3.3 (Rule of Float Substitutability) {\secref\FloatSubstitutability}
 -Notes
 
 +expt is defined as bx = ex log b. This defines the principal values precisely. The range of expt is the entire complex plane. Regarded as a function of x, with b fixed, there is no branch cut. Regarded as a function of b, with x fixed, there is in general a branch cut along the negative real axis, continuous with quadrant II. The domain excludes the origin. By definition, 00 = 1. If b = 0 and the real part of x is strictly positive, then bx = 0. For all other values of x, 0x is an error.
+### b^x = e^(x lob(b))
+### 0^0 = 1
+### b^x = 0
+### x^x = 0
 +When power-number is an integer 0, then the result is always the value one in the type of base-number, even if the base-number is zero (of any type). That is
 +<blockquote>
 +(expt x 0) ≡ (coerce 1 (type-of x))
 +</blockquote>
+### This look bad.
 +If power-number is a zero of any other type, then the result is also the value one, in the type of the arguments after the application of the contagion rules in \secref\NumericContagionRules, with one exception the consequences are undefined if base-number is zero when power-number is zero and not of type integer.
+### {\secref\NumericContagionRules}
 +====Examples====
 +<blockquote>
 +(exp 0) → 1.0
@@ -88,6 +100,7 @@
  Implementations of expt are permitted to use different algorithms for the cases of a power-number of type rational and a power-number of type float.
 +Note that by the following logic, (sqrt (expt x 3)) is not equivalent to (expt x 3/2)''.
 +(defparameter *x* (exp (/ (* 2 pi #c(0 1)) 3))) ; e2πi/3
+### e^(2πi/3)
 +(expt *x* 3) → 1 ; except for round-off error
 +(sqrt (expt *x* 3)) → 1 ; except for round-off error
 +(expt *x* 3/2) → -1 ; except for round-off error
