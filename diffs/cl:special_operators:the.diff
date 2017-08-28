@@ -1,33 +1,39 @@
+### Some changes
+### +++ CLUS
+### --- CLHS
+
 --- saved-pages-dpans3/cl:special_operators:the.txt	2017-04-27 21:57:42.000000000 +0100
 +++ saved-pages-clus/cl:special_operators:the.txt	2017-04-27 21:57:43.000000000 +0100
 @@ -2,7 +4,9 @@
  Syntax
-  
- 
+
+
 -the value-type form => result*
 + the value-type form → result*
-  
+
  Arguments and Values
-  
-@@ -6,38 +10,125 @@
-  
+
+@@ -6,13 +10,13 @@
+
  Arguments and Values
-  
- value-type - a type specifier; not evaluated. 
- form - a form; evaluated. 
-  results - the values resulting from the evaluation of form. These values must conform to the type supplied by value-type; see below.  
+
+ value-type - a type specifier; not evaluated.
+ form - a form; evaluated.
+  results - the values resulting from the evaluation of form. These values must conform to the type supplied by value-type; see below.
  Description
-  
--the specifies that the values[1a] returned by form are of the types specified by value-type. The consequences are undefined if any result is not of the declared type. 
+
+-the specifies that the values[1a] returned by form are of the types specified by value-type. The consequences are undefined if any result is not of the declared type.
 +the specifies that the values returned by form are of the types specified by value-type. The consequences are undefined if any result is not of the declared type.
-   
-   It is permissible for form to yield a different number of values than are specified by value-type, provided that the values for which types are declared are indeed of those types. Missing values are treated as nil for the purposes of checking their types. 
--Regardless of number of values declared by value-type, the number of values returned by the the special form is the same as the number of values returned by form.   
+### CLHS "values[1a]" CLUS "values"
+
+   It is permissible for form to yield a different number of values than are specified by value-type, provided that the values for which types are declared are indeed of those types. Missing values are treated as nil for the purposes of checking their types.
+-Regardless of number of values declared by value-type, the number of values returned by the the special form is the same as the number of values returned by form.
 +Regardless of number of values declared by value-type, the number of values returned by the is the same as the number of values returned by form.
+### Text slightly changed
  Examples
-  
-  
- 
+
+
+
 - (the symbol (car (list (gensym)))) =>  #G9876
 - (the fixnum (+ 5 7)) =>  12
 - (the (values) (truncate 3.2 2)) =>  1, 1.2
@@ -35,35 +41,35 @@
 - (the (values integer) (truncate 3.2 2)) =>  1, 1.2
 - (the (values integer float) (truncate 3.2 2))   =>  1, 1.2
 - (the (values integer float symbol) (truncate 3.2 2)) =>  1, 1.2
-- (the (values integer float symbol t null list) 
+- (the (values integer float symbol t null list)
 -      (truncate 3.2 2)) =>  1, 1.2
-+(the symbol (car (list (gensym)))) 
++(the symbol (car (list (gensym))))
 +→
 +#G9876
-+(the fixnum (math-add|+ 5 7)) 
++(the fixnum (math-add|+ 5 7))
 +→
 +12
-+(the (values) (truncate 3.2 2)) 
++(the (values) (truncate 3.2 2))
 +→
 +1
 +1.2
-+(the integer (truncate 3.2 2)) 
++(the integer (truncate 3.2 2))
 +→
 +1
 +1.2
-+(the (values integer) (truncate 3.2 2)) 
++(the (values integer) (truncate 3.2 2))
 +→
 +1,
 +1.2
-+(the (values integer float) (truncate 3.2 2)) 
++(the (values integer float) (truncate 3.2 2))
 +→
 +1,
 +1.2
-+(the (values integer float symbol) (truncate 3.2 2)) 
++(the (values integer float symbol) (truncate 3.2 2))
 +→
 +1,
 +1.2
-+(the (values integer float symbol t null list) (truncate 3.2 2)) 
++(the (values integer float symbol t null list) (truncate 3.2 2))
 +→
 +1,
 +1.2
@@ -78,37 +84,37 @@
 +→
 +101
 +(let* ((x (list 'a 'b 'c)) (y 5))
-+  (setf (the fixnum (car x)) y) x) 
++  (setf (the fixnum (car x)) y) x)
 +→
 +(5 B C)
 +Affected By
 +None.
- 
--<TT>  
+
+-<TT>
 -Affected By None.
-  
+
  Exceptional Situations
-  
+
 @@ -41,18 +132,29 @@
-  
+
  Exceptional Situations
-  
- The consequences are undefined if the values yielded by the form are not of the type specified by value-type. 
+
+ The consequences are undefined if the values yielded by the form are not of the type specified by value-type.
  See Also
-  
--values 
+
+-values
 +Type VALUES
  Notes
-  
- The values type specifier can be used to indicate the types of multiple values 
- 
+
+ The values type specifier can be used to indicate the types of multiple values
+
   (the (values integer integer) (floor x y))
 - (the (values string t)
 -      (gethash the-key the-string-table))
 +(the (values string t) (gethash the-key the-string-table))
- 
--<TT> 
- setf can be used with the type declarations. In this case the declaration is transferred to the form that specifies the new value. The resulting setf form is then analyzed. 
+
+-<TT>
+ setf can be used with the type declarations. In this case the declaration is transferred to the form that specifies the new value. The resulting setf form is then analyzed.
 -The following X3J13 cleanup issues, not part of the specification, apply to this section JUN90-TRIVIAL-ISSUES27 THE-AMBIGUITYFOR-DECLARATION THE-VALUESRETURN-NUMBER-RECEIVED
 \ No newline at end of file
 +\

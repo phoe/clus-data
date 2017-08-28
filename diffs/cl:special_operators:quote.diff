@@ -1,40 +1,45 @@
+### One change
+### +++ CLUS
+### --- CLHS
+
 --- saved-pages-dpans3/cl:special_operators:quote.txt	2017-04-27 21:57:45.000000000 +0100
 +++ saved-pages-clus/cl:special_operators:quote.txt	2017-04-27 21:57:45.000000000 +0100
 @@ -2,7 +4,9 @@
  Syntax
-  
- 
+
+
 -quote object => object
 + quote object → object
-  
+
  Arguments and Values
-  
-@@ -6,11 +10,20 @@
-  
+
+@@ -6,11 +10,11 @@
+
  Arguments and Values
-  
- object - an object; not evaluated. 
+
+ object - an object; not evaluated.
  Description
-  
--The quote special operator just returns object. 
+
+-The quote special operator just returns object.
 +The special operator quote just returns object.
- The consequences are undefined if literal objects (including quoted objects) are destructively modified. 
+### CLHS "quote special operator" CLUS "special operator quote"
+ The consequences are undefined if literal objects (including quoted objects) are destructively modified.
  Examples
-  
- 
-@@ -14,33 +27,164 @@
+
+
+@@ -14,33 +27,68 @@
  Examples
-  
- 
+
+
 - (setq a 1) =>  1
 - (quote (setq a 3)) =>  (SETQ A 3)
 - a =>  1
 - 'a =>  A
-- ''a =>  (QUOTE A) 
+- ''a =>  (QUOTE A)
 - '''a =>  (QUOTE (QUOTE A))
 - (setq a 43) =>  43
 - (list a (cons a 3)) =>  (43 (43 . 3))
-- (list (quote a) (quote (cons a 3))) =>  (A (CONS A 3)) 
+- (list (quote a) (quote (cons a 3))) =>  (A (CONS A 3))
 - 1 =>  1
 - '1 =>  1
 - "foo" =>  "foo"
@@ -43,73 +48,80 @@
 - '(car '(a b)) =>  (CAR (QUOTE (A B)))
 - #(car '(a b)) =>  #(CAR (QUOTE (A B)))
 - '#(car '(a b)) =>  #(CAR (QUOTE (A B)))
- 
--<TT> 
+
+-<TT>
 -Affected By None.
-+(defparameter *a* 1) 
++(defparameter *a* 1)
 +→
 +*A*
-+(quote (defparameter a 3)) 
++(quote (defparameter a 3))
 +→
 +(DEFPARAMETER A 3)
-+*a* 
++*a*
 +→
 +1
-+'*a* 
++'*a*
 +→
 +A
 +*a* <r>(QUOTE *A*)</r>
-+'*a* 
++'*a*
 +→
 +(QUOTE (QUOTE *A*))
-+(defparameter a 43) 
++(defparameter a 43)
 +→
 +43
-+(list a (cons a 3)) 
++(list a (cons a 3))
 +→
 +(43 (43 . 3))
-+(list (quote a) (quote (cons a 3))) 
++(list (quote a) (quote (cons a 3)))
 +→
 +(A (CONS A 3))
-+1 
++1
 +→
 +1
-+'1 
++'1
 +→
 +1
-+"foo" 
++"foo"
 +→
 +"foo"
-+'"foo" 
++'"foo"
 +→
 +"foo"
-+(car '(a b)) 
++(car '(a b))
 +→
 +A
-+'(car '(a b)) 
++'(car '(a b))
 +→
 +(CAR (QUOTE (A B)))
-+#(car '(a b)) 
++#(car '(a b))
 +→
 +#(CAR (QUOTE (A B)))
-+'#(car '(a b)) 
++'#(car '(a b))
 +→
 +#(CAR (QUOTE (A B)))
 +Affected By
 +None.
 +Exceptional Situations
 +None.
-  
+
 -Exceptional Situations None.
-  
+
  See Also
-  
--Section 3.1 (Evaluation), Section 2.4.3 (Single-Quote),  Section 3.2.1 (Compiler Terminology)  
+
+-Section 3.1 (Evaluation), Section 2.4.3 (Single-Quote),  Section 3.2.1 (Compiler Terminology)
+### Section 3.1 (Evaluation) {\secref\Evaluation}
+### Section 2.4.3 (Single-Quote) {\secref\QuoteMacro}
+### Section 3.2.1 (Compiler Terminology) {\secref\ConstantModification}
 +{\secref\Evaluation}, {\secref\QuoteMacro},
 +{\secref\ConstantModification}
+### {\secref\Evaluation}
+### {\secref\QuoteMacro},
+### {\secref\ConstantModification}
  Notes
-  
--The textual notation 'object is equivalent to (quote object); see Section 3.2.1 (Compiler Terminology). 
+
+-The textual notation 'object is equivalent to (quote object); see Section 3.2.1 (Compiler Terminology).
+### Section 3.2.1 (Compiler Terminology) {\secref\ConstantModification}
 +The textual notation 'object is equivalent to (quote object); see section {\secref\ConstantModification}.
  Some objects, called self-evaluating objects, do not require quotation by quote. However, symbols and lists are used to represent parts of programs, and so would not be useable as constant data in a program without quote. Since quote suppresses the evaluation of these objects, they become data rather than program.
 \ No newline at end of file

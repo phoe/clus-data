@@ -1,115 +1,124 @@
+### Some changes
+### +++ CLUS
+### --- CLHS
+
 --- saved-pages-dpans3/cl:special_operators:throw.txt	2017-04-27 21:55:07.000000000 +0100
 +++ saved-pages-clus/cl:special_operators:throw.txt	2017-04-27 21:55:07.000000000 +0100
-@@ -2,7 +4,9 @@
+@@ -2,4 +4,4 @@
  Syntax
-  
- 
--throw tag result-form =>| 
+
+
+-throw tag result-form =>|
 + throw tag result-form
-  
+### Something missing in CLUS
+
  Arguments and Values
-  
-@@ -6,13 +10,25 @@
-  
+
+@@ -6,6 +10,6 @@
+
  Arguments and Values
-  
- tag - a catch tag; evaluated. 
--result-form - a form; evaluated as described below. 
+
+ tag - a catch tag; evaluated.
+-result-form - a form; evaluated as described below.
 + result-form - a form; evaluatedspecial.
+### CLHS "evaluated as described below" CLUS "evaluatedspecial"
  Description
-  
- throw causes a non-local control transfer to a catch whose tag is eq to tag. 
- Tag is evaluated first to produce an object called the throw tag; then result-form is evaluated, and its results are saved. If the result-form produces multiple values, then all the values are saved. The most recent outstanding catch whose tag is eq to the throw tag is exited; the saved results are returned as the value or values of catch. 
--The transfer of control initiated by throw is performed as described in Section 5.2 (Transfer of Control to an Exit Point). 
+
+ throw causes a non-local control transfer to a catch whose tag is eq to tag.
+ Tag is evaluated first to produce an object called the throw tag; then result-form is evaluated, and its results are saved. If the result-form produces multiple values, then all the values are saved. The most recent outstanding catch whose tag is eq to the throw tag is exited; the saved results are returned as the value or values of catch.
+-The transfer of control initiated by throw is performed as described in Section 5.2 (Transfer of Control to an Exit Point).
+### Section 5.2 (Transfer of Control to an Exit Point) {\secref\TransferOfControl}
 +The transfer of control initiated by throw is performed as described in \secref\TransferOfControl.
+### {\secref\TransferOfControl}
  Examples
-  
- 
+
+
 @@ -16,42 +32,64 @@
  Examples
-  
- 
+
+
   (catch 'result
 -    (setq i 0 j 0)
 -    (loop (incf j 3) (incf i)
 -          (if (= i 3) (throw 'result (values i j))))) =>  3, 9
-+  (let ((i 0) (j 0)) 
++  (let ((i 0) (j 0))
 +    (loop
-+      (incf j 3) 
-+      (incf i) 
-+      (when (= i 3) 
-+        (throw 'result (values i j)))))) 
- 
++      (incf j 3)
++      (incf i)
++      (when (= i 3)
++        (throw 'result (values i j))))))
+
 +→
- 
--<TT> 
+
+-<TT>
 +3
 +        9
-  
- 
-- (catch nil 
+
+
+- (catch nil
 -   (unwind-protect (throw nil 1)
 -     (throw nil 2))) =>  2
- 
--<TT> 
--The consequences of the following are undefined because the catch of b is passed over by the first throw, hence portable programs must assume that its dynamic extent is terminated. The binding of the catch tag is not yet disestablished and therefore it is the target of the second throw. 
+
+-<TT>
+-The consequences of the following are undefined because the catch of b is passed over by the first throw, hence portable programs must assume that its dynamic extent is terminated. The binding of the catch tag is not yet disestablished and therefore it is the target of the second throw.
 +(catch nil
 +  (unwind-protect
-+      (throw nil 1) 
-+    (throw nil 2))) → 2 
- 
++      (throw nil 1)
++    (throw nil 2))) → 2
+
 - (catch 'a
 -   (catch 'b
 -     (unwind-protect (throw 'a 1)
 -       (throw 'b 2))))
- 
--<TT> 
--The following prints ``The inner catch returns SECOND-THROW'' and then returns outer-catch. 
- 
+
+-<TT>
+-The following prints ``The inner catch returns SECOND-THROW'' and then returns outer-catch.
+
   (catch 'foo
           (format t "The inner catch returns ~s.~%"
                   (catch 'foo
 -                     (unwind-protect (throw 'foo first-throw)
 +      (unwind-protect
-+          (throw 'foo first-throw) 
++          (throw 'foo first-throw)
                           (throw 'foo second-throw))))
           outer-catch)
 ->>  The inner catch returns SECOND-THROW
 -=>  OUTER-CATCH
- 
--<TT> 
+
+-<TT>
 +▷
-+The inner catch returns SECOND-THROW 
++The inner catch returns SECOND-THROW
 +→
 +OUTER-CATCH
 +The consequences of the following are undefined because the catch of b is passed over by the first throw, hence portable programs must assume that its dynamic extent is terminated. The binding of the catch tag is not yet disestablished and therefore it is the target of the second throw.
-+(catch 'a 
-+  (catch 'b 
++(catch 'a
++  (catch 'b
 +    (unwind-protect
-+        (throw 'a 1) 
++        (throw 'a 1)
 +      (throw 'b 2))))
 +Affected By
 +None.
-  
+
 -Affected By None.
-  
+
  Exceptional Situations
-  
-@@ -55,10 +93,29 @@
-  
+
+@@ -55,8 +93,12 @@
+
  Exceptional Situations
-  
- If there is no outstanding catch tag that matches the throw tag, no unwinding of the stack is performed, and an error of type control-error is signaled. When the error is signaled, the dynamic environment is that which was in force at the point of the throw. 
+
+ If there is no outstanding catch tag that matches the throw tag, no unwinding of the stack is performed, and an error of type control-error is signaled. When the error is signaled, the dynamic environment is that which was in force at the point of the throw.
  See Also
-  
--block, catch, return-from, unwind-protect, Section 3.1 (Evaluation) 
+
+-block, catch, return-from, unwind-protect, Section 3.1 (Evaluation)
+### block, catch, return-from, unwind-protect, Section 3.1 (Evaluation) {\secref\Evaluation}
 + Special Operator BLOCK
 + Special Operator CATCH
 + Special Operator RETURN-FROM
 + Special Operator UNWIND-PROTECT
 + {\secref\Evaluation}
  Notes
-  
+
 -catch and throw are normally used when the exit point must have dynamic scope (e.g., the throw is not lexically enclosed by the catch), while block and return are used when lexical scope is sufficient.
 \ No newline at end of file
 +catch and throw are normally used when the exit point must have dynamic scope (e.g. the throw is not lexically enclosed by the catch), while block and return are used when lexical scope is sufficient.

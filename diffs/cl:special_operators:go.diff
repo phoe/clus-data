@@ -1,29 +1,35 @@
+### Some changes
+### +++ CLUS
+### --- CLHS
+
 --- saved-pages-dpans3/cl:special_operators:go.txt	2017-04-27 21:55:30.000000000 +0100
 +++ saved-pages-clus/cl:special_operators:go.txt	2017-04-27 21:55:30.000000000 +0100
 @@ -2,7 +4,9 @@
  Syntax
-  
- 
--go tag =>| 
+
+
+-go tag =>|
 + go tag
-  
+
  Arguments and Values
-  
-@@ -6,22 +10,48 @@
-  
+
+@@ -6,9 +10,10 @@
+
  Arguments and Values
-  
- tag - a go tag. 
+
+ tag - a go tag.
  Description
-  
--go transfers control to the point in the body of an enclosing tagbody form labeled by a tag eql to tag. If there is no such tag in the body, the bodies of lexically containing tagbody forms (if any) are examined as well. If several tags are eql to tag, control is transferred to whichever matching tag is contained in the innermost tagbody form that contains the go. The consequences are undefined if there is no matching tag lexically visible to the point of the go. 
--The transfer of control initiated by go is performed as described in Section 5.2 (Transfer of Control to an Exit Point). 
+
+-go transfers control to the point in the body of an enclosing tagbody form labeled by a tag eql to tag. If there is no such tag in the body, the bodies of lexically containing tagbody forms (if any) are examined as well. If several tags are eql to tag, control is transferred to whichever matching tag is contained in the innermost tagbody form that contains the go. The consequences are undefined if there is no matching tag lexically visible to the point of the go.
+-The transfer of control initiated by go is performed as described in Section 5.2 (Transfer of Control to an Exit Point).
+### Section 5.2 (Transfer of Control to an Exit Point) {\secref\TransferOfControl}
 +go transfers control to the point in the body of an enclosing tagbody form labeled by a tag eql to tag.
 +If there is no such tag in the body, the bodies of lexically containing tagbody forms (if any) are examined as well. If several tags are eql to tag, control is transferred to whichever matching tag is contained in the innermost tagbody form that contains the go. The consequences are undefined if there is no matching tag lexically visible to the point of the go.
 +The transfer of control initiated by go is performed as described in \secref\TransferOfControl.
+### {\secref\TransferOfControl}
  Examples
-  
- 
+
+
 +(defvar *val*)
   (tagbody
 -   (setq val 2)
@@ -31,47 +37,47 @@
     (go lp)
 -   (incf val 3)
 -   lp (incf val 4)) =>  NIL
-- val =>  6 
-+   (incf *val* 3) 
-+ lp 
-+   (incf *val* 4)) 
+- val =>  6
++   (incf *val* 3)
++ lp
++   (incf *val* 4))
 +→
-+NIL 
-+*val* 
++NIL
++*val*
 +→
-+6 
- 
--<TT> 
-   
- The following is in error because there is a normal exit of the tagbody before the go is executed. 
- 
++6
+
+-<TT>
+
+ The following is in error because there is a normal exit of the tagbody before the go is executed.
+
 @@ -25,22 +55,59 @@
-   
- The following is in error because there is a normal exit of the tagbody before the go is executed. 
- 
-  (let ((a nil)) 
+
+ The following is in error because there is a normal exit of the tagbody before the go is executed.
+
+  (let ((a nil))
 -   (tagbody t (setq a #'(lambda () (go t))))
 +  (tagbody
-+   t 
++   t
 +     (setf a #'(lambda () (go t))))
     (funcall a))
- 
--<TT> 
+
+-<TT>
 +✖
 +Error attempt to GO to a tag that no longer exists.
- The following is in error because the tagbody is passed over before the go form is executed. 
- 
+ The following is in error because the tagbody is passed over before the go form is executed.
+
 - (funcall (block nil
 -            (tagbody a (return #'(lambda () (go a))))))
- 
--<TT>  
+
+-<TT>
 -Affected By None.
-  
+
 -Exceptional Situations None.
 +(funcall
 +  (block nil
 +    (tagbody
-+     a 
++     a
 +       (return #'(lambda () (go a))))))
 +✖
 +Error attempt to GO to a tag that no longer exists.
@@ -79,10 +85,10 @@
 +None.
 +Exceptional Situations
 +None.
-  
+
  See Also
-  
--tagbody 
+
+-tagbody
 -Notes None.
 \ No newline at end of file
 + Special Operator TAGBODY
