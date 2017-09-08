@@ -1,0 +1,97 @@
+### Same "cl:functions:pprint-fill.diff"
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:functions:pprint-linear.txt	2017-04-27 21:46:36.000000000 +0100
++++ saved-pages-clus/cl:functions:pprint-linear.txt	2017-04-27 21:46:36.000000000 +0100
+@@ -1,13 +1,13 @@
+ Function PPRINT-FILL, PPRINT-LINEAR, PPRINT-TABULAR
+
+-Syntax
+
++Syntax
+
+-pprint-fill stream object &optional colon-p at-sign-p => nil
+
+-pprint-linear stream object &optional colon-p at-sign-p => nil
++pprint-fill stream object &optional colon-p at-sign-p → nil
++pprint-linear stream object &optional colon-p at-sign-p → nil
++pprint-tabular stream object &optional colon-p at-sign-p tabsize → nil
+
+-pprint-tabular stream object &optional colon-p at-sign-p tabsize => nil
+
+ Arguments and Values
+
+@@ -11,39 +11,77 @@
+
+ Arguments and Values
+
+ stream - an output stream designator.
+ object - an object.
+ colon-p - a generalized boolean. The default is true.
+ at-sign-p - a generalized boolean. The default is implementation-dependent.
+ tabsize - a non-negative integer. The default is 16.
+ Description
+
+ The functions pprint-fill, pprint-linear, and pprint-tabular specify particular ways of pretty printing a list to stream. Each function prints parentheses around the output if and only if colon-p is true. Each function ignores its at-sign-p argument. (Both arguments are included even though only one is needed so that these functions can be used via ~/.../ and as set-pprint-dispatch functions, as well as directly.) Each function handles abbreviation and the detection of circularity and sharing correctly, and uses write to print object when it is a non-list.
+- If object is a list and if the value of *print-pretty* is false, each of these functions prints object using a minimum of whitespace, as described in Section 22.1.3.5 (Printing Lists and Conses). Otherwise (if object is a list and if the value of *print-pretty* is true)
++If object is a list and if the value of *print-pretty* is false, each of these functions prints object using a minimum of whitespace, as described in \secref\PrintingListsAndConses. Otherwise (if object is a list and if the value of *print-pretty* is true)
+
+   The function pprint-linear prints a list either all on one line, or with each element on a separate line.
+   The function pprint-fill prints a list with as many elements as possible on each line.
+   The function pprint-tabular is the same as pprint-fill except that it prints the elements so that they line up in columns. The tabsize specifies the column spacing in ems, which is the total spacing from the leading edge of one column to the leading edge of the next.
+
+ Examples
+
+ Evaluating the following with a line length of 25 produces the output shown.
+
+-(progn (princ "Roads ")
++(progn
++  (princ "Roads ")
+        (pprint-tabular *standard-output* '(elm main maple center) nil nil 8))
++▷
+ Roads ELM     MAIN
+       MAPLE   CENTER
+
+-<TT>
+ Side Effects
+
+ Performs output to the indicated stream.
+ Affected By
+
+ The cursor position on the indicated stream, if it can be determined.
+-Exceptional Situations None.
+
+-See Also None.
++Exceptional Situations
++None.
++See Also
++None.
+
+ Notes
+
+@@ -47,11 +85,15 @@
+
+ Notes
+
+ The function pprint-tabular could be defined as follows
+
+ (defun pprint-tabular (s list &optional (colon-p t) at-sign-p (tabsize nil))
+   (declare (ignore at-sign-p))
+-  (when (null tabsize) (setq tabsize 16))
++  (when (null tabsize)
++    (setf tabsize 16))
+   (pprint-logical-block (s list prefix (if colon-p "(" "")
+                                 suffix (if colon-p ")" ""))
+     (pprint-exit-if-list-exhausted)
+@@ -61,7 +103,9 @@
+           (pprint-tab section-relative 0 tabsize s)
+           (pprint-newline fill s))))
+
+-<TT>
+ Note that it would have been inconvenient to specify this function using format, because of the need to pass its tabsize argument through to a ~T format directive nested within an iteration over a list.
+
+-The following X3J13 cleanup issues, not part of the specification, apply to this section GENERALIZE-PRETTY-PRINTERUNIFY PRETTY-PRINT-INTERFACE
+\ No newline at end of file
++\
+\ No newline at end of file
