@@ -1,0 +1,85 @@
+--- saved-pages-dpans3/cl:functions:proclaim.txt	2017-04-27 21:58:02.000000000 +0100
++++ saved-pages-clus/cl:functions:proclaim.txt	2017-04-27 21:58:02.000000000 +0100
+@@ -2,7 +4,7 @@
+ Syntax
+
+
+-proclaim declaration-specifier => implementation-dependent
++ proclaim declaration-specifier → implementation-dependent
+
+ Arguments and Values
+
+@@ -6,19 +10,40 @@
+
+ Arguments and Values
+
+ declaration-specifier - a declaration specifier.
+ Description
+
+ Establishes the declaration specified by declaration-specifier in the global environment.
+ Such a declaration, sometimes called a global declaration or a proclamation, is always in force unless locally shadowed.
+ Names of variables and functions within declaration-specifier refer to dynamic variables and global function definitions, respectively.
+-The next figure shows a list of declaration identifiers that can be used with proclaim.
+
+-declaration  inline     optimize  type
+-ftype        notinline  special
+
+-Figure 3-22.  Global Declaration Specifiers
++A list of declaration identifiers that can be used with proclaim.
++ declaration  notinline  special
++ ftype  optimize
++ inline  type
+ An implementation is free to support other (implementation-defined) declaration identifiers as well.
+ Examples
+
+
+@@ -26,28 +52,54 @@
+    (proclaim `(type ,type ,@vars))
+    type)
+
+- ;; Once this form is executed, the dynamic variable *TOLERANCE*
+- ;; must always contain a float.
++→
++DECLARE-VARIABLE-TYPES-GLOBALLY
++;; Once this form is executed, the dynamic variable *TOLERANCE* must always contain a float.
+  (declare-variable-types-globally 'float '(*tolerance*))
+-=>  FLOAT
+
+-<TT>
+-Affected By None.
++→
++FLOAT
++Affected By
++None.
++Exceptional Situations
++None.
+
+-Exceptional Situations None.
+
+ See Also
+
+-declaim, declare, Section 3.2 (Compilation)
++Macro DECLAIM, Symbol DECLARE, {\secref\Compilation}
+ Notes
+
+ Although the execution of a proclaim form has effects that might affect compilation, the compiler does not make any attempt to recognize and specially process proclaim forms. A proclamation such as the following, even if a top level form, does not have any effect until it is executed
+
+ (proclaim '(special *x*))
+
+-<TT>
+ If compile time side effects are desired, eval-when may be useful. For example
+
+  (eval-when (execute compile-toplevel load-toplevel)
+    (proclaim '(special *x*)))
+
+@@ -51,7 +103,12 @@
+  (eval-when (execute compile-toplevel load-toplevel)
+    (proclaim '(special *x*)))
+
+-<TT>
+ In most such cases, however, it is preferrable to use declaim for this purpose.
+  Since proclaim forms are ordinary function forms, macro forms can expand into them.
+-The following X3J13 cleanup issues, not part of the specification, apply to this section DECLARE-MACROSFLUSH DECLARE-FUNCTION-AMBIGUITYDELETE-FTYPE-ABBREVIATION DYNAMIC-EXTENTNEW-DECLARATION
+\ No newline at end of file
++\
+\ No newline at end of file

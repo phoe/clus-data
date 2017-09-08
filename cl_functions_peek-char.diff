@@ -1,0 +1,72 @@
+--- saved-pages-dpans3/cl:functions:peek-char.txt	2017-04-27 21:43:17.000000000 +0100
++++ saved-pages-clus/cl:functions:peek-char.txt	2017-04-27 21:43:17.000000000 +0100
+@@ -2,7 +4,7 @@
+ Syntax
+
+
+-peek-char &optional peek-type input-stream eof-error-p eof-value recursive-p => char
++ peek-char &optional peek-type input-stream eof-error-p eof-value recursive-p → char
+
+ Arguments and Values
+
+@@ -6,19 +10,45 @@
+
+ Arguments and Values
+
+ peek-type - a character or t or nil.
+ input-stream - input stream designator. The default is standard input.
+ eof-error-p - a generalized boolean. The default is true.
+  eof-value - an object. The default is nil.
+ recursive-p - a generalized boolean. The default is false.
+ char - a character or the eof-value.
+ Description
+
+ peek-char obtains the next character in input-stream without actually reading it, thus leaving the character to be read at a later time. It can also be used to skip over and discard intervening characters in the input-stream until a particular character is found.
+-If peek-type is not supplied or nil, peek-char returns the next character to be read from input-stream, without actually removing it from input-stream. The next time input is done from input-stream, the character will still be there. If peek-type is t, then peek-char skips over whitespace[2] characters, but not comments, and then performs the peeking operation on the next character. The last character examined, the one that starts an object, is not removed from input-stream. If peek-type is a character, then peek-char skips over input characters until a character that is char= to that character is found; that character is left in input-stream.
+-If an end of file[2] occurs and eof-error-p is false, eof-value is returned.
++If peek-type is not supplied or nil, peek-char returns the next character to be read from input-stream, without actually removing it from input-stream. The next time input is done from input-stream, the character will still be there.
++If peek-type is t, then peek-char skips over whitespace characters, but not comments, and then performs the peeking operation on the next character. The last character examined, the one that starts an object, is not removed from input-stream.
++If peek-type is a character, then peek-char skips over input characters until a character that is char= to that character is found; that character is left in input-stream.
++If an end of file occurs and eof-error-p is false, eof-value is returned.
+  If recursive-p is true, this call is expected to be embedded in a higher-level call to read or a similar function used by the Lisp reader.
+  When input-stream is an echo stream, characters that are only peeked at are not echoed. In the case that peek-type is not nil, the characters that are passed by peek-char are treated as if by read-char, and so are echoed unless they have been marked otherwise by unread-char.
+ Examples
+
+
+@@ -27,20 +58,46 @@
+             (peek-char t input-stream)
+             (peek-char #\4 input-stream)
+             (peek-char nil input-stream)))
+->>  #\1 #\4 #\4
+-=>  NIL
+
+-<TT>
++▷
++#\1 #\4 #\4
++→
++NIL
+ Affected By
+
+-*readtable*, *standard-input*, *terminal-io*.
++*readtable*, *standard-input*,
++*terminal-io*.
+ Exceptional Situations
+
+-If eof-error-p is true and an end of file[2] occurs an error of type end-of-file is signaled.
+-If peek-type is a character, an end of file[2] occurs, and eof-error-p is true, an error of type end-of-file is signaled.
+-If recursive-p is true and an end of file[2] occurs, an error of type end-of-file is signaled.
+-See Also None.
+
+-Notes None.
++If eof-error-p is true and an end of file occurs an error of type end-of-file is signaled.
++If peek-type is a character, an end of file occurs, and eof-error-p is true, an error of type end-of-file is signaled.
++If recursive-p is true and an end of file occurs, an error of type end-of-file is signaled.
++See Also
++None.
++Notes
++None.
+
+-The following X3J13 cleanup issues, not part of the specification, apply to this section PEEK-CHAR-READ-CHAR-ECHOFIRST-READ-CHAR ARGUMENTS-UNDERSPECIFIEDSPECIFY
+\ No newline at end of file
++\
+\ No newline at end of file
