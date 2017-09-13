@@ -1,0 +1,256 @@
+### Same "cl:functions:caaaar.diff"
+
+--- saved-pages-dpans3/cl:functions:cdddar.txt	2017-04-27 22:02:51.000000000 +0100
++++ saved-pages-clus/cl:functions:cdddar.txt	2017-04-27 22:02:51.000000000 +0100
+@@ -1,2 +1,2 @@
+-Accessor CAR, CDR, CAAR, CADR, CDAR, CDDR, CAAAR, CAADR, CADAR, CADDR, CDAAR, CDADR, CDDAR, CDDDR, CAAAAR, CAAADR, CAADAR, CAADDR, CADAAR, CADADR, CADDAR, CADDDR, CDAAAR, CDAADR, CDADAR, CDADDR, CDDAAR, CDDADR, CDDDAR, CDDDDR
++Accessors CAR, CDR and their compositions
+ Syntax
+
+
+-car x => object
++ car x → object
+
+-cdr x => object
++ cdr x → object
+
+-caar x => object
++ (setf (car x) new-object)
+
+-cadr x => object
++ (setf (cdr x) new-object)
+
+-cdar x => object
+
+-cddr x => object
+
+-caaar x => object
++Click here for the syntax and equivalence chart of all car and cdr compositions.
+
+-caadr x => object
+
+-cadar x => object
++Arguments and values
+
+-caddr x => object
+
+-cdaar x => object
++ x - a list.
+
+-cdadr x => object
++ object - an object.
+
+-cddar x => object
++ new-object - an object.
+
+-cdddr x => object
+
+-caaaar x => object
+
+-caaadr x => object
++Description
+
+-caadar x => object
+
+-caaddr x => object
++If x is a cons, car returns the car of that cons. If x is nil, car returns nil.
+
+-cadaar x => object
+
+-cadadr x => object
++If x is a cons, cdr returns the cdr of that cons. If x is nil, cdr returns nil.
+
+-caddar x => object
+
+-cadddr x => object
++Functions are provided which perform compositions up to four car and cdr operations. Their names consist of a C, followed by two, three or four occurrences of A or D, and finally a R. The series of As and Ds in each function's name is chosen to identify the series of car and cdr operations that is performed by the function. The order in which the As and Ds appear is the inverse of the order in which the corresponding operations are performed.
+
+-cdaaar x => object
+
+-cdaadr x => object
++setf can also be used with any of these functions to change an existing component of x, but setf will not make new components. So, for example, the car of a cons can be assigned with setf of car, but the car of nil cannot be assigned with setf of car.
+
+-cdadar x => object
+
+-cdaddr x => object
++Similarly, the car of the car of a cons whose car is a cons can be assigned with setf of caar, but neither nil nor a cons whose car is nil can be assigned with setf of caar.
++The argument x is permitted to be a dotted list or a circular list.
+
+-cddaar x => object
+
+-cddadr x => object
++Examples
+
+-cdddar x => object
+
+-cddddr x => object
+
+-(setf (car x) new-object)
++(car nil)
+
+-(setf (cdr x) new-object)
++→
+
+-(setf (caar x) new-object)
++NIL
+
+-(setf (cadr x) new-object)
+
+-(setf (cdar x) new-object)
+
+-(setf (cddr x) new-object)
++(cdr '(1 . 2))
+
+-(setf (caaar x) new-object)
++→
+
+-(setf (caadr x) new-object)
++2
+
+-(setf (cadar x) new-object)
+
+-(setf (caddr x) new-object)
+
+-(setf (cdaar x) new-object)
++(cdr '(1 2))
+
+-(setf (cdadr x) new-object)
++→
+
+-(setf (cddar x) new-object)
++(2)
+
+-(setf (cdddr x) new-object)
+
+-(setf (caaaar x) new-object)
+
+-(setf (caaadr x) new-object)
++(cadr '(1 2))
+
+-(setf (caadar x) new-object)
++→
+
+-(setf (caaddr x) new-object)
++2
+
+-(setf (cadaar x) new-object)
+
+-(setf (cadadr x) new-object)
+
+-(setf (caddar x) new-object)
++(car '(a b c))
+
+-(setf (cadddr x) new-object)
++→
+
+-(setf (cdaaar x) new-object)
++A
+
+-(setf (cdaadr x) new-object)
+
+-(setf (cdadar x) new-object)
+
+-(setf (cdaddr x) new-object)
++(cdr '(a b c))
+
+-(setf (cddaar x) new-object)
++→
+
+-(setf (cddadr x) new-object)
++(B C)
+
+-(setf (cdddar x) new-object)
+
+-(setf (cddddr x) new-object)
+
+-Pronunciation
++Exceptional situations
+
+-cadr ['ka,duhr]
+-caddr ['kaduh,duhr] or ['ka,dduhr]
+-cdr ['k,duhr]
+-cddr ['kduh,duhr] or ['kuh,dduhr]
+-Arguments and Values
+
+-x - a list.
+-object - an object.
+-new-object - an object.
+-Description
++The functions car and cdr should signal type-error if they receive an argument which is not a list. The other functions (caar, cadr, ..., cddddr) should behave for the purpose of error checking as if defined by appropriate calls to car and cdr.
+
+-If x is a cons, car returns the car of that cons. If x is nil, car returns nil.
+-If x is a cons, cdr returns the cdr of that cons. If x is nil, cdr returns nil.
+-Functions are provided which perform compositions of up to four car and cdr operations. Their names consist of a C, followed by two, three, or four occurrences of A or D, and finally an R. The series of A's and D's in each function's name is chosen to identify the series of car and cdr operations that is performed by the function. The order in which the A's and D's appear is the inverse of the order in which the corresponding operations are performed. The next figure defines the relationships precisely.
+
+-This place ...  Is equivalent to this place ...
+-(caar x)        (car (car x))
+-(cadr x)        (car (cdr x))
+-(cdar x)        (cdr (car x))
+-(cddr x)        (cdr (cdr x))
+-(caaar x)       (car (car (car x)))
+-(caadr x)       (car (car (cdr x)))
+-(cadar x)       (car (cdr (car x)))
+-(caddr x)       (car (cdr (cdr x)))
+-(cdaar x)       (cdr (car (car x)))
+-(cdadr x)       (cdr (car (cdr x)))
+-(cddar x)       (cdr (cdr (car x)))
+-(cdddr x)       (cdr (cdr (cdr x)))
+-(caaaar x)      (car (car (car (car x))))
+-(caaadr x)      (car (car (car (cdr x))))
+-(caadar x)      (car (car (cdr (car x))))
+-(caaddr x)      (car (car (cdr (cdr x))))
+-(cadaar x)      (car (cdr (car (car x))))
+-(cadadr x)      (car (cdr (car (cdr x))))
+-(caddar x)      (car (cdr (cdr (car x))))
+-(cadddr x)      (car (cdr (cdr (cdr x))))
+-(cdaaar x)      (cdr (car (car (car x))))
+-(cdaadr x)      (cdr (car (car (cdr x))))
+-(cdadar x)      (cdr (car (cdr (car x))))
+-(cdaddr x)      (cdr (car (cdr (cdr x))))
+-(cddaar x)      (cdr (cdr (car (car x))))
+-(cddadr x)      (cdr (cdr (car (cdr x))))
+-(cdddar x)      (cdr (cdr (cdr (car x))))
+-(cddddr x)      (cdr (cdr (cdr (cdr x))))
++See also
+
+-Figure 14-6.  CAR and CDR variants
+-setf can also be used with any of these functions to change an existing component of x, but setf will not make new components. So, for example, the car of a cons can be assigned with setf of car, but the car of nil cannot be assigned with setf of car. Similarly, the car of the car of a cons whose car is a cons can be assigned with setf of caar, but neither nilnor a cons whose car is nil can be assigned with setf of caar.
+- The argument x is permitted to be a dotted list or a circular list.
+-Examples
+
++Function RPLACA, Function RPLACD, Function FIRST, Function REST
+
+- (car nil) =>  NIL
+- (cdr '(1 . 2)) =>  2
+- (cdr '(1 2)) =>  (2)
+- (cadr '(1 2)) =>  2
+- (car '(a b c)) =>  A
+- (cdr '(a b c)) =>  (B C)
+
+-<TT>
+-Affected By None.
++Example Implementation
+
+-Exceptional Situations
+
+-The functions car and cdr should signal type-error if they receive an argument which is not a list. The other functions (caar, cadr, ... cddddr) should behave for the purpose of error checking as if defined by appropriate calls to car and cdr.
+-See Also
++To be done.
+
+-rplaca, first, rest
+ Notes
+
+ The car of a cons can also be altered by using rplaca, and the cdr of a cons can be altered by using rplacd.
+
+-(car x)    ==  (first x)
+-(cadr x)   ==  (second x) ==  (car (cdr x))
+-(caddr x)  ==  (third x)  ==  (car (cdr (cdr x)))
+-(cadddr x) ==  (fourth x) ==  (car (cdr (cdr (cdr x))))
+
+-<TT>
+\ No newline at end of file
++ (car x) is equivalent to (first x).
++ (cadr x) is equivalent to (second x).
++ (caddr x) is equivalent to (third x).
++ (cadddr x) is equivalent to (fourth x).
+\ No newline at end of file

@@ -1,0 +1,150 @@
+### Same "cl:functions:acos.diff"
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:functions:atan.txt	2017-04-27 21:52:25.000000000 +0100
++++ saved-pages-clus/cl:functions:atan.txt	2017-04-27 21:52:25.000000000 +0100
+@@ -2,1 +4,1 @@
+ Syntax
+
+
+-asin number => radians
++ asin number → radians
++ acos number → radians
++ atan number1 &optional number2 → radians
+
+-acos number => radians
+
+-atan number1 &optional number2 => radians
+
+ Arguments and Values
+
+@@ -10,79 +14,222 @@
+
+ Arguments and Values
+
+ number - a number.
+ number1 - a number if number2 is not supplied, or a real if number2 is supplied.
+ number2 - a real.
+ radians - a number (of radians).
+ Description
+
+ asin, acos, and atan compute the arc sine, arc cosine, and arc tangent respectively.
+-The arc sine, arc cosine, and arc tangent (with only number1 supplied) functions can be defined mathematically for number or number1 specified as x as in the next figure.
++The arc sine, arc cosine, and arc tangent (with only number1 supplied) functions can be defined mathematically for number or number1 specified as x as in the below table.
+
+ Function     Definition
+-Arc sine     -i log  (ix+ sqrt(1-x^2) )
+-Arc cosine   (<PI>/2) - arcsin  x
+-Arc tangent  -i log  ((1+ix) sqrt(1/(1+x^2)) )
+
+-Figure 12-14.  Mathematical definition of arc sine, arc cosine, and arc tangent
++ Arc sine  -i * log(i * x + sqrt(1 - x2))
++ Arc cosine  (π / 2) - arcsin(x)
++ Arc tangent  -i * log((1 + i * x) * sqrt(1 / (1 + x2)))
+ These formulae are mathematically correct, assuming completely accurate computation. They are not necessarily the simplest ones for real-valued computations.
+-If both number1 and number2 are supplied for atan, the result is the arc tangent of number1/number2. The value of atan is always between -<PI> (exclusive) and <PI> (inclusive)  when minus zero is not supported. The range of the two-argument arc tangent when minus zero is supported includes -<PI>.
+-For a  real  number1, the result is  a real  and lies between -<PI>/2 and <PI>/2 (both exclusive). number1 can be a complex if number2 is not supplied. If both are supplied, number2 can be zero provided number1 is not zero.
++If both number1 and number2 are supplied for atan, the result is the arc tangent of number1/number2. The value of atan is always between -π (exclusive) and π (inclusive) when minus zero is not supported. The range of the two-argument arc tangent when minus zero is supported includes -π.
++For a real number1, the result is a real and lies between -π/2 and~π/2 (both exclusive). number1 can be a complex if number2 is not supplied. If both are supplied, number2 can be zero provided number1 is not zero.
+ The following definition for arc sine determines the range and branch cuts
+-   arcsin  z = -i log  (iz+sqrt(1-z^2))
+-The branch cut for the arc sine function is in two pieces one along the negative real axis to the left of -1 (inclusive), continuous with quadrant II, and one along the positive real axis to the right of 1 (inclusive), continuous with quadrant IV. The range is that strip of the complex plane containing numbers whose real part is between -<PI>/2 and <PI>/2. A number with real part equal to -<PI>/2 is in the range if and only if its imaginary part is non-negative; a number with real part equal to <PI>/2 is in the range if and only if its imaginary part is non-positive.
+-The following definition for arc cosine determines the range and branch cuts
+-
+-   arccos  z = <PI>/2- arcsin  z
+-or, which are equivalent,
+-   arccos  z = -i log  (z+i sqrt(1-z^2))
+-   arccos  z = 2 log  (sqrt((1+z)/2) + i sqrt((1-z)/2))/i
+-The branch cut for the arc cosine function is in two pieces one along the negative real axis to the left of -1 (inclusive), continuous with quadrant II, and one along the positive real axis to the right of 1 (inclusive), continuous with quadrant IV. This is the same branch cut as for arc sine. The range is that strip of the complex plane containing numbers whose real part is between 0 and <PI>. A number with real part equal to 0 is in the range if and only if its imaginary part is non-negative; a number with real part equal to <PI> is in the range if and only if its imaginary part is non-positive.
++arcsin(z) = -i * log(i * z + sqrt(1 - z2))
++The branch cut for the arc sine function is in two pieces one along the negative real axis to the left of~-1 (inclusive), continuous with quadrant II, and one along the positive real axis to the right of~1 (inclusive), continuous with quadrant IV. The range is that strip of the complex plane containing numbers whose real part is between -π/2 and~π/2. A number with real part equal to -π/2 is in the range if and only if its imaginary part is non-negative; a number with real part equal to π/2 is in the range if and only if its imaginary part is non-positive.
++The following equivalent definitions for arc cosine determines the range and branch cuts
++arccos(z) = π / 2 - arcsin(z)
++arccos(z) = -i * log(z + i 8 sqrt(1 - z2))
++arccos(z) = (2 * log(sqrt((1 + z) / 2) + i * sqrt((1 - z) / 2))) / i
++The branch cut for the arc cosine function is in two pieces one along the negative real axis to the left of -1 (inclusive), continuous with quadrant II, and one along the positive real axis to the right of 1 (inclusive), continuous with quadrant IV. This is the same branch cut as for arc sine. The range is that strip of the complex plane containing numbers whose real part is between 0 and~π. A number with real part equal to 0 is in the range if and only if its imaginary part is non-negative; a number with real part equal to π is in the range if and only if its imaginary part is non-positive.
+ The following definition for (one-argument) arc tangent determines the range and branch cuts
+-    arctan  z = log  (1+iz) - log  (1-iz)/(2i)
+-Beware of simplifying this formula; ``obvious'' simplifications are likely to alter the branch cuts or the values on the branch cuts incorrectly. The branch cut for the arc tangent function is in two pieces one along the positive imaginary axis above i (exclusive), continuous with quadrant II, and one along the negative imaginary axis below -i (exclusive), continuous with quadrant IV. The points i and -i are excluded from the domain. The range is that strip of the complex plane containing numbers whose real part is between -<PI>/2 and <PI>/2. A number with real part equal to -<PI>/2 is in the range if and only if its imaginary part is strictly positive; a number with real part equal to <PI>/2 is in the range if and only if its imaginary part is strictly negative. Thus the range of arc tangent is identical to that of arc sine with the points -<PI>/2 and <PI>/2 excluded.
+-For atan, the signs of number1 (indicated as x) and number2 (indicated as y) are used to derive quadrant information. The next figure details various special cases.  The asterisk (*) indicates that the entry in the figure applies to implementations that support minus zero.
++arctan(z) = (log(1 + i * z) - log(1 - i * z)) / 2 * i
++Beware of simplifying this formula; "obvious" simplifications are likely to alter the branch cuts or the values on the branch cuts incorrectly. The branch cut for the arc tangent function is in two pieces one along the positive imaginary axis above i (exclusive), continuous with quadrant II, and one along the negative imaginary axis below -i (exclusive), continuous with quadrant IV. The points i and -i are excluded from the domain. The range is that strip of the complex plane containing numbers whose real part is between -π/2 and π/2. A number with real part equal to -π/2 is in the range if and only if its imaginary part is strictly positive; a number with real part equal to π/2 is in the range if and only if its imaginary part is strictly negative. Thus the range of arc tangent is identical to that of arc sine with the points -π/2 and π/2 excluded.
++For atan, the signs of number1 (indicated as x) and number2 (indicated as y) are used to derive quadrant information. The next table details various special cases.
++The asterisk (*) indicates that the entry in the figure applies to implementations that support minus zero.
+
+ y Condition  x Condition  Cartesian locus  Range of result
+ y = 0        x > 0        Positive x-axis  0
+ * y = +0     x > 0        Positive x-axis  +0
+ * y = -0     x > 0        Positive x-axis  -0
+-y > 0        x > 0        Quadrant I       0 < result< <PI>/2
+-y > 0        x = 0        Positive y-axis  <PI>/2
+-y > 0        x < 0        Quadrant II      <PI>/2 < result< <PI>
+-y = 0        x < 0        Negative x-axis  <PI>
+-* y = +0     x < 0        Negative x-axis  +<PI>
+-* y = -0     x < 0        Negative x-axis  -<PI>
+-y < 0        x < 0        Quadrant III     -<PI>< result< -<PI>/2
+-y < 0        x = 0        Negative y-axis  -<PI>/2
+-y < 0        x > 0        Quadrant IV      -<PI>/2 < result< 0
++  y > 0  x > 0  Quadrant I 0 < result < π/2
++  y > 0  x = 0  Positive y-axis π/2
++  y > 0  x < 0  Quadrant II π/2 < result < π
++  y = 0  x < 0  Negative x-axis  π
++ *  y = +0  x < 0  Negative x-axis +π
++ *  y = -0  x < 0  Negative x-axis -π
++  y < 0  x < 0  Quadrant III -π < result < -π/2
++  y < 0  x = 0  Negative y-axis -π/2
++  y < 0  x > 0  Quadrant IV -π/2 < result < 0
+ y = 0        x = 0        Origin           undefined consequences
+ * y = +0     x = +0       Origin           +0
+ * y = -0     x = +0       Origin           -0
+-* y = +0     x = -0       Origin           +<PI>
+-* y = -0     x = -0       Origin           -<PI>
+
+-Figure 12-15.  Quadrant information for arc tangent
++ *  y = +0  x = -0  Origin +π
++ *  y = -0  x = -0  Origin -π
+ Examples
+
+
+
+- (asin 0) =>  0.0
+- (acos #c(0 1))  =>  #C(1.5707963267948966 -0.8813735870195432)
+- (/ (atan 1 (sqrt 3)) 6)  =>  0.087266
+- (atan #c(0 2)) =>  #C(-1.5707964 0.54930615)
++(asin 0)
++→
++0.0
++(acos #c(0 1))
++→
++#C(1.5707963267948966 -0.8813735870195432)
++(/ (atan 1 (sqrt 3)) 6)
++→
++0.087266
++(atan #c(0 2))
++→
++#C(-1.5707964 0.54930615)
++Affected By
++None.
+
+-<TT>
+-Affected By None.
+
+ Exceptional Situations
+
+-acos and asin should signal an error of type type-error if number is not a number. atan should signal type-error if one argument is supplied and that argument is not a number, or if two arguments are supplied and both of those arguments are not reals.
++acos and asin should signal an error of type type-error if number is a number. atan should signal type-error if one argument is supplied and that argument is not a number, or if two arguments are supplied and both of those arguments are not reals.
+ acos, asin, and atan might signal arithmetic-error.
+ See Also
+
+-log, sqrt, Section 12.1.3.3 (Rule of Float Substitutability)
++ Function LOG
++ Function SQRT
++ {\secref\FloatSubstitutability}
+ Notes
+
+ The result of either asin or acos can be a complex even if number is not a complex; this occurs when the absolute value of number is greater than one.
+-The following X3J13 cleanup issues, not part of the specification, apply to this section IEEE-ATAN-BRANCH-CUTSPLIT REAL-NUMBER-TYPEX3J13-MAR-89 COMPLEX-ATAN-BRANCH-CUTTWEAK COMPLEX-ATANH-BOGUS-FORMULATWEAK-MORE
+\ No newline at end of file
++\
+\ No newline at end of file
