@@ -1,0 +1,77 @@
+### File look OK
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:functions:array-row-major-index.txt	2017-04-27 22:05:36.000000000 +0100
++++ saved-pages-clus/cl:functions:array-row-major-index.txt	2017-04-27 22:05:36.000000000 +0100
+@@ -2,1 +4,1 @@
+ Syntax
+
+
+-array-row-major-index array &rest subscripts => index
++ array-row-major-index array &rest subscripts → index
+
+ Arguments and Values
+
+@@ -17,21 +34,60 @@
+ Examples
+
+
+- (setq a (make-array '(4 7) element-type '(unsigned-byte 8)))
+- (array-row-major-index a 1 2) =>  9
+- (array-row-major-index
+-    (make-array '(2 3 4)
+-                element-type '(unsigned-byte 8)
+-                displaced-to a
+-                displaced-index-offset 4)
+-    0 2 1) =>  9
+
+-<TT>
+-Affected By None.
++(defparameter *a*
++  (make-array '(4 7) element-type '(unsigned-byte 8)))
++→
++*A*
++(array-row-major-index *a* 1 2)
++→
++9
+
+-Exceptional Situations None.
+
+-See Also None.
++(defparameter *b*
++  (make-array '(2 3 4) element-type '(unsigned-byte 8)
++                       displaced-to *a*
++                       displaced-index-offset 4))
++→
++*B*
++(array-row-major-index *b* 0 2 1)
++→
++9
++Affected By
++None.
++Exceptional Situations
++None.
++See Also
++None.
+
+ Notes
+
+@@ -35,12 +91,11 @@
+
+ Notes
+
+ A possible definition of array-row-major-index, with no error-checking, is
+
+- (defun array-row-major-index (a &rest subscripts)
+-   (apply #'+ (maplist #'(lambda (x y)
+-                            (* (car x) (apply #'* (cdr y))))
+-                       subscripts
+-                       (array-dimensions a))))
+
+-<TT>
+\ No newline at end of file
++(defun array-row-major-index (a &rest subscripts)
++  (apply #'+ (maplist #'(lambda (x y) (* (car x) (apply #'* (cdr y))))
++                      subscripts (array-dimensions a))))
+\ No newline at end of file
