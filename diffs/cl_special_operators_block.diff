@@ -1,0 +1,90 @@
+### File look OK
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:special_operators:block.txt	2017-04-27 21:55:38.000000000 +0100
++++ saved-pages-clus/cl:special_operators:block.txt	2017-04-27 21:55:38.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+
+
+-block name form* => result*
++ block name form* → result*
+
+ Arguments and Values
+
+@@ -18,26 +37,57 @@
+ Examples
+
+
+- (block empty) =>  NIL
+- (block whocares (values 1 2) (values 3 4)) =>  3, 4
++(block empty)
++→
++NIL
++(block whocares (values 1 2) (values 3 4))
++→
++3
++4
+  (let ((x 1))
+-   (block stop (setq x 2) (return-from stop) (setq x 3))
+-   x) =>  2
+- (block early (return-from early (values 1 2)) (values 3 4)) =>  1, 2
+- (block outer (block inner (return-from outer 1)) 2) =>  1
+- (block twin (block twin (return-from twin 1)) 2) =>  2
+- ;; Contrast behavior of this example with corresponding example of CATCH.
++  (block stop
++    (setf x 2)
++    (return-from stop)
++    (setf x 3))
++  x)
++→
++2
++(block early
++  (return-from early (values 1 2))
++  (values 3 4))
++→
++1
++2
++(block outer
++  (block inner (return-from outer 1))
++  2)
++→
++1
++(block twin
++  (block twin (return-from twin 1))
++  2)
++→
++2
++In the below example, we contrast block behavior with corresponding example of catch.
+  (block b
+    (flet ((b1 () (return-from b 1)))
+-     (block b (b1) (print 'unreachable))
+-     2)) =>  1
++    (block b
++      (b1)
++      (print 'unreachable))
++      2))
+
+-<TT>
+-Affected By None.
++→
++1
++Affected By
++None.
++Exceptional Situations
++None.
+
+-Exceptional Situations None.
+
+ See Also
+
+-return, return-from, Section 3.1 (Evaluation)
+### return, return-from, Section 3.1 (Evaluation) {\secref\Evaluation}
++ Macro RETURN
++ Special Operator RETURN-FROM
++ {\secref\Evaluation}
+ Notes
+\ No newline at end of file
++None.
+\ No newline at end of file

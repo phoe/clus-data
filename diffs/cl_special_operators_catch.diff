@@ -1,0 +1,64 @@
+### File look OK
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:special_operators:catch.txt	2017-04-27 21:55:36.000000000 +0100
++++ saved-pages-clus/cl:special_operators:catch.txt	2017-04-27 21:55:36.000000000 +0100
+@@ -2,7 +4,9 @@
+ Syntax
+
+
+-catch tag form* => result*
++ catch tag form* → result*
+
+ Arguments and Values
+
+@@ -23,24 +48,35 @@
+ Examples
+
+
+- (catch 'dummy-tag 1 2 (throw 'dummy-tag 3) 4) =>  3
+- (catch 'dummy-tag 1 2 3 4) =>  4
+- (defun throw-back (tag) (throw tag t)) =>  THROW-BACK
+- (catch 'dummy-tag (throw-back 'dummy-tag) 2) =>  T
+
+- ;; Contrast behavior of this example with corresponding example of BLOCK.
++(catch 'dummy-tag 1 2 (throw 'dummy-tag 3) 4)
++→
++3
++(catch 'dummy-tag 1 2 3 4)
++→
++4
++(defun throw-back (tag) (throw tag t))
++→
++THROW-BACK
++(catch 'dummy-tag (throw-back 'dummy-tag) 2)
++→
++T
++In the below example, we contrast catch behavior with corresponding example of block.
+  (catch 'c
+    (flet ((c1 () (throw 'c 1)))
+-     (catch 'c (c1) (print 'unreachable))
+-     2)) =>  2
++    (catch 'c (c1) (print 'unreachable)) 2))
++→
++2
++Affected By
++None.
+
+-<TT>
+-Affected By None.
+  Exceptional Situations
+- An error of type control-error is signaled if throw is done when there is no suitable catch tag. See Also
+
+-throw, Section 3.1 (Evaluation)
+### throw, Section 3.1 (Evaluation) {\secref\Evaluation}
++An error of type control-error is signaled if throw is done when there is no suitable catch tag.
++See Also
++ Special Operator THROW
++ {\secref\Evaluation}
+ Notes
+
+ It is customary for symbols to be used as tags, but any object is permitted. However, numbers should not be used because the comparison is done using eq.
+ catch differs from block in that catch tags have dynamic scope while block names have lexical scope.
+\ No newline at end of file
