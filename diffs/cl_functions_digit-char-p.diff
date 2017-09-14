@@ -1,0 +1,85 @@
+### One minor change
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:functions:digit-char-p.txt	2017-04-27 22:04:01.000000000 +0100
++++ saved-pages-clus/cl:functions:digit-char-p.txt	2017-04-27 22:04:02.000000000 +0100
+@@ -2,1 +4,1 @@
+ Syntax
+
+
+-digit-char-p char &optional radix => weight
++ digit-char-p char &optional radix → weight
+
+ Arguments and Values
+
+@@ -6,40 +10,111 @@
+
+ Arguments and Values
+
+ char - a character.
+ radix - a radix. The default is 10.
+ weight - either a non-negative integer less than radix, or false.
+ Description
+
+-Tests whether char is a digit in the specified radix (i.e., with a weight less than radix). If it is a digit in that radix, its weight is returned as an integer; otherwise nil is returned.
++Tests whether char is a digit in the specified radix (i.e. with a weight less than radix). If it is a digit in that radix, its weight is returned as an integer; otherwise nil is returned.
+### CLHS "(i.e., with a weight less than radix)" CLUS "(i.e. with a weight less than radix)"
+ Examples
+
+
+- (digit-char-p #\5)    =>  5
+- (digit-char-p #\5 2)  =>  false
+- (digit-char-p #\A)    =>  false
+- (digit-char-p #\a)    =>  false
+- (digit-char-p #\A 11) =>  10
+- (digit-char-p #\a 11) =>  10
+- (mapcar #'(lambda (radix)
+-             (map 'list #'(lambda (x) (digit-char-p x radix))
+-                  "059AaFGZ"))
++(digit-char-p #\5)
++→
++5
++(digit-char-p #\5 2)
++→
++false
++(digit-char-p #\A)
++→
++false
++(digit-char-p #\a)
++→
++false
++(digit-char-p #\A 11)
++→
++10
++(digit-char-p #\a 11)
++→
++10
++(mapcar #'(lambda (radix) (map 'list #'(lambda (x) (digit-char-p x radix)) "059AaFGZ"))
+          '(2 8 10 16 36))
+- =>  ((0 NIL NIL NIL NIL NIL NIL NIL)
++→
++((0 NIL NIL NIL NIL NIL NIL NIL)
+      (0 5 NIL NIL NIL NIL NIL NIL)
+      (0 5 9 NIL NIL NIL NIL NIL)
+      (0 5 9 10 10 15 NIL NIL)
+      (0 5 9 10 10 15 16 35))
+
+-<TT>
+ Affected By
+
+ None. (In particular, the results of this predicate are independent of any special syntax which might have been enabled in the current readtable.)
+-Exceptional Situations None.
++Exceptional Situations
++None.
++Editor Notes
++The output of digit-char-p might be confusing, as this function's return value also serves a different purpose. digit-char-p, aside from being a predicate, is also a converting function it converts a digit in a given radix to its corresponding integer value.
+### Line added in CLUS
+ See Also
+
+-alphanumericp
++Function ALPHANUMERICP
+ Notes
+
+ Digits are graphic characters.
+\ No newline at end of file
