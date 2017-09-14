@@ -1,0 +1,82 @@
+### File look OK
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:functions:merge.txt	2017-04-27 21:44:39.000000000 +0100
++++ saved-pages-clus/cl:functions:merge.txt	2017-04-27 21:44:39.000000000 +0100
+@@ -2,7 +4,7 @@
+ Syntax
+
+
+-merge result-type sequence-1 sequence-2 predicate &key key => result-sequence
++ merge result-type sequence-1 sequence-2 predicate &key key → result-sequence
+
+ Arguments and Values
+
+@@ -26,23 +58,54 @@
+ Examples
+
+
+- (setq test1 (list 1 3 4 6 7))
+- (setq test2 (list 2 5 8))
+- (merge 'list test1 test2 #'<) =>  (1 2 3 4 5 6 7 8)
+- (setq test1 (copy-seq "BOY"))
+- (setq test2 (copy-seq nosy"))
+- (merge 'string test1 test2 #'char-lessp) =>  "BnOosYy"
+- (setq test1 (vector ((red . 1) (blue . 4))))
+- (setq test2 (vector ((yellow . 2) (green . 7))))
+- (merge 'vector test1 test2 #'< key #'cdr)
+-=>  #((RED . 1) (YELLOW . 2) (BLUE . 4) (GREEN . 7))
+
+-<TT>
++(defparameter *test1* (list 1 3 4 6 7)) *TEST1*
++(defparameter *test2* (list 2 5 8)) *TEST2*
++(merge 'list *test1* *test2* #'<)
++→
++(1 2 3 4 5 6 7 8)
++(setf *test1* (copy-seq "BOY"))
++(setf *test2* (copy-seq "nosy"))
++(merge 'string *test1* *test2* #'char-lessp)
++→
++"BnOosYy"
++(setf *test1* (vector '(red . 1) '(blue . 4)))
++(setf *test2* (vector '(yellow . 2) '(green . 7)))
++(merge 'vector *test1* *test2* #'< key #'cdr)
++→
++#((RED . 1) (YELLOW . 2) (BLUE . 4) (GREEN . 7))
++(merge '(vector * 4) '(1 5) '(2 4 6) #'<)
++✖
++Error The length requested (5) does not match the type restriction in (VECTOR * 4).
++Affected By
++None.
+
+- (merge '(vector * 4) '(1 5) '(2 4 6) #'<) should signal an error
+
+-<TT>
+-Affected By None.
+
+ Exceptional Situations
+
+@@ -46,9 +109,7 @@
+
+ Exceptional Situations
+
+  An error must be signaled if the result-type is neither a recognizable subtype of list, nor a recognizable subtype of vector.
+  An error of type type-error should be signaled if result-type specifies the number of elements and the sum of the lengths of sequence-1 and sequence-2 is different from that number.
+ See Also
+
+-sort, stable-sort,  Section 3.2.1 (Compiler Terminology),   Section 3.6 (Traversal Rules and Side Effects)
+### sort, stable-sort, Section 3.2.1 (Compiler Terminology) {\secref\ConstantModification}
+### Section 3.6 (Traversal Rules and Side Effects) {\secref\TraversalRules}
+-Notes None.
+
+-The following X3J13 cleanup issues, not part of the specification, apply to this section MAPPING-DESTRUCTIVE-INTERACTIONEXPLICITLY-VAGUE CONSTANT-MODIFICATIONDISALLOW SEQUENCE-TYPE-LENGTHMUST-MATCH CONCATENATE-SEQUENCESIGNAL-ERROR
+\ No newline at end of file
++ Function SORT
++ Function STABLE-SORT
++ {\secref\ConstantModification}
++ {\secref\TraversalRules}
++Notes
++None.
++\
+\ No newline at end of file
