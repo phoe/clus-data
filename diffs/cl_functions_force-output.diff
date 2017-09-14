@@ -1,0 +1,82 @@
+### Same "cl:functions:finish-output.diff"
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:functions:force-output.txt	2017-04-27 21:43:42.000000000 +0100
++++ saved-pages-clus/cl:functions:force-output.txt	2017-04-27 21:43:43.000000000 +0100
+@@ -2,11 +4,11 @@
+ Syntax
+
+
+-finish-output &optional output-stream => nil
++ finish-output &optional output-stream → nil
++ force-output &optional output-stream → nil
++ clear-output &optional output-stream → nil
+
+-force-output &optional output-stream => nil
+
+-clear-output &optional output-stream => nil
+
+ Arguments and Values
+
+@@ -10,28 +14,70 @@
+
+ Arguments and Values
+
+ output-stream - an output stream designator. The default is standard output.
+ Description
+
+ finish-output, force-output, and clear-output exercise control over the internal handling of buffered stream output.
+ finish-output attempts to ensure that any buffered output sent to output-stream has reached its destination, and then returns.
+ force-output initiates the emptying of any internal buffers but does not wait for completion or acknowledgment to return.
+ clear-output attempts to abort any outstanding output operation in progress in order to allow as little output as possible to continue to the destination.
+-If any of these operations does not make sense for output-stream, then it does nothing. The precise actions of these functions are implementation-dependent.
++If any of these operations does not make sense for output-stream, then it does nothing.
++The precise actions of these functions are implementation-dependent.
+ Examples
+
+
+-;; Implementation A
+- (progn (princ "am i seen?") (clear-output))
+-=>  NIL
+-;; Implementation B
+- (progn (princ "am i seen?") (clear-output))
+->>  am i seen?
+-=>  NIL
++Implementation A
++(progn (princ "am i seen?")
++       (clear-output))
++→
++NIL
++Implementation B
++(progn (princ "am i seen?")
++       (clear-output))
++▷
++am i seen?
++→
++NIL
++Side Effects
++None.
+
+-<TT>
+-Side Effects None.
+
+ Affected By
+
+@@ -35,11 +81,24 @@
+
+ Affected By
+
+ *standard-output*
+ Exceptional Situations
+
+ Should signal an error of type type-error if output-stream is not a stream designator.
+ See Also
+
+-clear-input
+-Notes None.
+\ No newline at end of file
++ Function CLEAR-INPUT
++Notes
++None.
+\ No newline at end of file
