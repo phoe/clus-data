@@ -1,0 +1,60 @@
+### BIG differences, this is diff of wrong files.
+### CLUS "Restart MUFFLE-WARNING"
+### and CLHS topic selection http://www.lispworks.com/documentation/HyperSpec/Body/a_muffle.htm
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:restarts:muffle-warning.txt	2017-04-27 22:00:02.000000000 +0100
++++ saved-pages-clus/cl:restarts:muffle-warning.txt	2017-04-27 22:00:02.000000000 +0100
+@@ -1,4 +1,94 @@
+-MUFFLE-WARNING
+-Please select which reference to MUFFLE-WARNING you intended
++Restart MUFFLE-WARNING
+
+-FunctionRestart
+\ No newline at end of file
++Data Arguments Required
++None.
++Description
++This restart is established by warn so that handlers of warning conditions have a way to tell warn that a warning has already been dealt with and that no further action is warranted.
++Examples
++(defvar *all-quiet* nil)
++→
++*ALL-QUIET*
++(defvar *saved-warnings* '())
++→
++*SAVED-WARNINGS*
++(defun quiet-warning-handler (c)
++  (when *all-quiet*
++    (let ((r (find-restart 'muffle-warning c)))
++      (when r
++        (push c *saved-warnings*)
++        (defmacro with-quiet-warnings (&body forms)
++  `(let ((*all-quiet* t)
++         (*saved-warnings* '()))
++     (handler-bind ((warning #'quiet-warning-handler))
++       ,@forms *saved-warnings*)))
++→
++WITH-QUIET-WARNINGS
++(defparameter *saved*
++  (with-quiet-warnings
++    (warn "Situation #1.")
++    (let ((*all-quiet* nil))
++      (warn "Situation #2."))
++    (warn "Situation #3.")))
++▷
++Warning Situation #2.
++→
++*SAVED*
++*saved*
++→
++(#<SIMPLE-WARNING 42744421> #<SIMPLE-WARNING 42744365>)
++(dolist (s *saved*) (format t "~&~A~%" s))
++▷
++Situation #3.
++Situation #1.
++→
++NIL
++See Also
++\secref\Restarts, {\secref\InterfacesToRestarts}, Function INVOKE-RESTART, Function MUFFLE-WARNING, Function WARN
+\ No newline at end of file
