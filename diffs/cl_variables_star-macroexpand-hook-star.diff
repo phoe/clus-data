@@ -1,0 +1,74 @@
+### File look OK
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:variables:star-macroexpand-hook-star.txt	2017-04-27 21:57:38.000000000 +0100
++++ saved-pages-clus/cl:variables:star-macroexpand-hook-star.txt	2017-04-27 21:57:38.000000000 +0100
+@@ -1,14 +1,27 @@
+ Variable *MACROEXPAND-HOOK*
+
+ Value Type
+
+ a designator for a function of three arguments a macro function, a macro form, and an environment object.
+ Initial Value
+
+   a designator for a function that is equivalent to the function funcall, but that might have additional implementation-dependent side-effects.
+ Description
+
+-Used as the expansion interface hook by macroexpand-1 to control the macro expansion process. When a macro form is to be expanded, this function is called with three arguments the macro function, the macro form, and the environment in which the macro form is to be expanded.  The environment object has dynamic extent; the consequences are undefined if the environment object is referred to outside the dynamic extent of the macro expansion function.
++Used as the expansion interface hook by macroexpand-1 to control the macro expansion process. When a macro form is to be expanded, this function is called with three arguments the macro function, the macro form, and the environment in which the macro form is to be expanded.
++The environment object has dynamic extent; the consequences are undefined if the environment object is referred to outside the dynamic extent of the macro expansion function.
+ Examples
+
+
+@@ -12,25 +25,36 @@
+ Examples
+
+
+  (defun hook (expander form env)
+-    (format t "Now expanding ~S~%" form)
+-    (funcall expander form env)) =>  HOOK
+- (defmacro machook (x y) `(/ (+ ,x ,y) 2)) =>  MACHOOK
+- (macroexpand '(machook 1 2)) =>  (/ (+ 1 2) 2), true
+- (let ((*macroexpand-hook* #'hook)) (macroexpand '(machook 1 2)))
+->>  Now expanding (MACHOOK 1 2)
+-=>  (/ (+ 1 2) 2), true
++  (format t "Now expanding ~S~ (funcall expander form env))
++→
++HOOK
++(defmacro machook (x y)
++  `(/ (+ ,x ,y) 2))
++→
++MACHOOK
++(macroexpand '(machook 1 2))
++→
++(/ (+ 1 2) 2)
++true
++(let ((*macroexpand-hook* #'hook))
++  (macroexpand '(machook 1 2)))
++▷
++Now expanding (MACHOOK 1 2)
++→
++(/ (+ 1 2) 2)
++true
++Affected By
++None.
+
+-<TT>
+-Affected By None.
+
+ See Also
+
+-macroexpand, macroexpand-1, funcall, Section 3.1 (Evaluation)
++Function MACROEXPAND, Function MACROEXPAND-1, Function FUNCALL, {\secref\Evaluation}
+### macroexpand, macroexpand-1, funcall, Section 3.1 (Evaluation) {\secref\Evaluation}
+ Notes
+
+ The net effect of the chosen initial value is to just invoke the macro function, giving it the macro form and environment as its two arguments.
+ Users or user programs can assign this variable to customize or trace the macro expansion mechanism. Note, however, that this variable is a global resource, potentially shared by multiple programs; as such, if any two programs depend for their correctness on the setting of this variable, those programs may not be able to run in the same Lisp image. For this reason, it is frequently best to confine its uses to debugging situations.
+  Users who put their own function into *macroexpand-hook* should consider saving the previous value of the hook, and calling that value from their own.
+
+-The following X3J13 cleanup issues, not part of the specification, apply to this section MACRO-ENVIRONMENT-EXTENTDYNAMIC MACROEXPAND-HOOK-INITIAL-VALUEIMPLEMENTATION-DEPENDENT MACROEXPAND-HOOK-DEFAULTEXPLICITLY-VAGUE FUNCTION-TYPEX3J13-MARCH-88
+\ No newline at end of file
++\
+\ No newline at end of file

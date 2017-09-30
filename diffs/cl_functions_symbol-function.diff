@@ -1,0 +1,124 @@
+### File look OK
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:functions:symbol-function.txt	2017-04-27 21:40:56.000000000 +0100
++++ saved-pages-clus/cl:functions:symbol-function.txt	2017-04-27 21:40:56.000000000 +0100
+@@ -2,1 +4,1 @@
+ Syntax
+
+
+-symbol-function symbol => contents
++ symbol-function symbol → contents
+
+ (setf (symbol-function symbol) new-contents)
+
+@@ -17,41 +30,136 @@
+ Examples
+
+
+- (symbol-function 'car) =>  #<FUNCTION CAR>
+- (symbol-function 'twice) is an error   ;because TWICE isn't defined.
+- (defun twice (n) (* n 2)) =>  TWICE
+- (symbol-function 'twice) =>  #<FUNCTION TWICE>
++(symbol-function 'car)
++→
++#<FUNCTION CAR>
++(symbol-function 'twice)
++✖
++Error The function FOO is not defined.
++(defun twice (n) (* n 2))
++→
++TWICE
++(symbol-function 'twice)
++→
++#<FUNCTION TWICE>
+  (list (twice 3)
+        (funcall (function twice) 3)
+        (funcall (symbol-function 'twice) 3))
+-=>  (6 6 6)
++→
++(6 6 6)
+  (flet ((twice (x) (list x x)))
+    (list (twice 3)
+          (funcall (function twice) 3)
+          (funcall (symbol-function 'twice) 3)))
+-=>  ((3 3) (3 3) 6)
++→
++((3 3) (3 3) 6)
+  (setf (symbol-function 'twice) #'(lambda (x) (list x x)))
+-=>  #<FUNCTION anonymous>
++→
++#<FUNCTION anonymous>
+  (list (twice 3)
+        (funcall (function twice) 3)
+        (funcall (symbol-function 'twice) 3))
+-=>  ((3 3) (3 3) (3 3))
+- (fboundp 'defun) =>  true
++→
++((3 3) (3 3) (3 3))
++(fboundp 'defun)
++→
++true
+  (symbol-function 'defun)
+-=>  implementation-dependent
++→
++implementation-dependent
+  (functionp (symbol-function 'defun))
+-=>  implementation-dependent
++→
++implementation-dependent
+  (defun symbol-function-or-nil (symbol)
+    (if (and (fboundp symbol)
+             (not (macro-function symbol))
+             (not (special-operator-p symbol)))
+        (symbol-function symbol)
+-       nil)) =>  SYMBOL-FUNCTION-OR-NIL
+- (symbol-function-or-nil 'car) =>  #<FUNCTION CAR>
+- (symbol-function-or-nil 'defun) =>  NIL
++      nil))
++→
++SYMBOL-FUNCTION-OR-NIL
++(symbol-function-or-nil 'car)
++→
++#<FUNCTION CAR>
++(symbol-function-or-nil 'defun)
++→
++NIL
++Side Effects
++None.
+
+-<TT>
+-Side Effects None.
+
+ Affected By
+
+@@ -55,19 +163,47 @@
+
+ Affected By
+
+ defun
+ Exceptional Situations
+
+ Should signal an error of type type-error if symbol is not a symbol.
+ Should signal undefined-function if symbol is not fbound and an attempt is made to read its definition. (No such error is signaled on an attempt to write its definition.)
+ See Also
+
+-fboundp, fmakunbound, macro-function,  special-operator-p
++ Function FBOUNDP
++ Function FMAKUNBOUND
++ Function MACRO-FUNCTION
++ Function SPECIAL-OPERATOR-P
+ Notes
+  symbol-function cannot access the value of a lexical function name produced by flet or labels; it can access only the global function value.
+ setf may be used with symbol-function to replace a global function definition when the symbol's function definition does not represent a special operator.
+
+-(symbol-function symbol) ==  (fdefinition symbol)
+
+-<TT> However, fdefinition accepts arguments other than just symbols.
+-The following X3J13 cleanup issues, not part of the specification, apply to this section SPECIAL-FORM-P-MISNOMERRENAME FUNCTION-TYPEX3J13-MARCH-88
+\ No newline at end of file
++ (symbol-function symbol) ≡ (fdefinition symbol)
++However, fdefinition accepts arguments other than just symbols.
++\
+\ No newline at end of file
