@@ -1,3 +1,7 @@
+### Some changes
+### +++ CLUS
+### --- CLHS
+
 --- saved-pages-dpans3/cl:functions:read-preserving-whitespace.txt	2017-04-27 21:45:32.000000000 +0100
 +++ saved-pages-clus/cl:functions:read-preserving-whitespace.txt	2017-04-27 21:45:32.000000000 +0100
 @@ -2,10 +4,10 @@
@@ -13,7 +17,7 @@
 
  Arguments and Values
 
-@@ -9,19 +12,43 @@
+@@ -9,17 +12,18 @@
 
  Arguments and Values
 
@@ -30,8 +34,11 @@
 -If a file ends in a symbol or a number immediately followed by an end of file[1], read reads the symbol or number successfully; when called again, it sees the end of file[1] and only then acts according to eof-error-p. If a file contains ignorable text at the end, such as blank lines and comments, read does not consider it to end in the middle of an object.
 +read-preserving-whitespace is like read but preserves any whitespace character that delimits the printed representation of the object.
 +read-preserving-whitespace is exactly like read when the recursive-p argument to read-preserving-whitespace is true.
+### CLHS "whitespace[2]" CLUS "whitespace"
 +When *read-suppress* is false, read throws away the delimiting character required by certain printed representations if it is a whitespace character; but read preserves the character (using unread-char) if it is syntactically meaningful, because it could be the start of the next expression.
+### CLHS "whitespace[2]" CLUS "whitespace"
 +If a file ends in a symbol or a number immediately followed by an end of file, read reads the symbol or number successfully; when called again, it sees the end of file and only then acts according to eof-error-p. If a file contains ignorable text at the end, such as blank lines and comments, read does not consider it to end in the middle of an object.
+### CLHS "file[1]" CLUS "file"
  If recursive-p is true, the call to read is expected to be made from within some function that itself has been called from read or from a similar input function, rather than from the top level.
   Both functions return the object read from input-stream. Eof-value is returned if eof-error-p is false and end of file is reached before the beginning of an object.
  Examples
@@ -77,7 +84,7 @@
   (defun slash-reader (stream char)
     (declare (ignore char))
     `(path . ,(loop for dir = (read-preserving-whitespace stream t nil t)
-@@ -47,31 +108,89 @@
+@@ -47,31 +108,43 @@
                     then (progn (read-char stream t nil t)
                                 (read-preserving-whitespace stream t nil t))
                     collect dir
@@ -106,6 +113,7 @@
 
 -<TT> There are times when whitespace[2] should be discarded. If a command interpreter takes single-character commands, but occasionally reads an object then if the whitespace[2] after a symbol is not discarded it might be interpreted as a command some time later after the symbol had been read.
 +There are times when whitespace should be discarded. If a command interpreter takes single-character commands, but occasionally reads an object then if the whitespace after a symbol is not discarded it might be interpreted as a command some time later after the symbol had been read.
+### CLHS "whitespace[2]" CLUS "whitespace"
  Affected By
 
  *standard-input*, *terminal-io*, *readtable*, *read-default-float-format*, *read-base*, *read-suppress*, *package*, *read-eval*.
@@ -116,6 +124,8 @@
  See Also
 
 -peek-char, read-char, unread-char, read-from-string, read-delimited-list, parse-integer, Section 2 (Syntax), Section 23.1 (Reader Concepts)
+### Section 2 (Syntax) {\chapref\Syntax}
+### Section 23.1 (Reader Concepts) {\chapref\ReaderConcepts}
 -Notes None.
 \ No newline at end of file
 + Function PEEK-CHAR
