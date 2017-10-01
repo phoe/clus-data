@@ -1,0 +1,143 @@
+### File look OK
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:macros:assert.txt	2017-04-27 22:00:24.000000000 +0100
++++ saved-pages-clus/cl:macros:assert.txt	2017-04-27 22:00:24.000000000 +0100
+@@ -2,7 +4,7 @@
+ Syntax
+
+
+-assert test-form [(place*) [datum-form argument-form*]] => nil
++ assert test-form [(place*) [datum-form argument-form*]] → nil
+
+ Arguments and Values
+
+@@ -6,13 +10,15 @@
+
+ Arguments and Values
+
+ test-form - a form; always evaluated.
+ place - a place; evaluated if an error is signaled.
+  datum-form - a form that evaluates to a datum. Evaluated each time an error is to be signaled, or not at all if no error is to be signaled.
+ argument-form - a form that evaluates to an argument. Evaluated each time an error is to be signaled, or not at all if no error is to be signaled.
+  datum, arguments - designators for a condition of default type error. (These designators are the result of evaluating datum-form and each of the argument-forms.)
+ Description
+
+ assert assures that test-form evaluates to true. If test-form evaluates to false, assert signals a correctable error (denoted by datum and arguments). Continuing from this error using the continue restart makes it possible for the user to alter the values of the places before assert evaluates test-form again. If the value of test-form is non-nil, assert returns nil.
+-The places are generalized references to data upon which test-form depends, whose values can be changed by the user in attempting to correct the error. Subforms of each place are only evaluated if an error is signaled, and might be re-evaluated if the error is re-signaled (after continuing without actually fixing the problem).  The order of evaluation of the places is not specified; see Section 5.1.1.1 (Evaluation of Subforms to Places).   If a place form is supplied that produces more values than there are store variables, the extra values are ignored. If the supplied form produces fewer values than there are store variables, the missing values are set to nil.
++The places are generalized references to data upon which test-form depends, whose values can be changed by the user in attempting to correct the error. Subforms of each place are only evaluated if an error is signaled, and might be re-evaluated if the error is re-signaled (after continuing without actually fixing the problem).
++The order of evaluation of the places is not specified; see section {\secref\GenRefSubFormEval}.
++If a place form is supplied that produces more values than there are store variables, the extra values are ignored. If the supplied form produces fewer values than there are store variables, the missing values are set to nil.
+### Section 5.1.1.1 (Evaluation of Subforms to Places) {\secref\GenRefSubFormEval}
+ Examples
+
+
+- (setq x (make-array '(3 5) initial-element 3))
+-=>  #2A((3 3 3 3 3) (3 3 3 3 3) (3 3 3 3 3))
+- (setq y (make-array '(3 5) initial-element 7))
+-=>  #2A((7 7 7 7 7) (7 7 7 7 7) (7 7 7 7 7))
++In the below example, we assert that the function really-matrix-multiply is already defined and implements matrix multiplication.
++(defparameter *x* (make-array '(3 5) initial-element 3))
++→
++*X*
++(defparameter *y* (make-array '(3 5) initial-element 7))
++→
++*Y*
++*x*
++→
++#2A((3 3 3 3 3) (3 3 3 3 3) (3 3 3 3 3))
++*y*
++→
++#2A((7 7 7 7 7) (7 7 7 7 7) (7 7 7 7 7))
+  (defun matrix-multiply (a b)
+    (let ((*print-array* nil))
+      (assert (and (= (array-rank a) (array-rank b) 2)
+                   (= (array-dimension a 1) (array-dimension b 0)))
+-             (a b)
+-             "Cannot multiply ~S by ~S." a b)
+-            (really-matrix-multiply a b))) =>  MATRIX-MULTIPLY
+- (matrix-multiply x y)
+->>  Correctable error in MATRIX-MULTIPLY
+->>  Cannot multiply #<ARRAY ...> by #<ARRAY ...>.
+->>  Restart options
+->>   1 You will be prompted for one or more new values.
+->>   2 Top level.
+->>  Debug> continue 1
+->>  Value for A x
+->>  Value for B (make-array '(5 3) initial-element 6)
+-=>  #2A((54 54 54 54 54)
++        (a b) "Cannot multiply ~S by ~S." a b)
++    (really-matrix-multiply a b)))
++→
++MATRIX-MULTIPLY
++(matrix-multiply *x* *y*)
++✖
++Correctable error in MATRIX-MULTIPLY
++Cannot multiply #<ARRAY ...> by #<ARRAY ...>.
++Restart options
++1 You will be prompted for one or more new values.
++2 Top level.
++Debug> continue 1
++Value for A *x*
++Value for B (make-array '(5 3) initial-element 6)
++→
++#2A((54 54 54 54 54)
+        (54 54 54 54 54)
+        (54 54 54 54 54)
+        (54 54 54 54 54)
+        (54 54 54 54 54))
+
+-<TT>
+
+- (defun double-safely (x) (assert (numberp x) (x)) (+ x x))
++(defun double-safely (x)
++  (assert (numberp x) (x))
++  (+ x x))
++→
++DOUBLE-SAFELY
+  (double-safely 4)
+-=>  8
++→
++8
+
+  (double-safely t)
+->>  Correctable error in DOUBLE-SAFELY The value of (NUMBERP X) must be non-NIL.
+->>  Restart options
+->>   1 You will be prompted for one or more new values.
+->>   2 Top level.
+->>  Debug> continue 1
+->>  Value for X 7
+-=>  14
+
+-<TT>
++✖
++Correctable error in DOUBLE-SAFELY The value of (NUMBERP X) must be non-NIL.
++Restart options
++1 You will be prompted for one or more new values.
++2 Top level.
++Debug> continue 1
++Value for X 7
++→
++14
+ Affected By
+
+-*break-on-signals*
++Variable *BREAK-ON-SIGNALS*
+ The set of active condition handlers.
+-Exceptional Situations None.
++Exceptional Situations
++None.
+
+ See Also
+
+-check-type, error, Section 5.1 (Generalized Reference)
+### check-type, error, Section 5.1 (Generalized Reference) {\secref\GeneralizedReference}
++Macro CHECK-TYPE, Function ERROR, {\secref\GeneralizedReference}
+ Notes
+
+-The debugger need not include the test-form in the error message, and the places should not be included in the message, but they should be made available for the user's perusal. If the user gives the ``continue'' command, the values of any of the references can be altered. The details of this depend on the implementation's style of user interface. The following X3J13 cleanup issues, not part of the specification, apply to this section SETF-MULTIPLE-STORE-VARIABLESALLOW PUSH-EVALUATION-ORDERFIRST-ITEM ASSERT-ERROR-TYPEERROR FORMAT-STRING-ARGUMENTSSPECIFY
+\ No newline at end of file
++The debugger need not include the test-form in the error message, and the places should not be included in the message, but they should be made available for the user's perusal. If the user gives the "continue" command, the values of any of the references can be altered. The details of this depend on the implementation's style of user interface.
++\
+\ No newline at end of file
