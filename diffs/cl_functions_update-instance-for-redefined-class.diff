@@ -1,0 +1,137 @@
+### File look OK
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:functions:update-instance-for-redefined-class.txt	2017-04-27 21:48:31.000000000 +0100
++++ saved-pages-clus/cl:functions:update-instance-for-redefined-class.txt	2017-04-27 21:48:31.000000000 +0100
+@@ -2,7 +4,7 @@
+ Syntax
+
+
+-update-instance-for-redefined-class instance added-slots discarded-slots property-list &rest initargs &key &allow-other-keys => result*
++ update-instance-for-redefined-class instance added-slots discarded-slots property-list &rest initargs &key &allow-other-keys → result*
+
+ Method Signatures
+
+@@ -27,61 +51,80 @@
+
+
+
+- (defclass position () ())
++(defclass coords () ())
++→
++#<STANDARD-CLASS COMMON-LISP-USERCOORDS>
++(defclass x-y-coords (coords)
++  ((x initform 0 accessor coords-x)
++   (y initform 0 accessor coords-y)))
++→
++#<STANDARD-CLASS COMMON-LISP-USERX-Y-COORDS>
++It turns out polar coordinates are used more than Cartesian coordinates, so the representation is altered and some new accessor methods are added.
++The before method on update-instance-for-redefined-class defined below transforms the x-y coordinates to polar coordinates and stores them into the new slots.
+
+- (defclass x-y-position (position)
+-     ((x initform 0 accessor position-x)
+-      (y initform 0 accessor position-y)))
+-
+-;;; It turns out polar coordinates are used more than Cartesian
+-;;; coordinates, so the representation is altered and some new
+-;;; accessor methods are added.
+
+  (defmethod update-instance-for-redefined-class before
+-    ((pos x-y-position) added deleted plist &key)
+-   ;; Transform the x-y coordinates to polar coordinates
+-   ;; and store into the new slots.
++    (pos x-y-coords) added deleted plist &key)
+    (let ((x (getf plist 'x))
+          (y (getf plist 'y)))
+-     (setf (position-rho pos) (sqrt (+ (* x x) (* y y)))
+-           (position-theta pos) (atan y x))))
++    (setf (coords-rho pos) (sqrt (+ (* x x) (* y y)))
++          (coords-theta pos) (atan y x))))
++→
++#<STANDARD-METHOD COMMON-LISPUPDATE-INSTANCE-FOR-REDEFINED-CLASS
++                     BEFORE (X-Y-COORDS T T T) {100273D1C3}>
++(defclass x-y-coords (coords)
++  ((rho initform 0 accessor coords-rho)
++   (theta initform 0 accessor coords-theta)))
+
+- (defclass x-y-position (position)
+-     ((rho initform 0 accessor position-rho)
+-      (theta initform 0 accessor position-theta)))
++→
+
+-;;; All instances of the old x-y-position class will be updated
+-;;; automatically.
++#<STANDARD-CLASS COMMON-LISP-USERX-Y-COORDS>
+
+-;;; The new representation is given the look and feel of the old one.
+
+- (defmethod position-x ((pos x-y-position))
+-    (with-slots (rho theta) pos (* rho (cos theta))))
+
+- (defmethod (setf position-x) (new-x (pos x-y-position))
++All instances of the old x-y-coords class will be updated automatically.
++The new representation is given the look and feel of the old one.
++(defmethod coords-x ((pos x-y-coords))
++  (with-slots (rho theta) pos
++    (* rho (cos theta))))
++→
++#<STANDARD-METHOD COMMON-LISP-USERPOSITION-X (X-Y-POSITION) {10027FC4E3}>
++(defmethod (setf coords-x) (new-x (pos x-y-coords))
+     (with-slots (rho theta) pos
+-      (let ((y (position-y pos)))
+-        (setq rho (sqrt (+ (* new-x new-x) (* y y)))
++    (let ((y (coords-y pos)))
++      (setf rho (sqrt (+ (* new-x new-x) (* y y)))
+               theta (atan y new-x))
+         new-x)))
+
+- (defmethod position-y ((pos x-y-position))
+-    (with-slots (rho theta) pos (* rho (sin theta))))
++→
+
+- (defmethod (setf position-y) (new-y (pos x-y-position))
++#<STANDARD-METHOD (COMMON-LISPSETF COMMON-LISP-USERPOSITION-X)
++                     (T X-Y-POSITION) {1002842601}>
++(defmethod coords-y ((pos x-y-coords))
++  (with-slots (rho theta) pos
++    (* rho (sin theta))))
++→
++#<STANDARD-METHOD COMMON-LISP-USERPOSITION-Y (X-Y-POSITION) {10027FC1F9}>
++(defmethod (setf coords-y) (new-y (pos x-y-coords))
+     (with-slots (rho theta) pos
+-      (let ((x (position-x pos)))
+-        (setq rho (sqrt (+ (* x x) (* new-y new-y)))
++    (let ((x (coords-x pos)))
++      (setf rho (sqrt (+ (* x x) (* new-y new-y)))
+               theta (atan new-y x))
+-        new-y)))
+
++→
++#<STANDARD-METHOD (COMMON-LISPSETF COMMON-LISP-USERPOSITION-Y)
++                     (T X-Y-POSITION) {10028766D3}>
++Affected By
++None.
+
+-<TT>
+-Affected By None.
+
+ Exceptional Situations
+  The system-supplied primary method on update-instance-for-redefined-class signals an error if an initarg is supplied that is not declared as valid.
+ See Also
+
+-make-instances-obsolete, shared-initialize, Section 4.3.6 (Redefining Classes), Section 7.1.4 (Rules for Initialization Arguments), Section 7.1.2 (Declaring the Validity of Initialization Arguments)
++ Generic Function MAKE-INSTANCES-OBSOLETE
++ Generic Function SHARED-INITIALIZE
++ {\secref\ClassReDef}
++ {\secref\InitargRules}
++ {\secref\DeclaringInitargValidity}
+### make-instances-obsolete, shared-initialize, Section 4.3.6 (Redefining Classes) {\secref\ClassReDef}
+### Section 7.1.4 (Rules for Initialization Arguments) {\secref\InitargRules}
+### Section 7.1.2 (Declaring the Validity of Initialization Arguments) {\secref\DeclaringInitargValidity}
+ Notes
+
+ Initargs are declared as valid by using the initarg option to defclass, or by defining methods for update-instance-for-redefined-class or shared-initialize. The keyword name of each keyword parameter specifier in the lambda list of any method defined on update-instance-for-redefined-class or shared-initialize is declared as a valid initarg name for all classes for which that method is applicable.
+\ No newline at end of file
++\
+\ No newline at end of file

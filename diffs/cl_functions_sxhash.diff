@@ -1,0 +1,76 @@
+### File look OK
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:functions:sxhash.txt	2017-04-27 21:54:43.000000000 +0100
++++ saved-pages-clus/cl:functions:sxhash.txt	2017-04-27 21:54:43.000000000 +0100
+@@ -3,7 +4,7 @@
+ Syntax
+
+
+-sxhash object => hash-code
++ sxhash object → hash-code
+
+ Arguments and Values
+
+@@ -7,15 +10,15 @@
+
+ Arguments and Values
+
+ object - an object.
+ hash-code - a non-negative fixnum.
+ Description
+
+ sxhash returns a hash code for object.
+ The manner in which the hash code is computed is implementation-dependent, but subject to certain constraints
+ 1.  (equal x y) implies (= (sxhash x) (sxhash y)).
+-2.  For any two objects, x and y, both of which are bit vectors, characters, conses, numbers, pathnames, strings, or symbols, and which are similar, (sxhash x) and (sxhash y) yield the same mathematical value even if x and y exist in different Lisp images of the same implementation. See Section 3.2.4 (Literal Objects in Compiled Files).
+-3.  The hash-code for an object is always the same within a single session provided that the object is not visibly modified with regard to the equivalence test equal. See Section 18.1.2 (Modifying Hash Table Keys).
++ 2. For any two objects, x and y, both of which are bit vectors, characters, conses, numbers, pathnames, strings, or symbols, and which are similar, (sxhash x) and (sxhash y) yield the same mathematical value even if x and y exist in different Lisp images of the same implementation. See section {\secref\LiteralsInCompiledFiles}.
++ 3. The hash-code for an object is always the same within a single session provided that the object is not visibly modified with regard to the equivalence test equal. see section {\secref\ModifyingHashKeys}.
+### Section 3.2.4 (Literal Objects in Compiled Files) {\secref\LiteralsInCompiledFiles}
+### Section 18.1.2 (Modifying Hash Table Keys) {\secref\ModifyingHashKeys}
+ 4.  The hash-code is intended for hashing. This places no verifiable constraint on a conforming implementation, but the intent is that an implementation should make a good-faith effort to produce hash-codes that are well distributed within the range of non-negative fixnums.
+ 5.  Computation of the hash-code must terminate, even if the object contains circularities.
+ Examples
+
+
+@@ -21,14 +41,37 @@
+ Examples
+
+
+- (= (sxhash (list 'list "ab")) (sxhash (list 'list "ab"))) =>  true
+- (= (sxhash "a") (sxhash (make-string 1 initial-element #\a))) =>  true
++(= (sxhash (list 'list "ab")) (sxhash (list 'list "ab")))
++→
++true
++(= (sxhash "a") (sxhash (make-string 1 initial-element #\\a)))
++→
++true
+  (let ((r (make-random-state)))
+    (= (sxhash r) (sxhash (make-random-state r))))
+-=>  implementation-dependent
+
+-<TT>
+-Side Effects None.
++→
++implementation-dependent
++Side Effects
++None.
+
+ Affected By
+
+@@ -32,10 +75,21 @@
+
+ Affected By
+
+ The implementation.
+-Exceptional Situations None.
+
+-See Also None.
++Exceptional Situations
++None.
++See Also
++None.
+
+ Notes
