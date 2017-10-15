@@ -1,0 +1,124 @@
+### Some changes
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:macros:psetq.txt	2017-04-27 21:55:52.000000000 +0100
++++ saved-pages-clus/cl:macros:psetq.txt	2017-04-27 21:55:52.000000000 +0100
+@@ -2,13 +4,11 @@
+ Syntax
+
+
+-psetq {pair}* => nil
++ psetq {pair*} → nil
+### CLHS "{pair}*" CLUS "{pair*}"
+
+
+ pair= var form
+
+
+-Pronunciation
+
+-psetq [;pee'set,kyoo]
+### Above text missing in CLUS
+ Arguments and Values
+
+ var - a symbol naming a variable other than a constant variable.
+ form - a form.
+ Description
+
+ Assigns values to variables.
+-This is just like setq, except that the assignments happen ``in parallel.'' That is, first all of the forms are evaluated, and only then are the variables set to the resulting values. In this way, the assignment to one variable does not affect the value computation of another in the way that would occur with setq's sequential assignment.
++This is just like setq, except that the assignments happen "in parallel." That is, first all of the forms are evaluated, and only then are the variables set to the resulting values. In this way, the assignment to one variable does not affect the value computation of another in the way that would occur with setq's sequential assignment.
+  If any var refers to a binding made by symbol-macrolet, then that var is treated as if psetf (not psetq) had been used.
+ Examples
+
+
+@@ -23,44 +37,143 @@
+ Examples
+
+
+- ;; A simple use of PSETQ to establish values for variables.
+- ;; As a matter of style, many programmers would prefer SETQ
+- ;; in a simple situation like this where parallel assignment
+- ;; is not needed, but the two have equivalent effect.
+- (psetq a 1 b 2 c 3) =>  NIL
+- a =>  1
+- b =>  2
+- c =>  3
+- ;; Use of PSETQ to update values by parallel assignment.
+- ;; The effect here is very different than if SETQ had been used.
+- (psetq a (1+ b) b (1+ a) c (+ a b)) =>  NIL
+- a =>  3
+- b =>  2
+- c =>  3
++A simple use of psetq to establish values for variables. As a matter of style, many programmers would prefer setq in a simple situation like this where parallel assignment is not needed, but the two have equivalent effect.
++;;; TODO condemn toplevel PSETQ
++(psetq a 1 b 2 c 3)
++→
++NIL
++a
++→
++1
++b
++→
++2
++c
++→
++3
++Use of psetq to update values by parallel assignment. The effect here is very different than if setq had been used.
++(psetq a (1+ b) b (1+ a) c (+ a b))
++→
++NIL
++a
++→
++3
++b
++→
++2
++c
++→
++3
++Use of psetq on a symbol macro.
+
+- ;; Use of PSETQ on a symbol macro.
+  (let ((x (list 10 20 30)))
+    (symbol-macrolet ((y (car x)) (z (cadr x)))
+      (psetq y (1+ z) z (1+ y))
+      (list x y z)))
+-=>  ((21 11 30) 21 11)
+
+- ;; Use of parallel assignment to swap values of A and B.
++→
++((21 11 30) 21 11)
++Use of parallel assignment to swap values of A and B.
+  (let ((a 1) (b 2))
+    (psetq a b  b a)
+    (values a b))
+-=>  2, 1
+
+-<TT>
++→
++2
++1
+ Side Effects
+
+ The values of forms are assigned to vars.
+-Affected By None.
+
+-Exceptional Situations None.
++Affected By
++None.
++Exceptional Situations
++None.
+
+ See Also
+
+-psetf, setq
+-Notes None.
+\ No newline at end of file
++ Macro PSETF
++ Special Operator SETQ
++Notes
++None.
++\
+\ No newline at end of file
