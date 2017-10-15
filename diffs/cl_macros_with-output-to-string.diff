@@ -1,0 +1,104 @@
+### Some changes
+### +++ CLUS
+### --- CLHS
+
+--- saved-pages-dpans3/cl:macros:with-output-to-string.txt	2017-04-27 21:42:36.000000000 +0100
++++ saved-pages-clus/cl:macros:with-output-to-string.txt	2017-04-27 21:42:37.000000000 +0100
+@@ -3,7 +4,9 @@
+ Syntax
+
+
+-with-output-to-string (var &optional string-form &key element-type) declaration* form* => result*
++ with-output-to-string (var &optional string-form &key element-type) declaration* form* → result*
+
+ Arguments and Values
+
+@@ -11,16 +15,17 @@
+ string-form - a form or nil; if non-nil, evaluated to produce string.
+ string - a string that has a fill pointer.
+  element-type - a type specifier; evaluated.  The default is character.
+-declaration - a declare expression; not evaluated.
++declaration - a decdeclarelare expression; not evaluated.
+### CLHS "declare expression" CLUS "decdeclarelare expression"
+ forms - an implicit progn.
+ results - If a string-form is not supplied or nil, a string; otherwise, the values returned by the forms.
+ Description
+
+ with-output-to-string creates a  character output stream, performs a series of operations that may send results to this stream, and then closes the stream.
+  The element-type names the type of the elements of the stream; a stream is constructed of the most specialized type that can accommodate elements of the given type.
+ The body is executed as an implicit progn with var bound to an output string stream. All output to that string stream is saved in a string.
+  If string is supplied, element-type is ignored, and the output is incrementally appended to string as if by use of vector-push-extend.
+-The output stream is automatically closed on exit from with-output-from-string, no matter whether the exit is normal or abnormal.  The output string stream to which the variable var is bound has dynamic extent; its extent ends when the form is exited.
+-If no string is provided, then with-output-from-string  produces a stream that accepts characters and returns a string of the indicated element-type. If string is provided, with-output-to-string returns the results of evaluating the last form.
++The output stream is automatically closed on exit from with-output-to-string, no matter whether the exit is normal or abnormal.
++The output string stream to which the variable var is bound has dynamic extent; its extent ends when the form is exited.
++If no string is provided, then with-output-to-string produces a stream that accepts characters and returns a string of the indicated element-type. If string is provided, with-output-to-string returns the results of evaluating the last form.
+### CLHS "with-output-from-string" CLUS "with-output-to-string"
+  The consequences are undefined if an attempt is made to assign the variable var.
+ Examples
+
+
+@@ -26,15 +50,26 @@
+ Examples
+
+
+- (setq fstr (make-array '(0) element-type 'base-char
+-                             fill-pointer 0 adjustable t)) =>  ""
+- (with-output-to-string (s fstr)
++(defparameter *fstr*
++  (make-array '(0) element-type 'base-char
++                   fill-pointer 0
++                   adjustable t))
++→
++*FSTR*
++*fstr*
++→
++""
++(with-output-to-string (s *fstr*)
+     (format s "here's some output")
+-    (input-stream-p s)) =>  false
+- fstr =>  "here's some output"
++  (input-stream-p s))
++→
++false
++*fstr*
++→
++"here's some output"
+
+-<TT>
+ Side Effects
+
+-The string is modified.
+-Affected By None.
++If string-form was non-nil, then the string is modified.
+### CLHS "The string is modified." CLUS "If string-form was non-nil, then the string is modified."
++Affected By
++None.
+
+ Exceptional Situations
+
+@@ -41,8 +102,14 @@
+
+ Exceptional Situations
+
+  The consequences are undefined if destructive modifications are performed directly on the string during the dynamic extent of the call.
+ See Also
+
+-make-string-output-stream, vector-push-extend,  Section 3.6 (Traversal Rules and Side Effects)
+### make-string-output-stream, vector-push-extend, Section 3.6 (Traversal Rules and Side Effects) {\secref\TraversalRules}
+-Notes None.
++ make-string-output-stream
++ vector-push-extend
++ {\secref\TraversalRules}
++Notes
++None.
++Editor Notes
++If no string is provided, the specification doesn't explicitly mention that with-output-to-string will return a fresh string.
++While the implementations seem to always produce fresh strings, this behaviour is theoretically unspecified and implementation-defined.
+### "Editor Notes" and on added in CLUS
+
+
+-The following X3J13 cleanup issues, not part of the specification, apply to this section MAPPING-DESTRUCTIVE-INTERACTIONEXPLICITLY-VAGUE STRING-OUTPUT-STREAM-BASHINGUNDEFINED WITH-OPEN-FILE-SETQEXPLICITLY-VAGUE WITH-OPEN-FILE-STREAM-EXTENTDYNAMIC-EXTENT WITH-OUTPUT-TO-STRING-APPEND-STYLEVECTOR-PUSH-EXTEND STREAM-ACCESSADD-TYPES-ACCESSORS CHARACTER-PROPOSAL2-3-6 CHARACTER-PROPOSAL2-5-6 DECLS-AND-DOC
+\ No newline at end of file
++\
+\ No newline at end of file
