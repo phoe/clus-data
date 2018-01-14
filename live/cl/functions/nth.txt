@@ -47,10 +47,11 @@ None.
 
 ====Example Implementation====
 <blockquote>
-([[CL:Macros:defun]] my-nth (num list) 
- ([[CL:Special Operators:if]] ([[CL:Functions:math-greater|>]] num 0) 
-     ([[CL:Macros:loop]] for x from 1 to num do ([[CL:Macros:setf]] list ([[CL:Functions:cdr]] list)))) 
- ([[CL:Functions:car]] list))
+([[CL:Macros:defun]] nth (num list) 
+ (let ((new-list list))
+  ([[CL:Special Operators:when]] ([[CL:Functions:check-type]] num [[CL:Types:unsigned-byte]]) 
+      ([[CL:Macros:loop]] for x from 1 to num do ([[CL:Macros:pop]] new-list)))) 
+  ([[CL:Functions:car]] new-list)))
 </blockquote>
 
 ====Notes====
