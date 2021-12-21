@@ -1,8 +1,5 @@
-# clus-data
-This is the data for the Common Lisp UltraSpec, currently deployed at http://phoe.tymoon.eu/clus/
+#+TITLE: Common Lisp UltraSpec (CLUS)
 
-There are two folders there, `live` and `raw`. `live` is exactly what is currently deployed on the website and `raw` is what I am working on right now, which is not ready to be pushed to the website just yet.
+This is the repository for the Common Lisp UltraSpec, currently deployed at clus.readthedocs.io. 
 
-Don't mind the other folders - this will be cleaned up, eventually.
-
-All data in this repository is in the public domain unless stated otherwise by an appropriate LICENSE file put in the directory the other license encloses.
+This specification is now under the [[https://www.gnu.org/licenses/fdl-1.3.html][GNU Free Documentation License (GNU FDL)]]. It was public domain prior to this fork. See the file 'LICENSE' for further detail about the license, and [[https://www.gnu.org/philosophy/free-doc.html][this article]] to explain why I've chosen to give this fork a new license.
